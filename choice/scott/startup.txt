@@ -1,5 +1,5 @@
 *title Scott of the Antarctic
-*author Jkj Yuio
+*author by Jkj Yuio
 
 *create z 4
 *create s 6
@@ -12,6 +12,16 @@
 
 *create t 0
 
+*create productThemePrimeColor "#e3f2fd"
+*create productThemeAccentColor "#b1bfca"
+*create productThemeContrastColor "#b1bfca"
+*create productCoverTextColor "black"
+*create productCoverEffect "Snow"
+*create productCoverTextFont "Kanit Thin"
+*create productCoverTextWeight 100
+*create productCoverImage "scott.jpg"
+*create mapBackImage "terranovamap.jpg"
+
 You are Robert Falcon Scott, intrepid Polar explorer and all round tough guy. You're British and play Cricket & Polo. It's vital that to sustain your air of superiority, you must keep a stiff upper lip at all times!
 Back at the turn of the Century - that's the 19th Century, you gained worldwide fame with your Discovery Expedition, scoring a new world record for the southernmost point reached; 82 degrees South. Crikey!
 
@@ -19,7 +29,7 @@ But that's not enough for you,  you're hard as nails. So to prove it, you've emb
 
 And here you are at the South Pole! It's January 17th 1912. What an amazing achievement! You take lots of photos, and selfies, posing with your flag pole and your buddy Captain Oats.
 
-But wait! Something is wrong. Very wrong. What! That upstart, whippersnapper Roald Amundsen has already been here. Four weeks ago!! How dare he! The total cad. The bounder. You are incandescent with rage. How dare he take the priority. He's stolen your thunder, your fame, your glory. How are you going to strut about like a big knob after this embarrassment.
+But wait! Something is wrong. Very wrong. What! That upstart, whippersnapper Roald Amundsen has already been here. Four weeks ago!! How dare he! The total cad. The bounder. You are incandescent with rage. How dare he take the priority. He's stolen your thunder, your fame, your glory. How are you going to strut about like a big nob after this embarrassment.
 
 Your stiff upper lip begins to quiver a bit. But after several large swigs of brandy, a cunning plan starts to form in your mind…
 
