@@ -1,0 +1,939 @@
+room flounge "lounge" {
+	desc {
+Some would call this apartment small and pretentious, but with house prices in
+Hydropolis the way they are, small and pretentious was all Dr. Roach could
+afford. Anyway, he managed to get a view of Hydropolis - not many places have
+even that. The room is decorated in a minimalist style but, as Dr. Roach would
+say if he weren't under your control, "I am a man of minimal needs." The only
+excesses he has allowed himself are a painting, a trendy black shelf,
+a switch to control the lights and, most important, a door to get out
+	}
+	wet
+	synonyms { apartment }
+	location flounge
+	lit_room
+	net {
+		north		nway_wallf
+		northeast	nway_wallf
+		east		nway_wallf
+		southeast	nway_wallf
+		south		nway_door
+		southwest	nway_wallf
+		west		nway_wallf
+		northwest	nway_wallf
+	}
+}
+
+room flobby "landing" {
+	desc {
+There are two doors on this level of the apartment block - one to your
+apartment and one to your new neighbour, Ernest Chub's. Beside each door is a
+handprint and an access shaft leads down to the lobby
+	}
+	wet
+	location flobby
+	lit_room
+	net {
+		north		nway_door
+		northeast	nway_wallf
+		east		fgroundlobby
+		down		fgroundlobby
+		southeast	nway_wallf
+		south		nway_door
+		southwest	nway_wallf
+		west		nway_wallf
+		northwest	nway_wallf
+		out		fgroundlobby
+	}
+}
+
+room fgroundlobby "lobby" {
+	desc {
+With no security guard, no intercom and no doors, any old eel could slip in
+here and break into every apartment in the block. It's a wonder it hasn't
+happened yet! Mind you, it wouldn't be all bad. At least Dr. Roach could get
+some new furniture with the insurance money. The exit out to Paddlington is to
+the south and the access shaft leads up to the landing
+	}
+	scen_noun_f intercom
+	scen_noun_f security_guard
+
+	wet
+	location fgroundlobby
+	lit_room
+	net {
+		north		nway_wallf
+		northeast	nway_wallf
+		east		flobby
+		southeast	nway_wallf
+		south		paddlington
+		southwest	nway_wallf
+		west		nway_wallf
+		northwest	nway_wallf
+		in		flobby
+		up 		flobby
+		out		paddlington
+	}
+}
+
+room paddlington "Paddlington" {
+	desc {
+This is the up and coming place to live in Hydropolis. It's also one
+of the busiest, teaming with guppies. Your apartment block is to the
+north and the entrance to the underground station bearing the logo of the
+Hydropolis Underground Omnibus Company stands to the east
+	}
+	wet
+	location paddlington
+	attribute no_article
+	lit_room
+	net {
+		north		fgroundlobby
+		northeast	pway_uptown
+		east		padstation
+		southeast	pway_uptown
+		south		pway_uptown
+		southwest	pway_uptown
+		west		pway_uptown
+		northwest	pway_uptown
+		in		padstation
+		out		padstation
+	}
+}
+
+room disco "university disco" {
+	desc {
+The university disco is open all day and every day during rag week. The
+students are having a wild and wacky sponsored bop-til-you-drop competition.
+They're having a whale of a time, pretending they're robots when the
+stroboscopic light is on and performing mindless synchronised dances to songs
+they'd normally only dance to if they were on holiday where no-one would
+remember them. You know it's all done for charity, but they look suspiciously
+like they're enjoying themselves
+	}
+	scen_noun_a dances
+
+	wet
+	synonyms { discotheque }
+	lit_room
+	location disco
+	net {
+		north		nway_wallf
+		northeast	nway_wallf
+		east		nway_wallf
+		southeast	nway_wallf
+		south 		outsideuni
+		southwest	nway_wallf
+		west		nway_wallf
+		northwest	nway_wallf
+		down		pway_loo
+		out		outsideuni	
+	}
+}
+
+room policestation "police station" {
+	desc {
+The police station is fished day and night by a stalwart dogfish who is ready
+to solve the troutiest of crimes, especially the really simple ones where the
+villains just confess. You can escape without much danger of pursuit to
+the north
+	}
+	force_adj
+	wet
+	lit_room
+	location policestation
+	net {
+		north		daceroad
+		northeast	nway_wallf
+		east		nway_wallf
+		southeast	nway_wallf
+		south		nway_wallf
+		southwest	nway_wallf
+		west		nway_wallf
+		northwest	nway_wallf
+	}
+}
+
+room musstation "museum underground station" {
+	desc {
+This station is the oldest in Hydropolis. The decoration reflects more decadent
+times, when men were men, fish were fish and they got together to build
+underground stations. An exit leads north to the museum while a funnel leads
+down to the platform
+	}
+	scen_noun_e	decoration
+	wet
+	force_adj
+	synonyms { tube hall ticket_hall }
+	lit_room
+	location musstation
+	net {
+		north		museum
+		out		museum
+		down		platform
+		in		platform
+	}
+}
+
+room padstation "Paddlington underground station" {
+	desc {
+This station is busy. Commuters are flooding down the access funnel
+to the platform, almost overwhelming the guard checking their tickets. The
+ticket clerk, sitting behind a counter, looks quite scared by the mad rush too.
+You can get back to the street westward, but you'd be swimming against the tide
+of commuters
+	}
+	wet
+	synonyms { tube }
+#	attribute alladjs
+	force_adj
+	lit_room
+	location padstation
+	net {
+		north		nway_wallf
+		northeast	nway_wallf
+		east		nway_wallf
+		southeast	nway_wallf
+		west		paddlington
+		southwest	nway_wallf
+		south		nway_wallf
+		northwest	nway_wallf
+		down		platform
+		in		platform
+		out		paddlington
+	}
+}
+
+room outsideuni "Opah" {
+	desc {
+If things want learning in Hydropolis, then Opah University is where they get
+learned. The university disco to the north is in the middle of a
+bop-til-you-drop rag week stunt with schools of tired students swimming in and
+out to the heavy four-four beat. An expensive restaurant lies to the south. Have
+you made a reservation? No? Too bad. It's very popular. An impressive archway
+leads east into the university itself. You can return to Opah tube station by
+going west
+	}
+	wet
+	lit_room
+	location outsideuni
+	net {
+		north		disco	
+		northeast	nway_wallf
+		east		unifoyer
+		southeast	nway_wallf
+		south		restaurant
+		southwest	nway_wallf
+		west		inunitube
+		northwest	nway_wallf
+		in		unifoyer
+		out		inunitube
+	}
+}
+
+room unifoyer "university foyer" {
+	desc {
+The foyer is lined with ancient busts of important looking fish from the
+university's past, an ugly bunch of egg-headed reprobates if ever you saw
+some. West, an impressive arch will take you out of the university. A corridor
+continues east, and a metal door blocks any access to the north. The
+principal's office is to the south
+	}
+	wet
+	force_adj
+	lit_room
+	location unifoyer
+	net {
+		north		nway_door
+		northeast	nway_wallf
+		east		unicor1
+		southeast	nway_wallf
+		south		death
+		southwest	nway_wallf
+		west		outsideuni
+		northwest	nway_wallf
+		out		outsideuni
+	}
+}
+
+room unicor1 "corridor" {
+	desc {
+Windows line the north wall of this corridor which continues east and west.
+They look out onto the quad, and stream light on to an archway which leads
+south to the library
+	}
+	wet
+	lit_room
+	location unicor1
+	net {
+		north		nway_wallf
+		northeast	nway_wallf
+		east		unicor4
+		southeast	nway_wallf
+		south		unilibrary
+		southwest	nway_wallf
+		west		unifoyer
+		northwest	nway_wallf
+		in		unilibrary
+		out		unifoyer
+	}
+}
+
+room unilibrary "library" {
+	desc {
+Containing the sum total of fish knowledge, this library is the best in all
+Hydropolis. As fish only have small brains, it is on the smallish side, but
+students spend a lot of time here delving into what knowledge there is - even
+during rag week. The library's rarest book lies on a lectern close to the exit
+in the north wall
+	}
+	wet
+	lit_room
+	location unilibrary
+	net {
+		north		unicor1
+		northeast	nway_wallf
+		east		nway_wallf
+		southeast	nway_wallf
+		south		nway_wallf
+		southwest	nway_wallf
+		west		nway_wallf
+		northwest	nway_wallf
+		out		unicor1
+	}
+}
+
+room unistoreroom "store messiest room" {
+	desc {
+Even though Dr. Roach is very clean and tidy, the same cannot be said of the
+rest of the team. They've made this the messiest store room in
+the university. And it's always left for you to straighten things out. All the
+equipment and spares needed for The Project are usually stashed here, with a
+wallchart keeping track of what's in and out of stock. The only exit leads
+northwest
+	}
+	scen_noun_f spares
+	scen_noun_f stock
+
+	wet
+	force_adj
+	lit_room
+	location unistoreroom
+	synonyms { storeroom }
+	net {
+		north		nway_wallf
+		northeast	nway_wallf
+		east		nway_wallf
+		southeast	nway_wallf
+		south		nway_wallf
+		southwest	nway_wallf
+		west		nway_wallf
+		northwest	lab
+	}
+}
+
+room unicor4 "dark corridor" {
+	desc {
+My worm, it's dark in this corridor. A metal door to the east prevents you from
+swimming directly into your laboratory and the corridor returns west
+	}
+	wet
+	lit_room
+	location unicor4
+	net {
+		north		nway_wallf
+		northeast	nway_wallf
+		east		nway_door
+		west		unicor1
+		southeast	nway_wallf
+		south		nway_wallf
+		southwest	nway_wallf
+		northwest	nway_wallf
+		out		unicor1
+	}
+}
+
+room lab "clean laboratory" {
+	desc {
+This lab is exceptionally clean. Dr. Roach must be remarkably fastidious.
+The water is constantly decontaminated and recycled to protect The Project
+equipment and your terminal from damage by grit, fluff and dirt. Exits are
+northeast, southeast and west through the metal door to the corridor
+	}
+	scen_noun_f fluff
+	scen_noun_f dirt
+	scen_noun_f grit
+
+	synonyms { lab }
+	wet
+	lit_room
+	location lab
+	net {
+		north		nway_wallf
+		northeast	uniprojectroom
+		southeast	unistoreroom
+		south		nway_wallf
+		east		nway_wallf
+		southwest	nway_wallf
+		west		nway_door
+		northwest	nway_wallf
+		in		uniprojectroom
+	}
+}
+
+room uniprojectroom "Project room" {
+	desc {
+Considering how important this place is for the future of all fishkind, you
+are stunned by how little has been done to make it look significant. A
+lick of paint, although distasteful for the fish licking it on, wouldn't have
+gone amiss. The only exit is southwest
+	}
+	scen_noun_f paint
+
+	wet
+	force_adj
+	lit_room
+	location uniprojectroom
+	net {
+		north		nway_wallf
+		northeast	nway_wallf
+		east		nway_wallf
+		southeast	nway_wallf
+		south		nway_wallf
+		southwest	lab
+		west		nway_wallf
+		northwest	nway_wallf
+	}
+}
+
+room restaurant "restaurant" {
+	desc {
+Bursting to the gills, this restaurant serves the finest plankton
+meals in Hydropolis. For the fabulously wealthy, gas-impregnated oils are on
+sale. They may not be as efficient as snifters, but they certainly put everyone
+else in their place! A waiter floats around near the exit to the north
+	}
+	wet
+	lit_room
+	location restaurant
+	set shops
+	net {
+		north		outsideuni
+	}
+}
+
+room pickerel "Pickerel underground station" {
+	desc {
+This station is teeming with guppies, nipping in and out of the access
+funnel which leads to the platform. A guard, looking rather bored with life,
+checks all their tickets. You can buy tickets from the ticket clerk, behind his
+counter close to the exit southeast
+	}
+	force_adj
+	wet
+	synonyms { tube }
+	attribute alladjs
+	lit_room
+	location pickerel
+	net {
+		north		nway_wallf
+		northwest	nway_wallf
+		northeast	nway_wallf
+		east		nway_wallf
+		south		nway_wallf
+		southwest	nway_wallf
+		southeast	plaza
+		out		plaza
+		west		nway_wallf
+		down		platform
+		in		platform
+	}
+}
+
+room hardwareshop "hardware shop" {
+	desc {
+This hardware shop contains everything for the fish with DIY leanings. If
+your DIY is leaning, this is were you can get the tools to mend it. If you
+require anything the assistant will only be too pleased to take your credit,
+if not your credit card. He may even give it back. You can leave the shop by
+swimming west
+	}
+	wet
+	desc_only
+	force_adj
+	lit_room
+	location hardwareshop
+	set shops
+	net {
+		north		nway_wallf
+		northeast	nway_wallf
+		east		nway_wallf
+		south		nway_wallf
+		west		sharkstreet
+	}
+}
+
+room secondhandshop "second hand shop" {
+	desc {
+This shop is run by a cool catfish of many talents, most of them illegal, who
+goes by the name of Steve. Steve is a fish who could sell stripes to tiger
+sharks, but would rather sell them his grandmother - if he hasn't already. The
+shop has a bad reputation. It normally sells "fins what have fallen off the
+back of a submarine" if you get my drift. The exit from this den of low morals
+and high prices is to the south
+	}
+	scen_noun_f grandmother
+
+	force_adj
+	wet
+	lit_room
+	location secondhandshop
+	set shops
+	net {
+		north		nway_wallf
+		east		nway_wallf
+		south		sharkstreet
+		west		nway_wallf
+		southwest	nway_wallf
+	}
+	attribute alladjs
+}
+
+room pub "pub" {
+	desc {
+The Hook, Line and Sinker is a good old-fashioned boozer, with a clean bar and
+filthy customers. One of them, a sorry drunk leaning unsteadily against the
+bar, seems familiar to your host. Steve, the cool catfish from the second hand
+shop, is serving behind the bar. Or is it his twin brother? He sells masks,
+filled with gas from behind the bar, for the customers to sniff.
+Hence, the masks are known to the locals as "snifters" and the state of
+drunkeness as being "sniffed to the gills" or "completely finless". Exits lead
+north and east
+	}
+	wet
+	synonyms { hook line sinker boozer }
+	lit_room
+	location pub
+	set shops
+	net {
+		north		plaza
+		east		daceroad
+		south		nway_wallf
+		west		nway_wallf
+		southwest	nway_wallf
+		northeast	nway_wallf
+		northwest	nway_wallf
+		southeast	nway_wallf
+	}
+}
+
+room clothingshop "clothing shop" {
+	desc {
+Behind a counter stands an assistant, ready to sell you anything in the
+shop. Many racks are filled with exciting jackets, a fashionable
+accessory in Hydropolis at the moment. You can leave the shop by going south
+	}
+	wet
+	force_adj
+	lit_room
+	location clothingshop
+	set shops
+	net {
+		north		nway_wallf
+		east		nway_wallf
+		south		plaza
+		southeast	nway_wallf
+		west		nway_wallf
+	}
+}
+
+room inunitube "Opah university underground station" {
+	desc {
+Commuters are busily swimming up and down the access funnel which leads to
+the platform. A ticket clerk sits behind a counter selling tickets to fish who
+lack the simple foresight to buy a pass. You can leave the station through the
+exit to the east
+	}
+	wet
+	force_adj
+	synonyms { tube }
+	lit_room
+	location inunitube
+	net {
+		in		platform
+		down		platform
+		east		outsideuni
+		southeast	nway_wallf
+		northwest	nway_wallf
+		northeast	nway_wallf
+		out		outsideuni
+		southwest	nway_wallf
+		south		nway_wallf
+		west		nway_wallf
+		north		nway_wallf
+	}
+}
+
+room musicshop "Tuna_Day''s music shop" {
+	desc {
+The music shop is cluttered with amateur musicians, most of whom are playing
+versions of the ancient heavy metal hit "Smoke Underwater", very badly, on
+expensive instruments that they have no intention of buying. An assistant is
+attempting to hide behind the counter. The hasty exit from this noisy place is
+north
+	}
+	wet
+	force_adj
+	attribute alladjs
+	lit_room
+	location musicshop
+	set shops
+	net {
+		north		sharkstreet
+		east		nway_wallf
+		northwest	nway_wallf
+		south		nway_wallf
+		west		nway_wallf
+	}
+}
+
+room eelpout "Eelpout underground station" {
+	desc {
+In the ticket hall, commuters are busily swimming up and
+down the access funnel which leads to the platform. The ticket counter stands in
+the centre with a clerk behind it. Northwest an exit leads out onto Shark Street
+	}
+	wet
+	force_adj
+	attribute alladjs
+	synonyms { tube hall }
+	lit_room
+	location eelpout
+	net {
+		north		nway_wallf
+		northwest	sharkstreet
+		northeast	nway_wallf
+		east		nway_wallf
+		southeast	nway_wallf
+		south		nway_wallf
+		southwest	nway_wallf
+		west		nway_wallf
+		down		platform
+		in		platform
+		out 		sharkstreet
+	}
+}
+
+room tube "tube" {
+	desc {
+Always busy, the tube trains are packed solid with guppies. Rules have been
+passed strictly governing the number of fish allowed in each carriage but
+these are often disregarded, especially by sardines and pilchards
+	}
+	wet
+	lit_room
+	location tube
+	synonyms { train }
+	net {
+	north		nway_wallf
+	northeast	nway_wallf
+	east		nway_wallf
+	southeast	nway_door
+	south		nway_door
+	southwest	nway_door
+	west		nway_wallf
+	northwest	nway_wallf
+	}
+}
+
+room platform "tube platform" { #[TS]
+	desc {
+The tracks, leading off into the dark tunnel, lie beyond the northern edge of
+the platform. Trains arrive quite frequently, once every three minutes on
+average, a fact not unnoticed by the section of the Hydropolis Underground
+Omnibus Company responsible for advertising. You can go up to ground level
+via the access funnel to 
+	}
+	scen_noun_e edge
+	scen_noun_d adverts
+	scen_noun_d advertisements
+
+	wet
+	lit_room
+	location platform
+	net {
+		north		nway_track
+		northeast	nway_track
+		east		nway_wallf
+		southeast	nway_wallf
+		south		nway_wallf
+		southwest	nway_wallf
+		west		nway_wallf
+		northwest	nway_track
+		out		padstation	#get's changed in tube
+		up		padstation	#get's changed in tube
+	}
+}
+
+room treasureroom "crystal room" {
+	desc {
+This is the most beautiful room you've ever seen. There are no decorations,
+no features, no flaws, and yet the colours shift and swirl on every surface
+creating a hypnotic, soothing ambience. If you ever get the urge to leave, the
+exit is south
+	}
+	scen_noun_f decorations
+	scen_noun_f flaws
+	scen_noun_f features
+	scen_noun_c surface
+	scen_noun_d colours
+	scen_noun_d colors
+
+	force_adj
+	wet
+	lit_room
+	location treasureroom
+	net {
+		south alarmroom
+	}
+}
+
+room alarmroom "alarm white room" {
+	desc {
+White rooms always have a bad effect on you. If the authorities had had their
+way, your laboratory would have been white. But you were firm. You put your
+tail down and refused. This room is white, and you don't like it. It leads
+north to the museum's finest exhibit and south back to the museum
+	}
+	wet
+	lit_room
+	force_adj
+	location alarmroom
+	net {
+		north	treasureroom
+		south	museum
+		east	pway_museumeast
+		west	pway_museumwest
+	}
+}
+
+room museum "museum" {
+	desc {
+Visited by many fish over the course of a year, the museum is a great
+attraction. Maybe this is due to its unique collection of piscean relics,
+the greatest of which is the skeleton of the 'Bloodyenormasaurus' which has
+pride of place in the centre of this room. You can explore the museum in your
+own time by going north, east or west. You can return to the station by
+swimming south
+	}
+	wet
+	lit_room
+	location	museum
+	net {
+		north 	alarmroom
+		east	pway_museumeast
+		west	pway_museumwest
+		south	musstation
+	}
+}
+	
+room battersea "Battersea" {
+	desc {
+Battersea is a place of dreams. The station was built many years ago to
+encourage visits by tourists. Regular tours around the complex leave from the
+north. An access funnel, leading down is fished by a guard who is checking
+tickets, or would be if there were any to check but the ticket clerk hasn't
+sold any
+	}
+	wet
+	lit_room
+	location battersea
+	net {
+		north	powerstation
+		down	platform
+		in	platform
+	}
+}
+
+room powerstation "power station" {
+	desc {
+The power station dwarfs almost anything you have ever seen. Guided tours leave
+from the north, so the citizens of Hydropolis can marvel at this fish-made
+wonder and the sophistication of their engineers. A steel door lies to the west
+near an important gauge and a large switch
+	}
+	force_adj
+	wet
+	lit_room
+	location powerstation
+	net {
+		out	battersea
+		west	nway_pressuredoor
+		south	battersea
+		north	death
+	}
+}
+
+room blades "tunnel" {
+	desc {
+You'll have to be very careful in this tunnel; the sharp blades of a giant
+turbine are all around you. They aren't spinning but the turbine could start up
+again at any moment so it's important not to panic. Just make up your mind
+quickly whether you're going to swim east back to the power station or further
+along the tunnel to the west
+	}
+	wet
+	lit_room
+	location blades
+	net {
+		east	powerstation
+		west	tunnel1
+	}
+}
+
+room tunnel1 "curve" {
+	desc {
+The tunnel curves upwards here through still, calm water, coming to a halt at a
+series of grilles. The turbine's sharp blades lie to the east
+	}
+	wet
+	lit_room
+	location tunnel1
+	net {
+		east 	blades
+	}
+}
+
+room researchwing "research wing" {
+	desc {
+This is where a lot of the groundwork for The Project was done by the famous
+Dr. Salmon. Unfortunately his work was shelved to make room for your endeavours,
+and anyway he sniffed far too much. You can swim up into the tower from here or
+pass through the metal door with a slot beside it to the south
+	}
+	wet
+	lit_room
+	force_adj
+	location researchwing
+	net {
+		up	tower
+		south	nway_door
+	}
+}
+
+room tower "tower" {
+	desc {
+Water must be evaporating fast; the tower is only half full! You swim up and
+break the surface to take a look around. In the ceiling, high above through the
+air, is a trapdoor, but there seems no way of getting there. You dive quickly
+back underwater before your gills dry out
+	}
+	lit_room
+	location tower
+	net {
+		south 	researchwing
+	}
+}
+
+room roof "flat roof" {
+	desc {
+When there was a lot of water around, students came up here to watch 
+the teeming city of Hydropolis. A railing around the edge of the roof
+was put here to prevent them being washed away by the deceptively strong
+overcurrent. Now the water has gone that has ceased to be a problem. The obvious
+exit is the trapdoor
+	}
+	scen_noun_e overcurrent
+	scen_noun_c edge
+
+	lit_room
+	location roof
+	net {
+		down	tower
+	}
+}
+
+room clouds "in_mid-air" {
+	desc {
+The bag of gas is carrying you high over Hydropolis. Oops, now you
+think about it, maybe you've gone a little too far. You're too high, too dry
+and about to die
+	}
+	lit_room
+	location clouds
+	net {
+	}
+}
+
+room plaza "busy plaza" {
+	desc {
+Noisy, dirty, fishy and grimy. Well, what did you expect a downtown Hydropolis
+shopping precinct to be like? You expected shops? OK, I'll give you some shops.
+To the north is a clothing shop, to the south is a pub and to the west is a
+cinema. Is that enough? No? Well, you'll have to go across Dace Road to the
+southeast if you want some more or northwest to Pickerel Underground Station if
+you want to go somewhere else
+	}
+	location plaza
+	lit_room
+	net {
+		northwest	pickerel
+		north		clothingshop
+		west		death
+		south		pub
+		southeast	daceroad
+		northeast	pway_road
+		east		pway_road
+		southwest	pway_road
+		out 		daceroad
+		in		pickerel
+	}
+}
+
+room daceroad "dace road" {
+	desc {
+You are swimming along the south side of Dace Road. The police station is to the
+south, west across Plaice Street is a pub, and east lies Shark Street
+	}
+	force_adj
+	location daceroad
+	lit_room
+	net {
+		northwest	plaza
+		west		pub
+		south		policestation
+		east		sharkstreet
+		north		pway_road
+		northeast	pway_road
+		southeast	nway_wallf
+		southwest	pway_road
+		out		sharkstreet
+		in		policestation
+	}
+}
+
+room sharkstreet "shark street" {
+	desc {
+This is the seedier part of town with shops to match, so watch who you're
+dealing with. South is a music shop, north is a second hand shop,
+across the road to the east is the hardware shop and southeast is the
+nearest underground station, Eelpout. Dace Road, a much safer place to be, is
+to the west
+	}
+	force_adj
+	location sharkstreet
+	lit_room
+	net {
+		north		secondhandshop
+		west		daceroad
+		southwest	nway_wall
+		south		musicshop
+		southeast	eelpout
+		east		hardwareshop
+		northeast	pway_road
+		northwest	pway_road
+		in 		eelpout
+		out		daceroad
+	}
+}
+

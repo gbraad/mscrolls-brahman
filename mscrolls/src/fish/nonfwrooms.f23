@@ -1,0 +1,846 @@
+
+room bowl1 "goldfish bowl" {
+	desc {
+Swimming upside down is good fun, but difficult, even for someone as highly
+trained as yourself. It looks like the pondweed is dangling from the gravel
+above your head. And the ant eggs, wow! Upside down they look, so, so much
+like, well, like exactly the same as if you were the right way up actually.
+Anyway, there's no need to get carried away. Sir Playfair has a message for
+you in the castle if you're not mistaken and he hates agents who are late
+	}
+	wet
+	force_adj
+	lit_room
+	location bowl1
+	net {
+		in		castle1
+		out		castle1
+		north		pway_downbowl1
+		northeast	pway_downbowl1
+		east		pway_downbowl1
+		southeast	pway_downbowl1
+		south		pway_downbowl1
+		southwest	pway_downbowl1
+		west		pway_downbowl1
+		northwest	pway_downbowl1
+		up		pway_upbowl1
+		down		pway_upbowl1
+	}
+}
+
+room bowl2 "goldfish bowl" {
+	desc {
+The ant eggs have stopped swirling around and are now floating on the surface.
+Gravel fills the bottom of the bowl and some tasty looking pondweed you've
+been wanting to nibble for days is lying on it. You get a nasty feeling in your
+swim bladder about the castle, probably because Sir Playfair has so rudely
+interrupted your vacation
+	}
+	wet
+	force_adj
+	lit_room
+	location bowl2
+	net {
+		in		castle1
+		north		pway_downbowl1
+		northeast	pway_downbowl1
+		east		pway_downbowl1
+		southeast	pway_downbowl1
+		south		pway_downbowl1
+		southwest	pway_downbowl1
+		west		pway_downbowl1
+		northwest	pway_downbowl1
+		up		pway_upbowl
+		down		pway_downbowl
+	}
+}
+
+room castle1 "plastic featureless castle" {
+	desc {
+Inside, the castle is exactly what you expected - tacky and featureless with
+ant eggs near the top and gravel at the bottom. To anyone else, the colours
+sprayed randomly on the wall would just be colours sprayed randomly on the
+wall. To a daring inter-dimensional espionage operative like yourself,
+however, they are obviously used to focus communications across the dimensions.
+The only exit is out, back to the goldfish bowl
+	}
+	wet
+	scen_noun_a colours
+	scen_noun_a colors
+	lit_room
+	location castle1
+	net {
+		north		nway_wallf
+		northeast	nway_wallf
+		east		nway_wallf
+		southeast	nway_wallf
+		south		bowl2
+		southwest	nway_wallf
+		west		nway_wallf
+		northwest	nway_wallf
+		out		bowl2
+	}
+}
+
+room hall "entrance hall" {
+	desc {
+By the prominently displayed gold discs
+this must be the entrance to an up-market recording studio, possibly somewhere
+in London. There is a lounge to the west and the exit to the street is
+east, through a large wooden door
+	}
+	force_adj
+	lit_room
+	location hall
+	net {
+		north		nway_wall
+		northeast	nway_wall
+		east		nway_door
+		southeast	nway_wall
+		south		nway_wall
+		southwest	nway_wall
+		west		lounge
+		northwest	nway_wall
+		in	lounge
+	}
+}
+
+room lounge "plush lounge" {
+	desc {
+Lounge areas in recording studios are usually for one purpose only, and that's
+to lull musicians into a false sense of the value of time. They'll sit in the
+comfortable sofa, drinking coffee and watching promo videos on the
+television here, all the while running up huge bills at the standard hourly
+rate. But they can afford it. Through a glass door to the north is an
+office. The only other exits are east and west
+	}
+	scen_noun_f promo_videos
+	scen_noun_f videos
+
+	force_adj
+	lit_room
+	location lounge
+	net {
+		north		nway_door
+		northeast	nway_wall
+		east		hall
+		southeast	nway_wall
+		south		nway_wall
+		southwest	nway_wall
+		west		hall1
+		northwest	nway_wall
+		out		hall
+		in		hall1
+	}
+}
+
+room office "office" {
+	desc {
+This is where the studio paperwork is done. It's also where the producer often
+complains bitterly that he does everything. In fact, he spends most of his time
+'delegating responsibility' or, in ordinary language, bossing people about.
+The glass door leads back to the lounge
+	}
+	scen_noun_a paperwork
+
+	lit_room
+	location office
+	net {
+		north		nway_wall
+		northeast	nway_wall
+		east		nway_wall
+		southeast	nway_wall
+		south		nway_door
+		southwest	nway_wall
+		west		nway_wall
+		northwest	nway_wall
+	}
+}
+
+room hall1 "hallway" {
+	desc {
+This east-west hallway has a blue door in the north wall which leads to the
+main studio. The light by the door is red, indicating that someone is playing
+at the moment. To the south is a locked door marked 'KITCHEN'
+	}
+	lit_room
+	location hall1
+	net {
+		north		nway_door
+		northeast	nway_wall
+		east		lounge
+		southeast	nway_wall
+		south		nway_door
+		southwest	nway_wall
+		west		hall2
+		northwest	nway_wall
+		in		hall2
+		out		lounge
+	}
+}
+
+room hall2 "corridor" {
+	desc {
+This is as far as the studio goes. On a first date, anyway. A wooden door with
+a switch by it is to the south and the secondary control room door, with a
+light by it, is northward. The hallway runs back to the east
+	}
+	lit_room
+	location hall2
+	net {
+		north		nway_door
+		northeast	nway_wall
+		east		hall1
+		southeast	nway_wall
+		south		nway_door
+		southwest	nway_wall
+		west		nway_wall
+		northwest	nway_wall
+		out		hall1
+		in		hall1
+	}
+}
+
+room store "small store" {
+	desc {
+This is where everything usually ends up. If you had the time to sift your way
+through it all you might find some unreleased tracks by bands who have since
+become famous under other names. A more likely find are tracks that should be
+taken from this place and, for the general good of the population, burned
+	}
+	synonyms { room }
+	location store
+	net {
+		north		nway_door
+		northeast	nway_wall
+		east		nway_wall
+		southeast	nway_wall
+		south		nway_wall
+		southwest	nway_wall
+		west		nway_wall
+		northwest	nway_wall
+	}
+}
+
+room cntrl2 "secondary control room" {
+	desc {
+This room is used to edit tracks so terrible that the bands who made them had
+to be sent down the pub. Unfortunately, the bands will probably become very
+famous as a result of the changes, which is why it's usually better to be a
+musician than a tape operator. An important button is next to the door
+to the south
+	}
+	force_adj
+	attribute alladjs
+	lit_room
+	location cntrl2
+	net {
+		north		nway_wall
+		northeast	nway_wall
+		east		nway_wall
+		southeast	nway_wall
+		south		nway_door
+		southwest	nway_wall
+		west		nway_wall
+		northwest	nway_wall
+	}
+}
+
+room vanback "back_of van" {
+	desc {
+Not the best place to sleep. It's very cold and more than slightly damp, but
+still better than sleeping outside. The icy draught is coming from the
+front of the van to the south
+	}
+	scen_noun_a draught
+
+	force_adj
+	lit_room
+	location vanback
+	net {
+		north		nway_trndoors
+		northeast	nway_van
+		east		nway_van
+		southeast	nway_van
+		south		vanfront
+		southwest	nway_van
+		west		nway_van
+		northwest	nway_van
+		out		vanfront
+		in		vanfront
+	}
+}
+
+room vanfront "cab" {
+	desc {
+The cab is Steve's province. Like most roadies, his ability to create chaos
+out of order is legendary and the rubbish all over the cab is definitely his
+work. Major slobs themselves, the band prefer to ride in the back in their own
+squalor. The passenger door has been jammed open, revealing a dark field
+	}
+	scen_noun_a chaos
+	scen_noun_a squalor
+
+	synonyms { van }
+	lit_room
+	location vanfront
+	net {
+		north		vanback
+		northeast	nway_van
+		east		carpark
+		southeast	nway_van
+		south		nway_van
+		southwest	nway_van
+		west		nway_van
+		northwest	nway_van
+		out		carpark
+		in		vanback
+	}
+}
+
+room carpark "dark field" {
+	desc {
+You're in the middle of a dark field, standing next to the band's van. You can
+hear music to the east, where a fire silhouettes a ruined building
+	}
+	scen_noun_d voices
+	scen_noun_d silhouettes
+	scen_noun_a silhouette
+
+	force_adj
+	location carpark
+	net {
+		north		pway_darkness
+		northeast	pway_darkness
+		east		track
+		southeast	pway_darkness
+		south		pway_darkness
+		southwest	pway_darkness
+		west		pway_darkness
+		northwest	pway_darkness
+		in		vanfront
+		out		track
+	}
+}
+
+room track "narrow east-west track" {
+	desc {
+This narrow east-west track is miles from civilisation. There is a fire to the
+east and some music is coming from the same direction
+	}
+	force_adj
+	location track
+	net {
+		north		pway_darkness
+		northeast	pway_darkness
+		east		nearruin
+		southeast	pway_darkness
+		south		pway_darkness
+		southwest	pway_darkness
+		west		carpark
+		northwest	pway_darkness
+	}
+}
+
+room nearruin "outside.the.abbey" {
+	desc {
+The ruined abbey stands before you, imposing even in such a state of decay.
+Through the grand arch to the east, you hear some awful music and see the glow
+from a large fire. Westward leads back into the gloom
+	}
+	scen_noun_a gloom
+	lit_room
+	location nearruin
+	net {
+		north		pway_darkness
+		northeast	pway_darkness
+		east		ruinedabbey
+		southeast	pway_darkness
+		south		pway_darkness
+		southwest	pway_darkness
+		west		track
+		northwest	pway_darkness
+		in		ruinedabbey
+		out		track
+	}
+}
+
+room ruinedabbey "ruined abbey" {
+	desc {
+Neglected over the centuries, only the shell of this abbey remains and even
+that is in a poor state of repair. Rubble is everywhere, except for a gap
+cleared in the middle, in which a fire is burning. You can go north and
+south, although the obvious exit is west, towards the grand arch
+	}
+	scen_noun_a rubble
+	scen_noun_a gap
+
+	location ruinedabbey
+	lit_room
+	net {
+		north		ruinedtransept
+		northeast	nway_wall
+		east		nway_wall
+		southeast	nway_wall
+		south		ruinednave
+		southwest	nway_wall
+		west		nearruin
+		northwest	nway_wall
+		in		ruinedtransept
+		out		nearruin
+	}
+}
+
+room ruinedtransept "ruined transept" {
+	desc {
+The transept, at right angles to the nave, is in ruins. The fire to the south
+gives the only light in here, allowing you to see an exit leading down
+	}
+	location ruinedtransept
+	force_adj
+	lit_room
+	net {
+		north		pway_darkness
+		northeast	pway_darkness
+		east		pway_darkness
+		southeast	nway_wall
+		south		ruinedabbey
+		southwest	nway_wall
+		west		pway_darkness
+		northwest	pway_darkness
+		up		archway
+		down		antechamber
+		in		antechamber
+		out		ruinedabbey
+	}
+}
+
+room archway "archway" {
+	desc {
+You're about thirty feet above ground. It feels as if the world is swaying
+which you put down to vertigo. Only when you realise that you don't suffer
+from vertigo do you realise that the world really IS swaying. This place
+isn't safe
+	}
+	scen_noun_f handholds
+
+	lit_room
+	location archway
+	synonyms { arch }
+	net {
+		down	ruinedtransept
+	}
+}
+
+room antechamber "antechamber" {
+	desc {
+The antechamber connects the ruins to the catacombs. Upwards is the transept
+and you can enter the catacombs through a doorway to the south
+	}
+	location antechamber
+	net {
+		north		ruinedtransept
+		northeast	nway_wall
+		east		nway_wall
+		southeast	nway_wall
+		south		catacombs
+		southwest	nway_wall
+		west		nway_wall
+		northwest	nway_wall
+		up		ruinedtransept
+		out		ruinedtransept
+		in		catacombs
+	}
+}
+
+room catacombs "sacred catacombs" {
+	desc {
+The ceiling's collapse has disturbed the sepulchral debris in this sacred
+place, throwing it all over the floor. A doorway leads north to the antechamber
+	}
+# desc can be suffixed with 'and there is an exit leading down'
+
+	scen_noun_f ceiling
+
+	location catacombs
+	force_plural
+	net {
+		north		antechamber
+		northeast	nway_wall
+		east		nway_wall
+		southeast	nway_wall
+		south		nway_wall
+		southwest	nway_wall
+		west		nway_wall
+		northwest	nway_wall
+		out		antechamber
+	}
+}
+
+#
+# twenty items #4
+#
+
+room altarroom "altar icy room" {
+	desc {
+This icy room has been sealed for a long time. Cold air slices through you;
+a chill foreshadow of your doom. Terrifying images flash into your mind. You
+feel that you have violated this place somehow
+	}
+	scen_noun_f air
+	scen_noun_f cold_air
+
+	location altarroom
+	force_adj
+	net {
+		north		nway_wall
+		northeast	nway_wall
+		east		nway_wall
+		southeast	nway_wall
+		south		nway_wall
+		southwest	nway_wall
+		west		nway_wall
+		northwest	nway_wall
+		up	catacombs
+		out	catacombs
+	}
+}
+
+room ruinednave "ruined nave" {
+	desc {
+As you survey this place, you wonder how such beauty could have been left to
+just rot. Depression hangs heavy on your heart, but not for long! 
+Inter-dimensional espionage operatives aren't renowned for their sentimentality
+with regard to ruined naves, and, besides, you have jobs to meet, people to be
+and places to do. Southward from here, it's as dark as pitch, but northward the
+fire is burning fiercely
+	}
+	location ruinednave
+	force_adj
+	net {
+		north		ruinedabbey
+		northeast	nway_wall
+		east		pway_darkness
+		southeast	pway_darkness
+		south		pway_darkness
+		southwest	pway_darkness
+		west		pway_darkness
+		northwest	nway_wall
+		out		ruinedabbey
+	}
+}
+
+room outsidesmithy "outside.Smithy" {
+	desc {
+Soggy leaves hang limply from the trees here, and thick clouds drift slowly
+overhead. A battered blacksmith's forge lies to the east, shrouded on all
+sides by the trees of the forest
+	}
+	scen_noun_d soggy_leaves
+	scen_noun_d clouds
+	scen_noun_d thick_clouds
+
+	lit_room
+	location outsidesmithy
+	net {
+		north		gloomyforest
+		northeast	pway_forest
+		east		smithy
+		southeast	pway_forest
+		south		pway_forest
+		southwest	pway_forest
+		west		wetforest
+		northwest	darkforest
+		in		smithy
+		out		darkforest
+	}
+}
+
+room darkforest "wet forest" {
+	desc {
+Don't you hate the rain? Why is it raining much harder in this bit of the
+forest than anywhere else? Cold, grey and wet. Blurg! You can leave in any
+direction, but the undergrowth is too dense for you to see which way would be
+best
+	}
+	scen_noun_a undergrowth
+
+	lit_room
+	another_noun
+	force_adj
+	location darkforest
+	set forests
+	net {
+		north		dimforest
+		northeast	path
+		east		gloomyforest
+		southeast	outsidesmithy
+		south		wetforest
+		southwest	glade
+		west		dankforest
+		northwest	clearing
+		out		clearing
+	}
+}
+
+room glade "charred glade" {
+	desc {
+This unpleasant scene is clear evidence that the hand of man has set foot
+here. The trees have been damaged by fire, and, on closer inspection, you notice
+the entrance to a mine leading down
+	}
+	lit_room
+	synonyms { entrance mine }
+	force_adj
+	location glade
+	net {
+		north		dankforest
+		northeast	darkforest
+		east		wetforest
+		southeast	pway_forest
+		south		pway_forest
+		southwest	pway_forest
+		west		pway_forest
+		northwest	pway_forest
+		down		death
+		in		death
+		out		darkforest
+	}
+}
+
+#####################################################
+#
+# the following forest rooms must remain together
+#
+#####################################################
+
+room path "cool glade" {
+	desc {
+Drizzle is falling here, to be followed by sunny spells, and a few
+showers in northern regions later in the day. The outlook for tomorrow is
+anybody's guess, but if you'd like to leave this place, you can go south, west
+or southwest
+	}
+	scen_noun_c	drizzle
+	scen_noun_b	breeze
+
+	lit_room
+	force_adj
+	location path
+	net {
+		north		pway_forest
+		northeast	pway_forest
+		east		pway_forest
+		southeast	pway_forest
+		south		gloomyforest
+		southwest	darkforest
+		west		dimforest
+		northwest	pway_forest
+		out		darkforest
+	}
+}
+
+room dimforest "dim forest" {
+	desc {
+The dense foliage blocks out nearly all the daylight here, with just a few
+patches peeking through. There are ways through the forest in every direction
+with the clearing to the west and a cool glade to the east
+	}
+	scen_noun_a daylight
+	scen_noun_a foliage
+	scen_noun_a dense_foliage
+	scen_noun_a patches
+
+	lit_room
+	another_noun
+	force_adj
+	location dimforest
+	set forests
+	net {
+		north		pway_forest
+		northeast	pway_forest
+		east		path
+		southeast	gloomyforest
+		south		darkforest
+		southwest	dankforest
+		west		clearing
+		northwest	pway_forest
+		out		clearing
+	}
+}
+
+room wetforest "dark forest" {
+	desc {
+You are in the middle of a dark forest. The dense bracken grabs at
+your feet as you walk. Brambles hinder your progress except towards a
+glade to the west
+	}
+	scen_noun_a dense_bracken
+	scen_noun_a bracken
+	scen_noun_a brambles
+	another_noun
+	lit_room
+	force_adj
+	location wetforest
+	set forests
+	net {
+		north		darkforest
+		northeast	gloomyforest
+		east		outsidesmithy
+		southeast	pway_forest
+		south		pway_forest
+		southwest	pway_forest
+		west		glade
+		northwest	dankforest
+		out		darkforest
+	}
+}
+
+room dankforest "dank forest" {
+	desc {
+This part of the forest is horribly cold and damp, and brambles scratch and
+pull at you as you pass. To the north and south the undergrowth clears a
+little. The forest continues freely in all other directions
+	}
+	scen_noun_d brambles
+	scen_noun_c undergrowth
+
+	another_noun
+	lit_room
+	force_adj
+	location dankforest
+	set forests
+	net {
+		north		clearing
+		northeast	dimforest
+		east		darkforest
+		southeast	wetforest
+		south		glade
+		southwest	pway_forest
+		west		pway_forest
+		northwest	pway_forest
+		out		darkforest
+	}
+}
+
+room gloomyforest "gloomy forest" {
+	desc {
+The constant rainfall here is incredibly depressing. So depressing in fact,
+that if you weren't an alert inter-dimensional espionage operative with other
+things to think about, you'd get pretty miserable. The forest is
+impassable to the northeast, east and southeast, although to the north and
+south it seems to clear a bit
+	}
+	scen_noun_b rainfall
+
+	another_noun
+	lit_room
+	force_adj
+	location gloomyforest
+	set forests
+	net {
+		north		path
+		northeast	pway_forest
+		east		pway_forest
+		southeast	pway_forest
+		south		outsidesmithy
+		southwest	wetforest
+		west		darkforest
+		northwest	dimforest
+		out		darkforest
+	}
+}
+
+#say it has been raining in desc below
+
+room clearing "clearing" {
+	desc {
+It's stopped raining here at the moment, but the clouds overhead
+show that it could start again any minute. If they decide to burst, the
+tree stump in the centre of the clearing would probably fill up with water.
+Paths go south, southeast and east. In all other directions the undergrowth is
+too tangled to make any progress
+	}
+	lit_room
+	location clearing
+	net {
+		north		pway_forest
+		northeast	pway_forest
+		east		dimforest
+		southeast	darkforest
+		south		dankforest
+		southwest	pway_forest
+		west		pway_forest
+		northwest	pway_forest
+		out		darkforest
+	}
+}
+
+#####################################################
+#
+# the above forest rooms must remain together
+#
+#####################################################
+
+#flesh out room below
+
+room smithy "smithy" {
+	desc {
+The smithy is dark and hot. The cherry-red glow of the fire is proof that
+someone has been using it quite recently. Curiously, the building has no
+windows and there is only the one exit, opposite a tool cupboard, to the west
+	}
+	lit_room
+	scen_noun_a	shadows
+	location smithy
+	net {
+		north		nway_wall
+		northeast	nway_wall
+		east		nway_wall
+		southeast	nway_wall
+		south		nway_wall
+		southwest	nway_wall
+		west		outsidesmithy
+		northwest	nway_wall
+	}
+}
+
+room death "Project" {
+	desc {
+	}
+	lit_room
+	location death
+	net {
+		north	nway_door
+		west	nway_door
+	}
+}
+
+room stream "In.The.Dimensions" {
+	desc {
+A lesser being would have no idea what's going on here. Their brains would
+probably get lightly scrambled if not completely fizzled out. But, for a highly
+trained inter-dimensional espionage operative, who has spent half his life
+travelling through the dimensions, exits are easy to spot
+	}
+	wet
+	lit_room
+	net
+	{
+	}
+}
+
+room lastbowl "goldfish bowl" {
+	desc {
+A tingle runs up and down your scales here. It's definitely not your vacation
+bowl. True, it does have gravel, ant eggs and pondweed, but then so has
+every goldfish bowl. The difference is you can see out of this bowl and it
+doesn't have a tacky plastic castle. It looks like you're in a computer room of
+some kind, with terminals lining the walls
+	}
+	wet
+	force_adj
+	lit_room
+	net {
+	}
+}

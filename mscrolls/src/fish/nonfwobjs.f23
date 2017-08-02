@@ -1,0 +1,1791 @@
+#############################################################
+#
+# the first 9 items are used to generate the villains
+# password. For this reason none of them may be force_adj
+# unless the first adj is also a synonym (see milk bottle)
+#
+#############################################################
+
+item gravel "multi coloured multi-coloured gravel" {
+	desc {
+is much like gravel everywhere. The only mystery is why it is multi coloured.
+Perhaps the owners don't consider their pet's aesthetic feelings
+	}
+	texture hard
+	wet
+	weight 1
+	hardness 15
+	moveable
+	size 1
+	force_plural
+	synonyms { stones }
+	pseudo
+	location { bowl1 bowl2 castle1 }
+}
+
+item castle "plastic castle" {
+	desc {
+Colours are sprayed on this tacky castle in a random fashion, as if it had been
+visited by a medieval graffiti artist with a belly full of mead and a nasty
+case of clinical depression. A large gateway leads inside
+	}
+	scen_noun_e 	colours
+	scen_noun_e 	colors
+	desc_only
+	pseudo
+	hardness 15
+	texture hard
+	wet
+	location { bowl1 bowl2 lastbowl }
+}
+
+item greenkey "grommet" {
+	desc {
+looks like it should be fixed to a gold ring with a spindle to form a focus
+wheel
+	}
+	set parts
+	size 1
+	weight 1
+	hardness 15
+	related
+	contained
+	moveable
+	location chalice
+	attribute teleportable
+}
+
+item bluekey "spindle" {
+	desc {
+would be incredibly useful for connecting a grommet to a gold ring, thus
+forming a focus wheel
+	}
+	set parts
+	texture cold
+	hardness 5
+	weight 1
+	size 1
+	contained
+	moveable
+	location filingcabinet
+	attribute teleportable
+}
+
+item eggs "ant eggs" {
+	desc {
+It's a pity that ant eggs are all you've had to eat for the past week, otherwise
+they might look appetising
+	}
+	desc_only
+	synonyms { egg }
+	texture soft
+	wet
+	weight 1
+	hardness 15
+	moveable
+	size 1
+	plural
+	edible 6
+	pseudo
+	location { bowl1 bowl2 castle1 lastbowl }
+	set food
+}
+
+item pondweed "pondweed" {
+	desc {
+makes a nice change from ant eggs, but you couldn't eat it all the time
+	}
+	texture clammy
+	wet
+	hardness 15
+	weight 1
+	moveable
+	synonyms { weed }
+	size 2
+	force_plural
+	edible 5
+	pseudo
+	location { bowl1 bowl2 castle1 }
+	set food
+}
+
+item gateway "gateway" {
+	desc {
+looks inviting
+	}
+	synonyms { entrance }
+	pseudo
+	wet
+	hardness 15
+	location { bowl1 bowl2 }
+}
+
+item sofa "plastic sofa" {
+	desc {
+Despite being made from plastic the sofa looks and sounds incredibly
+comfortable
+	}
+	related
+	desc_only
+	sittable
+	synonyms { settee couch }
+	texture soft
+	hardness 15
+	weight 15
+	location lounge
+}
+
+item tv "hi-tech hi tech television" {
+	desc {
+is the latest hi-tech marvel from Japan. It will show images even before they
+have been recorded. Unfortunately the remote controller was stolen by a light
+fingered roadie several weeks ago
+	}
+	scen_noun_d knobs
+	scen_noun_d leads
+
+	related
+	synonyms { tv telly }
+	texture smooth
+	size 4
+	hardness 5
+        attribute teleportable
+	weight 10
+	location lounge
+}
+
+item gargoyles "gargoyle" {
+	desc {
+The gargoyles are not easy to look at. They trigger some primeval fear
+response in any rational person. You swallow hard and look away
+	}
+	out
+	desc_only
+	size 9
+	weight 15
+	hardness 15
+	texture clammy
+	location altarroom
+	set gargoyles
+}
+
+item bportal "small warp" {
+	desc {
+is just big enough to swim through
+	}
+	out
+	force_adj
+	wet
+	hardness 0
+	texture npc
+	location castle1
+	set warps
+	another_noun
+}
+
+item gportal "jagged important warp" {
+	desc {
+looks important. It's jagged as well, but definitely important
+	}
+	out
+	force_adj
+	wet
+	hardness 0
+	texture void
+	location castle1
+	texture rough
+	set warps
+	another_noun
+}
+
+item rportal "smooth trendy trendiest warp" {
+	desc {
+looks the trendiest of all the warps. It must lead somewhere pretty cool
+	}
+	out
+	force_adj
+	wet
+	location castle1
+	hardness 0
+	texture smooth
+	set warps
+	another_noun
+}
+
+item wportal "large warp" {
+	desc {
+has metal spokes which connect the centre to the perimeter. The warp is large
+enough for you to swim through, provided you aren't carrying anything bulky
+under your arm. A number 73 bus, for example, is not recommended
+	}
+	scen_noun_e 	spokes
+
+	out
+	force_adj
+	wet
+	hardness 0
+	texture void
+	location castle1
+	set warps
+}
+
+item blackportal "dark warp" {
+	desc {
+fills you with fear. The Seven Deadly Fins are in there somewhere
+	}
+	hardness 0
+	texture void
+	wet
+	force_adj
+	location flounge
+	set warps
+	out
+}
+
+item golddisc "gold prominently displayed discs" {
+	desc {
+Several of the gold discs were awarded to the Seven Deadly Fins; one of the
+biggest was for their infamous album "Batting Averages From The Test Match Of
+Oblivion". This one has been stolen
+	}
+	synonyms { disks disk }
+	plural
+	desc_only
+	force_adj
+	hardness 11
+	size 3
+	strength 8
+	related
+	location hall
+}
+
+item glassdoor "glass door" {
+	desc {
+is made of glass. Were you expecting a glass door to be made of chicken
+soup? I hope not
+	}
+	force_adj
+	texture smooth
+	hardness 15
+	closed
+	pseudo
+	location { lounge office }
+	set doors
+}
+
+item poffice "office" {
+	desc {
+is where the real work gets done in the studio. Well, that's what the producer
+says, anyway
+	}
+	texture void
+	hardness 0
+	related
+	location lounge
+}
+
+item woodendoor "large wooden door" {
+	desc {
+is very imposing, probably designed to knock any band's ego into a manageable
+state
+	}
+	force_adj
+	hardness 15
+	attribute alladjs
+	texture rough
+	hardness 15
+	closed
+	pseudo
+	location { hall death }
+	set doors
+}
+
+item wastebin "waste bin" {
+	desc {
+is used for filing things which have outlived their usefulness, and
+sometimes things that haven't, by mistake
+	}
+	hardness 5
+	size 4
+	weight 2
+	force_adj
+	moveable
+	texture rough
+	contr_vol 4
+	location lounge
+	another_noun
+	set bins
+	attribute teleportable
+	attribute fodablelonglook
+}
+
+
+item kettle "kettle" {
+	desc {
+is totally unremarkable except for the fact that you can see Rod's reflection
+in it
+	}
+	hardness 11
+	strength 15
+	weight 1
+	moveable
+	texture hot
+	size 3
+	contr_vol 3
+	related
+	location rod
+	attribute teleportable
+	attribute fodablelonglook
+}
+
+item filingcabinet "filing dull grey cabinet" {
+	desc {
+is made of dull grey metal, obligatory for the modern '80s style office.
+It has a complex combination lock on it
+	}
+	force_adj
+	hardness 11
+	strength 15
+	weight 15
+	locked
+	contr_vol 3
+	texture hard
+	size 5
+	location office
+	attribute infinite_container
+}
+
+item combinationlock "complex lock" {  #desc is null- Its all done with mirrors!
+	desc {
+	}
+	synonyms { combination }
+	related
+	inseparable
+	hardness 15
+	location filingcabinet
+}
+
+item desk "incredibly untidy desk" {
+	desc {
+is incredibly untidy. Perhaps the cleaning woman should be sacked
+	}
+	sittable
+	weight 15
+	hardness 15
+	size 10
+	texture hard
+	location office
+	attribute teleportable
+}
+
+item hand "hands" {
+	desc {
+your hands look pretty, um, handy
+	}
+	synonyms { hand }
+	desc_only
+	hardness 15
+	plural
+	intrinsic
+	texture smooth
+	out
+	location inventory
+}
+
+item switch "switch" { #[TS]
+	desc {
+is one of the simplest machines in the universe, a device for making and
+breaking an electrical circuit to turn a light on or off. It is currently 
+	}
+	hardness 15
+	texture smooth
+	size 1
+	related
+	location hall2
+	set switches
+}
+
+item tapebin "tape bin" {
+	desc {
+collects stray bits of tape during editing
+	}
+	hardness 5
+	force_adj
+	weight 3
+	moveable
+	contr_vol 4
+	texture smooth
+	size 4
+	another_noun
+	location store
+	set bins
+	attribute teleportable
+	attribute fodablelonglook
+}
+
+item bluedoor "blue door" {
+	desc {
+is supposed to be sound-proof, but that never seems to work when there's a good
+thrash session happening in the studio
+	}
+	pseudo
+	hardness 15
+	closed
+	texture rough
+	force_adj
+	location { hall1 death }
+	set doors
+}
+
+item greendoor "secondary control room door" {
+	desc {
+keeps the corridor out of the secondary control room. Tsk! That corridor is
+always trying to get in there
+	}
+	force_adj
+	pseudo
+	closed
+	another_noun
+	hardness 15
+	texture rough
+	related
+	location { hall2 cntrl2 }
+	set doors
+	attribute alladjs
+}
+
+item light1 "red light" {
+	desc {
+Unless you're colour blind, which is highly unlikely for an inter-dimensional
+espionage operative of your calibre, the light is red
+	}
+	another_noun
+	desc_only
+	force_adj
+	hardness 15
+	related
+	inseperable
+	location hall1
+	set lights
+}
+
+item light2 "light" {	#[TS]
+	desc {
+is 
+	}
+	inseparable
+	hardness 15
+	related
+	location hall2
+	set lights
+	another_noun
+}
+
+item rcassette "ferric_oxide ferric oxide cassette" {
+	desc {
+is an old Seven Deadly Fins demo, overdubbed with something else
+	}
+	synonyms { demo tape }
+	force_adj
+	hardness 5
+	weight 1
+	size 1
+	moveable
+	texture smooth
+	contained
+	location wastebin
+	another_noun
+	set cassettes
+	attribute teleportable
+	class tapes
+}
+
+item bcassette "chrome cassette" {
+	desc {
+looks like it's been used as an ashtray, but it's probably still playable
+	}
+	synonyms { tape }
+	hardness 5
+	weight 1
+	force_adj
+	moveable
+	size 1
+	texture smooth
+	contained
+	location tapebin
+	set cassettes
+	class tapes
+	attribute teleportable
+}
+
+item scassette "metal brand spanking new cassette" {
+	desc {
+is brand spanking new. Well, almost. It's only had one previous owner - a
+lovely old granny who only played it on Sundays
+	}
+	synonyms { tape }
+	hardness 5
+	weight 1
+	moveable
+	size 1
+	texture smooth
+	force_adj
+	contained
+	location tapebin
+	set cassettes
+	class tapes
+	attribute teleportable
+}
+
+item mixer "amplifier" {
+	desc {
+This amplifier is the top of the range Scratchenitch. As usual, paying
+more means you get less, and so there is only one fader on the front, which
+can be used to set the output volume
+	}
+	synonyms { amp scratchenitch }
+	texture smooth
+	hardness 11
+	strength 15
+	desc_only
+	size 6
+	location cntrl2
+	attribute teleportable
+}
+
+item button "important button" { #[TS]
+	desc {
+looks complicated. It has two positions: "Safe" and "Record" and is currently
+set to 
+	}
+	related
+	hardness 15
+	location cntrl2
+}
+
+item fader "fader" {	#desc is null - it's not handled this way!
+	desc {
+	}
+	inseperable
+	related
+	hardness 15
+	location mixer
+}
+
+item studiocupboard "small plastic chipboard ugly cupboard" {
+	desc {
+is made from chipboard and covered in plastic. It's pretty ugly
+	}
+	closed
+	force_adj
+	moveable
+	hardness 15
+	weight 15
+	contr_vol 1	#starts off full
+	location cntrl2
+	attribute infinite_container
+}
+
+item cassetteplayer "cassette expensive player" {
+	desc {
+is a very expensive model, with woofers, tweeters, bells, whistles and a cuddly
+toy. Actually it has none of those things, but you know what salesmen are like
+	}
+	scen_noun_f woofers
+	scen_noun_f tweeters
+	scen_noun_f bells
+	scen_noun_f whistles
+	scen_noun_f cuddly_toy
+	scen_noun_f toy
+
+	force_adj
+	texture hard
+	hardness 11
+	strength 15
+	weight 15
+	moveable
+	contr_vol 2
+	location cntrl2
+}
+
+item column "ornate column" {
+	desc {
+has a niche in it, surrounded by an ornate carving. You wonder where it came
+from, and whether you could get one for your front garden
+	}
+	synonyms { niche }
+	short_look
+	out
+	weight 15
+	size 15
+	texture	cold
+	hardness 15
+	location altarroom
+}
+
+item ccassette "head cleaner" {
+	desc {
+is played in much the same way as any other cassette but no sound comes out.
+Strange, you might think, but all the while it is performing the
+useful function of cleaning the player
+	}
+	synonyms { cassette tape }
+	texture smooth
+	size 1
+	hardness 5
+	weight 1
+	moveable
+	force_adj
+	contained
+	location studiocupboard
+	set cassettes
+	class tapes
+	attribute teleportable
+}
+
+item doorway "doorway" {
+	desc {
+is between the antechamber and the catacombs
+	}
+	pseudo
+	contr_vol 7	#this is where you put the sarcophagus lid
+	size 8
+	texture void
+	location { antechamber catacombs }
+}
+
+npc rod "tape Rod" {
+	desc {
+is a young man with a penchant for brightly-coloured jumpers, and obviously
+a complete alien to the concept of skin care or personal hygiene. He's carrying
+a kettle for some reason
+	}
+	scen_noun_e jumper
+	scen_noun_e skin
+
+	synonyms { op }
+	texture npc
+	location lounge
+	article
+}
+
+item van "van" {
+	desc {
+is called 'The Pig' by the band that use it. Steve calls it Flattery, because it
+gets him nowhere. The band use it for driving themselves and their instruments
+around the country. It has a tasteless design on the side
+	}
+	synonyms { pig flattery }
+	texture cold
+	weight 15
+	moveable
+	hardness 15
+	related
+	inseparable
+	location carpark
+}
+
+item design "tasteless hand painted design" {
+	desc {
+This hand painted design on the van advertises the band who own it. Known as
+the 'Seven Deadly Fins', they are a motley crew if ever you saw one, which
+you probably have
+	}
+	texture smooth
+	related
+	hardness 15
+	inseparable
+	desc_only
+	location van
+}
+
+item legs "pair_of legs" {
+	desc {
+your legs are surprisingly efficient. Because they come in a matched pair
+you qualify as a biped
+	}
+	desc_only
+	intrinsic
+	texture furry
+	hardness 15
+	plural
+	location inventory
+	out
+}
+
+item head "head" {
+	desc {
+Your head is attached to your body in a cunningly simple way, which you
+can't see without the help of a mirror
+	}
+	desc_only
+	scen_noun_e	nose
+	intrinsic
+	hardness 15
+	texture hot
+	location inventory
+}
+
+item arms "arms" {
+	desc {
+Your arms are useful for keeping your hands at the right distance from your body
+	}
+	desc_only
+	intrinsic
+	texture warm
+	hardness 15
+	plural
+	out
+	location inventory
+}
+
+item trees "trees" {
+	desc {
+arch high above your head, their leaves filling the sky with glittering green
+	}
+	scen_noun_b	leaves
+	scen_noun_b	leaf
+	synonyms { tree }
+	plural
+	pseudo
+	texture rough
+	hardness 15
+	location { dankforest clearing gloomyforest dimforest darkforest
+	wetforest glade outsidesmithy path}
+}
+
+item fist "rough tough ruthless fist" {
+	desc {
+Your fist is rough, tough and ruthless, a bit like you
+	}
+	desc_only
+	inseparable
+	intrinsic
+	hardness 5
+	texture rough
+	location inventory
+}
+
+item fins "fins" {
+	desc {
+Your fins slice through the water and help you keep your balance, stopping you
+from falling over, swimming upside-down or going into uncontrollable spins
+	}
+	desc_only
+	inseparable
+	texture cold
+	plural
+	hardness 15
+	intrinsic
+	wet
+	location inventory
+}
+
+item tail "natty little tail" {
+	desc {
+Your tail propels you through the water, like a propeller. Except that a
+propeller is made of metal or wood and your tail is made of fish
+	}
+	scen_noun_f propeller
+
+	desc_only
+	inseperable
+	intrinsic
+	wet
+	hardness 15
+	texture cold
+	location inventory
+}
+
+item blanket "old army smelly blanket" {
+	desc {
+Smelly perhaps, but even a smelly blanket keeps out the draughts
+	}
+	desc_only
+	force_adj
+	moveable
+	weight 3
+	hardness 15
+	location vanback
+	size 4
+	combustable 1
+	texture furry
+	attribute teleportable
+	attribute fodablelonglook
+}
+
+item torch "rubber torch" {
+	desc {
+is the rubber type; the sort that looks like a marital aid but isn't
+	}
+	synonyms { lamp }
+	hidden
+	weight 2
+	moveable
+	hardness 15
+	combustable 3
+	size 2
+	texture warm
+	location rubbish
+	attribute teleportable
+}
+
+item oldjeans "old trusty denim pair_of jeans" {
+	desc {
+Your trusty denim jeans are the pinnacle of fashion. You're so lucky to
+have a mother who cares enough about her son to sew those ugly drainpipes
+into extra wide bell bottoms
+	}
+	scen_noun_d bell-bottoms
+	scen_noun_d bottoms
+
+	synonyms { trousers denims }
+	weight 1
+	size 3
+	location vanback
+	plural
+	moveable
+	covers { legs groin }
+	combustable 1
+	wearable 1
+	hardness 12
+	desc_only
+	texture rough
+	class clothes
+	set jeans
+	attribute teleportable
+	attribute fodablelonglook
+}
+
+item socks "squeaky socks" {
+	desc {
+are squeaky clean. Well, squeaky, anyway
+	}
+	weight 1
+	size 1
+	moveable
+	hardness 15
+	location inventory
+	texture furry
+	plural
+	combustable 1
+	wearable 1
+	worn
+	out
+	class clothes
+	attribute teleportable
+}
+
+item tshirt "white t tee-shirt" {
+	desc {
+is old and white. It keeps your chest warm
+	}
+	synonyms { shirt t-shirt tshirt }
+	weight 1
+	size 2
+	location inventory
+	wearable 1
+	hardness 15
+	moveable
+	combustable 1
+	covers { chest }
+	worn
+	out
+	texture soft
+	class clothes
+	attribute teleportable
+}
+
+item vandoor "van door" {
+	desc {
+has been welded shut to stop draughts
+	}
+	related
+	inseparable
+	hardness 15
+	texture cold
+	location vanback
+	set doors
+}
+
+item rubbish "rubbish" {
+	desc {
+covers the floor
+	}
+	moveable
+	related
+	hardness 15
+	force_plural
+	weight 3
+	size 4
+	texture rough
+	location vanfront
+	attribute fodablelonglook
+}
+
+item note "note" {
+	desc {
+is signed with a squiggle that looks like "Steve". There again, it could be
+"Rufus T. Flywheel". Fortunately, it doesn't matter. If you really hate not
+knowing, we suggest you take it to a pharmacist; they're used to deciphering
+illegible squiggles
+	}
+	scen_noun_a squiggle
+	scen_noun_a signature
+
+	moveable
+	hardness 3
+	weight 1
+	edible 1
+	combustable 1
+	size 1
+	texture smooth
+	location vanfront
+	attribute teleportable
+	attribute fodablelonglook
+}
+
+item interiorlight "interior softly glowing light" {
+	desc {
+is glowing softly
+	}
+	force_adj
+	another_noun
+	inseparable
+	related
+	size 1
+	hardness 15
+	texture warm
+	set lights
+	location vanfront
+	attribute teleportable
+}
+
+item music "awful music" {
+	desc {
+Don't be foolish! You can't examine music, it's ethereal
+	}
+	synonyms { singing }
+	force_plural
+	desc_only
+	texture void
+	pseudo
+	location { vanback vanfront carpark track nearruin ruinedabbey
+	ruinedtransept archway ruinednave hall lounge hall1 hall2 
+	office store cntrl2 disco musicshop }
+}
+
+item pfire "large fierce bright glowing fire" {
+	desc {
+is burning brightly, but you can't feel its heat from here
+	}
+	lit
+	lightable
+	short_look
+	texture warm
+	pseudo
+	location { carpark track nearruin ruinedtransept
+	ruinednave archway }
+}
+
+item fire "large hot bright fierce blazing fire" {
+	desc {
+is a real blazer, but you can't wear it. You can really feel the heat
+	}
+	short_look
+	inseperable
+	related
+	lit
+	lightable
+	sittable
+	location ruinedabbey
+	texture hot
+}
+
+item pruin "decrepit ruined abbey" {
+	desc {
+is in a state of considerable decrepitude
+	}
+	synonyms { ruins building }
+	pseudo
+	texture rough
+	location { carpark track nearruin archway ruinedtransept
+	ruinednave ruinedabbey }
+}
+
+item leaflet "fly discarded poster" {
+	desc {
+is a discarded advertisement for a concert by the Seven Deadly Fins
+	}
+	synonyms { advertisement flyposter }
+	moveable
+	weight 2
+	hardness 3
+	size 2
+	combustable 1
+	location nearruin
+	texture smooth
+	attribute teleportable
+	attribute fodablelonglook
+}
+
+item exteriorwall "wall" {
+	desc {
+rests on the ground and holds up the roof
+	}
+	scen_noun_a	ground
+	scen_noun_b	roof
+	scen_noun_b	sky
+	scen_noun_b	sun
+	hardness 15
+	pseudo
+	location { bowl2 nearruin ruinedabbey ruinedtransept ruinednave
+	paddlington outsideuni outsidesmithy }
+}
+
+item parch1 "archway" {
+	desc {
+arches high into the sky
+	}
+	scen_noun_a sky
+
+	pseudo
+	hardness 15
+	texture rough
+	synonyms { arch }
+	location { ruinednave ruinedabbey }
+}
+
+item pew "broken discarded pew" {
+	desc {
+is an old piece of church furniture, sadly discarded in these ungodly
+times. It's about four feet high, three feet wide and could just about support
+your weight
+	}
+	sittable
+	size 6
+	weight 14
+	moveable
+	force_adj
+	hardness 15
+	location ruinednave
+	attribute fodablelonglook
+}
+
+item crumblingarch "crumbling dangerous archway" {
+	desc {
+looks dangerous. A gargoyle peers balefully from the top of the arch
+	}
+	synonyms { arch }
+	short_look
+	force_adj
+	hardness 15
+	texture rough
+	location ruinedtransept
+}
+
+item gargoyle "gargoyle" {
+	desc {
+is about one foot square. Its pointed tongue is sticking out
+in a centuries old expression of disgust. You know just how he feels
+	}
+	scen_noun_a tongue
+
+	hardness 15
+	size 5
+	weight 14
+	location archway
+	attribute teleportable
+	attribute fodablelonglook
+}
+
+item pgargoyle "gargoyle" {
+	desc {
+is really horrible; a ghastly visage usually only found on accountants
+and nurses in family planning clinics. ^Note:^The accountants don't have to
+work in family planning clinics, you understand, just the nurses
+	}
+	hardness 15
+	size 4
+	weight 14
+	related
+	location crumblingarch
+}
+
+item fallenarch "fallen archway" {
+	desc {
+is totally ruined
+	}
+	synonyms { arch }
+	force_adj
+	out
+	weight 15
+	hardness 15
+	texture rough
+	location ruinedtransept
+}
+
+npc hippies "drunk hippies" {
+	desc {
+all have greasy hair and dirty denims. The bad news is that
+they are the band you're travelling with. The worse news is that they're
+blind drunk
+	}
+	scen_noun_a greasy_hair
+	scen_noun_a hair
+
+	hardness 15
+	texture npc
+	synonyms { hippy }
+	location ruinedabbey
+	plural
+}
+
+item guitars "guitars" {
+	desc {
+could certainly do with being properly tuned. Come to think of it, tuned at
+all would be better than nothing
+	}
+	related
+	hardness 15
+	inseperable
+	plural
+	location hippies
+}
+
+item cord "ceremonial cord" {
+	desc {
+is about thirty feet long and half an inch in diameter. Really good for
+strangling virgins after a bout of ceremonial custard-wrestling
+	}
+	scen_noun_f custard
+
+	synonyms { rope }
+	force_adj
+	weight 3
+	size 5
+	hardness 12
+	moveable
+	combustable 1
+	texture rough
+	related
+	location altar
+	attribute teleportable
+}
+
+item debris "sepulchral debris" {
+	desc {
+is swathed in many doom laden cliches
+	}
+	moveable
+	synonyms { rubbish }
+	texture rough
+	size 5
+	force_plural
+	weight 14
+	hardness 15
+	related
+	location catacombs
+	attribute teleportable
+}
+
+item hole "hole" {
+	desc {
+is a foot square. Something important has been removed from it
+	}
+	contr_vol 6
+	hardness 0
+	texture void
+	related
+	inseperable
+	location altar
+}
+
+item lid "sarcophagus bloody_heavy heavy lid" {
+	desc {
+is, interestingly, about the same size as the doorway. It's also bloody heavy
+	}
+	force_adj
+	hidden
+	weight 14
+	size 6
+	hardness 15
+	moveable
+	location debris
+	attribute teleportable
+}
+
+item altar "ancient altar" {
+	desc {
+Hideous faces carved from stone are positioned halfway along three of the four
+sides. Intriguingly, one side has a hole, surrounded by custard stains, where a
+gargoyle should be
+	}
+	scen_noun_a custard_stains
+	scen_noun_a stains
+
+	desc_only
+	sittable
+	weight 15
+	size 12
+	hardness 15
+	force_adj
+	location altarroom
+	attribute teleportable
+}
+
+item chalice "glass beautifully fluted delicate chalice" {
+	desc {
+is a beautifully fluted and delicate example of the glassmaker's art
+	}
+	moveable
+	weight 6
+	hardness 15
+	size 2
+	related
+	contr_vol 2
+	force_adj
+	location column
+}
+
+item psmithy "blacksmith''s battered old forge" {
+	desc {
+is a battered and old but could still be in use
+	}
+	force_adj
+	pseudo
+	location { outsidesmithy wetforest }
+}
+
+item earth "earth" {
+	desc {
+is cold and damp
+	}
+	pseudo
+	scen_noun_d	sky
+	scen_noun_d	sun
+	scen_noun_c	ground
+	force_plural
+	hardness 15
+	texture rough
+	location { outsidesmithy glade path darkforest dimforest
+	wetforest dankforest gloomyforest carpark track archway
+	clearing }
+}
+
+item rain "rain" {
+	desc {
+penetrates everywhere. It's that sort of rain
+	}
+	scen_noun_d	clouds
+	pseudo
+	force_plural
+	texture cold
+	wet
+	location { outsidesmithy clearing darkforest gloomyforest }
+}
+
+item hplayer "you." {
+	desc {
+are a tall human being with arms and legs. Somewhat surprisingly, you don't
+have any fishy traits at all
+	}
+	synonyms { me self }
+	out
+	texture warm
+	plural
+	inseparable
+	intrinsic
+	location inventory
+	attribute no_article
+	attribute article_null
+}
+
+item undergrowth "tangled knotted twisted undergrowth" {
+	desc {
+is a tangled mass of roots, all knotted and twisted together
+	}
+	synonyms { roots }
+	pseudo
+	force_plural
+	hardness 15
+	texture thorny
+	location { outsidesmithy glade path darkforest
+	dimforest wetforest dankforest gloomyforest }
+}
+
+item pforest "forest" {
+	desc {
+The trees of the forest are old and have grown closely together
+	}
+	desc_only
+	another_noun
+	pseudo
+	texture void
+	location { outsidesmithy glade path clearing }
+}
+
+item pclearing "natural clearing" {
+	desc {
+is the sort of natural wonder about which Wordsworth would have written an
+epic of some fifty pages only to have Coleridge use them as toilet paper when
+he got back from a spicy chow mein at the opium den
+	}
+	synonyms { wonder }
+	pseudo
+	texture void
+	location { darkforest dankforest dimforest }
+}
+
+item fiercefire "fierce hot fire" {
+	desc {
+is burning fiercely in the forge. The heat makes your face glow
+	}
+	moveable
+	synonyms { forge }
+	short_look
+	weight 0
+	sittable
+	lit
+	lightable
+	hardness 0
+	texture hot
+	related
+	location smithy
+}
+
+item shirt "natty shirt" {
+	desc {
+is a natty piece of craftsmanship
+	}
+	weight 1
+	size 2
+	covers { chest }
+	hardness 3
+	location inventory
+	wearable 1
+	moveable
+	combustable 1
+	worn
+	out
+	texture soft
+	class clothes
+	attribute teleportable
+}
+
+item studio "up-market recording studio" {
+	desc {
+is well-known throughout the world for the quality of it's recording, and it's
+coffee
+	}
+	intrinsic
+	out
+	location inventory
+}
+
+item stump "tree oak stump" {
+	desc {
+is all that remains of an oak tree, blown down in a huge gale sometime in
+late 1987
+	}
+	related
+	contr_vol 1
+	short_look
+	hardness 15
+	sittable
+	force_adj
+	texture rough
+	size 10
+	location clearing
+}
+
+#################################################################
+#
+# keep the next 15 items together and in this order or else
+# the red portal sub-ad will fail VERY BADLY
+#
+#################################################################
+
+item dirtyjeans "dirty denim pair_of jeans" {
+	desc {
+are held together by the dirt they've accumulated. A good wash and they'd
+fall to pieces
+	}
+	synonyms { trousers denims }
+	moveable
+	weight 2
+	size 3
+	hardness 4
+	texture warm
+	covers { legs groin }
+	wearable 1
+	worn
+	plural
+	combustable 1
+	out
+	location inventory
+	class clothes
+}
+
+item overcoat "herringbone fishy overcoat" {
+	desc {
+smells slightly fishy, but at least it keeps out the rain
+	}
+	synonyms { coat }
+	force_adj
+	weight 3
+	size 4
+	hardness 4
+	covers { chest }
+	moveable
+	wearable 1
+	combustable 1
+	worn
+	texture furry
+	out
+	location inventory
+	class clothes
+	attribute teleportable
+}
+
+item tongs "overwrought iron tongs" {
+	desc {
+are made from overwrought iron (the blacksmith was a nervous sort of chappie).
+They are ideal for holding things at a distance
+	}
+	plural
+	contained
+	weight 1
+	size 3
+	texture rough
+	moveable
+	hardness 15
+	strength 15
+	related
+	location smithycupboard
+	class tools
+}
+
+item liquidgold "molten gold" {
+	desc {
+is somewhere between 1063 and 2707 degrees centigrade
+	}
+	force_adj
+	weight 5
+	size 1
+	texture hot
+	out
+	moveable
+	hardness 1
+	related
+	contained
+	location crucible
+}
+
+item crucible "crucible" {
+	desc {
+can easily withstand the heat of the fire
+	}
+	contained
+	moveable
+	contr_vol 2
+	weight 1
+	size 2
+	hardness 11
+	strength 2
+	related
+	texture smooth
+	location smithycupboard
+	set tools
+	attribute teleportable
+}
+
+item redkey "gold dodgy ring" {
+	desc {
+is of slightly dodgy craftsmanship
+	}
+	set parts
+	weight 1
+	force_adj
+	size 1
+	weight 9
+	moveable
+	hardness 11
+	strength 15
+	texture smooth
+	combustable 2
+	related
+	out
+	contained
+	location mould
+	attribute teleportable
+}
+
+item birdcage "bird cane cage" {
+	desc {
+is made of cane or something very similar
+	}
+	force_adj
+	weight 4
+	size 3
+	contr_vol 1
+	local_contents
+	closed
+	hardness 11
+	strength 3
+	combustable 1
+	texture rough
+	moveable
+	location smithy
+	attribute teleportable
+	attribute fodablelonglook
+}
+
+npc mynah "parrot" {
+	desc {
+clearly doesn't like being cooped up
+	}
+	synonyms { bird }
+	weight 2
+	size 1
+	animal
+	contained
+	location birdcage
+	attribute teleportable
+}
+
+npc guru "sad warp Micky_Blowtorch" {
+	desc {
+was once Sir Playfair's best operative. Now a sad warp-junkie, he lives alone
+and has no contact with Mission HQ
+	}
+	synonyms { junkie warp-junkie micky blowtorch }
+	size 5
+	texture npc
+	contained
+	location stump
+	attribute teleportable
+	article
+}
+
+item gurusdisk "gold disc" {
+	desc {
+was awarded to the Seven Deadly Fins for their semi-mystical album "Batting
+Averages From The Test Match Of Oblivion". It has a slight bulge in the middle
+	}
+	synonyms { disk disks }
+	scen_noun_a bulge
+
+	synonyms { record }
+	size 1
+	weight 5
+	force_adj
+	texture hard
+	moveable
+	hardness 11
+	strength 8
+	combustable 2
+	contained
+	location stump
+	attribute teleportable
+}
+
+item mould "mould" {
+	desc {
+is the sort that can be broken open after the molten metal you've poured into it
+has cooled
+	}
+	synonyms { mold }
+	size 1
+	short_look
+	closed
+	weight 1
+	hardness 11
+	contr_vol 1
+	strength 2
+	texture rough
+	moveable
+	contained
+	location birdcage
+	attribute teleportable
+}
+
+item hammer "six_hundred_dollar precision impact hammer" {
+	desc {
+is a six hundred dollar precision impact implement, as used by US forces
+	}
+	synonyms { implement }
+	hardness 11
+	strength 14
+	texture hard
+	moveable
+	weight 4
+	size 1
+	contained
+	location smithycupboard
+	class tools
+	attribute teleportable
+}
+
+item smithycupboard "tool cupboard" {
+	desc {
+is a fine place to store metallurgical tools
+	}
+	closed
+	hardness 5
+	contr_vol 1		#full up at start of game
+	size 6
+	related
+	location smithy
+}
+
+item feathers "feathers" {
+	desc {
+are the last remains of a bird
+	}
+	scen_noun_f duvet
+	out
+	moveable
+	size 3
+	weight 1
+	hardness 2
+	combustable 1
+	plural
+	texture warm
+	location smithy
+	attribute teleportable
+}
+
+item gloves "asbestos gloves" {
+	desc {
+contain specially bonded fibres so they don't constitute a health hazard
+	}
+	scen_noun_d fibres
+
+	force_adj
+	moveable
+	weight 1
+	size 2
+	hardness 3
+	texture soft
+	wearable 1
+	plural
+	related
+	location smithycupboard
+	attribute teleportable
+	class clothes
+}
+
+##########################
+#
+# End of 15 item block
+#
+##########################
+
+item faces "carved faces" {
+	desc {
+are horribly contorted
+	}
+	plural
+	hardness 15
+	texture rough
+	inseparable
+	related
+	location altar
+}
+
+item driversdoor "van passenger door" {
+	desc {
+is jammed open - don't bother trying to shut it
+	}
+	short_look
+	set doors
+	hardness 15
+	force_adj
+	pseudo
+	open
+	location { vanfront carpark }
+}
+
+item pdoorway "grand imposing arch" {
+	desc {
+is all that is left of the entrance to the ruins. Compared to the rest of the
+place, it's in surprisingly good condition
+	}
+	hardness 15
+	pseudo
+	texture void
+	location { nearruin ruinedabbey }
+}
+
+item mouth "mouth" {
+	desc {
+You can't see your mouth - your eyes are pointing in just the wrong direction
+	}
+	scen_noun_f eyes
+	scen_noun_f hang_glider		#ask Ken about this one!!!
+	scen_noun_f submarine		#ask Ken about this one!!!
+	scen_noun_f tiger_shark		#ask Ken about this one!!!
+	scen_noun_f mirror		#ask Ken about this one!!!
+
+	desc_only
+	closed
+	hardness 15
+	inseperable
+	texture cold
+	intrinsic
+	wet
+	location inventory
+}
+
+item case "glass box" {
+	desc {
+shows all the hallmarks of a rush assembly. There are loads of electrical
+components in it and yards and yards of wiring. You can only hope the back-room
+boys didn't economise on waterproofing
+	}
+	scen_noun_a wiring
+	scen_noun_a components
+	scen_noun_a electrical_components
+	scen_noun_f waterproofing
+
+	force_adj
+	related
+	attribute teleportable
+	contr_vol 4
+	closed
+	local_contents
+	strength 15
+	weight 8
+	hardness 15
+	size 5
+	texture smooth
+	moveable
+	location castle1
+}
+
+item plounge "lounge" {
+	desc {
+is where musicians can relax, and take a short break from the pressures
+of a session, but at the same rates as if they were actually working
+	}
+	pseudo
+	location { hall hall1 office }
+}
+
+item kitchen_door "kitchen door" {
+	desc {
+is locked, preventing you from entering the kitchen
+	}
+	scen_noun_c frame
+
+	short_look
+	synonyms { kitchen }
+	force_adj
+	texture smooth
+	hardness 15
+	locked
+	related
+	location hall1
+	set doors
+}

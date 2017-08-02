@@ -1,0 +1,7179 @@
+#####################################
+#                                   #
+#	Alice fred23 source         #
+#                                   #
+#	%W%			    #
+#	%G%			    #
+#				    #
+#####################################
+
+
+
+verbs {
+	look examine get take carry drop leave go walk enter run shift move
+	lift raise lower push pull smell taste eat drink put insert inventory
+	fit
+	pour
+	empty fill
+	mix
+	jump
+	vault
+	throw
+#	punch kick
+	fight
+#	attack
+	kill
+	break smash damage remove scrape light unlight extinguish open
+	close suss status debug
+#	fire shoot blast
+	twist turn
+
+# these 'SAY' verbs must stay in order & in one lump
+
+	say shout yell cry call
+
+#	strangle choke
+	feel touch wear read
+	hide
+	hit steal bash unlock pick tie fix join untie
+	feed bite use cross slide blow press give climb burn
+	ignite
+#	cast
+	fod exit ask question melt listen search find
+	grab rub
+#	smoke
+	wait wake
+#	rape
+#	mend
+	lever
+#	buy purchase
+#	lean
+	ride
+#	plant
+	lock tear rip cut knock
+	point shine
+	split unmix separate
+	exits cover uncover sit
+	lie
+	kiss
+#	vote
+	stand
+	mount
+	tell offer
+	dismount
+	help laugh show loop
+#	dig
+#	bet
+	stop play
+#	swim flush
+#	piss
+	sleep
+#	set wind
+#	chew
+#	reflect
+	hold
+#	place position
+#	illuminate
+	catch
+#	pray
+#	cue
+#	pot
+#	shake
+#	roll fish
+#	sing 		#is now a synonym for say
+
+	look_for	#makelocal
+#	stick
+#	dial
+#	stay
+	follow
+#	strike
+#	warm
+#	paddle
+#	oil
+	wave
+#	start
+#	answer
+	reveal
+#	suck
+	tap
+#	tap-dance
+#	dance
+#	post
+#	sieve
+#	count
+	wash
+	clean
+#	chase
+#	weigh
+	paint
+#	make shave unscrew tune urinate confess screw
+	dip
+#	sacrifice
+	crawl
+	}
+
+synonym "clamber" { climb verb }
+synonym "grip" { hold verb }
+synonym "out_of" { exit verb }		#another nasty
+synonym "fold" { close verb }		#ok, so this is not nice but...
+synonym "unfold" { open verb }
+synonym "spread" { open verb }
+synonym "wade" { go verb }
+synonym "fan" { wave verb }
+synonym "whack" { hit verb }		#silly, but if it's what the
+synonym "wallop" { hit verb }		#crowd want...
+
+synonym "l_for" { makelocal verb }	#this is REALLY horrible!!!
+synonym "search_for" { makelocal verb }
+synonym "go_to" { makelocal verb }
+synonym "lounge" { sit verb }		#read desc of rabbit's lounge
+
+synonym "sing" { say verb }	#may not be 100% perfect, but should do
+synonym "scream" { shout verb }	#may not be 100% perfect, but should do
+synonym "talk" { say verb }
+synonym "speak" { say verb }
+synonym "poke" { push verb }
+
+synonym "switch" { turn verb }
+synonym "flick" { turn verb }
+synonym "borrow" { get verb }
+synonym "inspect" { look verb }
+synonym "ex" { look verb }
+synonym	"assist" { help verb }
+synonym "z" { wait verb }
+synonym "smear" { rub verb }
+synonym "beat" { hit verb }
+synonym "drag" { pull verb }
+synonym "tip" { empty verb }
+synonym "ls" { look verb }		# UNIX fans ...
+synonym "spin" { turn verb }
+synonym "swivel" { turn verb }
+synonym "screw" { fix verb }
+synonym "unscrew" { turn verb }
+synonym "lick"	{ taste verb }
+synonym "dislodge" { move verb }
+synonym "spiky" { prickly adj }
+
+# watch out for these (re lockers - don't be tempted to add them as real adjs) 
+
+synonym "seven" { 7 adj }
+synonym "seventh" { 7 adj }
+synonym "three" { 3 adj }
+synonym "third" { 3 adj }
+synonym "ten" { 10 adj }
+synonym "tenth" { 10 adj }
+
+synonym "two" { 2 adj }
+synonym "second" { 2 adj }
+synonym "four" { 4 adj }
+synonym "fourth" { 4 adj }
+synonym "five" { 5 adj }
+synonym "fifth" { 5 adj }
+synonym "six" { 6 adj }
+synonym "sixth" { 6 adj }
+synonym "eight" { 8 adj }
+synonym "eighth" { 8 adj }
+synonym "nine" { 9 adj }
+synonym "ninth" { 9 adj }
+synonym "eleven" { 11 adj }
+synonym "eleventh" { 11 adj }
+synonym "twelve" { 12 adj }
+synonym "twelvth" { 12 adj }
+synonym "thirteen" { 13 adj }
+synonym "thirteenth" { 13 adj }
+
+# so we don't need "number n locker locker key" which is a hassle for 
+# which one with attribute alladjs
+synonym "locker" { number adj }
+
+synonym "draw" { slide verb }
+synonym "next_to" { BY conj }
+synonym "near" { BY conj }
+synonym "beside" { BY conj }
+synonym "besides" { BY conj }
+synonym "thru" { THROUGH conj }
+synonym "noxious-smelling" { noxious adj }
+synonym "release" { drop verb }
+synonym "x" { examine verb }
+synonym "ex" { examine verb }
+synonym "cramped" { broom adj }
+synonym "bright" { brass adj }
+synonym "tiled" { marble adj }
+synonym "black_and_white" { marble adj }
+synonym "black" { marble adj }
+synonym "varnished" { beech adj }
+synonym "egg-sized" { rack adj }
+synonym "exquisitely" { engraved adj }
+synonym "gooey" { fragments_of adj }
+synonym "dense" { thistly adj }
+synonym "privet" { thistly adj }
+synonym "straighten" { pull verb }
+synonym "2_of" { two_of adj }
+synonym "3_of" { three_of adj }
+synonym "4_of" { four_of adj }
+synonym "5_of" { five_of adj }
+synonym "6_of" { six_of adj }
+synonym "7_of" { seven_of adj }
+synonym "8_of" { eight_of adj }
+synonym "9_of" { nine_of adj }
+synonym "10_of" { ten_of adj }
+synonym "brightly" { coloured adj }
+synonym "turned" { solid adj }
+synonym "broken" { heap_of adj }
+synonym "dried" { heap_of adj }
+synonym "dry" { heap_of adj }
+synonym "twisted" { heap_of adj }
+synonym "pile_of" { heap_of adj }
+synonym "emerald" { green adj }
+synonym "golden" { gold adj }
+synonym "wiggly" { wiggly_waggly adj }
+synonym "waggly" { wiggly_waggly adj }
+synonym "anti-clockwise" { ANTI_CLOCKWISE conj }
+synonym "counterclockwise" { ANTI_CLOCKWISE conj }
+synonym "heavy_looking" { heavy adj }
+synonym "heavy-looking" { heavy adj }
+synonym "display" { glass adj }
+
+synonym "from_in" { FROM conj }
+synonym "from_inside" { FROM conj }
+
+.irooms.f23
+.inpcs.f23
+
+#---------------------------------------------------------
+#
+#	Intrinsic bodily parts and initial clothing
+#
+#---------------------------------------------------------
+
+item player ".you" {
+	desc {
+are a little girl
+	}
+	scen_noun_a fingers
+	scen_noun_a finger
+	scen_noun_a thumbs
+	scen_noun_a thumb
+	plural
+	texture soft
+	set girls
+	attribute no_article
+	synonyms { child girl me player yourself myself alice }
+	class children
+	intrinsic
+	hardness 0
+	strength 0
+	size 0
+	inseparable
+	weight 0
+	location inventory
+}
+
+
+item hand "your hands" {
+	desc {
+Unsurprisingly, your hands show no evidence of hard work
+	}
+	synonyms { hand arm arms }
+	attribute no_article
+	force_adj
+	texture soft
+	plural
+	desc_only
+	intrinsic
+	hardness 0
+	strength 0
+	size 0
+	weight 0
+	inseparable
+	location inventory
+	owner player
+}
+
+item head "your head" {
+	desc {
+However hard you try, you're never going to be able to see your head
+	}
+	attribute no_article
+	force_adj
+	texture smooth
+	desc_only
+	intrinsic
+	hardness 0
+	strength 0
+	size 0
+	weight 0
+	inseparable
+	location inventory
+	owner player
+}
+
+item fist "your fists" {
+	desc {
+are miserable, puny things (no, we don't like to put people down, but take a
+look at yourself!)
+	}
+	force_adj
+	attribute no_article
+	texture soft
+	attribute nofullstop
+	plural
+	intrinsic
+	hardness 0
+	strength 0
+	size 0
+	weight 0
+	inseparable
+	location inventory
+	owner player
+}
+
+synonym "other" { your adj }		# so 'close other eye' has a hope (context!)
+
+item lefteye "your left eye" {
+	desc {
+is difficult to see
+	}
+	force_adj
+	attribute alladjs
+	attribute no_article
+	intrinsic
+	texture void
+	set eyes
+	size 0
+	weight 0
+	inseparable
+	hardness 0
+	strength 0
+	open
+	location inventory
+	owner player
+}
+
+item righteye "your right eye" {
+	desc {
+is difficult to see
+	}
+	force_adj
+	attribute alladjs
+	attribute no_article
+	intrinsic
+	texture void
+	set eyes
+	size 0
+	weight 0
+	inseparable
+	hardness 0
+	strength 0
+	open
+	location inventory
+	owner player
+}
+
+item nose "your nose" {
+	desc {
+Your eyes cross as you try to focus on your nose, but somehow you can't
+quite manage it
+	}
+	force_adj
+	texture cold
+	attribute no_article
+	size 0
+	desc_only
+	intrinsic
+	weight 0
+	hardness 0
+	strength 0
+	sittable		# note: only "put peg on nose" allowed
+	inseparable
+	location inventory
+	owner player
+}
+
+item mouth "your red mouth" {
+	desc {
+is red
+	}
+	texture hot
+	force_adj
+	attribute no_article
+	size 0
+	weight 0
+	hardness 0
+	strength 0
+	contr_vol 2			# empty
+	inseparable
+	intrinsic
+	location inventory
+	owner player
+}
+
+item emilydress "grey dress" {
+	desc {
+looks far too hot for such a beautiful afternoon
+	}
+	icon	ic168
+	another_noun
+	set dresses
+	texture soft
+	size 4
+	weight 1
+	hardness 12
+	wearable 1
+	class clothes
+	moveable
+	worn_by_npc
+	related
+	location emily
+	owner emily
+	covers {chest groin}
+}
+
+item dress "blue dress" {
+	desc {
+This has always been one of your favourites since your mother
+bought it for your birthday
+	}
+	icon	ic168
+	another_noun
+	set dresses
+	desc_only
+	texture soft
+	size 4
+	weight 1
+	hardness 12
+	wearable 1
+	class clothes
+	moveable
+	worn
+	location inventory
+	owner player
+}
+
+item apron "white apron" {
+	desc {
+reminds you of the one your mother uses at home
+	}
+	icon	ic99
+	force_adj
+	texture soft
+	size 4
+	weight 1
+	hardness 12
+	class clothes
+	wearable 1
+	moveable
+	worn
+	location inventory
+	owner player
+}
+
+synonym "leather" { red adj }
+
+item redshoes "red left right shoes" {
+	desc {
+are made of red leather with silver buckles
+	}
+	icon	ic195
+	synonyms { shoe }
+	scen_noun_e buckle
+	scen_noun_e buckles
+	scen_noun_e silver_buckle
+	scen_noun_e silver_buckles
+	attribute paintable
+	plural
+	size 2
+	weight 1
+	hardness 15
+	texture smooth
+	wearable 1
+	class clothes
+	moveable
+	worn
+	location inventory
+	owner player
+}
+
+#---------------------------------------------------------
+#
+#	Items for the initial part
+#	(before the rabbit hole)
+#
+#---------------------------------------------------------
+
+item emilybook "book" {
+	desc {
+is one of those strange ones which has no pictures or conversations - you
+wonder to yourself what use there could be for such a book
+	}
+	icon	ic307
+	size 1
+	moveable
+	weight 1
+	hardness 15
+	related
+	location emily
+	owner emily
+}
+
+item waistcoat "coloured waistcoat" {
+	desc {
+is bright red and has two small pockets, one on either side
+	}
+	icon	ic106
+	scen_noun_e pocket
+	scen_noun_e pockets
+	class clothes
+	worn_by_npc
+	hardness 12
+	covers { chest }
+	size 4
+	weight 1
+	related
+	location rabbit
+}
+
+item goldchain "gold chain" {
+	desc {
+is hanging from the rabbit's waistcoat
+	}
+	icon	ic185
+	size 1
+	weight 1
+	hardness 15
+	related
+	location waistcoat
+	owner rabbit
+}
+
+item peartree "pear tree" {
+	desc {
+Like most members of the Pyrus Communis genus at this time of year,
+the pear tree is laden with mouth-watering fruit just waiting to be picked.
+You may just be able to reach one particularly low branch growing
+just above your head
+	}
+	icon	ic241
+# Strangely, the branches of the pear tree are full of lanterns, not pears!
+# You may just be able to reach one particularly low branch growing
+# just above your head
+	set trees
+	another_noun
+	texture rough
+	short_look
+	desc_only
+	size 1
+	hardness 15
+#	inseperable
+	related
+	location grove
+}
+
+item leaves "leaves" {
+	desc {
+cover the branches just like any other leaves
+	}
+#	icon	ic237
+	synonyms { leaf }
+	plural
+#	pseudo
+#	location { treetops grove wood1 s_rbridge e_wgarden }
+	related			#now a clonedesc of tree so everywhere
+	location peartree
+}
+
+item branch "low branch" {
+	desc {
+is covered in leaves just like any other branch
+	}
+#	icon	ic131
+	synonyms { branches }
+	texture rough
+	size 14
+	hardness 15
+	related
+	location peartree
+	set branches
+}
+
+
+synonym "solitary" { red adj }		# bit of a hack but...
+
+# the rest of the pears on the tree
+item pears "luscious red pears" {
+	desc {
+look luscious
+	}
+	icon	ic129
+	class fruit
+	synonyms { pear }
+	plural
+	size 2
+	weight 15			# so u can't get 'em by devious means
+	moveable			# so u get 'get' on menu
+	hardness 15
+	related
+	location branch
+	set pears
+	attribute pickable
+	another_noun
+}
+
+# ditto lanterns
+item lanterns "hanging lanterns" {
+	desc {
+look unlit
+	}
+	icon	ic174
+	synonyms { lantern lamp }
+	plural
+	size 2
+	weight 1
+	hardness 15
+	related
+	moveable			# so u get 'get' on menu
+	out
+	location branch
+	attribute pickable
+	set lanterns
+	set lamps
+	another_noun
+}
+
+# set in after the rabbit arrives, if the pear is still on the tree
+item lantern "handy lantern" {
+	desc {
+is unlit although, come to think of it, you can't see how on earth you
+could light it even if you wanted to
+	}
+	icon	ic174
+# is glowing as if by magic
+# note: this happens when you enter a dark room
+	synonyms { lamp }
+	attribute paintable
+	texture smooth
+	short_look			# so no "It is glowing"
+	size 2
+	weight 2
+	hardness 15
+	out
+	moveable
+	related
+	location branch
+	attribute pickable
+	set lanterns
+	set lamps
+	another_noun
+}
+
+item pear "picked red pear" {
+	desc {
+is like any other you have ever had, bigger at
+one end than the other. It is not yet ripe
+	}
+	icon	ic321
+	class fruit
+	texture smooth
+	size 2
+	weight 1
+	hardness 4
+	strength 14
+	edible 1		# fatal
+	moveable
+	related
+	out
+	location branch
+	attribute pickable
+	set pears
+	another_noun
+}
+
+item stile "small overgrown wooden stile" {
+	desc {
+is made of wood
+	}
+	icon	ic291
+	synonyms { wood }
+	texture rough
+	size 6
+	weight 15
+	hardness 15
+	attribute infinite_container
+	contr_vol 6
+	pseudo	
+#	sittable		can't go it to field if sittable
+	location { countrylane1 field }
+}
+
+
+item earth "solid earth" {
+	desc {
+Just your standard type of earth here I'm afraid, nothing special about it
+	}
+	desc_only
+	force_plural
+	hardness 0
+	size 0
+	weight 15
+	texture rough
+	pseudo
+	location { field hole1 hole2 }
+}
+
+item rabbithole "rabbit hole" {
+	# note: desc has to work when in the field and both rabbit
+	# hole rooms
+	desc {
+is simply a rabbit's hole, or, to put it another way, a
+hole for rabbits and children
+	}
+#	icon	ic240
+	synonyms { burrow }
+	texture void
+	out
+	set holes
+	another_noun
+	size 0
+	hardness 0
+	weight 0
+	strength 0
+	owner rabbit
+	pseudo
+	location { field hole1 hole2 }
+}
+
+item grass "green grass" {
+	desc {
+is green and is growing, slowly
+	}
+#	icon	ic158
+	synonyms { lawn }
+	texture slippery
+	force_plural
+	size 0
+	moveable
+	weight 0
+	hardness 15
+	pseudo
+	location {
+		grove bank
+		magicgarden glade croquet1 croquet2
+		rabbitgarden outdkitchen frontdhouse veggarden
+		
+		w_duckpond		#grass
+		conservatory		#some plants
+		dlanding		#a plant
+		dlounge			#a plant
+	}
+}
+
+clone click_plant grass "plant" { synonyms { plants } }
+
+
+clone marmalade hockeypitches "marmalade" {}
+
+clone washing hockeypitches "washing" { }
+
+item marmaladelabel "marmalade jar label" {
+	desc {
+has the single word "marmalade" written on it
+	}
+#	icon	ic153
+	attribute paintable
+	attribute alladjs
+	another_noun
+	size 1
+	weight 1
+	hardness 3
+	inseparable
+	related
+	location jar
+	owner jar
+	set labels
+}
+
+item jar "marmalade jar" {
+	desc {
+is made of glass and has a label on the side
+	}
+	icon	ic192
+	attribute paintable
+	texture smooth
+	size 2
+	weight 1
+	hardness 10
+	strength 13
+	moveable
+	contr_vol 2			# initially empty
+	related
+	location shelves
+}
+
+item cupboards "cupboards" {
+	desc {
+look pretty interesting
+	}
+	icon	ic170
+	synonyms { cupboard }
+	sittable
+	plural
+	hardness 15
+	size 8
+	texture hard
+	related
+	location falling
+	closed
+	contr_vol 4
+	set cupboards
+}
+		
+item shelves "small shelves" {
+	desc {
+There is a jar on one shelf, but the rest are empty
+	}
+	icon	ic216
+	synonyms {shelf}
+	another_noun
+	desc_only
+	plural
+	sittable
+	desc_only
+	short_look
+	hardness 15
+	size 8
+	texture hard
+	related
+	location falling
+	set shelves
+}
+
+
+#---------------------------------------------------------
+#
+#	In the passage before the great hall
+#
+#---------------------------------------------------------
+
+item compost "compost heap" {
+	desc {
+is dark brown and steaming and smells most unpleasant.
+You certainly wouldn't want to touch it with your hands
+	}
+	icon	ic215
+	texture clammy
+	force_adj
+	another_noun
+	synonyms { compost }
+	weight 14		# don't go to get_
+	size 13
+	hardness 15
+	moveable
+	related
+	location veggarden
+	set heaps
+}
+
+item heap "heap_of leaves" {
+	desc {
+Some of the dried leaves and twigs are
+twisted and broken; it looks as if they may have sacrificed
+themselves to break the fall of something, or someone heavy.
+Like you for instance
+	}
+	icon	ic236
+	texture rough
+	modified_quantity
+	desc_only
+	force_adj
+	synonyms { heap pile leaf }
+	size 3
+	weight 1
+	hardness 15
+	moveable
+	sittable
+	location passage2
+	class twigs
+	set heaps
+}
+
+# the music you can hear outside the music room
+item pianomusic "strange music" {
+	desc {
+sounds melodic in a strange kind of way
+	}
+	force_plural
+	hardness 0
+	weight 0
+	strength 0
+	size 0
+	moveable
+	texture void
+	pseudo
+	location { passage1 }
+}
+
+synonym "candle" { strange adj }
+
+clonedesc click_candle_stick pianomusic "strange candle.stick" {
+	desc {
+is beautifully crafted
+	}
+	synonyms { stick }
+}
+
+item musicdoor "musical door" {
+	desc {
+is like any other door except that it is covered
+with musical notes
+	}
+	icon	ic327
+	synonyms { notes }	# a bodge
+	attribute paintable
+	hardness 15
+	pseudo
+	closed
+	set doors
+	another_noun
+	location { passage1 musicroom }
+}
+
+item letterc "letter_C" {
+	desc {
+is engraved on the door
+	}
+#	icon	ic147
+	hardness 15
+	synonyms { letter c }
+	related
+	sl passage2
+	location broomdoor
+	texture smooth
+}
+
+item broomdoor "broom cupboard door" {
+	desc {
+is just a door, nothing more
+	}
+	icon	ic262
+	attribute paintable
+	hardness 15
+	set doors
+	pseudo
+	locked
+	location { passage2 broomcupboard }
+}
+
+item musicalchairs "musical chairs" {
+	desc {
+look very musical.
+	}
+	icon	ic288
+	another_noun
+	synonyms { chair }
+	attribute paintable
+	class furniture
+	plural
+	attribute nofullstop		# makes appended descs easier.
+	size 8
+	hardness 15
+	weight 15
+	moveable			# maybe dangerous
+	sittable
+	initial_done			# IMPORTANT (for FirstGlance)
+	related
+	location musicroom
+	set chairs
+}
+
+item grandpiano "grand piano" {
+	desc {
+is grand and is supported by three fragile looking legs
+	}
+	icon	ic134
+	attribute infinite_container
+	attribute paintable
+	scen_noun_c legs
+	force_adj
+	size 11
+	moveable
+	weight 15		# too heavy to lift
+	hardness 15
+	closed
+	contr_vol 6		# contains golden key (in G)
+	sittable
+	related
+	location musicroom
+}
+
+item frontdoorkey "front door key" {
+	# PLEASE_EDIT (we decided - no rabbit whitener)
+	desc {
+is elegantly carved with images of carrots and cabbages
+	}
+	icon	ic311
+	attribute paintable
+	attribute alladjs
+	set keys
+	another_noun
+	size 1
+	weight 1
+	hardness 15
+	moveable
+	owner rabbit
+	out
+	location inventory
+}
+
+# unlocks the tiny door
+
+item goldenkey "white gold g key_in_G" {
+	desc {
+is made of white gold
+	}
+	icon	ic286
+	attribute paintable
+	synonyms { key }
+	set keys
+#	another_noun
+	size 1
+	weight 1
+	hardness 15
+	moveable
+	contained
+	location grandpiano
+}
+
+
+item sheetmusic "sheet strange music" {
+	desc {
+contains stave after stave of musical notes
+	}
+	icon	ic284
+	synonyms { sheet_of_music sheet notes }
+	force_adj
+	attribute paintable
+	force_plural
+	size 2
+	weight 1
+	hardness 3
+	moveable
+	texture soft
+	related
+	location grandpiano
+}
+
+# unlocks the broom cupboard (broomdoor)
+item keyinc "c key_in_C" {
+	desc {
+Apart from being in C this key is no different
+from any other
+	}
+	icon	ic286
+	attribute paintable
+	desc_only
+	synonyms { key }
+	set keys
+	size 1
+	weight 1
+	hardness 15
+	moveable
+	related
+	location sheetmusic
+}
+
+item bar "metal bar" {
+	desc {
+This is the bar where all the coat hangers hang out
+	}
+	icon	ic343
+	texture cold
+	attribute paintable
+	desc_only
+	sittable
+	size 8			#not when small/can't jump over
+	hardness 15
+	related
+	location broomcupboard
+}
+
+item coathanger "coat hanger" {
+	desc {
+is made of wire
+	}
+	icon	ic118
+	texture smooth
+	attribute paintable
+	force_adj
+	synonyms { coat-hanger coathanger wire }
+	size 2
+	weight 1
+	hardness 15
+	moveable
+	related
+	location bar
+}
+
+item overall "small maid''s overall" {
+	desc {
+is quite small and is made of red and white checked cotton
+	}
+	icon	ic348
+	another_noun
+	set overalls
+	texture soft
+	size 4
+	weight 1
+	hardness 12
+	moveable
+	wearable 1
+	class clothes
+	related
+	location coathanger
+	owner maid
+}
+
+item glassshoe "card glass shoe" {
+	desc {
+is glass and triangular in shape, with a
+slot at one end just big enough to slide a playing card through.
+At the opposite end to the slot is a handle
+	}
+	icon	ic222
+	force_adj
+	synonyms { slot }	#rather than clone so look in slot works
+	texture smooth
+	another_noun
+#	set shoes
+	short_look
+	attribute paintable
+	size 2
+	weight 1
+	hardness 15
+	locked
+	contr_vol 1
+	local_contents
+	moveable
+	location broomcupboard
+}
+
+item winchhandle "winch handle" {
+	desc {
+is a crooked piece of metal used to operate a winch
+	}
+	icon	ic176
+	another_noun
+	set handles
+	size 2
+	attribute paintable
+	weight 1
+	hardness 15
+	related
+	location conservatory
+}
+	
+clonedesc shoehandle glassshoe "shoe handle" {
+	desc {
+is what one would use to hold the shoe
+	}
+#	icon	ic220
+	attribute paintable
+	set handles
+}
+
+synonym "legged" { glass adj }
+
+item glasstable "glass 3 table" {	# 3 legged table (!?!)
+	desc {
+is made of thick glass and has three elegantly curved legs
+	}
+	icon	ic117
+	texture smooth
+	scen_noun_c legs
+	set tables
+	class furniture
+	attribute paintable
+	sittable
+	size 8
+	moveable		#too heavy to lift
+	weight 15
+	hardness 15		#brittle
+	strength 15
+	related
+	location greathall
+}
+
+		
+#has a label round its neck
+item potionbottle "potion bottle" {
+	desc {
+has a label on it
+	}
+	icon	ic218
+	set bottles
+	another_noun
+	attribute paintable
+	texture smooth
+	size 2
+	weight 1
+	hardness 10
+	strength 13
+	contr_vol 1			# 2 without the potion
+	closed
+	local_contents
+	moveable
+	related
+	location glasstable
+}
+
+item potionlabel "potion bottle label" {
+	desc {
+The words 'DRINK ME' are beautifully printed on
+the label in large letters, below which is a picture of a tiny girl, or perhaps a
+tiny picture of a girl
+	}
+#	icon	ic290
+	attribute paintable
+	attribute alladjs
+	another_noun
+	desc_only
+	size 1
+	weight 1
+	hardness 3
+	inseparable
+	related
+	location potionbottle
+	owner potionbottle
+	set labels
+}
+
+item potion "drink_me potion" {
+	desc {
+looks as if it would have a profound effect on anyone brave enough to drink it
+	}
+#	icon	ic218
+	set potions
+	another_noun
+	size 1
+	weight 1
+	hardness 1			# liquid
+	wet
+	texture cold
+	edible 7			# magical
+	contained
+	moveable
+	location potionbottle
+}
+
+item glassbox "glass tiny box" {
+	desc {
+is small and made of delicately thin glass. Written on the lid are the words
+'EAT ME'. Underneath these inviting words is a small illustration of a girl as tall
+as a tree
+	}
+	icon	ic244
+	set boxes
+	set lids
+	another_noun
+	force_adj
+	texture smooth
+	attribute paintable
+	synonyms { lid }
+	size 1
+	weight 1
+	hardness 10
+	strength 13
+	contr_vol 1			# 2 with cake
+	closed
+	local_contents
+	moveable
+	hidden
+	location glasstable
+}
+
+item footprints "paw rabbit prints" {
+	desc {
+look like they were made by a rabbit
+	}
+	icon	ic243
+	force_adj
+	texture void
+	synonyms { pawprints }
+	plural
+	out
+	hardness 0
+	moveable
+	weight 0
+	pseudo
+	# enough spaces for all the footprints	
+	location {
+		grove death death death death
+	}
+}
+
+item cake "small piece_of cake" {
+	desc {
+Even though you were taught never to eat between meals
+the tiny cake looks delicious
+	}
+	icon	ic239
+	texture sticky
+	attribute paintable
+	desc_only
+	size 1
+	weight 1
+	hardness 4
+	strength 3
+	edible 7			# magical
+	texture soft
+	moveable
+	contained
+	location glassbox
+}
+
+item bluefan "blue fan" {
+	desc {
+is just the kind of fan you need on a hot summer's day
+	}
+	icon	ic313
+# As you open the fan, you see, printed on it, a beautiful picture depicting
+# a maid wandering through some woods
+#	scen_noun_c beautiful_picture
+	texture soft
+	another_noun
+	attribute paintable
+	set fans
+	size 2
+	weight 1
+	hardness 3
+	closed
+	moveable
+	out
+	location greathall
+}
+
+item bluegloves "pair_of blue gloves" {
+	desc {
+is bright blue
+	}
+	icon	ic264
+	modified_quantity
+	attribute paintable
+	attribute alladjs
+	force_adj
+	another_noun
+	size 1
+	weight 1
+	hardness 3
+	texture soft
+	moveable
+	wearable 1
+	class clothes
+	out
+	location greathall
+}
+
+#halldoor_n and its clones are short look to cope with fglance
+#they are always locked
+item halldoor_n "red wooden door" {
+	desc {
+is made of red wood and has a small platinum keyhole.^It is locked
+	}
+	icon	ic262
+	short_look
+	attribute paintable
+	set doors
+	another_noun
+	hardness 15
+	locked				# no key fits this door
+	pseudo
+	location { greathall tunnel2 }
+}
+
+item click_door "wooden door" {
+	desc {
+is of simple design and made of wood.^It is locked
+	}
+	icon	ic262
+	short_look
+	attribute paintable
+	set doors
+	another_noun
+	hardness 15
+	locked				# no key fits this door
+	pseudo
+	location {
+		banquethall		#a locked door
+		diningroom		#a door
+		outdkitchen		#a door
+		passage3		#a door
+		westhall		#a door
+	}
+}
+
+clonedesc halldoor_ne halldoor_n "yellow door" {
+	desc {
+is six foot tall and three foot wide.^It is locked
+	}
+	attribute paintable
+	set doors
+}
+
+item halldoor_e "white door" {
+	desc {
+is painted a brilliant white
+	}
+	icon	ic262
+	synonyms { east_door }	#can't have east as an adjective
+	set doors
+	attribute paintable
+	another_noun
+	hardness 15
+	locked
+	pseudo
+	location { greathall pseudobank }	# was death - but that kills
+						# makelocal
+}
+
+clonedesc halldoor_se halldoor_n "green door" {
+	desc {
+is dark green.^It is locked
+	}
+	attribute paintable
+	set doors
+}
+
+item halldoor_s "silver door" {
+	desc {
+is silver-plated
+	}
+	icon	ic262
+	synonyms { south_door }	#can't have south as adj
+	attribute paintable
+	set doors
+	another_noun
+	hardness 15
+	locked
+	pseudo
+	location { greathall bytree }
+}
+
+# will always be locked - text here so it comes before fglance
+clonedesc halldoor_sw halldoor_n "orange door" {
+	desc {
+is bright orange.^It is locked
+	}
+	attribute paintable
+	set doors
+}
+# Out of the corner of your eye you glimpse a tiny curtain on
+# the west wall
+
+item curtain "tiny green curtain" {
+	desc {
+is emerald green, standing about twenty inches high
+	}
+	icon	ic127
+	synonyms { drape }
+	size 3
+	moveable
+	weight 1
+	texture soft
+	hardness 12
+	closed
+	related
+	location greathall
+}
+
+item tinydoor "tiny door" {
+	desc {
+is no more than fifteen inches high with a tiny golden keyhole
+	}
+	icon	ic173
+	set doors
+	synonyms { west_door }	#can't have west as adj
+	attribute paintable
+	another_noun
+	size 3				# so can use it when small
+	hardness 15
+	locked
+	pseudo
+	out				# until you open curtain
+	location { greathall tinytunnel }
+}
+
+#---------------------------------------------------------
+#
+#	Pseudos
+#
+#---------------------------------------------------------
+
+clonedesc ground sky "ground" {
+	desc {
+is below the sky
+	}
+	attribute article_the
+}
+		
+
+clonedesc sun sky "sun" {
+	desc {
+lights up the sky
+	}
+	synonyms { daylight sunlight sunbeams }
+	attribute article_the
+}
+
+item sky "blue sky" {
+	desc {
+is lit up by the sun
+	}
+	attribute article_the
+	sittable	#so people can put things on the ground
+	size 0
+	hardness 0
+	pseudo
+	location {
+		bank field grove countrylane1 countrylane2
+		sw_grounds n_duckpond s_duckpond e_duckpond w_duckpond
+		w_wgarden s_wgarden n_wgarden e_wgarden mushroom
+		induckpond croquet1 croquet2 gardenpath1
+		magicgarden glade rockypath cliffedge
+		rockledge footbridge s_footbridge
+		byriver bytree driveway stream1 stream2 stream3 stream4
+		stream5 wwpath1 wwpath2 wwpath3 wwpath4
+		rbridge s_rbridge treetops rabbitgarden veggarden
+		outdkitchen frontdhouse wgarden ooalimb teaparty
+		observatory outsidegates frontpalace wood1
+		inthesky giantoak cbedroom rabbitkitchen
+		beaverhole
+	}
+}
+
+clonedesc floor wall "floor" {
+	desc {
+The floor is below you
+	}
+	attribute article_the
+	synonyms { marble hole_in_floor }	# hole.. is a bit of
+							# a bodge job...
+}
+
+item ceiling "glass ceiling" {		# glass is only really for conservatory
+	desc {
+is above you
+	}
+	synonyms { marble }
+	attribute article_the
+	sittable	#so people can put things on the floor
+	size 0
+	hardness 0
+	pseudo
+	location {
+		hole1 hole2 passage2 passage3 passage1 greathall musicroom
+		broomcupboard rabbithall rabbitlounge rabbitkitchen
+		gardenshed rabbitlanding rabbitbedroom conservatory
+		throneroom
+	}
+}
+
+synonym "sparkling" { spring adj }
+synonym "mineral" { spring adj }
+
+item springwater "spring water" {
+	desc {
+is fresh and sparkling
+	}
+	icon	ic354				# was 302
+	force_adj
+	class ingredients
+	size 1
+	weight 1
+	hardness 1
+	edible 5
+	wet
+	texture cold
+	moveable
+	contained
+	location waterbottle
+}
+
+item stream "river" {
+	desc {
+bubbles by on its way to the sea
+	}
+	short_look
+	attribute infinite_container	#can put things in/on river
+	contr_vol 7
+	sittable
+	texture void
+	wet
+	synonyms { water stream }
+	size 15
+	moveable
+	weight 1
+	hardness 0
+	strength 0
+	pseudo
+	location {
+		bank grove
+		stream1 stream2 stream3 stream4 stream5
+		s_rbridge beaverhole
+		footbridge s_footbridge giantoak byriver wood2 rbridge
+		wwpath4 cliffedge rockypath bythesea
+	}
+}
+
+clonedesc sea stream "sea" {
+	desc {
+doesn't seem to get any deeper, oddly, as the river tries to fill it
+	}
+}
+
+item hedge "bramble thick thistly prickly green hedge" {
+	desc {
+is green and prickly
+	}
+	size 0
+	hardness 15
+	texture thorny
+	pseudo
+	location {
+		bank grove field countrylane1 countrylane2
+		outsidegates wood1 frontpalace
+		sw_grounds driveway n_duckpond s_duckpond
+		e_duckpond w_duckpond croquet1 			# croquet2
+		gardenpath1 glade magicgarden
+		wwpath1 wwpath2 wwpath3 wwpath4
+		rabbitgarden veggarden outdkitchen frontdhouse
+
+		teaparty		#a hedge
+		giantoak		#a hedge
+		madfootpath		#a hedge
+		rbridge			#a hedge
+	}
+}
+
+item trees "chestnut beech tree" {
+	desc {
+The trees sway gently in the breeze
+	}
+	synonyms { poplar willow weeping sapling ash ashes oaks
+		oak beeches chestnut wood }	#adj hassle
+	desc_only
+	set trees
+	size 0
+	hardness 15
+	texture rough
+	pseudo
+	location {
+		byriver
+		countrylane1
+		countrylane2
+		gardenpath1
+		glade
+		madfootpath
+		mushroom
+		n_wgarden
+#		ooalimb		# causes hassle from limb syns tree/trees
+		outsidegates
+		rabbitgarden
+		rockypath
+		s_duckpond
+		s_footbridge
+		s_wgarden
+		stream5
+		sw_grounds
+		teaparty
+		treetops
+		w_wgarden
+		wgarden
+		wwpath1
+
+#		wood1			#some trees
+		bank			#the trees
+		croquet2		#some trees
+		driveway		#a tree
+		field			#the trees
+		frontpalace		#some trees
+		induckpond		#some trees
+		n_wgarden		#some trees
+#		observatory		#a tree
+		rbridge			#a tree
+#		s_rbridge		#utree	 - can use room name
+#		tinytunnel		#some trees
+		veggarden		#a tree
+#		wood2			#some trees
+		wwpath3			#some trees
+
+	}
+}
+
+clonedesc leaves_clone trees "leaves" {
+	desc {
+The leaves cover the branches in the way leaves do when not covering the ground
+	}
+	synonyms { leaf }
+}
+
+clonedesc branches_clone trees "branches" {
+	desc {
+The branches are covered in leaves
+	}
+	synonyms { branch }
+	set branches
+}
+
+synonym "mud" { stone adj }		# for mud wall in pic
+
+item wall "stone wall" {
+	desc {
+Like most walls, this one stops you going from over here to over there
+	}
+	short_look	# because paintings in rabbithall are clones
+	synonyms { marble }		# adj hassle
+	set walls
+	another_noun
+	desc_only
+	size 0
+	hardness 15
+	texture rough
+	pseudo
+	location {
+		banquethall bathroom breakfastroom broomcupboard
+		cbedroom centralhall conservatory courtroom
+		dbedroom diningroom dinnerroom dkitchen
+		dlanding dlounge easthall falling
+		frontdhouse frontpalace gardenshed greathall
+		hatroom hole1 hole2 madfootpath
+		madkitchen musicroom observatory outdkitchen
+		outwinecellar palacekitchen palacelanding pantry
+		passage1 passage2 passage3 quarters
+		queenbedroom rabbitbedroom rabbitgarden rabbithall
+		rabbitkitchen rabbitlanding rabbitlounge tailorhouse
+		throneroom tinytunnel treehouse tunnel1
+		tunnel2 veggarden westhall winecellar
+		wood1 wwpath2
+
+		beaverhole		#the tunnel wall
+		outsidegates		#the wall
+		rbridge			#a wall
+		winepassage		#the wall
+		wwpath1			#the mud wall
+	}
+}
+
+item bed "bed" {
+	desc {
+is a standard single bed
+	}
+	icon	ic125
+	class furniture
+	texture soft
+	class odds
+	set ends
+	set beds
+	another_noun
+	attribute lionable
+	size 11
+	hardness 15
+	sittable
+	pseudo
+	location { rabbitbedroom cbedroom dbedroom }
+}
+
+item platkeyhole "platinum key keyhole" {
+	desc {
+is keyhole shaped
+	}
+#	icon	ic324
+	texture void
+	another_noun
+	synonyms { lock hole }
+	size 15
+	hardness 15
+	contr_vol 2
+	pseudo
+	location { greathall tunnel2 }
+	owner halldoor_n
+	set holes
+	set keyholes
+	attribute infinite_container
+}
+		
+item keyhole "tiny gold key keyhole" {
+	desc {
+is keyhole shaped
+	}
+	another_noun
+	synonyms { lock hole }
+	size 15
+	texture void
+	hardness 15
+	contr_vol 2
+	attribute infinite_container
+	pseudo
+	location {
+		death			# becomes greathall when tiny door found
+		rabbitlanding rabbitbedroom rabbitgarden rabbithall
+		rabbitkitchen veggarden
+		rabbitlounge		# for the cabinet
+		dlounge			# for the glass cabinet
+		outwinecellar winecellar
+		bytree			# silver door
+		n_duckpond		# hedge door (note: only 1 side)
+		palacekitchen pantry	# pantry door
+		passage2
+		broomcupboard
+		driveway tailorhouse	#tailor''s door
+	}
+	owner tinydoor	# so "door's keyhole" works
+	set holes
+	set keyholes
+}
+
+# note: this table used in rabbit's bedroom as well, so don't
+# mention kitchen too much (and madkitchen)
+# also used in duchess' dining room
+item kitchentable "kitchen small dining beech table" {
+	desc {
+is made from four planks of beech
+	}
+	icon	ic258
+	class odds
+	set ends
+	synonyms { planks dressing }
+	set tables
+	moveable
+	weight 15		# too heavy to lift
+	class furniture
+	size 11
+	hardness 15
+	sittable
+	pseudo
+	location {
+		palacekitchen rabbitkitchen dkitchen madkitchen
+		rabbitbedroom diningroom conservatory cbedroom
+		winecellar
+
+		quarters		#a table
+		hatroom			#a table
+		rabbitlounge		#a table
+		passage1		#a table
+
+#		gardenpath1		#a bench
+#		wwpath2			#a bench
+#		observatory		#a stool
+	}
+}
+
+clonedesc bench kitchentable "bench" {
+	desc {
+is of very simple construction
+	}
+}
+
+clonedesc stool kitchentable "stool" {
+	desc {
+is tall, square and less than comfortable
+	}
+}
+
+# generic chairs
+item chairs "uncomfortable chairs" {
+	desc {
+are for sitting on
+	}
+	icon	ic288
+	set chairs
+	synonyms { chair armchair }
+	class furniture
+	plural
+	another_noun
+	size 4
+	hardness 15
+	moveable
+	weight 15		# too heavy too lift
+	sittable
+	pseudo
+	location {
+		conservatory rabbitkitchen madkitchen breakfastroom
+		teaparty diningroom dlounge cbedroom
+		dkitchen		#a chair
+#		teaparty		#a chair
+		rabbitlounge		#a chair
+		dinnerroom		#a chair
+		passage1		#a chair
+		palacelanding		#a chair
+		rabbitbedroom		#a chair
+	}
+}
+
+item path "overgrown front garden wiggly-waggly foot path" {
+	desc {
+Unlike walls, paths take you from over here to over there
+	}
+	texture rough
+	another_noun
+	synonyms { footpath }
+	desc_only
+	size 0
+	hardness 15
+	pseudo
+	owner duchess	# for Duchess' front path
+	location {
+		gardenpath1 magicgarden glade rockypath
+		madfootpath teaparty rabbitgarden
+		wwpath1 wwpath2 wwpath3 wwpath4 wwpath5 wwpath6
+		bytree stream5 wood1 outsidegates s_rbridge
+		outdkitchen frontdhouse
+		n_wgarden e_wgarden s_wgarden w_wgarden
+
+		s_footbridge		#a path
+		cliffedge		#a path
+		driveway		#a path
+		e_duckpond		#a path
+		giantoak		#a path
+		grove			#a path
+		countrylane2		#a path
+		countrylane1		#a path
+		treetops		#the wigly-wagly path
+		outsidegates		#the path
+		outdkitchen		#a path
+		sw_grounds		#a path
+		rbridge			#a path
+		s_rbridge		#a path
+		wood2			#a path
+		wood3			#a path
+		w_duckpond		#the path
+	}
+}
+
+# this is local to all places that are outside
+item outside "outside" {
+	desc {
+is massive
+	}
+	attribute article_the
+	texture void
+	size 0
+	weight 0
+	strength 0
+	weight 0
+	pseudo
+	location {
+		# before the rabbit hole
+		grove bank countrylane1 field countrylane2
+		# in the woods
+		outsidegates wood1 wood2 wood3 bytree
+		rbridge s_rbridge treetops footbridge s_footbridge
+		giantoak byriver
+		# wwpath
+		wwpath1 wwpath2 wwpath3 wwpath4 outdkitchen frontdhouse
+		# walled garden
+		w_wgarden n_wgarden e_wgarden s_wgarden wgarden
+		ooalimb mushroom
+		# stream
+		stream1 stream2 stream3 stream4 stream5
+		# enchanted garden
+		magicgarden gardenpath1 glade rockypath cliffedge
+		rockledge w_duckpond n_duckpond e_duckpond s_duckpond
+		induckpond croquet1 croquet2
+		# palace grounds
+		sw_grounds driveway frontpalace
+		# rabbit gardens
+		rabbitgarden veggarden
+		# outside the hatter's
+		madfootpath teaparty
+		inthesky
+	}
+}
+
+item woods "woods" {
+	desc {
+are green and brown and woody
+	}
+	texture void
+	set woods
+	synonyms { wood }
+	plural
+	size 0
+	weight 0
+	strength 0
+	hardness 0
+	pseudo
+	location {
+		outsidegates wood1 wood2 wood3 bytree
+		s_footbridge giantoak byriver s_rbridge treetops
+		w_wgarden n_wgarden e_wgarden s_wgarden mushroom
+		rbridge
+	}
+}
+
+#---------------------------------------------------------
+#
+#	Cards
+#
+#---------------------------------------------------------
+
+# the card which the player can find
+# note: the description is made up in SP.LookCard
+item card "card" {
+	desc {
+e
+	}
+	icon	ic157
+	force_adj			# this is required for the clones
+					# but does not act is an obvious way (!!)
+	set cards
+	size 1
+	weight 1
+	hardness 15
+	moveable
+	out
+	location bank
+}
+
+# the aggregate of cards which collects in the glass shoe
+item cards "cards.in.the.shoe" {
+	desc {
+are made of shiny cardboard
+	}
+	plural
+	synonyms { card }
+	set cards
+	size 1
+	weight 1
+	hardness 15
+	moveable
+	out
+	contained
+	location glassshoe
+}
+
+# same as above for when the very first card is found
+item cards_sing "card.in.the.shoe" {
+	desc {
+is made of shiny cardboard
+	}
+	synonyms { card }
+	set cards
+	size 1
+	weight 1
+	hardness 15
+	moveable
+	out
+	contained
+	location glassshoe
+}
+
+clone suit2 random_object "suit" {}	#for you can't see a suit here
+
+item suit "suit_of diamonds" {
+	desc {
+is the most magnificent garment you ever saw. Such a suit would be fit
+for royalty to be sure
+	}
+	icon	ic312
+#	class diamonds
+	synonyms { suit }
+	force_adj
+	size 3				# size of shoe+handle
+	weight 1
+	hardness 3
+	texture soft
+	wearable 1
+	class clothes
+	moveable
+	out
+	location inventory
+}
+
+#---------------------------------------------------------
+#
+#	Items in the woods
+#
+#---------------------------------------------------------
+
+item poster "poster" {
+	desc {
+It is a poster reminding everyone, lucky enough to have
+received an invitation, that the royal croquet match is to be
+held this very afternoon. It finishes with the ominous words - "so
+don't be late or heads will roll"
+	}
+	icon	ic116
+	scen_noun_a pins	#'cos it be 'pinned' to the tree
+	texture soft
+	desc_only
+	attribute paintable
+	size 2
+	weight 1
+	hardness 3
+	moveable
+	related
+	location wood1	#related to room so untildist works
+}
+
+item pseudobranch "branches" {
+	desc {
+are covered in leaves just like any other branches
+	}
+	texture rough
+	synonyms { branch }
+	plural
+	size 0
+	hardness 15
+	pseudo
+	location { treetops wood1 s_rbridge e_wgarden }
+	set branches
+}
+
+item mapletree "maple tree" {
+	desc {
+has leaves and branches just like any other tree
+	}
+	icon	ic241
+	texture rough
+	force_adj
+	set trees
+	another_noun
+	size 9
+	attribute paintable
+	hardness 15
+	related
+	location wood1
+}
+	
+item grin "wide grin" {
+	desc {
+is broad and crescent shaped
+	}
+	icon	ic154
+	size 0
+	weight 0
+	hardness 0
+	related
+	moveable
+	location wood3
+}
+
+item saucer "saucer" {
+	desc {
+is like a concave disc. Or a convex one if you look at it from the
+other side
+	}
+	icon	ic198
+	size 2
+	weight 1
+	contr_vol 2			# initially empty
+	hardness 10
+	strength 9
+	attribute paintable
+	moveable
+	location wood3
+}
+
+item sugar "white sugar" {
+	desc {
+is sweet and granulated
+	}
+	icon	ic163
+	force_plural
+	class ingredients
+	size 1
+	weight 1
+	hardness 2
+	moveable
+	contained
+	out
+	location saucer
+	edible 5			# == good
+}
+
+#---------------------------------------------------------
+#
+#	Items around the White Rabbit's house
+#
+#---------------------------------------------------------
+
+# landing
+
+item rbdoor "bedroom door" {
+	desc {
+has a keyhole. There is a gap under the door
+	}
+	icon	ic262
+	set doors
+	another_noun
+	attribute paintable
+	hardness 15
+	locked			# key is in the lock on bedroom side
+	pseudo
+	location { rabbitlanding rabbitbedroom }
+}
+
+item bedroomkey "bedroom door key" {
+	desc {
+is the one the rabbit uses to stop nosey little girls looking
+where they shouldn't
+	}
+	icon	ic311
+	attribute alladjs
+	another_noun
+	attribute paintable
+	attribute lionable
+	set keys
+	size 1
+	weight 1
+	hardness 15
+	moveable
+	contained
+	location keyhole
+	sl rabbitbedroom		# the one in Rabbit's bedroom
+	owner rabbit			# "the Rabbit's bedroom door key"
+}
+
+# front garden
+
+item rabbithouse "white.rabbit''s.house" {
+	desc {
+is covered in whitewash
+	}
+#	icon	ic199
+	synonyms { house }
+	attribute alladjs
+	force_adj
+	set houses
+	owner rabbit
+	texture hard
+	size 0
+	hardness 15
+	pseudo
+	location { rabbitgarden veggarden }
+}
+
+item whitewash2 "whitewash" {
+	desc {
+covers the White Rabbit's house
+	}
+#	icon	ic202
+	set whitewashes
+	another_noun
+	hardness 0
+	size 0
+	weight 0
+	strength 0
+	texture smooth
+	force_plural
+	related
+	inseparable
+	location rabbithouse
+	owner rabbithouse
+}
+
+item gardengate "garden gate" {
+	desc {
+It's a gate, it opens and closes, what more do you want?
+	}
+	icon	ic266
+	attribute nofullstop
+	set gates
+	desc_only
+	attribute paintable
+	size 8
+	hardness 15
+	closed
+	pseudo
+	location { wood1 rabbitgarden }
+}
+
+item rfdoor "front door" {
+	desc {
+is made of oak with a brass plate fixed to it
+	}
+	icon	ic262
+	synonyms { oak }
+	force_adj
+	attribute paintable
+	hardness 15
+	locked			# frontdoorkey
+	pseudo
+	location { rabbitgarden rabbithall }
+	set doors
+	owner rabbit
+}
+
+item brassplate "brass plate" {
+	desc {
+has the name 'W.RABBIT' engraved upon it
+	}
+	icon	ic316
+	texture cold
+	force_adj
+	set plates
+	another_noun
+	size 0			#prevent tieing to
+	attribute paintable
+	hardness 15
+	related
+	sl rabbitgarden
+	location rfdoor
+}
+
+item washingline "washing line" {
+	desc {
+is long and made of rope
+	}
+	icon	ic349
+	set ropes
+	force_adj
+	synonyms { clothes_line rope }
+	size 3
+	weight 2
+	hardness 12
+	moveable
+	related
+	location rabbitgarden
+	fixed_num trees
+}
+
+item clothespeg "peg" {
+	desc {
+is used for fixing clothes to the washing line,
+amongst other things
+	}
+	icon	ic265
+	synonyms { clothes_peg }	# avoid hassle due to adj being set
+	texture rough
+	attribute paintable
+	size 1
+	weight 1
+	hardness 15
+	moveable
+	wearable 1
+	related
+	location washingline
+}
+
+# hall
+
+item time "time" {
+	desc {
+is shown by the clock
+	}
+	attribute article_the
+	size 0
+	weight 0
+	strength 0
+	hardness 0
+	texture void
+	inseparable
+	related
+	location grandclock
+}
+
+item grandclock "grandfather clock" {
+	desc {
+is one of the tall sort which can be opened and closed to inspect the inside
+	}
+	icon	ic235
+	initial_done
+	texture smooth
+	short_look
+	size 11
+	attribute paintable
+	weight 15
+	moveable
+	hardness 15
+	contr_vol 1			# 3, including penulum
+	closed
+	related
+	location rabbitlanding
+}
+
+item pendulum "pendulum" {
+	desc {
+swings to and fro
+	}
+	icon	ic120
+# additional :
+# a playing card is fixed to it
+	short_look
+	attribute paintable
+	size 2
+	weight 4
+	hardness 15
+	initial_done
+	contained
+	location grandclock
+}
+
+item roundpainting "circular painting" {
+	desc {
+The majority of the circular painting shows an ancient
+looking rabbit with a long grey beard, balanced precariously on a
+wooden walking stick. He looks as if he could be one of the White
+Rabbit's ancestors
+	}
+#	icon	ic221
+	synonyms { picture }
+	another_noun
+	set paintings
+	texture smooth
+	desc_only
+	size 5
+	hardness 15
+	related
+	sl rabbithall
+	location wall
+}
+
+clonedesc squarepainting roundpainting "square painting" {
+	desc {
+The square painting appears to be of some kind of family
+gathering. Rabbits of all shapes and sizes abound in the canvas,
+whose painter seems to have had little or no success in getting
+everyone to stay in the same place for long enough to bring any
+semblance of order to the piece
+	}
+	set paintings
+	synonyms { picture }
+}
+
+clonedesc ovalpainting roundpainting "oval painting" {
+	desc {
+The oval painting is a simple still life featuring various
+vegetables, predominantly carrots, lovingly arranged in a simple
+looking bowl
+	}
+	set paintings
+	synonyms { picture }
+}
+
+# lounge
+
+item cabinet "rosewood cabinet" {
+	desc {
+is embelished with walnut and rosewood marquetry
+and there is a richly engraved keyhole on one side
+	}
+	icon	ic232
+	scen_noun_a marquetry
+	texture smooth
+	set cabinets
+	another_noun
+	class furniture
+	attribute paintable
+	force_adj
+	short_look
+	size 9
+	weight 15
+	hardness 15
+#	initial_done			# so FGT_Cabinet works properly
+	locked
+	related
+	location rabbitlounge
+}
+
+item settee "white settee" {
+	desc {
+looks soft and extremely comfortable
+	}
+	icon	ic282
+	synonyms { sofa }
+	class furniture
+	size 11
+	weight 15
+	texture soft
+	hardness 15
+	sittable
+	related
+	location rabbitlounge
+}
+
+
+
+item cushions "soft cushions" {
+	desc {
+are covered in exotically embroidered velvet
+	}
+	icon	ic102
+	scen_noun_a velvet
+	attribute paintable
+	plural
+	size 4
+	weight 2
+	hardness 3
+	texture soft
+	moveable
+	related
+	location settee
+}
+
+item pshed "garden shed" {
+	desc {
+is like most sheds you've seen
+	}
+	icon	ic308
+	owner rabbit
+	texture rough
+	size 0			#prevent tieing
+	hardness 15
+	related
+	location veggarden
+}
+
+item carrots "carrot plants" {
+	desc {
+look irresistable, if you happen to be a rabbit that is
+	}
+	icon	ic263
+	texture rough
+	force_adj
+	synonyms { carrot }
+	plural
+	size 0		# stop tieing
+	hardness 4
+	strength 3
+	related
+	location veggarden
+	edible 1
+}
+
+# kitchen
+
+item rutensils "kitchen utensils" {
+	desc {
+are the the kind of pots and pans you would expect
+to find in any normal kitchen
+	}
+	icon	ic274
+	owner rabbit
+	set pots
+	synonyms { pot pots bowls pans saucepans crockery }
+	plural
+	size 3
+	hardness 15
+	related
+	moveable
+	force_adj
+	location rabbitkitchen
+}
+
+item rkwindow "window" {
+	desc {
+Through the window, you can see the Rabbit's garden
+	}
+	synonyms { glass }
+	set windows
+	desc_only
+	size 0			#stop tieing to
+	hardness 15
+	related
+	location rabbitkitchen
+}
+
+item rcupboard "kitchen cupboard" {
+	desc {
+is painted with various root vegetables
+	}
+	icon	ic170
+	scen_noun_b vegetables
+	scen_noun_b root_vegetables
+	size 8
+	hardness 15
+	attribute paintable
+	closed
+	contr_vol 5		# 7, including cup
+	related
+	location rabbitkitchen
+	another_noun
+	set cupboards
+}
+
+item cup "tea cup" {
+	desc {
+is normally used for drinking tea
+	}
+	icon	ic147
+	synonyms { teacup }
+	size 2
+	attribute paintable
+	weight 1
+	moveable
+	hardness 10		#brittle
+	strength 10
+	contr_vol 2		# initially empty
+	contained
+	location rcupboard
+}
+
+item rackholes "egg rack holes" {
+	desc {
+are round
+	}
+	plural
+	force_adj
+	attribute alladjs
+	another_noun
+	set holes
+	synonyms { hole }
+	size 0
+	weight 0
+	hardness 0
+	strength 0
+	related
+	inseparable
+	location eggrack
+	owner eggrack
+}
+
+item eggrack "egg engraved rack" {
+	desc {
+is like a little shelf with slightly smaller than egg-sized holes along it
+	}
+	icon	ic101
+	set racks
+	force_adj
+	another_noun
+	set shelves
+	synonyms { shelf }
+	attribute paintable
+	size 2
+	hardness 15
+	contr_vol 1		# 2, including egg
+	related
+	location rabbitkitchen
+}
+
+item eggshards "fragments_of eggshell" {
+	desc {
+are a gooey mess
+	}
+	icon	ic314
+	synonyms { mess fragments shell }
+	force_adj
+	plural
+	size 1
+	weight 1
+	moveable
+	hardness 15
+	out
+	location s_rbridge
+}
+
+item rbackdoor "back door" {
+	desc {
+opens onto a vegetable garden at the back of the house
+	}
+	icon	ic262
+	set doors
+	closed
+	another_noun
+	attribute paintable
+	hardness 15
+	pseudo
+	location { rabbitkitchen veggarden }
+}
+
+item waiterholes "tiny holes" {
+	desc {
+let the rope pass through the waiter
+	}
+	set holes
+	synonyms { hole }
+	texture void
+	weight 0
+	hardness 0
+	related
+	inseperable
+	location dumbwaiter
+}
+
+# vegetable garden
+
+# garden shed
+
+item workbench "work workbench" {
+	desc {
+reminds you of the one your father has
+in the shed at the bottom of the garden
+	}
+	icon	ic111
+	sittable
+	synonyms { bench }
+	attribute paintable
+	size 11
+	weight 15
+	hardness 15
+	related
+	location gardenshed
+}
+
+item vice "vice" {
+	desc {
+is just the job when you want to grip something really tightly
+	}
+	icon	ic144
+	size 4
+	hardness 15
+	attribute paintable
+	contr_vol 3
+	local_contents
+	open
+	related
+	location workbench
+}
+
+# bedroom
+
+item pinkfan "pink fan" {
+	desc {
+is quite like the blue fan you saw earlier, only much pinker
+	}
+	icon	ic313
+	force_adj
+	attribute paintable
+	another_noun
+	set fans
+	size 2
+	weight 1
+	hardness 3
+	closed
+	moveable
+	related
+	location bed			# bed is a pseudo
+	sl rabbitbedroom		# the bed in rabbit's bedroom
+}
+
+item chestofdrawers "chest_of pink drawers" {
+	desc {
+is made of solid oak
+	}
+	icon	ic254
+	class furniture
+	attribute paintable
+	another_noun
+	set ends
+	class odds
+	set chests
+	set drawers
+	synonyms { oak chest drawer }		# for "open drawer"
+	force_adj
+	size 11
+	hardness 15
+	moveable
+	weight 15
+	related
+	sittable
+	closed
+	contr_vol 5			# 7, including pink gloves
+	location rabbitbedroom
+}
+
+item pinkgloves "pair_of pink gloves" {
+	desc {
+is really more like a pair of mittens. You decide that it's because
+it belongs to someone who has no fingers and thumbs
+	}
+	icon	ic264
+	synonyms { mittens }
+	modified_quantity
+	attribute alladjs
+	force_adj
+	another_noun
+	attribute paintable
+	size 2
+	weight 1
+	hardness 3
+	texture soft
+	wearable 1
+	class clothes
+	moveable
+	contained
+	location chestofdrawers
+}
+
+clonedesc rbedwindow lookingglass "window" {
+	desc {
+The window looks out on the Rabbit's back garden
+	}
+	synonyms { glass }
+	set windows
+}
+
+item mirror "mirror" {
+	desc {
+Your reflection stares back at you, curiously
+	}
+	icon	ic177
+	synonyms { glass reflection }
+	another_noun
+	set mirrors
+	desc_only
+	size 3
+	hardness 15
+	pseudo
+	location {
+		bathroom
+		musicroom		#a mirror
+		rabbitkitchen		#a mirror
+		}
+}
+
+item lookingglass "looking glass" {
+	desc {
+Your reflection stares back at you
+	}
+	icon	ic347
+	force_adj
+	owner player			# for my reflection
+	texture smooth
+	synonyms { mirror reflection }
+	desc_only
+	set mirrors
+	another_noun
+	size 4
+	hardness 15
+	related
+	location rabbitbedroom
+}
+
+clone trinkets hockeypitches "trinkets" {}
+
+item smallshelf "small shelf" {
+	desc {
+is no more than nine inches long and three deep.
+The kind you might use to display all your trinkets
+	}
+	icon	ic132
+	set ends
+	class odds
+	size 8
+	attribute paintable
+	hardness 15
+	sittable
+	related
+	location rabbitbedroom
+	another_noun
+	set shelves
+}
+
+clone rainbow random_object "rainbow" {}
+
+item quartzbottle "quartz bottle" {
+	desc {
+has a picture of someone with an extremely long neck engraved on one side,
+on the other is engraved 'Minimum headroom required 30 feet'
+	}
+	icon	ic167
+	closed
+	local_contents
+	set bottles
+	another_noun
+	attribute paintable
+	size 2
+	weight 1
+	hardness 10
+	strength 11
+	contr_vol 1		# 2, including potion2
+	moveable
+	related
+	location smallshelf
+}
+
+item potion2 "rabbit''s.potion" {
+	desc {
+sits patiently, waiting to be drunk
+	}
+#	icon	ic218
+	synonyms { potion }
+	set potions
+	another_noun
+	size 1
+	weight 1
+	hardness 1
+	wet
+	texture cold
+	edible 7			# magical
+	moveable
+	contained
+	location quartzbottle
+	owner rabbit
+}
+
+item writingdesk "old desk" {
+	desc {
+reminds you of school; it even has an ink well set in the corner, just
+like yours. Thank goodness you've still got five weeks of holidays left
+before term starts again
+	}
+	icon	ic141
+	synonyms { writing }
+	scen_noun_c corners
+	scen_noun_c corner
+	class furniture
+	class odds
+	set ends
+	attribute paintable
+	moveable
+	weight 15		# too heavy to lift
+	size 10
+	hardness 15
+	sittable
+	related
+	location rabbitbedroom
+}
+
+item inkwell "ink well" {
+	desc {
+has a hole at the top into which you could dip a pen or brush
+	}
+	icon	ic328
+# Surprisingly, it looks as if it contains not ink,
+# but some kind of white fluid instead!
+# Curiouser and curiouser you think to yourself	
+	texture void
+	synonyms { hole inkwell }
+	set holes
+	set wells
+	another_noun
+	force_adj
+	size 2			#big enough to dip things in
+	weight 0
+	strength 0
+	hardness 0
+	inseparable
+	contr_vol 1
+	related
+	location writingdesk
+}
+
+item paintbrush "paint brush" {
+	desc {
+is used for painting things
+	}
+	icon	ic194
+	set brushes
+	another_noun
+	synonyms { paintbrush }
+	force_adj
+	size 1
+	weight 1
+	hardness 15
+	texture hard
+	moveable
+	out
+	location inventory
+}
+
+item hockeypitches "pitches" {
+	desc {
+e
+	}
+	icon	ic190
+	force_adj
+	plural
+	out
+	location bank
+}
+
+clone school random_object "school" {}
+
+item whitefluid "white fluid" {
+	desc {
+looks similar to the whitewash that horrible Mr. Thompson
+uses to mark out the hockey pitches at school
+	}
+	icon	ic113
+	set whitewashses
+	another_noun
+	force_plural
+	synonyms { whitewash paint }
+	force_adj
+	size 1
+	weight 1
+	hardness 1
+	wet
+	texture cold
+	contained
+	location inkwell
+}
+
+#---------------------------------------------------------
+#
+#	Items in the palace grounds
+#
+#---------------------------------------------------------
+
+item gardengloves "pair_of gardening gloves" {
+	desc {
+is made of the kind of hard-wearing material that lets you pick
+roses without getting pricked
+	}
+	icon	ic264
+	another_noun
+	scen_noun_c material
+	attribute paintable
+	modified_quantity
+	force_adj
+	attribute alladjs
+	size 2
+	weight 1
+	hardness 3
+	texture rough
+	moveable
+	class clothes
+	wearable 1
+	location sw_grounds
+}
+
+#---------------------------------------------------------
+#
+#	Items in the Duchess' house
+#
+#---------------------------------------------------------
+
+# outside the kitchen
+
+item dwindow "kitchen window" {
+	desc {
+is see-through
+	}
+	icon	ic247
+	synonyms { glass }
+	set windows
+	texture smooth
+	hardness 15
+	pseudo
+	location { outdkitchen cbedroom dkitchen
+		breakfastroom		#a window
+		dlanding		#a window
+		dlounge			#a window
+		easthall		#a window
+		frontdhouse		#a window
+		greathall		#a window
+		quarters		#a window
+		hatroom			#a window
+		palacelanding		#a window
+#		rabbitbedroom		#a window
+		tailorhouse		#a window
+		westhall		#a window
+	}
+}
+
+# front of the house
+
+item dfdoor "front door" {
+	desc {
+is definitely door-shaped
+	}
+	icon	ic262
+	force_adj
+	attribute paintable
+	set doors
+	another_noun
+	hardness 15
+	closed
+	pseudo
+	location { frontdhouse dlounge }
+	owner duchess
+}
+
+# lounge
+
+item bookshelf "book case" {
+	desc {
+is full of books that are of no interest to you
+	}
+	icon	ic211
+	synonyms { bookcase shelf shelves }
+	force_adj
+	size 9
+	attribute paintable
+	hardness 15
+	sittable
+	related
+	location dlounge
+}
+
+clonedesc fakebook bookshelf "book" {
+	desc {
+of your choice is of absolutely no interest
+	}
+}
+	
+
+item magazines "court gazettes" {
+	desc {
+These back copies of 'Hearts in the
+news' as the publication is known locally, are full of meaty bits
+of court gossip. They look to be quite heavy
+	}
+	icon	ic149
+	synonyms { magazines issues gossip hearts_in_the_news copies }
+	attribute paintable
+	plural
+	desc_only
+	size 2
+	related
+	texture smooth
+	moveable
+	weight 4
+	location coffeetable
+}
+
+item coffeetable "large occasional table" {
+	desc {
+is specifically designed as a resting place for any book
+too big to fit on the shelves
+	}
+	icon	ic213
+	scen_noun_c legs
+	set tables
+	class furniture
+	attribute paintable
+	force_adj
+	size 10
+	moveable
+	weight 15
+	hardness 15
+	sittable
+	related
+	location dlounge
+}
+
+item glassescase "glasses case" {
+	desc {
+is red and hinged
+	}
+	icon	ic151
+	attribute paintable
+	force_adj
+	size 2
+	weight 1
+	hardness 15
+	contr_vol 1		# 3, including large lens
+	closed
+	moveable
+	related
+	location bookshelf
+}
+
+item smalllens "small lens" {
+	desc {
+is smooth and convex
+	}
+	icon	ic175
+	another_noun
+	set lenses
+	size 1
+	weight 1
+	hardness 10
+	strength 13
+	moveable
+	contained
+	location glassescase
+}
+
+# Duchess' bedroom
+
+synonym "frilly" { pink adj }
+
+item slippers "pink bedroom slippers" {
+	desc {
+are pink and frilly, like that awful thing the dog dragged in last
+summer
+	}
+	icon	ic195
+	plural
+	size 2
+	attribute paintable
+	weight 1
+	hardness 3
+	texture soft
+	moveable
+	wearable 1
+	class clothes
+	hidden
+	location bed
+	sl dbedroom
+}
+
+# cook's bedroom
+
+item hatch "hatch" {
+	desc {
+seems to be an access hatch for a dumb waiter
+	}
+	icon	ic234
+	size 10
+	attribute paintable
+	hardness 15
+	pseudo
+	location { cbedroom dkitchen }
+}
+
+# in the dumb waiter
+
+item waiterrope "rough rope" {
+	desc {
+is used to pull the dumb waiter between floors. It looks very rough
+	}
+	icon	ic114
+	another_noun
+	set ropes
+	hardness 15
+	texture rough
+	related
+	location dumbwaiter
+}
+
+# kitchen
+
+item kniferack "knife rack" {
+	desc {
+is to keep knives out the way for extra safety. The thought
+of being safety conscious in this kitchen seems incongruous to say the
+least!
+	}
+	icon	ic281
+	attribute nofullstop
+	size 4
+	hardness 15
+	related
+	location dkitchen
+}
+
+item fridge "cooling.cupboard" {
+	desc {
+is similar to the cooler at home. It is about the same size as a normal
+cupboard but has a spring loaded door to stop careless people leaving it
+open
+	}
+	icon	ic100
+	synonyms { door fridge cooling cupboard }
+	size 10
+	attribute paintable
+	hardness 15
+	closed
+	contr_vol 5			# 7, including carton
+	attribute infinite_container	# randomly
+	sittable
+	related
+	location dkitchen
+}
+
+item dresser "dresser" {
+	desc {
+is the kind of thing that would make any kitchen feel homely. It is
+crammed with those kitchen utensils fortunate enough to have so far
+escaped the cook's attention
+	}
+	icon	ic191
+	size 11
+	attribute paintable
+	hardness 15
+	sittable
+	related
+	location dkitchen
+}
+
+synonym "flying" { kitchen adj } 	# for flying saucers
+
+item utensils "kitchen utensils" {
+	desc {
+are the the kind of pots and pans you would expect
+to find in any normal kitchen
+	}
+	icon	ic274
+	synonyms { pot pots pans saucepans crockery saucers }
+	set pots
+	plural
+	size 3
+	hardness 15
+	force_adj
+	pseudo
+	location {
+		dkitchen
+		madkitchen		#some crockery
+		palacekitchen		#some utensils
+		}
+}
+
+synonym "steel" { carving adj }
+synonym "ivory" { carving adj }
+
+clonedesc blade carvingknife "knife carving blade" {
+	desc {
+is made of steel
+	}
+}
+
+clonedesc knifehandle carvingknife "knife carving handle" {
+	desc {
+is made of ivory
+	}
+	set handles
+}
+
+# knife adj so that 'knife handle' is cool and doesn't hassle about which
+# handle...
+
+item carvingknife "carving knife" {
+	desc {
+has an inlaid ivory handle and a steel blade
+	}
+	icon	ic229
+	another_noun	# for the clones
+	size 2
+	weight 2
+	hardness 15
+	attribute paintable
+	sharpness 3			# nasty pointy teeth
+	moveable
+	related
+	location kniferack
+}
+
+item creamcarton "small cream red jug" {
+	desc {
+is made of red porcelain
+	}
+	icon	ic345
+	synonyms { porcelain }
+	attribute paintable
+	size 2
+	weight 1
+	hardness 3
+	contr_vol 1	# 2, including cream
+	moveable
+	contained
+#	edible 5		# why??? - ken
+	location fridge
+}
+
+item cream "cream" {
+	desc {
+is a thick white liquid much favoured by cats
+	}
+	icon	ic346
+	size 1
+	weight 1
+	hardness 1
+	wet
+	texture cold
+	moveable
+	contained
+	edible 5
+	location creamcarton
+}
+
+item glasskey "glass key" {
+	desc {
+looks extremely brittle, which isn't suprising really considering what it's made of
+	}
+	icon	ic311
+	another_noun
+	set keys
+	attribute paintable
+	size 1
+	weight 1
+	hardness 10
+	strength 13
+	moveable
+	related
+	location kitchentable
+	sl dkitchen
+}
+
+clonedesc royalcrest envelope "royal crest" {
+	desc {
+is heart shaped and features an imprint of the
+royal coat of arms which has two hearts with a
+croquet mallet, a croquet ball and a plate of tarts
+	}
+}
+
+item envelope "envelope" {
+	desc {
+has a royal crest on the side. The words 'To The Duchess'
+are inscribed in a large flowing hand below the crest. It seems fortunate that you
+can read the large writing from a distance, because the Duchess would surely notice
+you if you approached it any closer
+	}
+	icon	ic183
+	force_adj			#for the clone
+	size 1
+	weight 1
+	hardness 3
+	related
+	location dresser
+}
+
+# dining room
+
+item glasscabinet "glass cabinet" {
+	desc {
+is hand-crafted and perfect in every detail
+	}
+	icon	ic232
+	set cabinets
+	force_adj
+	size 10
+	hardness 15
+	attribute paintable
+	contr_vol 6	# 7, including pass
+	local_contents	# see through
+	locked		# glass key
+	related
+	location diningroom
+}
+
+clonedesc lettering royalpass "gold lettering" {
+	desc {
+reads, "ADMIT ONE"
+	}
+	attribute article_the
+	attribute nofullstop
+}
+
+item royalpass "royal pass" {
+	desc {
+is embossed with gold lettering
+	}
+	icon	ic283
+	short_look
+	size 1
+	attribute paintable
+	weight 1
+	hardness 3
+	moveable
+	contained
+	location glasscabinet
+}
+
+clone footman noone "fish royal footman" {
+	synonyms { footmen }
+	}
+
+#item trolley "soft drinks trolley" {
+#	desc {
+#This is the trolley from which the fish footman serves
+#fruit juices to the Duchess' guests - or carrot juice if the White
+#Rabbit has been invited
+#	}
+#	icon	ic146
+#	class furniture
+#	desc_only
+#	attribute paintable
+#	size 4
+#	hardness 15
+#	sittable
+#	related
+#	location diningroom
+#}
+
+#---------------------------------------------------------
+#
+#	The Caterpillar and mushrooms
+#	
+#---------------------------------------------------------
+
+# the one which the caterpillar is sitting on
+item mainmushroom "mushroom" {
+	desc {
+is much larger than the ones you are used to
+	}
+	icon	ic137
+	another_noun
+	set mushrooms
+	size 11
+	hardness 15
+	sittable
+	related
+	location mushroom
+}
+
+item leftside "left hand side" {
+	desc {
+looks just like the right hand side
+	}
+	another_noun
+	attribute alladjs
+	set sides
+	related
+	inseparable
+	location mainmushroom
+}
+
+item rightside "right hand side" {
+	desc {
+looks just like the left hand side
+	}
+	another_noun
+	attribute alladjs
+	set sides
+	related
+	inseparable
+	location mainmushroom
+}
+
+item chunk1 "mushroom chunk" {
+	desc {
+looks like a piece of mushroom
+	}
+	icon	ic126
+	synonyms { piece_of_mushroom }
+	edible 5
+	attribute plural_s
+	another_noun
+	set chunks
+	size 1
+	weight 1
+	hardness 15
+	moveable
+	out
+	location mushroom
+}
+
+item chunk2 "mushroom chunk" {
+	desc {
+looks like a piece of mushroom
+	}
+	synonyms { piece_of_mushroom }
+	attribute plural_s
+	another_noun
+	set chunks
+	edible 5
+	size 1
+	weight 1
+	hardness 15
+	moveable
+	out
+	location mushroom
+}
+
+item chunk3 "mushroom chunk" {
+	desc {
+looks like a piece of mushroom
+	}
+	synonyms { piece_of_mushroom }
+	attribute plural_s
+	another_noun
+	set chunks
+	edible 5
+	size 1
+	weight 1
+	hardness 15
+	moveable
+	out
+	location mushroom
+}
+
+item chunk4 "mushroom chunk" {
+	desc {
+looks like a piece of mushroom
+	}
+	synonyms { piece_of_mushroom }
+	attribute plural_s
+	another_noun
+	set chunks
+	edible 5
+	size 1
+	weight 1
+	hardness 15
+	moveable
+	out
+	location mushroom
+}
+
+item chunk5 "mushroom chunk" {
+	desc {
+looks like a piece of mushroom
+	}
+	synonyms { piece_of_mushroom }
+	attribute plural_s
+	another_noun
+	set chunks
+	edible 5
+	size 1
+	weight 1
+	hardness 15
+	moveable
+	out
+	location mushroom
+}
+
+item chunk6 "mushroom chunk" {
+	desc {
+looks like a piece of mushroom
+	}
+	synonyms { piece_of_mushroom }
+	attribute plural_s
+	another_noun
+	set chunks
+	edible 5
+	size 1
+	weight 1
+	hardness 15
+	moveable
+	out
+	location mushroom
+}
+
+item chunk7 "mushroom chunk" {
+	desc {
+looks like a piece of mushroom
+	}
+	synonyms { piece_of_mushroom }
+	attribute plural_s
+	another_noun
+	set chunks
+	edible 5
+	size 1
+	weight 1
+	hardness 15
+	moveable
+	out
+	location mushroom
+}
+
+item chunk8 "mushroom chunk" {
+	desc {
+looks like a piece of mushroom
+	}
+	synonyms { piece_of_mushroom }
+	attribute plural_s
+	another_noun
+	set chunks
+	edible 5
+	size 1
+	weight 1
+	hardness 15
+	moveable
+	out
+	location mushroom
+}
+
+#---------------------------------------------------------
+#
+#	Palace items
+#
+#---------------------------------------------------------
+
+# front palace
+
+item palaceentrance "entrance" {
+	desc {
+leads into the palace
+	}
+	icon	ic207
+	size 0
+	weight 0
+	texture void
+	hardness 0
+	strength 0
+	related
+	pseudo
+	location { frontpalace easthall }
+}
+
+item mist "sherbet mist" {
+	desc {
+is made of sherbet
+	}
+	icon	ic193
+	force_plural
+	texture void
+	size 0 
+	weight 0
+	strength 0
+	hardness 0
+	related
+	location frontpalace
+}
+
+item fountain "sherbet fountain" {
+	desc {
+is shrouded in a sherbet mist
+	}
+	icon	ic238
+	texture rough
+	attribute infinite_container
+	contr_vol 7
+	attribute paintable
+	size 7
+	hardness 15
+	related
+	location frontpalace
+}
+
+item sherbet "sherbet" {
+	desc {
+is white and powdery and temptingly sweet
+	}
+	icon	ic217
+	force_plural
+	texture sticky
+	size 1
+	weight 1
+	hardness 2
+	moveable
+	edible 6			# very good
+	inseparable
+	related
+	location mist
+}
+
+item roster "roster" {
+	desc {
+Luckily, the beheading roster doesn't seem to have your name on it. Yet
+	}
+	icon	ic304
+	synonyms { beheading } 		#adj shortage
+	attribute paintable
+	desc_only
+	size 2
+	hardness 15
+	related
+	location easthall
+}
+
+item guardroomdoor "guard heavy room door" {
+	desc {
+guards the guards' room
+        }
+	icon	ic262
+	set doors
+	force_adj
+	size 11
+	attribute paintable
+	hardness 15
+	closed
+	pseudo
+	location { easthall quarters }
+}
+
+item guardroomkey "red key" {
+	desc {
+is inscribed with the words: 'Guards' room door, for the locking of'
+	}
+	icon	ic311
+	another_noun
+	attribute paintable
+	set keys
+	size 1
+	weight 1
+	hardness 15
+	moveable
+	related
+	location tunnel1
+}
+
+item locker10key "number.10 number 10 key key" {
+	desc {
+has the word 'LOCKER' on one side and the number 10 on
+the other
+	}
+	icon	ic309
+	synonyms { 10 ten }
+	owner locker10
+	another_noun
+	set keys
+	attribute paintable
+	size 1
+	weight 1
+	hardness 15
+	moveable
+	hidden
+	location heap			# heap of leaves in passage2
+}
+
+item locker3key "number.3 number 3 key key" {
+	desc {
+has the word 'LOCKER' on one side and the number 3 on
+the other
+	}
+	icon	ic309
+	synonyms { 3 three }
+	owner locker3
+	another_noun
+	set keys
+	attribute paintable
+	size 1
+	weight 1
+	hardness 15
+	moveable
+	contained
+	location locker10
+}
+
+item locker7key "number.7 number 7 key key" {
+	desc {
+has the word 'LOCKER' on one side and the number 7 on
+the other
+	}
+	icon	ic309
+	synonyms { 7 seven }
+	owner locker7
+	another_noun
+	attribute paintable
+	set keys
+	size 1
+	weight 1
+	hardness 15
+	moveable
+	contained
+	location locker3
+}
+
+item lockers "thirteen lockers" {
+	desc {
+Each locker has a number engraved on it
+	}
+	icon	ic209
+	scen_noun_c numbers
+	desc_only
+	set lockers			#so look all lockers works
+	plural
+	size 5
+	hardness 15
+	related
+	location quarters
+}
+
+# the lockers are NOT in a set cos we want lockers to mean the one above
+
+clonedesc locker1 locker13 "first number locker" {
+	desc {
+has had the number 1 engraved on it then viciously erased and replaced with the
+word 'first'
+	}
+	synonyms { 1 }
+}
+
+clonedesc locker2 locker13 "number 2 locker" {
+	desc {
+has the number 2 engraved on it
+	}
+	synonyms { 2 two }
+	attribute alladjs
+}
+
+clonedesc locker4 locker13 "number 4 locker" {
+	desc {
+has the number 4 engraved on it
+	}
+	synonyms { 4 four }
+	attribute alladjs
+}
+
+clonedesc locker5 locker13 "number 5 locker" {
+	desc {
+has the number 5 engraved on it
+	}
+	synonyms { 5 five }
+	attribute alladjs
+}
+
+clonedesc locker6 locker13 "number 6 locker" {
+	desc {
+has the number 6 engraved on it
+	}
+	synonyms { 6 six }
+	attribute alladjs
+}
+
+clonedesc locker8 locker13 "number 8 locker" {
+	desc {
+has the number 8 engraved on it
+	}
+	synonyms { 8 eight }
+	attribute alladjs
+}
+
+clonedesc locker9 locker13 "number 9 locker" {
+	desc {
+has the number 9 engraved on it
+	}
+	synonyms { 9 nine }
+	attribute alladjs
+}
+
+clonedesc locker11 locker13 "number 11 locker" {
+	desc {
+has the number 11 engraved on it
+	}
+	synonyms { 11 eleven }
+	attribute alladjs
+}
+
+clonedesc locker12 locker13 "number 12 locker" {
+	desc {
+has the number 12 engraved on it
+	}
+	synonyms { 12 twelve }
+	attribute alladjs
+}
+
+item locker13 "number 13 locker" {
+	desc {
+has a number 13 engraved on it
+	}
+#	icon	ic209
+	synonyms { 13 thirteen }
+	attribute alladjs
+	force_adj
+	size 5
+	hardness 15
+	locked
+	contr_vol 7
+	related
+	location quarters
+}
+
+item locker3 "number 3 locker" {
+	desc {
+has a 3 engraved on it
+	}
+#	icon	ic209
+	synonyms { 3 three }
+	attribute alladjs
+	force_adj
+	size 5
+	hardness 15
+	locked
+	contr_vol 5			# 7, including key 7 and card
+	related
+	location quarters
+}
+
+item locker7 "number 7 locker" {
+	desc {
+has a 7 engraved on it
+	}
+#	icon	ic209
+	synonyms { 7 seven }
+	attribute alladjs
+	force_adj
+	size 5
+	hardness 15
+	locked
+	contr_vol 5			# 7, including boots
+	related
+	location quarters
+}
+
+item locker10 "number 10 locker" {
+	desc {
+has a 10 engraved on it
+	}
+#	icon	ic209
+	synonyms { 10 ten }
+	attribute alladjs
+	force_adj
+	size 5
+	hardness 15
+	locked
+	contr_vol 6			# 7, including key 3
+	related
+	location quarters
+}
+
+item boots "boots" {
+	desc {
+are hobnail and look as if they would keep out the damp
+	}
+	icon	ic152
+	plural
+	attribute paintable
+	size 2
+	weight 2
+	hardness 15
+	moveable
+	contained
+	wearable 1
+	class clothes
+	location locker7
+}
+
+# central hall
+
+item courtdoor "courtroom heavy wooden door" {
+	desc {
+This is one of the largest doors you have ever seen and looks far too
+heavy for you to move
+	}
+	icon	ic109
+	desc_only
+	another_noun
+	set doors
+	size 8
+	hardness 15
+	locked
+	pseudo
+	location { centralhall courtroom }
+}
+
+item leftgdoor "left gold pair_of door" {
+	desc {
+is engraved with a tiny letter 'k'
+	}
+	icon	ic330
+	synonyms { letter_k }
+	another_noun
+	set doors
+	set engravings
+	size 8
+	hardness 15
+	closed
+	pseudo
+	location {  centralhall throneroom }
+}
+
+item rightgdoor "right gold pair_of door" {
+	desc {
+is engraved with a gigantic letter 'Q'
+	}
+	icon	ic187
+	another_noun
+	synonyms { letter_q }
+	set engravings
+	set doors
+	size 8
+	hardness 15
+	closed
+	pseudo
+	location { centralhall throneroom }
+}
+
+	# note: this description relies on a space being put after
+	# each ^ by fred.
+#is etched with the words:
+#~'This used to be a legal loophole,^
+#Now it may be closed forever.^
+#But if a crime so dark and dreadful,^
+#Is perpetrated by whoever,^
+#Could contemplate on such a thing.^
+#Be sure that they are quite aware,^
+#That when this courtroom's bells do ring,^
+#They'll lose much more than just their hair.~
+#So think on this a while my friend^
+#But be prepared to swallow fear.^
+#As Wonderland for all must end,^
+#And all your dreams, they must end here'
+
+item juryroster "jury roster" {
+	desc {
+indicates which members of the jury are already present
+	}
+	icon	ic304
+	synonyms { plaque notice sign }
+	force_adj
+	size 2
+	hardness 15
+	related
+	location courtdoor
+	sl centralhall
+}
+
+item armour "coat_of armour" {
+	desc {
+is made of iron and stands about seven feet tall
+
+	}
+	icon	ic279
+	synonyms { coat }
+	set coats
+	size 8
+	attribute paintable
+	hardness 15
+	related
+	location centralhall
+}
+
+item coatofarms "coat_of arms" {
+	desc {
+Not surprisingly, this is the coat of arms
+belonging to the Queen of Hearts. It features two hearts with a
+croquet mallet, a croquet ball, and a plate of tarts
+	}
+	icon	ic112
+# first glance :
+# The coat of arms is hanging on a coat hook
+	synonyms { coat }
+	set coats
+	initial_done		# for FGT
+	desc_only
+	short_look
+	attribute paintable
+	force_adj		# always "coat of arms"
+	size 3
+	weight 2
+	hardness 15
+	moveable
+	related
+	location coathook
+}
+
+item coathook "coat hook" {
+	desc {
+is made of brass and is curved
+	}
+	icon	ic166
+# first glance :
+# . It has been loosely screwed to the wall
+# first glance when removed
+# . It is threaded at one end to enable it to be screwed into the wall
+	short_look
+	attribute paintable
+	size 1
+	weight 1
+	hardness 15
+	moveable
+	related
+	location centralhall
+}
+
+item malletpic "croquet mallet" {
+	desc {
+looks more like a flamingo than a croquet mallet
+	}
+#	icon	ic138
+	size 0
+	weight 0
+	strength 0
+	hardness 0
+	texture smooth
+	inseparable
+	related
+	location coatofarms
+}
+
+clonedesc ballpic malletpic "croquet ball" {
+	desc  {
+looks more like a hedgehog than a croquet ball
+	}
+}
+
+# throne room
+
+item queenthrone "Queen''s.throne" {
+	desc {
+is by far the bigger of the two, being adorned with heart-shaped jewels of
+every description.  Seeing the difference in size between the two thrones, a
+feeling of deep pity for the King comes over you
+	}
+	icon	ic256
+	synonyms { throne }
+	scen_noun_a jewels
+	attribute paintable
+#	another_noun
+	set thrones
+	size 12
+	hardness 15
+	sittable
+	related
+	location throneroom
+	owner queen
+	owner card12
+}
+
+item kingthrone "King''s.throne" {
+	desc {
+is dwarfed by the Queen's, although it still manages to project a
+modest level of royal dignity. Still, it is obvious who wears the
+crown in this royal household
+	}
+# first glance :
+# Although there are no jewels on the King's throne, you do catch
+# sight of a King of diamonds resting on one arm.
+	synonyms { throne }
+	icon	ic256
+	attribute paintable
+	set thrones
+	owner king
+	owner card13
+	size 12
+	hardness 15
+	sittable
+	related
+	location throneroom
+}
+
+item southentrance "entrance" {
+	desc {
+leads into what looks like a dark tunnel
+	}
+	icon	ic189
+	size 8
+	attribute paintable
+	hardness 0
+	related
+	out
+	location throneroom
+}
+
+# west hall
+
+item waxqueen "reclining statue" {
+	desc {
+reclines solidly
+	}
+#	icon	ic212
+	short_look
+	force_adj
+	attribute paintable
+	size 10
+	hardness 15
+	related
+	location westhall
+}
+
+# conservatory
+
+item queenschair "big Queen''s.chair" {
+	desc {
+looks very regal
+	}
+	icon	ic280
+	synonyms { chair }
+	set chairs
+	attribute paintable
+	size 6
+	sittable
+	hardness 15
+	weight 15
+	moveable
+	related
+	location conservatory
+	owner queen
+	owner card12
+}
+
+item panels "glass panels" {
+	desc {
+are made of glass
+	}
+	icon	ic165
+	force_adj
+	attribute paintable
+	size 3
+	hardness 15
+	related
+	location conservatory
+}
+
+item panelwindow "window" {
+	desc {
+differs from the other panels in the ceiling
+in that it seems to be possible to open it
+	}
+	icon	ic165
+	synonyms { glass }
+	set windows
+	size 3
+	hardness 15
+	related
+	open
+	location conservatory
+}
+
+item panelrope "window rope" {
+	desc {
+is fixed at one end to the window and at the other to the winch
+	}
+	icon	ic293
+	set ropes
+	another_noun
+	size 6
+	hardness 12
+	related
+	location conservatory
+}
+
+item winch "winch" {
+	desc {
+is used to open the window to which it is attached by a rope
+	}
+	icon	ic128
+	size 2
+	hardness 15
+	related
+	attribute paintable
+	location conservatory
+}
+
+item winchplate "metal plate" {
+	desc {
+carries instructions as to how to open and close the window
+	}
+	icon	ic142
+	set plates
+	another_noun
+	short_look
+	size 1
+	attribute paintable
+	hardness 15
+	related
+	location wall
+	sl conservatory
+}
+
+item instructions "instructions" {
+	desc {
+read "Turn Anticlockwise To Close"
+	}
+#	icon	ic142
+	size 1
+	plural
+	hardness 15
+	attribute paintable
+	related
+	location winchplate
+}
+
+# banquet hall
+
+item banquettable "banquet table" {
+	desc {
+is so long that it's hard to see how it was brought into
+the banquet hall in the first place
+	}
+	icon	ic258
+	set tables
+	class furniture
+	attribute paintable
+	size 14
+	weight 15
+	moveable
+	hardness 15
+	sittable
+	related
+	location banquethall
+}
+
+item crystalchest "crystal chest" {
+	desc {
+glistens in the sunlight
+	}
+	icon	ic319
+	scen_noun_b sunlight
+	set chests
+	attribute paintable
+	force_adj
+	size 4
+	hardness 15
+	contr_vol 3			# 4, including invitation
+	local_contents
+	locked
+	related
+	location banquethall
+}
+
+item crystalkey "crystal key" {
+	desc {
+is made of pure crystal
+	}
+	icon	ic311
+	another_noun
+	attribute paintable
+	set keys
+	size 1
+	weight 1
+	hardness 10			# brittle
+	strength 7
+	moveable
+	out
+	related
+	location palacekitchen
+}
+
+item invitation "royal croquet invitation" {
+	desc {
+is to a royal croquet match. It reads:^You are invited to the
+Royal Croquet match this afternoon. Absentees will be beheaded
+	}
+	icon	ic261
+	size 2
+	attribute paintable
+	weight 1
+	hardness 3
+	moveable
+	contained
+	location crystalchest
+}
+
+# palace kitchen
+
+item oven "oven" {
+	desc {
+It is hard to imagine how the royal cook manages with such a small oven
+	}
+	icon	ic115
+	desc_only
+	size 5
+	attribute paintable
+	hardness 15
+	open
+	contr_vol 5	# 7, including baking tray
+	related
+	location palacekitchen
+	owner royalcook
+}
+
+item bakingtray "baking tray" {
+	desc {
+has lots of tart sized depressions on it
+	}
+	icon	ic171
+	size 2
+	hardness 15
+	weight 2
+	moveable
+	attribute paintable
+	sittable
+	value 1
+	contained
+	location oven
+	owner royalcook
+}
+
+#item silverplatter "silver platter" {
+	#desc {
+#gleams back at you
+	#}
+	#icon	ic310
+	#size 2
+	#moveable
+	#weight 2
+	#attribute paintable
+	#hardness 15
+	#related
+	#sittable		# really putonnable
+	#location kitchentable
+	#sl palacekitchen
+#}
+
+synonym "fillet" { piece_of adj }
+synonym "slice_of" { piece_of adj }
+
+item steak "piece_of steak" {
+	desc {
+is fit for a King. Although the Queen might have something to say
+about that!
+	}
+	icon	ic285
+	attribute nofullstop
+	force_adj
+	size 1
+	weight 1
+	hardness 3
+	texture slippery
+	wet
+	moveable
+	related
+	#location silverplatter
+	edible 4			# == not nice
+	location kitchentable
+	sl palacekitchen
+}
+
+item paper "piece_of paper" {
+	# note: has a different description when it has been given
+	# to you - see scentext/Cook
+	desc {
+The cook is waving the paper about so much, you can't
+make out what's written on it
+	}
+	icon	ic253
+	force_adj
+	synonyms { recipe list list_of_ingredients problem }
+	desc_only
+	size 1
+	weight 1
+	hardness 3
+	strength 3
+	texture smooth
+	attribute paintable
+	moveable
+	related
+	location royalcook
+}
+
+# pantry
+
+item pantrykey "pantry door white key" {
+	desc {
+is white
+        }
+	icon	ic311
+	another_noun
+	set keys
+	size 1
+	attribute paintable
+	weight 1
+	hardness 15
+	texture hard
+	moveable
+	contained
+	location chefoverall
+}
+
+item pantrydoor "pantry door" {
+	desc {
+looks like a giant rectangular slab of pastry with a keyhole in it
+	}
+	icon	ic262
+	set doors
+	another_noun
+	size 9
+	hardness 15
+	texture hard
+	locked
+	pseudo
+	location { palacekitchen pantry }
+}
+
+item pantryshelves ".shelves" {
+	desc {
+are flat
+	}
+	icon	ic216
+	synonyms { shelf }
+	plural
+	size 5
+	hardness 15
+	attribute paintable
+	sittable		# not really
+	location pantry
+	set shelves
+}
+
+item tarts "treacle tarts" {
+	desc {
+look very tempting
+	}
+	icon	ic242
+	plural
+	size 3
+	weight 3
+	hardness 4
+	strength 14
+	moveable
+	related
+	out
+	edible 5
+	location bakingtray
+}
+
+# outwinecellar
+
+item chain "chain" {
+	desc {
+is fixed to the wall by the cellar door and,
+being made of steel, is obviously designed to stop anyone
+making off with the cellar key which is attached to the other end
+	}
+	icon	ic185
+	size 2
+	hardness 15
+	attribute paintable
+	related
+	fixed_num cellarkey
+	location outwinecellar
+}
+
+item cellarkey "cellar ancient door key" {
+	desc {
+is used to lock the cellar door from the inside.
+It is firmly attached to the chain
+	}
+	icon	ic311
+	another_noun
+	short_look			# avoid 'fixed to chain' msg
+	set keys
+	attribute paintable
+	size 1
+	hardness 15
+	related
+	moveable
+	location outwinecellar
+}
+
+item cellardoor "cellar door" {
+	desc {
+has a keyhole
+	}
+	icon	ic262
+	set doors
+	another_noun
+	size 8
+	hardness 15
+	pseudo
+	locked
+	location { outwinecellar winecellar }
+}
+
+# wine cellar
+
+item racks "rack" {
+	desc {
+may once have been used to store the royal wine collection,
+but now looks strangely empty
+	}
+	icon	ic277
+	set racks
+	another_noun
+	size 8
+	attribute paintable
+	hardness 15
+	sittable
+	related
+	location winecellar
+}
+
+item wedge "wedge" {
+	desc {
+is triangular in shape, rather like a very stale piece of cheese
+	}
+	icon	ic164
+	size 1
+	attribute paintable
+	hardness 15
+	weight 1
+	moveable
+        related
+	location winecellar
+}
+
+item waterbottle "green water spring bottle" {
+	desc {
+is smooth and rounded
+	}
+	icon	ic354
+	another_noun
+	attribute paintable
+	set bottles
+	size 2
+	weight 1
+	contr_vol 2
+	closed
+	moveable
+	related
+	location winecellar
+}
+
+# palace landing
+
+item palacestairs "creaking stairs" {
+	desc {
+are used for getting from one place to another, usually upwards or downwards
+	}
+	plural
+	synonyms { steps staircase }
+	attribute paintable
+	size 0			#can't tie things to it
+	hardness 15
+	pseudo
+	location {	# these are pairs of rooms joined by the stairs
+		easthall palacelanding
+		rabbithall rabbitlanding
+		dlounge dlanding
+	
+		observatory		#the stairs - is really a ladder
+		palacelanding
+
+		rabbitkitchen		#the stairs
+		rabbitlanding
+
+		n_duckpond		#steps
+		induckpond
+		s_duckpond
+		induckpond
+
+		outwinecellar		#some steps
+		palacekitchen
+		}
+}
+
+# queen's bedroom
+
+#can we have a better desc for the queenbed please
+item queenbed "queensize bed" {
+	desc {
+is the largest bed you have ever seen
+	}
+	icon	ic107
+	set beds
+	another_noun
+	size 12
+	attribute paintable
+	hardness 15
+	sittable
+	related
+	location queenbedroom
+	owner queen
+	owner card12
+}
+
+item queentable "queenside bedside table" {
+	desc {
+has a drawer in it
+	}
+	icon	ic172
+	attribute paintable
+	class furniture
+	another_noun
+	set tables
+	size 5
+	moveable
+	weight 15
+	hardness 15
+	sittable
+	related
+	location queenbedroom
+	owner queen
+	owner card12
+}
+
+item queendrawer "queenside bedside table drawer" {
+	desc {
+fits neatly into the Queen's bedside table
+	}
+	icon	ic172
+	another_noun
+	set drawers
+	attribute paintable
+	size 3
+	hardness 15
+	contr_vol 1	# 3, including wooden key
+	closed
+	related
+	owner queen
+	owner card12
+	location queenbedroom
+}
+
+item kingtable "kingside bedside table" {
+	desc {
+has a drawer in it
+	}
+	icon	ic172
+	class furniture
+	attribute paintable
+	another_noun
+	set tables
+	size 5
+	hardness 15
+	sittable
+	related
+	location queenbedroom
+	owner king
+	owner card13
+}
+
+item kingdrawer "kingside bedside table drawer" {
+	desc {
+fits neatly into the King's bedside table
+	}
+	icon	ic172
+	another_noun
+	attribute paintable
+	set drawers
+	size 3
+	hardness 15
+	contr_vol 2	# empty
+	closed
+	related
+	location queenbedroom
+	owner king
+	owner card13
+}
+
+item pillow "pillow" {
+	desc {
+is soft and fluffy
+	}
+	icon	ic260
+	size 3
+	weight 1
+	texture soft
+	hardness 12
+	moveable
+	related
+	location queenbed
+	owner queen
+	owner card12
+}
+
+item quilt "quilt" {
+	desc {
+has a pretty floral pattern and looks very warm and cuddly
+	}
+	icon	ic289
+	size 7
+	weight 4
+	hardness 12
+	texture soft
+	moveable
+	related
+	location queenbed
+	owner queen
+	owner card12
+}
+
+item woodenkey "wooden key" {
+	desc {
+is carved out of a single privet twig
+	}
+	icon	ic311
+	another_noun
+	attribute paintable
+	set keys
+	size 1
+	weight 1
+	hardness 15
+	moveable
+	contained
+	location queendrawer
+}
+
+# bathroom
+
+item bathroomcabinet "mirrored cabinet" {
+	desc {
+has a mirrored door
+	}
+	icon	ic170
+	set cabinets
+	synonyms { door }
+	size 3
+	attribute paintable
+	hardness 15
+	closed
+	contr_vol 1	# 4, including small lens, nail varnish remover
+	related
+	location bathroom
+}
+
+synonym "little" { small adj }
+
+item largelens "large lens" {
+	desc {
+is round and made of glass and looks like it belongs to some
+kind of optical instrument
+	}
+	icon	ic175
+	another_noun
+	set lenses
+	size 2
+	hardness 10
+	strength 13
+	weight 1
+	moveable
+	contained
+	location bathroomcabinet
+}
+
+item remover "nail varnish remover" {
+	desc {
+is pale blue and smells of acetone
+	}
+	synonyms { cleaner }
+	force_adj
+	attribute alladjs
+	size 1
+	hardness 1
+	wet
+	texture cold
+	weight 1
+	moveable
+	contained
+	location removerbottle
+}
+
+item removerbottle "nail varnish remover bottle" {
+	desc {
+is made of glass
+	}
+	icon	ic150
+	another_noun
+	attribute paintable
+	set bottles
+	force_adj
+	attribute alladjs
+	size 2
+	hardness 10
+	strength 13
+	weight 1
+	contr_vol 1			# 2, with remover
+	closed
+	moveable
+	contained
+	local_contents
+	location bathroomcabinet
+}
+
+# observatory
+
+item telescopestand "telescope stand" {
+	desc {
+supports the telescope and allows you to point it in various directions
+	}
+	icon	ic143
+	attribute paintable
+	size 4
+	weight 4
+	hardness 15
+	related
+	location observatory
+}
+
+clonedesc fakebook2 telescopestand "book" {
+	desc {
+of your choice is of absolutely no interest
+	}
+}
+	
+item telescope "telescope" {
+	desc {
+is mounted on a stand which lets it swivel round.
+It has a small end and a large end
+	}
+	icon	ic143
+	synonyms { scope eye_piece eyepiece eye-piece }
+	short_look
+	attribute paintable
+	size 4
+	hardness 15
+	contr_vol 2			# 3, including card
+	related
+	location observatory
+}
+
+item smallendts "small end" {
+	desc {
+has been designed to hold a small lens
+	}
+	set ends
+	attribute alladjs
+	force_adj
+	size 2
+	hardness 15
+	contr_vol 2			# enough for small lens
+	related				# insep_rel => x of y works
+	inseparable
+	location telescope
+}
+
+item largeendts "large end" {
+	desc {
+has been designed to hold a large lens
+	}
+	set ends
+	attribute alladjs
+	force_adj
+	size 3
+	hardness 15
+	contr_vol 3			# enough for large lens
+	related
+	inseparable
+	location telescope
+}
+
+item roof "observatory roof" {
+	desc {
+is specially designed to allow you to point the telescope in most directions
+	}
+	icon	ic140
+	force_adj			# for the clones mainly
+	size 15
+	hardness 15
+	related
+	location observatory
+}
+
+item basin "basin" {
+	desc {
+A typically boring piece of bathroom furniture
+	}
+	icon	ic122
+	desc_only
+	synonyms { tap plug-hole taps }		# a hack
+	set furniture
+	size 6
+	contr_vol 4
+	inseperable
+	related
+	location bathroom
+}
+
+item bath "bath" {
+	desc {
+is long and deep
+	}
+	icon	ic326
+	set furniture
+	size 12
+	contr_vol 7
+	inseperable
+	related
+	location bathroom
+}
+
+item fakebridge "rickety old foot bridge" {
+	desc {
+Bridges, in general, allow people and animals to safely cross rivers, roads,
+chasms and the like in safety and without fear. This one allows people,
+animals and small girls to cross a river, with fear and little safety
+	}
+#	icon	ic320
+	desc_only
+	synonyms { footbridge }
+	pseudo
+	location { rockypath stream4 
+		stream2		#the footbridge
+		}
+}
+
+clone ltt_dhouse roof "Duchess''.house" {
+	synonyms { house }
+	owner duchess
+	set houses
+}
+clone ltt_treehouse roof "tree house" {}
+clone ltt_nail roof "nail" {}
+clone ltt_card roof "playing card" {}
+item ltt_wood "planks_of wood" {
+	# note: no description
+	desc {
+is much, much too far away to see with the naked eye
+	}
+#	icon	ic306
+	set woods
+	plural
+	hardness 15
+	force_adj
+	related
+	location observatory
+}
+
+clonedesc ltt_girls ltt_wood ".girls" {
+	desc {
+e
+	}
+	synonyms { girl two_girls }
+	set girls
+}
+clone ltt_madhouse roof "Mad.Hatter''s house" {
+ 	owner hatter
+	set houses
+}
+
+clone ltt_madgarden roof "Mad.Hatter''s garden" {
+ 	owner hatter
+}
+
+clone ltt_green roof "croquet green" { attribute force_adj }
+
+#---------------------------------------------------------
+#
+#	items for the walled garden area
+#
+#---------------------------------------------------------
+
+item gardenwall "brick red wall" {
+	desc {
+is not made of pieces of natural stone, but instead
+carefully assembled to form a solid structure from bricks
+	}
+	synonyms { brick }
+	another_noun
+	set walls
+	size 15
+	hardness 15
+	pseudo
+	location {
+		n_wgarden s_wgarden w_wgarden e_wgarden wgarden
+	}
+}
+
+# east of garden
+
+item walnuttree "walnut tree" {
+	desc {
+It's a good thing that walnut trees have a lot
+of branches otherwise there'd be nothing for you to climb and,
+more importantly, nothing holding up the tree-house
+	}
+	icon	ic201
+	synonyms { walnut }
+	set trees
+	force_adj
+	desc_only
+	size 14
+	hardness 15
+	pseudo
+	location { e_wgarden treehouse }
+}
+
+# tree house
+
+item treehousedoor "tree house door" {
+	desc {
+is made out of old pieces of walnut wood
+	}
+	icon	ic329
+	set doors
+	another_noun
+	attribute alladjs
+	force_adj
+	closed
+	size 6
+	hardness 15
+	pseudo
+	location { treehouse ooalimb }
+}
+
+item nail "nail" {
+	desc {
+is sticking into the outside of the treehouse
+	}
+	icon	ic155
+	size 1
+	weight 15
+	hardness 15
+	attribute paintable
+	related
+	location th_hole
+}
+
+item th_hole "small hole" {		# tree house hole (card+nail through it)
+	desc {
+sits in the north west corner of the tree house, it is just about big enough
+to let you put your arm through it
+	}
+	icon	ic225
+	set holes
+	short_look
+	size 6
+	contr_vol 6
+	texture void
+	attribute infinite_container	# special will drop things
+	weight 0
+	hardness 0
+	inseperable
+	related
+	location treehouse
+}
+
+# north of the garden
+
+synonym "reddish" { red adj }
+
+item brick "red orange loose brick" {
+	desc {
+is reddish orange and rough to the touch
+	}
+	icon	ic228
+	size 2
+	another_noun
+	weight 3
+	hardness 11			# dangerous...
+	strength 15
+	attribute paintable
+	texture rough
+	moveable
+	related				# derelated when levered out
+	location n_wgarden
+}
+
+item holeinwall1 "square hole" {
+	desc {
+is about the right size for a brick
+	}
+	synonyms { hole_in_wall hole_in_the_wall }
+	icon	ic204
+	set holes
+	texture void
+	another_noun
+	size 2
+	hardness 15
+	texture rough
+	contr_vol 2
+	inseparable
+	out				# appears when brick is levered
+#	contained			# so "hole in wall" works
+#	location gardenwall
+#	sl n_wgarden			# only in one place
+	related
+	location n_wgarden		# only in one place
+}
+
+item holeinwall2 "square hole" {
+	desc {
+is about the right size for a brick
+	}
+	synonyms { hole_in_wall hole_in_the_wall }
+	icon	ic204
+	set holes
+	texture void
+	another_noun
+	size 2
+	hardness 15
+	texture rough
+	contr_vol 2
+	inseparable
+#	contained			# so "hole in wall" works
+	out				# appears when brick is levered
+#	location gardenwall
+#	sl wgarden			# only in one place
+	related
+	location wgarden		# only in one place
+}
+
+# out on a limb
+
+item limb "limb" {
+	desc {
+is bent under your weight sufficiently to allow you to jump down into
+the garden below
+	}
+	icon	ic131
+	synonyms { tree trees }
+	set branches
+	size 5
+	attribute paintable
+	hardness 15
+	weight 15
+	moveable			# hack
+	texture rough
+	inseperable
+	related
+	location ooalimb
+}
+
+# Walled garden
+
+item trapdoor "wooden trap door" {
+	desc {
+has a small hole close to one edge
+	}
+	icon	ic303
+	another_noun
+	attribute alladjs
+	force_adj
+#	short_look			# stop "there is a hole on it"
+	synonyms { trapdoor }
+	size 5
+	hardness 15
+	closed	
+	pseudo
+	location { wgarden winepassage }
+	set doors
+}
+
+item roundhole "small hole" {
+	desc {
+looks as if it was meant for a handle of some kind
+	}
+	another_noun
+	texture void
+	set holes
+	size 1
+	hardness 0
+	contr_vol 2			# initially empty
+	related
+	inseparable
+	location trapdoor
+}
+
+#---------------------------------------------------------
+#
+#	items for the enchanted garden
+#
+#---------------------------------------------------------
+
+# magic garden
+
+clonedesc flowerbeds flowers "flower beds" {
+	desc {
+Ssshh! The flowers are all asleep in their beds!
+	}
+	synonyms { flower-beds bed }
+	set beds
+	attribute nofullstop
+}
+
+item flowers "beautiful exotic flowers" {
+	desc {
+Ssshh! The flowers are all asleep in their beds!
+	}
+	synonyms { flower blooms }	# 'cos adj 'flower' gets seen 
+	force_adj
+	another_noun
+	desc_only
+	attribute nofullstop
+	plural
+	size 2
+	hardness 15
+	texture thorny
+	pseudo
+	location { magicgarden rabbitgarden frontdhouse wgarden 
+		wwpath3			#some flowers
+		s_duckpond		#flowers
+		tinytunnel		#the flowers
+	}
+}
+
+item littlepot "small flower pot" {
+	desc {
+is just like the terracotta pots in your garden
+at home
+	}
+	icon	ic103
+	owner gardeners
+	value 1
+	attribute paintable
+	attribute alladjs
+	another_noun
+	set pots
+	size 3
+	weight 2
+	contr_vol 1			# 3, including flour
+	moveable
+	hardness 15
+	related
+	location magicgarden
+}
+
+item bigpot "big flower pot" {
+	desc {
+is just like the terracotta pots in your garden
+at home only bigger
+	}
+	icon	ic103
+	owner gardeners
+	value 1
+	attribute paintable
+	attribute alladjs
+	another_noun
+	set pots
+	size 4
+	weight 3
+	contr_vol 4			# empty
+	moveable
+	hardness 15
+	related
+	location magicgarden
+}
+
+item flourbag "bag_of flour" {
+	desc {
+is very similar to those you have seen in the kitchen at home
+	}
+	icon	ic246
+	set bags
+	force_adj
+	class ingredients
+	modified_quantity
+	value 1
+	size 2
+	weight 2
+	hardness 15
+	moveable
+	contained
+	location littlepot
+	owner gardeners
+}
+
+# to avoid "l roses"->"you can't see any trees here"
+clone roses rosetrees "roses" {
+	synonyms { rose }
+}
+
+item rosetrees "rose trees" {
+	desc {
+are all red and blooming
+	}
+	icon	ic110
+# , except one which has some white/pink roses
+# when the gardeners are painting :
+# . Three gardeners are franticaly painting the white roses red
+	set trees
+	another_noun
+	plural
+	synonyms { bush bushes tree }
+	attribute paintable
+	size 4
+	hardness 15
+	texture thorny
+	related
+	location magicgarden
+}
+
+item paintpot "paint pot" {
+	desc {
+is where the gardeners keep their paint
+	}
+	icon	ic202
+	another_noun
+	synonyms { paintpot }
+	set pots
+	size 3
+	contr_vol 1
+	hardness 15
+	related
+	location magicgarden
+}
+
+# the brushes that the gardeners are using
+item brushes "paint brushes" {
+	desc {
+are bristly and covered with paint
+	}
+	icon	ic203
+	synonyms { paintbrushes paintbrush }
+	set brushes
+	another_noun
+	plural
+	size 1
+	hardness 15
+	related
+	owner gardeners
+	location gardeners
+}
+
+# south of duckpond
+
+item gapinhedge "gap" {
+	desc {
+is a stretch of empty space between two things
+	}
+	size 0
+	hardness 0
+	weight 0
+	strength 0
+	pseudo
+	location {	# more pairs of locations used by sp.go.n
+			s_duckpond croquet1
+			rabbitlanding rabbitbedroom
+			wwpath3 outdkitchen
+		}
+}
+
+item pond "duck pond" {
+	desc {
+is smooth, clear and covered in lily-pads. Although the water is not too deep it
+looks too cold for unprotected feet. There are, however, two clusters of stepping
+stones, one each at the northern and southern ends of the pond for those willing to
+brave the water
+	}
+	synonyms { water }
+	short_look
+	edible 4		# not nice - killing them is a bit anti-social here
+	size 7
+	attribute infinite_container	#can put things in/on river
+	contr_vol 7
+	hardness 1
+	wet
+	texture cold
+	pseudo	
+	location {
+		s_duckpond w_duckpond e_duckpond n_duckpond
+		induckpond
+	}
+}
+
+clonedesc lilypads steppingstones "lily pads" {
+	desc {
+are round and green and float lazily on the surface of the pond
+	}
+	synonyms { lily-pads pad lily-pad }
+}
+
+item steppingstones "stepping stones" {
+	desc {
+are flat and hard and protrude out of the water just enough to allow
+you to use them to clamber out of the pond
+	}
+	plural
+	size 3
+	hardness 15
+	texture smooth
+	pseudo
+	location {
+		induckpond s_duckpond n_duckpond
+#		w_duckpond e_duckpond			# not here really
+	}
+}
+
+# door between n_duckpond and sw_grounds
+item hedgedoor "hedge door" {
+	desc {
+is cleverly built into the side of the hedge
+	}
+	icon	ic325
+	attribute paintable
+	hardness 15
+	locked
+	pseudo
+	location { n_duckpond sw_grounds }
+	set doors
+	another_noun
+}
+
+# croquet2
+
+item smallhole "small hole" {
+	desc {
+is just large enough for a hedgehog
+	}
+	set holes
+	texture void
+	size 2
+	contr_vol 3			# 4, including card
+	related
+	hardness 0
+	location croquet2
+}
+
+#---------------------------------------------------------
+#
+# items for the stream and surrounding area
+#
+#---------------------------------------------------------
+
+item duchesshouse "Duchess''.house" {
+	desc {
+reflects the stature of its owner
+	}
+#	icon	ic294
+	synonyms { house roof }
+	set houses
+	owner duchess
+	force_adj
+	hardness 15
+	size 0
+	pseudo
+	location { outdkitchen wwpath3 frontdhouse }
+}
+
+item noise "strange noise" {
+	desc {
+You can hear the crashing of pots and pans punctuated by the occaisional sneeze
+	}
+	desc_only
+	force_plural
+	hardness 0
+	weight 0
+	strength 0
+	size 0
+	moveable
+	texture void
+	pseudo
+	location { wwpath3 outdkitchen }
+}
+
+clonedesc handle fork "wooden handle" {
+	desc {
+is used to hold the fork
+	}
+	set handles
+}
+
+item prongs "metal long pointed prongs" {
+	desc {
+are long and pointed
+	}
+#	icon	ic180
+	synonyms { tines }		#really, it's true!
+	texture cold
+	plural
+	size 1
+	weight 1
+	hardness 11
+	strength 15
+	moveable
+	related
+	inseparable
+	location fork
+}
+
+item fork "gardening fork" {
+	desc {
+is the sort used for gardening with a wooden handle and four metal prongs
+	}
+	icon	ic351
+	texture rough
+#	set forks
+	another_noun
+	attribute paintable
+	size 4
+	weight 1
+	hardness 11
+	strength 15
+	related
+	moveable
+	location wwpath3
+}
+
+item treaclewell "treacle well" {
+	desc {
+is encircled by a stone wall and has a roof below which is fixed a sturdy looking
+winch
+	}
+	icon	ic226
+	short_look
+	set wells
+	another_noun
+	force_adj
+	size 7
+	hardness 15
+	contr_vol 7
+	attribute infinite_container
+	related
+	location wwpath2
+}
+
+item moretreacle "inexhaustible.supply.of.treacle" {
+	desc {
+lurks at the bottom of the well, dreading the day when someone works out how to
+deplete it
+	}
+	synonyms { treacle molasses }		#context specials will help here
+	contained
+	location treaclewell
+	size 0
+	weight 0
+}
+
+item treacleroof "roof" {
+	desc {
+rests on top of the treacle well
+	}
+#	icon	ic226
+	hardness 15
+	size 6
+	texture rough
+	inseparable
+	related
+	location treaclewell
+}
+
+synonym "molasses" { treacle adj }
+
+item treacle "black treacle" {
+	desc {
+is extremely sticky
+	}
+	synonyms { molasses }
+	icon	ic301
+	class ingredients
+	force_plural
+	size 1
+	weight 1
+	hardness 2
+	edible 5
+	texture sticky
+	moveable
+	out
+	contained
+	location treaclewell
+}
+
+item treaclewinch "winch" {
+	desc {
+is fixed to the well wall. Turning it would raise or lower the rope which hangs from
+it
+	}
+#	icon	ic226
+	short_look			# skip telling us about the rope
+	texture hard
+	size 2
+	hardness 15
+	inseparable
+	related
+	location treaclewell
+	fixed
+	fixed_num treaclerope
+}
+
+item treaclehole "hole" {
+	desc {
+is a space to hold a handle
+	}
+	texture void
+	set holes
+	size 0
+	hardness 0
+	inseparable
+	contained			# so we have a 'hole in winch'
+	location treaclewinch
+	contr_vol 3			# so winch handle fits
+}
+
+item treaclerope "treacle well rope" {
+	desc {
+is secured to the winch and dangles into the well
+	}
+	icon	ic293
+	another_noun
+	set ropes
+	attribute alladjs
+	texture rough
+	size 6
+	hardness 12
+	weight 2
+	related
+	location treaclewinch
+	moveable
+}
+
+# you see the puppy bring this back from the stream
+clonedesc shinything silverkey "shiny silver thing" {
+	desc {
+is silver and looks like a key
+	}
+}
+
+item silverkey "silver key" {
+	desc {
+is shiny
+	}
+	icon	ic311
+	force_adj			# mainly for the 'shiny thing'
+	another_noun
+	set keys
+	size 1
+	weight 1
+	hardness 15
+	moveable			# in No Reach Table though
+	related
+	location stream1
+}
+
+item leftpouch "left hand pouch" {
+	desc {
+looks useful for keeping things in
+	}
+	icon	ic268
+	set bags
+	another_noun
+	texture soft
+	attribute alladjs
+	set pouches
+	size 6
+	attribute paintable
+	contr_vol 7			# so it can have lots of mushrooms
+	open
+	moveable
+	weight 1
+	hardness 3
+	related
+	location wood3
+}
+
+item rightpouch "right hand pouch" {
+	desc {
+looks useful for keeping things in
+	}
+	icon	ic245
+	another_noun
+	attribute alladjs
+	texture soft
+	set bags
+	set pouches
+	size 6
+	attribute paintable
+	contr_vol 7			# so it can have lots of mushrooms
+	open
+	moveable
+	weight 1
+	hardness 3
+	contained
+	location laundrybasket		# should be in the rabbit house section
+}
+
+item driveway_pseudo "driveway" {
+	desc {
+winds its way from the palace gates to the palace and back again
+	}
+	hardness 15
+	pseudo
+	location { outsidegates driveway frontpalace }
+}
+
+item palacegates "palace heavy gates" {
+	desc {
+look very heavy
+	}
+	icon	ic223
+	size 8
+	open
+	plural
+	synonyms { gate }
+	set gates
+	hardness 15
+	pseudo
+	location { outsidegates driveway }
+}
+
+item stickinsect "stick stick-insect" {
+	desc {
+is thin and spindly and is sticking to a stick
+	}
+	icon	ic119
+	synonyms { insect }
+	size 1
+	weight 1
+	hardness 15
+	moveable
+	related
+	location stick
+}
+
+item stick "wooden stick" {
+	desc {
+is short, straight and made of wood
+	}
+	icon	ic200
+	texture rough
+	class twigs
+	attribute paintable
+	size 1
+	weight 1
+	hardness 15
+	moveable
+	related				# gets derelated after insect gone
+	location outsidegates
+}
+
+# driveway
+
+item tailordoor "tailor''s.door" {
+	desc {
+is tailor-made for the doorway
+	}
+	icon	ic262
+	synonyms { doorway door }
+	owner tailor
+	locked
+	pseudo
+	location { driveway tailorhouse }
+	set doors
+	hardness 15
+	another_noun
+}
+
+item notice "notice" {
+	desc {
+says, "Off in search of inspiration."
+	}
+	icon	ic224
+# Other description after you give the Tailor the suit :
+# says, "Found it!"
+	synonyms { sign }
+	attribute nofullstop
+	texture smooth
+	size 0			#prevent tieing
+	attribute paintable
+	related
+	location tailordoor
+}
+
+
+item redpaint "red paint" {
+	desc {
+the red paint is a very regal shade of red
+	}
+	desc_only
+	another_noun
+	size 1
+	weight 1
+	hardness 1
+	wet
+	texture cold
+	contained
+	location paintpot
+}
+
+clonedesc red paintpot "red" {
+	desc {
+You try really, really hard but only manage to go a tiny bit purple..
+	}
+}
+	
+# treetops
+
+#odt  is like a giant pink serpent
+item neck "your neck" {
+	desc {
+supports your head
+	}
+	attribute no_article
+	force_adj
+	texture smooth
+	intrinsic
+	hardness 0
+	strength 0
+	size 0
+	weight 0
+	inseparable
+	location inventory
+	owner player
+}
+
+item pigeonnest "nest" {
+	desc {
+is made from bits of straw and fluff
+	}
+	icon	ic136
+	scen_noun_a straw
+	scen_noun_a fluff
+	owner pigeon
+	size 3
+	hardness 15
+	contr_vol 2
+	out
+	moveable
+	weight 2
+	location treetops
+}
+
+item pigeoneggs "pigeon eggs" {
+	desc {
+are smooth, round and white
+	}
+	icon	ic196
+	moveable
+	weight 3
+	set eggs
+	force_adj
+	synonyms { egg }
+	owner pigeon
+	size 2
+	plural
+	hardness 15
+	contained
+	location pigeonnest
+}
+
+item pinkegg "breakfast large pink egg" {
+	desc {
+is large, round and a surprisingly deep pink in colour
+	}
+	icon	ic344
+# other desc :
+# The egg is round and white.
+	set eggs
+	force_adj
+	attribute paintable
+	size 1
+	weight 1
+	hardness 10		# brittle
+	strength 5
+	moveable
+	contained
+	location eggrack
+}
+
+#---------------------------------------------------------
+#
+#	Items for the Mad Hatter's house
+#
+#---------------------------------------------------------
+
+# beaver's hole
+
+item madhatch "hatch" {
+	desc {
+is square and wooden
+	}
+	icon	ic303
+	size 6
+	hardness 15
+	closed
+	pseudo
+	location { beaverhole madcupboard }
+}
+
+# cupboard
+
+item pipes "pipes" {
+	desc {
+are cylindrical
+	}
+	icon	ic135
+	plural
+	size 3
+	hardness 15
+	related
+	texture smooth
+	location madcupboard
+}
+
+
+item lard "lard" {
+	desc {
+is white and greasy to the touch
+	}
+	icon	ic227
+	force_plural
+	class ingredients
+	size 1
+	weight 1
+	hardness 2
+	edible 3
+	texture sticky
+	moveable
+	contained
+	location tuboflard
+}
+
+item tuboflard "tub" {
+	desc {
+looks like any other tub
+	}
+	icon	ic276
+synonyms { tub_of_lard }
+	closed
+	contr_vol 1		#with lard
+	size 2
+	weight 1
+	modified_quantity
+	force_adj
+	hardness 15
+	moveable
+	location madcupboard
+}
+
+item madcupboarddoors "cupboard door" {
+	desc {
+is made of wood panelling
+	}
+	icon	ic262
+	size 6
+	hardness 15
+	closed
+	pseudo
+	location { madcupboard madkitchen }
+	set doors
+}
+
+clone pseudomadcupboard madcupboarddoors "cupboard" {
+	# this is the cupboard that you can examine inside AND outside
+	# madcupboard
+	set cupboards
+}
+
+# mad kitchen
+
+item teachest "tea chest" {
+	desc {
+is one of those square wooden boxes much treasured by those about to
+move house
+	}
+	icon	ic353
+	set chests
+	set boxes
+	synonyms { box }
+	force_adj
+	size 4
+	weight 4
+	contr_vol 4
+	attribute paintable
+	texture rough
+	sittable
+	moveable
+	related
+	location kitchentable
+	sl madkitchen
+}
+
+item sink "sink" {
+	desc {
+is made of porcelain
+	}
+	icon	ic269
+	size 4
+	weight 15			# heavy.. (you couldn't get it anyway)
+	hardness 15
+	contr_vol 4			# empty
+	texture smooth
+	attribute paintable
+	related
+	location madkitchen
+}
+
+item madwindow "curved window" {
+	desc {
+is made of glass
+	}
+	icon	ic181
+	synonyms { glass }
+	set windows
+	size 3
+	hardness 15
+	texture smooth
+	related
+	location madkitchen
+}
+
+clonedesc click_clock2 madwindow "grandfather clock" {
+	desc {
+seems to be stuck at tea-time
+	}
+}
+
+clonedesc click_dresser madwindow "dresser" {
+	desc {
+is beatifully crafted and highly polished
+	}
+}
+
+# breakfast room
+
+item napkin "white napkin" {
+	desc {
+is made of white linen
+	}
+	icon	ic148
+	size 2
+	attribute paintable
+	weight 1
+	hardness 3
+	texture soft
+	moveable
+	related
+	location chairs
+	sl breakfastroom
+}
+
+clone particles hockeypitches "particles" {}
+
+item breadcrumbs "bread crumbs" {
+	desc {
+are small particles of bread
+	}
+	icon	ic255
+	class ingredients
+	force_adj
+	synonyms { breadcrumbs particles }
+	plural
+	size 1
+	weight 1
+	hardness 15
+	moveable
+	texture void
+	related
+	location napkin
+	edible 4			# == not nice
+}
+
+item dust "dust" {
+	desc {
+makes you want to sneeze
+	}
+#	icon	ic208
+	size 1
+	weight 0
+	hardness 15
+	texture void
+	related
+	location breakfastroom
+}
+
+item ladder "wooden ladder" {
+	desc {
+allows passage between the observatory and the landing below it
+	}
+	icon	ic145
+	pseudo
+	location { palacelanding observatory 
+		}
+}
+
+clonedesc hatchway ladder "hatchway" {
+	desc {
+contains no hatch
+	}
+}
+
+
+# hat room
+
+item hats "hats" {
+	desc {
+are bewildering in their variety
+	}
+	icon	ic186
+	synonyms { stetsons trilbys peaked_caps top_hats
+		hat }
+	plural
+	size 4
+	hardness 15
+	pseudo
+	location { hatroom dinnerroom }
+}
+
+clonedesc click_door2 hats "glass doors" {
+	desc {
+are nearly see-through
+	}
+	set doors
+}
+
+clonedesc click_cabinet hats "glass cabinets" {
+	desc {
+are fronted by glass doors
+	}
+	synonyms { cabinet }
+	set cabinets
+}
+
+item sack "small canvas sack" {
+	desc {
+has the letters 'HATTER. M' embroidered on it
+	}
+	icon	ic270
+	set bags
+	force_adj
+	attribute paintable
+	attribute alladjs
+	texture rough
+	hardness 3
+	size 3
+	weight 1
+	moveable
+	contr_vol 5			# initially empty
+	closed
+	location hatroom
+}
+
+# dinner room
+
+item dinnertable "beautiful antique table" {
+	desc {
+looks very old
+	}
+	icon	ic117
+	set tables
+	class furniture
+	force_adj
+	attribute paintable
+	attribute alladjs
+	size 6
+	weight 15
+	hardness 15
+	moveable
+	sittable
+	location dinnerroom
+}
+
+clonedesc click_clock dinnertable "grandfather clock" {
+	desc {
+has stopped about tea time
+	}
+}
+
+item madfdoor "front door" {
+	desc {
+is made of curved wood
+	}
+	icon	ic188
+	set doors
+	another_noun
+	size 5
+	hardness 15
+	closed
+	pseudo
+	location { breakfastroom madfootpath }
+}
+
+# mad footpath
+
+# note: the pseudo path used all over the adventure is also here
+
+item madhouse "Mad.Hatter''s house" {
+	desc {
+has been built in the shape of a giant top hat, no doubt explaining
+why some of the interior walls are curved
+	}
+#	icon	ic275
+	force_adj
+	attribute alladjs
+	set houses
+	another_noun
+	owner hatter
+	hardness 15
+	related
+	location madfootpath
+}
+
+# tea party
+
+item opening "opening" {
+	desc {
+is a part of the wall that isn't
+	}
+	size 0
+	weight 0
+	texture void
+	hardness 0
+	strength 0
+	related
+	pseudo
+	location { madkitchen breakfastroom }
+}
+
+
+item harehouse "March.Hare''s.House" {
+	desc {
+is furry
+	}
+#	icon	ic300
+	synonyms { house }
+	owner hare
+	set houses
+	another_noun
+	hardness 15
+	related
+	location teaparty
+	owner hare
+}
+
+clonedesc haredoor harehouse "door" {
+	desc {
+is very firmly locked
+	}
+	owner hare
+}
+
+item teatable "tea table" {
+	desc {
+is full of the things you would expect to
+find on the tea table, including a plate of bread and butter and a
+large teapot with a small brim
+	}
+	icon	ic108
+	set tables
+	class furniture
+	short_look
+	size 6
+	hardness 15
+	sittable
+	texture smooth
+	related
+	attribute paintable
+	location teaparty
+}
+
+synonym "slice_of" { plate_of adj }
+
+item plateofbread "plate_of bread" {
+	desc {
+is piled full of slices of brown bread and butter
+	}
+	icon	ic233
+	set plates
+	size 3
+	hardness 15
+	force_adj
+	synonyms { plate butter }
+	related
+	location teatable
+}
+
+clone tea hockeypitches "tea" {}	# "you can't see any tea here"
+
+item teapot "tea silver teapot" {
+	desc {
+is one of those large silver ones with a small brim
+	}
+	icon	ic252
+	sittable
+	set pots
+	synonyms { pot spout brim }	# maybe spout & brim should be clones
+	size 4
+	hardness 15
+	contr_vol 3			# 6, including mouse & card
+	related
+	location teatable
+}
+
+
+item laundrybasket "laundry basket" {
+	desc {
+is round, made of wicker and entirely lidless
+	}
+	icon	ic317
+	attribute paintable
+	texture rough
+	force_adj
+	moveable
+	strength 14
+	weight 6
+	size 6
+	contr_vol 7		#so pouch will fit
+	hardness 4		#cutable and breakable
+	location rabbitlanding
+	attribute infinite_container
+}
+
+item cauldron "huge cauldron" {
+	desc {
+reminds you of your Book of Witches. It is filled to overflowing with a
+dark bubbling noxious-smelling liquid which looks singularly unappetising
+	}
+	icon	ic267
+	contr_vol 2	#contains noxious-liquid
+	hardness 15
+	owner cook
+	short_look
+	inseparable
+	related
+	location dkitchen
+}
+
+item pepper "pepper" {
+	desc {
+is being thrown about by the cook
+	}
+	force_plural
+	size 0
+	weight 0
+	texture void
+	strength 0
+	hardness 0
+	inseparable
+	related
+	location dkitchen
+}
+
+item axes "axes" {
+	desc {
+look too sharp to touch
+	}
+	icon	ic182
+	plural
+	owner queen
+	owner card12
+	hardness 15
+	weight 8
+	size 8
+	moveable
+	related
+	location throneroom
+}
+
+synonym "bubbling" { noxious adj }
+
+item liquid "noxious dark liquid" {
+	desc {
+makes you hope that the Duchess doesn't invite you to stay for tea
+	}
+	icon	ic292
+	synonyms { soup }
+	hardness 1
+	size 1
+	weight 0
+	wet
+	moveable
+	texture hot
+	force_adj
+	contained
+	location cauldron
+}
+
+item ptailorhouse "tailor''s.house" {
+	desc {
+sits here, prettily. The only real point of interest is the door which
+invites closer inspection
+	}
+#	icon	ic323
+	set houses
+	synonyms { cottage house }
+	texture hard
+	size 0			#prevent tieing
+	hardness 15
+	owner tailor
+	related
+	location driveway
+}
+
+item chefoverall "chef''s overall" {
+	desc {
+obviously belongs to a high ranking chef
+	}
+	icon	ic287
+	set overalls
+	another_noun
+	related
+	location tailor
+	contr_vol 2
+	texture soft
+	size 4
+	weight 1
+	hardness 12
+	moveable
+	wearable 1
+	class clothes
+	owner royalcook
+}
+
+#items that can be seen through the Hatter's kitchen window
+clone beechtree girl "beech tree" {
+	set trees
+}
+
+clone greydress girl "grey dress" {
+	set dresses
+	class clothes
+}
+
+clone pstream girl "stream" {}
+
+clone pgrass girl "grass" {}
+
+clone pbook girl "book" {}
+
+item girl ".girls" {
+	desc {
+e
+	}
+	icon	ic219
+	set girls
+	synonyms { girl }
+	plural			#for context
+	force_adj
+	inseparable
+	related
+	location pseudobank
+}
+	
+clone card1 card "ace_of diamonds" {
+	synonyms { ace }
+	attribute is_a_diamond
+}
+
+clone card2 card "two_of diamonds" {
+	synonyms { 2 two }
+	attribute is_a_diamond
+}
+
+clone card3 card "three_of diamonds" {
+	synonyms { 3 three }
+	attribute is_a_diamond
+}
+
+clone card4 card "four_of diamonds" {
+	synonyms { 4 four }
+	attribute is_a_diamond
+}
+
+clone card5 card "five_of diamonds" {
+	synonyms { 5 five }
+	attribute is_a_diamond
+}
+
+clone card6 card "six_of diamonds" {
+	synonyms { 6 six }
+	attribute is_a_diamond
+}
+
+clone card7 card "seven_of diamonds" {
+	synonyms { 7 seven }
+	attribute is_a_diamond
+}
+
+clone card8 card "eight_of diamonds" {
+	synonyms { 8 eight }
+	attribute is_a_diamond
+}
+
+clone card9 card "nine_of diamonds" {
+	synonyms { 9 nine }
+	attribute is_a_diamond
+}
+
+clone card10 card "ten_of diamonds" {
+	synonyms { 10 ten }
+	attribute is_a_diamond
+}
+
+clone card11 card "jack_of diamonds" {
+	synonyms { jack }
+	attribute is_a_diamond
+}
+
+clone card12 card "queen_of diamonds" {
+	synonyms { queen }
+	attribute is_a_diamond
+}
+
+clone card13 card "king_of diamonds" {
+	synonyms { king }
+	attribute is_a_diamond
+}
+
+#---------------------------------------------------------
+
+
+item qbeddoor "bedroom door" {
+	desc {
+is a remarkably boring door for such an interesting palace
+	}
+	another_noun
+	attribute paintable
+	hardness 15
+	pseudo
+	open
+	set doors
+	location { queenbedroom palacelanding }
+}
+
+item qbathdoor "bathroom door" {
+	desc {
+offers some privacy to royal bathers
+	}
+	another_noun
+	attribute paintable
+	hardness 15
+	pseudo
+	open
+	set doors
+	location { bathroom palacelanding }
+}
+
+
+item bell_pull "bell pull" {
+	desc {
+hangs high above you, between the thrones
+	}
+	synonyms { rope }
+	set ropes
+	icon ic341
+	force_adj
+	texture soft
+	size 2
+	weight 5
+	inseperable
+	related
+	location throneroom
+}
+
+item keynotice "notice" {
+	desc {
+reads: due to the imminent beheadings of several guards lockers have been re-asigned
+as follows:^
+
+	}
+	out
+	inseperable
+	related
+	location quarters
+}
+
+item clickable "clickable" {		# singular clickable objects
+	desc {
+is here only to keep people who insist on clicking all over the pictures happy
+	}
+	pseudo
+	location { 
+		banquethall		#an ornament
+		bathroom		#a plug
+		breakfastroom		#a radiator
+		broomcupboard		#broom
+#		broomcupboard		#a bucket
+		cbedroom		#a nightie
+#		cbedroom		#an ornament
+		centralhall		#ornament
+		conservatory		#a pulley
+		countrylane2		#a cornfield
+		croquet1		#a post
+		croquet2		#an ornament
+		dbedroom		#a shadow
+		dlounge			#an ornament
+		driveway		#drive
+		e_duckpond		#the duck pond
+		easthall		#the balcony
+#		easthall		#the flag
+		frontdhouse		#a Fish Footman
+		frontpalace		#the drive
+		gardenpath1		#an ornament
+		glade			#a deer
+#		glade			#a stag
+		greathall		#an ornament
+		hatroom			#a vase
+		induckpond		#a duck
+		mushroom		#a caterpillar
+		madcupboard		#a bucket
+		n_duckpond		#the duck pond
+		observatory		#a drawing
+#		observatory		#an ornament
+		outdkitchen		#a bucket
+#		outdkitchen		#a fence
+		queenbedroom		#a crown
+#		queenbedroom		#a heart
+		rabbitbedroom		#a towel
+		rabbitkitchen		#a vase
+		rabbitlanding		#an ornament
+		rbridge			#horse
+		rockledge		#the cliffside
+#		rockledge		#the sand
+		s_duckpond		#a duck pond
+		stream2			#a bird
+#		stream2			#a cat
+		stream3			#fish
+		sw_grounds		#a bird
+		sw_grounds		#a post
+		tailorhouse		#a tailor's dummy
+		treehouse		#fence (scen_noun_a really)
+		veggarden		#a fence
+		w_duckpond		#the duck pond
+		westhall		#a carpet
+#		westhall		#an ornament
+		winecellar		#a barrel
+		winepassage		#a metal ring
+		
+		
+		}
+}
+
+item clickable2 "clickable2" {		# singular(ish) clickable objects
+	desc {
+is here only to keep people who insist on clicking all over the pictures happy
+	}
+	force_plural			# for SOME cutlery rather than A cutlery
+	pseudo
+	location {
+		pantry			#some cutlery
+		dkitchen		#steam
+		countrylane1		#the corn
+		stream4			#the river surf
+		}
+}
+
+item clickables "clickables" {		# plural clickable objects
+	desc {
+are here only to keep people who insist on clicking all over the pictures happy
+	}
+	plural
+	pseudo
+	location { 
+		byriver			#some buildings
+		cbedroom		#some toiletries
+		dlanding		#the banisters
+		easthall		#some ornaments
+		inthesky		#the clouds
+		musicroom		#the ornaments
+		stream3			#some reeds
+		}
+}
+
+# clones of clickable things - these are ALL local ALL over the place so take
+#			       care, if the clickable exists in the game elsewhere
+#			       u had better not use these since the list of places
+#                              that the root pseudos exist in is allowed to increase
+#			       so u cannot know that a conflict will not happen in
+#                              the future
+
+clone balcony clickable "balcony" {}		# a singular one
+clone banisters clickables "banisters" {}	# a plural one
+clone barrel clickable "barrel" {}
+
+clonedesc bird clickable "bird" {
+	desc {
+flies gracefully by
+	}
+}
+
+clone candle_stick clickable "candle_stick" {}
+clone carpet clickable "carpet" {}
+
+clonedesc cat clickable "cat" {
+	desc {
+can't quite reach the hole	
+	}
+}
+
+clone cliffside clickable "cliffside" {}
+clone clouds clickables "clouds" {}
+clone corn clickable2 "corn" {}
+clone cornfield clickable "cornfield" {}
+clone crown clickable "crown" {}
+clone cutlery clickable2 "cutlery" {}
+
+clonedesc deer clickable "deer" {
+	desc {
+is moving rather too quickly to get a good look at
+	}
+}
+
+clone drawing clickable "drawing" {}
+clone drive clickable "drive" {}
+
+clonedesc duck clickable "duck" {
+	desc {
+bobles up and down on the water quacking contentedly to itself in entirely unmusical
+fashion
+	}
+}
+
+clone dust_pan clickable "dust_pan" {}
+clone fish clickable "fish" {}
+
+clonedesc flag clickable "flag" {
+	desc {
+flutters in the wind
+	}
+}
+
+clone heart clickable "heart" {}
+
+clonedesc horse clickable "horse" {
+	desc {
+is moving too quickly to catch
+	}
+}
+
+clone metal_ring clickable "metal ring" {}
+clone nightie clickable "nightie" {}
+clone ornament clickable "ornament" {}
+clone ornaments clickables "ornaments" {}
+clone plug clickables "plug" {}
+clone post clickable "post" {}
+clone pulley clickable "pulley" {}
+clone reeds clickables "reeds" {}
+clone sand clickable "sand" {}
+clone shadow clickable "shadow" {}
+
+clonedesc stag clickable "stag" {
+	desc {
+is certainly moving too quickly to get a good look at
+	}
+}
+
+clone steam clickable2 "steam" {}
+clone dummy clickable "dummy" {}
+clone toiletries clickables "toiletries" {}
+clone towel clickable "towel" {}
+clone vase clickable "vase" {}
+clone broom clickable "broom" {}
+clone bucket clickable "bucket" {}
+clone fence clickable "old garden fence" {}
+
+item ajspicture "picture" {
+	desc {
+this beautifully framed masterpiece, entitled 'crudites' is yet further
+proof of the Rabbit's obvious fixation with vegetables
+	}
+	related
+	location rabbitlounge
+}
+
+clonedesc ajsclock settee "clock" {
+	desc {
+contentedly ticks away to itself
+	}
+}
+
+clonedesc ajswindow settee "window" {
+	desc {
+looks out onto the woods beyond the White Rabbit's garden
+	}
+}
+
+item click_curtains "curtains" {
+	desc {
+are flapping gently in the wind
+	}
+	plural
+	texture soft
+	pseudo
+	location {
+		conservatory		#a curtain
+		dkitchen		#a curtain
+		rabbitlounge		#curtain
+		}
+}
+		
+item ajshills "hills" {
+	desc {
+are inclined to roll
+	}
+	pseudo
+	location {
+		s_rbridge		#some hills
+		wood2			#some hills
+		sw_grounds
+		}
+}
+		
+item ajspalace "palace" {
+	desc {
+effuses regality
+	}
+	inseperable
+	related
+	location sw_grounds
+}
+
+
+clonedesc ajsstump ajspalace "stump" {
+	desc {
+is stumpy
+	}
+}
+
+clonedesc ajseagle ajspalace "eagle" {
+	desc {
+flaps about a bit
+	}
+}
+
+item click_bank "bank" {
+	desc {
+keeps the water from escaping
+	}
+	pseudo
+	location {
+		stream3		#the bank
+		stream1		#The bank
+		stream4		#the bank
+		footbridge	#the bank
+		rbridge		#the bank
+		stream5		#the bank
+		stream2		#the bank
+		}
+}
+
+item click_bottle "strange bottle" {
+	desc {
+is tall and cylindrical
+	}
+	pseudo
+	set bottles
+	another_noun
+	location {
+		madkitchen		#a bottle
+		madcupboard		#a bottle
+		}
+}
+
+item click_bush "bushes" {
+	desc {
+look really nice growing here
+	}
+	synonyms { bush }
+	pseudo
+	plural
+	location {
+		driveway		#a bush
+		n_wgarden		#a bush
+		outsidegates		#a bush
+		rockypath		#some bushes
+		w_wgarden		#a bush
+		}
+}
+
+item click_chest_of_drawers "chest_of drawers" {
+	desc {
+is made of wood but is of absolutely no interest
+	}
+	force_adj
+	locked
+	pseudo
+	location {
+		dlounge			#a chest of drawers
+		observatory		#a chest of drawers
+		}
+}
+
+clonedesc click_papers click_chest_of_drawers "strange paper" {
+	desc {
+are quite incomprehensible
+	}
+	synonyms { paper }
+}
+
+item click_cauldron "cauldron" {
+	desc {
+sits below the chimney
+	}
+	attribute infinite_container
+	contr_vol 3
+	hardness 15
+	owner royalcook
+	inseparable
+	related
+	location palacekitchen
+}
+
+clonedesc click_chimney click_cauldron "chimney" {
+	desc {
+allows smoke to leave the kitchen
+	}
+}		
+
+item click_cupboard "cupboard" {
+	desc {
+seems to have been designed especially to keep little girls from getting at the
+things inside
+	}
+	locked
+	set cupboards
+	pseudo
+	location {
+		hatroom			#a cupboard
+		palacekitchen		#some cupboards
+		pantry			#some cupboards
+		tailorhouse		#a cupboard
+		}
+}
+
+item click_field "ploughed field" {
+	desc {
+has been recently ploughed
+	}
+	pseudo
+	location {
+		countrylane1		#the fields
+		sw_grounds		#a ploughed field
+		bytree			#fields
+		wwpath2			#some fields
+		}
+}
+
+
+item click_flowerpot "flower tea pot" {
+	desc {
+seems well suited to its purpose
+	}
+	synonyms { pots flowerpots teapot }
+	pseudo
+	location {
+		frontdhouse		#some flowerpots
+		w_wgarden		#a flowerpot
+		rabbitgarden		#a flower pot
+		rabbitkitchen		#a teapot
+		}
+}
+
+item click_ladder "ladder" {
+	desc {
+lets the gardeners work more easily
+	}
+	pseudo
+	owner gardeners
+	value 1
+	location {
+		magicgarden		#a ladder
+		tinytunnel		#a ladder
+		}
+}
+
+item click_lamp "small lamp" {
+	desc {
+seems to be entirely non-functional, it's lucky that you found one for yourself!
+	}
+	another_noun
+	set lamps
+	attribute nofullstop
+	inseperable
+	related
+	location madkitchen		#a lamp
+}
+
+item click_picture "picture" {
+	desc {
+is colourful and brightens up the place no end
+	}
+	pseudo
+	location {
+		banquethall		#a picture
+		breakfastroom		#a picture
+		centralhall		#a picture
+		diningroom		#a picture
+#		diningroom		#a picture
+		dlanding		#a picture
+		dlounge			#a picture
+		dinnerroom		#a picture
+		passage1		#a picture
+		passage2		#a picture
+		passage3		#a picture
+#		rabbitlounge		#a picture - cos ajspicture is here
+		rabbitbedroom		#a picture
+		rabbitlanding		#a picture
+		}
+}
+
+item click_tap "tap" {
+	desc {
+stops an endless stream of water gushing all over the place. To remain successfull at
+this it will stay closed despite all attempts to the contrary
+	}
+	pseudo
+	location {
+		bathroom		#the tap
+		outdkitchen		#a tap
+		rabbitkitchen		#a tap
+		}
+}
+
+
+item click_shelves ".shelves" {
+	desc {
+are quite flat
+	}
+	icon	ic216
+	synonyms { shelf }
+	plural
+	size 5
+	hardness 15
+	attribute paintable
+	pseudo
+	sittable		# not really
+	location {
+		queenbedroom		#a shelf
+		madcupboard		#a shelf
+		palacekitchen		#some shelves
+		tailorhouse		#some shelves
+		}
+	set shelves
+}
+
+item spare5 "a.spare" {
+	desc {
+	no desc
+	}
+	out
+	related
+	location random_object
+}
+
+item spare6 "a.spare" {
+	desc {
+	no desc
+	}
+	out
+	related
+	location random_object
+}
+
+
+item random_object "random_object" {	#no need for a 'random' adj
+# this is the last object in the fred file, to stop a crash.
+# This MUST NOT get onto the player's inventory
+	desc {
+[NO desc - the random object]
+	}
+	out				# not here
+	inseperable			# not gettable
+	related				# and invisible (paranoia...)
+	location bank
+}

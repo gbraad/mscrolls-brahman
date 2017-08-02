@@ -1,0 +1,2794 @@
+#---------------------------------------------------------
+#
+#	Rooms for Alice In Wonderland
+#
+#---------------------------------------------------------
+
+room bank "river southern bank" {
+	desc {
+You are on the southern bank of a river whose waters flow lazily
+by with a trickle and a ripple so soothing you could almost go
+right off to sleep. To the southwest you can just see the
+beginnings of a winding country lane, whilst eastwards is a pear grove. Emily,
+your sister, is sitting here reading a book
+	}
+	pictures { bank }
+	force_adj
+	lit_room
+	net {
+		north		nway_water
+		northeast	nway_water
+		east		grove
+		southeast	nway_hedge
+		south		nway_hedge
+		southwest	countrylane1
+		west		nway_hedge
+		northwest	nway_water
+		in		grove
+		out		countrylane1
+	}
+}
+
+synonym "picturesque" { country adj }
+synonym "hedge-lined" { country adj }
+synonym "winding" { country adj }
+
+room countrylane1 "country lane" {
+	desc {
+You are walking down a picturesque hedge-lined country
+lane which appears to go nowhere in particular unless you happen
+to be going in a north-easterly direction in which case it is
+more than likely to take you back to the river bank. You wonder
+idly whether you could return the favour and take the lane
+somewhere instead. A small overgrown stile lies almost hidden in
+the hedge to your west while the lane continues winding to the
+south
+	}
+	force_adj
+	lit_room
+	pictures { lane }
+	net {
+		north		nway_hedge
+		northeast	bank
+		east		nway_hedge
+		southeast	nway_hedge
+		south		countrylane2
+		southwest	nway_hedge
+		west		field
+		northwest	nway_hedge
+		in		field
+		out		countrylane2
+	}
+}
+
+#synonym "picturesque" { country adj }
+#synonym "hedge-lined" { country adj }
+#synonym "winding" { country adj }
+# as above...
+
+room countrylane2 "country lane" {
+	desc {
+The lane seems to extend endlessly both to the north and the south
+	}
+	pictures { lane2 }
+	force_adj
+	lit_room
+	initial_done
+	net {
+		north		countrylane1
+		northeast 	nway_hedge
+		east		nway_hedge
+		southeast	nway_hedge
+		south		countrylane2
+		southwest	nway_hedge
+		west		nway_hedge
+		northwest	nway_hedge
+	}
+}
+
+room grove "pear grove" {
+	desc {
+You are in a grove full of pear trees, their branches laden with
+fruit busy ripening in the summer's sun
+	}
+	pictures { grove }
+	force_adj
+	lit_room
+	initial_done
+	net {
+		north		nway_water
+		northeast	nway_water
+		east		nway_hedge
+		southeast	nway_hedge
+		south		nway_hedge
+		southwest	nway_hedge
+		west		bank
+		northwest	nway_water
+		out		bank
+	}
+}
+
+##################################################
+#
+# the next four rooms (field,hole1,hole2,falling) must be consecutive
+#
+##################################################
+
+room field "freshly ploughed field" {
+	desc {
+By the looks of it this field has been freshly ploughed, leaving
+plenty of succulent worms for hungry beaks. The stile to your east
+appears to be the only way in or out of the field which is
+surrounded on all sides by a thick and thistly bramble hedge
+	}
+# additional :
+# There is a a small rabbit's hole under the hedge opposite the sty
+# after the rabbit:
+# A set of paw prints
+# are clearly visible on the recently turned earth. The prints
+# appear to stretch all the way across the field, from the sty to
+# the east, to a rabbit's hole under the bramble hedge to the west.
+	scen_noun_c worms
+	scen_noun_c worm
+	lit_room
+	initial_done		#to suppress first glance until rabbit arrives
+	pictures { plough }
+	net {
+		north		nway_hedge
+		northeast	nway_hedge
+		east		countrylane1
+		southeast	nway_hedge
+		south		nway_hedge
+		southwest	nway_hedge
+		west		nway_hedge	#becomes connection to hole
+		northwest	nway_hedge
+		in		countrylane1	#becomes hole later
+		out		countrylane1
+	}
+}
+
+room hole1 "rabbit.hole" {
+	desc {
+You are in a rabbit's burrow, with walls of solid earth.
+Although a hint of daylight comes from the east, the light from
+the lantern enables you to see that you could go deeper into the
+hole by crawling south
+	}
+	pictures { well1 }
+	size 2
+	topline 1			# just inside the
+	scen_noun_e daylight
+	net {
+		north		nway_wall
+		northeast	nway_wall
+		east		field
+		southeast	nway_wall
+		south		hole2
+		southwest	nway_wall
+		west		nway_wall
+		northwest	nway_wall
+		in		hole2
+		out		field
+	}
+}
+
+room hole2 "rabbit.hole" {
+	desc {
+You are in a rabbit's burrow with walls of solid earth. From
+here, the burrow stretches off into darkness to the north and
+south
+	}
+	net {
+		north		hole1
+		northeast	nway_wall
+		east		nway_wall
+		southeast	nway_wall
+		south		falling
+		southwest	nway_wall
+		west		nway_wall
+		northwest	nway_wall
+		out		hole1
+		in		falling
+	}
+}
+
+# after one move falling in this room, you move to falling2
+# firstglance : A shelf.
+# note: the shelf is zapped after one move, and after two,
+# you fall onto the leaves in passage2
+
+room falling "well" {
+	desc {
+Either the well is very deep or you are falling very slowly,
+for you have plenty of time to look at the walls of the well,
+which is just as well really because, otherwise, you might have
+missed all the shelves and cupboards that are rushing by you
+	}
+	topline 2			# falling down the
+#	set wells
+	pictures { well2 }
+
+	# 'which way: nowhere' is acceptable, I think
+	# Doug may think it is but Bob doesn't
+	# all exits go to same room and are caught in setmode to say
+	# you can't do that when falling
+	net {
+		north		falling
+		northeast	falling
+		east		falling
+		southeast	falling
+		south		falling
+		southwest	falling
+		west		falling
+		northwest	falling
+		in		falling
+		out		falling
+		up		falling
+		down		falling
+	}
+}
+
+##################################################
+#
+# the previous four rooms (field,hole1,hole2,falling) must be consecutive
+#
+##################################################
+
+
+room passage1 "long marble passage" {
+	desc {
+You are at the west end of the marble passage.
+There is a door to the northwest, while the passage
+stretches back to the east.
+	}
+	pictures { outcel }
+	attribute nofullstop		# so fglance can be used elsewhere
+	initial_done			# for FGT_PASSAGE1
+	net {
+		north		nway_wall
+		northeast	nway_wall
+		east		passage2
+		southeast	nway_wall
+		south		nway_wall
+		southwest	nway_wall
+		west		nway_wall
+		northwest	nway_door
+		in		nway_door
+		out		passage2
+	}
+}
+
+room passage2 "long marble passage" {
+	desc {
+You are in the middle of a long marble passage which
+runs from east to west.
+On the southern wall of the passage is a door with
+the letter 'C' engraved in the centre
+	}
+	pictures { passage }
+	net {
+		north		nway_wall
+		northeast	nway_wall
+		east		passage3
+		southeast	nway_wall
+		south		nway_door
+		southwest	nway_wall
+		west		passage1
+		northwest	nway_wall
+		out		passage3
+		in		nway_door
+	}
+}
+
+room passage3 "long marble passage" {
+	desc {
+You are at the east end of the marble passage.
+From here, the passage stretches back to the west and continues
+round a corner to the southeast
+	}
+	pictures { pass3 }
+	scen_noun_c corner
+	scen_noun_c corners
+	net {
+		north		nway_wall
+		northeast	nway_wall
+		east		nway_wall
+		southeast	greathall
+		south		nway_wall
+		southwest	nway_wall
+		west		passage2
+		northwest	nway_wall
+		in		greathall
+		out		passage2
+	}
+}
+
+room musicroom "music room" {
+	desc {
+You are in a large rectangular room, its walls, floor and ceiling
+are all made of marble allowing music to echo about the room as
+if it were some magnificent concert hall. The room is dominated by
+a grand piano in its centre surrounded by some chairs
+	}
+#	set rooms
+	scen_noun_a f_sharp_string		# well....
+	scen_noun_a string
+	force_adj
+
+	pictures { music }
+
+	net {
+		north		nway_wall
+		northeast	nway_wall
+		east		nway_wall
+		southeast	nway_door
+		south		nway_wall
+		southwest	nway_wall
+		west		nway_wall
+		northwest	nway_wall
+		out		nway_door
+		up		nway_chair	#so up will take you onto chair
+		down		nway_floor	#so down will take you off chair
+	}
+}
+
+room greathall "long low hall" {
+	desc {
+A bewildering number of doors lead off in every direction and a glass
+table stands in one corner
+	}
+	force_adj
+	lit_room
+	pictures { grthal }
+	net {
+		north		nway_door	# tunnel
+		northeast	nway_door
+		east		nway_door	# outsidegates
+		southeast	nway_door
+		south		nway_door
+		southwest	nway_door
+		west		nway_door	# tinytunnel
+		northwest	passage3
+		in		passage3
+		out		passage3
+	}
+}
+
+room broomcupboard "broom cupboard" {
+	desc {
+You are in a cramped broom cupboard, with a bar for coathangers
+	}
+	pictures { broom }
+	synonyms { broom }
+	force_adj
+#	set cupboards
+	net {
+		north		nway_door	# passage2
+		northeast	nway_wall
+		east		nway_wall
+		southeast	nway_wall
+		south		nway_wall
+		southwest	nway_wall
+		west		nway_wall
+		northwest	nway_wall
+		out		nway_door	# passage2
+	}
+}
+
+room tinytunnel "tiny passage" {
+	desc {
+From a bend in this neatly dug passage, you can see the entrance
+to a garden to the south, while a low hall lies to the east
+	}
+	pictures { tinyt }
+	net {
+		north	nway_wall
+		south	magicgarden
+		east	nway_door	# greathall
+		west	nway_wall
+		northwest nway_wall
+		northeast nway_wall
+		southwest magicgarden
+		southeast nway_wall
+	}
+}
+
+room magicgarden "rose trees" {
+	desc {
+This is the eastern edge of a beautiful garden, full of bright
+flower-beds. From here, paths wend their way
+southwest through the trees, and west up the garden path. To the
+north is a tiny opening, no more than 15" high, almost hidden
+behind a cloak of shrubs, creepers, and a number of well-kept
+rose trees
+	}
+# While the roses are not red
+# Although most of the rose-trees are red, one seems to be having
+# some difficulty making up its mind quite what colour to be; some
+# blooms are white while others are red.
+	initial_done			# so I can toggle FGlance
+	scen_noun_a shrubs
+	scen_noun_a creepers
+	scen_noun_f entourage
+	plural
+	force_adj
+	lit_room
+	pictures { bumble }
+	net {
+		north	tinytunnel
+		south	nway_hedge
+		west	gardenpath1
+		east	nway_hedge
+		southwest glade
+		southeast nway_hedge
+		northwest nway_wall
+		northeast tinytunnel
+	}
+}
+
+room glade "glade" {
+	desc {
+This delightful glade is almost entirely surrounded by trees.
+Paths leave the glade through gaps in the trees to the northwest,
+north and northeast, while a rocky path slopes away to the
+southeast
+	}
+	force_adj
+	lit_room
+	pictures { glade }
+	net {
+		north	gardenpath1
+		south	nway_hedge
+		east	nway_hedge
+		west	nway_hedge
+		northwest s_duckpond
+		northeast magicgarden
+		southeast rockypath
+		southwest nway_hedge
+	}
+}
+
+room rockypath "rocky .path" {
+	desc {
+From this bend in the rocky path, the sea is visible beyond the
+cliff edge to the west. Far below to the southeast, you can see a
+river winding its way under a footbridge and on towards the sea.
+The top of the rocky path disappears through a gap in some trees
+to the northwest
+	}
+	force_adj
+	lit_room
+	synonyms { rocks }
+	pictures { river }
+	net {
+		up	cliffedge
+		west	cliffedge
+		northwest glade
+		north	nway_fall
+		northeast nway_fall
+		east	nway_fall
+		southeast nway_fall
+		south	nway_fall
+		southwest nway_fall
+	}
+}
+
+room cliffedge "cliff edge" {
+	desc {
+From the edge of the cliff you can climb
+up a rocky path to the east or go down a steep path towards a rock
+ledge below
+	}
+	pictures { cedge }
+	synonyms { top_of_cliff cliff }
+	force_adj
+	lit_room
+	net {
+		east	rockypath
+		south	rockledge
+		down	rockledge
+		north	nway_fall
+		northeast nway_fall
+		northwest nway_fall
+		southeast nway_fall
+		southwest nway_fall
+	}
+}
+
+synonym "overhanging" { rock adj }
+
+# watch out - space on the end of this (see FGlance_gryphon etc)
+
+room rockledge "rock ledge" {
+	desc {
+From this overhanging rock ledge you get a perfect view of a secluded beach to the
+southwest. 
+	}
+	pictures { ledge }
+	synonyms { view }
+	force_adj
+	lit_room
+	net {
+		north	cliffedge
+		up	cliffedge
+		northeast nway_fall
+		northwest nway_fall
+		southeast nway_fall
+		south	nway_fall
+		southwest nway_gryphon		#bythesea
+		down	 nway_gryphon		#bythesea
+		east	nway_fall
+		west	nway_fall
+	}
+}
+
+room gardenpath1 "garden .path" {
+	desc {
+The garden path continues east towards some rose-trees and west to
+a duck pond. A wooded path disappears south through the trees
+	}
+	force_adj
+	lit_room
+	pictures { path }
+	net {
+		north	nway_hedge
+		south	glade
+		east	magicgarden
+		west	s_duckpond
+		northwest nway_hedge
+		northeast nway_hedge
+		southwest nway_hedge
+		southeast nway_hedge
+	}
+}
+
+room s_duckpond "Duck.Pond" {
+	desc {
+Standing on the paved perimeter of the pond, you could reach the
+other side by going round the perimeter either to the northwest or
+northeast, or by wading north. Looking down the garden path, you
+can see some rose-trees to the east. A path disappears to the
+southeast and 
+	}			# watch out for space at end of desc!
+	topline 3			# south of the
+	scen_noun_a perimeter
+	lit_room
+	pictures { spond }
+	net {
+		north	induckpond
+		in	induckpond
+		south	nway_hedge
+		east	gardenpath1
+		northwest w_duckpond
+		northeast e_duckpond
+		southwest croquet1
+		southeast glade
+	}
+}
+
+room n_duckpond "Duck.Pond" {
+	desc {
+Standing on the paved perimeter of the pond, you could reach the
+other side by going around the perimeter either to the southwest or
+southeast, or by wading south. To the north is a thick,
+impenetrable hedge with a door in it
+	}
+	topline 4			# north of the
+	scen_noun_a perimeter
+	lit_room
+	pictures { npond }
+	net {
+		south	induckpond
+		in	induckpond
+		north	nway_door
+		west	nway_hedge
+		east	nway_hedge
+		northwest nway_hedge
+		northeast nway_hedge
+		southwest w_duckpond
+		southeast e_duckpond
+	}
+}
+
+room w_duckpond "Duck.Pond" {
+	desc {
+From the western side of the pond you can see numerous lily-pads floating
+nonchalantly in the water. You can reach the other side by going around the perimeter
+to the northeast or the northwest
+	}
+	pictures { wpond }
+	scen_noun_a perimeter
+	topline 5			# west of the
+	lit_room
+	net {
+		north	nway_hedge
+		south	nway_hedge
+		west	nway_hedge
+		northeast n_duckpond
+		southeast s_duckpond
+		northwest nway_hedge
+		southwest nway_hedge
+	}
+}
+
+room e_duckpond "Duck.Pond" {
+	desc {
+From the eastern side of the duckpond the water looks cold and uninviting. You could
+reach the other side by going either northwest or southwest around the perimeter
+	}
+	pictures { epond }
+	scen_noun_a perimeter
+	topline 6			# east of the
+	lit_room
+	net {
+		north	nway_hedge
+		south	nway_hedge
+		east	nway_hedge
+		northwest n_duckpond
+		southwest s_duckpond
+		northeast nway_hedge
+		southeast nway_hedge
+	}
+}
+
+room induckpond "Duck.Pond" {
+	desc {
+Stepping carefully over the stepping stones, you wade out into the
+pond. The water is cold and tranquil and covered in lily-pads,
+and is fortunately not too deep. Unfortunately, the sides of the
+pond are too slippery for you to climb, although clusters of
+stepping stones should help you leave the pond to the north and
+south
+	}
+	pictures { dpond }
+	lit_room
+	net {
+		north	n_duckpond
+		south	s_duckpond
+		northwest n_duckpond
+		northeast n_duckpond
+		southwest s_duckpond
+		southeast s_duckpond
+		out	s_duckpond
+	}
+}
+
+room sw_grounds "palace grounds" {
+	desc {
+From the southwest corner of the palace grounds you can see the driveway to the
+east and a wooden door in a privet hedge to the south
+	}
+	pictures { outpal }
+	force_adj
+	plural
+	lit_room
+	net {
+		north	nway_hedge
+		northwest nway_hedge
+		northeast nway_hedge
+		southwest nway_hedge
+		southeast nway_hedge
+		west	nway_hedge
+		south	nway_door
+		east	driveway
+	}
+}
+
+room croquet1 "croquet.green" {
+	desc {
+The royal croquet green has seen many a fine tournament, all won
+by the Queen of course. A single bramble hedge surrounds the green
+on all sides except for the entrance to the northeast, which is
+being closely guarded in case anyone should try and enter the
+tournament without an invitation.
+	}
+	pictures { croque }
+	attribute nofullstop
+	lit_room
+	net {
+		north	nway_hedge
+		south	croquet2
+		west	nway_hedge
+		east	nway_hedge
+		northwest nway_hedge
+		northeast s_duckpond
+		southwest nway_hedge
+		southeast croquet2
+	}
+}
+
+room croquet2 "bramble hedge" {
+	desc {
+The only feature of any interest here is a small hole dug
+alongside the base of the hedge. The croquet green is to the
+northwest
+	}
+	pictures { hedge }
+	topline 7			# under the
+	force_adj
+	lit_room
+	net {
+		north	croquet1
+		south	nway_hedge
+		west	nway_hedge
+		east	nway_hedge
+		northwest croquet1
+		northeast nway_hedge
+		southwest nway_hedge
+		southeast nway_hedge
+	}
+}
+
+# the next three rooms must stay together in this order
+# OUTSIDEGATES,DRIVEWAY,FRONTPALACE
+
+room outsidegates "palace gates" {
+	desc {
+From outside the palace gates, you can see up a driveway towards
+an imposing palace to the north. Paths lead through the woods to
+the southwest, south, and southeast, and along a hedge to the east
+	}
+	pictures { outgat }
+	topline 8			# by the
+	plural
+	force_adj
+	lit_room
+	net {
+		north		driveway
+		northeast	nway_hedge
+		east		wood1
+		southeast	wood2
+		south		wood3
+		southwest	bytree
+		west		nway_trees
+		northwest	nway_hedge
+		in		driveway
+		out		wood1
+	}
+}
+
+room driveway "palace .driveway" {
+	desc {
+From here, the driveway continues north to the palace and south to
+the palace gates. The palace grounds lie to the west, and the
+royal tailor's house is to the east
+	}
+	pictures { drive }
+	force_adj
+	lit_room
+	net {
+		north		frontpalace
+		northeast	nway_hedge
+		east		nway_door	# tailor's house
+		southeast	nway_hedge
+		south		outsidegates
+		southwest	nway_hedge
+		west		sw_grounds
+		northwest	nway_hedge
+		in		nway_door	# tailor's house
+		out		outsidegates
+	}
+}
+
+room frontpalace "imposing palace" {
+	desc {
+Although you always dreamt of living in a palace, you never
+realised just how big and impressive they were. This particular
+royal palace, you decide, must be bigger and more impressive than
+most, for you couldn't possibly imagine one being much bigger. The
+reason for this is simple; if a Queen, or King, lived in a palace
+any bigger than this one, they would spend so much time getting
+from one part of the palace to another, there would be no time
+left over to do any ruling and reigning - simple really!
+~As palaces go, this one has all the towers, domes, and archways
+one would expect. The palace driveway, which winds its way back to
+the south, ends here in a loop, which has a fountain at its
+centre. An odd looking guard is pacing up and down outside the
+palace entrance to the north
+	}
+	pictures { frtpal }
+	scen_noun_c tower
+	scen_noun_c towers
+	scen_noun_c dome
+	scen_noun_c domes
+	scen_noun_c archways
+	scen_noun_c archway
+	topline 9			# in front of the
+	lit_room
+	net {
+		north		easthall
+		northeast	nway_wall
+		east		nway_hedge
+		southeast	nway_hedge
+		south		driveway
+		southwest	nway_hedge
+		west		nway_hedge
+		northwest	nway_wall
+		in		easthall
+		out		driveway
+	}
+}
+
+# the previous three rooms must stay together in this order
+# OUTSIDEGATES,DRIVEWAY,FRONTPALACE
+
+room easthall "eastern hall" {
+	desc {
+The East hall is the first part of the palace you see when you
+come in and, of course, the last part you see when you go out.
+Because of this, it has been built to impress both comers and
+goers. The hall itself stretches for some way to the west. A
+heavy looking door is to the east. To the
+south is a grand staircase leading to the landing above
+	}
+	pictures { enthal }
+	force_adj
+	lit_room
+	net {
+		north	nway_wall
+		south	frontpalace
+		west	centralhall
+		east	nway_door	# quarters
+		in	nway_door
+		up	palacelanding
+		northwest nway_wall
+		northeast nway_wall
+		southwest nway_wall
+		southeast nway_wall
+	}
+}
+
+# locker is a synonym of locker so for 'locker room' use 'number...'
+
+room quarters "guards' guard number quarters" {
+	desc {
+Everything in the guards' quarters is neat and ordered. The room
+is surrounded on all sides by countless metal lockers, each a
+foot wide and as tall as a guard. As you finish counting the
+lockers, you decide that countless is a bit of an exaggeration, as
+you can count 13 of them
+	}
+	owner guards
+	force_adj
+	lit_room
+	plural
+	synonyms { room guardroom }
+	pictures { guardr }
+	net {
+		north	nway_wall
+		south	nway_wall
+		east	nway_wall
+		northwest nway_wall
+		northeast nway_wall
+		southwest nway_wall
+		southeast nway_wall
+		west	nway_door	# easthall
+		out	nway_door
+	}
+}
+
+room palacelanding "landing" {
+	desc {
+From the landing, the stairs curve down to the entrance hall
+below. There is also a ladder which leads up through a hatchway in
+the ceiling and doors to the east and west
+	}
+	pictures { pland }
+	lit_room
+	net {
+		west	queenbedroom
+		east	bathroom
+		up	observatory
+		down	easthall
+		north	nway_wall
+		south	nway_wall
+		northwest nway_wall
+		northeast nway_wall
+		southwest nway_wall
+		southeast nway_wall
+	}
+}
+
+# NB: quit and pillows can be removed from bed, bear this in mind when
+# rewriting desc
+room queenbedroom "Queen''s.bedroom" {
+	desc {
+The main feature of this room is an enormous queensize bed,
+normally complete with flamingo down quilt and pillows. This vast
+construction was specially commissioned by the Queen when she grew
+tired of her old one. Either side of the bed, stand a queenside
+and a kingside table, each with a small drawer
+	}
+#	set bedrooms
+	owner queen
+	owner card12
+#	force_adj
+	pictures { bed }
+	synonyms { bedroom }
+	lit_room
+	net {
+		east	palacelanding
+		north	nway_wall
+		south	nway_wall
+		west	nway_wall
+		northwest nway_wall
+		northeast nway_wall
+		southwest nway_wall
+		southeast nway_wall
+	}
+	owner	queen
+}
+
+room bathroom "bathroom" {
+	desc {
+A cabinet with a mirrored door is the only fitting in the Queen's
+bathroom, except for the basin and bath of course
+	}
+#	set rooms
+	owner queen
+	owner card12
+	synonyms { room }
+	lit_room
+	pictures { bath }
+	net {
+		west	palacelanding
+		north	nway_wall
+		south	nway_wall
+		east	nway_wall
+		northwest nway_wall
+		northeast nway_wall
+		southwest nway_wall
+		southeast nway_wall
+	}
+}
+
+room observatory "royal observatory" {
+	desc {
+The royal observatory is a dome shaped room at the very top of the
+royal palace. There is a telescope here, pointing out through the
+open roof
+	}
+	pictures { observ }
+	force_adj
+	lit_room
+	net {
+		down	palacelanding
+		north	nway_wall
+		south	nway_wall
+		west	nway_wall
+		east	nway_wall
+		northwest nway_wall
+		northeast nway_wall
+		southwest nway_wall
+		southeast nway_wall
+	}
+}
+
+room centralhall "central hall" {
+	desc {
+From here the hall, which continues both to the east and west, can
+be seen in all its splendour. To the north is a heavy wooden door
+with a plaque on it. To the south is a pair of golden doors, each
+with an engraving. Amongst all the other great works of art, you
+are particularly taken by a coat of armour
+	}
+	force_adj
+	lit_room
+	pictures { cenhall }
+	net {
+		north	nway_door	# courtroom
+		south	nway_door	# throneroom
+		west	westhall
+		east	easthall
+		northwest nway_wall
+		northeast nway_wall
+		southwest nway_wall
+		southeast nway_wall
+	}
+}
+
+# this desc ONLY happens when u load up a saved game mid trial, it is followed by
+# some stuff to tell 'em who accused 'em last
+
+room courtroom "court courtroom" {
+	desc {
+Looking about you remember with a start that you were being
+tried for the theft of the Queen's tarts!
+	}
+	pictures { court jury1 jury2 jury3 jury4 }
+#	set rooms
+	attribute nofullstop
+	lit_room
+	net {
+		south	nway_door	# central hall
+		north	nway_wall
+		west	nway_wall
+		east	nway_wall
+		northwest nway_wall
+		northeast nway_wall
+		southwest nway_wall
+		southeast nway_wall
+	}
+}
+
+room throneroom "throne room" {
+	desc {
+Standing in this high ceilinged throne room, a gentle through-breeze blows your
+hair over your face. Facing the only apparent exit, to the north,
+are two magnificent golden thrones, one each for the King and
+Queen, above which hangs a bell pull.^This is also where the Queen's
+favourite collection of axes
+hangs, serving as a constant source of pleasure to the Queen, and a
+reminder to her subjects that there is always room for just one
+more axe to be added to the collection
+	}
+	pictures { throne }
+	scen_noun_f breeze
+#	set rooms
+	lit_room
+	force_adj
+	net {
+		north	nway_door
+		south	nway_wall
+		west	nway_wall
+		east	nway_wall
+		northwest nway_wall
+		northeast nway_wall
+		southwest nway_wall
+		southeast nway_wall
+	}
+}
+
+room westhall "western hall" {
+	desc {
+From the West end of the hall, you can look back east towards the
+Central hall and beyond to the East hall. Dominating this end of
+the hall is a life-size statue of a reclining man.
+To the south is the royal conservatory and the north the banquet hall
+	}
+	force_adj
+	lit_room
+
+	pictures { westhl }
+
+	net {
+		north	banquethall
+		south	conservatory
+		east	centralhall
+		west	nway_wall
+		northwest nway_wall
+		northeast nway_wall
+		southwest nway_wall
+		southeast nway_wall
+	}
+}
+
+room banquethall "banquet hall" {
+	desc {
+Those lucky enough to be invited here, would doubtless enjoy the lavish
+surroundings afforded by this magnificent banquet hall with its
+murals depicting famous historical scenes looking down on a solid
+oak banquet table, which spans the length of the room. There is
+also a lovely crystal chest standing in one corner of the hall.
+From here, guests would retire south towards the conservatory for
+after-banquet tea while footmen and waiters began the arduous
+task of taking all the dirty dishes back into the kitchen which is to the
+west
+	}
+	scen_noun_f waiters
+	scen_noun_f dishes
+	scen_noun_f dirty_dishes
+	scen_noun_a murals
+	scen_noun_a mural
+	pictures { banque }
+	force_adj
+	lit_room
+	net {
+		south	westhall
+		west	palacekitchen
+		north	nway_wall
+		east	nway_wall
+		northwest nway_wall
+		northeast nway_wall
+		southwest nway_wall
+		southeast nway_wall
+	}
+}
+
+room palacekitchen "palace royal kitchens" {
+	desc {
+Apart from the door, to the east, that leads back to the banquet
+hall, there are two others that would take you northwest and
+southwest. It is amazing that any banquets at all manage to come
+out of this small, modestly equipped kitchen with its cold stone
+floor and only an oven and a small table with which to prepare
+food for so many guests
+	}
+	force_adj
+	plural
+	lit_room
+	pictures { palkit }
+	synonyms { kitchen }
+	net {
+		east	banquethall
+		northwest nway_door		# pantry
+		southwest outwinecellar
+		down	outwinecellar
+		north	nway_wall
+		south	nway_wall
+		west	nway_wall
+		northeast nway_wall
+		southeast nway_wall
+	}
+}
+
+room outwinecellar "steps." {
+	# note: trailing space
+	# one of closed/open appended
+	desc {
+At the bottom of the stone steps is the wine cellar door. An ancient key is
+hanging on a chain near the door which is 
+	}
+	attribute nofullstop
+	pictures { outdun }
+	plural
+	net {
+		northeast palacekitchen
+		up	palacekitchen
+		south	nway_door		# winecellar
+		southwest nway_door		# "
+		in	nway_door
+		north	nway_wall
+		west	nway_wall
+		east	nway_wall
+		northwest nway_wall
+		southwest nway_wall
+		southeast nway_wall
+	}
+}
+
+room winecellar "wine cellar" {
+	desc {
+Judging from the table and the wine racks this is meant to be a wine
+cellar, and a royal one at
+that, you are surprised to find that the room is not crammed full of vintage
+wines fit for a king - oops sorry, a Queen!
+	}
+	scen_noun_c cobwebs
+	another_noun
+	attribute nofullstop
+#	set cellars
+# if door open :
+# A door leads up some steps to the northeast and a hole
+# in the brick wall will take you south
+# if door closed and wedged :
+# you notice a wedge under the door to the northeast
+	pictures { dunge }
+	net {
+		north	nway_door		# outwinecellar
+		northeast nway_door		# "
+		out	nway_door
+		south	winepassage
+		west	nway_wall
+		east	nway_wall
+		northwest nway_wall
+		northeast nway_wall
+		southwest nway_wall
+		southeast nway_wall
+	}
+}
+
+room pantry "pantry" {
+	desc {
+Lined with shelves, the pantry is small and cold. In fact, just the right
+temperature for cooling down tarts. The kitchen is to the southeast
+	}
+	pictures { pantry }
+	net {
+		southeast nway_door		# palacekitchen
+		north	nway_wall
+		south	nway_wall
+		west	nway_wall
+		east	nway_wall
+		northwest nway_wall
+		northeast nway_wall
+		southwest nway_wall
+	}
+}
+
+room conservatory "conservatory" {
+	desc {
+Various tables and chairs are informally
+arranged about the room, although the Queen's chair, much bigger
+and grander than the rest, is set in one corner from where she can
+look down on (and gloat at) her subjects as they enjoy a cup of
+tea after a royal banquet.^The conservatory ceiling is made of
+glass panels one of which is actually a window which can
+be opened by means of a rope, connected at one end to the window,
+and at the other to a winch handle. There is a metal plate fixed
+to the wall next to the winch handle. Anybody leaving the
+conservatory would have to go north, back to the West hall
+	}
+	lit_room
+	pictures { conser }
+	net {
+		north	westhall
+		south	nway_wall
+		west	nway_wall
+		east	nway_wall
+		northwest nway_wall
+		northeast nway_wall
+		southwest nway_wall
+		southeast nway_wall
+	}
+}
+
+room tunnel1 "tunnel" {
+	desc {
+This is the northern end of the dank, dark, damp tunnel.
+The throne room is barely visible to the north and the
+tunnel continues to the south
+	}
+	pictures { tunnel }
+	net {
+		north	throneroom
+		south	tunnel2
+		west	nway_wall
+		east	nway_wall
+		northwest nway_wall
+		northeast nway_wall
+		southwest nway_wall
+		southeast nway_wall
+	}
+}
+
+room tunnel2 "tunnel" {
+	desc {
+This is the southern end of the dark, dank, damp tunnel. Further
+progress is made impossible by a locked door to the south. By the
+light of the lantern, you can see that the door is bright red with
+a small platinum keyhole
+	}
+	pictures { tunnel }
+	net {
+		north	tunnel1
+		south	nway_door
+		west	nway_wall
+		east	nway_wall
+		northwest nway_wall
+		northeast nway_wall
+		southwest nway_wall
+		southeast nway_wall
+	}
+}
+
+room tailorhouse "tailor''s.cottage" {
+	desc {
+The Tailor's cottage is crammed full of rolls of material and
+robes and dresses of every description, some arranged in piles on
+the floor, others hanging on the wall. Dummies, with
+half finished garments draped on them, line the walls
+	}
+	scen_noun_a rolls
+	scen_noun_c material
+	scen_noun_e robes
+	scen_noun_e dummies
+	scen_noun_a garments
+	lit_room
+	synonyms { house cottage }
+#	set houses
+	pictures { tailor }
+	net {
+		west	nway_door	# driveway
+		out	nway_door	# "
+		north	nway_wall
+		south	nway_wall
+		east	nway_wall
+		northwest nway_wall
+		northeast nway_wall
+		southwest nway_wall
+		southeast nway_wall
+	}
+	owner tailor
+}
+
+room wood1 "woods" {
+	desc {
+A maple tree is growing alongside a path which leads southeast to
+a rickety old bridge. Through the trees, you can see a garden gate
+to the north, and a path disappears into the woods to the
+southwest. To the west, a path runs beside a hedge leading to the
+palace gates
+	}
+	pictures { bygate }
+	plural
+	topline 10			# in the
+	force_adj
+	lit_room
+	net {
+		north		nway_gardengate
+		northeast	nway_hedge
+		east		nway_trees
+		southeast	rbridge
+		south		nway_trees
+		southwest	wood2
+		west		outsidegates
+		northwest	nway_hedge
+		in		nway_gardengate
+		out		outsidegates
+	}
+}
+
+room wood2 "sycamore tree" {
+	desc {
+Standing under the shade of a lovely sycamore tree, listening to the
+tranquil rippling of a small river to the southeast, you could easily
+drop off to sleep. On the opposite bank, you can see two girls lying
+by the river; one reading, the other fast asleep. You have the
+strangest feeling that you've seen one of the girls (the one who's
+sleeping) somewhere before. But that's silly, you can't have, you must
+be dreaming. More real perhaps, are the paths which lead northwest,
+northeast, west and southwest
+	}
+	pictures { wood }
+#	set trees
+	synonyms { trees sycamore }
+	force_adj
+	lit_room
+	net {
+		northwest outsidegates
+		north	nway_trees
+		northeast wood1
+		southwest wood3
+		south	nway_trees
+		west	bytree
+		east	nway_trees
+		southeast nway_trees
+	}
+}
+
+room wood3 "horse chestnut tree" {
+	desc {
+This area of the woods is heavily populated with saplings and
+younger trees although a particularly old horse chestnut towers
+majestically above all else, keeping watch over its younger
+cousins. Paths lead through the woods to the northwest, north, and
+northeast, while a footbridge crosses the river to the south
+	}
+	pictures { wood3 }
+	synonyms { trees chestnut }
+#	set trees
+	attribute alladjs
+	force_adj
+	lit_room
+	net {
+		south	footbridge
+		west	nway_trees
+		northwest bytree
+		northeast wood2
+		north	outsidegates
+		east	nway_trees
+		southwest nway_trees
+		southeast nway_trees
+	}
+}
+
+room bytree "old tree" {
+	desc {
+Apart from the silver door in the trunk of an old tree to your
+north, this neck of the woods is much like any other including
+those you could reach by going along paths to the southeast, east,
+or northeast
+	}
+	pictures { tree }
+	lit_room
+#	set trees
+	synonyms { trees }
+	force_adj
+	net {
+		north	nway_door
+		south	nway_trees
+		southeast wood3
+		northeast outsidegates
+		west	nway_trees
+		east	wood2
+		northwest nway_trees
+		southwest nway_trees
+	}
+}
+
+room footbridge "foot footbridge" {
+	desc {
+Standing on this wooden footbridge, you can look down through the
+gaps in the planks into the fast-flowing waters of the river which
+marches impatiently on towards the sea. To the south, you can see
+a row of weeping willow trees lining the river bank, while a
+wooded area lies to the north. Further up river, to the
+northeast, you can just make out two girls lying on the river bank
+	}
+	pictures { onbrge }
+	synonyms { bridge planks }
+	scen_noun_a gaps
+	scen_noun_a gap
+	lit_room
+#	set bridges
+	net {
+		north	wood3
+		south	s_footbridge
+		northwest nway_fall
+		west	nway_fall
+		southwest nway_fall
+		southeast nway_fall
+		east	nway_fall
+		northeast nway_fall
+	}
+}
+
+room s_footbridge ".footbridge" {
+	desc {
+The woods here are full of trees of all shapes and sizes. You can
+see ashes, beeches, oaks, and a line of weeping willows growing
+along the river bank which continues to the west. The only way across the river here, is via a footbridge to the north
+	}
+	topline 3			# south of the
+	pictures { barnes }
+	lit_room
+	net {
+		north	footbridge
+		west	giantoak
+		south	nway_trees
+		east	nway_trees
+		southwest nway_trees
+		southeast nway_trees
+		northwest nway_steep
+		northeast nway_steep
+	}
+}
+
+room giantoak "giant oak" {
+	desc {
+Walking along the southern river bank, you come across a giant
+oak tree, covered in ivy and other creepers. The river bank continues to
+the east, and you can just see a way through the trees to the west
+	}
+	pictures { giant }
+	scen_noun_a ivy
+	scen_noun_a creepers
+	synonyms { trees tree bank riverbank }
+#	set trees
+	force_adj
+	lit_room
+	net {
+		west	byriver
+		east	s_footbridge
+		south	nway_trees
+		southwest nway_trees
+		southeast nway_trees
+		northwest nway_steep
+		north	nway_steep
+		northeast nway_steep
+	}
+}
+
+room byriver "river." {
+	desc {
+You decide that this would make a perfect spot for a picnic what
+with the soothing sound of the river and the rustling of the
+leaves in the trees that surround you to the south and west. The
+only way out of this secluded spot is east, back along the
+riverbank
+	}
+	pictures { byriv }
+	topline 8			# by the
+	force_adj
+	lit_room
+	net {
+		east	giantoak
+		south	nway_trees
+		west	nway_trees
+		southwest nway_trees
+		southeast nway_trees
+		northwest nway_steep
+		north	nway_steep
+		northeast nway_steep
+	}
+}
+
+room rabbitgarden "front garden" {
+	desc {
+You can't help but notice how untidy things are in the White Rabbit's
+garden. The flower beds are full of beautiful blooms, fighting a
+losing battle against weeds of every description. The lawn is in need
+of a good cut and is split into two halves by an overgrown garden path
+which leads north to the front door. The Rabbit's house is a two storey
+higgledy-piggledy construction. All the walls are covered in a more than
+generous coating of whitewash. The garden gate, to the south, would
+take you back to the woods
+	}
+# UntilDisturbed
+# [A clothes line between 2 trees]
+
+	pictures { rabhse }
+
+	scen_noun_e weeds
+	scen_noun_e weed
+	scen_noun_a lawn
+	scen_noun_a lawns
+	scen_noun_a flowerbeds
+#	set gardens
+	force_adj
+	lit_room
+	owner rabbit
+	net {
+		north		nway_door		# rabbithall
+		northeast	nway_wall
+		east		nway_hedge
+		southeast	nway_hedge
+		south		nway_gardengate		# wood1
+		southwest	nway_hedge
+		west		nway_hedge
+		northwest	nway_wall
+		in		nway_door
+		out		nway_gardengate
+	}
+}
+
+room rabbithall "hall" {
+	desc {
+Unlike the garden, the Rabbit's hall is neat and tidy with rooms to
+the north and east. There are several paintings on the walls, most
+featuring rabbits of one description or another. There is a front
+door to the south, and some stairs lead upwards
+	}
+#	set halls
+ 	lit_room
+	owner rabbit
+	pictures { rabhal }		#was land
+ 	net {
+		north		rabbitkitchen
+ 		northeast	nway_wall
+ 		east		rabbitlounge
+ 		southeast	nway_wall
+		south		nway_door		# rabbitgarden
+		southwest	nway_wall
+		west		nway_wall
+		northwest	nway_wall
+		up		rabbitlanding
+		in		rabbitlounge
+		out		nway_door
+ 	}
+}
+
+room rabbitlounge "lounge" {
+ 	desc {
+The only furniture in the
+Rabbit's lounge is a rosewood cabinet and a very comfortable looking
+white settee. The room is surrounded on all sides by walnut panelling
+which makes it feel more like a library than a lounge. But a lounge is
+what it is and, apart from lounging on the settee, going west would
+take you back out to the hall
+ 	}
+	scen_noun_c panelling
+	lit_room
+	owner rabbit
+
+	pictures { lounge }
+ 	net {
+		north		nway_wall
+		northeast	nway_wall
+		east		nway_wall
+		southeast	nway_wall
+		south		nway_wall
+ 		southwest	nway_wall
+ 		west		rabbithall
+ 		northwest	nway_wall
+		out		rabbithall
+ 	}
+}
+
+room rabbitlanding "landing" {
+ 	desc {
+Looking down the stairs, from
+the safety of the landing, you wonder whether you'll manage to get
+down again without falling through one of the creaking steps that
+groaned under your weight on the way up. From here, there is a
+solitary door to the north or you can go back down the creaking stairs
+to the south, though you might stay here to admire the grandfather clock
+	}
+	lit_room
+	owner rabbit
+	pictures { rablan }		# was rabhal
+	net {
+		north		nway_door		# rabbitbedroom
+		northeast	nway_wall
+		east		nway_wall
+		southeast	nway_wall
+		south		rabbithall
+		southwest	nway_wall
+		west		nway_wall
+		northwest	nway_wall
+		down		rabbithall
+		out		rabbithall
+		in		nway_door
+	}
+}
+
+room rabbitbedroom "white rabbit''s.bedroom" {
+	desc {
+The Rabbit's bedroom is cluttered with all kinds of odds and ends.
+Apart from the small beech table in the window, you notice an old
+writing desk, similar to the one you use at school. There is also a
+chest of drawers by the bed and a looking glass on the wall, with a
+shelf fixed underneath it
+	}
+#	attribute alladjs
+#	set bedrooms
+#	another_noun
+	synonyms { bedroom }
+	pictures { rabbed }
+	force_adj
+	owner rabbit
+	lit_room
+	net {
+		north		nway_wall
+		northeast	nway_wall
+		east		nway_wall
+		southeast	nway_wall
+		south		nway_door		# rabbitlanding
+		southwest	nway_wall
+		west		nway_wall
+		northwest	nway_wall
+		out		nway_door
+	}
+}
+
+room rabbitkitchen "rabbit''s kitchen" {
+	desc {
+The kitchen is full of the pots and pans, bowls and utensils, you
+would expect to find in the kitchen of any self-respecting White
+Rabbit. On the black and white tiled floor stands a table and four
+chairs, while a cupboard and an exquisitely engraved egg rack hang
+on opposite walls. There is a bright and airy feel to the room, due
+to the sunlight, which is streaming in through the window by the
+back door to the north. The hall is to the south
+	}
+	pictures { rabkit }
+#	set kitchens
+	another_noun
+	owner rabbit
+	scen_noun_b sunlight
+	lit_room
+	net {
+		north		nway_door	# veggarden
+		northeast	nway_wall
+		east		nway_wall
+		southeast	nway_wall
+		south		rabbithall
+		southwest	nway_wall
+		west		nway_wall
+		northwest	nway_wall
+		out		nway_door
+		in		rabbithall
+	}
+}
+
+room veggarden "back vegetable garden" {
+	desc {
+From the looks of this small, well tended vegetable garden, it is
+obvious that carrots play a very important part in the White Rabbit's
+every-day life. Almost the entire garden is covered with carrot plants.
+There is a shed to the east and you can return to the house through the back
+door to the south
+	}
+#UNTILDIST:A compost heap, as far away as possible from the house, gives off
+#an unpleasant smell
+#	set gardens
+	scen_noun_a vegetables
+
+	force_adj
+	lit_room
+	owner rabbit
+
+	pictures { vege }
+
+	net {
+		north		nway_hedge
+		northeast	nway_hedge
+		east		gardenshed
+		southeast	nway_wall
+		south		nway_door	# rabbitkitchen
+		southwest	nway_wall
+		west		nway_hedge
+		northwest	nway_hedge
+		in		gardenshed
+	}
+}
+
+room gardenshed "garden shed" {
+	desc {
+Although there is a perfectly good workbench in this garden shed,
+there doesn't appear to be one solitary tool with which to do any
+work. In fact, were it not for the vice, attached to one end of
+the bench, the shed would be entirely empty, its most noteworthy
+feature being the complete lack of a wheelbarrow
+	}
+	pictures { shed }
+	scen_noun_f wheelbarrow
+	owner rabbit
+	force_adj
+	lit_room
+	net {
+		north		nway_wall
+		northeast	nway_wall
+		east		nway_wall
+		southeast	nway_wall
+		south		nway_wall
+		southwest	nway_wall
+		west		veggarden
+		northwest	nway_wall
+		out		veggarden
+	}
+}
+
+room stream1 "river." {
+	desc {
+Any further down-river and you would surely loose your footing and get
+washed out to sea. You really should go back under the footbridge to
+the east
+	}
+# additional :
+# something shiny catches your eye further up the river.
+	topline 10			# in the
+	force_adj
+	lit_room
+	initial_done
+	pictures { end }
+	net {
+		east	stream2
+		west	nway_water
+		northwest nway_steep
+		north	nway_steep
+		northeast nway_steep
+		southwest nway_steep
+		south	nway_steep
+		southeast nway_steep
+	}
+}
+
+room stream2 "foot footbridge" {
+	desc {
+Sunbeams filter down through the wooden planks of a footbridge
+and dance about the rushes and the fast-flowing waters of the
+river, which now comes up to your waist. The river continues to
+the west, although the water looks dangerously deep and the
+current perilously strong. Perhaps it would be better if you went
+upriver to the northeast, instead
+	}
+	topline 11			# under a
+#	set bridges
+	lit_room
+
+	pictures { underb }
+
+	synonyms { bridge }
+	net {
+		west	stream1
+		east	nway_steep
+		northeast stream3
+		north	nway_steep
+		southwest nway_steep
+		south	nway_steep
+		southeast nway_steep
+	}
+}
+
+room stream3 "beaver''s.hole" {
+	desc {
+The water is cooler and deeper than it is further
+upstream, beyond the rickety bridge to the northeast. Although you
+have no problem keeping your balance here, the current looks as if
+it gets stronger further down-river as it disappears under a
+footbridge to the southwest. Half hidden in the bank to the
+southeast is a beaver's hole
+	}
+	synonyms { hole }
+	topline 16
+	scen_noun_a current
+	force_adj
+	lit_room
+	pictures { beaver }
+	net {
+		southwest stream2
+		northeast stream4
+		north	stream4
+		west	nway_steep
+		east	beaverhole
+		southeast beaverhole
+		in 	beaverhole
+		south	nway_steep
+	}
+	owner beaver
+#	set holes
+}
+
+room stream4 "river." {
+	desc {
+The stream laps at your ankles as it gently flows under a rickety
+bridge to the southwest. The spring is upstream to the northeast
+	}
+	pictures { inriv }
+	topline 10			# in the
+	force_adj
+	lit_room
+	net {
+		southwest stream3
+		northeast stream5
+		north	stream5
+		south	stream3
+		west	nway_steep
+		east	nway_steep
+		southeast nway_steep
+		northwest nway_steep
+	}
+}
+
+# HELP HELP HELP!!!
+#
+# no hot spring please!!
+#
+
+room stream5 "spring" {
+	desc {
+Half hidden between the roots of a large poplar tree is a small
+hole from which crystal-clear water gurgles its way to the
+surface and trickles away southwest into a stream.
+The wiggly-waggly path lies to the east
+	}
+	pictures { sstrem }
+	lit_room
+	net {
+		southwest stream4
+		east	wwpath4
+		west	nway_trees
+		northwest nway_trees
+		north	nway_trees
+		northeast nway_trees
+		south	nway_trees
+		southeast nway_trees
+	}
+}
+
+clonedesc hole_in_s5 stream5 "hole" {
+	desc {
+The hole gushes clear water into the stream
+	}
+}
+
+
+
+room wwpath1 "wiggly-waggly .path" {
+	desc {
+From this fork the wiggly-waggly path continues to the
+northwest and southwest, and a heavily wooded footpath will take
+you southeast through the trees
+	}
+	pictures { wwpa3 }
+	synonyms { fork }
+#	set forks
+	force_adj
+	lit_room
+	net {
+		north		nway_hedge
+		northeast	nway_hedge
+		east		nway_hedge
+		southeast	w_wgarden
+		south		nway_hedge
+		southwest	s_rbridge
+		west		nway_hedge
+		northwest	wwpath2
+		out		wwpath2
+	}
+}
+
+#long look for treacle well here
+room wwpath2 "wiggly-waggly .path" {
+	desc {
+This part of the wiggly-waggly path wiggles northeast and waggles
+southeast. A treacle well is standing near to the path here
+	}
+	pictures { well }
+	force_adj
+	lit_room
+	net {
+		north		nway_hedge
+		northeast	wwpath3
+		east		nway_hedge
+		southeast	wwpath1
+		south		nway_hedge
+		southwest	nway_hedge
+		west		nway_hedge
+		northwest	nway_hedge
+		down		death		#for jump down well
+		out		wwpath3
+	}
+}
+
+room wwpath3 "wiggly-waggly .path" {
+	desc {
+From this part of the wiggly-waggly path, you can see the Duchess'
+house through a gap in the hedge to the northeast. The path
+continues to the northwest and southwest.
+	}
+# permanent FGlance
+# You can hear a strange noise coming from the northeast.
+	pictures { house }
+	attribute nofullstop
+	force_adj
+	lit_room
+	net {
+		north		nway_hedge
+		northeast	outdkitchen
+		east		nway_hedge
+		southeast	nway_hedge
+		south		nway_hedge
+		southwest	wwpath2
+		west		nway_hedge
+		northwest	wwpath4
+		in		outdkitchen
+		out		wwpath4
+	}
+}
+
+room wwpath4 "wiggly-waggly .path" {
+	desc {
+Standing here on the path you can see it wiggles and waggles away
+to the southeast and northeast. The sound of trickling water can be heard coming
+from the west
+	}
+	pictures { wwpa6 }
+	force_adj
+	lit_room
+	net {
+		north		nway_hedge
+		northeast	wwpath5
+		east		nway_hedge
+		southeast	wwpath3
+		south		nway_hedge
+		southwest	nway_hedge
+		west		stream5
+		northwest	nway_hedge
+		out		stream5
+	}
+}
+
+room wwpath5 "wiggly-waggly .path" {
+	desc {
+From here, the path wiggles southwest and waggles northwest
+	}
+	pictures { wwpa3 }
+	force_adj
+	lit_room
+	net {
+		north		nway_hedge
+		northeast	nway_hedge
+		east		nway_hedge
+		southeast	nway_hedge
+		south		nway_hedge
+		southwest	wwpath6
+		west		nway_hedge
+		northwest	wwpath6
+		out		wwpath6
+	}
+}
+
+room wwpath6 "wiggly-waggly .path" {
+	# PLEASE_EDIT. This is the second room in the
+	# infinite sequence
+	desc {
+From here, the path waggles southeast and wiggles northeast
+	}
+	pictures { wwpa3 }
+	force_adj
+	lit_room
+	net {
+		north		nway_hedge
+		northeast	wwpath5
+		east		nway_hedge
+		southeast	wwpath5
+		south		nway_hedge
+		southwest	nway_hedge
+		west		nway_hedge
+		northwest	nway_hedge
+		out		wwpath5
+	}
+}
+
+room outdkitchen "Outside.A.Kitchen" {
+	desc {
+You are standing outside the Duchess' kitchen.
+Looking east through the kitchen window, you can see the Duchess' cook
+who is busy throwing every available pot and pan at the Duchess, while
+at the same time stirring the steaming contents of a huge cauldron
+into which she is pouring copious amounts of pepper; and all this
+punctuated by occasional, but none-the-less violent, fits of sneezing.
+You can return to the relative sanity of the wiggly-waggly path to
+the southwest, or venture north to the front of the Duchess' house
+	}
+	pictures { outkit }
+#	topline 12			# outside a
+	lit_room
+	net {
+		north		frontdhouse
+		northeast	nway_wall
+		east		nway_wall
+		southeast	nway_hedge
+		south		nway_hedge
+		southwest	wwpath3
+		west		nway_hedge
+		northwest	nway_hedge
+		out		wwpath3
+		in		frontdhouse
+	}
+}
+
+room frontdhouse "front_of Duchess''.house" {
+	desc {
+The Duchess' front path is flanked by exotic flowers asleep in their
+beds. The front door lies at the end of the path to the east, while
+south would take you back to the kitchen window
+	}
+# After everything
+# you've seen today, you are not a bit surprised to find the path
+# covered in fish scales
+	topline 13			# front of the
+	lit_room
+	pictures { frog }
+	net {
+		north		nway_hedge
+		northeast	nway_wall
+		east		nway_door		# dlounge
+		southeast	nway_wall
+		south		outdkitchen
+		southwest	nway_hedge
+		west		nway_hedge
+		northwest	nway_hedge
+		in		nway_door		# dlounge
+		out		outdkitchen
+	}
+}
+
+#***************************************************
+#*
+#* the following rooms from dlounge to dumbwaiter must stay together
+#*
+#***************************************************
+
+room dlounge "lounge" {
+	desc {
+This is obviously where the Duchess takes tea after a good meal in the
+dining room, which lies to the east. Some uncomfortable looking
+armchairs surround a large and cluttered occasional table. A bookcase, which
+extends from the floor to the ceiling, covers one wall. You can see
+some stairs twisting up and out of sight through an archway to the
+northeast, and can leave by the front door to the west. In the kitchen
+to the south, you can plainly see that the cook, whose back is turned
+to you, is throwing pots and pans at the Duchess. The unfortunate
+kitchenware makes a terrible racket as it lands on the kitchen
+floor. In fact it looks like one of those kitchen floors that would make
+even normal footsteps alarmingly loud!
+	}
+	pictures { dloung }
+	scen_noun_c archways
+	scen_noun_c archway
+	lit_room
+	attribute nofullstop
+	owner duchess
+	net {
+		north		nway_wall
+		northeast	dlanding
+		east		diningroom
+		southeast	nway_wall
+		south		dkitchen
+		southwest	nway_wall
+		west		nway_door		# frontdhouse
+		northwest	nway_wall
+		up		dlanding
+		out		nway_door		# frontdhouse
+		in		diningroom
+	}
+}
+
+room dkitchen "kitchen" {
+	desc {
+It doesn't take long to convince you that this is not a very safe
+place to be. While dodging bits of broken crockery and flying saucers,
+you take in the bizarre scene of destruction around you. The cook is
+standing by the stove, stirring the steaming contents of a large
+cauldron. Often, between stirs, the cook picks up whatever kitchen
+utensil comes to hand, and throws it at the Duchess, who is sitting by
+the dresser on a three legged stool.^The lounge lies beyond the cook
+to the north although you could probably return to the dumb waiter
+undetected by going east. A knife rack is mercifully situated out of
+the immediate reach of the cook and below it a stands a cooling cupboard
+whilst an ordinary looking kitchen table sits innocently beside it
+	}
+	scen_noun_a stove
+	scen_noun_a stool
+	lit_room
+	pictures { dkitch }
+	owner duchess
+	net {
+		north	dlounge
+ 		south	nway_wall
+		west	nway_wall
+ 		east	nway_wall
+		northwest nway_wall
+ 		northeast nway_wall
+		southwest nway_wall
+ 		southeast nway_wall
+ 	}
+}
+
+room diningroom "dining room" {
+	desc {
+The Duchess' dining
+room is most notable for the beautiful glass cabinet that dominates
+one wall. A plain dining room table and a matching set of chairs are
+completely eclipsed by this magnificent piece
+	}
+	pictures { ddine }
+	force_adj
+	lit_room
+	owner duchess
+	net {
+		west	dlounge
+ 		north	nway_wall
+		south	nway_wall
+ 		east	nway_wall
+		northwest nway_wall
+ 		northeast nway_wall
+		southwest nway_wall
+ 		southeast nway_wall
+ 	}
+}
+
+room dlanding "landing" {
+ 	desc {
+From here, the sound of breaking plates and crashing pans is
+thankfully little more than the occassional distant tinkle. The
+stairs to the southwest, would take you back down to the lounge. More
+serene possibilities lie to the south and east
+	}
+	pictures { dland }
+	owner duchess
+	lit_room
+	net {
+		down	dlounge
+		south	cbedroom
+		east	dbedroom
+		north	nway_wall
+		west	nway_wall
+		northwest nway_wall
+		northeast nway_wall
+		southwest dlounge
+		southeast nway_wall
+	}
+}
+
+room dbedroom "Duchess''.bedroom" {
+	desc {
+You wonder to yourself where the Duchess keeps all her clothes,
+if indeed she has any to keep. The reason for your wonderment is
+the rather surprising sight of a bedroom with just a bed and
+nothing else; no wardrobe or shelves, no paintings on the wall, no
+dressing table, and no looking glass. You conclude that the
+Duchess does very little else here except sleep, and there's very
+little else that you can do here except return to the landing by
+going west
+	}
+	scen_noun_f wardrobe
+	pictures { dbed }
+	synonyms { bedroom }
+#	set bedrooms
+	owner duchess
+	lit_room
+	net {
+		west	dlanding
+		north	nway_wall
+		south	nway_wall
+		east	nway_wall
+		northwest nway_wall
+		northeast nway_wall
+		southwest nway_wall
+		southeast nway_wall
+	}
+}
+
+room cbedroom "cook''s.bedroom" {
+	desc {
+The cook's bedroom is a mixture of reds and browns and yellows.
+Sunlight streams in through a single window illuminating a table, chair and a
+dressing table at the far end of the room. A neatly made bed dominates the centre of
+the room while a dumb waiter gives an option of going east, rather than north to the
+landing
+	}
+	owner cook
+	scen_noun_e books
+	scen_noun_e cook_books
+	synonyms { bedroom }
+	lit_room
+	pictures { cooksb }
+	net {
+		north	dlanding
+		south	nway_wall
+		west	nway_wall
+		east	dumbwaiter
+		in	dumbwaiter
+		northwest nway_wall
+		northeast nway_wall
+		southwest nway_wall
+		southeast nway_wall
+	}
+}
+
+room dumbwaiter "dumb waiter" {
+	desc {
+This cramped dumb waiter has a rope which runs vertically
+down the side, appearing and disappearing through tiny holes in the
+floor and ceiling
+	}
+	force_adj
+	lit_room
+	synonyms { dumb-waiter }
+	pictures { waiter }
+	net {
+		west	cbedroom
+	}
+}
+
+#***************************************************
+#*
+#* the previous rooms from dlounge to dumbwaiter must stay together
+#*
+#***************************************************
+
+room s_rbridge "giant elm tree" {
+	desc {
+Looking up at the sky through a gap in the foliage you imagine the elm tree
+to be about 30 feet high and a likely nesting site. A wiggly-waggly path
+begins its crooked journey to the northeast and a rickety bridge can be seen
+to the northwest
+	}
+	pictures { utree }
+	synonyms { trees elm site }
+#	set trees
+	force_adj
+	attribute alladjs
+	lit_room
+	net {
+		north		nway_trees
+		northeast	wwpath1
+		east		nway_trees
+		southeast	nway_trees
+		south		nway_trees
+		southwest	nway_trees
+		west		nway_trees
+		northwest	rbridge
+		out		wwpath1
+	}
+}
+
+room rbridge "rickety old bridge" {
+	desc {
+The rickety old bridge creaks and groans as you step onto it, as
+if complaining about your weight. In fact, you doubt very much
+whether it could support anyone more grown up. Some woods lie at
+the northwest end of the bridge, while a giant elm tree beckons
+to the southeast. Further down river, to the southwest, you can
+just see two girls lying on the river bank; one reading, the other
+fast asleep
+	}
+	pictures { rbrige }
+	force_adj
+	lit_room
+#	set bridges
+	net {
+		north		nway_fall
+		northeast	nway_fall
+		east		nway_fall
+		southeast	s_rbridge
+		south		nway_fall
+		southwest	nway_fall
+		west		nway_fall
+		northwest	wood1
+		out		s_rbridge
+	}
+}
+
+room inthesky "In.The.Sky" {
+	desc {
+It is very blue up here
+	}
+	pictures { insky }
+	lit_room
+	net {}
+}
+
+room treetops "treetops" {
+	desc {
+Trees, trees, trees, as far as the eye can see
+	}
+	pictures { nest }
+	topline 10			# in the
+	scen_noun_f serpent		# you can't see a serpent (!)
+	scen_noun_a tree_tops
+	scen_noun_a treetops
+	scen_noun_a tops_of_trees
+	attribute alladjs
+	plural
+	lit_room
+	initial_done			# for FGT hacks
+	net {
+		north	nway_trees
+		south	nway_trees
+		west	nway_trees
+		east	nway_trees
+		northwest nway_trees
+		northeast nway_trees
+		southwest nway_trees
+		southeast nway_trees
+	}
+	owner pigeon
+}
+
+room w_wgarden ".footpath" {
+	desc {
+A heavily wooded footpath threads its way northwestwards towards
+the fork in the path. Although a tall stone wall prevents any
+progress to the east, you can go southeast and northeast, round
+the southern and northern ends of the wall respectively
+	}
+	pictures { wwall }
+	lit_room
+	net {
+		northwest wwpath1
+		northeast n_wgarden
+		southeast s_wgarden
+		north	nway_trees
+		south	nway_trees
+		west	nway_trees
+		east	nway_wall
+		southwest nway_trees
+	}
+}
+
+room n_wgarden ".path" {
+	desc {
+The path continues southwest and southeast, along the side of an
+imposing stone wall which blocks your view to the south
+	}
+# additional :
+# You notice that there is a loose brick in the wall.
+	pictures { nwall }
+	lit_room
+	net {
+		southwest w_wgarden
+		southeast e_wgarden
+		north	nway_trees
+		south	nway_wall
+		west	nway_trees
+		east	nway_trees
+		northwest nway_trees
+		northeast nway_trees
+	}
+}
+
+room s_wgarden "hidden clearing" {
+	desc {
+This clearing is protected by woods to the south,
+east and west. A tall stone wall, half-hidden by creepers and
+hanging plants, stands to the north. Apart from investigating the
+giant mushroom, at the southern end of the clearing, you could
+leave via wooded paths which follow the wall round to the
+northeast and northwest
+	}
+	pictures { wall }
+	lit_room
+	scen_noun_a hanging_plants
+	scen_noun_a creepers
+	net {
+		northwest w_wgarden
+		northeast e_wgarden
+		south	mushroom
+		north	nway_wall
+		west	nway_trees
+		east	nway_trees
+		southwest nway_trees
+		southeast nway_trees
+	}
+}
+
+room e_wgarden "walnut .tree" {
+	desc {
+To the east of a tall stone wall, grows an enormous walnut tree
+which casts a shadow over the wooded paths that disappear round
+the wall to the northwest and southwest
+	}
+	pictures { ewall }
+	force_adj
+	lit_room
+	net {
+		northwest n_wgarden
+		southwest s_wgarden
+		up	treehouse
+		north	nway_trees
+		south	nway_trees
+		west	nway_wall
+		east	nway_trees
+		northeast nway_trees
+		southeast nway_trees
+	}
+}
+
+room treehouse "tree cupboard house" {
+	desc {
+Whoever built this treehouse, certainly didn't believe in waste. The
+sides and roof have been put together with everything from a cupboard
+door (complete with hinges), to bits of old garden fence. The floor
+has been made from a single piece of oak, that looks like it was once
+a table. A hole has been sawn into the floor to allow access down to
+the ground. You catch sight of another, much smaller hole in the
+northwest corner of the house, and a door would take you west
+	}
+	pictures { treehs }
+	force_adj
+	synonyms { treehouse tree-house door hinges}
+	lit_room
+#	set houses
+	net {
+		down	e_wgarden
+		west	nway_door	# ooalimb
+		out	nway_door	# ooalimb
+	}
+}
+
+room ooalimb "limb." {
+	desc {
+This is one of the largest branches in the tree, and extends west,
+right out over the tall stone wall below. Looking down, you can see that
+the wall forms an uninterrupted square around a garden; though
+where the garden gate is, it's impossible to say from up here.
+Looking back east along the limb towards the trunk, you can see a
+treehouse nestling in the branches of this magnificent walnut
+tree. The limb bends under you weight sufficiently that you could
+jump down into the garden from here without hurting yourself
+	}
+	topline 14			# out on a
+	force_adj
+	lit_room
+	pictures { limb }
+	net {
+		east	nway_door	# treehouse
+		in	nway_door	# treehouse
+		down	wgarden
+	}
+}
+
+room wgarden "walled country garden" {	# 'cos country==picturesque
+	desc {
+Surrounded on all sides by a tall brick wall, this
+picturesque garden boasts a beautiful array of flowers and shrubs but
+no gate, although there is a trap door nestling in the lawn
+	}
+	scen_noun_a lawn
+	scen_noun_a shrubs
+	scen_noun_a lawns
+	force_adj
+	lit_room
+	pictures { walgdn }
+	net {
+		north	nway_wall
+		south	nway_wall
+		west	nway_wall
+		east	nway_wall
+		down	nway_trapdoor	# winepassage
+		up	nway_branch	# branch is too high
+		northwest nway_wall
+		northeast nway_wall
+		southwest nway_wall
+		southeast nway_wall
+	}
+}
+
+room mushroom "giant.mushroom" {
+	desc {
+The most notable thing about this mushroom is its size. You
+certainly can't remember ever seeing one this big before, not even
+in the fields near your house
+	}
+	lit_room
+	initial_done
+	pictures { catter }
+	net {
+		north	s_wgarden
+		south	nway_trees
+		west	nway_trees
+		east	nway_trees
+		northwest nway_trees
+		northeast nway_trees
+		southwest nway_trees
+		southeast nway_trees
+	}
+}
+
+room beaverhole "disused beaver''s.hole" {
+	desc {
+There is a small hatch in the roof of this overgrown beaver's
+hole, and you can hear the sound of running water through an
+opening to the west
+	}
+	synonyms { hole bank }
+	force_adj
+	pictures { beahol }
+	net {
+		out	stream3
+		west	stream3
+		south	nway_hatch	# madcupboard
+		up	nway_hatch	# madcupboard
+	}
+	owner beaver
+#	set holes
+}
+
+room madcupboard ".cupboard" {
+	desc {
+The most notable thing about this small, cramped cupboard is the pipes,
+lots and lots of pipes; some starting from the ceiling and going
+straight down one of the walls and out through the floor, others
+winding their way across the cupboard from one side to the other. As
+this is obviously not a cupboard designed for humans, you could leave
+through the hatch in the floor, or the cupboard door to the east
+	}
+	topline 15
+	pictures { sink }
+	net {
+		east	nway_door	# madkitchen
+		north	nway_hatch	# beaverhole
+		down	nway_hatch	# beaverhole
+	}
+}
+
+room madkitchen "curved kitchen" {
+	desc {
+The odd thing about this, unusually shaped, kitchen, is that some of
+the walls are curved as if they formed part of a giant round
+sculpture. A kitchen table and some chairs stand on a tiled floor and
+a hat shaped opening leads southwest. Below a curved window is the
+kitchen sink, underneath which is a cupboard
+	}
+	pictures { madkit }
+	lit_room
+	net {
+		west	nway_door	# madcupboard
+		southwest breakfastroom
+		north	nway_wall
+		south	breakfastroom
+		east	nway_wall
+		northwest nway_wall
+		northeast nway_wall
+		southeast nway_wall
+	}
+	owner hatter
+}
+
+room breakfastroom "breakfast room" {
+	desc {
+It looks as if there was once a table here, but now all that remains
+are the chairs. A hat shaped opening leads northeast while other exits
+would take you east and southeast. You can leave the house by the
+curved front door to the south
+	}
+	pictures { brkrom }
+	force_adj
+	lit_room
+	net {
+		northeast madkitchen
+		east	hatroom
+		southeast dinnerroom
+		south	nway_door		# madfootpath
+		out	nway_door
+		north	madkitchen
+		west	nway_wall
+		northwest nway_wall
+		southwest nway_wall
+	}
+}
+
+room hatroom "hat room" {
+	desc {
+Behind the glass doors of the many curved display cabinets here,
+you see the largest collection of hats imaginable. Everything from
+Stetsons to Trilbys, from peaked caps to top hats, tall, short,
+narrow-rimmed, wide-rimmed, plain, checked, the list is endless.
+The only exit lies to the west
+	}
+	pictures { hatrom }
+	force_adj
+	lit_room
+	net {
+		west	breakfastroom
+		north	nway_wall
+		south	nway_wall
+		east	nway_wall
+		northwest nway_wall
+		northeast nway_wall
+		southwest nway_wall
+		southeast nway_wall
+	}
+}
+
+room dinnerroom "dinner room" {
+	desc {
+Just like the breakfast room, which lies to the northwest, you get
+the feeling that no-one has eaten here in a long time.
+	}
+#	set rooms
+	attribute nofullstop
+	force_adj
+	lit_room
+	pictures { maddin }
+	net {
+		northwest breakfastroom
+		north	nway_wall
+		south	nway_wall
+		west	nway_wall
+		east	nway_wall
+		northeast nway_wall
+		southwest nway_wall
+		southeast nway_wall
+	}
+}
+
+room madfootpath "meandering.footpath" {
+	desc {
+From here, the footpath meanders west through the trees, towards
+the March Hare's house, or north to the front door of the Mad
+Hatter's strange looking house
+	}
+	lit_room
+	pictures { madfoo }
+	net {
+		north	nway_door		# breakfastroom
+		in	nway_door
+		west	teaparty
+		south	nway_trees
+		east	nway_hedge
+		northwest nway_wall
+		northeast nway_wall
+		southwest nway_trees
+		southeast nway_trees
+	}
+}
+
+room teaparty "Mad tea party" {
+	desc {
+The March Hare's house, to the southwest, has chimneys shaped like
+ears and a roof thatched with fur. The only exit is back along the
+meandering footpath to the east. Under a chestnut tree, outside the
+Hare's house, you see a breakfast table surrounded by dining chairs.
+The table is set for tea but, although plenty of places have been
+laid, the March Hare and the Mad Hatter are crowded together at one
+corner
+	}
+	synonyms { roof chimneys tea-party thatch }
+	force_adj
+	attribute alladjs
+	lit_room
+	pictures { dormou }
+	net {
+		east	madfootpath
+		north	nway_trees
+		south	nway_trees
+		west	nway_trees
+		northwest nway_trees
+		northeast nway_trees
+		southwest nway_harehouse
+		southeast nway_trees
+		in	inteapot
+	}
+}
+
+room inteapot ".teapot" {
+	desc {
+The inside of the teapot is black and damp and, not surprisingly,
+smells of tea. By the light coming from your lantern, you can see
+that the dormouse is sound asleep. Mind you, even in the dark it
+wouldn't be difficult to guess this, because the sound of his snoring,
+is echoing off the insides of the tea pot and making a terrible din.
+You doubt that anything, however loud, could wake the dormouse from
+such a deep sleep
+	}
+	topline 10			# in the
+	pictures { intea }
+	net {
+		out	teaparty	# trapped in setmode
+	}
+}
+
+room winepassage "secret passage" {
+	desc {
+The earthen walls of the secret passage angrily reflect back the light
+from your lantern as if interrupted from a deep sleep. It feels as if
+you are the first person to venture down here in a very long time.
+Exits lead north and up
+	}
+	synonyms { tunnel }
+	force_adj
+	pictures { secret }
+	net {
+		up	nway_trapdoor	# wgarden
+		north	winecellar
+	}
+}
+
+# pretend room where girls can be seen from
+# wood2,footbridge,rbridge,madkitchen
+room pseudobank "river steep opposite bank" {
+	desc {
+[this room is unreachable]
+	}
+	force_adj
+	net {
+	}
+}
+
+#room to cope with white door connections in great hall
+#this is bad news - ken (makelocal will try to take u down the well!)
+#so using pseudobank instead!
+room death "death" {
+	desc {
+[this room is unreachable]
+	}
+	net {
+	}
+}
+
+synonym "sheer" { cliff adj }
+
+room bythesea "sea" {
+	desc {
+This beautiful secluded beach is encircled by a sheer cliff wall to the north, the
+sea to the south and impassable rocks to the east and west. The only way to leave the
+beach is up onto a rock ledge to the northeast. Sitting, or perhaps lying - it being
+hard to tell with turtles, on a slab of rock is the Mock Turtle
+	}
+	synonyms { beach slab_of_rock rock slab_of }	#serious hacks
+	topline 8			# by the
+	lit_room
+	pictures { turtle }
+	net {
+		up		rockledge
+		northeast	rockledge
+		south		nway_sea
+		southeast	nway_sea
+		southwest	nway_sea
+		west		nway_beach
+		east		nway_beach
+		northwest	nway_cliff
+		north		nway_cliff
+		}
+}
+
+
+# to get arround fake room hassle we have a bodge (ought to just kill the whole idea
+# but this is quicker...)
+
+item fake_waiter "dumb waiter" {
+	desc {
+e
+	}
+	force_adj
+	out
+	location dumbwaiter
+}
+

@@ -1,0 +1,494 @@
+#---------------------------------------------------------
+#
+#	Alice in Wonderland Npcs
+#
+#---------------------------------------------------------
+
+npc rabbit "white rabbit" {
+	desc {
+has pink eyes, big floppy ears and is a blur of nervous energy. A gold
+chain hangs from his brightly coloured waistcoat
+	}
+	icon	ic121
+	scen_noun_a ears
+	icon ic193
+	size 10
+	weight 10
+	hardness 5
+	nonpause
+	texture npc
+	nice
+	out
+	location grove
+}
+
+clone official rabbit "court official" {}
+
+npc queen "ugly Queen" {
+	desc {
+is perhaps the ugliest queen you ever saw. Towering above her subjects
+like some gigantic thunderstorm, grown men have been known to cringe
+at the mere mention of her name
+	}
+	icon	ic184
+	attribute article_the
+	another_noun
+	synonyms { queen_of_hearts }
+	out
+	sex female
+	location queenbedroom	# for now
+}
+
+npc king "King" {
+	desc {
+Looking at the Queen, you feel enormously sorry for the poor diminutive
+King, forever living in the shadow of his frightening wife
+	}
+	icon	ic161
+	attribute article_the
+	synonyms { king_of_hearts }
+	out
+	sex male
+	location queenbedroom	# for now
+}
+
+npc tailor "royal tailor" {
+	desc {
+is wearing one of his favourite creations
+	}
+	icon	ic159
+	attribute article_the
+	force_adj
+	location tailorhouse
+}
+
+npc duchess "duchess" {
+	desc {
+has large beady eyes and an alarmingly long nose. A red velvet robe
+struggles valiantly to contain her more than ample royal personage.
+She is tossing an ugly looking baby into the air
+	}
+	icon	ic248
+	scen_noun_c robe
+	sex female
+	inseparable
+	related
+	location dkitchen
+}
+
+npc cook "cook" {
+	desc {
+looks so angry that you wouldn't be in the least bit surprised if
+steam started to spurt from her ears. You decide she is so
+hot-tempered because of the amount of pepper she is pouring into the soup
+	}
+	icon	ic296
+	scen_noun_a ears
+#	emotion angry
+	owner duchess
+	sex female
+	inseparable
+	related
+	location dkitchen
+}
+
+npc emily "Emily" {
+	desc {
+your sister is wearing a grey dress, all prim
+and proper and altogether most unsuitable for such a warm
+afternoon. She is reading a book
+	}
+	icon	ic322
+	icon ic194
+	class children
+	size 10
+	weight 10
+	hardness 5
+	texture npc
+	nonpause
+	another_noun
+	synonyms { child girl sister }
+	set girls
+	desc_only
+	article
+	related
+	location bank
+	sex female
+	owner player
+}
+
+npc noone "no-one" {
+	desc {
+Boo!
+	}
+	desc_only
+	out
+	location bank
+}
+
+npc noone_proper "no-one" {
+	desc {
+e
+	}
+	article
+	out
+	location bank
+}
+
+clone maid noone "maid" {}
+clone beaver noone "beaver" {}
+clone mrthompson noone_proper "Mr_Thompson" {
+	synonyms { thompson }
+}
+
+npc pigeon "pigeon" {
+	desc {
+seems to have had its feathers ruffled
+	}
+#	icon	ic136
+	sex female
+	class birds
+	size 3
+	hardness 15
+	animal
+	out
+	location treetops
+}
+
+npc guard "royal guard" {
+	desc {
+appears to be having an extremely bad day
+}
+	icon	ic273
+	synonyms { club }
+	size 10
+	weight 10
+	hardness 5
+	texture npc
+	nonpause
+	related
+	location frontpalace
+}
+
+npc guards "royal guards" {
+	desc {
+look more like playing cards but with arms and legs attached to the
+appropriate corners
+	}
+	icon	ic273
+	synonyms { guard club clubs hoops }
+	plural
+	hardness 15
+	size 6
+	pseudo
+	location {
+		# one of the croquet1s changes to quarters later
+		death croquet1 croquet2 s_duckpond courtroom
+	}
+}
+
+# overalls rip...
+
+npc royalcook "royal palace chef" {
+	desc {
+sports a chef-like moustache
+that completely obscures the area of his face where you assume
+his mouth to be. How he ever manages to sample any of his royal dishes
+is a mystery
+	}
+	icon	ic271
+	scen_noun_a moustache
+	synonyms { cook }
+	force_adj
+	attribute article_the
+	size 6
+	hardness 15
+	location palacekitchen
+}
+
+npc gardeners "gardeners" {
+	desc {
+resemble the two, five and seven of spades
+	}
+	icon	ic273
+	synonyms { painter }
+	size 6
+	plural
+	covetous
+	pseudo
+	location {
+		magicgarden
+		tinytunnel		#a painter
+		}
+}
+
+npc puppy "puppy" {
+	desc {
+has large round eyes and long ears and is wagging his tail as if
+waiting for you to play with him
+	}
+	icon	ic206
+	scen_noun_a ears
+	synonyms { dog pup tail }
+	size 3
+	hardness 15
+	animal
+	pseudo
+	location { byriver stream1 }
+	
+}
+
+npc caterpillar "blue orange large caterpillar" {
+	desc {
+is large and blue and is sitting atop a mushroom with his arms
+folded, quietly smoking some sherbet with a long hookah
+	}
+	icon	ic230
+	size 6
+	hardness 15
+	sex male
+	related
+	location mushroom
+}
+
+item hookah "long hookah" {
+	desc {
+consists of a vessel containing a quantity of water through which smoke
+is drawn by the inhalation of the caterpillar such that the water cools
+the smoke
+	}
+	synonyms { vessel pipe water  }
+	owner caterpillar
+#	icon	ic
+	texture smooth
+	size 3
+	hardness 15
+	related
+	inseperable
+	location caterpillar
+}
+
+npc hatter "Mad Hatter" {
+	desc {
+peers out contemptuously at the world from beneath a huge top hat. He
+appears to be completely bonkers
+	}
+	icon	ic331
+	scen_noun_a watch
+	scen_noun_a pocket_watch
+	attribute article_the
+	size 6
+	hardness 15
+	sex male
+	related
+	force_adj
+	location teaparty
+}
+
+item top_hat "top hat" {
+	desc {
+sits on the Mad Hatter's head
+	}
+	synonyms { hats }
+	owner hatter
+	inseperable
+	related
+	location hatter
+}
+
+npc hare "March Hare" {
+	desc {
+is wearing a white bow tie and brown jacket which vaguely matches his
+fur. His ears appear to have been tied together with a strand of grass
+	}
+	icon	ic332
+	scen_noun_a ears
+	attribute article_the
+	size 6
+	hardness 15
+	sex male
+	texture furry
+	force_adj
+	related
+	location teaparty
+}
+
+item bowtie "bow-tie" {
+	desc {
+gently strangles the March Hare
+	}
+	synonyms { tie bow }
+	owner hare
+	inseperable
+	related
+	location hare
+}
+
+clonedesc harejacket bowtie "brown jacket" {
+	desc {
+suits the March Hare
+	}
+	owner hare
+}
+
+clonedesc hgrass bowtie "grass strand" {
+	desc {
+suits the March Hare, but not as much as the jacket
+	}
+	owner hare
+}
+
+clonedesc fur bowtie "fur" {
+	desc {
+is furry
+	}
+	owner hare
+}
+
+npc dormouse "dor dormouse" {
+	desc {
+is small, furry and very much asleep
+	}
+	icon	ic333
+	synonyms { mouse }
+	short_look
+	size 2
+	hardness 15
+	sex male
+	animal
+	texture furry
+	contained
+	location teapot
+}
+
+npc flamingo "pink flamingo" {
+	desc {
+is definitely the pinkest animal you have ever laid eyes upon. It's a
+wonder that such long thin legs are capable of supporting a bird so
+large, especially when it never seems to use more than one at once!
+	}
+	icon	ic334
+	attribute nofullstop
+	class birds
+	size 3
+	weight 2
+	hardness 15
+	animal
+	texture soft
+	moveable
+	contained
+	out
+	location pigeonnest
+}
+
+synonym "spiny" { prickly adj }		# so spiny norman == hedgehog
+					# this may change to a clonedesc
+					# sometime if I'm bored
+
+clonedesc spiny_norman hedgehog "prickly spiny.norman" {
+	desc {
+is wont to be about twelve feet from nose to tail, but can be up to eight hundred
+yards long
+	}
+	attribute no_article
+	synonyms { norman }
+}
+
+npc hedgehog "prickly hedge hedgehog" {
+	desc {
+is round and prickly and has a small pointed nose and a back full of bristles
+	}
+	icon	ic335
+	synonyms { hog }
+	size 3
+	weight 2
+	hardness 15
+	animal
+	texture npc
+	moveable
+	location wgarden
+}
+
+npc baby "ugly baby" {
+	desc {
+This is positively the ugliest baby you ever did see. In fact it
+looks more like a piglet than a baby
+	}
+	icon	ic336
+	synonyms { piglet }
+	desc_only
+	size 3
+	weight 2
+	hardness 15
+	animal
+	texture npc
+	moveable
+	owner duchess
+	related
+	location dkitchen
+}
+
+npc guests "croquet guests" {
+	desc {
+are trying to keep their heads while all about lose theirs, literally
+	}
+	icon	ic337
+	synonyms { player players }
+	plural
+	size 6
+	hardness 15
+	texture npc
+	pseudo
+	out		 # setin for match, queen gets insp rel'ed to 'em
+	location { croquet1 croquet2 s_duckpond }
+}
+
+clonedesc croquetball guests "croquet ball" {
+	desc {
+looks much more like a hedgehog than any ball you have ever played with
+	}
+}
+
+npc knave "Knave_of_Hearts" {
+	desc {
+looks like a bit of a rogue
+	}
+	icon	ic338
+	synonyms { knave }
+	size 10
+	weight 10
+	hardness 5
+	nonpause
+	texture npc
+	out
+	location courtroom
+}
+
+npc mock_turtle "mock turtle" {
+	desc {
+is looking very sorry for himself
+	}
+	icon	ic339
+	size 12
+	weight 12
+	hardness 5
+	texture hard
+	related
+	location bythesea
+}
+
+npc gryphon "gryphon" {
+	desc {
+has an eagle's head and wings and a lion's body
+	}
+	icon	ic340
+	scen_noun_f lion
+	scen_noun_f wings
+
+	size 12
+	weight 12
+	hardness 5
+	texture hard
+	related
+	location rockledge
+}

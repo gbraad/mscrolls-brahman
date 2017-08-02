@@ -1,0 +1,197 @@
+#######################################################
+#
+#	%W%
+#	%G%
+#
+#	fish fred file
+#
+########################################################
+
+verbs {
+	look examine get take carry drop leave go walk enter run shift move
+	lift raise lower push pull smell taste eat drink put insert inventory
+	fit
+	pour
+	empty fill mix jump
+#	vault
+	throw punch kick fight attack
+	kill break smash damage remove scrape light unlight extinguish open
+	close suss status debug
+#	fire shoot blast
+	twist turn
+# these 'SAY' verbs must stay in order & in one lump
+	say shout yell cry call
+#
+	strangle choke
+	feel touch wear read
+	hide hit steal bash
+	unlock
+	pick tie fix join untie
+#	feed
+	bite use cross slide
+#	blow
+	press give climb burn
+	ignite
+#	cast
+	fod exit ask question melt listen search find
+	grab
+#	rub
+#	smoke
+	wait
+#	wake
+#	rape
+#	mend
+#	lever
+	buy purchase
+#	lean
+	ride
+#	plant
+	lock
+	tear rip cut knock
+#	point shine
+#	split unmix separate
+	exits
+#	cover uncover
+	sit
+	lie
+#	kiss vote
+	stand mount tell offer dismount help laugh show loop dig
+#	bet stop
+	play swim
+#	flush piss
+	sleep
+	set
+#	wind
+#	chew
+#	reflect
+	hold place position
+#	illuminate
+#	catch
+	pray
+#	cue pot shake roll fish sing
+#	look_for flush
+#	new ones..
+	dial
+#	stay
+#	follow
+#	strike warm paddle oil wave start
+#	answer aqua flyzz dracmazza sol
+	reveal
+#	suck tap
+#	tap-dance
+	dance
+#	post sieve
+#	count
+#	wash clean oojimy chase weigh
+	make
+#	shave
+	unscrew
+	tune
+#	urinate confess
+	screw
+	}
+
+synonym "board" {ride verb}
+synonym "time" { pray verb }
+synonym "z" { wait verb }
+synonym "breathe" { smell verb }
+synonym "inhale" { smell verb }
+synonym "roll" { turn verb }
+synonym "login" { dial verb }
+synonym "order" { buy verb }
+synonym "switch" { turn verb }
+synonym "disco" {dance verb }
+synonym "big" { large adj }
+synonym "tacky" { plastic adj }
+synonym "x" { examine verb }
+synonym "nibble" { eat verb }
+synonym "gray" { grey adj }
+synonym "upside_down" { UPSIDEDOWN conj }
+synonym "invite" { ask verb }
+synonym "come" { go verb }
+synonym "out_of" { exit verb }
+
+
+.inonfwrooms.f23
+.ifwrooms.f23
+
+.ifwobjs.f23
+.inonfwobjs.f23
+
+######################
+#
+# clones next ...
+#
+######################
+
+clone band death "seven deadly band" {
+	synonyms { fins }
+	attribute article_the
+}
+
+clone principal death "principal" {
+	attribute article_the
+}
+
+clone mortgage death "mortgage" {
+}
+
+clone attendant death "attendant" {
+}
+
+clone clams plans "clams" {
+	synonyms { cash money }
+}
+
+clone shutdown death "shutdown" {
+}
+
+clone producer death "producer" {
+	attribute article_the
+}
+
+clone panchax death "sir boss" {
+	synonyms { playfair panchax }
+	attribute article_the
+}
+
+clone main_studio death "main studio" {
+}
+
+clone coffee death "coffee" {
+}
+
+clone pyramid death "glass pyramid" {
+}
+
+clone hq death "mission HQ" {
+}
+
+clone explosion death "explosion" {
+}
+
+######################
+#
+# clonedescs next ...
+#
+######################
+
+clonedesc volume mixer "volume" {
+	desc {
+I'm afraid that volume is an abstract concept used to express the level of
+sound present in a room and so it can't be seen
+	}
+}
+
+clonedesc piscean_relics bones "piscean relics" {
+	desc {
+are quite boring really, except for the skeleton of the 'Bloodyenormasaurus'
+	}
+	synonyms { exhibits collection }
+}
+
+##################
+#
+# end of fish.f23
+#
+##################

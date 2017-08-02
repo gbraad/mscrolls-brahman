@@ -1,0 +1,3598 @@
+#####################################
+#                                   #
+#	assassin fred23 source      #
+#                                   #
+#	%W%			    #
+#	%G%			    #
+#				    #
+#####################################
+.isynonyms.f23
+
+######################
+#                    #
+# rooms start here   #
+#                    #
+######################
+
+.irooms.f23
+
+####################
+#                  #
+# npc's start here #
+#                  #
+####################
+
+.inpc.f23
+
+##################################################
+#                                                #
+# items start here with you and your possessions #
+# first and then they are rem'd by the room in   #
+# which they start the game,eg '# sec_room items'#
+#                                                #
+##################################################
+
+
+	# 'y' and 't'adjectives are used by sp.play_blackjack, so you can say
+	# yes i do want another card
+
+
+# WARNING - This has been hacked to deal with reduced packaging: desc was:
+# was a Christmas present from your son Christopher
+
+item diary "personal organiser" {
+	desc {
+was a Christmas present from your son Christopher, the only noteable entries
+for today remind you to phone Peter at 11.20 and to call Jenny at noon to
+confirm lunch at le Monaco at 2pm
+	}
+	synonyms { filofax }
+	force_adj
+	moveable
+	owner player
+	size 1
+	weight 1
+	hardness 15
+	combustible 1
+	contained
+	location case
+	texture smooth
+	synonyms { diary }
+}
+
+item case "leather briefcase" {
+	desc {
+was a christmas present from your wife
+	}
+	synonyms { case }
+	force_adj
+	closed
+	moveable
+	owner player
+	weight 1
+	size 4
+	contr_vol 4
+	npc_refuses
+	location inventory
+	hardness 15
+	attribute infinite_container	
+#	attribute impermeable
+	set cases
+}
+
+item tie "old school tie" {
+	desc {
+has survived since you were in the Lower Fourth at Churtley
+	}
+	moveable
+	force_adj
+	attribute alladjs	# print ALL the adjs it has please
+	worn
+	covers { chest }
+	location inventory
+	hardness 12
+	size 1
+	owner player
+	weight 1
+	texture soft
+	npc_refuses
+	combustable 1
+	wearable 1
+	class clothes
+}
+
+item jacket "pinstriped jacket" {
+	desc {
+is pinstriped to make you look like every other stockbroker. Its pocket has
+the emblem of your old school embroidered on it
+	}
+	moveable
+#	force_adj
+	owner player
+	worn
+	covers { chest arms }
+	hardness 12
+	weight 1
+	size 2
+	npc_refuses
+	texture soft
+	wearable 1
+	combustable 1
+	location inventory
+	class clothes
+	class suit
+}
+
+item shirt "white shirt" {
+	desc {
+was clean on this morning
+	}
+	moveable
+	owner player
+	worn
+	covers { chest arms head }
+	hardness 15
+	npc_refuses
+	weight 1
+	size 1
+	texture soft
+	wearable 1
+	combustable 1
+	location inventory
+	class clothes
+}
+
+item trousers "pinstriped trousers" {
+	desc {
+are in the height of city fashion
+	}
+#	force_adj
+	plural
+	moveable
+	worn
+	covers { groin legs }
+	hardness 15
+	weight 1
+	owner player
+	npc_refuses
+	size 2
+	texture soft
+	wearable 1
+	combustable 1
+	location inventory
+	class clothes
+	class suit
+}
+
+item microphone "radio microphone" {
+	desc {
+is minute and inconspicuous
+	}
+	synonyms { radio transmitter }
+	hardness 4
+	moveable
+	size 1
+	weight 1
+	related
+	location shirt
+	out	
+}
+
+item credit_card "credit card" {
+	desc {
+is the one that's accepted in more places than any other in the world
+	}
+	force_adj
+	moveable
+	npc_refuses
+	contained
+	location pocket1
+	money
+	owner player
+	size 1
+	weight 1
+	hardness 5
+	value 10000
+}
+
+item key1 "car key" {
+	desc {
+The car key serves as both a door and ignition key for your BMW
+	}
+#	force_adj		# since i dont have a car key...
+	desc_only
+	another_noun
+	size 1
+	weight 1
+	hardness 15
+	contained
+	location pocket1
+	owner player
+	moveable
+	set keys
+}
+
+#####################
+#                   #
+# your_office items #
+#                   #  
+#####################
+
+item chair "plastic office chair" {
+	desc {
+is one of those plastic ones that make you sweat a lot in the summer
+	}
+	sittable
+	weight 10
+	size 6
+	related
+	strength 5
+	location your_office
+	hardness 15
+	set chairs
+	another_noun
+	npc_refuses
+	owner player
+}
+
+item desk "office desk" {
+	desc {
+is covered with tea and coffee stains
+	}
+	scen_noun_a stains
+
+	sittable
+	moveable
+	size 10
+	weight 15
+	related
+	location your_office
+	hardness 15
+	owner player
+}
+
+item cabinet "filing office cabinet" {
+	desc {
+holds the sum total of your life's work
+	}
+	force_adj
+	moveable
+	closed
+	related
+	contr_vol 5
+	size 10
+	weight 15
+	location your_office
+	hardness 15
+	texture smooth
+	owner player
+}
+
+item false_accounts "amended company ledger" {
+	desc {
+is your copy of the company's accounts over the past financial year,
+amended to include movement of monies relevant to your department only
+	}
+	synonyms { accounts }
+	moveable
+	size 1
+	weight 1
+	hardness 15
+	contained
+	location cabinet
+	owner player
+	another_noun
+	set ledgers
+}
+
+item certificate "share certificate" {
+	desc {
+confirms your purchase of twenty thousand shares in a company called Scott
+Electronics
+	}
+	force_adj
+	size 1
+	weight 1
+	hardness 3
+	contained
+	location cabinet
+	moveable
+}
+
+item receipts "bundle_of receipts" {
+	desc {
+is a record of all payments made by the company in the past few weeks,
+ready for the company accountant to deal with
+	}
+	force_adj
+	modified_quantity	# you can't see ANY receipts here.
+	synonyms { bundle }
+	size 2
+	weight 1
+	hardness 3
+	combustable 1
+	contained
+	location safe
+	moveable
+}
+
+item chips "casino gambling chips" {
+	desc {
+The total value of the chips is 
+	}
+	synonyms { chip }
+	another_noun
+	desc_only
+	force_adj
+	plural
+	moveable
+	size 1
+	weight 1
+	hardness 15
+	contained
+	location safe
+	value 500		# 500 pounds
+	attribute nofullstop
+}
+
+item real_accounts "full company ledger" {
+	desc {
+is your partner's copy of all the company's accounts over the past financial
+year
+	}
+	synonyms { accounts }
+	another_noun
+	moveable
+	size 1
+	weight 1
+	hardness 15
+	contained
+	location safe
+	owner partner
+	set ledgers
+}
+
+item envelope1 "envelope" {
+	desc {
+is addressed to Blue Dolphin Security, 22 London Road, London, EC2
+	}
+	synonyms { address }  		# for READ ADDRESS
+	short_look
+	moveable
+	contr_vol 1
+	local_contents
+	size 1
+	weight 1
+	hardness 3			# can tear it.
+	related
+	location desk1
+	open
+	out
+}
+
+item cheque "cheque" {
+	desc {
+is drawn out on the company account to a Monsieur Charpontier for the sum of
+sixty thousand pounds
+	}
+	size 1
+	weight 1
+	moveable
+	hardness 3
+	contained
+	location envelope1
+	owner mrbig
+}
+
+
+item window "window" {
+	desc {
+looks out across the park in the square to a fine old building which has
+probably been snapped up by the council or the civil service
+	}
+	hardness 15
+	strength 5
+	pseudo
+	location { your_office part_office sec_room }
+	size 10
+	weight 5
+	set windows
+}
+
+##################
+#                #
+# sec_room items #
+#                #
+##################
+
+item phone "telephone" {
+	desc {
+is the latest all-singing all-dancing telecommunications technology from BT,
+supposed to handle all internal and external calls in the building through a
+mini-exchange. It is thus famed for its frequently crossed, crackly and
+unobtainable lines. Its internal number is 01; for an external line, dial 9
+then the number you want
+	}
+	synonyms { phone receiver handset }
+	size 3		# else cannot get
+	weight 2
+	moveable
+	strength 5
+	related
+	location desk1
+	hardness 15
+	fixed_num desk1
+	fixed
+	short_look
+	owner secretary
+	attribute phone
+}
+
+item pictures "family pictures" {
+	desc {
+The Stubbs family look a grim bunch; there isn't a smile to be seen in any
+of Margaret's pictures
+	}
+	synonyms { family photos }
+	force_adj
+	plural
+	desc_only
+#	moveable
+	related
+	location sec_room
+	size 3
+	weight 3
+	npc_refuses
+	hardness 15
+	owner secretary
+}
+
+item desk1 "desk" {
+	desc {
+is the same make as the one in your office but a lot shabbier
+	}
+	sittable
+	moveable
+	size 10
+	weight 15
+	related
+	location sec_room
+	owner secretary
+	hardness 15
+#	attribute singleseat
+}
+
+item chair1 "soft comfortable chair" {
+	desc {
+looks soft and comfortable
+	}
+	sittable
+	weight 10
+	size 6
+	strength 5
+	texture soft
+	related
+	location sec_room
+	owner secretary
+	hardness 15
+	npc_refuses
+	set chairs
+	attribute singleseat
+}
+
+#####################
+#                   #
+# corridor2 items   #
+# corridor3 items   #
+#                   #
+#####################
+
+item fire_door2 "fire door" {
+	desc {
+has the words 'fire door - keep shut' written on it and a mechanism above it
+to do this automatically
+	}
+	scen_noun_a mechanism
+
+	force_adj
+	closed
+	pseudo
+	location { corridor2 stairs2 }
+	size 5
+	weight 10
+	strength 5
+	set doors
+	hardness 15
+}
+
+item collection_box "collection box" {
+	desc {
+By its heavy rattle, the collection box sounds almost full
+	}
+	desc_only
+	force_adj
+	size 2
+	weight 2
+	contr_vol 2
+	related
+	location sally_man
+	hardness 15
+	strength 5
+	attribute infinite_container
+}
+
+item salad "small fresh salad" {
+	desc {
+is plain and uninteresting. The sort of salad that people on diets love to
+starve themselves with
+	}
+	size 1
+	weight 1
+	texture crunchy
+	hardness 15
+	moveable
+	related
+	edible 1
+	location rest_table
+	out
+	owner wife
+}
+
+item circ_window "circular window" {
+	desc {
+looks onto a scene that turns your stomach
+	}
+	scen_noun_c stomach
+	
+	force_adj
+	inseparable
+	related
+	location swing_door
+	size 2
+	weight 2
+	hardness 15
+	set windows
+}
+
+##################
+#                #
+# bathroom items # 
+#                #
+##################
+
+item urinal "urinal" {
+	desc {
+looks very old but is still usable
+	}
+	size 5
+	weight 15
+	inseparable
+	related
+	location bathroom
+	contr_vol 5
+	hardness 15
+	attribute smallcontents		# no chairs in here please.
+	attribute article_a
+}
+
+item sink "sink" {
+	desc {
+is slightly cracked but has lasted well considering its age. It still has the 
+same brass plughole and single brass tap that it did when it was made
+	}
+	contr_vol 3
+	size 3
+	weight 15
+	inseparable
+	related
+	location bathroom
+	synonyms { basin }
+	sittable
+	hardness 15
+	attribute impermeable
+}
+
+item plughole "plug brass hole" {
+	desc {
+gurgles occasionally
+	}
+	hardness 0
+	weight 0
+	contr_vol 2
+	inseparable
+	related
+	location sink
+	size 1
+	synonyms { plughole }
+}
+
+item mirror "mirror" {
+	desc {
+ . You also notice tiny scratches over the mirror's surface
+	}
+	scen_noun_c scratches
+
+	desc_only
+	hardness 5
+	size 2
+	weight 1
+	moveable
+	related
+	location bathroom
+	npc_refuses
+}
+
+item plug "rubber plug" {
+	desc {
+is a rubber replacement for the original brass one
+	}
+	contained
+	size 1
+	weight 1
+	moveable
+	contained
+	location sink
+	hardness 15
+	npc_refuses
+}
+
+item tap "brass original tap" {
+	desc {
+has 'warm' written on it
+	}
+	short_look
+	closed
+	size 1
+	weight 1
+	inseparable
+	related
+	location sink
+	texture warm
+	hardness 15
+}
+
+item door2 "cubicle door" {
+	desc {
+swings inwards so that the person inside, if there is one, has one last chance
+to avoid embarrassment if they haven't locked the door
+	}
+	size 5
+	force_adj
+	open
+	weight 10
+	strength 5
+	pseudo
+	location { bathroom cubicle }
+	set doors
+	hardness 15
+}
+
+item lock "cubicle door original brass lock" {
+	desc {
+is made of solid brass that is slightly tarnished because of its age
+	}
+	inseparable
+	related
+	location door2
+	sl cubicle
+	size 1
+	weight 1
+	hardness 15
+	class fittings
+}
+
+item cosmetics "cosmetics" {
+	desc {
+range from foundation creams, shampoos and make-up kits to ugly face packs and
+pink hair dyes
+	}
+	plural
+	related
+	location chem_shelves
+	sittable
+	size 1
+	weight 1
+	hardness 15
+	moveable
+}
+
+#################
+#	        #
+# cubicle items #
+#	        #
+#################
+
+item toilet "old toilet" {
+	desc {
+looks solid enough, if a little old
+	}
+	synonyms { loo }	
+	inseparable 
+	related
+	location cubicle
+	size 4
+	weight 15
+	contr_vol 4
+	hardness 15
+	attribute smallcontents
+	class fittings
+	sittable
+}
+
+item cistern "cistern" {
+	desc {
+makes some odd gurgling noises that seem to give it a character of its own
+	}
+	scen_noun_a ballcock
+
+	short_look
+	inseparable 
+	related
+	location cubicle
+	size 4
+	weight 12
+	contr_vol 3
+	closed
+	hardness 15
+	class fittings
+}
+
+
+item bag "plastic small bag" {
+	desc {
+is the sort you buy nails or electrical components in
+	}
+	contained
+	local_contents
+	force_adj
+	location cistern
+	size 1
+	weight 1
+	contr_vol 1
+	hardness 15
+	moveable
+	wet
+	npc_refuses
+	closed
+	texture smooth
+}
+
+item powder "white dull powder" {
+	desc {
+is a mixture of fine white grains and solid grey lumps
+	}
+	scen_noun_a grains
+	scen_noun_a lumps
+
+	force_plural
+	force_adj
+	moveable
+	hardness 2
+	edible 4
+	size 1
+	weight 1
+	contained
+	location bag
+	npc_refuses
+	synonyms { cocaine coke snow drugs }
+}
+
+###############
+#             #
+# lift items  #
+#             #
+###############
+
+item door3 "lift door" {
+	desc {
+is automatically operated by the lift
+	}
+	synonyms { lift }
+	short_look
+	closed
+	size 5
+	weight 10
+	strength 5
+	pseudo
+	location { corridor3 car_park reception corridor1 }
+	set doors
+	another_noun
+	hardness 15
+}
+
+#item cubicle_object "cubicle" {
+#	desc {
+#
+#
+	#}
+	#out
+	#size 5
+	#closed
+	#weight 10
+	#strength 5
+	#pseudo
+	#location { corridor3 corridor3 }
+	#set doors
+	#another_noun
+	#hardness 15
+#}
+#
+#item door6 "spare door" {
+	#desc {
+#Made of a dull grey metal, the lift door has a button next to it that calls
+#the lift when pressed
+	#}
+	#out
+	#desc_only
+	#closed
+	#size 5
+	#weight 10
+	#strength 5
+	#pseudo
+	#hardness 15
+	#location { reception reception }
+	#set doors
+	#another_noun
+#}
+#
+#item door7 "spare door" {
+	#desc {
+#is made of a dull grey metal and has a glowing button next to it that 
+#automatically calls the lift when pressed
+	#}
+	#out
+	#closed
+	#size 5
+	#weight 10
+	#strength 5
+	#pseudo
+	#location { car_park car_park }
+	#set doors
+	#another_noun
+	#hardness 15
+#}
+
+#item b_button "B button" {
+	#desc {
+#will take you to the basement, where the building's car park is situated
+	#}
+	#out
+	#synonyms { button_b }
+	#force_adj
+	#inseparable
+	#related
+	#hardness 15
+	#location lift
+	#size 1
+	#weight 1
+	#set buttons
+#}
+#
+#item g_button "G button" {
+	#desc {
+#takes the lift to the ground floor
+	#}
+	#out
+	#synonyms { button_g }
+	#force_adj
+	#inseparable
+	#hardness 15
+	#related
+	#location lift
+	#size 1
+	#weight 1
+	#set buttons
+#}
+##
+#item one_button "1 one button" {
+	#desc {
+#takes you to the first floor, where your partner's office is situated
+	#}
+	#out
+	#synonyms { button_one button_1 }
+	#force_adj
+	#inseparable
+	#hardness 15
+	#related
+	#location lift
+	#size 1
+	#weight 1
+	#set buttons
+#}
+#
+#item two_button "2 two button" {
+	#desc {
+#takes you to the second floor where you have your office
+	#}
+	#out
+	#synonyms { button_two button_2 }
+	#force_adj
+	#inseparable
+	#related
+	#hardness 15
+	#location lift
+	#size 1
+	#weight 1
+	#set buttons
+#}
+#
+###################
+#                 #
+# corridor1 items #
+#                 #
+###################
+
+item fire_door1 "fire door" {
+	desc {
+has the words 'fire door - keep shut' written on it and a mechanism above it
+to do this automatically
+	}
+	scen_noun_a mechanism
+
+	force_adj
+	closed
+	pseudo
+	location { corridor1 stairs1 }
+	size 5
+	weight 10
+	strength 5
+	set doors
+	another_noun
+	hardness 15
+}
+
+#################
+#               #
+# part_sec room #
+#               #
+#################
+
+item phone1 "telephone" {
+	desc {
+is for Theresa's use only. Its internal number is 10; to get an outside line,
+precede the number you want with a 9
+	}
+	synonyms { phone receiver handset}
+	size 3
+	weight 2
+	moveable
+	strength 5
+	related
+	location desk2
+	hardness 15
+	fixed_num desk2
+	fixed
+	owner theresa
+	attribute phone
+}
+
+item desk2 "mahogany desk" {
+	desc {
+is adequate for Theresa's needs and much more attractive than your own second 
+hand one. It has one drawer
+	}
+	sittable
+	moveable
+	size 10
+	weight 15
+	related
+	location part_sec
+	texture smooth
+	hardness 15
+	owner theresa
+}
+
+
+item shred_machine "shredding machine" {
+	desc {
+could cause a grievous injury if not handled properly
+	}
+	synonyms { shredder }
+	force_adj
+	contr_vol 1			# so it won't fit.
+	size 10
+	weight 15
+	related
+	location part_sec
+	owner theresa
+	hardness 15
+	sittable
+#	attribute switchable
+}
+
+item letter "perfumed letter" {
+	desc {
+is obviously a personal missive - and it's in your wife's handwriting!
+	}
+	force_adj
+	related
+	location shred_machine
+	hardness 3
+	npc_refuses
+	size 1
+	weight 1
+	moveable
+	owner partner
+}
+
+item door8 "office door" {
+	desc {
+Mr. D. Rogers, Senior Partner^Rogers & Rogers, Stockbrokers^is written on
+the office door in gaudy gold lettering
+	}
+	scen_noun_a lettering
+
+	desc_only
+	size 5
+	locked
+	weight 10
+	strength 5
+	pseudo
+	location { part_sec part_office }
+	set doors
+	another_noun
+	hardness 15
+	owner partner
+}
+
+item drawer2 "desk drawer" {
+	desc {
+is set into Theresa's desk
+	}
+	size 2
+	closed
+	moveable
+	weight 2
+	hardness 15
+	contr_vol 1
+	inseparable
+	related
+	location desk2
+	attribute smallcontents
+	owner theresa
+}
+
+item key "brass spare office key" {
+	desc {
+is the spare key to your partner's office
+	}
+	force_adj
+	moveable
+	size 1
+	weight 1
+	npc_refuses
+	another_noun
+	hardness 15
+	contained
+	location drawer2
+	owner partner
+	set keys
+}
+
+####################
+#                  #
+# board_room items #
+#                  #
+####################
+
+synonym "impressive" { rosewood adj }
+
+item rose_table "rosewood table" {
+	desc {
+has collected a few knocks and bumps over the years but is still impressive
+	}
+	size 10
+	weight 15
+	hardness 15
+	force_adj
+	related
+	location board_room
+	sittable
+}
+
+item portraits "family portraits" {
+	desc {
+show all the family partners in old age, just after their retirement. They are
+not well painted but are effective in giving an air of solemnity to the room
+	}
+	synonyms { pictures paintings }
+	size 10
+	weight 5
+	hardness 15
+	related
+	location board_room
+	strength 5
+}
+
+#####################
+#                   #
+# part_office items #
+#                   #
+#####################
+
+item safe "safe" {
+	desc {
+has a lock on it operated by a dial
+	}
+	out
+	owner partner
+	sittable
+	contr_vol 1
+	contained
+	strength 5
+	location hole
+	locked
+	size 2
+	hardness 15
+	weight 15
+}
+
+item safe_lock "dial" {
+	desc {
+would take days to figure out if you didn't know the correct combination of
+turns to make to the dial
+	}
+	synonyms { lock }
+	force_adj
+	size 1
+	weight 1
+	hardness 15
+	inseparable
+	related
+	location safe
+}
+
+item hole "hole_in_the_wall" {
+	desc {
+goes back about two feet
+	}
+	size 6
+	weight 0
+	hardness 0
+	inseparable
+	related
+	location part_office
+	synonyms { hole }
+	contr_vol 6
+	local_contents
+	texture void
+	attribute infinite_container
+}
+
+item part_desk "huge desk" {
+	desc {
+is hardly ever used for work
+	}
+	sittable
+	owner partner
+	moveable
+	size 10
+	weight 15
+	related
+	location part_office
+	hardness 15
+}
+
+item chaise "chaise longue" {
+	desc {
+looks comfortable enough to sleep on
+	}
+	force_adj
+	sittable
+	moveable
+	texture soft
+	size 10
+	weight 15
+	hardness 15
+	related
+	location part_office
+	attribute lieonable
+	owner partner
+	synonyms { chaise }
+}
+
+item tele "office television" {
+	desc {
+has a flatter squarer tube
+	}
+	size 5
+	weight 5
+	hardness 15
+	contained
+	npc_refuses
+	location hole
+	moveable
+	synonyms { telly tv tube }
+	owner partner
+}
+
+item cdisc "cd disc compact player" {
+	desc {
+must have cost a lot of money
+	}
+	size 3
+	force_adj
+	weight 3
+	related
+	strength 5
+	location part_office	#not moveable for special msg
+	synonyms { cd disc }	#change if any discs appear
+	owner partner
+}
+
+####################
+#                  #
+# law_office items #
+#                  #
+####################
+
+item law_chair1 "red leather chair" {
+	desc {
+is lower than the black chair, making Mr. Hughes look much larger than he 
+really is when sitting down
+	}
+	sittable
+	weight 10
+	size 6
+	related
+	location law_office
+	hardness 15
+	npc_refuses
+	set chairs
+	force_adj
+	attribute alladjs
+	strength 5
+}
+
+item law_desk "large desk" {
+	desc {
+has a drawer set into it
+	}
+	sittable
+	moveable
+	size 10
+	weight 15
+	related
+	location law_office
+	hardness 15
+	owner lawyer
+}
+
+# the drawer has a clone called law_lock at the end of the file
+
+item drawer "desk drawer" {
+	desc {
+is on Mr. Hughes' side of the desk
+	}
+	contr_vol 1
+	size 2
+	weight 3
+	hardness 15
+	inseparable
+	related
+	location law_desk
+	locked
+}
+
+item document "document" {
+	desc {
+looks highly confidential
+	}
+	combustible 1
+	size 1
+	moveable
+	weight 1
+	hardness 3
+	contained
+	location drawer
+	owner lawyer
+}
+
+item law_chair2 "black leather chair" {
+	desc {
+has a lot of padding into which Mr. Hughes can sink
+	}
+	scen_noun_e padding
+
+	sittable
+	weight 10
+	size 6
+	related
+	npc_refuses
+	location law_office
+	hardness 15
+	set chairs
+	force_adj
+	strength 5
+	attribute alladjs
+	attribute singleseat
+}
+
+item back_door "back kitchen door" {
+	desc {
+is fairly sturdy
+	}
+	another_noun
+	inseparable
+	related
+	location yard
+	size 10
+	weight 10
+	hardness 15
+	closed
+	set doors
+}
+
+item books "company.law company one_of_the law books" {
+	desc {
+would be incomprehensible to anyone but a lawyer
+	}
+	plural
+	synonyms { book }
+	moveable
+	related
+	location law_office
+	size 10
+	weight 15
+	hardness 15
+	npc_refuses
+	combustible 1
+	strength 5
+	force_adj
+}
+
+item magazine "company law magazine" {
+	desc {
+looks very very boring
+	}
+	synonyms { monthly }
+	size 1
+	weight 1
+	hardness 3
+	combustible 1
+	related
+	location pile
+	force_adj
+	attribute alladjs
+	moveable
+	synonyms { mag }
+}
+
+item pile "pile_of magazines" {
+	desc {
+consists of every copy of "Company Law Monthly" dating back to 1959
+	}
+	short_look
+	modified_quantity
+	force_adj
+	moveable
+	size 10
+	weight 15
+#	moveable
+	combustible 1
+	related
+	location law_office
+	synonyms { mags pile }
+	sittable
+	strength 5
+}
+
+#########
+#       #
+# doors #
+#       #
+#########
+
+item door9 "wooden door" {
+	desc {
+doesn't look secure enough for a lawyer's office, having just a latch
+	}
+	synonyms { latch }
+	size 5
+	closed
+	weight 10
+	strength 5
+	pseudo
+	location { corridor3 law_office }
+	set doors
+	another_noun
+	hardness 15
+	owner lawyer
+}
+
+item fire_door3 "fire door" {
+	desc {
+has a mechanism above it that automatically shuts the door
+	}
+	scen_noun_a mechanism
+
+	size 5
+	closed
+	weight 10
+	strength 5
+	pseudo
+	location { reception landing }
+	set doors
+	another_noun
+	hardness 15
+}
+
+##################
+#                #
+# car park items #
+#                #
+##################
+
+item ramp "ramp" {
+	desc {
+is built from concrete like the rest of the car park
+	}
+	inseparable
+	related
+	location car_park
+	size 15
+	weight 15
+	hardness 15
+}
+
+###################
+#                 #
+# reception items #
+#                 #
+###################
+
+item cubicle_object "cubicle" {
+	desc {
+almost reaches the floor
+	}
+	size 10
+	weight 15
+	hardness 15
+	inseparable
+	related
+	location bathroom
+}
+
+item revolving_door "revolving glass door" {
+	desc {
+provides a touch of class to an otherwise grotty building
+	}
+	short_look
+	size 10
+	weight 15
+	hardness 15
+	force_adj
+	open
+	pseudo
+	location { pave3 reception }
+	set doors
+}
+
+item porsche "red Porsche carrera Porsche" {
+	desc {
+is a red Carrera model that unfortunately belongs to your partner and not
+to you
+	}
+	synonyms { car carrera }
+	size 15
+	weight 15
+	hardness 15
+	owner partner
+	location car_park
+	class cars
+	locked
+	short_look
+}
+
+item volvo "Volvo Volvo" {
+	desc {
+is five years old and used primarily to take Mr. Hughes' family on visits at
+weekends
+	}
+	synonyms { car }
+	size 15
+	weight 15
+	hardness 15
+	owner lawyer
+	local_contents
+	contr_vol 7
+	short_look
+	attribute infinite_container
+	location car_park
+	closed
+	short_look
+	class cars
+}
+
+#############
+#           #
+# bmw items #
+#           #
+#############
+
+item bmw "BMW BMW" {
+	desc {
+Some jealous vandal has scratched the door of your BMW. Fortunately,
+the scratches match the ones sustained during this morning's parking effort
+	}
+	scen_noun_a scratches
+
+	synonyms { car engine }
+	closed
+	desc_only
+	size 15
+	weight 15
+	hardness 15
+	owner player
+	location car_park
+	local_contents
+	contr_vol 7
+	short_look
+	attribute infinite_container
+	class cars
+}
+
+item bmw_window "BMW car window" {
+	desc {
+is made of a special glass that probably isn't as tough as they reckon
+	}
+	desc_only
+	size 5
+	weight 0
+	hardness 10
+	inseparable
+	related
+	location bmw
+	owner bmw
+	set windows
+	force_adj
+}
+
+item bmw_door "BMW car black door" {
+	desc {
+has a thin scratch across it
+	}
+	size 5
+	force_adj
+	locked
+	weight 10
+	strength 5
+	pseudo
+	location { car_park in_the_car }
+	set doors
+	force_adj
+	hardness 15
+	owner bmw
+}
+
+item ignition "ignition" {
+	desc {
+is set into the steering column
+	}
+	scen_noun_a column
+
+	size 1
+	weight 1
+	pseudo
+	location { in_the_car in_the_volvo }
+	hardness 15
+	contr_vol 2
+	owner bmw
+}
+
+item wheel "steering wheel" {
+	desc {
+cannot be used until the ignition key is turned
+	}
+	scen_noun_a dashboard
+
+	force_adj
+	size 2
+	weight 2
+	pseudo
+	location { in_the_car in_the_volvo }
+	hardness 15
+}
+
+item litter "litter" {
+	desc {
+is just empty wrappers and cans
+	}
+	synonyms { rubbish trash }
+	contained	
+	location bin
+	size 3
+	weight 15
+	hardness 15
+	strength 5	
+	modified_quantity
+	force_plural
+}
+
+item phone2 "telephone" {
+	desc {
+is an extension to Theresa's phone. Its internal number is 12
+	}
+	synonyms { phone handset receiver }
+	size 3
+	weight 2
+	moveable
+	related
+	location part_desk
+	hardness 15
+	fixed_num part_desk
+	fixed
+	short_look
+	owner partner
+	attribute phone
+}
+
+item compart "glove compartment" {
+	desc {
+normally holds a variety of useful things
+	}
+	closed
+	synonyms { box }
+	force_adj
+	size 2
+	weight 2
+	inseparable
+	related
+	location in_the_car
+	hardness 15
+	contr_vol 2
+}
+
+item head "head" {
+	desc {
+has a hat size of seven and three quarters. You know from when you filled in
+the personal information section of your personal organiser
+	}
+	size 4
+	weight 1
+	hardness 15
+	intrinsic	
+	location inventory
+	owner player	
+}
+
+item cassette "cassette" {
+	desc {
+has 'Derek Rogers, March 25th' written on it, just like the one in the
+packaging
+	}
+	size 1
+	weight 1
+	synonyms { tape }
+	related
+	location part_desk
+	moveable
+	hardness 15
+	owner partner	
+}
+
+item cheese_sandwich "cheese sandwiches" {
+	desc {
+are Theresa's lunch
+	}
+	plural
+	synonyms { sandwich lunch }
+	moveable
+	related
+	location theresa
+	size 1
+	weight 1
+	hardness 15
+	owner theresa	
+}
+
+item screwdriver "screwdriver" {
+	desc {
+The differing styles that combine to make this screwdriver a truly bold
+statement in the evolutionary nature of design standards involve so many
+juxtaposed forms, the cross head, the hand-held bulb and the driving force of
+the slim and powerful shaft, that one could almost attempt a complete Freudian
+analysis of the confused psyche that generated the shroud of functionalism 
+surrounding the piece, almost obscuring the baseness inherent in its origin.
+However, Freud is so passe these days that such an analysis would achieve very 
+little indeed. It's just a normal flat head screwdriver OK
+	}
+	size 1
+	weight 1
+	contained
+	location compart
+	hardness 11
+	desc_only
+	moveable
+}
+
+item broken_volvo_window "broken Volvo window" {
+	desc {
+The sharp glass around the window would make it impossible to climb in
+	}
+	force_adj
+	short_look
+	broken
+	desc_only
+	size 1
+	weight 0
+	hardness 15
+	texture rough
+	sharpness 2
+	related
+	location volvo
+	out
+	set windows
+	another_noun
+}
+
+item stereo "cassette tape stereo deck" {
+	desc {
+is simple to operate and gives out an amazingly sophisticated sound
+	}
+	size 1
+	weight 1
+	contr_vol 2
+	hardness 15
+	synonyms { stereo player }
+	inseparable
+	related
+	location in_the_car
+	force_adj
+	strength 5
+}
+
+
+item chem_shelves "shelves" {
+	desc {
+are stacked full with necessary but uninteresting items
+	}
+	synonyms { shelf }
+	plural
+	moveable
+	size 15
+	weight 15
+	hardness 15
+	sittable
+	related	
+	location pharmacy
+}
+
+###########
+#         #
+# pseudos #
+#         #
+###########
+
+item building "office building" {
+	desc {
+is old and beginning to crumble
+	}
+	pseudo
+	location { pave1 pave2 pave3 pave4 pave5 by_pond park1 }
+	size 15
+	weight 0
+	hardness 15
+	texture void
+}
+
+item bandstand "bandstand" {
+	desc {
+is used almost every day by the Salvation Army
+	}
+	pseudo
+	location { reception your_office pave1 pave2 pave3 pave4 pave5 by_pond park1 park2 park3 by_bandstand on_bandstand }
+	size 15
+	weight 0
+	hardness 15
+	texture hard
+}
+
+item restaurant "Le Monaco Restaurant" {
+	desc {
+has won many awards for the quality of its food
+	}
+	synonyms { monaco }
+	force_adj
+	attribute alladjs
+	pseudo
+	location { pave1 pave2 pave3 park1 }
+	size 15
+	weight 0
+	hardness 15
+}
+
+
+#item lift1 "lift" {
+	#desc {
+#is too small for a building of this size
+	#}
+	#out
+	#synonyms { elevator }
+	#pseudo
+	#location { corridor1 corridor3 reception car_park }
+	#size 10
+	#weight 0
+	#hardness 15
+	#texture void
+#}
+
+##############
+#            #
+# ward items #
+#            #
+##############
+
+item hosp_beds "beds" {
+	desc {
+There are ten beds; nine of them are in use; one by you
+	}
+	desc_only
+	plural
+	size 15
+	weight 15
+	related
+	location ward
+	hardness 15
+	texture soft
+	strength 5
+	set beds
+}
+
+item murals "murals" {
+	desc {
+The outlines for the murals were drawn by a local artist and the
+colours painted in by children in the hospital
+	}
+	desc_only
+	size 10
+	weight 0
+	inseparable
+	related
+	location ward
+	hardness 0
+}
+
+item folder "loose leaf folder" {
+	desc {
+is really just a thin piece of cardboard folded in half
+	}
+#	synonyms { cardboard }
+	short_look
+	closed
+	size 1
+	weight 1
+	force_adj
+	moveable
+	contained	
+	location volvo
+	hardness 15
+	contr_vol 1
+	attribute alladjs
+	
+}
+
+item characters "cartoon characters" {
+	desc {
+include some of your own favourites
+	}
+	inseparable
+	related
+	location ward
+	hardness 0
+	size 10
+	weight 0
+}
+
+item screens "screens" {
+	desc {
+are placed around the beds when treatment is being administered so other
+patients cannot see the gory details
+	}
+	plural
+	strength 5
+	size 10
+	weight 10
+	related
+	location ward
+	hardness 15
+}
+
+item hosp_bed "your bed" {
+	desc {
+Your bed is very comfortable
+	}
+	another_noun
+	desc_only
+	sittable
+	size 10
+	weight 15
+	moveable
+	contr_vol 7
+	related
+	location ward
+	set beds
+	hardness 15
+	texture soft
+	attribute infinite_container
+	owner player
+	attribute lieonable
+	attribute no_article
+	attribute article_null
+}
+
+item pyjama1 "pyjama top" {
+	desc {
+is standard hospital issue in a dull blue-grey colour
+	}
+	moveable
+	out
+	force_adj
+	owner player
+	worn
+	covers { chest arms }
+	hardness 12
+	weight 1
+	npc_refuses
+	size 1
+	texture soft
+	wearable 1
+	combustable 1
+	location inventory
+	class clothes
+	class pyjamas
+}
+
+item pyjama2 "pyjama bottoms" {
+	desc {
+were last worn by someone who must have been seventeen stone and six feet
+five as they are rather baggy on you
+	}
+	out
+	plural
+	moveable
+	force_adj
+	owner player
+	worn
+	covers { groin legs }
+	hardness 12
+	weight 1
+	npc_refuses
+	size 1
+	texture soft
+	wearable 1
+	combustable 1
+	location inventory
+	class clothes
+	class pyjamas
+}
+
+###########
+#         #
+# pseudos #
+#         #
+###########
+
+item tlights "traffic lights" {
+	desc {
+The traffic lights are situated at the north end of London Road and at the east
+end of Hanover Street. At the moment they are 
+	}
+	desc_only
+	plural
+	force_adj
+	pseudo
+	location { pave2 park1 pave1 pave5 }
+	size 15
+	weight 0
+	hardness 15
+#	class crossings			;there's only one!!!!
+}
+
+item trees "trees" {
+	desc {
+are clearly suffering from neglect
+	}
+	plural
+	pseudo
+	location { your_office pave1 pave2 pave3 park1 park2 park3 by_bandstand on_bandstand by_pond pave4 pave5 }
+	size 15
+	weight 0
+	hardness 15
+}
+
+item bushes "bushes" {
+	desc {
+are becoming overgrown as they haven't been pruned for a while
+	}
+	plural
+	pseudo
+	location { your_office pave1 pave2 pave3 park1 park2 park3 by_bandstand on_bandstand by_pond pave4 pave5 }
+	size 15
+	weight 0
+	hardness 15
+	texture thorny
+}
+
+item grass "green grass" {
+	desc {
+is green
+	}
+	plural
+	pseudo
+	location { your_office pave1 pave2 pave3 park1 park2 park3 by_bandstand on_bandstand by_pond pave4 pave5 }
+	size 15
+	weight 0
+	sittable
+	hardness 15
+	texture soft
+	attribute lieonable
+}
+
+item traffic "traffic" {
+	desc {
+streams along London Road and Hanover Street at such high speeds that it is a
+wonder there aren't more accidents
+	}
+	force_plural
+	pseudo
+	location { your_office pave1 pave2 pave3 park1 park2 park3 pave4 pave5 }
+	size 15
+	weight 0
+	hardness 15
+	set cars
+	texture void
+}
+
+item lroad "London road" {
+	desc {
+London Road runs south from the traffic lights outside Le Monaco restaurant, 
+passes your office building and then turns east past the building's south side
+	}
+	desc_only
+	force_adj
+	pseudo
+	location { your_office pave1 pave2 pave3 park1 park2 park3 pave4 pave5 }
+	size 15
+	weight 0
+	hardness 15
+}
+
+item hstreet "Hanover street" {
+	desc {
+Hanover Street runs along the west and north sides of the square before merging
+with London Road at the traffic lights
+	}
+	force_adj
+	desc_only
+	pseudo
+	location { your_office pave1 pave2 pave3 park1 park2 park3 pave4 pave5 }
+	size 15
+	weight 0
+	hardness 15
+}
+
+item zebra "zebra crossing" {
+	desc {
+has almost worn away with the constant stream of traffic that flows over it
+	}
+	force_adj
+	pseudo
+	location { park3 pave4 pave5 }
+	size 15
+	weight 0
+	hardness 15
+#	set crossings
+}
+
+item pol_station "police station" {
+	desc {
+has a lot of work to deal with in this area
+	}
+	force_adj
+	pseudo
+	location { pave5 pave4 }
+	size 15
+	weight 0
+	hardness 15
+}
+
+item drivers "drivers" {
+	desc {
+are hunched over their steering wheels with white knuckles, their eyes fixed on
+the road and paying as little attention as possible to any pedestrians
+	}
+	synonyms { motorists }	
+	plural
+	force_adj
+	pseudo
+	location { pave2 park1 pave1 }
+	size 15
+	weight 0
+	hardness 15
+	texture void
+}
+
+################
+#              #
+# tvroom items #
+#              #
+################
+
+item locker "locker" {
+	desc {
+doesn't even have a lock on it so anyone could steal what is inside
+	}
+	moveable
+	closed
+	contr_vol 7
+	size 10
+	weight 15
+	related
+	location tvroom
+	hardness 15
+}
+
+item tv "hospital television" {
+	desc {
+is an ancient model given to the hospital by a former patient
+	}
+	size 5
+	weight 5
+	hardness 15
+	npc_refuses
+	related
+	location tvroom
+	synonyms { telly tv }
+	strength 5
+}
+
+item armchair "low armchair" {
+	desc {
+is too low to watch the television comfortably
+	}
+	synonyms { chair }
+	strength 5
+	sittable
+	weight 10
+	size 6
+	related
+	location tvroom
+	hardness 15
+	npc_refuses
+	set chairs
+	another_noun
+	texture soft
+}
+
+item bear "cuddly polar bear" {
+	desc {
+was a favourite with all the children who stayed in the hospital
+	}
+	moveable
+	size 4
+	weight 5
+	hardness 3
+	texture furry
+	synonyms { boris }
+	short_look
+	related
+	location tvroom
+}
+
+item toys "toys" {
+	desc {
+are completely different from the type you played with as a child
+	}
+	texture furry
+	moveable
+	npc_refuses
+	size 5
+	weight 4
+	hardness 5
+	plural
+	related
+	location tvroom
+}
+
+item posters "posters" {
+	desc {
+are of some of the children's favourite television characters and animals to
+make them feel more comfortable while away from home
+	}
+	moveable
+	size 5
+	weight 4
+	hardness 15
+	plural
+	inseparable
+	related
+	location tvroom
+}
+
+##################
+#                #
+# casualty items #
+#                #
+##################
+
+item empty_bed "empty bed" {
+	desc {
+has just been made, ready for a new patient
+	}
+	another_noun
+	force_adj
+	sittable
+	size 10
+	weight 15
+	moveable
+	contr_vol 7
+#	related
+	location ward
+	set beds
+	hardness 15
+	texture soft
+	attribute infinite_container
+	attribute lieonable
+	owner davis
+}
+
+item ambulances "ambulances" {
+	desc {
+are constantly arriving with new patients and leaving with patients unable to
+make their own way home
+	}
+	size 15
+	weight 15
+	related
+	location casualty
+	hardness 15
+}
+
+item ambulance "private ambulance" {
+	desc {
+is a car that has been converted to enable it to carry wheelchair-bound patients
+	}
+	size 15
+	weight 15
+	related
+	location casualty
+	hardness 15
+}
+
+item benches "hard wooden benches" {
+	desc {
+are lined up back to back between the small rooms and the X-Ray department
+	}
+	plural
+	related
+	location casualty
+	size 15
+	weight 15
+	moveable
+	hardness 15
+	sittable
+	attribute lieonable
+}
+
+item xray "x-ray x ray department" {
+	desc {
+Nearly every patient that goes into the small rooms limps across to the X-Ray
+department afterwards, brown envelope in hand, to have various parts of their
+insides photographed
+	}
+	force_adj
+	synonyms { ray dept }
+	size 0
+	weight 0
+	hardness 0
+	inseparable
+	related
+	location casualty
+	force_adj
+}
+
+item steth "stethoscope" {
+	desc {
+was given to the children as a toy
+	}
+	synonyms { scope }
+	size 2
+	weight 1
+	moveable
+	hardness 15
+	related
+	location bear
+	wearable 1
+	#covers { head }		always tobe mentioned.
+}
+
+item duck_pond "duck pond" {
+	desc {
+stretches around the back of the bandstand where reeds and bushes give
+the ducks
+some protection from the lumps of stale bread that are constantly thrown at 
+them by over-zealous patrons of the park
+	}
+	scen_noun_d reeds
+	scen_noun_a lumps
+	scen_noun_f bread	# there isn't any.
+
+	synonyms { water }
+	size 14
+	texture cold
+	wet
+	weight 15
+	hardness 1
+	contr_vol 7		# things dissapear.
+	moveable
+	force_adj
+	pseudo
+	location { park2 by_pond }
+	attribute article_the
+}
+
+######################
+#                    #
+# park3 items        #
+# on_bandstand items #
+# by_bandstand items #
+#                    #
+######################
+
+item park_bench "park bench" {
+	desc {
+has graffiti scrawled over it that gives you such wondrous gems of information
+as 'CAFC RULE', 'Shaz 4 Gaz' and 'If Thatcher is the answer it must have been a
+bloody stupid question'
+	}
+	scen_noun_a graffiti
+
+	force_adj
+	size 15
+	weight 15
+	hardness 15
+	inseparable
+	related
+	location by_pond
+	sittable
+	strength 5
+	attribute lieonable
+}
+
+item bin "litter bin" {
+	desc {
+is the only one in the park
+	}
+	force_adj
+	contr_vol 3
+	size 2
+	weight 5
+	hardness 15
+	inseparable
+	related
+	location park3
+	strength 5
+}
+
+
+item deckchair "deck deckchair" {
+	desc {
+looks as if it will collapse under your weight
+	}
+	synonyms { chair }
+	size 10
+	weight 10
+	hardness 15
+	related
+	location by_bandstand
+	strength 5
+	sittable
+	set chairs
+	attribute article_a		# a deckchair
+}
+
+########################
+#                      #
+# police station items #
+#   (outside and in)   #
+#                      #
+########################
+
+
+item pol_room "control room" {
+	desc {
+is the control room for the police station where all statements are made,
+reports filed and cups of tea drunk
+	}
+	size 15
+	weight 0
+	hardness 0
+	inseparable
+	related
+	location police1
+}
+
+item serg_desk "desk" {
+	desc {
+sections off the control room from the reception area
+	}
+	size 15
+	weight 15
+	hardness 15
+	inseparable
+	related
+	location police1
+	owner sergeant
+}
+
+item pol_key "large key" {
+	desc {
+is the largest key you have ever seen
+	}
+	another_noun
+	size 1
+	weight 1
+	hardness 15
+	related
+	location sergeant
+	moveable
+	set keys
+}
+
+item int_table "table" {
+	desc {
+is at the back of the room to put as much space between the suspect and the
+door as possible
+	}
+	size 10
+	weight 15
+	hardness 15
+	moveable
+	related
+	sittable
+	location interview
+}
+
+
+##############
+#            #
+# cell items #
+#            #
+##############
+
+item bunk_bed "bunk bed" {
+	desc {
+looks like it was built for children rather than grown men
+	}
+	force_adj
+	size 10
+	weight 15
+	hardness 15
+	related
+	location cell
+	sittable
+	attribute lieonable
+}
+
+
+item sq_window "tiny cell window" {
+	desc {
+lets in just enough light to stop your eyes from straining
+	}
+	size 4
+	weight 0
+	hardness 0
+	inseparable
+	related
+	location cell
+	set windows
+}
+
+item ticket "book_of match matchbook" {
+	desc {
+is embossed with the logo of Le Monaco restaurant. McNally has used all the
+matches
+	}
+	scen_noun_a logo
+
+	synonyms { book matches }
+	size 1
+	weight 1
+	hardness 3
+	moveable
+	related
+	location gerry
+	texture soft
+}
+
+###################
+#                 #
+# main_rest items #
+#                 #
+###################
+
+
+item menu "menu" {
+	desc {
+makes your mouth water
+	}
+	size 1
+	weight 1
+	hardness 3
+	related
+	location waiter
+	moveable
+	owner restaurant
+}
+
+item plants "large plants" {
+	desc {
+frame each of the alcoves in its own little shroud of secrecy
+	}
+	plural
+	size 5
+	weight 5
+	hardness 3
+	pseudo
+	location { alcove main_rest }
+	strength 5
+	owner restaurant
+}
+
+item food "meal" {
+	desc {
+is a superb piece of lamb with just the right amount of covering sauce
+	}
+	scen_noun_a sauce
+
+	synonyms { lunch lamb food }
+	owner player
+	size 1
+	edible 6
+	weight 1
+	hardness 15
+	moveable
+	related
+	location rest_table
+	out
+}
+
+item rest_table "circular table" {
+	desc {
+is circular so couples in the alcove can be more intimate
+	}
+	moveable
+	size 10
+	weight 15
+	hardness 15
+	related
+	location alcove
+	sittable
+	owner restaurant
+}
+
+################
+#              #
+# alcove items #
+#              #
+################
+
+
+################
+#              #
+# casino items #
+#              #
+################
+
+
+item baccarat "baccarat gambling table" {
+	desc {
+The baccarat game seems to have collected all the big gamblers
+	}
+	force_adj
+	size 0
+	weight 0
+	hardness 0
+	inseparable
+	related
+	location casino
+	owner casino
+	desc_only
+	set games
+	set tables
+	synonyms { baccarat game }
+}
+
+item trente "trente-et-quarante gambling table" {
+	desc {
+The trente-et-quarante game isn't attracting much attention here
+	}
+	synonyms { trente-et-quarante trente quarante game }
+	size 0
+	weight 0
+	hardness 0
+	inseparable
+	related
+	location casino
+	owner casino
+	set games
+	desc_only
+	force_adj
+	set tables
+}
+
+item roulette "roulette gambling table" {
+	desc {
+The crowd around the roulette table is packed solid. You would be hard
+pressed to get a look at the action never mind playing
+	}
+	synonyms { roulette game }
+	desc_only
+	size 0
+	weight 0
+	hardness 0
+	inseparable
+	related
+	location casino
+	owner casino
+	set games
+	set tables
+	force_adj
+}
+
+item blackjack "blackjack gambling table" {
+	desc {
+The gamblers around the blackjack table are disgruntled with one of the players
+as she is the only one that is winning
+	}
+	desc_only
+	synonyms { blackjack game }
+	size 0
+	weight 0
+	hardness 0
+	inseparable
+	related
+	location casino
+	owner casino
+	set tables
+	set games
+	force_adj
+}
+
+item cas_counter "counter" {
+	desc {
+is where the exchange of cash and chips takes place and, for the more
+unfortunate gamblers, the teller can arrange credit. You can speak to the
+teller through a grille
+	}
+	scen_noun_a grille
+
+	size 5
+	weight 15
+	hardness 15
+	inseparable
+	related
+	location casino
+	owner teller
+	owner casino
+	sittable
+}
+
+item playing_cards "playing cards" {
+	desc {
+consist of two packs shuffled together. They are dealt from a shoe 
+	}
+	plural
+	size 1
+	weight 1
+	hardness 2
+	synonyms { deck pack pack_of }
+	related
+	location croupier
+	strength 5
+}
+
+###################
+#                 #
+# back_room items #
+#                 #
+###################
+
+item card_table "card table" {
+	desc {
+is covered in green baize
+	}
+	scen_noun_a baize
+
+	force_adj
+	size 10
+	weight 15
+	hardness 15
+	related
+	location back_room
+	sittable
+}
+
+
+item notes "stake money" {
+	desc {
+must be near ten thousand pounds
+	}
+	synonyms { stakes }
+	force_adj
+	another_noun
+	size 2
+	weight 1
+	hardness 15
+	related
+	location card_table
+	modified_quantity
+	moveable
+}
+
+##############
+#            #
+# yard items #
+#            #
+##############
+
+item dustbins "dust dustbins" {
+	desc {
+have '22 London Road' painted on them
+	}
+	synonyms { bin bins }
+	plural
+	contr_vol 1
+	local_contents
+	open
+	short_look
+	size 6
+	weight 15
+	moveable
+	hardness 15
+	related
+	location yard
+	owner restaurant
+}
+
+synonym "moss" { moss_covered adj }
+synonym "drain" { moss_covered adj }
+synonym "covered" {moss_covered adj }
+
+item pipe "moss-covered drainpipe" {
+	desc {
+empties straight out onto the cobbles
+	}
+	synonyms { pipe }
+	size 15
+	weight 15
+	hardness 15
+	inseparable
+	related
+	location yard
+}
+
+item rubbish "rubbish" {
+	desc {
+Most of the rubbish consists of unidentifiable gunge and fatty joints of
+meat which were once edible
+	}
+	scen_noun_a gunge
+
+	size 5
+	weight 5
+	hardness 15
+	contained
+	location dustbins
+	force_plural
+	desc_only
+	strength 5
+}
+
+item film "camera film" {
+	desc {
+would be just right for your camera
+	}
+	size 1
+	force_adj
+	weight 1
+	hardness 5
+	texture clammy
+	moveable
+	related
+	location chem_shelves
+	value 299
+}
+
+#########
+#       #
+# doors #
+#       #
+#########
+
+item pol_door "steel door" {
+	desc {
+looks impregnable
+	}
+	size 5
+	force_adj
+	locked
+	weight 10
+	strength 5
+	pseudo
+	location { police1 pol_corridor }
+	set doors
+	hardness 15
+}
+
+item cell_door "cell door" {
+	desc {
+is kept locked and closed for most hours of the day
+	}
+	size 5
+	force_adj
+	locked
+	weight 10
+	strength 5
+	pseudo
+	location { cell pol_corridor }
+	set doors
+	hardness 15
+}
+
+item rest_door "kitchen door" {
+	desc {
+allows the waiters to slip silently in and out of the kitchens without arousing
+the customers' attention
+	}
+	synonyms { kitchen }		# since we dont have one.
+	size 5
+	weight 10
+	strength 5
+	inseparable
+	related
+	location main_rest
+	set doors
+	another_noun
+	hardness 15
+	owner restaurant
+	another_noun
+}
+
+item cas_door "wooden door" {
+	desc {
+looks very secure
+	}
+	size 5
+	locked
+	weight 10
+	strength 5
+	related
+	location yard
+	set doors
+	another_noun
+	hardness 15
+}
+
+item padded_door "padded door" {
+	desc {
+blocks out the noise of the casino from the private room
+	}
+	locked
+	size 5
+	weight 10
+	strength 5
+	pseudo
+	location { casino back_room }
+	owner casino
+	set doors
+	another_noun
+	hardness 15
+}
+
+##################
+#                #
+# pharmacy items #
+#                #
+##################
+
+item medicine "medicine" {
+	desc {
+The medicines range from headache tablets and antibiotics to pep pills
+and vitamin supplements
+	}
+	desc_only
+	plural
+	force_adj
+	force_plural
+	size 1
+	moveable
+	weight 1
+	strength 5
+	hardness 15
+	related
+	location chem_shelves
+	owner chemist
+	value 399
+}
+
+item counter "counter" {
+	desc {
+runs across the back of the pharmacy
+	}
+	moveable
+	size 10
+	weight 15
+	hardness 15
+	inseparable
+	related
+	location pharmacy
+	sittable
+}
+
+synonym "cut-throat" { cut adj }
+
+item razors "cut throat razor" {
+	desc {
+should be used with the utmost care as it is very, very sharp
+	}
+	attribute alladjs
+	force_adj
+	moveable
+	size 1
+	weight 1
+	hardness 15
+	sharpness 3
+	related
+	npc_refuses
+	location chem_shelves
+	value 499
+	owner chemist
+}
+
+item watch "digital watch" {
+	desc {
+Since you managed to lose the instruction manual the day you bought it, you
+have never figured out how to do anything with your digital watch except
+tell the time
+	}
+#	force_adj
+	moveable
+	size 1
+	weight 1
+	hardness 4
+	wearable 1	
+	worn
+	location inventory
+	attribute nofullstop
+	desc_only
+	owner player
+}
+
+item alcove_chair "chair" {
+	desc {
+the chairs are just the same as any other in the restaurant
+	}
+	size 1
+	desc_only
+	weight 1
+	hardness 15
+	pseudo	
+	location { alcove main_rest } 
+	sittable
+	set chairs
+	owner restaurant
+}
+
+item int_chair "chair" {
+	desc {
+is purely functional; designer's parlance for very uncomfortable
+	}
+	size 6
+	weight 15
+	hardness 15
+	sittable
+	related
+	location interview
+}
+
+item soap "shaving soap" {
+	desc {
+will soften any beard
+	}
+	force_adj
+	moveable
+	size 1
+	weight 1
+	hardness 2
+	related
+	location chem_shelves
+	force_plural
+	npc_refuses
+	value 95
+	owner chemist
+	texture soft
+}
+
+###############
+#             #
+# volvo items #
+#             #
+###############
+
+item volvo_door "Volvo car door" {
+	desc {
+is pretty chunky like the rest of the car
+	}
+	pseudo
+	location { in_the_volvo car_park }
+	locked
+	size 5
+	weight 10
+	hardness 15
+	set doors
+	force_adj
+	owner volvo
+}
+
+item volvo_window "Volvo car window" {
+	desc {
+is just as chunky as the rest of the car
+	}
+#	desc_only
+	size 5
+	weight 0
+	hardness 10
+	inseparable
+	related
+	location volvo
+	owner volvo
+	set windows
+	force_adj
+}
+
+item affidavit "affidavit" {
+	desc {
+is a sworn statement, not yet signed, intended to be used as evidence in court
+	}
+	synonyms { paper }
+	size 1
+	weight 1
+	hardness 3
+	moveable
+	contained
+	location folder
+}
+
+item dealer_door "sound proof door" {
+	desc {
+The dealing room is so noisy that William Hughes insisted on it having a sound
+proof door so as not to disturb him
+	}
+	force_adj
+	another_noun
+	size 10
+	weight 15
+	inseparable
+	related
+	location corridor3
+	hardness 15
+	attribute alladjs
+	closed
+	set doors
+	desc_only
+}
+
+# Note:
+# various items (eg. tablecloth, condiments etc.) are clones of this
+# item, so it's desription must be carefully chosen.
+
+item cutlery "cutlery" {
+	desc {
+is of the fine quality you expect from this restaurant
+	}
+	synonyms { knife fork spoon }
+	force_plural
+	related
+	location rest_table
+	moveable
+	size 2
+	weight 2
+	texture smooth
+	hardness 15
+	owner restaurant	
+}
+
+#################
+#               #
+# porsche items #
+#               #
+#################
+
+item porsche_window "Porsche car window" {
+	desc {
+has a small sticker on the inside informing you that the car is protected by
+an alarm system
+	}
+	scen_noun_a sticker
+
+	size 5
+	weight 0
+	hardness 15
+	inseparable
+	related
+	location porsche
+	owner porsche
+	set windows
+	force_adj
+}
+
+item porsche_door "Porsche car door" {
+	desc {
+has a thin scratch across it that is all the more noticeable because of the
+black paint
+	}
+	size 5
+	force_adj
+	locked
+	weight 10
+	strength 5
+	set doors
+	force_adj
+	hardness 15
+	inseparable
+	related
+	location porsche
+	owner porsche
+}
+
+item ftimes "Financial Times" {
+	desc {
+is your usual daily read
+	}
+	synonyms { paper ft newspaper }
+	attribute article_the		# THE times.
+	short_look
+	closed
+	size 1
+	weight 1
+	hardness 3
+	texture soft
+	combustible 1
+	contained
+	location case
+	force_adj
+	moveable
+}
+#################
+#               #
+# theatre items #
+#               #
+#################
+
+item swing_door "swing door" {
+	desc {
+has 'Do Not Enter - Operation in Progress' written on it
+	}
+	short_look
+	size 5
+	closed
+	weight 10
+	strength 5
+	related
+	location theatre
+	set doors
+	another_noun
+	hardness 15
+}
+
+item hosp_papers "papers" {
+	desc {
+are records concerning the patient who occupies the bed
+	}
+	moveable
+	size 1
+	weight 1
+	hardness 3
+	related
+	location empty_bed
+	plural
+	texture soft
+	owner davis
+}
+
+item op_bed "bed" {
+	desc {
+is used to wheel patients back and forth from ward to operating theatre
+	}
+	scen_noun_a wheels
+
+	sittable
+	size 10
+	weight 15
+	moveable
+	location theatre
+	set beds
+	hardness 15
+	texture soft
+	attribute lieonable
+}
+
+item bandage "bandage" {
+	desc {
+is standard health service issue for head wounds
+	}
+	size 1
+	weight 1
+	hardness 12		# flexible!
+	related
+	location op_bed
+	wearable 1
+	moveable
+#	covers { head }
+	texture soft
+}
+
+item pillow_case "pillow case" {
+	desc {
+is the property of St. Lawrence's hospital
+    }
+	synonyms { pillow pillowcase }
+	open
+	local_contents
+	short_look	
+	force_adj
+	size 3		#wont fit in itself!
+	weight 1
+	hardness 15
+	texture soft
+	contr_vol 3		#max size at once.
+	moveable
+	related
+	location empty_bed
+	attribute infinite_container	# has to contain clothes/boris/scope.
+	set cases
+}
+
+item amb_door "ambulance door" {
+	desc {
+has been widened to allow access for beds and wheel chairs
+	}
+	force_adj
+	closed
+	pseudo
+	location { in_ambulance pave2 }
+	size 5
+	weight 10
+	strength 5
+	hardness 15
+	set doors
+	out
+}
+
+item badge "badge" {
+	desc {
+shows your support for a worthy charity
+	}
+	size 1
+	weight 1
+	hardness 15
+	related
+	location sally_man
+	owner sally_man
+}
+
+####################
+#                  #
+# items needed for #
+# ask abouts       #
+#                  #
+####################
+
+item bookings "list_of early list" {
+	desc {
+gives a list of shares for the dealers to buy early in the day, before they
+rise in price, for sale to clients (usually big investment institutions) later
+on.  Hence the name 'early bookings'
+	}
+	size 1
+	weight 1
+	hardness 15
+	texture soft
+	combustable 1
+	location inventory
+	synonyms { bookings }
+	moveable
+	attribute article_the
+}
+
+
+item hosp_cabinet "cabinet" {
+	desc {
+looks like it has been put together by a bad first year woodwork student. It
+doesn't even have a door
+	}
+	hardness 15
+	size 10
+	weight 15
+	related
+	location ward
+	sittable
+	contr_vol 5
+}
+
+
+item office_door "office shabby door" {
+	desc {
+looks even shabbier than the rest of your office
+	}
+	force_adj
+	open
+	pseudo
+	location { your_office sec_room }
+	size 5
+	weight 10
+	strength 5
+	set doors
+	hardness 15
+}
+
+item board_chairs "board room room.chairs" {
+	desc {
+are almost as old as the portraits
+	}
+	synonyms { chair }
+	force_adj
+	plural
+	hardness 15
+	weight 5
+	size 5
+	texture soft
+	related
+	location board_room
+	sittable
+	set chairs
+}
+
+
+item volvo_keys "Volvo key" {
+	desc {
+You can't see the Volvo key; David must have it on him somewhere
+	}
+	desc_only
+	another_noun
+	hardness 15
+	weight 0
+	related
+	location partner
+	owner lawyer	
+	set keys
+	attribute article_the
+}
+
+item phone3 "telephone" {
+	desc {
+is Mr. Hughes's personal phone, internal number 04
+	}
+	synonyms { phone handset receiver }
+	size 3
+	weight 2
+	moveable
+	related
+	location law_desk
+	hardness 15
+	fixed_num law_desk
+	fixed
+	short_look
+	owner lawyer
+	attribute phone
+}
+
+clone broking children "stock broking" {
+	synonyms { dealing }
+}
+
+clone credit children "credit" {
+}
+
+clone school accident "churtley" {
+	owner player
+	synonyms { school public }
+}
+
+clone article accident "magazine article" {
+}
+
+clone company accident "Rogers_and company" {
+	synonyms { firm business }
+}
+
+clone flat accident "appartment" {
+	synonyms { flat }
+	owner player
+}
+
+clone crime children "crime" {
+	synonyms { offence }
+	owner gerry
+}
+
+clone phonecall accident "phone call" {
+	synonyms { conversation }
+}
+
+clone nobody accident "nobody" {
+}
+
+clone assassin accident "assassin" {
+}
+
+clone shares children "shares" {
+}
+
+clone prescriptions children "prescriptions" {
+}
+
+clone frame accident "frame" {
+}
+
+clone bluedolphin accident "blue dolphin security" {
+	synonyms { dolphin }
+}
+
+clone carbomb accident "car thermonuclear bomb" {
+	synonyms { device }
+
+}
+
+clone pounds chips "money" {
+	synonyms { cash pounds pound quid sterling }
+}
+
+clone winner baccarat "player" {
+}
+
+clone bank baccarat "bank" {
+}
+
+clone black trente "black" {
+}
+
+clone red trente "red" {
+}
+
+clone couleur trente "couleur" {
+}
+
+clone inverse trente "inverse" {
+}
+
+clone black_row trente "black row" {
+}
+
+clone red_row trente "red row" {
+}
+
+clone dealing_room dealer_door "dealing dealing.room" {
+	synonyms { dealers room }
+}
+
+clone escape_plan accident "escape plan" {
+	synonyms { escape }
+}
+
+clone law_lock drawer "lock" {} #so you can break lock open
+
+clone dti accident "serious fraud serious.fraud.office" {
+	synonyms { fraud sfo office }
+}
+
+clone electris accident "scott.electronics" {
+	synonyms { scott electronics }
+}
+
+clone hospital accident "St Lawrence''s memorial hospital" {
+}
+
+clone chefs accident "chef" {
+}
+
+clone face head "face" {
+	owner player
+}
+
+clone tablecloth cutlery "table tablecloth" {
+	synonyms { cloth }
+	owner restaurant
+}
+
+clone wives accident "wife" {
+	owner lawyer
+}
+
+clone husband accident "husband" {
+	owner secretary
+}
+
+clone joke accident "joke" {
+	owner lawyer
+}
+
+clone affair accident "affair" {
+}
+
+clone divorce accident "divorce" {
+}
+
+clonedesc tables alcoves "table" {
+	desc {
+The tables surround the main floor of the restaurant
+	}
+}
+
+clone cleaning accident "cleaning" {
+}
+
+clone gun accident "gun" {
+}
+
+clone insider_dealing accident "insider dealing" {
+}
+
+clone joints rubbish "joints_of fatty meat" {
+	synonyms { joints }
+}
+
+clonedesc crowd traffic "crowd" {
+	desc {
+are rushing about their business. Not one of them is smiling and they are all
+staring at the ground
+	}
+}
+
+clonedesc pills medicine "headache tablets" {
+	desc {
+would give you an acid stomach
+	}
+}
+
+clonedesc linctus medicine "pep pep.pills" {
+	desc {
+are basically pills packed full with caffeine
+	}
+	synonyms { pills }
+}
+
+clonedesc cod_liver medicine "antibiotics" {
+	desc {
+fight off all manner of infections
+	}
+}
+
+clonedesc vitamins medicine "vitamin supplements" {
+	desc {
+are for paranoids who don't eat properly
+	}
+	synonyms { tablets }
+}
+
+clonedesc creams cosmetics "foundation creams" {
+	desc {
+are for people who need to cover their spots
+	}
+}
+
+clonedesc shampoo cosmetics "guava beer egg lychee jojoba shampoos" {
+	desc {
+are made from things like guavas, beer, eggs, lychees and jojoba nuts
+	}
+}
+
+clonedesc make_up cosmetics "make-up kits" {
+	desc {
+would make you look very pretty indeed
+	}
+	synonyms { make_up }
+}
+

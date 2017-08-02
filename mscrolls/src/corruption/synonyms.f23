@@ -1,0 +1,151 @@
+
+# list of verbs potentially removable from GUILD ????
+#
+# mix fire shoot blast strangle? choke? blow melt smoke lever split unmix
+# separate vote dismount?
+#
+
+# WARNING: the order of these verbs may NOT be changed
+
+verbs {
+	look examine get take carry drop leave go walk enter run shift move
+	lift raise lower push pull smell taste eat drink put insert inventory
+#	fit 
+#	pour
+	empty fill 
+#	mix 
+	jump 
+#	vault
+	throw punch
+#	kick
+	fight attack
+	kill break smash damage remove 
+#	scrape light unlight extinguish
+	open
+	close suss status debug 
+#	fire shoot blast 
+	twist turn
+
+# these 'SAY' verbs must stay in order & in one lump
+
+	say shout yell cry call
+
+	strangle choke
+	feel touch wear read
+#	hide
+	hit steal bash unlock
+	pick
+#	tie fix join
+	untie
+	feed bite use cross slide
+#	blow
+	press give climb
+#	burn
+#	ignite 
+#	cast 
+	fod exit ask question
+#	melt
+	listen search find
+	grab rub 
+	smoke 
+	wait wake 
+#	rape 
+	mend 
+#	lever 
+	buy purchase
+#	lean
+#	ride 
+#	plant
+	lock tear rip cut knock
+#	point shine
+#	split unmix separate
+	exits
+#	cover uncover
+	sit 
+	lie
+	kiss
+#	vote
+	stand 
+#	mount
+	tell offer 
+#	dismount
+	help laugh show loop
+#	dig
+	bet stop play
+#	swim
+	flush piss
+	sleep 
+#	set wind 
+#	chew
+#	reflect hold
+	place
+#	position illuminate catch 
+#	pray
+#	cue 
+#	pot 
+#	shake
+#	roll fish 
+#	sing 		#is now a synonym for say
+	look_for
+	stick
+	dial
+#	stay
+	follow
+#	strike
+#	warm
+#	paddle
+#	oil
+#	wave
+	start
+	answer
+	reveal
+#	suck
+#	tap
+#	tap-dance
+#	dance
+#	post
+#	sieve
+#	count
+#	wash
+#	clean
+#	chase
+#	weigh
+#	make
+	shave
+	drive
+	urinate
+	confess
+	}
+
+#	synonym "l_for" { makelocal verb }	#this is REALLY horrible!!!
+	synonym "search_for" { makelocal verb }
+	synonym "go_to" { makelocal verb }
+
+synonym "sing" { say verb }	#may not be 100% perfect, but should do
+synonym "switch" { turn verb }
+synonym "flick" { turn verb }
+synonym "borrow" { get verb }
+synonym "inspect" { look verb }
+synonym	"assist" { help verb }
+synonym "z" { wait verb }
+synonym "smear" { rub verb }
+synonym "pee" { piss verb }
+synonym "urinate" { piss verb }
+synonym "beat" { hit verb }
+synonym "drag" { pull verb }
+synonym "tip" { empty verb }
+synonym "snort" { eat verb }		#to deal with cocaine
+synonym "sniff" { smell verb }		# ditto but not really satisfactory
+synonym "spin" { turn verb }
+synonym "lick"	{ taste verb }
+#synonym "ladies" { set_WOMEN mult }
+#synonym "gentlemen" { set_MEN mult }
+synonym "x" { look verb }
+synonym "ex" { look verb }
+synonym "stake" { bet verb }
+synonym "phone" { dial verb }
+synonym "ring" { dial verb }
+synonym "big" { large adj }
+
+
+

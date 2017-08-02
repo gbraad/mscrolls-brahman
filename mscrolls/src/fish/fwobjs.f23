@@ -1,0 +1,1879 @@
+
+item player "small scaly you." {
+	desc {
+are a small, scaly fish, with fins and a natty little tail. Tres chic
+	}
+	scen_noun_d eyes
+	scen_noun_a bladder
+	scen_noun_f secretary
+	scen_noun_f grouper
+
+	synonyms { me self }
+	plural
+	texture cold
+	inseparable
+	intrinsic
+	wet
+	hardness 15
+	location inventory
+	attribute no_article
+	attribute article_null
+	class fish
+}
+
+item ptraffic "heavy traffic" {
+	desc {
+streams busily along the road in an almost unbroken line
+	}
+	force_plural
+	pseudo
+	texture void
+	location { plaza daceroad sharkstreet }
+}
+
+item water "wet water" {
+	desc {
+Yes, it's water, and what's more it's wet
+	}
+	desc_only
+	wet
+	texture cold
+	hardness 0
+	force_plural
+	intrinsic
+	location inventory
+}
+
+item tie "kipper tie" {
+	desc {
+is to be worn on special occasions: births, deaths, marriages, visits to
+the disco and so on. It's made from finest kipper
+	}
+	owner shopassistant
+	value 25
+	size 2
+	hardness 12
+	wearable 1
+	texture smooth
+	weight 1
+	moveable
+	wet
+	class clothes
+	location clothingshop
+}
+
+item pdisco "disco" {
+	desc {
+is an ideal place for a bop. Boys - you can sniff snifters and fall over to
+loud music. Girls - you can swim around your handbags
+	}
+	scen_noun_d handbags
+
+	related
+	location outsideuni
+}
+
+item pplaicestreet "plaice street" {
+	desc {
+is a busy north south road which takes heavy traffic through Hydropolis
+	}
+	synonyms { road }
+	pseudo
+	location { plaza daceroad }
+}
+
+item slot1 "slot" {
+	desc {
+is beside the door. It's about the same size as your identity card
+	}
+	inseparable
+	related
+	contr_vol 1
+	texture smooth
+	hardness 15
+	location metaldoor1
+}
+
+item slot2 "slot" {
+	desc {
+is beside the door. It's about same size as your identity card
+	}
+	inseparable
+	related
+	contr_vol 1
+	texture smooth
+	hardness 15
+	location metaldoor2
+}
+
+item window "large window" {
+	desc {
+Hydropolis, city of tall thrusting buildings. They follow the same basic
+design; silver, rectangular tins with rounded corners. For some reason this
+sight looks familiar, but you can't put your finger on it. The city is laid
+out in blocks. The only irregularity lies at the south east of
+town; the university, which provides a splash of greeny-blue in an otherwise
+uniform bluish-blue
+	}
+	scen_noun_d blocks
+	scen_noun_c rectangular_tins
+	scen_noun_c tins
+	scen_noun_c buildings
+
+	synonyms { view }
+	desc_only
+	inseperable
+	short_look
+	closed
+	hardness 15
+	related
+	location flounge
+}
+
+item pdaceroad "dace road" {
+	desc {
+is a busy east west road which runs right through the centre of Hydropolis
+	}
+	pseudo
+	location { plaza sharkstreet }
+}
+
+item railings "railings" {
+	desc {
+When there was more water in Hydropolis, students used to come up here to
+admire Hydropolis. Lots of them were swept over the edge by the
+overcurrent so some railings were kindly put up
+	}
+	scen_noun_c edge
+
+	desc_only
+	plural
+	wet
+	hardness 15
+	texture hard
+	location roof
+}
+
+item storedoor "wooden solid large door" {
+	desc {
+is large, solid and here to slow you down
+	}
+	closed
+	force_adj
+	pseudo
+	texture cold
+	location { store hall2 }
+	another_noun
+	set doors
+}
+
+item fishton "space glorified saving fishton" {
+	desc {
+Fishtons are really popular in Hydropolis at the moment. Most fish can only
+afford small apartments so these space saving beds are essential. You didn't
+get any instructions with it so it's really just a glorified sofa
+	}
+	scen_noun_f instructions
+
+	synonyms { sofa bed }
+	desc_only
+	value 0
+	texture	soft
+	hardness 15
+	weight 15
+	moveable
+	size 10
+	sittable
+	location flounge
+}
+
+item blackshelf "trendy black shelf" {
+	desc {
+Dr. Roach bought the trendy black shelf from his favourite trendy black shelf
+shop
+	}
+	synonyms { shelves }
+	desc_only
+	sittable
+	related
+	hardness 15
+	location flounge
+}
+
+item watch "watch" {
+	desc {
+	}
+	synonyms { time }
+	wearable 1
+	worn
+	weight 1
+	size 2
+	moveable
+	hardness 15
+	location inventory
+	class clothes
+	out
+}
+
+item fishofax "fishofax" {
+	desc {
+is a really useful item. Honest. It combines all the features of a diary and
+a wallet, for about four or five times the price
+	}
+	contr_vol 1	#full up at start
+	synonyms { fax wallet diary }
+	open
+	texture smooth
+	hardness 15
+	weight 2
+	size 2
+	moveable
+	related
+	location blackshelf
+	attribute small_contents
+}
+
+item fisacard "Fisa small plastic credit card" {
+	desc {
+saves you carrying cash around. For this pleasure, you have to pay extortionate
+interest rates on your outstanding balance
+	}
+	money
+	another_noun
+	synonyms { Fisa }
+	contained
+	texture smooth
+	weight 1
+	size 1
+	moveable
+	hardness 15
+	force_adj
+	location fishofax
+	class cards
+}
+
+item identitycard "tatty identity id card" {
+	desc {
+is in a sorry state, probably because you have to carry it around all the time
+to keep proving your identity
+	}
+	contained
+	synonyms { id }
+	force_adj
+	texture smooth
+	hardness 15
+	weight 1
+	size 1
+	moveable
+	location fishofax
+	another_noun
+	class cards
+}
+
+item drunkscard "new identity id card" {
+	desc {
+gives you access to parts of the university other fish cannot reach
+	}
+	related
+	synonyms { id }
+	force_adj
+	texture smooth
+	hardness 15
+	weight 1
+	size 1
+	moveable
+	location drunk
+	another_noun
+	class cards
+}
+
+item travelpass "travel pass" {
+	desc {
+gives you unlimited use of the Hydropolis Underground Omnibus system, until it
+expires of course
+	}
+	synonyms { card }
+	force_adj
+	texture smooth
+	weight 1
+	size 1
+	moveable
+	hardness 15
+	hidden
+	location fishton
+	another_noun
+	class cards
+}
+
+item silverprint "silver hand print" {
+	desc {
+looks like someone has dipped their hand in silver paint and pressed it on the
+wall
+	}
+	synonyms	{ handprint }
+	attribute alladjs
+	force_adj
+	pseudo
+	location { flounge flobby }
+	set prints
+}
+
+item goldprint "gold hand print" {	# entry to Chub's apartment
+	desc {
+is used by Ernest Chub, your neighbour, to open the door of his flat
+	}
+	synonyms	{ handprint }
+	attribute alladjs
+	force_adj
+	hardness 0
+	inseparable
+	hardness 15
+	related
+	location flobby
+	set prints
+}
+
+item flatdoor "apartment sliding door" {
+	desc {
+is the latest sliding design, operated by a silver hand print next to it
+	}
+	force_adj
+	pseudo
+	closed
+	another_noun
+	hardness 15
+	location { flobby flounge }
+	set doors
+}
+
+item pcity "busy Hydropolis" {
+	desc {
+is busier than the busiest place you've ever seen before, except one, and you
+can't for the life of you remember where that was
+	}
+	synonyms { city }
+	out
+	intrinsic
+	attribute article_null
+	attribute no_article
+	texture void
+	hardness 0
+	location inventory
+}
+
+item pshaft "access shaft" {
+	desc {
+provides access to the different levels of your apartment block
+	}
+	pseudo
+	force_adj
+	texture void
+	location { flobby fgroundlobby }
+}
+
+item pblock "apartment block" {
+	desc {
+is where you live
+	}
+	related
+	hardness 15
+	force_adj
+	location paddlington
+}
+
+item pstation "underground station" {
+	desc {
+is the closest access point to the Hydropolis Underground Omnibus system.
+You do have your travel pass, don't you? Good
+	}
+	force_adj
+	pseudo
+	hardness 15
+	location { paddlington museum battersea outsideuni }
+}
+
+npc pfishcitizens "guppies" {
+	desc {
+The fish dart this way and that, in the way shoals of fish do. They're all too
+busy to stop and chat
+	}
+	desc_only
+	plural
+	synonyms { guppy citzens dolphins angelfish passengers pike pilchards
+	commuters }
+	texture	npc
+	pseudo
+	location { eelpout musstation battersea padstation inunitube tube
+	platform paddlington plaza daceroad sharkstreet pickerel }
+	class fish
+}
+
+npc pcustomers "filthy customers" {
+	desc {
+know more than they are letting on
+	}
+	pseudo
+	plural
+	texture npc
+	location { secondhandshop restaurant pub musicshop disco hardwareshop
+	clothingshop }
+}
+
+npc pstudents "students" {
+	desc {
+can't be bothered to study. They're just here for fun
+	}
+	pseudo
+	plural
+	texture npc
+	location { restaurant disco musicshop unicor1 unicor4
+	outsideuni unilibrary }
+}
+
+item servicecounter "service counter" {
+	desc {
+is pretty dull so I won't bother describing it
+	}
+	sittable
+	related
+	hardness 15
+	texture smooth
+	force_adj
+	location clothingshop
+}
+
+item slice "meals" {
+	desc {
+are made from the finest selection of plankton available; lovingly prepared to
+tempt any palate
+	}
+	plural
+	edible 5
+	hardness 15
+	value 1
+	size 2
+	moveable
+	weight 2
+	related
+	location waiter
+	class food
+}
+
+item flashinglight "stroboscopic light" {
+	desc {
+gets on your nerves a bit
+	}
+	synonyms { strobe }
+	another_noun
+	texture void
+	related
+	inseparable
+	hardness 0
+	location disco
+	set lights
+}
+
+npc policeofficer "police stalwart officer" {
+	desc {
+is a dogfish, with large whiskers and a semi-alert expression
+	}
+	scen_noun_d whiskers
+	scen_noun_a expression
+
+	synonyms { policeman dogfish police }
+	force_adj
+	texture npc
+	related
+	location policestation
+	class fish
+}
+
+item policestationdesk "desk" {
+	desc {
+separates the police officer from all the villains that swim in
+	}
+	scen_noun_f villains
+
+	sittable
+	inseparable
+	related
+	hardness 11
+	strength 15
+	location policestation
+}
+
+item screwdriver "screw screwdriver" {
+	desc {
+works with any normal any kind of screw
+	}
+	owner shopassistant
+	synonyms { driver }
+	value 8
+	moveable
+	weight 2
+	hardness 11
+	strength 13
+	location hardwareshop
+	class tools
+	set drivers
+	size 2
+}
+
+item electricaltool "tool" {
+	desc {
+Well, what can I say? The tool is a sort of gadget but then again, it's slightly
+less useful than an ordinary gadget. It might come in handy one day, but
+probably not
+	}
+	desc_only
+	synonyms { gadget }
+	force_adj
+	hardness 15
+	moveable
+	weight 4
+	size 4
+	value 10
+	related
+	location hardwareshop
+	class tools
+}
+
+item secondhandshopcounter "second hand counter" {
+	desc {
+is second hand. Well, what else would you expect in a second hand shop? Not a
+brand new counter surely
+	}
+	sittable
+	inseparable
+	related
+	hardness 15
+	location secondhandshop
+}
+
+item stool "bar free stool" {
+	desc {
+is the only stool at the bar available for your use
+	}
+	sittable
+	moveable
+	size 4
+	weight 3
+	hardness 15
+	texture hard
+	location pub
+}
+
+item racks "racks" {
+	desc {
+are displaying lots of exciting jackets
+	}
+	plural
+	owner shopassistant
+	hardness 15
+	related
+	location clothingshop
+}
+
+item jackets "exciting jackets" {
+	desc {
+are much too exciting for a staid university project leader like Dr. Roach
+	}
+	value 200
+	plural
+	hardness 15
+	related
+	owner shopassistant
+	location clothingshop
+	class clothes
+}
+
+item pressuredoor "steel pressure automatic door" {
+	desc {
+opens automatically when the pressure from the turbines in the area to the west
+falls below danger levels. For safety reasons, it cannot be opened by hand
+	}
+	force_adj
+	closed
+	hardness 15
+	set doors
+	pseudo
+	location { blades powerstation }
+}
+
+item logo "red logo" {
+	desc {
+is a red herring, the well recognised symbol of the Hydropolis Underground
+Omnibus Company
+	}
+	synonyms { herring symbol }
+	pseudo
+	texture void
+	location { paddlington museum pickerel eelpout battersea }
+}
+
+item prestaurant "restaurant" {
+	desc {
+is a fun place to eat your life away, or have it eaten, if you happen to be
+plankton
+	}
+	related
+	hardness 15
+	location outsideuni
+}
+
+npc amateurmusicians "amateur musicians" {
+	desc {
+are demonstrating with supreme skill why they are still amateurs
+	}
+	plural
+	texture npc
+	force_adj
+	related
+	location musicshop
+	class fish
+}
+
+item instruments "expensive musical instruments" {
+	desc {
+are being played really badly
+	}
+	plural
+	owner shopassistant
+	force_adj
+	weight 3
+	moveable
+	hardness 15
+	texture smooth
+	value 200
+	related
+	location musicshop
+}
+
+item musicshopcounter "counter" {
+	desc {
+is where you can buy things. However, the assistant has forgotten what it's
+like to sell things
+	}
+	sittable
+	related
+	inseparable
+	hardness 15
+	location musicshop
+}
+
+item busyfunnel "access funnel" {
+	desc {
+provides swift access to and exit from the tube trains. A guard stands at
+the entrance examining tickets
+	}
+	pseudo
+	texture void
+	location { platform eelpout pickerel musstation battersea padstation
+	inunitube }
+}
+
+item ticketcounter "ticket counter" {
+	desc {
+is the only place in the station you can buy tickets for the tube. There is a
+clerk sitting behind it
+	}
+	sittable
+	inseparable
+	hardness 15
+	pseudo
+	force_adj
+	location { musstation battersea padstation inunitube pickerel eelpout }
+}
+
+item interiorwall "wall" {
+	desc {
+rests on the floor and holds up the ceiling
+	}
+	scen_noun_a	floor
+	scen_noun_b	ceiling
+
+	pseudo
+	hardness 15
+	location { castle1 hall lounge office hall1 hall2 store cntrl2
+	antechamber catacombs altarroom flounge flobby fgroundlobby padstation
+	unifoyer unicor1 unilibrary unistoreroom unicor4,treasureroom
+	lab uniprojectroom musstation battersea restaurant disco policestation
+	pickerel hardwareshop secondhandshop pub clothingshop musicshop
+	eelpout smithy tube inunitube platform powerstation blades tunnel1
+	researchwing tower vanback  alarmroom museum lastbowl }
+}
+
+item flutedpillars "fluted pillars" {
+	desc {
+are guaranteed to make any freshmen feel overawed when they come to Opah
+	}
+	related
+	plural
+	force_adj
+	hardness 15
+	location unifoyer
+}
+
+item busts "ancient busts" {
+	desc {
+are of people who have made the university what it is. Lack of humour
+is their sole common trait
+	}
+	scen_noun_c people
+
+	related
+	plural
+	hardness 5
+	force_adj
+	location unifoyer
+}
+
+item pmarblearch "impressive archway" {
+	desc {
+is a magnificent example of craftfishship
+	}
+	pseudo
+	hardness 15
+	texture smooth
+	force_adj
+	location { unifoyer outsideuni }
+	synonyms { arch }
+}
+
+item bronzearch "archway" {
+	desc {
+must have taken the fish ages to build
+	}
+	pseudo
+	force_adj
+	hardness 15
+	texture smooth
+	strength 15
+	location { unicor1 unilibrary }
+	synonyms { arch }
+}
+
+synonym "rarest " { rare adj }
+
+item book "rare illustrated large picture book" {    #don't say open or closed
+	desc {
+is illustrated with many wondrous things from ages gone by. Perhaps you should
+look some of them up
+	}
+	scen_noun_d things
+
+	related
+	closed
+	hardness 15
+	size 3
+	weight 15
+	moveable
+	location lectern
+}
+
+item lectern "lectern" {
+	desc {
+has a large picture book on it
+	}
+	short_look
+	related
+	sittable
+	hardness 11
+	strength 15
+	location unilibrary
+}
+
+item projectterminal "Project terminal" {
+	desc {
+gives team members access to the university computer
+	}
+	synonyms { terminals computer }
+	sittable
+	hardness 15
+	force_adj
+	inseparable
+	related
+	location lab
+	attribute article_the
+}
+
+item wallplan "large wall wallchart" {
+	desc {
+is an informal record of the equipment held in store for The Project
+	}
+	synonyms { chart }
+	hardness 15
+	texture soft
+	related
+	location unistoreroom
+}
+
+item metaldoor1 "metal door" {	#door to main lab
+	desc {
+will not open to unauthorised persons. There is a slot next to it
+	}
+	pseudo
+	closed
+	hardness 15
+	texture smooth
+	force_adj
+	location { unicor4 lab }
+	set doors
+}
+
+item metaldoor2 "metal door" {	#door to main lab
+	desc {
+remains closed to all except those who are authorised. There is a slot next to
+it
+	}
+	pseudo
+	closed
+	texture smooth
+	force_adj
+	hardness 15
+	location { unifoyer researchwing }
+	set doors
+}
+
+item puni "university" {
+	desc {
+is the only seat of learning in all Hydropolis and consequently, the only place
+where young fish can avoid their parents and get together for fun, plankton
+and the other thing which we're not allowed to talk about (I thought this was a free country)
+	}
+	pseudo
+	texture void
+	location { outsideuni flounge unifoyer unicor1 unilibrary
+	unistoreroom unicor4 lab uniprojectroom }
+}
+
+item device "impressive device" {
+	desc {
+Dr. Roach certainly knows how to build impressive machines - this one nearly
+fills the project room. It looks a bit like a huge aquarium, filled to the brim
+with multi-coloured gravel and, if you and Sir Playfair have anything to do
+with it, it's going to save Hydropolis from water evaporation
+	}
+	synonyms { machine }
+	desc_only
+	contr_vol 1  		#full up
+	hardness 15
+	location uniprojectroom
+	attribute article_the
+}
+
+item fplayer "doctor you." {
+	desc {
+are in the body of Doctor Roach, a fish scientist and leader of The Project.
+You have arms and hands to help you adjust your environment, and a tail to help
+you swim through it
+	}
+	synonyms { me self roach }
+	hardness 15
+	plural
+	out
+	texture slippery
+	intrinsic
+	location inventory
+	attribute no_article
+	attribute article_null
+}
+
+item painting "solid painting" {
+	desc {
+is called 'Waves in Black'. One of Finn's more solid works
+	}
+	related
+	synonyms { waves_in_black picture }
+	hardness 15
+	weight 2
+	size 5
+	moveable
+	texture rough
+	location flounge
+}
+
+item statue "statue" {
+	desc {
+has the University motto, 'Scientia est bona' engraved underneath
+	}
+	scen_noun_a motto
+
+	weight 15
+	hardness 11
+	strength 15
+	location outsideuni
+}
+
+npc bertiebream "Bertie_Bream" {
+	desc {
+Though extremely pedantic, Bertie Bream is a capable and valuable member of the
+team, able to spot tiny mistakes that most would consider irrelevant. He's also
+after your job
+	}
+	desc_only
+	synonyms { bertie bream }
+	texture npc
+	location uniprojectroom
+	article
+	class fish
+}
+
+npc anothereric "Ernest_Chub" {
+	desc {
+wants to be like you in every way. You're his hero and this leads to plenty of
+grovelling on his part. He really needs to get a life - of his own preferably,
+especially since he rented the apartment next door to you
+	}
+	synonyms { neighbour ernest chub }
+	texture npc
+	location restaurant
+	article
+	class fish
+}
+
+npc yettonimoore "Simon_Tench" {
+	desc {
+is a brilliant scientist with a searing intuition for the right answer.
+Unfortunately, he'd much rather have fun than work on The Project
+	}
+	synonyms { simon tench }
+	texture npc
+	location secondhandshop
+	article
+	class fish
+}
+
+npc drunk "doctor sorry dr: drunk" {
+	desc {
+All washed up, Doctor Salmon is a no-good drunk. He hasn't been the same
+since he was taken off The Project
+	}
+	synonyms { salmon }
+	related
+	texture npc
+	desc_only
+	location pub
+	class fish
+}
+
+npc shopassistant "shop assistant" {
+	desc {
+is almost willing to serve
+	}
+	pseudo
+	force_adj
+	texture npc
+	location { clothingshop musicshop restaurant hardwareshop }
+	covetous
+	class fish
+}
+
+item pcinema "cinema" {
+	desc {
+shows films all day and every day
+	}
+	related
+	hardness 15
+	location  plaza
+}
+
+item darkglasses "dark cool trendy black glasses" {
+	desc {
+are incredibly cool and trendy, highly unsuitable for Dr. Roach
+	}
+	synonyms { shades }
+	plural
+	related
+	value 5
+	weight 1
+	wearable 1
+	size 2
+	hardness 5
+	texture smooth
+	moveable
+	force_adj
+	sl clothingshop
+	location shopassistant
+	class clothes
+}
+
+item earplugs "ear ear-plugs" {
+	desc {
+reduce all types of loud noise to a bearable level
+	}
+	synonyms { earplugs plugs }
+	texture furry
+	plural
+	hardness 3
+	owner shopassistant
+	size 2
+	value 5
+	moveable
+	weight 1
+	wearable 1
+	class clothes
+	related
+	location musicshop
+}
+
+item hyperdriver "hyper hyperdriver" {
+	desc {
+is a variant on the standard screwdriver, designed for removing lok screws
+	}
+	owner shopassistant
+	synonyms { driver }
+	value 99
+	moveable
+	weight 2
+	size 2
+	hardness 11
+	strength 15
+	class tools
+	set drivers
+	location hardwareshop
+}
+
+item lokscrew "lok screw" {
+	desc {
+(TM) is a small item for fixing items semi-permanently; without the right
+tool it cannot be removed
+	}
+	force_adj
+	synonyms { lokscrew }
+	locked
+	hardness 11
+	strength 12
+	size 2
+	weight 1
+	moveable
+	related
+	another_noun
+	location accelerator
+	set screws
+}
+
+item accelerator "stream accelerator" {
+	desc {
+accelerates particles gathered by the main Project machine
+	}
+	scen_noun_f particles
+
+	force_adj
+	hardness 15
+	weight 4
+	size 6
+	moveable
+	contained
+	related
+	location device
+}
+
+item regulator "stream regulator" {
+	desc {
+controls the flow of particles from one dimension to another
+	}
+	force_adj
+	out
+	hardness 15
+	weight 4
+	size 6
+	moveable
+	location inventory
+}
+
+item untunedcrystal "untuned crystal" {
+	desc {
+Light catches this crystal in a beautifully irregular manner
+	}
+	desc_only
+	hardness 11
+	strength 9
+	weight 1
+	size 1
+	moveable
+	location treasureroom
+}
+
+item box "radio antique case" {
+	desc {
+is the outer casing of an antique radio. There is a lot of space inside
+where the radio bits used to be
+	}
+	value 5
+	hardness 11
+	strength 15
+	weight 1
+	size 6
+	force_adj
+	moveable
+	contr_vol 5
+	location secondhandshop
+}
+
+item filter "filter" {
+	desc {
+is a near-perfect criss-cross of wires which has probably seen better days
+in a physics lab
+	}
+#	moveable	;starts off not moveable cos its screwed in place
+	size 1
+	weight 1
+	texture	cold
+	hardness 15
+	related
+	location grilles
+}
+
+item tunedcrystal "tuned crystal" {
+	desc {
+Just by looking at this crystal you can grasp its purpose: to resonate with
+the entire range of inter-dimensional extra-temporal frequencies. Ah,
+scientia est bona
+	}
+	desc_only
+	moveable
+	out
+	size 1
+	weight 1
+	texture	cold
+	force_adj
+	hardness 15
+	contained
+	location testequipment
+}
+
+item focuswheel "focus wheel" {
+	desc {
+looks like a small-scale model of a turbine. It can focus an inter-dimensional
+energy beam to a minute point
+	}
+	moveable
+	size 3
+	weight 2
+	texture	cold
+	hardness 15
+	force_adj
+	contained
+	out
+	location case
+	attribute teleportable
+}
+
+item photonbridge "photon bridge" {
+	desc {
+looks like a specialised radio aerial. Spiky bits poke out at all angles
+as if they should be grasping something. It is obviously the work of a
+deranged snifter addict
+	}
+	scen_noun_d bits
+	scen_noun_d spiky_bits
+
+	synonyms { aerial }
+	moveable
+	size 2
+	weight 1
+	texture	cold
+	force_adj
+	hardness 15
+	location roof
+}
+
+item focusfilter "focus filter" {
+	desc {
+is capable of fully filtering finely focussed photons (try saying that when
+you've sniffed a few). You have combined two items which regulate and
+concentrate energy but you have no way to filter or focus that energy
+	}
+	moveable
+	out
+	size 3
+	weight 2
+	texture	cold
+	force_adj
+	hardness 15
+	location inventory
+}
+
+item crystalbridge "crystal bridge" {
+	desc {
+works in a very simple way, allowing you to gather energy from a specific
+source. However, you have no way of controlling that energy
+	}
+	moveable
+	out
+	size 2
+	weight 2
+	texture	cold
+	hardness 15
+	force_adj
+	location inventory
+}
+
+item focussedcrystal "crystal filter" {
+	desc {
+gathers energy from various sources which it filters and refines
+	}
+	moveable
+	out
+	size 1
+	weight 4
+	texture	cold
+	force_adj
+	hardness 15
+	location inventory
+}
+
+item testequipment "crystal tuna" {
+	desc {
+is a box which lets you adjust the receiving frequency of a given crystal
+	}
+	synonyms { box }
+	contr_vol 2		#to take an untuned crystal
+	force_adj
+	moveable
+	weight 15
+	hardness 15
+	local_contents
+	open
+	location researchwing
+}
+
+item bluejeans "blue denim pair_of jeans" {
+	desc {
+are made from denim, at least they might be under that dirt
+	}
+	moveable
+	synonyms { trousers denims }
+	weight 2
+	size 3
+	covers { legs groin }
+	combustable 1
+	texture soft
+	hardness 15
+	wearable 1
+	worn
+	plural
+	out
+	location inventory
+	class clothes
+}
+
+item oppositedoor "opposite door" {	#door to Eric's flat
+	desc {
+is just like the one outside your apartment, except that it has a gold print
+beside it
+	}
+	pseudo
+	closed
+	hardness 15
+	force_adj
+	location { flobby death }
+	set doors
+	owner anothereric
+}
+
+item pstation2 "underground tube station" {
+	desc {
+	}
+	hardness 0
+	texture void
+	moveable
+	weight 0
+	related
+	location platform
+}
+
+item tubedoor "tube door" {	#door to tube train
+	desc {
+opens and closes viciously at stations, threatening to fillet anything that
+gets in the way
+	}
+	out
+	hardness 15
+	pseudo
+	open
+	texture slippery
+	force_adj
+	location { platform tube }
+	set doors
+}
+
+item train "underground train" {
+	desc {
+is packed full of commuters, with plenty of doors for access
+	}
+	out
+	synonyms { tube }
+	texture slippery
+	force_adj
+	hardness 15
+	location platform
+}
+
+npc guard "guard" {
+	desc {
+stands by the access funnel checking commuters tickets before allowing them
+through
+	}
+	scen_noun_d tickets
+
+	synonyms { perch }
+	pseudo
+	texture npc
+	location { musstation battersea platform padstation eelpout inunitube
+	pickerel }
+	class fish
+}
+
+npc ticketclerk "ticket clerk" {
+	desc {
+sits behind the ticket counter selling tickets
+	}
+	force_adj
+	pseudo
+	texture npc
+	location { musstation battersea padstation inunitube pickerel eelpout }
+	class fish
+}
+
+item ticket "ticket" {
+	desc {
+Tickets are a simple device for allowing passage on one of the many trains of
+the Hydropolis Underground Omnibus system
+	}
+	desc_only
+	value 1
+	hardness 15
+	related
+	location ticketclerk
+}
+
+item tracks "unreleased tracks" {
+	desc {
+run off into the distance, in both directions, almost in parallel, without
+moving. Quite clever really, when you think about it
+	}
+	plural
+	related
+	hardness 15
+	location platform
+}
+
+item tunnel "dark tunnel" {
+	desc {
+has a train rushing around in it once every three minutes or so
+	}
+	related
+	hardness 15
+	pseudo
+	location { platform tube }
+}
+
+item storeroomdoor "store room door" {
+	desc {
+is intended to prevent unauthorised access to the store room. But security
+is so tight these days it's almost always left wide open
+	}
+	force_adj
+	attribute alladjs
+	hardness 15
+	open
+	pseudo
+	texture smooth
+	location { unistoreroom lab }
+	set doors
+}
+
+item metal "twisted metal" {
+	desc {
+is a cross between a Henry Moore sculpture and an Anderson bomb shelter. Fine
+if you like that sort of thing, but it doesn't look like it's going to save
+Hydropolis
+	}
+	out
+	force_adj
+	wearable 1
+	size 4
+	weight 14
+	texture cold
+	hardness 12
+	force_plural
+	moveable
+	combustable 3
+	location inventory
+}
+
+item blender "blender" {
+	desc {
+is the biggest you have seen in you're whole life. Well done. Now
+you've got it you might as well mix something until the world blows up.
+Which it undoubtedly will
+	}
+	out
+	size 15
+	weight 6
+	hardness 15
+	texture hot
+	location inventory
+}
+
+item light3 "light" { #desc blank - not done this way
+	desc {
+	}
+	another_noun
+	related
+	hardness 15
+	location flounge
+	set lights
+}
+
+item corwindows "window" {
+	desc {
+The windows look out onto the university grounds
+	}
+	scen_noun_c grounds
+
+	desc_only
+	short_look
+	hardness 15
+	related
+	location unicor1
+}
+
+item toilet "toilet" {
+	desc {
+is downstairs
+	}
+	related
+	location disco
+}
+
+npc dancers "disco dancers" {
+	desc {
+are having a whale of a time dancing to the music, except the whales, who
+are forbidden to dance in such confined spaces
+	}
+	scen_noun_d whales
+
+	plural
+	force_adj
+	texture npc
+	location disco
+	class fish
+}
+
+npc steve "cool Steve" {
+	desc {
+is a cool catfish, keen on selling anything to anyone at ridiculously high
+prices. Somehow, this ploy usually works and has made a rich fish out of him
+	}
+	synonyms { catfish }
+	article
+	pseudo
+	texture npc
+	location { secondhandshop pub }
+	class fish
+}
+
+item snifter "snifter" {
+	desc {
+is a mask through which you sniff intoxicating gases with the purpose
+of getting "finless"
+	}
+	wearable 1
+	synonyms { mask }
+	moveable
+	hardness 15
+	value 5
+	weight 1
+	size 2
+	related
+	sl pub
+	location steve
+	texture soft
+}
+
+item gas "pink intoxicating gas" {
+	desc {
+is the favoured intoxicant in Hydropolis, liquid being somewhat too easy to
+come by and hang onto
+	}
+	synonyms { intoxicant }
+	another_noun
+	force_plural
+	moveable
+	weight 0
+	texture void
+	hardness 0
+	related
+	value 5
+	location pub
+	set gases
+}
+
+item film "fruity vegetable film" {
+	desc {
+is an original copy of "Attack of the Killer Tomatoes". It's more of a
+vegetable video than a fruity film now you think about it
+	}
+	synonyms { video }
+	texture cold
+	value 75
+	moveable
+	weight 3
+	hardness 15
+	size 4
+	moveable
+	related
+	sl secondhandshop
+	location steve
+}
+
+item bar "clean bar" {
+	desc {
+is the only place in downtown Hydropolis licensed to sell snifters
+	}
+	inseparable
+	related
+	sittable
+	hardness 15
+	location pub
+}
+
+item stools "bar stools" {
+	desc {
+are occupied by the other customers
+	}
+	sittable
+	size 4
+	weight 3
+	sl pub
+	hardness 15
+	plural
+	force_adj
+	moveable
+	related
+	location pcustomers
+}
+
+item terminal2 "vacant terminals" {
+	desc {
+are suspiciously vacant
+	}
+	synonyms { computer }
+	related
+	hardness 15
+	plural
+	location lastbowl
+}
+
+item sachet "sachet" {
+	desc {
+is used by customers who wish to take their food away to eat at home
+	}
+	sl restaurant
+	related
+	owner shopassistant
+	hardness 3
+	closed
+	value 5
+	size 2
+	weight 1
+	local_contents
+	contr_vol 0
+	moveable
+	location shopassistant
+}
+
+item plankton "tasty plankton" {  #2 descs to look different - hmm?
+	desc {
+makes a tasty snack
+	}
+	force_plural
+	synonyms { snack }
+	contained
+	location sachet
+	size 2
+	weight 0
+	edible 5
+	hardness 0
+	texture warm
+	moveable
+	class food
+}
+
+item beams "beams" {
+	desc {
+sparkle through the drifting plankton
+	}
+	moveable
+	weight 0
+	out
+	plural
+	location alarmroom
+	texture void
+	hardness 0
+}
+
+item page "page" { #no desc. Bob does it
+	desc {
+	}
+	synonyms { picture }
+	hardness 3
+	texture smooth
+	weight 1
+	size 1
+	strength 1
+	inseperable
+	related
+	location book
+}
+
+item photocopier "large protocopier" {
+	desc {
+is a large box with a slot on one side and a simple on-off switch where you
+would expect one, built by Dr. Salmon as a prototype Device. While it is
+indeed remarkable, the University authorities took a different view
+for two reasons: the protocopier used so much power that fuel bills
+reached record levels and secondly, it could only teleport in very small
+amounts of water. It was the downfall of Dr. Salmon; he was fired by the
+principal
+	}
+	synonyms { copier prototype box }
+	texture smooth
+	hardness 15
+	moveable
+	weight 15
+	size 10
+	location unistoreroom
+}
+
+item slot3 "slot" {
+	desc {
+is about as thick as a piece of paper
+	}
+	inseparable
+	related
+	texture smooth
+	contr_vol 1
+	hardness 15
+	location photocopier
+}
+
+######################################################
+# next three switches must stay together!! R.H.
+######################################################
+
+item floungeswitch "light switch" { #[TS]
+	desc {
+For a joke, when Roach was bored one evening last
+week, he re-wired the switch so that it controls the lights for all of the
+other apartments in the whole block. For the time being it is 
+	}
+	related
+	hardness 15
+	texture smooth
+	size 1
+	location flounge
+	set switches
+	desc_only
+}
+
+item deviceswitch "large switch" { #[TS]
+	desc {
+is large - obviously the protocopier consumes a lot of energy. It is currently 
+	}
+	inseparable
+	related
+	hardness 15
+	texture smooth
+	size 1
+	location photocopier
+	set switches
+}
+
+item tubeswitch "large switch" { #[TS]
+	desc {
+is just like those seen in fifties science-fiction movies, requiring both
+hands to turn it on or off. It controls the power supply to the whole of the
+tube system. At the moment it is 
+	}
+	hardness 15
+	texture smooth
+	size 2
+	related
+	location powerstation
+	set switches
+}
+
+######################################################
+# last three switches must stay together!! R.H.
+######################################################
+
+item gauge "important gauge" {		#[TS]
+	desc {
+shows the total electricity output of the Battersea sub-station. It is
+currently displaying a value of 
+	}
+	related
+	synonyms { dial }
+	hardness 15
+	force_adj
+	location powerstation
+}
+
+item screw "brass screw" {
+	desc {
+is a perfectly ordinary screw
+	}
+	related
+	moveable
+	size 1
+	weight 1
+	hardness 5
+	location filter
+	another_noun
+	set screws
+}
+
+item turbine "giant sharp turbine" {
+	desc {
+As turbines go you've never seen a turbine quite as large as this one. Come
+to think of it, you've never seen any turbines before. And the blades look very
+sharp. You'd better watch out
+	}
+	synonyms { blades }
+	desc_only
+	hardness 15
+	location blades
+}
+
+item bag "plastic bag" {
+	desc {
+is for wrapping rubbish for disposal
+	}
+	hardness 3
+	related
+	moveable
+	weight	2
+	value 2
+	contr_vol 5
+	sl hardwareshop
+	location shopassistant
+}
+
+item cylinder "gas small cylinder" {
+	desc {
+holds the smoothest, most potent, twenty five year old snifter gas known to fish
+	}
+	size 4
+	hardness 5
+	related
+	closed
+	contr_vol 2
+	local_contents
+	short_look
+	value 99
+	moveable
+	weight 12
+	location pub
+}
+
+item gas1 "clear gas" {
+	desc {
+You try very hard but can't see the gas. Unsurprising, as it's clear
+	}
+	desc_only
+	texture void
+	force_plural
+	contained
+	size 1
+	weight 0
+	moveable
+	another_noun
+	set gases
+	location cylinder
+}
+
+item bones "bloodyenormasaurus" {
+	desc {
+roamed the seas of Hydropolis until fish became civilised. Then they killed
+every single Bloodyenormasaurus they could lay their grubby little fins on,
+simply because they made such great museum exhibits
+	}
+	synonyms { skeleton bones }
+	hardness 15
+	related
+	location museum
+}
+
+item trapdoor "trap trapdoor" {
+	desc {
+has been put here to stop students getting to the roof
+	}
+	synonyms { door }
+	closed
+	hardness 15
+	pseudo
+	location { tower roof }
+	set doors
+}
+
+item grilles "grilles" {
+	desc {
+are an intricate criss-cross of filters, screwed together, designed to stop
+bits of rubbish getting into the turbine
+	}
+	plural
+	related
+	location tunnel1
+}
+
+item plans "logout rule commands mail games chess wimpout prawn hack logic gilled equipment plans" {
+	desc {
+oh!
+	}
+	plural
+	out
+	location death
+}
+
+npc waiter "waiter" {
+	desc {
+bows and scrapes to every customer in the restaurant
+	}
+	texture npc
+	related
+	size 5
+	weight 10
+	location restaurant
+	class fish
+	covetous
+}
+
+item oils "gas impregnated oils" {
+	desc {
+are much denser than water so they sit at the bottom of the glass - just like in
+the picture
+	}
+	plural
+	size 2
+	hardness 1
+	related
+	location restaurant
+	value 1
+	owner waiter
+}
+
+item plaza_shops "shop" {
+	desc {
+You can't see into the shops from here; perhaps you should go in first
+	}
+	desc_only
+	hardness 0
+	texture void
+	pseudo
+	location { sharkstreet plaza }
+	set shops
+}

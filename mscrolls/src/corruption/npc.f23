@@ -1,0 +1,708 @@
+####################
+#                  #
+# npcs start here  #
+#                  #
+####################
+
+synonym "mister" { Mr_ adj }
+synonym "mr_and" { Mr_ adj }
+synonym "mr" { Mr_ adj }
+synonym "mrs_and" { Mrs_ adj }
+synonym "mrs" { Mrs_ adj }
+synonym "dr" { Dr_ adj }
+
+item player ".you" {
+	desc {
+You don't look cunning and devious enough for this game
+	}
+	plural				#for you are
+	desc_only
+	synonyms { me myself derek_rogers derek }
+	texture smooth
+	intrinsic
+	size 10
+#	inseparable
+#	set men
+	location inventory
+	attribute no_article
+	attribute article_null
+}
+
+npc tealady "cleaning woman" {
+	desc {
+Working in this building for thirty years has brought a stoop to
+Barbara's walk but she retains her cheerful disposition, always taking an
+interest in everyone's welfare
+	}
+	icon ac001
+	desc_only
+#	related
+	nonpause
+	location reception
+	texture npc
+	size 10
+	weight 10
+	hardness 5
+	sex female
+	synonyms { babs barbara lady cleaner }
+	attribute article_the
+	force_adj
+#	set people
+#	set women
+}
+
+npc secretary "Mrs: Margaret" {
+	desc {
+is a large and powerful woman whose influence reaches far beyond the walls of
+her office. Despite her lack of charm she tries hard to present a friendly
+image. But underneath this mask is a formidable woman whom you would be well
+advised not to cross
+	}
+	icon ac002
+	synonyms { mags maragret margret stubbs maggie }
+	related
+	location chair1			#sitting on her chair
+	texture npc
+	size 10
+	weight 10
+	hardness 5
+	article
+	sex female
+	nice
+	nonpause
+	owner player
+	synonyms { secretary }
+#	set people
+	set secretarys
+#	set women
+}
+
+npc theresa "miss Theresa" {
+	desc {
+is in her early twenties. With her streaked blonde hair she looks the classic
+dumb blonde; stupid and easy to take advantage of
+	}
+	icon ac003
+	scen_noun_e hair
+	scen_noun_e shoulder
+
+	location part_sec
+	texture npc
+	#!sup_clothing
+	size 10
+	weight 10
+	hardness 5
+	owner partner
+	article
+	sex female
+	nonpause
+	synonyms { jenkins secretary }
+#	set people
+	set secretarys
+#	set women
+}
+
+npc partner "Mr: David" {
+	desc {
+is polite, charming, and always has a funny story to tell. He has made some
+enemies in the world through his business deals but it is hard to dislike him
+	}
+	icon ac004
+	article
+	related
+	location your_office
+	texture npc
+	size 10
+#	set men
+	weight 10
+	hardness 5
+	nonpause
+	owner player
+	synonyms { dave partner rogers ticklepot }
+#	set people
+}
+
+# ask mr hughes about his children.
+# but mr hughes does not have any children.
+
+npc lawyer "Mr: William company Hughes" {
+	desc {
+is a relaxed, confident man with a congenial nature. He is in his early forties
+	}
+	icon ac005
+	force_adj
+	article
+	related
+	location law_chair2		#sitting on his chair.
+	texture npc
+	size 10
+	weight 10
+	nonpause
+	hardness 5
+	synonyms { william lawyer bill }
+#	set people
+#	set men
+}
+
+synonym "di" { Detective_Inspector adj }
+
+npc inspector "Detective.Inspector police Mr: Goddard" {
+	desc {
+With his hard face and thin bony frame it is difficult to see how DI
+Goddard can play the role of 'Mr. Nice' in police interviews. He is a member
+of the fraud squad who will stop at nothing to achieve convictions in the city
+	}
+	icon ac006
+	desc_only
+	synonyms { inspector detective man }
+	force_adj
+	article
+#	related
+	location interview
+	texture npc
+	nonpause
+	size 10
+	weight 10
+	hardness 5
+#	set people
+#	set men
+}
+
+# These are first in the file so that 
+# 	ask about police
+# references the officers, as far as the replay tables are concerned.
+
+npc officers "police officers" {
+	desc {
+are all hard at work
+	}
+	icon ac007
+	synonyms { police policemen officer }
+	plural
+	force_adj
+	related
+	location police1
+	texture npc
+	size 10
+	weight 10
+	hardness 5
+#	set people
+#	set men
+}
+
+synonym "sgt" { Sergeant adj }
+#synonym "policemen" { set_POLICE mult }
+
+npc sergeant "Sergeant duty police Mr: Russell" {
+	desc {
+was only recently promoted and, though inexperienced, he certainly looks the
+part
+	}
+	icon ac008
+	synonyms { sergeant man }
+	force_adj
+	article
+	location police1
+	texture npc
+	size 10
+	weight 15
+	nonpause
+	hardness 5
+#	set people
+#	set men
+}
+
+npc gerry "Gerry Mr: McNally" {
+	desc {
+is a thin, unshaven man in his late twenties. He looks like he would purposely
+live in squalor and eat cold baked beans so that he could complain about the
+quality of his life
+	}
+	icon ac009
+	synonyms { gerry }
+	force_adj
+	article
+	location cell			# has already jumped down.
+	texture npc
+	nonpause
+	size 10
+	weight 10
+	hardness 5
+#	set people
+#	set men
+}
+
+npc sally_man "Salvation Army man" {
+	desc {
+clutches his collection box tightly against his coat and avoids people's eyes
+when asking for money. He looks so meek and humble that the pensioners gladly
+hand over their coppers
+	}
+	icon ac010
+	scen_noun_a box
+
+	attribute alladjs
+	force_adj
+	location by_bandstand
+	texture npc
+	size 10
+	weight 10
+	hardness 5
+#	set people
+#	set men
+	out
+}
+
+npc doctor_ingram "Doctor Dr: Ingram" {
+	desc {
+is a tall man with short grey hair. He is in his early sixties and becoming
+overweight though his army discipline won't allow him to slip too much
+	}
+	icon ac011
+	force_adj
+	article
+	location ward
+	out
+	texture npc
+	size 10
+	weight 10
+	hardness 5
+	synonyms { doctor }
+#	set people
+#	set men
+	set doctors
+}
+
+npc nurse "Nurse Stephenson" {
+	desc {
+is a plump Irish woman in her early thirties with pale skin and wavy red
+hair. The ease with which she handles difficult patients shows her
+experience but the strain of the work has definitely taken its toll
+	}
+	icon ac012
+	scen_noun_e hair
+	
+	force_adj
+	sex female
+	article
+	location ward
+	texture npc
+	size 10
+	weight 10
+	nonpause
+	hardness 5
+	synonyms { nurse }
+#	set people
+#	set women
+	set nurses
+}
+
+
+npc wife "your.wife Jenny" {
+	desc {
+is beginning to look much older than her forty years. She has nagged you 
+increasingly over the past year and hardly speaks at home now unless it is
+to argue about how little time you spend with the children
+	}
+	icon ac013
+	sex female
+	location pave2
+	out
+	texture npc
+	article
+	nonpause
+	force_adj
+	synonyms { jennifer wife rogers }
+	size 10
+	weight 10
+	hardness 5
+	owner player
+#	set people
+#	set women
+}
+
+npc mrbig "Monsieur Mr: three bald Charpontier" {
+	desc {
+is wearing an impeccable tuxedo. His bald head lends an air of ill-deserved
+sophistication to a cruel face
+	}
+	icon ac014
+	scen_noun_a tuxedo
+
+	synonyms { manager charpo }
+	force_adj
+	related
+	location back_room
+	article
+	texture npc
+	size 10
+	weight 10
+	hardness 5
+#	set people
+	set players
+#	set gamblers
+#	set men
+}
+
+npc waiter "head waiter" {
+	desc {
+has a snobbish air about him that is almost comical
+	}
+	icon ac015
+	attribute article_the
+	location main_rest
+	texture npc
+	size 10
+	weight 10
+	hardness 5
+	nonpause
+#	set people
+#	set men
+	force_adj
+}
+
+npc tramp "tramp" {
+	desc {
+is too young to have been on the street for long and his clothes
+are almost clean
+	}
+	icon ac016
+#	article
+	location park3
+	out
+	texture npc
+	size 10
+	weight 10
+	hardness 5
+#	set people
+#	set men
+	force_adj
+#	attribute article_the
+}
+
+npc chemist "chemist" {
+	desc {
+is a grey old man in a white coat who constantly rubs his sweaty little
+hands together. His round glasses are oddly familiar and virtually hide the 
+laughter lines around his piggy little eyes
+	}
+	icon ac017
+	scen_noun_a glasses
+	scen_noun_a coat
+	scen_noun_a spectacles
+
+	synonyms { pharmacist }
+	related
+	location pharmacy
+	texture npc
+	size 10 
+	weight 10
+	hardness 5
+#	set people
+}
+
+npc teller "teller" {
+	desc {
+is a slight man, dressed in a baggy suit and bow-tie
+	}
+	icon ac018
+	related
+	location casino
+	texture npc
+	size 10
+	weight 10
+	hardness 5
+#	set people
+#	set men
+}
+
+npc bouncer "Mr: bouncer" {
+	desc {
+is a huge man whose fingers are decked with large gold rings
+	}
+	icon ac019
+	scen_noun_d rings
+	scen_noun_d fingers
+
+	synonyms { prentice }
+	related
+	location casino
+	texture npc
+	size 10
+	weight 10
+	hardness 5
+#	set people
+#	set men
+}
+
+npc croupier "croupier" {
+	desc {
+knows every trick in the book, and needs to in a place like this
+	}
+	icon ac020
+	related
+	synonyms { dealer }
+	location casino
+	texture npc
+	size 10
+	weight 10
+	sex female
+	hardness 5
+#	set people
+#	set women
+}
+
+npc henchman "henchman" {
+	desc {
+stands with his arms crossed over his blue-grey double-breasted suit. His
+flickering eyes suggest he is capable of far more in the way of violence
+than will be necessary
+	}
+	icon ac021
+	related
+	location back_room
+	texture npc
+	size 10
+	weight 10
+	hardness 5
+	synonyms { wesley }
+#	set people
+#	set men
+}
+
+npc doctor_james "Doctor Dr: James" {
+	desc {
+looks awkward in his white coat, as if he had only just qualified. Half his
+right eyebrow is missing as if he had been bruised in a fight
+	}
+	icon ac022
+	force_adj
+	article
+	location ward
+	out
+	texture npc
+	size 10
+	weight 10
+	hardness 5
+	synonyms { doctor }
+#	set men
+#	set people
+	set doctors
+}
+
+npc punters "glamorous gamblers" {
+	desc {
+Though losing many more games than winning, the gamblers are enjoying themselves
+a great deal
+	}
+	desc_only
+	plural
+	synonyms { crowd punters }
+	related
+	location casino
+	texture npc
+	size 10
+	weight 10
+	hardness 5
+}
+
+npc gambler2 "Mr: three Park" {
+	desc {
+is smiling but his eyes show he isn't as confident as he would like to think
+	}
+	icon ac196
+	force_adj
+	article
+	related
+	location back_room
+	texture npc
+	size 10
+	weight 10
+	hardness 5
+#	set people
+	set players
+#	set men
+}
+
+npc gambler3 "Mr: three Seeley" {
+	desc {
+looks very nervous, continually puffing at a huge cigar and wiping his sweaty
+face, but you can't make out if this is an act
+	}
+	icon ac197
+	force_adj
+	article
+	related
+	location back_room
+	texture npc
+	size 10
+	weight 10
+	hardness 5
+#	set people
+	set players
+#	set men
+}
+
+npc oldman "old burly man" {
+	desc {
+Despite his age, the old man is a bundle of energy. He never stops talking,
+always having a go at someone or something, and when he runs out of doctors
+and nurses to shout at he turns on one of the patients
+	}
+	icon ac024
+	scen_noun_a raincoat
+
+	desc_only
+	force_adj
+	related
+	location casualty
+	texture npc
+	size 10
+	weight 10
+	hardness 5
+#	set people
+#	set men
+}
+
+npc driver "ambulance driver" {
+	desc {
+is short and stocky with a bushy moustache
+	}
+	icon ac025
+	scen_noun_a moustache
+
+	force_adj
+	related
+	location casualty
+	out			#he gets put in after a couple of turns
+	texture npc
+	size 10
+	weight 10
+	hardness 5
+#	set people
+}
+
+npc doctors "surgeons" {
+	desc {
+are just finishing the night shift
+	}
+	icon ac026
+	plural
+	related
+	location casualty
+	texture npc
+	size 10
+	weight 10
+	hardness 5
+#	set people
+#	set men
+#	set women
+	set doctors
+}
+
+npc nurses "nurses" {
+	desc {
+are incredibly tired from working all weekend
+	}
+	icon ac027
+	plural
+	related
+	location casualty
+	texture npc
+	size 10
+	weight 10
+	hardness 5
+#	set people
+#	set men
+#	set women
+	set nurses
+}
+
+npc patients "hospital patients" {
+	desc {
+are looking very sorry for themselves
+	}
+	icon ac028
+	plural
+	pseudo
+	location { ward casualty }
+	texture npc
+	size 10
+	weight 10
+	hardness 5
+#	set people
+#	set men
+#	set women
+}
+
+npc ducks "ducks" {
+	desc {
+splash about in the pond, waiting for someone to feed them
+	}
+	icon ac029
+	synonyms { duck } # since 'duck' is already an adj.
+	related
+	location by_pond
+	plural
+	texture npc
+	size 2
+	weight 2
+	hardness 5
+	animal
+}
+
+
+npc sally_band "Salvation Army band" {
+	desc {
+are a group of twelve highly talented musicians who gather at the bandstand
+during the lunch hour to play a selection of songs from their vast repertoire
+	}
+	icon ac030
+	synonyms { player musicians }
+	force_adj
+	attribute alladjs
+	pseudo
+	location { by_bandstand on_bandstand }
+	texture npc
+	size 10
+	weight 10
+	hardness 5
+#	set people
+	out
+	plural
+}
+
+npc jarvis "Mr: door Jarvis" {
+	desc {
+is a crusty old man, useless as a security guard because of his deafness
+and the fact that he still thinks he's working in a twenty five storey
+hotel
+	}
+	icon ac031
+	synonyms { man }
+	force_adj
+	location reception
+	texture npc
+	size 10
+	weight 10
+	hardness 5
+#	set people
+#	set men
+	article
+}
+
+npc davis "Mr: Davis" {
+	desc {
+You can't actually see Mr. Davis through the operating theatre window. His
+body is obscured with blood, sheets and scalpel-wielding doctors
+	}
+	desc_only
+	force_adj
+	related
+	location theatre
+	texture void			#feel davis => dbs.
+	size 0
+	weight 0			# get davis => dbs
+	hardness 5
+	article
+}

@@ -1,0 +1,1037 @@
+######################
+##                  ##
+## rooms start here ##
+##                  ##
+######################
+
+room your_office "your office" {
+	desc {
+Compared to your old office this isn't much of an improvement. You wonder
+whether it was worth accepting the partnership when you still have the same
+chair, the same filing cabinet, the same desk and still no phone. Margaret has
+her office next door and, on first impressions, she isn't much of an
+improvement either. The only consolation is the splendid view of the square out
+of your window
+	}
+	pictures { cstart }	
+	force_adj
+	lit_room
+	no_article
+	another_noun	
+	net { 
+		north sec_room 
+		in sec_room
+		out sec_room
+	}
+	location your_office
+	set offices
+	owner player
+	attribute article_when_no_adj
+}
+
+room sec_room "Margaret''s. office" {
+	desc {
+Margaret has made a great effort to make this room homely by having flowers
+next to the typewriter on her desk, putting pictures of her family on the wall
+and keeping the place clean and tidy. However, it will remain an unsightly
+place due to her presence. The corridor for the second floor is beyond an exit
+to the east
+	}
+	pictures { cmaggs }
+	scen_noun_c wallpaper
+	scen_noun_a typewriter
+	scen_noun_a flowers
+	force_adj
+	no_article
+	another_noun
+	lit_room
+	net { 
+		east corridor2
+		south your_office
+		in your_office
+		out corridor2
+	}
+	location sec_room
+	set offices
+	owner secretary
+	attribute article_when_no_adj
+}
+
+room corridor2 "gloomy corridor" {
+	desc {
+The faint sound of car horns comes from behind a fire door to the south in this
+gloomy corridor. Further up the corridor to the north is the dealing room and
+William Hughes's office. Margaret's office is to the west, opposite the
+building's gurgling bathroom
+	}
+	pictures { cocorr }
+	lit_room
+	net {
+		north corridor3
+		east bathroom
+		west sec_room
+		south nway_firedoor
+		in sec_room
+		out nway_firedoor
+	    }
+	location corridor2
+}
+
+room bathroom "bathroom" {
+	desc {
+The plumbing in this building dates from the turn of the century - easy to
+believe with the smell coming from the cubicle to the south. The sink against
+the north wall gurgles at inopportune moments in time with the urinal
+	}
+	scen_noun_e plumbing
+
+	pictures { csink }	
+	lit_room
+	net {
+		in cubicle
+		south cubicle
+		west corridor2
+		out corridor2
+	    }
+	location bathroom
+}
+
+#room lift "lift" {
+	#desc {
+#The four buttons, marked B, G, 1 and 2, next to the door to the south are all 
+#that is of interest in this tiny lift
+	#}
+	#out
+	#topline 1	#in the
+	#lit_room
+	#net {
+		#south corridor1
+		#out corridor1
+		#in corridor1
+	    #}
+	#location lift
+#}
+#
+room stairs2 "fire escape" {
+	desc {
+As the lift constantly breaks down, this fire escape is used in preference more
+often than not. A fire door to the north leads to the second floor, where you
+have your office
+	}
+	pictures { cfscap }
+	scen_noun_d steps
+
+	force_adj
+	lit_room
+	net {
+		out nway_firedoor
+		in nway_firedoor
+		north nway_firedoor
+		down stairs1
+	    }
+	location stairs2
+}
+
+room cubicle "cubicle" {
+	desc {
+The smell and the constant gurgling of the cistern in this cubicle would
+dissuade most people from using it. However, everyone must be quite happy
+as it has never been fixed or changed in any way. All the original fittings
+are here, right down to the brass lock on the door
+	}
+	pictures { carse }
+	lit_room
+	net {
+		north bathroom
+		out bathroom
+	    }
+	location cubicle
+}
+
+room stairs1 "fire stairs" {
+	desc {
+These stairs run from the roof of the building right down to the car park
+without ever breaking down, unlike the lift. The fire door to the north leads
+onto the first floor and the reception is downstairs
+	}
+	scen_noun_d steps
+
+	plural
+	synonyms { escape }
+	lit_room
+	net {
+		in nway_firedoor
+		out nway_firedoor
+		north nway_firedoor
+		up stairs2
+		down landing
+	    }
+	location stairs1
+}
+
+room corridor1 "corridor" {
+	desc {
+The dim lighting in this corridor shows day old traces of coffee by a fire
+door to the south. The coffee was probably spilt by your partner's secretary,
+Miss Jenkins, whose office is to the west. The lift is at the north end of the
+corridor and the company board room is to the east
+	}
+	scen_noun_e coffee
+	scen_noun_d traces
+
+	lit_room
+	net {
+		north nway_lift
+		south nway_firedoor
+		out nway_firedoor
+		in part_sec
+		west part_sec
+		east board_room
+	    }
+	location corridor1
+}
+
+room part_sec "Theresa''s. office" {
+	desc {
+The deep pile carpet, mahogany desk and holiday postcards on the walls in here
+make you jealous of the relationship Theresa and your partner have. Next to a
+shredding machine is the door to your partner's office and the corridor is
+outside
+	}
+	pictures { cthere }
+	scen_noun_e carpet
+	scen_noun_d walls
+	scen_noun_d postcards
+
+	lit_room
+	another_noun
+	force_adj
+	no_article
+	net {
+		east corridor1
+		west nway_door
+		out corridor1
+		in nway_door
+	    }
+	location part_sec
+	set offices
+	owner theresa
+	attribute article_when_no_adj
+}
+
+room board_room "board room" {
+	desc {
+This grand room has an imposing set of portraits of members of the Rogers
+family who have all had a controlling interest in the business. They all stare
+down onto an impressive rosewood table. The collection is headed by Hilda
+Rogers who founded the company in 1807 after her husband died in the Battle of
+Trafalgar
+	}
+	pictures { cboard }
+	force_adj
+	lit_room
+	net {
+
+		west corridor1		
+		out corridor1
+	    }
+	location board_room
+}
+
+room part_office "your.Partner''s. office" {
+	desc {
+Solving the company's financial problems seems to be the least of your
+partner's worries as his office seems designed purely for pleasure. A compact
+disc player and television are set flush into the wall and a comfortable chaise
+longue stands next to his huge desk
+	}
+	pictures { cpart }
+	force_adj
+	another_noun
+	lit_room
+	no_article
+	net {
+		east nway_door
+		out nway_door
+	    }
+	location part_office
+	set offices
+	owner partner
+	attribute article_when_no_adj
+}
+
+room corridor3 "tatty corridor" {
+	desc {
+At the end of this tatty corridor is the lift, probably out of order knowing
+your luck. A sound proof door leads to the dealing room and William Hughes,
+the company lawyer, has his office to the east
+	}
+	pictures { cmop }
+	lit_room
+	net {
+		north nway_lift
+		south corridor2
+		east nway_door
+		west corridor3
+		in nway_door
+		out corridor2
+	    }
+	location corridor3
+}
+
+room law_office "Mr:.Hughes''. office" {
+	desc {
+A large desk neatly splits this office in two. Behind it stands Mr. Hughes'
+black leather chair, in easy reach of a pile of magazines and his books on
+company law. In front of the desk, with its back to the door, is a red leather
+chair for customers
+	}
+	pictures { chugh }
+	force_adj
+	lit_room
+	another_noun
+	owner lawyer
+	no_article
+	net {
+		west nway_door
+		out nway_door
+		in nway_door
+	    }
+	location law_office
+	set offices
+	attribute article_when_no_adj
+}
+
+room car_park "car small parking park" {
+	desc {
+The low ceiling here is supported by pillars which have a habit of scratching
+cars indiscriminately. A ramp leads west to street level and the main office
+building can be reached by using the lift or going up a flight of stairs
+	}
+	pictures { ccarpk cboom }
+	scen_noun_d pillars
+	scen_noun_e ceiling
+
+	synonyms { lot }	#americanisms go here
+	force_adj
+	lit_room
+	net {
+		west pave1
+		north nway_lift
+		up landing
+		in nway_cardoor
+		east nway_volvodoor
+		out pave1
+	    }
+	location car_park
+}
+
+room reception "reception" {
+	desc {
+A revolving glass door looks out onto London Road from this smart reception.
+You can just make out the bandstand in the square across the road between small
+breaks in the traffic. There is a fire door to the south, opposite the lift
+	}
+	pictures { crevo }
+	lit_room
+	net {
+		north nway_lift
+		south nway_firedoor
+		west pave3
+		out pave3
+		in nway_firedoor
+
+	    }
+	location reception
+}
+
+room in_ambulance "ambulance" {
+	desc {
+There is enough room in here for the patient and two passengers - much more
+than it looks. A partition separates the front and back of the ambulance so the
+driver cannot be disturbed. The door is to the south
+	}
+	pictures { cambul }
+	topline 1	#in the 
+	lit_room
+	net {
+		out nway_door
+		south nway_door
+		in nway_door
+	}
+	location in_ambulance
+}
+
+
+room landing "fire landing" {
+	desc {
+The stairs from here lead down to the car park and up to your partner's office
+on the first floor. The only other exit is the fire door to the north which
+leads to the reception
+	}
+	pictures { cupfsc }
+	synonyms { escape }
+	lit_room
+	net {
+		north nway_firedoor
+		up stairs1
+		down car_park
+		in nway_firedoor
+		out car_park
+	    }
+	location landing
+}
+
+room pave1 "pavement" {
+	desc {
+The stale air of the city hangs all around you here, clogging your lungs. The
+only refuge from the fumes and the crowds along London Road is to cross over
+into the relative seclusion of the park. The only safe means of crossing is
+via a set of traffic lights to the north, outside Le Monaco restaurant. Your
+office building is to the south and a ramp leads east into the office car park
+	}
+	lit_room
+	net {
+		east car_park
+		in car_park
+		north pave2
+		south pave3
+		west park2		#trapped in setmode
+		out pave2
+	    }
+	location pave1
+}
+
+room in_the_car "your.car" {
+	desc {
+Relaxing in the driver's seat, you survey this impressive piece of machinery
+that goes with the new job. The whole car is engineered to perfection, right
+down to the glove compartment. The experience is so comfortable you just want
+to put a tape in the stereo, start up and drive for hours
+	}
+	pictures { cbmw }
+	scen_noun_d seats
+	scen_noun_a handbrake
+	scen_noun_c windscreen
+	scen_noun_c windshield
+	scen_noun_a gear
+	scen_noun_a stick
+
+	
+	no_article
+	lit_room
+	net {
+		out nway_cardoor
+		in nway_cardoor
+	    }
+	location in_the_car
+	owner player
+}
+
+room pave2 "Le Monaco" {
+	desc {
+The beautiful facade of Le Monaco restaurant beckons you to take refuge from
+the streams of cars and buses which rush past along London Road, swerving
+dangerously close to the pedestrians as the road turns by the restaurant. The
+only other place to find some seclusion is in the park over the road to the
+west. It's only safe to cross the road when traffic has stopped at the lights.
+At the moment the lights are
+	}
+	scen_noun_e road
+	force_adj
+	topline 2	#Outside 
+
+	no_article
+	lit_room
+	net {
+		south pave1
+		east main_rest
+		west park1
+		northwest nway_car
+		north nway_car
+		in main_rest
+		out pave1
+	    }
+	location pave2
+	synonyms { sidewalk pavement }
+	attribute article_when_no_adj
+}
+
+room pave3 "office building" {
+	desc {
+Your office building and the revolving door to the east are almost black with
+deposits from the fumes of the buses and cars which race along London Road and
+turn sharply past the building. The meagre foliage of the park across the road
+to the west has not escaped this suffocation and is struggling hard to make
+itself presentable. The pavement continues northward
+	}
+	no_article
+	force_adj
+	topline 3		#Outside The
+	lit_room
+	net {
+		north pave1
+		east reception
+		in reception
+		out pave1
+		southwest nway_car
+		west by_pond		#trapped in setmode
+	    }
+	location pave3
+	synonyms { sidewalk pavement }
+	attribute article_when_no_adj
+}
+
+room ward "hospital luke ward" {
+	desc {
+The cartoon characters here in Luke Ward are a legacy of St. Lawrence's
+Memorial Hospital's devotion to children's care. In your present condition, the
+bold colours make you feel sick though the other patients, who occupy all
+the beds except one, don't seem at all bothered; probably because they are all
+either asleep or sedated. The corridor outside provides a much more sober
+atmosphere
+	}
+	pictures { cluke }
+	lit_room
+	force_adj
+	net {
+		south hosp_corridor
+		in hosp_corridor
+		out hosp_corridor
+	    }
+	location ward
+}
+
+room hosp_corridor "corridor" {
+	desc {
+This is just like any other hospital corridor, spotlessly clean and reeking
+of antiseptic. Off to the east you can hear the noise of the casualty
+department and an exit south leads to the TV room. The corridor also leads
+westward into the depths of St. Lawrence's
+	}
+	pictures { chosco }
+	lit_room
+	net {
+		north ward
+		in ward
+		out casualty
+		east casualty
+		south tvroom
+		west theatre
+	    }
+	location hosp_corridor
+}
+
+room theatre "The.Operating operating theatre" {
+	desc {
+A swing door with a circular window here is the entrance to an operating
+theatre. Low murmuring and the occasional 'ping' tell you that an operation is
+in progress. The corridor continues southward and your ward is back to the east
+	}
+	pictures { nopic copera }
+	no_article
+	topline 2		#Outside
+	force_adj
+	lit_room
+	net {
+		east hosp_corridor
+		out hosp_corridor
+		south theatre		# south to ITSELF.
+		west theatre
+	    }
+	location theatre
+#	attribute article_when_no_adj
+	attribute article_the
+}
+
+room tvroom "TV room" {
+	desc {
+The patients on Luke ward are normally under sedation, so this room doesn't see
+much use. The locker against the far wall tells you that it is now used as a
+store room for patients' clothes. This was the play room when Luke ward was
+ populated by children and some of the toys from then still survive
+	}
+	pictures { ctvroo }
+	force_adj
+	lit_room
+	net {
+		north hosp_corridor
+		out hosp_corridor
+		in hosp_corridor
+	    }
+	location tvroom
+}
+
+synonym "accident" { accident_and_emergency adj }
+synonym "emergency" { accident_and_emergency adj }
+
+room casualty "accident_and_emergency department" {
+	desc {
+Apart from being the casualty department this place also doubles as the
+reception area for St. Lawrence's. Ambulances constantly arrive outside
+bringing patients with injuries ranging from minor burns and scalds to car
+crash fatalities. Doctors and nurses bustle around some small rooms, 
+occasionally calling patients for examination from an informal queue. The
+X-Ray Department is to the south, busy as always. Eastward is a corridor
+leading to other departments, opposite the corridor back to Luke ward
+	}
+	force_adj
+	lit_room
+	synonyms { dept casualty }
+	net {
+		west hosp_corridor
+		northwest car_park
+		north pway_casualty
+		out pway_casualty
+		south pway_xray
+		east pway_casualty
+		in hosp_corridor
+	    }
+	location casualty
+}
+
+room park1 "park" {
+	desc {
+This park is used a great deal by the business men and women who work in the
+square for a bit of peace and quiet as the bushes and trees that surround it
+block out most of the noise from the road, making the cars seem a mile away.
+The park continues westward and southward with a bandstand to the southwest
+where the Salvation Army often give lunchtime concerts. Across Hanover
+Street, to the north, is a pharmacy but the only safe way of getting to it
+is by using the zebra crossing further down the Street to the west. Waiting
+for the traffic lights to the east to go red provides the only safe way for
+pedestrians to cross London Road. The lights at the moment are
+	}
+	pictures { nopic cknife }
+	lit_room
+	net {
+		south park2
+		east pave2
+		north pave5	#trapped in setmode
+		west park3
+		southwest by_bandstand
+		northeast nway_car
+		out pave2
+		in by_bandstand
+	    }
+	location park1
+}
+
+room park2 "park" {
+	desc {
+This is the most peaceful part of the park, right near the centre, though the
+peace is frequently broken by the Salvation Army band that plays in the
+bandstand to the west most lunchtimes. London Road, always chock full with
+cars, is to the east and a duck pond to the south is refuge for a large number
+of the city's feathered friends
+	}
+	pictures { nopic cknife }
+	lit_room
+	net {
+		north park1
+		northwest park3
+		west by_bandstand
+		southwest by_pond
+		south by_pond
+		east pave1		#trapped in setmode
+		out park1
+		in by_bandstand
+	    }
+	location park2
+}
+
+room park3 "park" {
+	desc {
+The noise of the cars driving along Hanover Street reaches into the park here
+as the bushes which normally provide a natural sound barrier have given up all
+hope of living in the fume laden air. Sweet wrappers and empty drink cartons
+have been blown over the limp grass making the park even more untidy. A zebra
+crossing to the north allows you to cross Hanover Street to the local police
+station. Hanover Street turns south here, running down the west side of the
+square and passing the bandstand while the rest of the park is to the south and
+east
+	}
+	pictures { cfins cknife }
+	
+	scen_noun_a wrappers
+	scen_noun_a cartons
+	scen_noun_a cans
+
+	lit_room
+	net {
+		north pave4
+		south by_bandstand
+		southeast park2
+		east park1
+		out pave4
+		in by_bandstand
+	    }
+	location park3
+}
+
+room by_pond "duck .Pond" {
+	desc {
+In summer the duck pond becomes the centre of activity for everyone in the
+square as they rush to find the best spot for sunbathing whilst reaping the
+benefit of the cool air. At these times the ducks 
+swarm from the west end of the pond, behind the bandstand, hoping
+that someone sitting on the park bench will throw them some sandwich scraps
+	}
+	pictures { cduck cknife }
+	attribute article_when_noadj
+	topline 5
+	force_adj
+	no_article
+	lit_room
+	net {
+		north park2
+		northwest on_bandstand
+		southwest nway_pond
+		west nway_pond
+		east pave3		#trapped in setmode
+		south nway_pond
+		southeast nway_pond
+		out park2
+		in nway_pond
+	    }
+	location by_pond
+}
+
+room on_bandstand "bandstand" {
+	desc {
+With room for roughly ten or twelve players at most this bandstand is not
+exactly impressive; but when the Salvation Army Band play one of their
+lunchtime concerts they manage to draw enough pensioners from the surrounding
+area to fill the deckchairs to the north. During the concerts ducks congregate
+on the steps to the southeast in an attempt to provide backing vocals
+	}
+	pictures { csally }
+	scen_noun_d steps
+	topline 4		#On The
+	no_article
+	lit_room
+	net {
+		north by_bandstand
+		southeast by_pond
+		down by_pond
+		out by_bandstand
+		in by_pond
+	    }
+	location on_bandstand
+}
+
+room by_bandstand "paved area" {
+	desc {
+Deckchairs cover this paved surface in the southwestern corner of the park, all
+facing a small bandstand. The original bandstand, erected in the nineteenth
+century, had a domed roof that made it look like a cast-off from the Kremlin.
+It was viewed as an eccentric monstrosity by the locals who eventually knocked
+it down. The replacement they built, which stands in front of you, is much more
+in keeping with the character of the square
+	}
+	pictures { cchair }
+	scen_noun_d pensioners
+
+	force_adj
+	lit_room
+	net {
+		north park3
+		south on_bandstand
+		northeast park1
+		east park2
+		southeast by_pond
+		in on_bandstand
+		out park3
+	    }
+	location by_bandstand
+}
+
+synonym "brick" { red_brick adj }
+
+room pave4 "red-brick red police outside.the.police.station" {
+	desc {
+The red-brick police station here was built ten years ago to combat the rising
+tide of inner city crime and has unfortunately not been as successful in this
+enterprise as was initially hoped. The metropolitan police crest above the door
+to the north tries to look as friendly as possible but fails dismally, imposing
+instead a repressive air along Hanover Street. Further along the street to the
+east is a pharmacy and the park across Hanover Street can be reached via a
+zebra crossing to the south
+	}
+	pictures { cpoli }
+	scen_noun_d crest
+	no_article
+	lit_room
+	net {
+		north police1
+		south park3
+		east pave5
+		west nway_car
+		in police1
+		out park3
+	    }
+	location pave4
+	synonyms { sidewalk }
+}
+
+room pave5 "pavement" {
+	desc {
+Hanover Street and London Road merge here and cross each other into two one-way
+systems which run east past Le Monaco restaurant and north past a small
+pharmacy. Needless to say, attempting to cross the road without waiting for the
+lights to change to red would be a risky exercise; it would be much wiser to
+use the zebra crossing outside the police station if you want to reach the park
+when the cars are racing past. The traffic lights at the moment are
+	}
+	lit_room
+	net {
+		west pave4
+		south park1		#trapped in setmode
+		east nway_car
+		north pharmacy
+		in pharmacy
+		out pave4
+	    }
+	location pave5
+	synonyms { sidewalk pavement }
+}
+
+room police1 "police station" {
+	desc {
+The reception area for the police station reminds you of a dentist's surgery
+but the notices here give information on wanted criminals instead of gum
+hygiene. In a room behind the sergeant's desk, which is next to a steel door
+in the east wall, several officers are busy filing forms and statements
+	}
+	scen_noun_d notices
+	scen_noun_d report
+
+	force_adj
+	lit_room
+	net {
+		south pave4
+		east nway_door
+		in nway_door
+		out pave4
+	    }
+	location police1
+}
+
+room pol_corridor "corridor" {
+	desc {
+This filthy corridor has absolutely nothing to commend it. Outside a cell door
+are traces of vomit that must have been here for days. An interview room is to
+the north and the steel door to the west will take you through to the main
+entrance for the police station. The corridor continues eastward
+	}
+	scen_noun_d traces
+	scen_noun_e vomit
+	scen_noun_e paint
+
+	lit_room
+	net {
+		west nway_door
+		east pol_corridor
+		south nway_celldoor
+		north interview
+		in interview
+		out nway_door
+	    }
+	location pol_corridor
+}
+
+room interview "interview room" {
+	desc {
+This room has been specifically designed to make interviewees feel distinctly
+uncomfortable. It is bare apart from a table and two chairs, the interviewee's 
+chair facing the door. It also has a high ceiling, presumably to induce a
+feeling of inadequacy in the person under interrogation
+	}
+	pictures { cinter }
+	force_adj
+	lit_room
+	net {
+		south pol_corridor
+		out pol_corridor
+		in pol_corridor
+	    }
+	location interview
+}
+
+room cell "cell" {
+	desc {
+This cell is normally used just to keep drunks off the streets. A bunk bed is
+set against the wall and a tiny window allows light to fall on the dull
+metal of the door to the north. The door looks as if it will never open
+	}
+	pictures { cmcnal cescap }
+	scen_noun_a cigarette
+	
+	lit_room
+	net {
+		north nway_celldoor
+		out nway_celldoor
+		in nway_celldoor
+	    }
+	location cell
+}
+
+room main_rest "le Monaco restaurant" {
+	desc {
+Secluded alcoves on raised levels give the mainly business clientele of Le
+Monaco ample chance to discuss financial matters out of earshot of their 
+competitors. A door leads to the kitchens, where the chefs prepare their superb
+meals
+	}
+	pictures { cdindi }
+	attribute alladjs
+	synonyms { monaco }
+	lit_room
+	net {
+		west pave2
+		north alcove
+		east nway_waiter
+		in alcove
+		out pave2
+	    }
+	location main_rest
+}
+
+room alcove "alcove" {
+	desc {
+Before your promotion this was your lucky alcove as so many deals were clinched
+here over coffee after a particularly delicious meal, your clients only too
+happy to sign any contract you cared to put in front of them in the hope of 
+being invited to indulge themselves again. When seated at the table, dimly 
+illuminated and surrounded by large plants, your view of other alcoves is 
+obscured and only the main floor of the restaurant is visible down a couple of
+steps to the south
+	}
+	pictures { calcov }
+	lit_room
+	net {
+		south main_rest
+		out main_rest
+		in main_rest
+	    }
+	location alcove
+}
+
+# This is the fodded description of the kitchen which is now 'spareroom' below
+#
+# Like all restaurant kitchens this is not as clean as it could be. The vast
+# range used by the chefs could almost be considered antique and the copper
+# pots and pans are so battered as to seem useless. However, recalling the
+# delights that come from this kitchen you accept that these must be the
+# implements with which the chefs can most ably create their masterpieces.
+# Opposite the door which leads into the main restaurant is the back door,
+# next to a huge worktable on which all the food is prepared before
+# cooking begins
+
+
+room casino "casino" {
+	desc {
+This casino is packed with glamorous gamblers, cheerfully handing chips over
+as they inevitably lose. The occasional win is greeted by cheers and a round of
+applause. Baccarat, trente-et-quarante, blackjack and roulette are all
+catered for and a private room through a padded door can be hired for other
+games. Standing next to the teller's counter is a large bouncer, waiting to
+step in if any trouble ensues over transactions
+	}
+	pictures { ccasin }
+	lit_room
+	scen_noun_c shoe
+	net {
+		north nway_bouncer
+		south yard
+		in nway_bouncer
+		out yard
+	    }
+	location casino
+}
+
+room back_room "private back room" {
+	desc {
+A heavy carpet of cigar smoke hangs in mid-air in this plush private room.
+Three men are playing poker, two of them looking nervously at a bald one as the
+stakes get higher and higher. A tough henchman stands by the door keeping an
+eye on the money
+	}
+	pictures { cmrbig }
+	force_adj
+	lit_room
+	net {
+		south nway_door
+		out nway_door
+		in nway_door
+	    }
+	location back_room
+}
+
+room pharmacy "pharmacy" {
+	desc {
+Behind the prescription counter of this small pharmacy stands the chemist,
+dutifully making up prescriptions as he has done for the last thirty years.
+Despite its size, the pharmacy stocks a staggering range of items, all
+stacked neatly on shelves that stretch high up to the ceiling
+	}
+	pictures { cphist }
+	synonyms { shop }
+	lit_room
+	net {
+		south pave5
+		in pave5
+		out pave5
+	    }
+	location pharmacy
+}
+
+room yard "back yard" {
+	desc {
+All the restaurant's rubbish from the past month seems to have been dumped
+here; dustbins are full to overflowing, a moss-covered drainpipe spills
+straight onto the cobbles and a pile of sacks and boxes stacked next to a
+wooden door looks as if it will topple at any moment. The only exit apart from
+the wooden door to the casino is into the kitchen through the back door
+	} 
+	pictures { cback }
+	scen_noun_d cobbles
+	scen_noun_d boxes
+	scen_noun_e sacks
+
+	lit_room
+	force_adj
+	net {
+		north nway_door
+		west main_rest
+		in nway_door
+		out nway_door
+	    }
+	location yard
+}
+
+room in_the_volvo "in.the.Volvo" {
+	desc {
+William Hughes' car bears all the hallmarks of many a family outing. The
+seats and floor are filthy, with tissues and empty drink cartons strewn
+everywhere
+	}
+	scen_noun_a tissues
+	scen_noun_d seats
+	scen_noun_a seat
+	scen_noun_a handbrake
+	scen_noun_c windscreen
+	scen_noun_c windshield
+	scen_noun_a gear
+	scen_noun_a stick
+	scen_noun_d cartons
+
+	lit_room
+	net {
+		out car_park
+		in car_park
+		west car_park
+	    }
+	location in_the_volvo
+	owner lawyer
+}

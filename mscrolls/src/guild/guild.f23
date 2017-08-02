@@ -3325,7 +3325,7 @@ is made out for the sum of
 	size 1
 	texture soft
 	value 55
-#	money
+	money
         attribute ismoney
 	location inventory
 }
@@ -3712,7 +3712,7 @@ five ferg notes and coins
 	size 1
 	texture smooth
 	value 5
-#	money
+	money
         attribute ismoney
 	contained
 	location cushion
@@ -5819,7 +5819,7 @@ bears the monarch's likeness, and is worth two fergs
 	size 1
 	texture hard
 	value 2
-#	money
+	money
         attribute ismoney
 	contained
 	location till
