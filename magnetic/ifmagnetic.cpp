@@ -42,7 +42,7 @@
 #include "filters.h"
 
 
-#define VERSION_STRING  "4"
+#define VERSION_STRING  "6"
 
 static IFMagnetic* theMS;
 
@@ -856,7 +856,7 @@ bool IFMagnetic::evalUseXwithY(const string& x, const string& y,
         {
             if (yi.isNPC())
             {
-                if (xi.isNPC())
+                if (xi.isNPC() || !xi.couldGet())
                 {
                     cmd = "ask " + yi.toString() + " about " + xi.toString(); 
                 }
@@ -1095,7 +1095,7 @@ std::string IFMagnetic::currentVersion() const
     return VERSION_STRING;
 }
 
-void IFMagnetic::moveUpdate()
+void IFMagnetic::moveUpdate(int moveCount)
 {
     updateAutoSave();
     _puzzles.moveUpdate();
@@ -1259,14 +1259,14 @@ void IFMagnetic::updateGameSaveArea(uchar* ptr, size_t size)
     {
         if (_gameSaveMemory != ptr || _gameSaveMemorySize != size)
         {
-            LOG1("MS, save game memory area changed! ", ptr);
+            LOG1("MS WARNING: ", "save game memory area changed!");
         }
     }
     
     _gameSaveMemory = ptr;
     _gameSaveMemorySize = size;
 
-    LOG4("MS save area ", std::hex << (long)_gameSaveMemory << " size: " << _gameSaveMemorySize << std::dec);
+    LOG4("MS save area ", std::hex << (long)_gameSaveMemory << " size: 0x" << _gameSaveMemorySize << std::dec);
 }
 
 bool IFMagnetic::saveGame(const char* name, uchar* ptr, size_t size)
@@ -1393,6 +1393,9 @@ bool IFMagnetic::loadGame(const char* name, SaveGameHeader& shead)
          
             if (res)
             {
+                // puzzle assistant state not saved, so reset on load
+                _puzzles.reset();
+                
                 LOG2("MS, loaded game '", path << "'");
             }
             else
@@ -1453,7 +1456,7 @@ bool IFMagnetic::setOptions(const VarSet& vs)
         else if (it->first == BRA_OPT_PIXELSCALE)
         {
             bool v = it->second.isTrue();
-            LOG3("MS use XBR pixel scaling ", (v ? "true" : "false"));
+            LOG4("MS use XBR pixel scaling ", (v ? "true" : "false"));
             if (v != _useXBR4)
             {
                 _useXBR4 = v;
@@ -1550,9 +1553,15 @@ type8 ms_load_file(type8s *name, type8 *ptr, type16 size)
     return theMS->loadGame((const char*)name, (uchar*)ptr, size) ? 0 : 1;
 }
 
-void game_state_notify()
+void game_state_notify(int movecount)
 {
     // NB: on engine thread
-    theMS->moveUpdate();
+    theMS->moveUpdate(movecount);
+}
+
+void update_game_save_area(uchar* ptr, size_t size)
+{
+    // can some straight from emu
+    theMS->updateGameSaveArea(ptr, size);
 }
 

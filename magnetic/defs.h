@@ -546,7 +546,8 @@ extern const type8* get_psudat();
 extern type16 get_object_player_on();
 extern type8* getcode();
 
-void game_state_notify();
+void game_state_notify(int movecount);
+void update_game_save_area(unsigned char* ptr, size_t size);
 
 typedef int (*ms_hook)(int, void*, int);
 void set_stop_or_restart_hook(ms_hook hook, void* ctx);

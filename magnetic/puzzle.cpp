@@ -559,29 +559,45 @@ struct DragonPuzzle: public Puzzle
 {
     DragonPuzzle() : Puzzle("dragon") {}
 
+    /*
+    bool match(const char* name) const override
+    {
+    // allow other items to be clicken on to progress dragon puzzle
+    // BUT, then you can never get their descriptions!
+        return equalsIgnoreCase(_name, name)
+            || equalsIgnoreCase(name, "shapes")
+            || equalsIgnoreCase(name, "shadows");
+    }
+    */
+
     void run() override
     {
         IItem white("white");
         if (white.carried(true)) // x-ray
         {
+            uchar* flagDragon2 = atDragon2();
+            LOG3("puz dragon ", (unsigned int)*flagDragon2);
+            
             if (has("pouch").isClosed())
             {
                 text("maybe [open pouch](open pouch)");
-
-                uchar* flagDragon2 = atDragon2();
-                if (*flagDragon2 && *flagDragon2 != 0xff) 
+                
+                if (*flagDragon2 && *flagDragon2 != 0xff)
+                {
+                    LOG3("puz ", "extra dragon turn");
                     --*flagDragon2; // give them an extra move to open pouch
+                }
                 return;
             }
             
             if (state(0, 1))
             {
-                text("maybe [illuminate](shine white at shadows) the shadows with the [white]", 1);
+                text("maybe [illuminate](shine white at shadows) the shadows with the [white].", 1);
                 return;
             }
             else if (state(1, 2))
             {
-                text("maybe [point out](point at shapes) the hobbits hiding in the shadows", 2);
+                text("maybe [point out](point at shapes) the hobbits hiding in the shadows.", 2);
             }
         }
     }
@@ -711,7 +727,7 @@ const char* PuzzleManager::messageHook(int m)
     switch (get_game())
     {
     case 1: // the pawn
-        if (!prog_format) break;
+        if (prog_format) break;
         if (m == 1105) 
         {
             // revealing a path to the nw
@@ -719,8 +735,13 @@ const char* PuzzleManager::messageHook(int m)
         }
         if (m == 726)
         {
-            //LOG3("puz ", "died!, trigger undo");
-            _triggerUndo = true;
+            LOG3("puz ", "died!, trigger undo");
+            if (_triggerUndo)
+            {
+                // undo wasn't triggered!
+                _triggerUndo = false; // give up
+            }
+            else _triggerUndo = true;
         }
         if (m == 92)
         {
@@ -760,7 +781,6 @@ const char* PuzzleManager::messageHook(int m)
         {
             // narrow track room
             IItem::getRoom(31).setExit(IItem::dir_n, 32);
-            
         }
         if (m == 1122)
         {
@@ -837,6 +857,9 @@ void PuzzleManager::applyGameFixes()
             IItem::getRoom(4).setExit(IItem::dir_n, 3);
             IItem::getRoom(4).setExit(IItem::dir_ne, 16);
             IItem::getRoom(4).setExit(IItem::dir_nw, 6);
+
+            // damp passage with poster make lit
+            IItem::getRoom(54).setLit();
         }
         break;
     }
@@ -871,6 +894,9 @@ std::string PuzzleManager::itemToStringSpecial(IItem ii)
             else if (ii.wordIs("green")) s = "The Green";
             else if (ii.wordIs("blue")) s = "The Blue";
             else if (ii.wordIs("teapot")) s = "A Teapot";
+            else if (ii.wordIs("rice")) s = "Long Grain Rice";
+            else if (ii.wordIs("chit")) s = "IOU Chit";
+            else if (ii.wordIs("coin")) s = "Ferg Coin";
             break;
     }
 

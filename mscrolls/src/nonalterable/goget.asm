@@ -66,7 +66,8 @@
       XREF     W.BUT,DO.FIX,MOVE.TAB,DOORS,PSUDAT,ROOM,CALCNET,MLISTNGO
 
       XREF	FULLSTOP,BSFULLSTOP,P.TNSTOP,SP.SCORE.NOUN,LastDirection
-
+      XREF      REMASTER
+      
 
 WantGoLeave	SET	FALSE
 
@@ -220,15 +221,11 @@ GT31
 	MSG	GOT
 
       IFNE	THE_PAWN
-
 	DO	P.TN
-
       ENDC
 
       IFEQ	THE_PAWN
-
 	DO	P.TNSTOP
-      
       ENDC
 
 	CALL    SP.MOVE.          ;ANYTHING REVIELED  ?
@@ -243,9 +240,7 @@ LBL32
 	ADDQ    #1,GETNUM(A4)
 
       IFEQ	THE_PAWN
-
 	CALL	SP.SCORE.NOUN
-      
       ENDC
 
 	MSGGO     LINE
@@ -255,9 +250,7 @@ TAKEN
 	CALL    SP.MOVE.          ;CATCHES 'G MAT' ETC
 
       IFEQ	THE_PAWN
-
 	CALL	SP.SCORE.NOUN
-      
       ENDC
 
 	BRA     SCANSV
@@ -482,7 +475,10 @@ DRP.PNT2
 12$
 	CALL    SP.DROP
 
-      IFNE	THE_PAWN
+        IFNE	THE_PAWN
+
+        TEST_B  REMASTER(A4)
+        BNE.S   14$             ;lose "drop carefully" 
 
 	CMP.W   #VNDROP,VERB(A4)     ;MUST ME DROP TO BREAK
 	BNE.S   14$    

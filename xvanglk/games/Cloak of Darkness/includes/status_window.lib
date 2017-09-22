@@ -1,0 +1,56 @@
+#============================================
+# XVAN implementation of "Cloak of Darkness"
+#============================================
+
+#-------------------------------------------------------------------------------
+$OBJECT o_status_window
+
+ DESCRIPTIONS
+   d_nodescr  ""
+
+ CONTAINED in o_player
+
+ FLAGS
+   f_hidden = 1
+
+ TRIGGERS
+   "restore" -> t_restore
+
+   t_entrance
+     agree()
+
+   t_exit
+     agree()
+
+   t_update
+    # updates the status window (only in Glk version)
+    # triggered by m_statuswindow timer
+    clearstatus()
+    setcursor(0,2)
+    if islit(l_location) then
+      printstatus(l_location)
+    else
+      printstatus("Darkness")
+    endif
+
+   t_restore
+     restore()
+     # timers are not called after save and restore
+     if trigger(t_update) then
+       agree()
+
+END_OBJ
+#-------------------------------------------------------------------------------
+
+$TIMERS
+
+ m_status_window
+   init       0
+   step       0
+   direction  up
+   interval   1
+   state      go
+   trigger_at 0
+   execute    o_status_window.t_update
+  
+  

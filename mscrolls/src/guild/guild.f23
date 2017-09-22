@@ -1182,7 +1182,7 @@ room gdn1 "temple Garden" {
 	desc {
 Bees buzz lazily around their hive in this sedate little garden. Austere 
 railings which section the temple off from the rest of the wood detract from
-the general summery atmosphere
+the general summery atmosphere. The temple is back north
 	}
 	scen_noun_a railings 
 
@@ -1208,7 +1208,7 @@ room temple "temple" {
 Frescoes depicting the religious exploits of the temple's most respected
 followers adorn the altar and walls, making the otherwise sombre process of
 worship an exciting and colourful spectacle. Stairways are situated in the
-four corners of the temple and there are also exits south and north
+four corners of the temple (NE, SE, SW, NW) and there are also exits south and north
 	}
 	scen_noun_c frescoes 
 
@@ -1230,7 +1230,7 @@ four corners of the temple and there are also exits south and north
 
 room stair1 "top_of_stairway" {
 	desc {
-This stairway spirals gently down to a lower level of the temple
+This stairway spirals gently down to a lower level of the temple or back southeast
 	}
 
 	lit_room
@@ -1253,8 +1253,8 @@ This stairway spirals gently down to a lower level of the temple
 
 room stair2 "bottom_of_stairway" {
 	desc {
-Looking southwest from this upwardly spiralling stairway you can see the
-colourful frescoes that make up the main worshipping area of the temple
+Looking southwest from this upward spiralling stairway you can see the
+colourful frescoes that make [up] the main worshipping area of the temple
 	}
 	scen_noun_b frescoes 
 
@@ -1278,7 +1278,7 @@ colourful frescoes that make up the main worshipping area of the temple
 
 room stair3 "bottom_of_stairway" {
 	desc {
-You are at the bottom of a stairway which leads up to the temple roof
+You are at the bottom of a stairway which leads up to the temple roof or back northwest
 	}
 	scen_noun_d roof	# roof is a noun
 
@@ -1326,8 +1326,8 @@ temple area
 
 room sway1 "bottom_of_stairway" {
 	desc {
-You are at the bottom of a stairway, in the depths of the temple. Another exit
-leads southeast from here with the word 'WOBNIAR' engraved in large letters
+You are at the bottom of a stairway, in the depths of the temple. You could go back up or another exit
+leads southeast from here with the word '**WOBNIAR**' engraved in large letters
 above it
 	}
 	scen_noun_c word 
@@ -1376,7 +1376,7 @@ Here the stairway comes to an abrupt halt. The only way to go is down
 room sway3 "top_of_stairway" {
 	desc {
 
-The stairway leads into a corridor with a small alcove to the east and a door which should lead onto the temple roof. However, due to sabotage by lackeys of the Grunckev Building Company, which failed to win the tender to build the temple, that part was never completed
+The stairway leads into a corridor with a small alcove to the east and a door which should lead onto the temple roof. However, due to sabotage by lackeys of the Grunckev Building Company, which failed to win the tender to build the temple, that part was never completed. Looks like the only way back is down
 	}
 #	scen_noun_c alcove	# this is a noun too
 
@@ -1400,7 +1400,7 @@ The stairway leads into a corridor with a small alcove to the east and a door wh
 
 room sway4 "top_of_stairway" {
 	desc {
-You are in an alcove at the top of the stairway which opens out onto a 
+You are in an alcove at the top of the stairway down which opens out onto a 
 small room to the east
 	}
 	synonyms {alcove}
@@ -1425,8 +1425,8 @@ small room to the east
 
 room organroom "organ Room" {
 	desc {
-An organ which constantly plays by itself provides an eerie air of mystery to
-this room which overlooks the frescoes of the main temple
+An organ which constantly plays by itself provides an eerie [air] of mystery to
+this room which overlooks the frescoes of the main temple and west leads back out
 	}
 	scen_noun_b frescoes 
 
@@ -1448,8 +1448,8 @@ this room which overlooks the frescoes of the main temple
 room crypt "Crypt" {
 	desc {
 Damp moss covers a huge stone sarcophagus in the centre of this crypt. Earth
-covers the floor with heavy footprints leading to the exits in the east wall
-and northwest corner. Engraved in large letters above the northwest exit is
+covers the floor with heavy footprints between an east exit in the wall
+and the entrance. Engraved in large letters above the northwest exit is
 the word 'WOBNIAR'
 	}
 	scen_noun_a moss 
@@ -1477,7 +1477,7 @@ room shrine "shrine" {
 	desc {
 Draped in black, this shrine contains many sacrosanct objects of the dark side
 of religion. Expecting some evil demon to startle you at any moment, you
-cautiously look around and notice an exit in the west wall as well as a shiny
+cautiously look around and notice the exit west in the wall as well as a shiny
 black door, neatly concealed behind the drapes, in the east wall
 	}
 	scen_noun_a objects 
@@ -1502,7 +1502,7 @@ room library2 "black Library" {
 	desc {
 A deathly hush hangs in the air in this cramped little library. A few black,
 leather-bound books (with their titles also written in black) sit on shelves
-against the south wall. The door in the west wall leads into the shrine
+against the wall. The door west leads back to the shrine
 	}
 #	scen_noun_d shrine		#this a noun/adj
 
@@ -1713,9 +1713,9 @@ passageway narrowing to only a crack northwards
 room cave2 "claustrophobic small Chamber" {
 	desc {
 The crabwalk leads off north from this small chamber and a wet rope,
-fixed to the wall, provides access to a passage high up in the east wall.
+fixed to the wall, provides access to a passage high up in the east [wall].
 Leading west is a small opening at ground level through which you could probably
-just crawl and, through an exit in the south wall, you can hear the sound of
+just crawl and, through an exit in the south [wall], you can hear the sound of
 gushing water
 	}
 #	scen_noun_c hole 	#is 2 nouns!
@@ -1744,7 +1744,7 @@ room face "rock Face" {
 Swallowing some of the stagnant water which half fills a metre high crawl,
 you realise how brave all those speleologists are. The crawl takes you through
 a myriad of twists and turns bringing you to where a vein of some
-semi-precious mineral runs through this otherwise empty, but wet, cave
+semi-precious mineral runs through this otherwise empty, but wet, cave. East takes you back
 	}
 
 	scen_noun_d crawl 		#is a verb!
@@ -1771,9 +1771,9 @@ semi-precious mineral runs through this otherwise empty, but wet, cave
 
 room cave1 "waterfall" {
 	desc {
-Water gushes down onto you from a sheer face about ten metres high.
+[Water] gushes down onto you from a sheer face about ten metres high.
 Refreshing though it may be, it still drenches you. After falling to the
-floor, the water runs northward through an opening in the cave wall
+[floor], the water runs northward through an [opening] in the cave [wall]
 	}
 
 	location cave1
@@ -1815,7 +1815,7 @@ streams out by the rope
 room entr "cave Entrance" {
 	desc {
 Slipping and sliding on the wet earth that has fallen into the hollow hill
-over the years, you notice that warm air flows westward from outside,
+over the years, you notice that warm air flows westward from [outside](go east),
 indicating the possibility of more caves further inside the hill
 	}
 	scen_noun_a earth 
@@ -2203,7 +2203,7 @@ this place. A gravedigger is hard at work here
 room rrm "circular echo Chamber" {
 	desc {
 A clear, shallow stream runs swiftly across the southern edge of this almost
-circular chamber, creating loud echoes which travel down the passage to the
+circular chamber, creating loud echoes which travel [down] the passage to the
 northeast
 	}
 	scen_noun_c edge 
@@ -2220,7 +2220,7 @@ northeast
 
 room rvr "In.The.Stream" {
 	desc {
-Up to your knees in the clear water, you see that, apart from getting up out
+[Up] to your knees in the clear water, you see that, apart from getting up out
 of the stream into a circular chamber, the only way out is to follow
 it westward through a high opening
 	}
@@ -2241,7 +2241,7 @@ it westward through a high opening
 room tpwfl "top_of_the_waterfall" {
 	desc {
 The stream makes a tremendous roar as it falls over a sheer face to the north,
-spraying you with spume in the process. Despite the slippery floor, you could
+spraying you with spume in the process. Despite the slippery [floor], you could
 still manage to go eastward, upstream, thanks to your balance training
 	}
 	scen_noun_c spume 
@@ -4546,7 +4546,7 @@ is air-tight when closed
 
 item board "notice board" {
 	desc {
-is divided into two sections: laity and clergy
+is divided into two [sections](read notice board): laity and clergy
 	}
 	scen_noun_a laity
 	scen_noun_a clergy
@@ -4582,7 +4582,7 @@ is adorned with the same colourful frescoes as the temple walls
 
 item statue "statue" {
 	desc {
-resembles one of the temple's greatest zealots: Hurligan the Sweet
+resembles one of the temple's greatest zealots: **Hurligan the Sweet**
 	}
 	moveable
 	hardness 5
@@ -4724,7 +4724,7 @@ has twenty coloured squares in it, each one metre by one metre, arranged in the 
 }
 
 #
-# WARNING the following squares have thier descriptions supplied via SCN
+# WARNING the following squares have their descriptions supplied via SCN
 # msgs and FirstGlance stuff. The use of '^' as a blank desc is a frig
 #
 
@@ -5278,9 +5278,9 @@ is the normal entrance to the shrine
 
 item pamphlet "pamphlet" {
 	desc {
-is a paper by Dr. Jenks, explaining a new method of 'fire walking'. In the
+is a paper by Dr. Jenks, explaining a new method of '**fire walking**'. In the
 pamphlet he studies the incredible ritual of the tribe of Swelk nomads and
-discovers that the feat is achieved by rubbing the succulent Gerominitus on
+discovers that the feat is achieved by rubbing the succulent **Gerominitus** on
 the soles of the feet before commencing the walk across hot coals
 	}
 	moveable
@@ -5383,7 +5383,7 @@ was left here by a kind-hearted potholer
 
 item mineral "semi_precious mineral" {
 	desc {
-doesn't resemble any you learnt about in the guild
+doesn't resemble any you learnt about in the Guild
 	}
 	synonyms { vein }
 	moveable

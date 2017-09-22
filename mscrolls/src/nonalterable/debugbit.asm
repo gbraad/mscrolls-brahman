@@ -1478,7 +1478,7 @@ UTRESTART2
 
 	LEA      SLADDR(A4),A1        ;Start of buffer
 
-	MOVE.L   #SLADDR.E+511,D1     ;End of buffer
+	MOVE.L   #SLADDR.E,D1         ;End of buffer
 	SUB.L    #SLADDR,D1           ;Calculate length
 	MOVE.L   POSWRD(A4),A0        ;Pointer to name
 
@@ -2028,10 +2028,8 @@ BD.MEDIUM.SV
 SAVEGAME
 
    IFNE   QL128
- 
 	MOVE.W  LEFTM(A4),LEFTM.SV(A4)         ;PRESERVE LEFT MARGIN ETC ON
 	MOVE.B  DISPTYPE(A4),DISP.SV(A4)       ;SAVE GAME
-    
    ENDC
 
 	LEA     SAVE_EXIT(PC),A0
@@ -2049,49 +2047,36 @@ SAVEGAME
 	SUB.L   #SLADDR,D0
 
     IFNE     QL128
-
 	LSR.L   #8,D0			;div by 512
 	LSR.L   #1,D0
-
     ENDC
 
 	MOVE.W  D0,FILESIZE(A4)
 	
     IFEQ    QL128
-
 	MOVE.B  SLGAMENO(A4),INBUFF(A4)	     ;game no. (ascii 1-8)
 	MOVE.B  SLGAMENO+5(A4),INBUFF+1(A4)  ;drive no. (ascii 1/2)
 	CLR.B   INBUFF+2(A4)		     ;zero at end for luck
-
     ENDC
 
 	MOVE.L  A4,-(A7)              ;OUCH IF STOMPED!!
-
 	CALL    CALC.DATA             ;CALCULATE SOME CHK SUMS
 	CALL    CRYPT                 ;ENCRYPT GAME
 
     IFNE    QL128
-
 	CALL    WRITEIT               ;SAVE GAME
-
     ENDC
 
     IFEQ    QL128
-
 	LEA	INBUFF(A4),A0		;point at 'filename'
 	LEA     SLADDR(A4),A1		;point at area to save/load
 	MOVE.W  FILESIZE(PC),D1         ;no. of bytes to do
-
 	CALL    WRITEFIL
-
     ENDC
-
  
 	MOVE.L  (A7)+,A4
-  
 	CMP.W   #-1,D7
 	BEQ     BD.MEDIUM.SV
- 
 	CALL    CRYPT                 ;DECRYPT GAME & EXIT
 
 SAVE_EXIT
@@ -2117,24 +2102,18 @@ GETGAME
 	SUB.L   #SLADDR,D0
 
     IFNE    QL128
-	
 	LSR.L   #8,D0			;div by 512
 	LSR.L   #1,D0
-
     ENDC
 
 	MOVE.W  D0,FILESIZE(A4)
-	
 	MOVE.L  A4,-(A7)              ;MIGHT BE *VERY* PAINFUL
  
     IFNE   QL128
-
 	CALL    READIT
-	
     ENDC
 
     IFEQ    QL128
-
 	MOVE.B  SLGAMENO(A4),INBUFF(A4)	     ;game no. (ascii 1-8)
 	MOVE.B  SLGAMENO+5(A4),INBUFF+1(A4)  ;drive no. (ascii 1/2)
 	CLR.B   INBUFF+2(A4)		     ;zero at end for luck
@@ -2142,49 +2121,38 @@ GETGAME
 	LEA	INBUFF(A4),A0		;point at 'filename'
 	LEA     SLADDR(A4),A1		;point at area to save/load
 	MOVE.W  FILESIZE(PC),D1         ;no. of bytes to do
-
 	CALL    READFILE
-
     ENDC
-
 
 	MOVE.L  (A7)+,A4
 	
     IFNE	QL128       
-
 	CMP.W   #-1,D7                ;IO ERROR
 	BEQ     BD.MEDIUM.LD          ;YES
 	
 	CMP.W   #-2,D7                ;NOT FOUND?
 	BEQ     NT.FOUND.LD
-
     ENDC
 
     IFEQ	QL128
-
 	TEST_B	D7
 	BEQ.S	10$
 	MSG	OBLOAD			;<'Ouch - bad load'>
 	BRA.S	LOAD_EXIT
 10$
-
     ENDC
-  
 	
 	CALL    CRYPT                 ;DECRYPT
 	CALL    CHK.DATA              ;SEE IF IT'S A VALID GAME
  
     IFNE	BookProtection
-
 	CALL	PROTECT2
-
     ENDC
 
 
 * RETURN = YES OK
 
     IFNE  QL128
-
  
 	MOVE.W  LEFTM.SV(A4),LEFTM(A4)
 	MOVE.B  DISP.SV(A4),DISPTYPE(A4)       ;RECOVER SCREEN INFO
@@ -2603,64 +2571,46 @@ UTRESTORE
 	LEA      UTEXIT(PC),A0        ;if unsure exit
 
       IFD	Amiga_Demo_PCW
-
 	PRINT	<'Not in a demo!^'>
 	DOGO	UTEXIT
-
       ENDC
 
       IFD	DEMO_for_PCW
-
 	PRINT	<'Not in a demo!^'>
 	DOGO	UTEXIT
-
       ENDC
 
 UTRESTORE2
 
       IFD	DEMO_for_PCW
-
 	PRINT	<'Not in a demo!^'>
 	DC.W	$A0EE
-
       ENDC
 
       IFD	Amiga_Demo_PCW
-
 	PRINT	<'Not in a demo!^'>
 	BRA	UTRESTART2
-
       ENDC
 
-
       IFNE      AMIGA512
-
 	MOVE.L   A4,A6
 	MOVEQ    #10,D1
-
 	JSR      AD_COUT(A6)
-
 	JSR      OldCLIST(A6)         ;AmigaDos screen please!
-
       ENDC
 
       IFEQ     MAC512
-
 	CALL     CHECK_FILE_NAME      ;Make sure we have a filename of some sort
 	LEA	UTEXIT(PC),A0		; because check_file.. fucks it
 	DO	RUSURE
-
       ENDC
 
       IFNE	CPC6128
-
 	CALL	GetSavedGameDisk
-
       ENDC
 
 	LEA      SLADDR(A4),A1        ;Start of buffer
-
-	MOVE.L   #SLADDR.E+511,D1     ;End of buffer
+	MOVE.L   #SLADDR.E,D1         ;End of buffer
 	SUB.L    #SLADDR,D1           ;Calculate length
 	MOVE.L   POSWRD(A4),A0        ;Pointer to name
 
@@ -2679,7 +2629,6 @@ UTRESTORE2
 
 20$
       IFNE	PCW8256
-
 	TEST_B	RestartFlag(A4)
 	BEQ.S	30$
 	RET
@@ -2687,81 +2636,57 @@ UTRESTORE2
       ENDC
 
       IFNE      AMIGA512
-
 	JSR      NewCLIST(A4)         ;our screen please!
-
       ENDC
+        
       IFNE      BookProtection
- 
 	CALL     PROTECT2
-
       ENDC
+        
 	DOGO	UTEXIT
 
 UTSAVE
 
       IFD	Amiga_Demo_PCW
-
 	PRINT	<'Not in a demo!^'>
 	DOGO	UTEXIT
-
       ENDC
 
       IFD	DEMO_for_PCW
-
 	PRINT	<'Not in a demo!^'>
 	DOGO	UTEXIT
-
       ENDC
 
       IFNE      AMIGA512
-
 	MOVE.L   A4,A6
 	MOVEQ    #10,D1
-
 	JSR      AD_COUT(A6)
-
 	JSR      OldCLIST(A4)   ;AmigaDos screen please!
-
       ENDC
 
-
       IFEQ     MAC512
-
 	CALL     CHECK_FILE_NAME         ;If we don't have a file name get one
-
 	LEA      UTEXIT(PC),A0           ;if unsure exit
 	DO	RUSURE
-
       ENDC
 
       IFNE	CPC6128
-
 	CALL	GetSavedGameDisk
-
       ENDC
 
 	MOVE.L   POSWRD(A4),-(A7)        ;Save pointer to filename
-
 	CALL     CALC.DATA               ;Calculate checksums
 	CALL     CRYPT                   ;Encode game info
 
 	LEA      SLADDR(A4),A1           ;Start of buffer
-	MOVE.L   #SLADDR.E+511,D1        ;End of buffer
+	MOVE.L   #SLADDR.E,D1            ;End of buffer
 	SUB.L    #SLADDR,D1              ;Calculate length
-
 	MOVE.L   (A7)+,A0                ;Pointer to name
-
 	CALL     WRITEFIL
 
-
 	MOVE.L   D7,-(A7)
-
-
 	CALL     CRYPT                   ;Decode game again
 	CALL     CHK.DATA
-
-
 	MOVE.L   (A7)+,D7
 
 	TEST_B   D7                   ;Error?
@@ -2770,7 +2695,6 @@ UTSAVE
 	MSG	OBSAVE			;<'Ouch - bad save^'>
 10$
       IFNE	PCW8256
-
 	TEST_B	RestartFlag(A4)
 	BEQ.S	20$
 	RET
@@ -2778,16 +2702,12 @@ UTSAVE
       ENDC
 
       IFNE      AMIGA512
-
 	JSR      NewCLIST(A4)         ;our screen please!
-
       ENDC
 
 	DOGO	UTEXIT
 
-
       IFNE	CPC6128
-
 GetSavedGameDisk
 
 	XREF	GETCHAR2

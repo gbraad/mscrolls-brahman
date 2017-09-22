@@ -344,6 +344,8 @@ Byte #3
 extern "C"
 {
 #include "defs.h"
+extern type8 prog_format;
+int get_sym_value(const char* s);
 }
 
 #include "types.h"
@@ -477,6 +479,7 @@ struct IItem
         while (*p)
         {
             char c = *p++;
+            if (c == '_') c = ' '; // eliminate any underscores in names
             if (u_isspace(c)) first = true;
             else
             {
@@ -521,7 +524,7 @@ struct IItem
         if (_item)
         {
             const char* w = word();
-            if (strchr(w, ' ')) return toWordCaps(w); // more than one word
+            if (strchr(w, ' ') || strchr(w, '_')) return toWordCaps(w); // more than one word
             return adjWord();
         }
         return "unknown";
@@ -612,9 +615,18 @@ struct IItem
     {
         if (_item) _item->data[6] &= 0x7f;
     }
+
+    bool couldGet() const
+    {
+        // can get, but might already be carried
+        return !isRoom() && isMoveable() && !isInseparable() && !isTooHeavy();
+    }
     
     bool gettable() const
-    { return !isRoom() && isMoveable() && !isInseparable() && !isTooHeavy() && !carried(); }
+    {
+        // able to get and not already carried
+        return couldGet() && !carried(); 
+    }
 
     bool canTieTo() const
     {
@@ -808,7 +820,7 @@ struct IItem
         IItem ex;
         if (_item)
         {
-            assert(direction < (int)bytesPerRoom);
+            assert(direction >= 0 && direction < (int)bytesPerRoom);
             size_t ei = _item->exitData[direction];
             if (ei > 0 && ei <= maxRoom) ex = getRoom(ei);
         }
@@ -991,7 +1003,4 @@ private:
     static bool _spine(IItem x, IItem y, bool xray = false);
 };
 
-
-extern char prog_format;
-extern "C" int get_sym_value(const char* s);
 

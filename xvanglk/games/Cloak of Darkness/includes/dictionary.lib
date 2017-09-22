@@ -1,0 +1,80 @@
+# FILE FOR XVAN 2.3
+
+# Cloak of Darkness demo game
+
+#==================
+# Direction section
+#==================
+
+$DIRECTIONS
+# Any word can be defined as a direction.
+
+# When using synonyms, the interpreter will
+# use the first word for printing, so don't
+# start with the abbreviations.
+
+north     SYNONYM n,
+south     SYNONYM s,
+east      SYNONYM e,
+west      SYNONYM w,
+northeast SYNONYM ne,
+northwest SYNONYM nw,
+southeast SYNONYM se,
+southwest SYNONYM sw
+
+
+#=============
+# Noun section
+#=============
+
+$NOUNS
+bar, chandeliers, cloak, cloakroom, decoration, floor, foyer, hall,
+hook, house, message, sawdust, wall, walls, you SYNONYM me
+
+#==================
+# Adjective section
+#==================
+
+$ADJECTIVES
+black, blue, brass, foyer, glittering, gold, opera, red, scrawled,
+small, spacious, velvet
+
+
+#====================
+# Preposition section
+#====================
+
+$PREPOSITIONS
+about, at, behind, below, in, off, on, out, over, through,
+to, under, with
+
+
+#===============
+# Adverb section
+#===============
+
+$ADVERBS
+slowly
+
+#================
+# article section
+#================
+
+$ARTICLES
+a, an, the
+
+
+#======================
+# Question word section
+#======================
+
+$Q_WORDS
+how, where, which, who
+
+
+#====================
+# Conjunction section
+#====================
+
+$CONJUNCTION
+and

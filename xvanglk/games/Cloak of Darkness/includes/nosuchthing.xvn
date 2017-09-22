@@ -1,0 +1,22 @@
+#============================================
+# XVAN implementation of "Cloak of Darkness"
+#============================================
+
+#-------------------------------------------------------------------------------
+$OBJECT o_nst
+  # this object must always be present
+  # it may be modified but removal will cause a compiler error
+
+ DESCRIPTIONS
+  d_no  "no such thing"
+  d_any "any such thing"
+
+ CONTAINED in o_player
+
+ TRIGGERS
+   t_entrance
+     agree()
+
+END_OBJ
+#-------------------------------------------------------------------------------
+  

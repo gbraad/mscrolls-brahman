@@ -140,7 +140,7 @@ SCREEN
       ENDC
 
 
-	TEST_W  SCRPNT(A4)         ;CHANGED ROOM?
+	TEST_W  SCRPNT(A4)		;CHANGED ROOM?
 	BEQ.S	10$			;nope, only do top line
 	CALL	P.Refresh
 	BRA.S   NOTNEWROOM
@@ -400,6 +400,11 @@ DOKILL
  
  
 PROCESS
+
+	
+	XREF	MakeUndoDiff
+	CALL	MakeUndoDiff
+
  
 	CLR.W   REP1(A4)           
 

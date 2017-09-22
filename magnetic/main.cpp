@@ -534,8 +534,8 @@ int main(int argc, char **argv)
     return 0;
 }
 
-void game_state_notify() {}
-
+void game_state_notify(int movecount) {}
+void update_game_save_area(unsigned char* ptr, size_t size) {}
 
 #endif // STANDALONE
 

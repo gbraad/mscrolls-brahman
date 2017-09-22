@@ -1,0 +1,66 @@
+#============================================
+# XVAN implementation of "Cloak of Darkness"
+#============================================
+
+#=====================
+# Common triggers part
+#=====================
+
+$COMMON_TRIGGERS
+
+# Triggers t_entrance, t_exit and t_default are predefined. If not defined 
+# here, the triggers will be created with empty code.
+# In each location's or object's TRIGGERS section, t_entrance, t_exit and
+# t_default can be redefined.
+
+
+  t_entrance
+    if not(islit(o_player)) then
+      printcr("It is pitch black.")
+      disagree()
+    else
+      if equal(%this, l_location) then
+        # trigger is called for the current location
+        printcr(d_entr_short)
+        if not(testflag(f_been_before)) then
+          printcr(d_entr_long)
+          setflag(f_been_before)
+        endif
+      else
+        # it´s not the current location but an object in the location
+        if cansee(o_player, %this) then
+          if owns(owner(o_player), %this) then
+            # object is at the same hierarchical level as player
+             printcr(d_entr_short)
+          else
+            if not(owns(o_player, %this, 0)) then
+              # it´s in another object, but not in the player's inventory.
+              print("There is [a] [this] [this.r_preposition] [the] ")  
+              print(owner(%this))
+              printcr(".")
+          # all the endif stuff is not necessary at the end of a trigger.
+
+  t_i
+    if owns(o_player, %this) then
+      indent()
+      printcr("[a] [this]")
+    else
+      nomatch()
+
+  t_look
+    # execute the t_entrance trigger for location and what's in it
+    clearflag(%this.f_been_before)
+    entrance(owner(o_player))
+    disagree()
+    
+   t_exa
+     if equal(%this, l_location) then
+       printcr(d_entr_long)
+     else
+       printcr(%this.d_exa)
+       contents(%this)
+     endif
+     agree()
+
+  
+  

@@ -1,0 +1,7 @@
+Makefile
+Makefile.*
+*.vcxproj
+*.vcxproj.*
+debug
+release
+object_script.*

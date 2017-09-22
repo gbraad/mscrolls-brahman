@@ -254,7 +254,7 @@ int emu_word_subst(int gameid, int section, Word* w, const char* p, int len)
     static const char* subTable[] =
         {
             "S9", "lead",  // lead lumps
-            "long", "long grain",
+            //"long", "long grain",
             0,
         };
 
@@ -358,7 +358,7 @@ static void show_exits_and_entrances(IItem room, bool exits, bool entrance)
         if (entrance)
         {
             cout << "entrances:\n";
-            for (int i = 1; i <= maxRoom; ++i)
+            for (size_t i = 1; i <= maxRoom; ++i)
             {
                 IItem ri = IItem::getRoom(i);
                 if (!ri) continue;

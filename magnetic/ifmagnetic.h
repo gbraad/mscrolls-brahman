@@ -407,6 +407,8 @@ public:
         if (_puzzles._triggerUndo)
         {
             //LOG3("getchar, ", "trigger undo");
+            _inpos = 0;
+            _inbuf[0] = 0;
             _puzzles._triggerUndo = false;
             return 0; // signal emu to undo move
         }
@@ -446,7 +448,7 @@ public:
     bool loadGame(const char* name, SaveGameHeader& h);
 
     bool updateAutoSave();
-    void moveUpdate();
+    void moveUpdate(int movecount);
     bool autoLoad(int delta);
     bool loadMemGame(const char* name, bool forceLook, bool clearpic);
 

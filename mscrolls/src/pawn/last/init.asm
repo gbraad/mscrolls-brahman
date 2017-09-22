@@ -78,10 +78,10 @@ INIT
 	XREF	MessageCode,SpaceTable,MinSpaceEntry
 	XREF	SLADDR,SLADDR.E
 
-	LEA	SLADDR(A4),A1		;start of restart area
+	LEA	SLADDR(A4),A1		;start of restart/save area
 	LEA	SLADDR.E(A4),A2		;end of same
 	SUB.L	A1,A2
-	MOVE.L	A2,D0
+	MOVE.L	A2,D0                   ; save_len
 
 	LEA	MessageCode(PC),A3	;code to deal with MSG macros
 	LEA	SpaceTable,A5		;for clever F-lines
@@ -153,6 +153,17 @@ INIT2
 	CALL    INITRND
 	MOVE.W  #-1,PEND2(A4)
 	MOVE.W  #-1,NPCINRM(A4)
+        IFNE  Remastered
+
+        ;; call dictionary lookup with a random word "A"
+        ;; *before* generating initial text. This will initialise the back-end
+      	LEA     INBUFF(A4),A6
+        MOVE.L  A6,A0
+        MOVE.B  #'A',(A0)+
+        CLR.B   (A0)
+	DO	SEARCH
+        
+        ENDC
  
  
 	SCN     384                ;COPYRIGHT ETC

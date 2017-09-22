@@ -304,6 +304,7 @@ static FILE *snd_fp = 0;
 static type8 big = 0, period = 0, epipe = 0, escape = 0;
 static MagHeader ms_head;
 type8 prog_format = 0;
+static int getCharCount;
 
 Item* items;
 size_t itemCount;
@@ -314,7 +315,7 @@ size_t bytesPerRoom;
 size_t npcCount;
 
 const type8s undo_ok[] = "\n[Previous turn undone.]";
-const type8s undo_fail[] = "\n[You can't \"undo\" what hasn't been done!]";
+const type8s undo_fail[] = "\n[You can't undo what hasn't been done!]";
 static type32 undo_regs[2][18], undo_pc, undo_size;
 static type8 *undo[2] = {0, 0}, undo_stat[2] = {0, 0};
 static type16 gfxtable = 0, table_dist = 0;
@@ -560,6 +561,13 @@ static void _ms_showpic(type32 c, type8 mode)
     ms_showpic(c, mode, gfx_ver, profile);
 }
 
+static type8 _ms_getchar(type8 trans)
+{
+    type8 c = ms_getchar(trans);
+    if (c > 1) ++getCharCount;
+    return c;
+}
+
 /* Convert virtual pointer to effective pointer */
 type8 *effective(type32 ptr)
 {
@@ -567,7 +575,9 @@ type8 *effective(type32 ptr)
         return &(code[ptr & 0xffff]);
     if (ptr >= mem_size)
     {
-        ms_fatal("Outside memory experience");
+        char buf[256];
+        sprintf(buf, "outside memory experience %08X", (int)ptr);
+        ms_fatal(buf);
         return code;
     }
     return code + ptr;
@@ -2026,27 +2036,33 @@ type8 *sound_extract(type8s * name, type32 * length, type16 * tempo)
     return 0;
 }
 
-void save_undo(void)
+static void undo_swap()
 {
-    type8 *tmp, i;
-    type32 tmp32;
+    // swap undo buffers and registers
+    
+    type8* tmp;
+    int i;
 
-    tmp = undo[0];  /* swap buffers */
+    tmp = undo[0];
     undo[0] = undo[1];
     undo[1] = tmp;
 
     for (i = 0; i < 18; i++)
     {
-        tmp32 = undo_regs[0][i];
+        type32 tmp32 = undo_regs[0][i];
         undo_regs[0][i] = undo_regs[1][i];
         undo_regs[1][i] = tmp32;
     }
+}
 
+void save_undo(void)
+{
+    int i;
+    
+    undo_swap();
+
+    // save into buf1
     memcpy(undo[1], code, undo_size);
-
-    // update the autosave
-    game_state_notify();
-
     for (i = 0; i < 8; i++)
     {
         undo_regs[1][i] = dreg[i];
@@ -2057,19 +2073,19 @@ void save_undo(void)
 
     undo_stat[0] = undo_stat[1];
     undo_stat[1] = 1;
+    
+    if (!prog_format) game_state_notify(0); // unknown move count
 }
 
 type8 ms_undo(void)
 {
     type8 i;
 
-    //printf("ms_undo\n");
-    
     ms_flush();
     if (!undo_stat[0])
         return 0;
 
-    undo_stat[0] = undo_stat[1] = 0;
+    // restore from buf0
     memcpy(code, undo[0], undo_size);
     for (i = 0; i < 8; i++)
     {
@@ -2078,6 +2094,11 @@ type8 ms_undo(void)
     }
     i_count = undo_regs[0][16];
     pc = undo_regs[0][17];  /* status flags intentionally omitted */
+
+    // buf 0 -> 1
+    undo_swap();
+    undo_stat[0] = 0;
+
     return 1;
 }
 
@@ -2293,7 +2314,7 @@ void _char_out(type8 c, outfn fn)
         }
 
         if (c == '_') c = ' ';
-        if (c == '.' || c == ',' || c == ';' || c == ':' || c == '!' || c == '?')
+        else if (c == '.' || c == ',' || c == ';' || c == ':' || c == '!' || c == '?')
             period = 1;
     }
     
@@ -3631,7 +3652,8 @@ void dict_lookup(void)
     /*
       dtab=A5.W                    ;dict_table offset <L22>
       output=output_bak=A2.W       ;output <L24>
-      A5.W=A6.W                    ;input word
+      A6.W                         ;input word
+      A5.W =                       ; synonym table, if > pawn
       doff=A3.W                    ;lookup offset (doff) <L1C>
       adjlist=A0.W ;adjlist <L1E>
     */
@@ -3987,13 +4009,13 @@ type16s hint_input(void)
 
     do
     {
-        c1 = ms_getchar(0);
+        c1 = _ms_getchar(0);
     }
     while (c1 == '\n');
     if (c1 == 1)
         return -1; /* New game loaded, abort hints */
 
-    c2 = ms_getchar(0);
+    c2 = _ms_getchar(0);
     if (c2 == 1)
         return -1;
 
@@ -4001,7 +4023,7 @@ type16s hint_input(void)
     c3 = c2;
     while (c3 != '\n')
     {
-        c3 = ms_getchar(0);
+        c3 = _ms_getchar(0);
         if (c3 == 1)
             return -1;
     }
@@ -4136,11 +4158,12 @@ void do_line_a(void)
       out2("LINE A %d\n",byte2-0xdd);
     */
 #endif
-    if ((byte2 < 0xdd) || (version < 4 && byte2 < 0xe4) || (version < 2 && byte2 < 0xed))
+    int vcheck = (version < 4 && byte2 < 0xe4) || (version < 2 && byte2 < 0xed);
+    if ((byte2 < 0xdd) || (!prog_format && vcheck))
     {
         ms_flush();     /* flush output-buffer */
         rand_emu();     /* Increase game randomness */
-        l1c = ms_getchar(1);    /* 0 means UNDO */
+        l1c = _ms_getchar(1);    /* 0 means UNDO */
         if (l1c == 1)
             return;
         if (l1c)
@@ -4168,7 +4191,9 @@ void do_line_a(void)
             write_reg(1, 0, 1);     /* Should remove the manual check */
             break;
 
-        case 2: /* A0DF */
+        case 2: /* A0DF */ 
+            // NOTIFY 
+
             a1reg = (type32)read_reg(9,2);
             dtype = read_b(code+a1reg+2);
 
@@ -4235,7 +4260,7 @@ void do_line_a(void)
             }
             break;
 
-        case 3: /* A0E0 */
+        case 3: /* A0E0 */ // PROMPT_EV
 #ifdef LOGDIS
             push_msg(DASM_COM,"NOT IMPLEMENTED");
 #endif
@@ -4243,6 +4268,8 @@ void do_line_a(void)
 
         case 4: /* A0E1 Read from keyboard to (A1), status in D1 (0 for ok) */
 #ifdef LOGDIS
+            // GET_NEXT_EV
+
             push_msg(DASM_COM,"Read from keyboard to (A1), status in D1 (0 for ok)");
 #endif
             ms_flush();
@@ -4252,7 +4279,7 @@ void do_line_a(void)
             tmp16 = 0;
             do
             {
-                if (!(l1c = ms_getchar(1)))
+                if (!(l1c = _ms_getchar(1)))
                 {
                     if ((l1c = ms_undo()) != 0)
                         output_text(undo_ok);
@@ -4290,21 +4317,36 @@ void do_line_a(void)
             break;
 
         case 5: /* A0E2 */
+             // UNDO_DIFF
+
+            //printf("trap UNDO_DIFF\n");
+
 #ifdef LOGDIS
             push_msg(DASM_COM,"NOT IMPLEMENTED");
 #endif
             break;
 
         case 6: /* A0E3 */
+            // MAKE_UNDO
+            // MAKE_DIFF
+            if (prog_format)
+            {
+                int n = read_reg(0,1); // D0 = CLOCK
+                game_state_notify(n);
+            }
+
+            /*
             if (read_reg(1, 2) == 0)
             {
                 if ((version < 4) || (read_reg(6, 2) == 0))
                     _ms_showpic(0, 0);
             }
-            /* printf("\nMoves: %u\n",read_reg(0,1)); */
+            */
+
             break;
 
         case 7: /* A0E4 sp+=4, RTS */
+            // POPSP_RET
 #ifdef LOGDIS
             push_msg(DASM_COM,"sp+=4, RTS");
 #endif
@@ -4316,7 +4358,15 @@ void do_line_a(void)
             break;
 
         case 8: /* A0E5 set z, RTS */
+            /* SETEQ_RET
+               MOVE	#4,CCR
+               RET
+             */
         case 9: /* A0E6 clear z, RTS */
+            /* SETNE_RET
+               MOVE	#0,CCR
+               RET
+             */
 #ifdef LOGDIS
             push_msg(DASM_COM,"set z/clear z, RTS");
             if (!no_branch)
@@ -4326,6 +4376,9 @@ void do_line_a(void)
             break;
 
         case 10: /* A0E7 set z */
+            // SETEQ
+            // MOVE    #4,CCR             ;SET ZERO FLAG
+
 #ifdef LOGDIS
             push_msg(DASM_COM,"set z");
 #endif
@@ -4333,6 +4386,9 @@ void do_line_a(void)
             break;
 
         case 11: /* A0E8 clear z */
+            // SETNE
+            // MOVE    #0,CCR             ;CLEAR ZERO FLAG
+
 #ifdef LOGDIS
             push_msg(DASM_COM,"clear z");
 #endif
@@ -4340,6 +4396,9 @@ void do_line_a(void)
             break;
 
         case 12: /* A0E9 [3083 - j] */
+            // COPYWORD
+            // copy hibit term string form (A1) to (A0)
+
             ptr = (type16)read_reg(8 + 0, 1);
             ptr2 = (type16)read_reg(8 + 1, 1);
             do
@@ -4353,7 +4412,11 @@ void do_line_a(void)
             break;
 
         case 13: /* A0EA A1=write_dictword(A1,D1=output_mode) */
-            ptr = (type16)read_reg(8 + 1, 1);
+            // PrtWTabWord
+            // print hibit terminated string -> A1
+            // D1 = CHANNEL
+
+            ptr = (type16)read_reg(8 + 1, 1); // A1
             tmp32 = read_reg(3, 0);
             write_reg(3, 0, read_reg(1, 0));
             do
@@ -4367,24 +4430,30 @@ void do_line_a(void)
             break;
 
         case 14: /* A0EB [3037 - j] */
+            // PutWTabByte
+
             dict[read_reg(8 + 1, 1)] = (type8)read_reg(1, 0);
             break;
 
         case 15: /* A0EC */
+            // GetWTabByte
             write_reg(1, 0, dict[read_reg(8 + 1, 1)]);
             break;
 
         case 16:
+            // QUIT
             /* infinite loop A0ED */
             ms_stop_or_restart(0); // stop
             break;
         case 17:
             /* restart game ie. pc, sp etc. A0EE */
+            // RESTART
             ms_stop_or_restart(1); // restart
             break;
         case 18:        /* printer A0EF */
+            // PRINTER
             break;
-        case 19:
+        case 19: // A0F0 GRAPHICS
             {
                 // gfx_ver >= 2 will pass a code offset
                 int d0 = read_reg(0,1);
@@ -4394,8 +4463,21 @@ void do_line_a(void)
                 _ms_showpic(d0, (type8)read_reg(1, 0));
             }
             break;
-        case 20:
-            ptr = (type16)read_reg(8 + 1, 1);       /* A1=nth_string(A1,D0) A0F1 */
+        case 20: // A0F1 FINDZERO
+
+            /* 
+               FINDZERO -  finds the Nth zero in a list
+               
+               On entry    A1.L points at start of list
+               D0.W is the no. of zeros (-1) to find.
+
+               On exit     A1.L points at byte after Nth zero
+               D0.W = -1 (optional)
+            */
+
+            /* A1=nth_string(A1,D0) A0F1 */
+            ptr = (type16)read_reg(8 + 1, 1);
+
             tmp32 = read_reg(0, 1);
             while (tmp32-- > 0)
             {
@@ -4405,6 +4487,7 @@ void do_line_a(void)
             break;
 
         case 21: /* [2a43] A0F2 */
+            // GETTIED
             cflag = 0;
             write_reg(0, 1, read_reg(2, 1));
             do_findprop();
@@ -4427,10 +4510,12 @@ void do_line_a(void)
             break;
 
         case 22:
+            // CHAROUT2
             char_out((type8)read_reg(1, 0));        /* A0F3 */
             break;
 
         case 23: /* D7=Save_(filename A0) D1 bytes starting from A1  A0F4 */
+            // SAVEFILE
             {
 #ifdef LOGDIS
                 push_msg(DASM_COM,"D7=Save_(filename A0) D1 bytes starting from A1");
@@ -4449,6 +4534,7 @@ void do_line_a(void)
             break;
 
         case 24: /* D7=Load_(filename A0) D1 bytes starting from A1  A0F5 */
+            // LOADFILE
             {
 #ifdef LOGDIS
                 push_msg(DASM_COM,"D7=Load_(filename A0) D1 bytes starting from A1");
@@ -4460,12 +4546,13 @@ void do_line_a(void)
                 pos = read_reg(8 + 1, 1);
                 size = (type16)read_reg(1, 1);
 
-                //printf("load at %x, size %d (%x)\n", pos, (int)size, (int)size);
+                //printf("load at %x, size %d (0x%x)\n", pos, (int)size, (int)size);
                 write_reg(7, 0, ms_load_file(str, effective(pos), size));
             }
             break;
 
         case 25: /* D1=Random(0..D1-1) [3748] A0F6 */
+            // RANDOM2
 #ifdef LOGDIS
             push_msg(DASM_COM,"D1=Random(0..D1-1)");
 #endif
@@ -4474,6 +4561,7 @@ void do_line_a(void)
             break;
 
         case 26: /* D0=Random(0..255) [3742] A0F7 */
+            // RANDOM1
 #ifdef LOGDIS
             push_msg(DASM_COM,"D0=Random(0..255)");
 #endif
@@ -4482,6 +4570,7 @@ void do_line_a(void)
             break;
 
         case 27: /* write string [D0] [2999] A0F8 */
+            // TEXT
 #ifdef LOGDIS
             push_msg(DASM_COM,"write string [D0]");
 #endif
@@ -4489,6 +4578,8 @@ void do_line_a(void)
             break;
 
         case 28: /* Z,D0=Get_inventory_item(D0) [2a9e] A0F9 */
+            // QCARRIED
+
 #ifdef LOGDIS
             push_msg(DASM_COM,"Z,D0=Get_inventory_item(D0)");
 #endif
@@ -4530,6 +4621,21 @@ void do_line_a(void)
             break;
 
         case 29: /* [2b18] A0FA */
+
+            /* 
+               GETNOUNS -  scans noundata for nouns with given attributes
+
+               Entry:  D5.B == 0=> bytewise else wordwise
+               D2.B/W      value to match
+               D3.W        no. of last noun matched
+               D4.W        no. of nouns in table (NOT no. left to do - total!)
+               A0.L        pointer to first noun to compare
+
+               Exit:   A0.L        Points to NEXT byte/word to compare
+               D3.W        no. of noun that matched
+               carry       SET=> match found, else not
+            */
+
             ptr = (type16)read_reg(8, 1);
             do
             {
@@ -4561,6 +4667,18 @@ void do_line_a(void)
             break;
 
         case 30: /* [2bd1] A0FB */
+
+            /*
+              WORDSCAN -  finds the Nth word in the dictionary
+              words being hi-bit terminated strings 
+
+              entry   D2.W = no. of words to scan
+              A1.L = points at dictionary
+
+              exit    D2.W = 0
+              A1.L = points at end of correct word
+            */
+            
             ptr = (type16)read_reg(8 + 1, 1);
             do
             {
@@ -4574,7 +4692,21 @@ void do_line_a(void)
             write_reg(8 + 1, 1, ptr);
             break;
 
-        case 31: /* [2c3b] A0FC */
+        case 31: /* [2c3b] A0FC */ 
+
+            /* 
+               NOUNSCAN -  like WORDSCAN but scans adjective list simultaneously
+               adjective list is zero terminated bytes
+
+               Entry:  A0.L    points at word list
+               A1.L    points at adjective list
+               D0.W    no. of words to skip
+
+               Exit:   A0.L    pointer to end of word
+               A1.L    pointer to end of its adjective list
+               D0.W    now zero
+            */
+
             ptr = (type16)read_reg(8 + 0, 1);
             ptr2 = (type16)read_reg(8 + 1, 1);
             do
@@ -4591,16 +4723,18 @@ void do_line_a(void)
             write_reg(8 + 1, 1, ptr2);
             break;
 
-        case 32: /* Set properties pointer from A0 [2b7b] A0FD */
+        case 32:  // SETNOUNS
+            /* Set properties pointer from A0 [2b7b] A0FD */
 #ifdef LOGDIS
             push_msg(DASM_COM,"Set properties pointer from A0");
 #endif
+
             // A0 = object properties (aka noundata)
-            properties = (type16)read_reg(8 + 0, 1);
+            properties = (type16)read_reg(8 + 0, 1);  // A0
             if (version > 0)
             {
                 // A3 = MessageCode PC address
-                fl_sub = (type16)read_reg(8 + 3, 1);
+                fl_sub = (type16)read_reg(8 + 3, 1); // A3
             }
             if (version > 1)
             {
@@ -4613,15 +4747,30 @@ void do_line_a(void)
             }
             if (version > 2)
             {
-                fp_tab = (type16)read_reg(8 + 6, 1);
-                fp_size = (type16)read_reg(6, 1);
+                fp_tab = (type16)read_reg(8 + 6, 1); // A6
+                fp_size = (type16)read_reg(6, 1); // D1
             }
             //printf("Sub: %x",fl_sub);
             //printf("Tab: %x",fl_tab);
             //printf("Size: %x",fl_size);
+
+            if (prog_format)
+            {
+                // NB: these might also be valid in non-prog format
+                // A1 = save game start
+                // D0 = save game len
+
+                int savearea = read_reg(8 + 1, 2); // A1 = SLADDR
+                int savesize = read_reg(0, 1); // D0
+
+                //printf("save area = %04X\n", savearea);
+                //printf("save size = %04X\n", savesize);
+
+                update_game_save_area(effective(savearea), savesize);
+            }
             break;
 
-        case 33: /* A0FE */
+        case 33: /* GETDATA A0FE */
 #ifdef LOGDIS
             push_msg(DASM_COM,"findprop");
 #endif
@@ -4629,6 +4778,7 @@ void do_line_a(void)
             break;
 
         case 34: /* Dictionary_lookup A0FF */
+            // SEARCH
 #ifdef LOGDIS
             push_msg(DASM_COM,"Dictionary_lookup");
 #endif
@@ -4662,11 +4812,19 @@ type8 ms_rungame(void)
     static int stat = 0;
 #endif
 
+
     if (!running)
         return running;
     
     if (undo_pc && pc == undo_pc)
-        save_undo();
+    {
+        static lastCharCount;
+
+        // only undo if we've processed input since last time.
+        if (lastCharCount != getCharCount) save_undo();
+        
+        lastCharCount = getCharCount;
+    }
 
 #ifdef LOGEMU
     if (pc == 0x0000)
