@@ -74,6 +74,7 @@ class IFMagnetic : public QObject, public IFEngineInterface
     bool                _running;
     bool                _shutdown;
     bool                _starting;
+    bool                _initialising;
 
     bool                _createImageDir;
     bool                _addCommandNewline;
@@ -116,26 +117,34 @@ class IFMagnetic : public QObject, public IFEngineInterface
 
     uchar*              _gameSaveMemory;
     size_t              _gameSaveMemorySize;
+    uint                _gameSaveAddr; // in emu space
     UndoState           _undos;
 
     PuzzleManager       _puzzles;
-    bool                _puzzlesEnabled;  // modern mode
     Messages            _messages;
     string              _originalCredits;
 
     bool                _useXBR4;
     bool                _ignoreOutput;
 
+    SaveContext         _saveContext;
+    RequestExtraFn*     _requestSaveExtraFn = 0;
+    void*               _requestSaveExtraCtx = 0;
+
+    RequestExtraFn*     _requestLoadExtraFn = 0;
+    void*               _requestLoadExtraCtx = 0;
+
 public:
 
     struct PicRequest
     {
-        int     _picn;
+        int     _picn = -1;
+        int     _picAddr = 0;
         int     _mode;
         int     _ver;
-        float*  _profile;
+        float*  _profile = 0;
+        bool    _showInline = false;
 
-        PicRequest() { _picn = -1; }
         bool valid() const { return _picn >= 0; }
     };
     
@@ -162,14 +171,7 @@ public:
     void gameStarting();
     void gameRestarting();
 
-    void emitScene() override 
-    {
-        if (_sync())
-        {
-            flush();
-            _syncLock.unlock();
-        }
-    }
+    void emitScene() override;
 
     bool setOptions(const VarSet&) override;
 
@@ -195,10 +197,10 @@ public:
     void tidyTranscript();
     void parseTranscript();
 
+    void showImage(const string& filepath, const PicRequest* pr);
     void clearImage() override
     {
         delete [] _imageJSONBuf;
-
 
         GrowString gs;
         gs.append("{}");
@@ -228,8 +230,12 @@ public:
         }
     }
     
-    void flush()
+    bool flush()
     {
+        // true if something emitted
+
+        bool r = false;
+        
         if (_outpos)
         {
             // terminate
@@ -241,12 +247,17 @@ public:
 
             // transform
             parseTranscript();
+
+            r = _outbuf[0] != 0;
+
+            if (r)
+            {
+                // emit
+                _emits(_transcriptEmit, _tctx, _outbuf);
             
-            // emit
-            _emits(_transcriptEmit, _tctx, _outbuf);
-            
-            // end of section
-            (*_transcriptEmit)(_tctx, 0);
+                // end of section
+                (*_transcriptEmit)(_tctx, 0);
+            }
         }
 
         if (_statusReady)
@@ -264,20 +275,23 @@ public:
         }
         
         flushImage();
+
+        if (!r)
+        {
+            //LOG3("MS, ", "flush empty");
+        }
+        return r;
     }
 
     string transformCommand(const char* cmd) const;
-    bool evalCommandSpecial(const char* cmd, CommandResultI* cres);
-    bool _evalCommand(const char* cmd,
-                      CommandResultI* res = 0, 
-                      bool echo = false);
+
     
     bool evalCommand(const char* cmd,
                      CommandResultI* cres = 0,
                      bool echo = false) override
     {
         string c = transformCommand(cmd);
-        return evalCommandSpecial(c.c_str(), cres)
+        return _evalCommandSpecial(c.c_str(), cres)
             || _evalCommand(c.c_str(), cres, echo);
     }
 
@@ -308,7 +322,14 @@ public:
         
         _running = false;
         _shutdown = false;
+
+        // interval between launching thread and it running
         _starting = false;
+
+        // interval between starting the game and user commands
+        // eg where autosaves do not happen
+        _initialising = false;
+        
         _waiting = false;
         _inputReady = false;
 
@@ -328,8 +349,8 @@ public:
 
         _gameSaveMemory = 0;
         _gameSaveMemorySize = 0;
+        _gameSaveAddr = 0;
         
-        _puzzlesEnabled = true; // modern default
         _useXBR4 = true;
         _ignoreOutput = false;
     }
@@ -431,54 +452,141 @@ public:
         return c;
     }
 
-    const char*  messageHook(int msg)
+    string messageHook(int msg, const char* s)
     {
         // called when a `msg` is printed
         // pass to game specific puzzle handlers
         // NB: game thread
-        return _puzzles.messageHook(msg);
+        return _puzzles.messageHook(msg, s);
     }
 
+    string _decodePicture(const PicRequest* pr, const char* imagename);
     void _showpic(const PicRequest*);
 
-    void updateGameSaveArea(uchar* ptr, size_t size);
-    bool loadGame(const char* name, uchar* ptr, size_t size);
-    bool saveGame(const char* name, uchar* ptr, size_t size);
-    bool saveGame(const char* name, SaveGameHeader& h);
-    bool loadGame(const char* name, SaveGameHeader& h);
+    void updateGameSaveArea(uchar* ptr, size_t size, uint addr);
+    bool saveGame(const char* name, SaveGameHeader&, SaveContext&);
+    bool loadGame(const char* name, SaveGameHeader&, SaveContext&);
 
     bool updateAutoSave();
     void moveUpdate(int movecount);
-    bool autoLoad(int delta);
-    bool loadMemGame(const char* name, bool forceLook, bool clearpic);
+    bool autoLoad(int delta, bool neverLook);
+    bool loadMemGame(const char* name, SaveGameHeader&, SaveContext&);
 
-    bool saveGame(const char* name) override
+    bool _saveGame(const char* name, int type, SaveContext& sctx)
     {
         bool res = _gameSaveMemory != 0;
         if (res)
         {
             SaveGameHeader shead;
-            
-            // mark as a memory image
-            shead._type = SAVE_TYPE_MEMIMAGE;
+            shead._type = type;
+
+            sctx._ptr = _gameSaveMemory;
+            sctx._size = _gameSaveMemorySize;
+            sctx._addr = _gameSaveAddr;
 
             // raw save game file
-            res = saveGame(name, shead);        
+            res = saveGame(name, shead, sctx);        
         }
         return res;
     }
-    
+
+    bool saveGame(const char* name) override
+    {
+        // save UI format
+        return _saveGame(name, SAVE_TYPE_MEMIMAGE, _saveContext);
+    }
+
+    bool saveGameEMU(const char* name)
+    {
+        // save emu format (might be the same!)
+        return _saveGame(name, SAVE_TYPE_ENGINE, _saveContext);
+    }
+
     bool loadGame(const char* name) override 
     {
         // called from UI
+        _saveContext._clearPic = true;
+        _saveContext._forceLook = false;
+        _saveContext._neverLook = false;
+        return _loadGame(name, SAVE_TYPE_MEMIMAGE, _saveContext);
+    }
+
+    bool loadGameEMU(const char* name)
+    {
+        _saveContext._clearPic = false;
+        _saveContext._forceLook = false;
+        _saveContext._neverLook = true;
+        return _loadGame(name, SAVE_TYPE_ENGINE, _saveContext); 
+    }
+
+    bool _loadGame(const char* name, int type, SaveContext& sctx)
+    {
         bool res = _gameSaveMemory != 0;
-        if (res) res = loadMemGame(name, false, true);
+        if (res)
+        {
+            SaveGameHeader shead;
+            shead._type = type;
+
+            sctx._ptr = _gameSaveMemory;
+            sctx._size = _gameSaveMemorySize;
+            sctx._addr = _gameSaveAddr;
+            
+            res = loadMemGame(name, shead, sctx);
+        }
         return res;
     }
 
+    bool restartGame() override;
     bool clearImageCache();
 
+    string makeConfigPath(const char* name) const
+    {
+        string path = _configDir;
+        if (!path.empty()) path += '/';
+        path += name;
+        return path;
+    }
+
+    string makeDataPath(const char* name) const
+    {
+        string path = _dataDir;
+        if (!path.empty()) path += '/';
+        path += name;
+        return path;
+    }
+
+    string makeImagePath(const char* name) const
+    {
+        string path = _imageDir;
+        if (!path.empty()) path += '/';
+        path += name;
+        return path;
+    }
+
+    bool undo(int delta);
+
+    bool setRequestSaveExtra(RequestExtraFn* fn, void* ctx) override
+    {
+        _requestSaveExtraFn = fn;
+        _requestSaveExtraCtx = ctx;
+        return true; // supported
+    }
+
+    bool setRequestLoadExtra(RequestExtraFn* fn, void* ctx) override
+    {
+        _requestLoadExtraFn = fn;
+        _requestLoadExtraCtx = ctx;
+        return true; // supported
+    }
+
+    static string prettyCommand(const char* cmd);
+
 private:
+
+    bool _evalCommand(const char* cmd,
+                      CommandResultI* res = 0, 
+                      bool echo = false);
+    bool _evalCommandSpecial(const char* cmd, CommandResultI* cres);
 
     void _buildRosterJSON(GrowString& buf);
     void _buildMapJSON(GrowString& buf);

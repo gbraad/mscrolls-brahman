@@ -152,13 +152,11 @@ GET_
 	BEQ     GETWTH               ;GET WITH
 
       IFEQ	THE_PAWN
-
 	MOVE.B	2(A0),D1
 	AND.B	#$0F,D1			;get weight 15=> no can get
 	CMP.B	#15,D1
 	BEQ	TOOHVY
-
-       ENDC
+      ENDC
 
 	MOVE.W  D0,D2
 11$

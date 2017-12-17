@@ -62,33 +62,25 @@
 	include	"equates.asm"
 
      IFNE      BookProtection
-
          XDEF        PROT_FLG
-
      ENDC
 
 
          XREF       COUT,GETLINE
 
       IFNE     QL128
-
          XDEF       CURSX,CURSY
-
       ENDC
 
-         XDEF       BIOS.COU,BIOS.INP,BIOSQUIT,RND.CHIN
+         XDEF      BIOSQUIT,RND.CHIN
 
       IFNE     Wimp
-
          XDEF       VOLDBUF
-
       ENDC
 
       IFEQ     DosPresent
-
          XDEF       DEST,DRIVE
          XDEF       FILESIZE,READIT,WRITEIT
-
       ENDC
 
 
@@ -96,23 +88,17 @@
          XDEF       DISPTYPE
 
       IFNE     FunctionKeys
-
          XDEF       FUNCTNO,FUNCPNTR
-
       ENDC
 
 
       IFNE     Graphics
-
          XDEF        PICTNUM
-
       ENDC
 
 
       IFNE     SpoolLen
-
          XDEF        PRINTER
-
       IFNE	INOUTLINK
 
 	 XDEF	SpoolPos,PrtThere,SpoolOff
@@ -126,10 +112,9 @@
       XDEF	MORE_CNT,CWID_FLG,INBUFF,OLDTEXT,CHANNEL
 
       IFNE	ST520
-
       XDEF	FREE_FLG,CURSX,STIP_FLG,SCR_IGNO,DITH_FLG,CONTERM,COL_FLG
-
       ENDC
+
       ENDC
 
 
@@ -138,11 +123,8 @@
 PROT_FLG:   DC.W  0
 
 	IFEQ	M68000
-
 	XDEF	ProtData
-
 ProtData	DC.L	0
-
 	ENDC
 
       ENDC
@@ -154,7 +136,6 @@ TOPCURS1    EQU   $00000001
 TOPCURS2    EQU   $00300001
 	
 	IFNE	INOUTLINK
-
 MORE_CNT	DC.W	0
 CWID_FLG	DC.W	0
 CHANNEL		DC.W	0
@@ -183,7 +164,6 @@ CURSX		DC.W	0
 	ENDC
 
 
-
 LEFTM       DS.W  1
 SWIDTH      DC.W  WIDTH.DEF-1
 VWIDTH      DC.W  WIDTH.DEF
@@ -193,86 +173,67 @@ SCNTOP      DS.L  1
 SCNBOT      DS.L  1
 
 
+        XDEF       BIOS.COU,BIOS.INP
+        
 BIOS.COU    BRA.L COUT      ;DS.L  1
 BIOS.INP    BRA.L GETLINE   ;DS.L  1
-
             DS.L  1        ;BIOS STUFF USES THIS (I THINK)
 
       IFNE  QL128
-
 CURSX       DS.W  1        ;CURSX & CURSY MUST REMAIN IN ORDER
 CURSY       DS.W  1
-
       ENDC
 
+      IFEQ DosPresent
 READIT      DS.L  1
 WRITEIT     DS.L  1
-
 GETCHAR     DS.L  1
-
+      ENDC
+        
 BUFFER
 
            IFNE  Wimp
-
 VOLDBUF     DS.B  BUFFLEN
-
            ENDC
 
 	IFNE	QL128
-
 OLDTEXT     DS.B  BUFFLEN		;these 'happen' to match
 INTEXT      DS.B  BUFFLEN		;where real BIOS version lives
 					;in ye olde QL version
-
 	ENDC
 
            IFEQ   DosPresent
-
 DEST        DS.L  1
 DRIVE       DS.W  1
 FILENO      DS.W  1        ;Used to store file handle in ATARI
 FILESIZE    DS.W  1
-
 BAD.COUNT   DS.W  1
 SECT.COUNT  DS.W  1
 ROT.COUNT   DS.W  1
-
 HEADBUF     DS.W  10
-
            ENDC
 
 DISPTYPE    DS.B  1
 DISPTYPE2   DS.B  1
-
 EOR.COUT    DS.W  1
-
 RND.CHIN    DS.W  1
-
 BIOSQUIT    DS.L  1
 
            IFNE   DosPresent
-
 FILENO      DS.W  1        ;Used to store file handle in ATARI
-
            ENDC
 
            IFNE   Graphics
-
 PICTNUM     DC.B  0     ;Current picture on screen
-
            ENDC
 
            IFNE   SpoolLen
-
 PRINTER     DC.B  0     ;0=> no script, -1=>script
-
            ENDC
 
            IFNE   FunctionKeys
-
 FUNCTNO     DC.W  0
 FUNCPNTR    DC.W  0
-
            ENDC
 
             END

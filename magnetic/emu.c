@@ -329,7 +329,10 @@ struct picture
     type16 height;
     type16 wbytes;
     type16 plane_step;
-    type8 * mask;
+    type16 mask_wbytes;
+    type16 transp;
+    type8* mask;
+    
 };
 
 #ifndef NO_ANIMATION
@@ -529,19 +532,21 @@ static void push_msg(int attr, char * format,...)
 }
 #endif // LOGEMU || DISASSEM
 
-#if defined(LOGGFX) || defined(LOGHNT)
+#if defined(LOGGFX) || defined(LOGHNT) || defined(LOGGFX_EXT)
 void out2(char *format,...)
 {
     va_list a;
 
     va_start(a, format);
-    vfprintf(dbg_log, format, a);
+    //vaprintf(dbg_log, format, a);
+    printf(format, a);
+
     va_end(a);
-    fflush(dbg_log);
+    //fflush(dbg_log);
 }
 #endif
 
-static void _ms_showpic(type32 c, type8 mode)
+static void _ms_showpic(type32 c, type32 picAddr, type8 mode)
 {
     // shader values: Contrast Brightness Saturation Lightness Gamma
     float* profile = 0;
@@ -549,16 +554,64 @@ static void _ms_showpic(type32 c, type8 mode)
     int g = get_game();
     if (g > 0)
     {
+#if 1
+        assert(c >= 0 && c <= 0xff);
+        if (mode == 1) profile = pcc[g-1][c];
+#else
         if (gfx_ver < 2)
         {
             profile = pcc[g-1][c];
+        }
+        else
+        {
+            // in the original releases, all image names were lowercase with the
+            // exception of static alternatives for animated images which were all
+            // in uppercase
+            // the original collection game had all guild pictures start with 'g'
+            // all corruption images start with 'c' and the fish! images start with 'f'
+            // wonderland names were not prefixed
+            // for the remastered versions we use the image name until the '.', convert
+            // it to lowercase, prepend the necessary character and cut after 6 chars
+            char picname[7];
+            if (g==2) picname[0]='g';
+            else if (g==4) picname[0]='c';
+            else if (g==5) picname[0]='f';
 
-            // to guard against versions not yet set, look for zero gamma
+            const char* p = (const char*)getcode() + c;
+            char* q = picname+1;
+            while (*p && (q-picname < 6))
+            {
+                //printf("Distance: %ld\n",q-picname);
+                if (*p == '.') break;
+                *q++ = u_tolower(*p);
+                ++p;
+            }
+            *q = 0;
+            //printf("Searching index of %s#\n",picname);
+            type16s header_pos=0;
+            while (header_pos < gfx2_hsize)
+            {
+                type8s* hname = (type8s*)(gfx2_hdr + header_pos);
+
+                if (u_strnicmp(hname,picname,6) == 0)
+                   break;
+
+                header_pos += 16;
+            }
+            int idx = header_pos/16;
+            //printf("Calculated index: %d\n",idx);
+            profile = pcc[g-1][idx];
+        }
+#endif        
+
+        // to guard against versions not yet set, look for zero gamma
+        if (profile)
+        {
             float gamma = profile[4];
             if (gamma == 0.0) profile = 0;
         }
     }
-    ms_showpic(c, mode, gfx_ver, profile);
+    ms_showpic(c, picAddr, mode, gfx_ver, profile);
 }
 
 static type8 _ms_getchar(type8 trans)
@@ -804,6 +857,7 @@ void ms_stop(void)
 static int ms_restart()
 {
     // non-zero means ok
+    // do not call this directly from outside
     return ms_init(0,0,0,0);
 }
 
@@ -842,6 +896,12 @@ static void ms_stop_or_restart(int r)
         // call again after not as request
         (*sr_hook)(r, sr_hook_ctx, 0);
     }
+}
+
+void ms_restart_request()
+{
+    // call from outside to initiate restart
+    ms_stop_or_restart(1);
 }
 
 type8 init_gfx1(type8* header)
@@ -978,7 +1038,6 @@ static int get_int(FILE* fp)
 
 static int ms_load_prog_header(const char* name, FILE* fp)
 {
-
     /* format of a very simple AmigaDOS load file:
 
        hunk_header L
@@ -1087,7 +1146,7 @@ type8 ms_init(type8s * name, type8s * gfxname, type8s * hntname, type8s * sndnam
             // restore game state from restart buffer
             memcpy(code, restart, undo_size);
             undo_stat[0] = undo_stat[1] = 0;
-            _ms_showpic(0, 0);
+            _ms_showpic(0, 0, 0);
         }
     }
     else
@@ -1119,7 +1178,7 @@ type8 ms_init(type8s * name, type8s * gfxname, type8s * hntname, type8s * sndnam
         {
             // AmigaDOS prog file
             prog_format = 1;
-            if (!ms_load_prog_header(name, fp)) return 0; // fail
+            ok = ms_load_prog_header(name, fp);
         }
         else
         {
@@ -1133,13 +1192,6 @@ type8 ms_init(type8s * name, type8s * gfxname, type8s * hntname, type8s * sndnam
             ok = ok && (fread((type8*)&ms_head + 4,
                               1, sizeof(ms_head) - 4, fp) == sizeof(ms_head)-4);
 
-            if (!ok)
-            {
-                printf("can't read header\n");
-                fclose(fp);
-                return 0;
-            }
-
             // fix header
             fix_long(&ms_head.code_size);
             fix_long(&ms_head.string_size);
@@ -1150,23 +1202,12 @@ type8 ms_init(type8s * name, type8s * gfxname, type8s * hntname, type8s * sndnam
             fix_long(&ms_head.dec);
         }
 
-        gameid = ms_head.gameid;
-        version = ms_head.version;
-        string_size = ms_head.string_size;
-        undo_size = ms_head.undo_size;
-        undo_pc = ms_head.undo_pc;
-
-#if 0
-        printf("gameid = 0x%x\n", gameid);
-        printf("version = %d\n", version);
-        printf("code_size %x\n", ms_head.code_size);
-        printf("string size %x\n", string_size);
-        printf("string2 size %x\n", ms_head.string2_size);
-        printf("dict size = %x\n", ms_head.dict_size);
-        printf("undo size = %x\n", undo_size);
-        printf("undo pc = %x\n", undo_pc);
-        printf("dec = %x\n", ms_head.dec);
-#endif
+        if (!ok)
+        {
+            printf("can't read header\n");
+            fclose(fp);
+            return 0;
+        }
 
         if (prog_format)
         {
@@ -1183,21 +1224,64 @@ type8 ms_init(type8s * name, type8s * gfxname, type8s * hntname, type8s * sndnam
                 else mem_size = ms_head.code_size;
             }
         }
+        
+        ok = (code = malloc(mem_size)) != 0;
+        ok = ok && fread(code, 1, ms_head.code_size, fp) == ms_head.code_size;
+        
+        if (ok && prog_format)
+        {
+            // load symbol table if present
+            init_syms(fp);
 
-        /* Some C libraries don't like malloc(0), so make
-           sure that undo_size is always positive. */
-        if (undo_size == 0)
-            undo_size = 8;
+            //int save_start = get_sym_value("SLADDR");
+            int save_end = get_sym_value("SLADDR.E");
+
+            //printf("save_start = 0x%x\n", save_start);
+            //printf("save_end = 0x%x\n", save_end);
+            ms_head.undo_size = save_end;
+        }
+
+        gameid = ms_head.gameid;
+        version = ms_head.version;
+        string_size = ms_head.string_size;
+        undo_size = ms_head.undo_size;
+        undo_pc = ms_head.undo_pc;
+
+#if 0
+        printf("gameid = 0x%x\n", gameid);
+        printf("version = %d\n", version);
+        printf("code_size 0x%x\n", ms_head.code_size);
+        printf("string size 0x%x\n", string_size);
+        printf("string2 size 0x%x\n", ms_head.string2_size);
+        printf("dict size = 0x%x\n", ms_head.dict_size);
+        printf("undo size = 0x%x\n", undo_size);
+        printf("undo pc = 0x%x\n", undo_pc);
+        printf("dec = 0x%x\n", ms_head.dec);
+        printf("mem size = 0x%x\n", mem_size);
+#endif
 
         sd = (type8)((ms_head.dict_size != 0L) ? 1 : 0); /* if (sd) => separate dict */
-
-
-        ok = (code = malloc(mem_size)) != 0;
         
         if (ms_head.string2_size)
             ok = ok && (string2 = malloc(ms_head.string2_size)) != 0;
+
+        if (undo_size)
+        {
+            ok = ok && (restart = malloc(undo_size)) != 0;
+
+            if (!prog_format)
+            {
+                ok = ok && (undo[0] = malloc(undo_size)) != 0;
+                ok = ok && (undo[1] = malloc(undo_size)) != 0;
+            }
+            
+            if (ok)
+            {
+                //printf("enable undo restart\n");
+                memcpy(restart, code, undo_size);
+            }
+        }
         
-        ok = ok && (restart = malloc(undo_size)) != 0;
         if (sd)
         {
             ok = ok && (dict = malloc(ms_head.dict_size)) != 0;
@@ -1211,18 +1295,6 @@ type8 ms_init(type8s * name, type8s * gfxname, type8s * hntname, type8s * sndnam
             {
                 ok = ok && (string3 = malloc(string_size - MAX_STRING_SIZE)) != 0;
             }
-        }
-        
-        ok = ok && (undo[0] = malloc(undo_size)) != 0;
-        ok = ok && (undo[1] = malloc(undo_size)) != 0;
-        
-        ok = ok && fread(code, 1, ms_head.code_size, fp) == ms_head.code_size;
-        if (ok) memcpy(restart, code, undo_size);       /* fast restarts */
-
-        if (prog_format)
-        {
-            // load symbol table if present
-            init_syms(fp);
         }
         
         if (string_size > MAX_STRING_SIZE)
@@ -1244,11 +1316,12 @@ type8 ms_init(type8s * name, type8s * gfxname, type8s * hntname, type8s * sndnam
             ok = ok && (fread(dict, 1, ms_head.dict_size, fp) == ms_head.dict_size);
         }
 
+        fclose(fp);
+
         if (!ok)
         {
             printf("error reading '%s'\n", name);
             ms_freemem();
-            fclose(fp);
             return 0;
         }
         
@@ -1270,7 +1343,6 @@ type8 ms_init(type8s * name, type8s * gfxname, type8s * hntname, type8s * sndnam
                     decode_table = string + ms_head.dec;
             }
         }
-        fclose(fp);
     }
 
     for (i = 0; i < 8; i++) dreg[i] = areg[i] = 0;
@@ -1531,13 +1603,19 @@ type16s find_name_in_header(type8s * name, type8 upper)
 
     // XX HACK
     // the image names all start with a G inside the gfx file
-    pic_name[j++] = 'G';
+    if (upper)
+        pic_name[j++] = 'G';
+    else
+        pic_name[j++] = 'g';
+
+
     
     for (i = 0; i < 6; ++i)
     {
         char c = name[i];
         if (!c || c == '.') break;
         if (upper) c = u_toupper(c);
+        else c= u_tolower(c);
         pic_name[j++] = c;
     }
     pic_name[j] = 0;
@@ -1559,7 +1637,7 @@ type16s find_name_in_header(type8s * name, type8 upper)
             putchar('\n');
         }
 #endif
-
+        /*
         if (upper)
         {
             if (strncmp(hname,pic_name,6) == 0)
@@ -1570,11 +1648,76 @@ type16s find_name_in_header(type8s * name, type8 upper)
             if (u_strnicmp(hname,pic_name,6) == 0)
                 return header_pos;
         }
-        
+        */
+        if (strncmp(hname,pic_name,6) == 0)
+            return header_pos;
         header_pos += 16;
     }
     return -1;
 }
+
+#if 0
+type8* extract_mask(struct picture * pic)
+{
+    // caller must free return mask
+    
+    type8* maskp = 0;
+    if (pic->mask)
+    {
+        int w = pic->width;
+        int h = pic->height;
+        int stride = pic->mask_wbytes;
+        type8* sp;
+        type8* dp;
+
+        assert(stride > 0);
+
+        printf("extract_mask w:%d, h:%d, stride:%d\n", w, h, stride);
+        
+        int sum = 0;
+        for (int i = 0; i < stride*h; ++i) sum += pic->mask[i];
+        if (!sum)
+        {
+            // mask is all zero. a blank mask. ignore it.
+            printf("mask is all zero\n");
+            return 0;
+        }
+
+        for (int i = 0; i < stride*h; ++i) printf("%02X ", pic->mask[i]);
+        printf("\n");
+        
+        // extracted mask is 1 byte per pixel, no stride padding
+        dp = maskp = (type8*)malloc(stride*h);
+        
+        for (int i = 0; i < h; ++i)
+        {
+            sp = pic->mask + i*stride;
+
+            int v;
+            for (int j = 0; j < w; ++j)
+            {
+                // every 8, get a new byte
+#if 1
+                if ((j & 7) == 0) v = (*sp++) << 24;
+                *dp++ = (v < 0) ? 0 : 0xff;
+                v <<= 1;
+#else
+                if ((j & 7) == 0) v = *sp++;
+                *dp++ = (v & 1) ? 0 : 0xff;
+                v >>= 1;
+#endif
+
+                //printf("(%d,%d):%d ", j, i, dp[-1]);
+            }
+            
+            //printf("\n");
+        }
+
+    }
+
+    return maskp;
+}
+#endif
 
 void extract_frame(struct picture * pic)
 {
@@ -1651,8 +1794,7 @@ type8 *ms_extract2(type8s * name, type16 * w, type16 * h, type16 * pal, type8 * 
         }
 
         gfx2_buf = malloc(length);
-        if (!gfx2_buf)
-            return 0;
+        if (!gfx2_buf) return 0;
 
         if (fseek(gfx_fp, offset, SEEK_SET) < 0)
         {
@@ -1660,7 +1802,7 @@ type8 *ms_extract2(type8s * name, type16 * w, type16 * h, type16 * pal, type8 * 
             gfx2_buf = 0;
             return 0;
         }
-
+        
         if (!fread(gfx2_buf, length, 1, gfx_fp))
         {
             free(gfx2_buf);
@@ -1668,13 +1810,45 @@ type8 *ms_extract2(type8s * name, type16 * w, type16 * h, type16 * pal, type8 * 
             return 0;
         }
 
+        int startcode = read_w2(gfx2_buf);
+        if (startcode != 0x4)  // RAW_MAGIC_NUMBER
+            printf("expected RAW magic number, %x\n", startcode);
+
+        startcode = read_w2(gfx2_buf + 2);
+        if (startcode != 0x101)  // BACKGROUND_CODE
+            printf("expected background code, %x", startcode);
+
+        // LoadPalette
         for (i = 0; i < 16; i++)
             pal[i] = read_w2(gfx2_buf + 4 + (2 * i));
 
-        main_pic.data = gfx2_buf + 48;
-        main_pic.data_size = read_l2(gfx2_buf + 38);
+        // offset = 36
+
+        // short transp;        +0
+        // short monoW = 0;     +2
+        // short size;          +4
+        // short w;             +6
+        // short h;             +8
+        // short d;             +10
+        // char data[size];     +12
+
+        // indicates transparency present
+        main_pic.transp = read_w2(gfx2_buf + 36);
+
+        // main picture should not have transparency
+        assert(main_pic.transp > 15);
+
+        // if non-zero, we have a mono image.
+        int monoW = read_w2(gfx2_buf + 38);
+
+        // main pic should not be mono
+        assert(monoW == 0);
+        
+        main_pic.data_size = read_w2(gfx2_buf + 40);
         main_pic.width = read_w2(gfx2_buf + 42);
         main_pic.height = read_w2(gfx2_buf + 44);
+        //int depth = read_w2(gfx2_buf + 46);
+        main_pic.data = gfx2_buf + 48;
         main_pic.wbytes = (type16)(main_pic.data_size / main_pic.height);
         main_pic.plane_step = (type16)(main_pic.wbytes / 4);
         main_pic.mask = (type8*)0;
@@ -1683,20 +1857,30 @@ type8 *ms_extract2(type8s * name, type16 * w, type16 * h, type16 * pal, type8 * 
         *w = main_pic.width;
         *h = main_pic.height;
 
+        // offset = 48 + size
+
 #ifndef NO_ANIMATION
         /* Check for an animation */
         anim_data = gfx2_buf + 48 + main_pic.data_size;
+
+        // short start_time
+        // short n_images;
+        
+        //int start_time = read_w2(anim_data);
+        
         if ((anim_data[0] != 0xD0) || (anim_data[1] != 0x5E))
         {
-            type8 *current;
+            //type8 *current;
             type16 frame_count, command_count;
-            type16 value1, value2;
 
-            if (is_anim != 0)
-                *is_anim = 1;
+            if (is_anim != 0) *is_anim = 1;
 
-            current = anim_data + 6;
-            frame_count = read_w2(anim_data + 2);
+            frame_count = read_w2(anim_data + 2); // n_images
+            //printf("Frame count: %d\n",frame_count);
+
+            type8* fi = anim_data + 4;
+            
+            //current = anim_data + 6;
             if (frame_count > MAX_ANIMS)
             {
                 ms_fatal("animation frame array too short");
@@ -1706,31 +1890,92 @@ type8 *ms_extract2(type8s * name, type16 * w, type16 * h, type16 * pal, type8 * 
             /* Loop through each animation frame */
             for (i = 0; i < frame_count; i++)
             {
-                anim_frame_table[i].data = current + 10;
-                anim_frame_table[i].data_size = read_l2(current);
-                anim_frame_table[i].width = read_w2(current + 4);
-                anim_frame_table[i].height = read_w2(current + 6);
+                // short transp;        +0
+                // short monoW          +2
+                // short size;          +4
+                // short w;             +6
+                // short h;             +8
+                // short d;             +10
+                // char data[size];     +12
+                
+                anim_frame_table[i].transp = read_w2(fi);
+                
+                int monoW = read_w2(fi + 2);
+                assert(monoW == 0); // expect colour frames
+
+                int size = read_w2(fi + 4);
+                anim_frame_table[i].data_size = size;
+                anim_frame_table[i].width = read_w2(fi + 6);
+                anim_frame_table[i].height = read_w2(fi + 8);
+                anim_frame_table[i].data = fi + 12;
                 anim_frame_table[i].wbytes = (type16)(anim_frame_table[i].data_size / anim_frame_table[i].height);
                 anim_frame_table[i].plane_step = (type16)(anim_frame_table[i].wbytes / 4);
                 anim_frame_table[i].mask = (type8*)0;
 
-                current += anim_frame_table[i].data_size + 12;
-                value1 = read_w2(current - 2);
-                value2 = read_w2(current);
+                fi += 12 + size;
 
-                /* Get the mask */
-                if ((value1 == anim_frame_table[i].width) && (value2 == anim_frame_table[i].height))
+                /*
+                printf("frame %d:\ntransp:%u, size:%d,w:%u,h:%u,data:%x\n",
+                       i,
+                       anim_frame_table[i].transp,
+                       size, 
+                       anim_frame_table[i].width,
+                       anim_frame_table[i].height,
+                       (unsigned int)anim_frame_table[i].data);
+                */
+                       
+                if (anim_frame_table[i].transp < 16)
                 {
-                    type16 skip;
+                    int monoW = read_w2(fi);
+                    int w, h, mask_size;
 
-                    anim_frame_table[i].mask = (type8*)(current + 4);
-                    skip = read_w2(current + 2);
-                    current += skip + 6;
+                    if (monoW)
+                    {
+                        w = monoW;
+                        h = read_w2(fi + 2);
+                        mask_size = read_w2(fi + 4);
+
+                        // mask must be same size
+                        assert(w == anim_frame_table[i].width);
+                        assert(h == anim_frame_table[i].height);
+
+                        anim_frame_table[i].mask_wbytes = mask_size/h;
+                        anim_frame_table[i].mask = fi + 6;
+                        
+                        fi += 6 + mask_size;
+                    }
+                    else
+                    {
+                        assert(0); // colour mask??
+                        
+                        mask_size = read_w2(fi + 2);
+                        w = read_w2(fi + 4);
+                        h = read_w2(fi + 6);
+                        //depth = read_w2(fi + 8);
+
+                        // mask must be same size
+                        assert(w == anim_frame_table[i].width);
+                        assert(h == anim_frame_table[i].height);
+                        
+                        anim_frame_table[i].mask_wbytes = mask_size/h;
+                        anim_frame_table[i].mask = fi + 10;
+
+                        fi += 10 + mask_size;
+                    }
+
+                    //printf("mask %d: mono:%d, w:%d, h:%d, transp size:%d\n", i, monoW, w, h, mask_size);
                 }
+
             }
 
+            //printf("Start of positioning tables: %x %x %x %x\n",fi[0],fi[1],fi[2],fi[3]);
+
+            // short n_sequences;
+
             /* Get the positioning tables */
-            pos_table_size = read_w2(current - 2);
+            pos_table_size = read_w2(fi); fi += 2;
+            //printf("Position table size: %d\n",pos_table_size);
+                        
             if (pos_table_size > MAX_POSITIONS)
             {
                 ms_fatal("animation position array too short");
@@ -1742,8 +1987,15 @@ type8 *ms_extract2(type8s * name, type16 * w, type16 * h, type16 * pal, type8 * 
 #endif
             for (i = 0; i < pos_table_size; i++)
             {
-                pos_table_count[i] = read_w2(current + 2);
-                current += 4;
+                // short priority;
+                // short length;
+                
+                int priority = read_w2(fi);
+                int length = read_w2(fi + 2);
+                fi += 4;
+
+                pos_table_count[i] = length;
+                //printf("Position table %d size: %d\n",i, length);
 
                 if (pos_table_count[i] > MAX_ANIMS)
                 {
@@ -1751,22 +2003,40 @@ type8 *ms_extract2(type8s * name, type16 * w, type16 * h, type16 * pal, type8 * 
                     return 0;
                 }
 
-                for (j = 0; j < pos_table_count[i]; j++)
+                for (j = 0; j < length; j++)
                 {
-                    pos_table[i][j].x = read_w2(current);
-                    pos_table[i][j].y = read_w2(current + 2);
-                    pos_table[i][j].number = read_w2(current + 4) - 1;
-                    current += 8;
+                    // short posx;
+                    // short posy;
+                    // short index;
+                    // short interval;
+
+                    pos_table[i][j].x = read_w2(fi);
+                    pos_table[i][j].y = read_w2(fi + 2);
+                    pos_table[i][j].number = read_w2(fi + 4) - 1;
+
+                    int interval = read_w2(fi + 6);
 #ifdef LOGGFX_EXT
-                    out2("Position entry: Table: %d  Entry: %d  X: %d Y: %d Frame: %d\n",
+                    printf("Position entry: Table: %hu  Entry: %hu  X: %hi Y: %hi Frame: %hi\n",
                          i,j,pos_table[i][j].x,pos_table[i][j].y,pos_table[i][j].number);
 #endif
+                    fi += 8;
                 }
             }
 
+            // short n;
+            // char data[n];
+
             /* Get the command sequence table */
-            command_count = read_w2(current);
-            command_table = current + 2;
+            command_count = read_w2(fi);
+            command_table = fi + 2;
+            fi += 2 + command_count;
+
+            /*
+            printf("Script size: %d\n",command_count);
+            printf("Script: ");
+            for (i = 0; i < command_count; ++i) printf(" %02X",command_table[i]);
+            printf("\n");
+            */
 
             for (i = 0; i < MAX_POSITIONS; i++)
             {
@@ -1802,6 +2072,15 @@ type8 *ms_extract(type32 pic, type16 * w, type16 * h, type16 * pal, type8 * is_a
     return 0;
 }
 
+
+#define         AN_OP_END                       0
+#define         AN_OP_RUN_SEQUENCE              1
+#define         AN_OP_WAIT_FOR                  2
+#define         AN_OP_GOTO                      3
+#define         AN_OP_RANDOM_WAIT               4
+#define         AN_OP_GOTO_IF_RANDOM            5
+#define         AN_OP_GOTO_IF_RUNNING           6
+
 type8 ms_animate(struct ms_position ** positions, type16 * count)
 {
 #ifndef NO_ANIMATION
@@ -1834,7 +2113,7 @@ type8 ms_animate(struct ms_position ** positions, type16 * count)
 
                         pos_array[*count] = pos_table[i][anim_table[i].flag];
 #ifdef LOGGFX_EXT
-                        out2("Adding frame %d to buffer\n",pos_array[*count].number);
+                        out2("Adding frame %hu to buffer\n",pos_array[*count].number);
 #endif
                         (*count)++;
 
@@ -1865,12 +2144,12 @@ type8 ms_animate(struct ms_position ** positions, type16 * count)
 
             switch (command)
             {
-            case 0x00:
+            case AN_OP_END:
                 command_index = -1;
                 return 0;
-            case 0x01:
+            case AN_OP_RUN_SEQUENCE:
 #ifdef LOGGFX_EXT
-                out2("Load Frame Table: %d  Start at: %d  Count: %d\n",
+                out2("Load Frame Table: %hi  Start at: %hi  Count: %hi\n",
                      command_table[command_index],command_table[command_index+1],
                      command_table[command_index+2]);
 #endif
@@ -1902,17 +2181,17 @@ type8 ms_animate(struct ms_position ** positions, type16 * count)
                     }
                 }
                 break;
-            case 0x02:
+            case AN_OP_WAIT_FOR:
 #ifdef LOGGFX_EXT
-                out2("Animate: %d\n", command_table[command_index]);
+                out2("Animate: %hi\n", command_table[command_index]);
 #endif
                 pos_table_max = command_table[command_index];
                 pos_table_index = 0;
                 command_index++;
                 break;
-            case 0x03:
+            case AN_OP_GOTO:
 #ifdef LOGGFX_EXT
-                out2("Stop/Repeat Param: %d\n", command_table[command_index]);
+                out2("Stop/Repeat Param: %hi\n", command_table[command_index]);
                 command_index = -1;
                 return 0;
 #else
@@ -1935,14 +2214,14 @@ type8 ms_animate(struct ms_position ** positions, type16 * count)
                 }
                 break;
 #endif
-            case 0x04:
+            case AN_OP_RANDOM_WAIT:
 #ifdef LOGGFX_EXT
-                out2("Unknown Command: %d Prop1: %d  Prop2: %d WARNING:not parsed\n", command,
+                out2("Unknown Command: %hi Prop1: %hi  Prop2: %hi WARNING:not parsed\n", command,
                      command_table[command_index],command_table[command_index+1]);
 #endif
                 command_index += 3;
                 return 0;
-            case 0x05:
+            case AN_OP_GOTO_IF_RANDOM:
                 ttable = next_table;
                 command_index++;
 
@@ -1955,6 +2234,7 @@ type8 ms_animate(struct ms_position ** positions, type16 * count)
                 command_index++;
                 next_table++;
                 break;
+            case AN_OP_GOTO_IF_RUNNING:
             default:
                 ms_fatal("unknown animation command");
                 command_index = -1;
@@ -1962,8 +2242,8 @@ type8 ms_animate(struct ms_position ** positions, type16 * count)
             }
         }
     }
-#ifdef LOGGFX_EXT
-    out2("ms_animate() returning %d frames\n",*count);
+#if 0
+    out2("ms_animate() returning %hu frames\n",*count);
 #endif
     return got_anim;
 #else
@@ -2058,6 +2338,8 @@ static void undo_swap()
 void save_undo(void)
 {
     int i;
+
+    if (prog_format) return; // not done here
     
     undo_swap();
 
@@ -2073,13 +2355,16 @@ void save_undo(void)
 
     undo_stat[0] = undo_stat[1];
     undo_stat[1] = 1;
+
+    game_state_notify(0); // unknown move count for non prog-format
     
-    if (!prog_format) game_state_notify(0); // unknown move count
 }
 
 type8 ms_undo(void)
 {
     type8 i;
+
+    if (prog_format) return 0; // not done here
 
     ms_flush();
     if (!undo_stat[0])
@@ -2250,6 +2535,7 @@ void _char_out(type8 c, outfn fn)
         if (c == '^') c = 0x0a;
         if (c == '@')
         {
+            // plural agreement
             if (read_reg(2, 0)) return;
             c = 's';
         }
@@ -3303,6 +3589,7 @@ const type8* get_psudat()
     {
         static int s_psudat;
         if (!s_psudat) s_psudat = get_sym_value("PSUDAT");
+        assert(s_psudat);
         return code + s_psudat;
     }
     else
@@ -3324,6 +3611,7 @@ static type8* get_npcdata()
     {
         static int s_npcdata;
         if (!s_npcdata) s_npcdata = get_sym_value("NPC.DATA");
+        assert(s_npcdata);
         return code + s_npcdata;
     }
     else
@@ -3346,6 +3634,7 @@ type16 get_object_player_on()
     {
         static int s_seated;
         if (!s_seated) s_seated = get_sym_value("SEATED");
+        assert(s_seated);
         return read_w(code + s_seated);
     }
     else
@@ -3358,6 +3647,98 @@ type16 get_object_player_on()
     }
     return 0;            
 }
+
+type16 get_stopron()
+{
+    // get the stored pronoun (stopron).
+    // only valid for prog_format binaries.
+    //
+    // this pronoun is used for ' @ ' in messages to substitute
+    // "the object" as decoded by `tnWord`
+    //
+    int obj = 0;
+    if (prog_format)
+    {
+        static int s_stopron;
+        if (!s_stopron) s_stopron = get_sym_value("STOPRON");
+        assert(s_stopron);
+        obj = read_w(code + s_stopron);
+    }
+    return obj;
+}
+
+type16 get_cantsave()
+{
+    // GUILD remastered onward has a symbol "CANTSAVE" which contains
+    // a flag indicating the auto save should not be performed.
+    //
+    // this flag is set when, for example, a timer is started that could
+    // involve the player dieing unless certain actions are taken.
+    // the upshot of not autosaving is that the _last_ autosave will be
+    // immediately before this timer begins and constitutes a sensible
+    // restore point.
+    
+    type16 val = 0;
+    if (prog_format)
+    {
+        static int s_cantsave;
+        if (!s_cantsave)
+        {
+            static int no_cantsave;
+            if (!no_cantsave)
+            {
+                s_cantsave = get_sym_value("CANTSAVE");
+
+                // we don't have this symbol, so dont try again
+                if (!s_cantsave) no_cantsave = 1;
+            }
+        }
+
+        if (s_cantsave) val = read_w(code + s_cantsave);
+    }
+    return val;
+}
+
+#define DEF_BYTE_SYM(_sym)                              \
+static type8* get_ ## _sym ## _addr()                   \
+{                                                       \
+    type8* addr = 0;                                    \
+    if (prog_format)                                    \
+    {                                                   \
+        static int s_addr;                              \
+        if (!s_addr) s_addr = get_sym_value(#_sym);     \
+        assert(s_addr);                                 \
+        addr = code + s_addr;                           \
+    }                                                   \
+    return addr;                                        \
+}                                                       \
+type8 get_ ## _sym ()                                   \
+{                                                       \
+    type8* a = get_ ## _sym ## _addr();                 \
+    return a ? *a : 0;                                  \
+}                                                       \
+int set_ ## _sym (int v)                                \
+{                                                       \
+    type8* a = get_ ## _sym ## _addr();                 \
+    if (a)                                              \
+    {                                                   \
+        *a = (type8)v;                                  \
+        return 1;                                       \
+    }                                                   \
+    return 0;                                           \
+}
+
+// get the current output mode;
+// 0 => normal, 1=>verbose, 2=>brief
+// set the current output mode
+// return 1 for success (ie prog_format), else 0
+DEF_BYTE_SYM(OUTMODE);
+
+// new or classic mode
+DEF_BYTE_SYM(REMASTER);
+
+// get the current picture as understood by the game
+DEF_BYTE_SYM(PICTNUM);
 
 type8* getcode()
 {
@@ -4207,7 +4588,7 @@ void do_line_a(void)
                 push_msg(DASM_COM,"Show picture");
 #endif
                 /* gfx mode = normal, df is not called if graphics are off */
-                _ms_showpic(a1reg + 3, 2);
+                //_ms_showpic(a1reg + 3, 2);
                 break;
 
             case 10: /* Open window commands */
@@ -4319,11 +4700,7 @@ void do_line_a(void)
         case 5: /* A0E2 */
              // UNDO_DIFF
 
-            //printf("trap UNDO_DIFF\n");
-
-#ifdef LOGDIS
-            push_msg(DASM_COM,"NOT IMPLEMENTED");
-#endif
+            ms_undo_signal();
             break;
 
         case 6: /* A0E3 */
@@ -4334,15 +4711,6 @@ void do_line_a(void)
                 int n = read_reg(0,1); // D0 = CLOCK
                 game_state_notify(n);
             }
-
-            /*
-            if (read_reg(1, 2) == 0)
-            {
-                if ((version < 4) || (read_reg(6, 2) == 0))
-                    _ms_showpic(0, 0);
-            }
-            */
-
             break;
 
         case 7: /* A0E4 sp+=4, RTS */
@@ -4456,11 +4824,15 @@ void do_line_a(void)
         case 19: // A0F0 GRAPHICS
             {
                 // gfx_ver >= 2 will pass a code offset
-                int d0 = read_reg(0,1);
-                if (gfx_ver < 2) d0 &= 0xff;
 
+                int picNumber = read_reg(0,1); // d0
+                int picAddr = 0; // not known
+                
+                if (gfx_ver > 1)
+                    picAddr = read_reg(8,1); // A0
+                
                 /* Do_picture(D0) A0F0 */
-                _ms_showpic(d0, (type8)read_reg(1, 0));
+                _ms_showpic(picNumber, picAddr, (type8)read_reg(1, 0));
             }
             break;
         case 20: // A0F1 FINDZERO
@@ -4529,7 +4901,7 @@ void do_line_a(void)
 
                 //printf("save at %x, size %d (%x)\n", pos, (int)size, (int)size);
                 write_reg(7, 0,
-                          ms_save_file(str, effective(pos), size));
+                          ms_save_file(str, effective(pos), size, pos));
             }
             break;
 
@@ -4547,7 +4919,7 @@ void do_line_a(void)
                 size = (type16)read_reg(1, 1);
 
                 //printf("load at %x, size %d (0x%x)\n", pos, (int)size, (int)size);
-                write_reg(7, 0, ms_load_file(str, effective(pos), size));
+                write_reg(7, 0, ms_load_file(str, effective(pos), size, pos));
             }
             break;
 
@@ -4766,7 +5138,7 @@ void do_line_a(void)
                 //printf("save area = %04X\n", savearea);
                 //printf("save size = %04X\n", savesize);
 
-                update_game_save_area(effective(savearea), savesize);
+                update_game_save_area(effective(savearea), savesize, savearea);
             }
             break;
 
@@ -4818,7 +5190,7 @@ type8 ms_rungame(void)
     
     if (undo_pc && pc == undo_pc)
     {
-        static lastCharCount;
+        static int lastCharCount;
 
         // only undo if we've processed input since last time.
         if (lastCharCount != getCharCount) save_undo();

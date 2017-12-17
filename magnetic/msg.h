@@ -56,7 +56,7 @@ struct Messages
     };
 
     typedef std::set<Msg>               MessageSet;
-    typedef std::function<const char*(int)>    Hook;
+    typedef std::function<std::string(int, const char*)>    Hook;
 
     MessageSet          _messages;
     int                 _line;
@@ -64,6 +64,7 @@ struct Messages
 
     bool start(const char* filename);
     void emitMsg(int n, const char* s, outfn fn);
+    void emitChars(const char* s, outfn fn);
     
     int                 _getc(FILE* fp)
     {

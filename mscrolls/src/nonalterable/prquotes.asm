@@ -51,7 +51,7 @@
    
 	include	"equates.asm"
 	include	"verbequ.asm"
-	include	"nounequ2.asm"    ;JUST FOR NOUNNUM
+	include	"nounequ2.i"    ;JUST FOR NOUNNUM
 	include	"macros.asm"
 
 
@@ -867,18 +867,13 @@ PR.HMUCH
 	DO	ISARE
       
       IFNE	THE_PAWN
-
 	MOVE.B  4(A0),D1           ;GET VALUE
 	AND.B   #$7,D1             ;LOW 3 BITS
-      
       ENDC
 
       IFEQ	THE_PAWN
-	
 	XREF	GetValue
-
 	CALL	GetValue
-
       ENDC
 
 	BEQ.S	17$			;zero value - not for sale

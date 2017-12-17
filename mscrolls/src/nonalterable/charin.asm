@@ -65,24 +65,16 @@
 
 
       IFNE     FunctionKeys
-
         XREF    FUNCBASE,FUNCTNO,FUNCPNTR
-
-
-
       ENDC
 
        IFNE    Wimp
-
         XREF    MS_BUTT
-
        ENDC
 
     IFNE   M68000
       IFNE     SpoolLen
-
         XREF    SPOOLOUT
-
       ENDC
     ENDC
 
@@ -91,10 +83,7 @@
 
 
        IFNE    AMIGA512
-
-
 *           INCLUDE  "info.amg"
-
             INCLUDE  "exec/types.i"
             INCLUDE  "exec/libraries.i"            ;NB path names '\' = '/'
 
@@ -117,8 +106,6 @@ FUNC_CNT    SET      LIB_NONSTD
 
          XREF        CSI_FLAG,CSI_PIPE,lib.dos,buffer
          XREF        ScrnMode,ConRead
-
-
        ENDC
 
        IFNE    MAC512
@@ -416,35 +403,24 @@ PipeMatchList
 GETCHAR2
 
     IFNE	M68000
-
       ADDQ.W   #1,RND.CHIN(A6)   ;Add a taste of reality to random no.s
-    
     ENDC 
 
       MOVE.L   A0,-(A7)
 
      IFNE      FunctionKeys
-
       MOVE.B   FUNCTNO(A6),D1    ;Has a function key been pressed lately
       BNE.S    10$               ;Yes, get a charcter from it
-
-
      ENDC
 
     IFNE	M68000
-
       CALL     CHARIN            ;Char to D1
-
     ENDC
 
     IFEQ	M68000
-
      IFNE	IBM
-      
       XREF	SCR_IGNO
-
       MOVE.B	SCR_IGNO(PC),D1		;NE => ignore scrolls
-
      ENDC
 
       DC.W	$A000		;charin trap
@@ -452,11 +428,9 @@ GETCHAR2
       BNE.S	10$
       MOVEQ	#10,D1
 10$
-
     ENDC
 
      IFNE      FunctionKeys
-
       CMP.B    #-11,D1           ;Function key?
       BLS.S    90$               ;No, exit
 
@@ -476,26 +450,21 @@ GETCHAR2
       CLR.W    FUNCTNO(A6)       ;At end of function key string
 90$
       AND.W    #$FF,D1
-
      ENDC
 
     IFNE    M68000		;else native code can cope!
      IFNE      SpoolLen
-
       MOVE.L   A4,-(A7)
       MOVE.L   A6,A4
       LEA      SPOOLOUT,A0
       JSR      0(A6,A0.L)
       MOVE.L   (A7)+,A4
-
      ENDC
     ENDC
 
       MOVE.L   (A7)+,A0
 
       RET
-
-
 
       END
 

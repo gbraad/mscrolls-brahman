@@ -52,8 +52,8 @@
 	include	"equates.asm"
 
 	include	"macros.asm"
-	include	"nounequ1.asm"
-	include	"nounequ2.asm"
+	include	"nounequ1.i"
+	include	"nounequ2.i"
 	include	"verbequ.asm"
 
 

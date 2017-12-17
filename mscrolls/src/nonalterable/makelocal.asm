@@ -52,8 +52,8 @@
 
 	include	"equates.asm"
 	include	"macros.asm"
-	include	"verbequ.asm"
-	include	"roomequ.asm"
+	include	"verbequ.i"
+	include	"roomequ.i"
 
 	XREF	ForceRefresh,PRTTXT,FindRoom,ROOM,CALCNET,CALCNET2,M.SURECONTINUE
 	XREF	P.TNSTOP,P.TN,SafeSetmode,CHEAT,VALID.NP,P.Refresh,WHOOPS

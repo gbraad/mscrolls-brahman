@@ -62,24 +62,60 @@ bool Messages::start(const char* filename)
     return res;
 }
 
+void Messages::emitChars(const char* msg, outfn fn)
+{
+    char last = 0;
+    char c;
+    const char* s = msg;
+
+    for (;;)
+    {
+        c = *s++;
+        if (!c) break;
+
+        if (c == '@' && last == ' ')
+        {
+            int obj = get_stopron();
+            if (obj)
+            {
+                IItem ii(find_item(obj));
+                if (ii)
+                {
+                    string tn = ii.tnWord();
+                    emitChars(tn.c_str(), fn);
+                }
+                else
+                {
+                    LOG1("MS, failed to decode msg obj ", obj << " for " << msg);
+                }
+            }
+            else
+            {
+                LOG1("MS, warning missing object for @ in ;", msg);
+            }
+        }
+        else (*fn)(c);
+
+        last = c;
+    }
+}
+
 void Messages::emitMsg(int n, const char* s, outfn fn)
 {
     if (_hook)
     {
-        const char* m = (_hook)(n);  // IFMagnetic hooks our messages
-        if (m)
+        string altm = (_hook)(n, s);  // IFMagnetic hooks our messages
+        if (!altm.empty())
         {
             // allow return to change message, using %s to embed original
+            const char* m = altm.c_str();
             while (*m)
             {
                 if (*m != '%') (*fn)(*m++);
                 else
                 {
                     char c = *++m;
-                    if (c == 's')
-                    {
-                        while (*s) (*fn)(*s++);
-                    }
+                    if (c == 's') emitChars(s, fn);
                     else (*fn)(c);
                     ++m;
                 }
@@ -87,8 +123,8 @@ void Messages::emitMsg(int n, const char* s, outfn fn)
             return;
         }
     }
-    
-    while (*s) (*fn)(*s++);
+
+    emitChars(s, fn);
 }
 
 bool Messages::readFromTextFile(const char* filename)

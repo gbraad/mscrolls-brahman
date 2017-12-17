@@ -30,7 +30,6 @@
  *
  */
 
-#include <QImage> 
 #include "ifmagnetic.h"
 #include "strutils.h"
 #include "qdefs.h"
@@ -40,9 +39,11 @@
 #include "ifproduct.h"
 #include "ifpic.h"
 #include "filters.h"
+#include "imgpng.h"
+#include "rect.h"
 
 
-#define VERSION_STRING  "6"
+#define VERSION_STRING  "8"
 
 static IFMagnetic* theMS;
 
@@ -50,8 +51,12 @@ static int stop_restart_hook(int r, void* ctx, int request)
 {
     // this hook is called twice, once before and once after
     // beforehand `request`==1 otherwise 0.
-    
-    if (!request)
+
+    if (request)
+    {
+        LOG3("MS ", (r ? "restart" : "stop") << " issued");
+    }
+    else
     {
         // make adjustments after restart
         ((IFMagnetic*)ctx)->gameRestarting();
@@ -82,10 +87,10 @@ bool IFMagnetic::start(const char* configDir,
     if (_createImageDir)
     {
         // images stored in a subdirectory
-         _imageDir = _dataDir + "/images";
+        _imageDir = makeDataPath("images");
 
-         if (!FD::mkdirIf(_imageDir.c_str()))
-             LOG("ERROR: failed to create image dir ", _imageDir);
+        if (!FD::mkdirIf(_imageDir.c_str()))
+            LOG("ERROR: failed to create image dir ", _imageDir);
         
         LOG3("MS, imageDir ", _imageDir);
     }
@@ -100,6 +105,8 @@ bool IFMagnetic::start(const char* configDir,
 
     // assign to global so that emulator handlers can get back to us
     theMS = this;
+
+    _initialising = true;
 
     // save game directory
     _undos.setup(_dataDir);
@@ -123,12 +130,18 @@ bool IFMagnetic::start(const char* configDir,
     
     _msTask = std::thread(&IFMagnetic::runMsTask, this);
 
+    // let the game start before issuing commands
+    emitScene(); // sync, flush etc.
+
     // send initial setup commands to game
     initialCommands();
 
     // load puzzles after initial commands. this is to ensure game
     // has started. assume puzzles solving isn't needed by initial commands!
     _puzzles.start(this);
+
+    // game ready to play
+    _initialising = false;
     
     return true;
 }
@@ -164,7 +177,8 @@ void IFMagnetic::runMsTask()
     // hook messages back to us for special cases
     _messages._hook = std::bind(&IFMagnetic::messageHook,
                                 this, 
-                                std::placeholders::_1);
+                                std::placeholders::_1,
+                                std::placeholders::_2);
 
     _messages.start(story);
 
@@ -219,6 +233,20 @@ bool IFMagnetic::_sync()
     return true;
 }
 
+void IFMagnetic::emitScene() 
+{
+    if (_sync())
+    {
+        bool r = flush();
+        _syncLock.unlock();
+
+        if (r)
+        {
+            updateAutoSave();
+        }
+    }
+}
+
 static void builderEmitter(char c, void* ctx)
 {
     GrowString* buf = (GrowString*)ctx;
@@ -241,10 +269,12 @@ void IFMagnetic::_buildPictureJSON(GrowString& buf,
     {
         build.picContast(profile[0]);
         build.picBrightness(profile[1]);
-        build.picLightness(profile[2]);
-        build.picSaturation(profile[3]);
+        build.picSaturation(profile[2]);
+        build.picLightness(profile[3]);
         build.picGamma(profile[4]);
     }
+
+    if (pr->_showInline) build.picInline(true);
 
     build.endPic();
     
@@ -263,9 +293,7 @@ bool IFMagnetic::clearImageCache()
             // the images are all PNG
             if (equalsIgnoreCase(suffixOf(files[i]), ".png"))
             {
-                const string& fi = files[i];
-
-                string imagepath = _imageDir + '/' + fi;
+                string imagepath = makeImagePath(files[i].c_str());
                 if (FD::remove(imagepath.c_str()))
                 {
                     LOG2("MS, removed cache image ", imagepath);
@@ -284,13 +312,242 @@ bool IFMagnetic::clearImageCache()
     return r;
 }
 
-void IFMagnetic::_showpic(const PicRequest* pr)
+static bool scaleXBR(ImgData& src, ImgData& dst, int scaleFactor)
 {
-    if (pr->_ver <= 1)
+    int r = false;
+    
+    dst.format(src._width*scaleFactor, src._height*scaleFactor, src._bpp);
+    dst.create();
+                    
+    xbr_params xbrParams;
+    xbrParams.input = src._data;
+    xbrParams.output = dst._data;
+    xbrParams.inWidth = src._width;
+    xbrParams.inHeight = src._height;
+    xbrParams.inPitch = src._stride;
+    xbrParams.outPitch = dst._stride;
+
+    switch (scaleFactor)
     {
-        LOG3("MS showpic #", pr->_picn << " mode " << pr->_mode);
+    case 2: xbr_filter_xbr2x(&xbrParams); r = true; break;
+    case 3: xbr_filter_xbr3x(&xbrParams); r = true; break;
+    case 4: xbr_filter_xbr4x(&xbrParams); r = true; break;
     }
 
+    return r;
+}
+
+static bool makeMSImage(ImgData& img, int w, int h, ushort* pal,
+                        uchar* data, uchar* mask)
+{
+    // sanity
+    bool r = w > 0 && w < 1024 && h > 0 && h < 1024;
+    
+    if (r)
+    {
+        img.format(w, h, 32);
+        img.create();
+
+        // mask stride
+        int mstride = ((w + 15)/16)*2;
+
+        for (int y = 0; y < h; ++y)
+        {
+            uchar* s = data + y*w; // source stride 1
+            uchar* q = img._data + img._stride*y;
+            uchar* mp = mask ? mask + y*mstride : 0;
+                    
+            for (int x = 0; x < w; ++x)
+            {
+                uint v = (*s++) & 0xf;
+                v = pal[v];
+                
+                uint alpha = 0xff;
+
+                if (mp)
+                {
+                    int q = x/8;
+                    int r = 7 - (x & 7);
+                    if (mp[q] & (1<<r)) alpha = 0;
+                }
+                
+                *q++ = (v&0x0F00)>>3; // red
+                *q++  = (v&0x00F0)<<1; // green
+                *q++ = (v&0x000F)<<5; // blue
+                *q++ = alpha;
+            }
+        }
+    }
+
+    if (!r)
+    {
+        LOG1("MS,", "failed to extract MS image");
+    }
+    
+    return r;
+}
+
+static bool makeMSImageScaled(ImgData& img, int w, int h, ushort* pal,
+                              uchar* data, uchar* mask, int scaleFactor)
+{
+    bool r = makeMSImage(img, w, h, pal, data, mask);
+    if (r && scaleFactor > 1)
+    {
+        // apply XBR scale
+        ImgData out;
+        r = scaleXBR(img, out, scaleFactor);
+        if (r) img = out; // donate
+    }
+    return r;
+}
+
+std::string IFMagnetic::_decodePicture(const PicRequest* pr,
+                                      const char* imagename)
+{
+    // decode picture and save it
+    // return the full path of the picture saved (with suffix)
+    
+    type16 w, h;
+    type16 pal[16];
+    type8 isAnim;
+
+    string savedFilename;
+
+    // full path without suffix
+    string imagepath = makeImagePath(imagename);
+
+    int code = pr->_ver > 1 ? pr->_picAddr : pr->_picn;
+    uchar* p = ms_extract(code, &w, &h, pal, &isAnim);
+    if (p)
+    {
+        LOG4("MS ", "Have animation? " << (int)isAnim);
+
+        ImgData bgimg;
+        if (makeMSImageScaled(bgimg, w, h, pal, p, 0, _useXBR4 ? 4 : 1))
+        {
+            LOG3("MS showpic, saving ", imagepath);
+                                
+            // write directly with libpng
+            ImgAPng png(&bgimg);
+                
+            if (isAnim)
+            {
+                struct ms_position * positions;
+                type16 count, width, height;
+                type8 * pmask;
+                int cc = 0;
+                Rect rframeLast;
+
+                while (ms_animate(&positions,&count) != 0)
+                {
+                    ImgData playback;
+                    playback.copy(bgimg);
+                    Rect rframe;
+
+                    // render images for this frame
+                    for (int i = 0; i < count; i++)
+                    {
+                        type8* picdata = ms_get_anim_frame(positions[i].number,&width,&height,&pmask);
+
+                        if (picdata)
+                        {
+                            LOG4("Extracting anim ","frame: " << positions[i].number << " x: " << positions[i].x << " y: " << positions[i].y << " width: " << width << " height: " << height);
+
+                            ImgData img;
+                            int scale = _useXBR4 ? 4 : 1;
+                            if (makeMSImageScaled(img, width, height,
+                                                  pal, picdata, pmask,
+                                                  scale))
+                            {
+                                ++cc;
+
+                                int px = positions[i].x*scale;
+                                int py = positions[i].y*scale;
+
+                                // clip against background 
+                                img.clip(px, py, bgimg._width, bgimg._height);
+
+                                Rect ri(px, py, img._width, img._height);
+                                rframe = rframe.combine(ri);
+
+                                // blit onto background
+                                if (pmask)
+                                {
+                                    // has mask data
+                                    playback.blitAlpha(img, 0, 0,
+                                                       px, py,
+                                                       img._width, img._height);
+                                }
+                                else
+                                {
+                                    // otherwise just copy over
+                                    playback.blit(img, 0, 0,
+                                                  px, py,
+                                                  img._width, img._height);
+                                }
+                            }
+                        }
+                    }
+
+                    // combine last & current areas
+                    Rect rchange = rframe.combine(rframeLast);
+
+                    // make a frame for the combined change
+                    ImgData cimg;
+                    cimg.format(rchange._w, rchange._h, playback._bpp);
+                    cimg.create();
+                    
+                    cimg.blit(playback, rchange._x, rchange._y,
+                              0, 0,
+                              rchange._w, rchange._h);
+
+                    png.addFrame(cimg, rchange._x, rchange._y);
+                    
+                    rframeLast = rframe;
+                }
+
+                LOG3("animated image ", imagepath << " total " << cc << " frames");
+
+            }
+
+            png.write(imagepath);
+
+            // APNG or PNG 
+            savedFilename = png._filename;
+        }
+    }
+    else
+    {
+        LOG1("MS could not find picture ", imagename);
+    }
+
+    return savedFilename; // null if not saved
+}
+
+void IFMagnetic::showImage(const string& filepath, const PicRequest* pr)
+{
+    if (!filepath.empty())
+    {
+        // build picture json
+        GrowString buf;
+        _buildPictureJSON(buf, filepath, pr);
+
+        // takes out the string and gives it to us
+        _imageJSONBuf = buf.donate();
+    }
+}
+
+void IFMagnetic::_showpic(const PicRequest* pr)
+{
+    LOG3("MS showpic #", pr->_picn << " mode " << pr->_mode);
+
+    if (pr->_mode == 0)
+    {
+        LOG3("MS hidepic ", pr->_picn);
+        clearImage();
+        return;
+    }
+    
     char imagename[128];
 
     // prefix
@@ -298,7 +555,8 @@ void IFMagnetic::_showpic(const PicRequest* pr)
     
     if (pr->_ver > 1)
     {
-        const char* p = (const char*)getcode() + pr->_picn;
+        assert(pr->_picAddr);
+        const char* p = (const char*)getcode() + pr->_picAddr;
         LOG3("MS show pic name: ", p << " mode " << pr->_mode);
 
         char* q = imagename + strlen(imagename);
@@ -312,17 +570,18 @@ void IFMagnetic::_showpic(const PicRequest* pr)
     }
     else sprintf(imagename + strlen(imagename), "image%d", pr->_picn);
 
+    // don't ignore picture for ignoroutput;
+    // will load start picture then either
+    // (a) will be at start
+    // (b) will load a save for a location that will load another picture
+    // (c) will load a save for a location with no picture BUT now a hide is issued for those locations.
+    /*
     if (_ignoreOutput)
     {
         LOG3("ignoring picture ", imagename);
         return;
     }
-    
-    if (pr->_mode == 0)
-    {
-        LOG3("MS hidepic ", imagename);
-        return;
-    }
+    */
 
     if (_useXBR4)
     {
@@ -330,105 +589,47 @@ void IFMagnetic::_showpic(const PicRequest* pr)
         strcat(imagename, "_xbr4");
     }
     
-    strcat(imagename, ".png");
-    //LOG3("pic save name: ", imagename);
-
     _lastPic = *pr;
 
     // exists or not
-    string imagepath = _imageDir + '/' + imagename;
+    string imagepath = makeImagePath(imagename);
+    string savedFilename;
 
-    bool ok = true;
+    // first look for PNG
+    savedFilename = changeSuffix(imagepath, ".png");
 
-    if (!FD::exists(imagepath.c_str()))
+    bool found = FD::exists(savedFilename.c_str());
+    if (!found)
     {
-        // decode picture and save it
+        // try APNG
+        savedFilename = changeSuffix(imagepath, ".apng");
+        found = FD::exists(savedFilename.c_str());
+    }
 
-        type16 w, h;
-        type16 pal[16];
-        type8 isAnim;
+    if (!found)
+    {
+        // decode it
+        savedFilename = _decodePicture(pr, imagename);
+    }
+
+    showImage(savedFilename, pr);
+}
+
+std::string IFMagnetic::prettyCommand(const char* cmd)
+{
+    // neaten the command for display.
+    string s;
+    if (cmd && *cmd)
+    {
+        s += u_toupper(*cmd);
+        s += toLower(cmd + 1);
+
+        char last = cmd[strlen(cmd)-1];
+        if (!strchr(".?!\"", last))
+            s += '.';
+    }
+    return s;
     
-        uchar* p = ms_extract(pr->_picn, &w, &h, pal, &isAnim);
-        if (p)
-        {
-            //LOG3("MS ", "pic size " << w << "x" << h);
-
-            if (w > 0 && w < 1024 && h > 0 && h < 1024)
-            {
-                uchar* raw = new uchar[w*h*4];
-                uchar* q = raw;
-                
-                int stride = w;
-                for (int y = 0; y < h; ++y)
-                {
-                    for (int x = 0; x < w; ++x)
-                    {
-                        uint v = p[stride*y + x];
-                        
-                        v = pal[v & 0xf];
-
-                        *q++ = (v&0x000F)<<5; // blue
-                        *q++  = (v&0x00F0)<<1; // green
-                        *q++ = (v&0x0F00)>>3; // red
-                        *q++ = 0xff; // alpha
-                    }
-                }
-
-                int scaleFactor = 1;
-                
-                if (_useXBR4)
-                {
-                    scaleFactor = 4;
-                    uchar* outBuffer = new uchar[w * scaleFactor * h * scaleFactor * 4];
-                    xbr_params xbrParams;
-                    xbrParams.input = raw;
-                    xbrParams.output = outBuffer;
-                    xbrParams.inWidth = w;
-                    xbrParams.inHeight = h;
-                    xbrParams.inPitch = w * 4;
-                    xbrParams.outPitch = w * scaleFactor * 4;
-
-                    switch (scaleFactor)
-                    {
-                    case 2: xbr_filter_xbr2x(&xbrParams); break;
-                    case 3: xbr_filter_xbr3x(&xbrParams); break;
-                    case 4: xbr_filter_xbr4x(&xbrParams); break;
-                    }
-
-                    delete [] raw;
-
-                    raw = outBuffer;
-                }
-                
-                QImage* img = new QImage(w*scaleFactor, h*scaleFactor,
-                                         QImage::Format_RGB32);
-                QRgb* pix = (QRgb*)img->bits();
-                memcpy(pix, raw, w*scaleFactor * h*scaleFactor * 4);
-
-                delete [] raw;
-
-                LOG3("MS showpic, saving ", imagepath);
-                img->save(imagepath.c_str(), "PNG");
-                delete img;
-            }
-            else ok = false;
-        }
-        else
-        {
-            LOG1("MS could not find picture ", imagename);
-            ok = false;
-        }
-    }
-
-    if (ok)
-    {
-        // build picture json
-        GrowString buf;
-        _buildPictureJSON(buf, imagepath, pr);
-
-        // takes out the string and gives it to us
-        _imageJSONBuf = buf.donate();
-    }
 }
 
 bool IFMagnetic::_evalCommand(const char* cmd, CommandResultI* cres, bool echo)
@@ -449,7 +650,7 @@ bool IFMagnetic::_evalCommand(const char* cmd, CommandResultI* cres, bool echo)
 
         if (echo)
         {
-            _emits(_consoleEmit, _cctx, cmd);
+            _emits(_consoleEmit, _cctx, prettyCommand(cmd).c_str());
 
             // flush
             (*_consoleEmit)(_cctx, '\n');
@@ -605,7 +806,14 @@ bool IFMagnetic::_substWordsID(std::vector<string>& words)
     return r;
 }
 
-bool IFMagnetic::evalCommandSpecial(const char* cmd, CommandResultI* cres)
+bool IFMagnetic::undo(int delta)
+{
+    bool v = autoLoad(delta, true);
+    LOG3("Undo: ", _undos);
+    return v;
+}
+
+bool IFMagnetic::_evalCommandSpecial(const char* cmd, CommandResultI* cres)
 {
     // handle special cases
     assert(cmd);
@@ -615,9 +823,8 @@ bool IFMagnetic::evalCommandSpecial(const char* cmd, CommandResultI* cres)
     // handle undo/redo first. other commands reset the undo state
     if (!u_stricmp(cmd, "undo"))
     {
-        bool v = autoLoad(-1);
+        bool v = autoLoad(-1, false);        
         LOG3("Undo: ", _undos);
-        
         if (cr)
             cr->_result = v ? "undo " + std::to_string(_undos.position()) : "no more undo";
         
@@ -625,7 +832,7 @@ bool IFMagnetic::evalCommandSpecial(const char* cmd, CommandResultI* cres)
     }
     else if (!u_stricmp(cmd, "redo"))
     {
-        bool v = autoLoad(1);
+        bool v = autoLoad(1, false);
         LOG3("Redo: ", _undos);
 
         if (cr)
@@ -671,8 +878,8 @@ bool IFMagnetic::evalCommandSpecial(const char* cmd, CommandResultI* cres)
             const string* adj = 0;
             if (n > 2) adj = &words[n-2];
             
-            // first look for a puzzle bound to the root word
-            res = _puzzlesEnabled && puzzleForX(adj, words[n-1], act);
+            // first look for a puzzle bound to the root word (if enabled)
+            res = puzzleForX(adj, words[n-1], act);
 
             if (!res)
             {
@@ -685,7 +892,7 @@ bool IFMagnetic::evalCommandSpecial(const char* cmd, CommandResultI* cres)
     {
         res = evalUseX(unsplit(words, ' ', 1, n), true);
     }
-    else if (equalsIgnoreCase(words[0], "goto")) 
+    else if (equalsIgnoreCase(words[0], "_goto")) 
     {
         // goto command can be
         // goto room#  where we figure out the route  OR
@@ -701,6 +908,54 @@ bool IFMagnetic::evalCommandSpecial(const char* cmd, CommandResultI* cres)
         res = true;
         
     }
+    else if (n == 2 && equalsIgnoreCase(words[0], "script"))
+    {
+        string spath = makeConfigPath(words[1].c_str());
+        res = true;
+
+        FD fd;
+        if (fd.open(spath.c_str()))
+        {
+            // read all the script text, converting from DOS (where present)
+            uchar* stext = fd.readAll(0, true);
+            if (stext)
+            {
+                char* s = (char*)stext;
+                char* p;
+
+                for (;;s = p)
+                {
+                    while (u_isspace(*s)) ++s;
+                    if (!*s) break; // done
+                    
+                    p = s; 
+                    while (*p && *p != '\n') ++p;  // end of line
+
+                    // skip blank lines and comments (# lines)
+                    if (*s == '#' || p == s) continue;
+                    
+                    string cmd(s, p - s);
+                    //LOG3("cmd: ", cmd);
+
+                    //echo
+                    res = evalCommand(cmd.c_str(), 0, true);
+                    if (!res) break;
+
+                    emitScene();
+                }
+                
+                delete [] stext;
+            }
+            else
+            {
+                LOG1("Problem reading script file '", spath << "'");
+            }
+        }
+        else
+        {
+            LOG1("Script file '", spath << "' not found");
+        }
+    }
     return res;
 }
 
@@ -710,6 +965,8 @@ bool IFMagnetic::puzzleForX(const string* adj, const string& x, int act)
     // if adj and no puzzle for x, look for a puzzle for "adj x".
     
     bool res = false;
+
+    if (!_puzzles._enabled) return false; // switched off
     
     Puzzle* p = _puzzles.find(x.c_str());
 
@@ -788,17 +1045,18 @@ bool IFMagnetic::evalUseX(const string& x, bool frommenu)
             
             if (xi.gettable() && !xi.carried())
             {
-                seq.add("get");
+                if (_puzzles.allowSuggestGet(xi)) seq.add("get");
             }
             if (xi.isClosed() || xi.isLocked())
             {
-                seq.add("open");
+                // puzzle code can allow/disallow open in various cases
+                if (_puzzles.allowSuggestOpen(xi)) seq.add("open");
             }
             if (xi.isWearable() && !xi.isWorn())
             {
                 seq.add("wear");
             }
-            if (xi.isContainer())
+            if (xi.isContainer() && !xi.isClosed() && !xi.isLocalContents())
             {
                 seq.add("look in");
             }
@@ -810,15 +1068,15 @@ bool IFMagnetic::evalUseX(const string& x, bool frommenu)
             {
                 seq.add("look on");
             }
-            if (xi.isBigThing() && xi.isMoveable())
+            if (xi.isBigThing())
             {
                 seq.add("look under");
             }
 
             command = _puzzles._pchooser.choose(xi, seq);
-
             command += ' ';
             command += xi.toString();
+            
             LOG3("useX: ", command);
 
             res = _evalCommand(command.c_str(), 0, true); // always echo
@@ -850,7 +1108,10 @@ bool IFMagnetic::evalUseXwithY(const string& x, const string& y,
     {
         LOG3("MS useXY \"", xi << "\" with \"" << yi << "\"");
 
-        cmd = _puzzles.evalUseXwithYSpecial(xi, yi);
+        bool done = false;
+        cmd = _puzzles.evalUseXwithYSpecial(xi, yi, done); // &done
+
+        if (done) return true; // handled
 
         if (cmd.empty())
         {
@@ -935,6 +1196,8 @@ void IFMagnetic::_buildMapJSON(GrowString& buf)
     // build a collection rooms we know about
     MapPosSet knownMapPos;
     Point2 minpos;
+
+    bool allMapCheat = false;
     
     for (size_t i = 0; i < gm.size(); ++i)
     {
@@ -943,15 +1206,13 @@ void IFMagnetic::_buildMapJSON(GrowString& buf)
 
         IItem ri = IItem::getRoom(mpi.room);
 
-        bool allMapCheat = false;
-
 #ifdef LOGGING
             // logging level >= 2, add room# to name 
             if (Logged::_logLevel >= 2) allMapCheat = true;
 #endif
 
         // collect only rooms we know about
-        if (ri && (ri.isExplored() || allMapCheat))
+        if (ri && (ri.visibleOnMap() || allMapCheat))
         {
             // collect the min grid locations
             if (knownMapPos.size()) minpos = minpos.min(mpi.pos);
@@ -976,15 +1237,38 @@ void IFMagnetic::_buildMapJSON(GrowString& buf)
         build.placeX(mpi.pos.x);
         build.placeY(mpi.pos.y);
 
-        // exits
-        int exits[ITEM_MAX_EXITS];
-        int ne = ri.getExitRooms(exits);
+        // leave out if lit (is default)
+        if (!ri.isLit()) build.placeDark(true);
 
-        if (ne > 0)
+        if (ri.getExit(IItem::dir_u)) build.placeIndicatorUp(true);
+        if (ri.getExit(IItem::dir_d)) build.placeIndicatorDown(true);
+        
+        // to indicate items of interest in room, accept only
+        // explored, carryable and non-live NPC.
+        IItem::IItems roomItems;
+        ri.getItemsInRoom(roomItems, true, true, true);
+        build.placeItemCount(roomItems.size());
+
+        // rooms may be visible on the map even though they aren't explored.
+        // ie, they have never been visible.
+        // rooms that are visible but not explored do not show map links
+        if (ri.isExplored() || allMapCheat)
         {
-            build.beginExits();
-            for (int i = 0; i < ne; ++i) build.exit(exits[i]);
-            build.endExits();
+            // exits
+            int exits[ITEM_MAX_EXITS];
+            int ne = ri.getExitRooms(exits);
+
+            if (ne > 0)
+            {
+                build.beginExits();
+                for (int i = 0; i < ne; ++i)
+                {
+                    IItem rj = IItem::getRoom(exits[i]);
+                    if (rj.isExplored() || allMapCheat)
+                        build.exit(exits[i]);
+                }
+                build.endExits();
+            }
         }
         
         build.endPlace();
@@ -997,13 +1281,12 @@ void IFMagnetic::_buildMapJSON(GrowString& buf)
 
 bool IFMagnetic::updateMapInfo(MapInfo& mi)
 {
-    LOG3("MS ", "updateMapInfo");
-     
     IItem croom = IItem::currentRoom();
 
     mi._currentLocation = croom.roomNumber();
     mi._currentExits = 0;
-    
+
+    // `currentExits` is a bit mask of exits 
     uint dmask = 1;
     for (int d = IItem::dir_n; d < IItem::dir_count; ++d, dmask <<= 1)
         if (croom.getExit(d)) mi._currentExits |= dmask;
@@ -1016,6 +1299,9 @@ bool IFMagnetic::updateMapInfo(MapInfo& mi)
         mi._changed = mi._json != buf.start();
         if (mi._changed) mi._json = buf.start();
     }
+
+    LOG3("MS ", "updateMapInfo " << (mi._changed ? "changed" : "not changed"));
+
     return true;
 }
 
@@ -1097,26 +1383,42 @@ std::string IFMagnetic::currentVersion() const
 
 void IFMagnetic::moveUpdate(int moveCount)
 {
-    updateAutoSave();
-    _puzzles.moveUpdate();
+    // this gets called every game move.
+    // NOTE: on game thread
+
+    // for mag binaries (eg Pawn), we're called according to save_undo
+    // triggered from undo_pc.
+    // but for prog binaries, we don't have undo_pc NOR do we have emu
+    // undos. So instead we're called from trap A0E3 (make_undo)
+    //
+    // NO! DO not autosave here!!
+    //updateAutoSave();
+
+    _puzzles.moveUpdate(moveCount);
 }
 
 bool IFMagnetic::updateAutoSave()
 {
     // NB: on engine thread
-    bool res = _gameSaveMemory != 0 && _undos.canAutoSave();
+    bool res = _gameSaveMemory != 0 && _undos.canAutoSave() && !_initialising;
+
     if (res)
     {
-        SaveGameHeader shead;
-
-        // mark autosave as a memory image
-        shead._type = SAVE_TYPE_MEMIMAGE;
-
+        int v = get_cantsave();
+        if (v)
+        {
+            LOG3("MS, save suspended by game ", v);
+            res = false;
+        }
+    }
+    
+    if (res)
+    {
         // next save name
         string sname = _undos.autosaveName(_undos._last + 1);
         
-        // raw save game file
-        res = saveGame(sname.c_str(), shead);        
+        // raw save game file UI format
+        res = _saveGame(sname.c_str(), SAVE_TYPE_MEMIMAGE, _saveContext);
 
         if (res) _undos.advanceLast(); 
 
@@ -1124,22 +1426,24 @@ bool IFMagnetic::updateAutoSave()
     return res;
 }
 
-bool IFMagnetic::loadMemGame(const char* name, bool forceLook, bool clearpic)
+bool IFMagnetic::loadMemGame(const char* name,
+                             SaveGameHeader& shead,
+                             SaveContext& sctx)
 {
-    SaveGameHeader shead;
+    bool res = loadGame(name, shead, sctx);
 
-    // mark as requiring a mem image
-    shead._type = SAVE_TYPE_MEMIMAGE;
-
-    bool res = loadGame(name, shead);
-
-    if (res && clearpic)
+    if (res && sctx._clearPic)
     {
         // clear any old pic before look
         clearImage();
+
+        // reset the game's idea of the current picture so that
+        // after a load, the "look" will cause the picture to be loaded
+        // in the case where we're loading a game in the current location
+        set_PICTNUM(0);
     }
 
-    if (res || forceLook)
+    if ((res || sctx._forceLook) && !sctx._neverLook)
     {
         UndoState::SuspendSave ss(_undos);
         
@@ -1160,16 +1464,33 @@ bool IFMagnetic::loadMemGame(const char* name, bool forceLook, bool clearpic)
     return res;
 }
 
-bool IFMagnetic::autoLoad(int delta)
+bool IFMagnetic::autoLoad(int delta, bool neverLook)
 {
     bool res = false;
     
     if (!delta || _undos.deltaCurrent(delta))
     {
         // NB: if load fails (eg corrupt file) continue to force a look
-        // otherwise get blank screen. will be fixed once game writes new
-        // autosave
-        res = loadMemGame(_undos.autosaveName(0).c_str(), true, false);
+        // otherwise get blank screen.
+
+        // BUT if neverLook, will will never look regardless!
+        // what is this?
+        //
+        // Currently we have a situation were some loads are requested
+        // through the UI (including undo/redo) in these cases
+        // we will force a look because otherwise the game text is not
+        // updated
+        // but SOMETIMES the load is via the game (eg DO.death -> undo)
+        // in _these_ cases, the game itself will refresh the text.
+        //
+        // eventually, we'll add undo/redo support to the game and then
+        // the UI version can invoke the game version, then we
+        // wont have to force look (nor will load/save cost a move!)
+
+        _saveContext._clearPic = false;
+        _saveContext._forceLook = true;
+        _saveContext._neverLook = neverLook;
+        res = _loadGame(_undos.autosaveName(0).c_str(), SAVE_TYPE_MEMIMAGE, _saveContext);
     }
     
     return res;
@@ -1178,62 +1499,86 @@ bool IFMagnetic::autoLoad(int delta)
 void IFMagnetic::restartCommands()
 {
     // issues commands to the game after restarted
-    
-    CommandResult* cr = (CommandResult*)makeResult();
 
-    cr->_op = CommandResultI::op_capture;    
+    // ensure we're in "verbose" mode.
 
-    static const char* setupCommands[] = 
+    // prog_mode can set internal state directly, if not, we have to issue
+    // game command manually
+    bool v = set_OUTMODE(1) != 0;
+
+    if (v)
     {
-        "verbose",
-    };
-    
-    for (size_t i = 0; i < DIM(setupCommands); ++i)
-    {
-        _evalCommand(setupCommands[i], cr);
-        LOG4("MS, command: ", setupCommands[i] << ",  '" << cr->toString() << "'");
+        LOG3("MS, ", "enabled verbose mode directly");
     }
 
-    delete cr;
+    if (!v)
+    {
+        UndoState::SuspendSave ss(_undos);
+    
+        CommandResult* cr = (CommandResult*)makeResult();
+
+        cr->_op = CommandResultI::op_capture;    
+
+        static const char* setupCommands[] = 
+            {
+                "verbose",
+            };
+    
+        for (size_t i = 0; i < DIM(setupCommands); ++i)
+        {
+            _evalCommand(setupCommands[i], cr);
+            LOG4("MS, command: ", setupCommands[i] << ",  '" << cr->toString() << "'");
+        }
+
+        delete cr;
+    }
 }
 
 void IFMagnetic::initialCommands()
 {
     // issue commands to the game on first start
     
-    CommandResult* cr = (CommandResult*)makeResult();
-
-    cr->_op = CommandResultI::op_capture;    
-
-    /* if we start with an autosave, a "load" command doesn't refresh
-     * the screen, furthermore, we also get the initial game spiel.
-     * 
-     * as a workaround, we gag the output (by sending it to NULL) in
-     * setup, then here we perform the load, then we un-gag the output
-     * and perform a "look". this generates current output, title and
-     * picture.
-     *
-     * if there was no autosave, we still perform the "load", but it
-     * fails silently. This operation is important because it serves
-     * to initialise the save game area, which is used to automatically
-     * write out save files, without having to pass commands to the game
-     * 
-     * but the saves are encoded. that's another story...
-     */
-
-    static const char* setupCommands[] = 
+    // No need for dummy load if we already have the save game area
+    // (ie prog_format)
+    if (!_gameSaveMemory)
     {
-        // try loading a non-existent file
-        "load",
-        "dummyfile",
-        "y",
-    };
+        CommandResult* cr = (CommandResult*)makeResult();
+
+        cr->_op = CommandResultI::op_capture;    
+
+        /* if we start with an autosave, a "load" command doesn't refresh
+         * the screen, furthermore, we also get the initial game spiel.
+         * 
+         * as a workaround, we gag the output (by sending it to NULL) in
+         * setup, then here we perform the load, then we un-gag the output
+         * and perform a "look". this generates current output, title and
+         * picture.
+         *
+         * if there was no autosave, we still perform the "load", but it
+         * fails silently. This operation is important because it serves
+         * to initialise the save game area, which is used to automatically
+         * write out save files, without having to pass commands to the game
+         * 
+         * but the saves are encoded. that's another story...
+         */
+
+        static const char* setupCommands[] = 
+            {
+                // try loading a non-existent file
+                "load",
+                "dummyfile",
+                "y",
+            };
     
-    for (size_t i = 0; i < DIM(setupCommands); ++i)
-    {
-        _evalCommand(setupCommands[i], cr);
-        LOG4("MS, command: ", setupCommands[i] << ",  '" << cr->toString() << "'");
+        for (size_t i = 0; i < DIM(setupCommands); ++i)
+        {
+            _evalCommand(setupCommands[i], cr);
+            LOG4("MS, command: ", setupCommands[i] << ",  '" << cr->toString() << "'");
+        }
+
+        delete cr;
     }
+
 
     if (_ignoreOutput)
     {
@@ -1245,19 +1590,22 @@ void IFMagnetic::initialCommands()
 
     if (_undos.size())
     {
-        autoLoad(0); // load latest, force "look".
+        //LOG3("MS, ", "restoring previous game");
+        autoLoad(0, false); // load latest, force "look".
     }
-
-    delete cr;
 
     restartCommands(); // issue "verbose" etc.
 }
 
-void IFMagnetic::updateGameSaveArea(uchar* ptr, size_t size)
+void IFMagnetic::updateGameSaveArea(uchar* ptr, size_t size, uint addr)
 {
+    assert((addr & 0xffff) == addr);
+    
     if (_gameSaveMemory)
     {
-        if (_gameSaveMemory != ptr || _gameSaveMemorySize != size)
+        if (_gameSaveMemory != ptr ||
+            _gameSaveMemorySize != size ||
+            _gameSaveAddr != addr)
         {
             LOG1("MS WARNING: ", "save game memory area changed!");
         }
@@ -1265,42 +1613,54 @@ void IFMagnetic::updateGameSaveArea(uchar* ptr, size_t size)
     
     _gameSaveMemory = ptr;
     _gameSaveMemorySize = size;
+    _gameSaveAddr = addr;
 
-    LOG4("MS save area ", std::hex << (long)_gameSaveMemory << " size: 0x" << _gameSaveMemorySize << std::dec);
+    LOG4("MS save area ", std::hex << _gameSaveAddr << " size: 0x" << _gameSaveMemorySize << std::dec);
 }
 
-bool IFMagnetic::saveGame(const char* name, uchar* ptr, size_t size)
-{
-    // remember the save game area
-    updateGameSaveArea(ptr, size);
-    
-    SaveGameHeader shead;
-
-    // mark type as saved by engine
-    shead._type = SAVE_TYPE_ENGINE;
-
-    return saveGame(name, shead);
-}
-
-bool IFMagnetic::saveGame(const char* name, SaveGameHeader& shead)
+bool IFMagnetic::saveGame(const char* name,
+                          SaveGameHeader& shead, SaveContext& sctx)
 {
     bool res = false;
     if (name && *name)
     {
-        assert(_gameSaveMemory);
-        assert(_gameSaveMemorySize);
+        assert(sctx._ptr);
+        assert(sctx._size);
+        assert(sctx._addr);
 
         string path = _undos.makeSavePath(name);
+
+        shead._gameid = get_game();
+
+        const uchar* xdata = 0;
+        size_t xsize = 0;
+
+        // do we have any extra data to save?
+        if (_requestSaveExtraFn)
+        {
+            if ((*_requestSaveExtraFn)(_requestSaveExtraCtx, &xdata, &xsize) &&
+                xdata && xsize > 0)
+            {
+                // have any extra data to save?
+                shead._extraDataSize = xsize;
+            }
+        }
+
         
         FD file;
         res = file.open(path.c_str(), FD::fd_new);
 
         if (res)
         {
-            shead.calcCrc(_gameSaveMemory, _gameSaveMemorySize);
+            shead.calcCrc(sctx._ptr, sctx._size);
+            shead._dataSize = sctx._size;
+            shead._dataAddr = sctx._addr;
 
-            res = shead.write(file) &&
-                file.write(_gameSaveMemory, _gameSaveMemorySize);
+            // save header and game data
+            res = shead.write(file) && file.write(sctx._ptr, sctx._size);
+
+            if (res && shead._extraDataSize)
+                res = file.write(xdata, xsize);
             
             if (res)
             {
@@ -1319,26 +1679,17 @@ bool IFMagnetic::saveGame(const char* name, SaveGameHeader& shead)
     return res;
 }
 
-bool IFMagnetic::loadGame(const char* name, uchar* ptr, size_t size)
-{
-    // remember the save game area
-    updateGameSaveArea(ptr, size);
-
-    SaveGameHeader shead;
-    
-    // mark as requiring a engine save
-    shead._type = SAVE_TYPE_ENGINE;
-
-    return loadGame(name, shead);
-}
-
-bool IFMagnetic::loadGame(const char* name, SaveGameHeader& shead)
+bool IFMagnetic::loadGame(const char* name,
+                          SaveGameHeader& shead,
+                          SaveContext& sctx)
 {
     bool res = false;
     if (name && *name)
     {
-        assert(_gameSaveMemory);
-        assert(_gameSaveMemorySize);
+
+        assert(sctx._ptr);
+        assert(sctx._size);
+        assert(sctx._addr);
 
         string path = _undos.makeSavePath(name);        
 
@@ -1353,39 +1704,123 @@ bool IFMagnetic::loadGame(const char* name, SaveGameHeader& shead)
             res = shead.read(file) && file.seek(shead._size);
             
             if (shead._magic != SAVE_MAGIC)
-            {
                 LOG("loadGame, not a magnetic save file! ", shead._magic);
-            }
 
             if (res && ahead._type && ahead._type != shead._type)
             {
                 // check header compat
                 // if type specified, it must match
                 LOG("loadGame, header type mismatch ", shead._type);
-                res = false;
+
+                // allow mismatch for prog format, as they should be compatible
+                if (!prog_format) res = false;
             }
             
             if (res) 
             {
-                // read into temp memory, in case fail check
-                uchar* data = new uchar[_gameSaveMemorySize];
+                if (shead.oldVersion())
+                {
+                    LOG1("MS loading old save game version ", shead._versionMajor << "." << shead._versionMinor);
+                }
                 
-                res = data != 0 && file.read(data, _gameSaveMemorySize);
+                // read into temp memory, in case fail check
+                uchar* data = new uchar[sctx._size];
+                
+                res = data != 0 && file.read(data, sctx._size);
 
                 if (res && shead.versionOver(1,2))
                 {
                     //LOG3("MS checking crc", "");
                 
                     // header has crc, check it
-                    res = shead.checkCrc(data, _gameSaveMemorySize);
+                    res = shead.checkCrc(data, sctx._size);
 
                     if (!res) LOG("MS, ", "file crc error");
+                }
+
+                if (res && shead.versionOver(1,3))
+                {
+                    //LOG3("MS checking save size ", sctx._size);
+                    res = shead._dataSize == sctx._size;
+                    if (!res)
+                    {
+                        LOG1("MS, Save Game Size Mismatch; expected ", sctx._size << " got " << shead._dataSize);                        
+                    }
+                    
+                    if (shead._dataAddr != sctx._addr)
+                    {
+                        LOG1("MS, Save Game Addrees Mismatch; expected ", sctx._addr << " got " << shead._dataAddr);                        
+                        res = false;
+                    }
+                }
+                else
+                {
+                    // not supported
+                    shead._dataSize = 0;
+                    shead._dataAddr = 0;
+                }
+
+                // support extra data?
+                if (res && shead.versionOver(1,4))
+                {
+                    // drop any previous loaded extra data
+                    sctx.dropLoad();
+
+                    size_t xsize = shead._extraDataSize;
+                    
+                    // put a load limit, in case file corrupt
+                    if (xsize > 1024*1024)
+                    {
+                        LOG1("MS, load extra data too large ", shead._extraDataSize);
+                    }
+                    else if (xsize > 0 && _requestLoadExtraFn)
+                    {
+                        //LOG3("load game has extra data, size: ", shead._extraDataSize);
+
+                        uchar* xdata = new uchar[xsize];
+                        assert(xdata);
+
+                        // if, for some reason, the extra data fails to 
+                        // load then this is not fatal for a load game.
+                        
+                        bool v = file.read(xdata, xsize);
+                        if (v)
+                        {
+                            // give data to context
+                            sctx.setLoad(xdata, xsize);
+
+                            // anyone want this data??
+                            (*_requestLoadExtraFn)(_requestLoadExtraCtx,
+                                                   (const uchar**)&xdata,
+                                                   &xsize);
+                        }
+                        else
+                        {
+                            LOG1("MS, WARNING: extra data failed to load ", shead._extraDataSize);
+                            delete [] xdata;
+                        }
+                    }
+                }
+                else shead._extraDataSize = 0;
+
+                // support game_id
+                if (res && shead.versionOver(1,5))
+                {
+                    if (shead._gameid != get_game())
+                    {
+                        LOG1("MS, load game, wrong game ", shead._gameid);
+                        res = false;
+                    }
+                }
+                else
+                {
+                    shead._gameid = 0; // unknown
                 }
 
                 if (res)
                 {
                     // only copy in loaded game if ok
-                    memcpy(_gameSaveMemory, data, _gameSaveMemorySize);
+                    memcpy(sctx._ptr, data, sctx._size);
                 }
                 
                 delete [] data;
@@ -1433,8 +1868,12 @@ void IFMagnetic::tidyTranscript()
         while (p != q && u_isspace(q[-1])) *--q = 0;
 
         // remove any prompt on end
-        if (p != q && q[-1] == '>') *--q = 0;
-        else break;
+        if (p == q || q[-1] != '>') break;
+
+        *--q = 0;
+
+        // remove "-" before prompt (eg --->)
+        //while (p != q && q[-1] == '-') *--q = 0;
     }
 }
 
@@ -1445,12 +1884,13 @@ bool IFMagnetic::setOptions(const VarSet& vs)
         if (it->first == BRA_OPT_LOGLEVEL) setLogLevel(it->second.toInt());
         else if (it->first == BRA_OPT_MODERN)
         {
-            _puzzlesEnabled = it->second.toInt() != 0;
-            LOG3("MS, puzzles enabled ", _puzzlesEnabled);
+            bool v = it->second.toInt() != 0;
+            _puzzles.enabled(v);
         }
         else if (it->first == BRA_OPT_RANDOMSEED)
         {
-            int64 seed = it->second.toInt();
+            // we're pass a random seed from the front end, if we need it
+            //int64 seed = it->second.toInt();
             //LOG3("MS, random seed ", seed);
         }
         else if (it->first == BRA_OPT_PIXELSCALE)
@@ -1507,6 +1947,34 @@ void IFMagnetic::tidyStatusText()
 #endif
 }
 
+bool IFMagnetic::restartGame() 
+{
+    LOG3("MS, ", "restartGame");
+
+    if (!_sync()) return false;
+
+    // initiate restart in emu. 
+    // will callback through hook to `gameRestarting`
+    ms_restart_request();
+
+    _inpos = 0;
+    _inbuf[0] = 1;  // continue signal
+    _inbuf[1] = 0;
+
+    _inputReady = true;
+    _waiter.notify_one();
+    _syncLock.unlock();
+
+    emitScene();
+
+    // then issue "verbose" and any others
+    restartCommands();
+
+    return true;
+}
+
+
+// ----------------------------------------
     
 void ms_flush()
 {
@@ -1528,10 +1996,11 @@ void ms_statuschar(type8 c)
     theMS->_putStatusChar(c);
 }
 
-void ms_showpic(type32 c,type8 mode, type8 ver, float* profile)
+void ms_showpic(type32 c, type32 picAddr, type8 mode, type8 ver, float* profile)
 {
     IFMagnetic::PicRequest pr;
     pr._picn = c;
+    pr._picAddr = picAddr;
     pr._mode = mode;
     pr._ver = ver;
     pr._profile = profile;
@@ -1543,14 +2012,16 @@ void ms_playmusic(type8 * midi_data, type32 length, type16 tempo)
     LOG2("MS ", "music");
 }
 
-type8 ms_save_file(type8s *name, type8 *ptr, type16 size)
+type8 ms_save_file(type8s *name, type8 *ptr, type16 size, unsigned int addr)
 {
-    return theMS->saveGame((const char*)name, (uchar*)ptr, size) ? 0 : 1;
+    theMS->updateGameSaveArea(ptr, size, addr);
+    return theMS->saveGameEMU((const char*)name) ? 0 : 1;
 }
 
-type8 ms_load_file(type8s *name, type8 *ptr, type16 size)
+type8 ms_load_file(type8s *name, type8 *ptr, type16 size, unsigned int addr)
 {
-    return theMS->loadGame((const char*)name, (uchar*)ptr, size) ? 0 : 1;
+    theMS->updateGameSaveArea(ptr, size, addr);
+    return theMS->loadGameEMU((const char*)name) ? 0 : 1;
 }
 
 void game_state_notify(int movecount)
@@ -1559,9 +2030,16 @@ void game_state_notify(int movecount)
     theMS->moveUpdate(movecount);
 }
 
-void update_game_save_area(uchar* ptr, size_t size)
+void update_game_save_area(uchar* ptr, size_t size, unsigned int addr)
 {
     // can some straight from emu
-    theMS->updateGameSaveArea(ptr, size);
+    theMS->updateGameSaveArea(ptr, size, addr);
+}
+
+void ms_undo_signal()
+{
+    // from game trap A0E2
+    LOG3("MS, ", "undo signal");
+    theMS->undo(0);  // restore game delta 0 (ie latest)
 }
 

@@ -102,10 +102,8 @@ LOOK
 	BEQ.S   30$                  ;NO
 
       IFEQ	THE_PAWN
-
 	BTST	#3,(A0)
 	BNE.S	30$
-
       ENDC
 
 	DO	P.BTN	               ;BUT THE ..
@@ -127,10 +125,8 @@ LOOK
 	DO	GETNPC
 
       IFEQ	THE_PAWN
-
 	BTST	#2,2(A3)		;animal?
 	BNE.S	55$			;yes, give normal desc
-      
       ENDC
 
 	DO	P.TN	
@@ -140,11 +136,9 @@ LOOK
 	CALL    P.Description		;First check which description.
     
       IFEQ	THE_PAWN
-
 	BTST	#2,4(A0)		;short look?
 	BEQ.S	60$			;nope
 	RET				;NE => yes, forget rest of look
-      
       ENDC
 60$
 	MSG    LINE

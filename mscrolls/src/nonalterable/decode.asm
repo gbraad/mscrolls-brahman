@@ -67,15 +67,11 @@
 	XREF	WRDPNT,BACK.WRD,NOERR
 	
       IFEQ	THE_PAWN
-
 	XREF	DoScenery
-
       ENDC
 
      IFNE     BookProtection
-
 	XREF    PROTECT
-     
      ENDC
  
 *--------------------------------
@@ -97,7 +93,7 @@ DECODE
  
 	CLR.L   SUBJECT(A4)
  
-      IFNE    YCHEAT
+      IFNE    YCHEATMORE
 	TEST_W  CHEAT2(A4)
 	BEQ.S   10$
 	MOVE.L  A7,D6
@@ -107,7 +103,6 @@ DECODE
       ENDC
  
 	DO	YESERR
-
 
       IFNE      BookProtection
 	CALL    PROTECT          ;This does the word protection with books
@@ -124,9 +119,7 @@ NOTOUT
 	CALL    INITCOM
 
       IFEQ	THE_PAWN
-
 	XREF	DecodeSpecials
-
 	CALL	DecodeSpecials		;things that want to tweek parser's
 					;view of the world (like NearNPC)
       ENDC
@@ -175,8 +168,8 @@ NPCCMDPT
 	BEQ     DO.SING
 	CMP.B   #SECT.VERB,D6
 	BEQ.S   12$
-	   CALL	   CONVSTART			;must it be conversation anyway?
-	   BEQ	   SPIEL				;yes,
+        CALL	CONVSTART			;must it be conversation anyway?
+        BEQ	SPIEL				;yes,
 	TEST_W  PEND2(A4)
 	BMI     DIRECT
 	MOVE.W  PEND2(A4),D5

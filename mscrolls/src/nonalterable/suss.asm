@@ -52,8 +52,8 @@
 * AID TO DEBUGGING
 
 	include	"equates.asm"
-	include	"nounequ1.asm"
-	include	"nounequ2.asm"
+	include	"nounequ1.i"
+	include	"nounequ2.i"
 	include	"macros.asm"
  
       XREF     P.TN,LINE,CHAROUT,GETNPC,IGNORAJ

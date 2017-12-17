@@ -53,7 +53,7 @@
 
 	include	"equates.asm"
 	include "macros.asm"
-	include	"nounequ2.asm"       ;JUST FOR NMAXNOUN
+	include	"nounequ2.i"       ;JUST FOR NMAXNOUN
 
 
         XREF    DERR,D.NOUNS,DNOUNBUF,VALID,VECT.V,NPC.DATA,NPC.LIST
@@ -147,6 +147,9 @@ GETNOUN2
    
 GETNPC
 
+       ;; NPC in D0
+       ;; NPC DATA returned in A3
+        
        PUSH_L  D3/D4/A0/A1
        CALL_S  GETNPCNO
        LEA     NPC.DATA(A4),A3

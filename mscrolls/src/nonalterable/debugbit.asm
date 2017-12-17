@@ -56,97 +56,66 @@
 	include  "scen.i"
 
 	XREF   MSGPNTR,UNDOHINT
-
+        XREF   SP.DEATH
 
    IFNE  BookProtection
-
 	XREF    PROTECT2
-
    ENDC
 
    IFNE  SpeechAvail
-
 	XREF   SpeechOn
-
    ENDC
 
 
    IFEQ	QL128
-
 	XREF   READFILE,WRITEFIL
-
    ENDC
 
    IFNE  Graphics
-
 	XREF    CWID_FLG,GRAPHICS,PICTURES,LOAD_PIC
 
     IFNE  Mono_Possible
-
 	 XREF   SWHEIGHT,MAKESTIP,MAKEDITH,MAKEFREE
 	 XREF   DITH_FLG,COL_FLG,STIP_FLG,FREE_FLG
-
     ENDC
-
    ENDC
 
    IFNE  Wimp!IBM
-
 	XREF   SCR_IGNO
-   
    ENDC
    
    IFNE	Wimp
-   
 	XREF	DO_FOREG,DO_BACKG,DO_CONTR,DO_SCROL
     
 
       IFEQ   MAC512
-
 	XREF    GRA_EXIT,MS_END
-
       ENDC
-
    ENDC
 
    IFNE  SpoolLen
-
 	XREF   PRINTER
-
    ENDC
-
 
    IFNE  RestartRAM
-
 	XREF   NEWGAME
-
    ENDC
-
 
    IFNE  FunctionKeys
-
 	XREF   FUNCBASE
-
    ENDC
 
-      IFEQ  DosPresent
-
+   IFEQ  DosPresent
 	XREF   READIT,FILESIZE,DEST,FILENO,DRIVE,BIOSQUIT,WRITEIT
-
    ENDC
 
    IFNE  ST520
-
 	XREF    CONTERM
-
    ENDC
 
    IFNE  AMIGA512
-
 	XREF    AD_COUT,NewCLIST,OldCLIST
-
    ENDC
-
 
 	XREF   INPUT,INBUFF,INITG.E,P.LOC,P.NOUN,DISPTYPE,CHAROUT,INIT
 	XREF   POSWRD,GETDATA,FNDWRD,GETWRD,MATCHBUF,LINE,PRTTXT,SC70
@@ -163,11 +132,8 @@
 	XREF	P.EXITS
 
       IFNE	YCHEAT
-
 	XREF	CHEAT
-
       ENDC
-
 
 	XDEF   DEBUGBIT,DO.SING,DO.DEATH,Switch,DO.QUIT
 	XDEF	UTEXIT,DBEXIT,RUSURE
@@ -176,10 +142,8 @@ DO.SING
 DEBUGBIT
 
    IFNE    YCHEAT
-
 	CMP.B   #Adj_word_num,D5              ;ADJ
 	BEQ.S   04$    
-
    ENDC
 
 	DO	FNDWRD              ;GET A6= START OF NUM
@@ -202,7 +166,6 @@ HEXLIST
 	DC.B    '0123456789ABCDEF'
  
 GETHEX
- 
 	MOVE.L	D5,-(A7)		;used as a space flag
 	MOVEQ	#0,D6
 	MOVE.L	D6,D5
@@ -306,8 +269,7 @@ DBLIST
 	 DC.W    UTID-DBLIST
  
     IFNE     YCHEAT
-  
-	 DC.W    DBWHATIS-DBLIST
+  	 DC.W    DBWHATIS-DBLIST
 	 DC.W    DBSG-DBLIST
 	 DC.W    DBWHEREIS-DBLIST
 	 DC.W    DBZAP-DBLIST
@@ -316,156 +278,116 @@ DBLIST
 	 DC.W    DBNOUN-DBLIST
 	 DC.W    DBMSG-DBLIST
 	 DC.W    DBSCN-DBLIST
-   
-    ENDC
+      ENDC
   
 	 DC.W    DBPN-DBLIST
 	 DC.W    DBPN-DBLIST          ;INSTEAD OF 'REAL' SYNONYM
   
     IFNE     YCHEAT
-
 Adj_word_num EQU (*-DBLIST)/2
-
 	 DC.W    DBADJ-DBLIST
-	
     ENDC
 	
     IFNE	M68000
-
 	 DC.W    DBLEFT-DBLIST
 	 DC.W    DBRIGHT-DBLIST
-
     ENDC
 	
     IFNE     YCHEAT
-	
 	 DC.W    DBVIDEO-DBLIST
 	 DC.W    DBSUSN-DBLIST
 	 DC.W    DBSUSR-DBLIST
 	 DC.W    DBSUSCR-DBLIST
-	
     ENDC
     
     IFNE	M68000
-	
 	 DC.W    DBCONTRAST-DBLIST
-	
     ENDC
 
     IFNE     YCHEAT
-	
 	 DC.W    DBWORD-DBLIST
 	 DC.W    DBMEM-DBLIST
 	 DC.W    DBSET-DBLIST
- 
     ENDC
 
       IFNE      AMIGA512&YCHEAT
-
 	 DC.W    DBBPON-DBLIST
 	 DC.W    DBBPOFF-DBLIST
 	 DC.W    DBMISC-DBLIST
-
       ENDC
 
     IFNE     Graphics
-
-	 DC.W    UTGRAPHICS-DBLIST
-    
+	DC.W    UTGRAPHICS-DBLIST
+        
       IFNE    YCHEAT
-
 	 DC.W    DBPICTURE-DBLIST
-
       ENDC
 
       IFNE	AMIGA512!ST520
-
 	 DC.W    UTSWHEIGHT-DBLIST
-
       ENDC
 
       IFNE    Mono_Possible
-
 	 DC.W    UTMAKESTIP-DBLIST
 	 DC.W    UTMAKEDITH-DBLIST
 	 DC.W    UTMAKEFREE-DBLIST
-
       ENDC
 
     ENDC
 
     IFNE     SpoolLen
-
 	 DC.W    UTPRINTER-DBLIST
-
     ENDC
 
     IFNE     FunctionKeys
-
 	 DC.W    UTFUNCT-DBLIST
 	 DC.W    UTFUNCT-DBLIST            ;less hassle than synonym
-
     ENDC
 
 	 DC.W    UTCREDIT-DBLIST
 	 DC.W    UTHINT-DBLIST
 
     IFNE     Wimp                         ;poor definition
-
 	 DC.W    UTFOREGROUND-DBLIST
 	 DC.W    UTBACKGROUND-DBLIST
 	 DC.W    UTSCROLLCOLOUR-DBLIST
-
     ENDC
 
     IFNE     YCHEAT
-
 	 DC.W    DBCOUNT-DBLIST
-
     ENDC
 
     IFNE     SpeechAvail
-
 	 DC.W    UTSPEECH-DBLIST
-
     ENDC
 
 
     IFNE	PCW8256				;hmmmmm
-
 	DC.W	PCWSTIPPLE-DBLIST
 	DC.W	PCWDITHER-DBLIST
-
     ENDC
 
     IFNE	IBM
-
 	DC.W	IBMTITLE-DBLIST
 	DC.W	IBMMORE-DBLIST
 	DC.W	IBMPICTURE-DBLIST
 	DC.W	IBMTEXT-DBLIST
 	DC.W	IBMFASTER-DBLIST
 	DC.W	IBMSLOWER-DBLIST
-
     ENDC
 
 
     IFNE	YCHEAT
-
 	DC.W	DBSYN-DBLIST
 	DC.W	DBVNET-DBLIST
-
     ENDC
 
     IFD	C64Pict
-
 	DC.W	DBC64Pict-DBLIST
-
     ENDC
 
 
     IFNE	IBM
-
 	XREF	IsTextOnly,GET_TITLE,P.IDFY,LOAD_PIC2
 
 IBMMORE
@@ -1081,7 +1003,6 @@ DBCONTRAST
 DBVIDEO
 
    IFNE     QL128
-
 	CALL    TST.DBUG
 	MOVEQ   #0,D1
 	BCHG    #0,20$          ;!! URK !!!!
@@ -1089,17 +1010,13 @@ DBVIDEO
 	MOVEQ   #-$80,D1
 10$
 	MOVE.B  D1,$18063       ;QL video bit
-
    ENDC
 
 	DOGO	DBEXIT
 
    IFNE  QL128
-
 20$
-
 	DS.B     2
-
    ENDC
 
 
@@ -1412,42 +1329,25 @@ UTSCORE
 UTQUIT
 	LEA	UTEXIT(PC),A0
 
-DO.QUIT
 
+        ;; this is the emu version
+        
+DO.QUIT 
+
+        
 	MSG     QUIT                  ;'DO U WANT TO QUIT OR RESTART
 	LEA     SLGAMENO+2(A4),A2     ;POINT AT 'R' - RESTART DEFAULT
 	CALL    GETCHAR               ;DO CURSOR ETC
 	AND.B   #$5F,D1               ;SORT CASE
 
 
-*	CMP.B   #'L',D1
-*	BEQ     UTRESTORE2
-
 	CMP.B   #'Q',D1               ;IF NOT QUIT THEN RESTART
 	BNE.S   UTRESTART2            ;OK THEN
 
-	IFD	DEMO_for_PCW
-
-	DC.W    $A0EE			;non 68k restart call
-	
-	ENDC
-
-
 	MOVE.L  A0,-(A7)              ;Where to return to if not sure
 	DO	RUSURE
-     
 
-	IFND	DEMO_for_PCW
-
-	DC.W	$A0ED			;non 68k quit call (fod memory etc)
-
-	ENDC
-
-	IFD	DEMO_for_PCW
-
-	DC.W    $A0EE			;non 68k restart call
-	
-	ENDC
+	DC.W	$A0ED		      ;non 68k quit call (fod memory etc)
 
 	
 UTRESTART
@@ -1457,63 +1357,45 @@ UTRESTART
 UTRESTART2
 
       IFNE	PCW8256&THE_PAWN
-
 	XREF	INIT.Restart
 	XDEF	UTSAVE,UTRESTORE
-
 	ST	RestartFlag(A4)
-
 	CALL	UTRESTORE
-
 	SF	RestartFlag(A4)
-
 	ADDQ.L  #4,A7                   ;ADJUST SP
 	BRA     INIT.Restart            ;RESTART GAME
-
       ENDC
 
 	DO	RUSURE
 
       IFNE	SPECTRUM
-
 	LEA      SLADDR(A4),A1        ;Start of buffer
-
 	MOVE.L   #SLADDR.E,D1         ;End of buffer
 	SUB.L    #SLADDR,D1           ;Calculate length
 	MOVE.L   POSWRD(A4),A0        ;Pointer to name
-
       ENDC
 
       IFNE	BookProtection
-
 	XREF	PROT_FLG		
-
 	MOVE.B	PROT_FLG(A4),D7		;to avoid forgetting
-    
       ENDC
 
 	DC.W    $A0EE			;non 68k restart call
 
       IFNE	SPECTRUM
-	
 	CALL	CRYPT                ;Decode game
 	CALL	CHK.DATA             ;Check if its been messed around
-
 	ADD.L	#4,A7			;pop
 	BRA	INIT
-
       ENDC
 
       IFNE	BookProtection
-
       MOVE.B	D7,PROT_FLG(A4)
-
       ENDC
 
 	BRA	INIT
 
       ENDC
-
 
 
       IFNE     AMIGA512!MAC512!ST520
@@ -1522,7 +1404,8 @@ UTRESTART2
 UTQUIT
  
 	LEA     UTEXIT(PC),A0         ;SAVE RET ADDR in case not sure
- 
+
+        ;; this is NOT the emu version
 DO.QUIT
 
 	MSG     QUIT                  ;'DO U WANT TO QUIT OR RESTART
@@ -1598,7 +1481,8 @@ UTRESTART2
 UTQUIT
  
 	LEA     UTEXIT(PC),A0         ;SAVE RET ADDR in case not sure
- 
+
+        ;; this is NOT the emu version
 DO.QUIT
  
 	MSG     QUIT                  ;'DO U WANT TO QUIT OR RESTART
@@ -1736,6 +1620,8 @@ DBMISC
 
 DBPICTURE
 
+      	CALL    TST.DBUG
+        MOVEQ   #1,D1                   ;show pic code
 	CALL    LOAD_PIC                ;Get picture as per D0 (starts at 0)
 	DOGO	UTEXIT
 
@@ -1787,10 +1673,8 @@ UTGRAPHICS
 
 10$
       IFEQ	M68000			;ie not amiga/st/mac
-
 	MOVEQ	#0,D1			;turn piccy off
 	CALL	LOAD_PIC
-
       ENDC
 
 	MSGGO	OFF
@@ -1985,25 +1869,34 @@ UTRESTART2
     ENDC
 
 DO.DEATH
- 
+
+        XREF    CANTSAVE,C.STATUS,UndoDiff,EXTRA
+        
 	MSG	DEADED
+
+       	CLR.W   DIED(A4)
+        CLR.W   CANTSAVE(A4)
+        CLR.W   C.STATUS(A4)
+        CLR.W   EXTRA(A4)            ; kill any trailing commands
 	
     IFNE    YCHEAT
-
 	TEST_W  DBUG.ON(A4)
 	BNE.S   10$
-
     ENDC
 	
 	TEST_W  USER.DB(A4)
 	BEQ.S   20$
 10$
-	CLR.W   DIED(A4)
-	MSG	LETOFF 
+	MSG	LETOFF
+        CALL    SP.DEATH
 	DOGO	SCREEN                ;STACK SHOULD BE OK
  
 20$
-	PEA	30$(PC)
+	MSG	LETOFF
+        CALL    SP.DEATH
+        BRA     UndoDiff              ;apply undo & go to screen (sc70)
+
+        PEA	30$(PC)
 30$
 	LEA     30$(PC),A0            ;COME HERE IF WILL NOT SAY OK
 
@@ -2233,14 +2126,13 @@ SLOT.RUSURE
 
 	
 RUSURE
-	
+
 	MSG	USURE               ;'U SURE (Y/N)?
  
 	LEA     SLGAMENO+1(A4),A2     ;POINT AT "N" (DEFAULT IS NO)
 	CALL    GETCHAR               ;DO CURSE ETC, BYTE TO D1
 
       IFNE    M68000
-
 	CMP.B   #10,D1                ;Lose CR for printing
 	BEQ.S   10$ 
 	DO	CHAR.SUB              ;PRINT WHATEVER THEY TYPE
@@ -2250,13 +2142,10 @@ RUSURE
 	MSG	LINE                  ;SO WE DON'T UPSET LEFT JUST
 	AND.B   #$5F,D1               ;FIX CASE
 	CMP.B   #'Y',D1
-    
 	BEQ.S   90$                   ;YEA - DO IT !!!!
  
       IFNE      AMIGA512
-
 	JSR     NewCLIST(A4)          ;our screen please!
-
       ENDC
 
 	MOVE.L  (A7)+,D0              ;FORGET IT
@@ -2276,9 +2165,7 @@ RUSURE
 CRYPT
 
       IFNE	VAX
-
 	RET
-
       ENDC
 
       IFNE    M68000 
@@ -2415,10 +2302,8 @@ NT.FOUND.LD
 CHK.DO
 
       IFNE	VAX
-
 	MOVEQ	#0,D5
 	RET
-
       ENDC
 	
 	LEA     SLADDR(A4),A0            ;START OF SAVE/LOAD AREA
@@ -2480,19 +2365,15 @@ CALC.DATA
 	LEA     SUM.CHK(PC),A0        ;START OF BLOCK
 
       IFNE	M68000
-
 	MOVE.W  D1,(A0)+              ;SUM.WORD
 	MOVE.W  D2,(A0)+              ;EOR.WORD
 	MOVE.W  D3,(A0)+              ;MULT.WORD
 	MOVE.W  D6,(A0)+              ;ZERO COUNT
 	MOVE.L  D4,(A0)               ;SUM.LONG
-      
       ENDC
 
       IFEQ	M68000
-
 	MOVE.L	D5,(A0)
-
       ENDC
 
 	RET                           ;BYE BYE
@@ -2503,14 +2384,12 @@ CHK.DATA
 	LEA     SUM.CHK(PC),A1        ;SAVE LOADED SET
 
       IFEQ	M68000
-
 	MOVE.L	(A1),-(A7)		;push sum (long)
 	CLR.L	(A1)+			; clear it as it was originally
 
 * AJS changed this because it was checksumming it first with SUM.CHK 
 * cleared - and then with SUM.CHK with the checksum in it !!!!!!!
 * THIS WAS A VICIOUS BUG!!!
-
       ENDC
 
       IFNE	M68000

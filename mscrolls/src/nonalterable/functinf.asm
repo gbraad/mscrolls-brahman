@@ -57,9 +57,10 @@
 
 
 FUNCBASE     DS.B    (FunctionKeys)*256
-
              DC.W    0               ;incase
-SLADDR.E
 
+        
+        ;;  end of save game area
+SLADDR.E
 
          END

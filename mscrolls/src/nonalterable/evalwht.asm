@@ -50,7 +50,7 @@
 *--------------------------------
 
 	include	"equates.asm"
-	include	"nounequ2.asm"       ;FOR NOUNNUM
+	include	"nounequ2.i"       ;FOR NOUNNUM
 	include	"macros.asm"
 
 

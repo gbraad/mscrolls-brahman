@@ -65,7 +65,7 @@ UndoDiff
 	LEA	INVENT,A0
 	ADD.L	A4,A0
 	JSR	(A0)
-	MOVE.L	(A7)+,D0
+*	MOVE.L	(A7)+,D0
 	BRA	SC70
 
 MakeUndoDiff

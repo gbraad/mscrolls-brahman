@@ -57,7 +57,7 @@
       XDEF     NOVERB
 
       XREF     CONJ,FIGHT,V.BREAK,CHK4PT,IFLIQUID,WHOOPS,P.TN,W.VPSYC,CHKNPC
-      XREF     CARRIED,P.MHAV,FIXCHK,YCANT,W.ATMOMT,SP.GIVE,P.PRN,W.THANK
+      XREF     CARRIED,P.MHAVSTOP,FIXCHK,YCANT,W.ATMOMT,SP.GIVE,P.PRN,W.THANK
       XREF     P.SUBOB,W.STEADF,PRTTXT,FIXCONT,YCANTNOW,BSFULLSTOP
 
       IfVerb	HIT
@@ -66,11 +66,8 @@
   
 HIT
       IFEQ	THE_PAWN
-	
 	XREF	SP.HIT
-
 	CALL	SP.HIT
-
       ENDC
    
 	LEA     CONJ(A4),A1
@@ -111,36 +108,58 @@ GIVE
 	CALL    IFLIQUID           ;FLOAT UP TO CONTAINER IF A LIQUID
 	MOVEQ   #1,D1
 	DO	CHK4PT	
-	BTST    #6,4(A5)		;give TO a non-npc?
+	BTST	#6,4(A5)		;give TO a non-npc?
 	BNE.S   10$
 	MOVE.W  D5,D0
-	ST      WHOOPS(A4)         ;NO MORE
+	ST	WHOOPS(A4)		;NO MORE
 	DO	P.TN
-	MSGGO	VPSYC            ;GO SEE UR SHRINK
+	MSGGO	VPSYC			;GO SEE UR SHRINK
 10$
-	BTST    #4,3(A0)           ;1=MOVEABLE
-	BEQ.S   20$        
+	BTST    #4,3(A0)                ;1=MOVEABLE
+	BEQ.S   20$        	        ; steadfast refuses
  
-	DO	CHKNPC          ;ABLE?
-	DO	CARRIED	        ;MUST HAVE IT
-	BNE     P.MHAV          ;NO
+	DO	CHKNPC			;ABLE?
+	DO	CARRIED			;MUST HAVE IT
+	BNE	P.MHAVSTOP		;NO
 
-	DO	FIXCHK          ;NOT IF TIED
-	BNE.S   11$             ;not OK
+	DO	FIXCHK			;NOT IF TIED
+	BNE.S   11$			;not OK
 
 * let's consider whether the NPC is smaller than the object 
 * this will stop us giving the tub to the maggot (crash) etc
 
-	MOVE.B	2(A0),D1	;get size of object we're giving away
+	MOVE.B	2(A0),D1		;get size of object we're giving away
 	LSR.B	#4,D1
-	MOVE.B	2(A5),D2	;and size of the NPC
+	MOVE.B	2(A5),D2		;and size of the NPC
 	LSR.B	#4,D2
-	CMP.B	D2,D1		;if NPC > object then OK
-	BMI.S	12$		;MI => ok
+	CMP.B	D2,D1			;if NPC > object then OK
+	BMI.S	12$			;MI => ok
 11$
-	DOGO	YCANTNOW 	;NOT AT THE MOMENT
+	DOGO	YCANTNOW 		;NOT AT THE MOMENT
 12$
-	CALL    SP.GIVE
+     	CALL    SP.GIVE
+
+	TST_NPCREFUSES			;is it rubbish?
+	BEQ.S	15$                     ;no
+	EXG	D0,D5			;move npc to d0
+        DO      GETNPC                  ; ->A3
+      	BTST	#2,2(A3)		;animal?
+        BEQ.S   13$                     ;no, refuse rubbish
+	EXG	D0,D5			;put back
+        BRA.S   15$                     ;animals dont refuse rubbish
+13$        
+	DO	P.SAY2			;the npc says
+	MSG	IDONTNEED		;I don't need
+	MOVE.W	D5,D0			;back
+	DO	P.QN
+	DO	UTIL.BS
+	MSG	YOUKEEP			;, you keep
+	DO	P.OBJPRN
+	DO	UTIL.BS
+	DO	FULLSTOP
+        MSG     QUOTE
+        RET
+15$
 	DO	FIXCONT		;if contained!
 	MOVE.W  D5,8(A0)
 	MOVE.B  #1,6(A0)

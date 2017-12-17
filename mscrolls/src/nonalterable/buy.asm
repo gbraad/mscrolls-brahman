@@ -80,11 +80,8 @@ V.BUY
 	EXG     A0,A5
 
       IFEQ	THE_PAWN
-
 	XREF	SP.BUY_Before
-
 	CALL	SP.BUY_Before		;if anything done, won't come back
-
       ENDC
 
 	CALL    IFLIQUID
@@ -96,20 +93,14 @@ V.BUY
 	MSGGO	FLOOK
 11$
       IFNE	THE_PAWN
-
 	MOVE.B  4(A0),D1           ;GET VALUE BYTE
 	AND.W   #$F,D1             ;BIT3 = MONEY, BITS 0-2 R VALUE
-
       ENDC
 
       IFEQ	THE_PAWN
-
 	XREF	GetValue
-
 	CALL	GetValue	;values object in D0, returns D1/Z flag
-
       ENDC
-
 
 	BNE.S   10$
 	DO	P.TN	              ;ZERO VALUE = NOT FOR SALE
@@ -124,20 +115,16 @@ V.BUY
 	
 20$
       IFNE	THE_PAWN
-
 	MOVE.B  4(A5),D1
 	AND.W   #$0F,D1            ;LOSE JUNK BITS
 	BCLR    #3,D1              ;USING MONEY?
-
       ENDC
 
       IFEQ	THE_PAWN
-
 	EXG	D0,D5
 	CALL	GetValue
 	EXG	D0,D5
 	BTST	#3,4(A5)		;test money bit
-
       ENDC
 
 	BNE.S   30$
@@ -146,20 +133,16 @@ V.BUY
 	MSGGO	NTENDE           ;NOPE - USELESS!
 30$
       IFNE	THE_PAWN
-
 	MOVE.B  4(A0),D2
 	AND.W   #$0F,D2
 	BCLR    #3,D2
-      
       ENDC
 
       IFEQ	THE_PAWN
-
 	EXG	D1,D2			;cause result will be in D1
 	CALL	GetValue
 	EXG	D1,D2
 	BTST	#3,4(A0)
-
       ENDC
 
 	BEQ.S	4909$
@@ -171,18 +154,14 @@ V.BUY
 	MSGGO	NDEAL            ;NOPE!
 50$
       IFNE	THE_PAWN
-
 	OR.B    #8,D1              ;SET TO BEW VALUABLE
 	AND.B   #$F0,4(A5)
 	OR.B    D1,4(A5)
 	AND.W   #3,D1              ;ANY REMAINING VALUE?
-      
       ENDC
 
       IFEQ	THE_PAWN
-    
 	XREF	SetValue
-
 	CALL	SetValue	   ;set the value of obj D5 to D1.B
 				   ;returns EQ => no value
       ENDC
@@ -194,12 +173,9 @@ V.BUY
 60$
       
       IFEQ	THE_PAWN
-
 	XREF	SP.BUY
-
 	CALL	SP.BUY		;returns EQ => avoid 'you have now...'
 	BEQ.S	ONINV
-      
       ENDC
 
 	CALL    PRTTXT

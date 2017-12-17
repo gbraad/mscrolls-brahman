@@ -57,6 +57,10 @@
 
         IFEQ    NAMEDPICS
 LOAD_PIC
+
+        ;; picture number in D0
+        ;; operation in D1 (1=>display)
+
         DC.W    $A0F0
         RET
         ENDC
@@ -67,15 +71,21 @@ LOAD_PIC
         ALIGN
         
 LOAD_PIC
-        MOVE.L  A0,-(A7)
+
+        ;; A0 = code address of name of picture
+        ;; D0 = picture number
+        ;; D1 = operation
+
+        PUSH_L  D2/A0
         LEA     NAMETAB(PC),A0
-        ADD.W   D0,D0
-        MOVE.W  0(A0,D0.W),D0
-        EXT.L   D0
-        ADD.L   A0,D0
-        SUB.L   A4,D0
+        MOVE.W  D0,D2
+        ADD.W   D2,D2
+        MOVE.W  0(A0,D2.W),D2           ; name offset
+        EXT.L   D2
+        ADD.L   D2,A0
+        SUB.L   A4,A0
         DC.W    $A0F0
-        MOVE.L  (A7)+,A0
+        PULL_L  D2/A0
         RET
         ENDC
 

@@ -52,7 +52,7 @@
 
 	include	"equates.asm"
 	include	"macros.asm"
-	include	"roomequ.asm"
+	include	"roomequ.i"
 
 	XDEF	MAKESTORE
 

@@ -273,7 +273,10 @@ INITCOM
 *--------------------------------
   
 INTEXT
-  
+
+        XREF	MakeUndoDiff
+	CALL	MakeUndoDiff
+
 	MSG    LINE
 01$
 	

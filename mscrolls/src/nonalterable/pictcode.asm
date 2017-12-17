@@ -88,9 +88,8 @@ PICTURES
 	                             ;room no. Maybe change this to be an
 	                             ;array of pointers to the start of the
 	 IFNE	THE_PAWN
-
 	MOVE.B   -1(A0,D0.W),D0       ;pictures on the disk itself.
-	BEQ.S    90$                  ;EQ=>no picture in this room, back to screen
+        BRA.S   80$                   ;draw pic D0 (if zero, no pic).
 	 ENDC
 
 	 IFEQ	THE_PAWN
@@ -101,31 +100,48 @@ PICTURES
 * 
 10$
 	MOVE.W	(A0)+,D1	 	;-1 terminated
-	BMI.S	90$			; SETEQ
+	BMI.S	20$			;no picture
 	CMP.B	D0,D1			; is the room the same?
 	BNE.S	10$
 	MOVE.B	-2(A0),D0		; get the picture number
+        BRA.S   80$                     ;draw pic D0
+20$        
+        CLR.W   D0                      ;no pic, picnum = 0
+	ENDC
 
-	 ENDC
-
+80$
 	CALL_S   DRAWPIC              ;Display the picture in D0.B
-
-90$
 	MOVEM.L  (A7)+,REGLIST
 99$
 	RET
 
 
 	XDEF	DRAWPIC
+        XREF    SP.PICTURES
 
 DRAWPIC
 
+        ;;  D0 = picture#
+
+        CALL    SP.PICTURES     ;can change d0
+        
+        TEST_B  D0              ; picture?
+        BNE.S   10$             ;yes
+
+        CLR.B   PICTNUM(A4)
+	MOVEQ	 #0,D1          ;signal hide pic
+      	EXT.W    D0
+        CALL    LOAD_PIC        ;hide pic
+        BRA.S   90$
+        
+10$        
 	CMP.B    PICTNUM(A4),D0       ;No point in redrawing same picture
 	BEQ.S    90$
 	MOVE.B   D0,PICTNUM(A4)
 	EXT.W    D0
 	SUBQ.W   #1,D0
-	MOVEQ	#1,D1			;non 68k (z80 mainly) load_pic param
+	MOVEQ	 #1,D1			;non 68k (z80 mainly) load_pic param
+80$        
 	CALL     LOAD_PIC
 90$
 	RET

@@ -25,6 +25,7 @@ parssub2.o
 init.o
 random.o
 debugbit.o
+m2special.o
 screen.o
 decode.o
 decom.o

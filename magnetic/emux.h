@@ -92,8 +92,11 @@ Byte #2;  Size & Weight.
 	3       like a bag small box,
 	4, 	a chair
 	5,	a person.
-	6-14	not clearly defined.
+	6-14	not clearly defined. bed ~ 10
 	15,     large
+
+        Weight:
+        person ~ 5
 
 	If the object is a `room' the sizes mean the following,
 	0,	Normal
@@ -238,6 +241,9 @@ Byte #10; Data3
 	  |   |  Arms		    The Volume must never reduce to zero,
 	  |  Groin		    for otherwise the object is no longer
        Feet & Legs		    a container.
+
+       * bit 7 => no article for rooms.
+       * bit 6 => visible on map (only applies for rooms)
 
 
 Byte #11, Data4
@@ -505,13 +511,19 @@ struct IItem
     bool isDoor() const
     {
         // are we a door?
-        const char* w = word();
-        return w ? !u_stricmp(w, "door") : false;
+        return wordIs("door") || wordIs("gate");
     }
 
     static string toWordCaps(const string& s)
     {
         return toWordCaps(s.c_str());
+    }
+
+    string      tnWord() const
+    {
+        // approximately follow the logic of "p.tn", "the object."
+        if (omitArticle()) return adjWordIf();
+        else return "the " + adjWordIf();
     }
 
     string      adjWordIf() const
@@ -577,11 +589,10 @@ struct IItem
     bool isClosed() const { return _item && _item->data[0] & 0x20; }
     bool isClosedOrLocked() const { return _item && _item->data[0] & 0x60; }
     bool isOpen() const { return _item && _item->data[0] & 0x10; }
-    int  volume() const { return _item ? _item->data[10] & 0x7 : 0; }
+    uint volume() const { return _item ? _item->data[10] & 0x7 : 0; }
     bool isContainer() const { return volume() > 0; }
-    bool isContained() const { return loc_head() & 0x20; }
-    int  weight() const { return _item ? _item->data[2] & 0xf : 0; }
-    int  size() const { return _item ? _item->data[2] >> 4 : 0; }
+    uint weight() const { return _item ? _item->data[2] & 0xf : 0; }
+    uint size() const { return _item ? _item->data[2] >> 4 : 0; }
     bool isTooHeavy() const
     {
         // zero weights aren't really too heavy, but they're things you
@@ -591,25 +602,89 @@ struct IItem
     }
     bool isMoney() const { return _item && _item->data[4] & 0x08; }
     bool isWorn() const { return loc_head() & 0x04; }
-    int  hardness() const { return _item ? _item->data[1] >> 4 : 0; }
-    int  strength() const { return _item ? _item->data[1] & 0x0f : 0; }
+    uint hardness() const { return _item ? _item->data[1] >> 4 : 0; }
+    bool isHard() const
+    {
+        // normal kind of hardness, not soft nor flex nor breakable etc
+        uint h = hardness();
+        return h >= 5 && h < 12;
+    }
+    bool isContained() const
+    {
+        // contained, but not a room nor out
+        return (loc_head() & 0xE0) == 0x20;
+    }
+    
+    uint strength() const { return _item ? _item->data[1] & 0x0f : 0; }
+    uint sharpness() const { return _item ? _item->data[3] >> 4 : 0; }
+    uint texture() const { return _item ? _item->data[3] & 0x0f : 0; }
     bool isLiquid() const { return hardness() == 1; }
     bool isTieable() const { return hardness() == 12; }
     bool isBrittle() const { return hardness() == 10; }
     bool isIntrinsic() const { return loc_head() & 0x08; }
     bool isDead() const { return _item && _item->data[0] & 0x02; }
+    bool isBroken() const { return _item && _item->data[0] & 0x04; }
+    bool isHidden() const { return loc_head() & 0x02; }
     bool isOut() const { return loc_head() & 0x80; }
     bool isWearable() const { return _item && _item->data[11] & 6; }
+    bool isEdible() const { return _item && ((uint)(_item->data[11] >> 5) != 0); }
+    bool isInitialStateDone() { return _item && _item->data[5] & 0x02; }
     bool isSurface() const { return _item && _item->data[5] & 0x8; }
     bool isBigThing() const
     {
         // object that may or not be gettable, but is big enough to look under
-        int s = size();
-        int w = weight();
-        return (s >= 4 && s < 15 && w > 1 && w < 15);
+        // NB: can still be inseparable 
+        bool ok = !isNPC() || isDead();
+        ok = ok && isMoveable();
+        if (ok)
+        {
+            int s = size();
+            int w = weight();
+            ok = (s >= 8 && s < 15 && w > 5); // && w < 15);
+        }
+        return ok;
     }
     bool isAnimal() const
     { return isNPC() && _item->npcData && _item->npcData[2] & 4; }
+    bool isLocalContents() const { return _item && _item->data[0] & 0x08; }
+    bool visibleOnMap() const
+    {
+        bool v = isExplored();
+        if (!v && isRoom()) v = (_item->data[10] & 0x40) != 0;
+        return v;
+    }
+
+    void setVisibleOnMap(bool v = true)
+    {
+        if (isRoom())
+        {
+            if (v) _item->data[10] |= 0x40;
+            else _item->data[10] &= ~0x40;
+        }
+    }
+
+    bool omitArticle() const
+    {
+        bool omit = false;
+        if (isNPC())
+        {
+            if (_item->npcData[2] & 0x08) omit = true;
+        }
+        else if (isRoom())
+        {
+            // room omit article flag (not for the pawn)
+            if ((_item->data[10] & 0x80)) omit = true;
+        }
+        return omit;
+    }
+
+    IItem container() const
+    {
+        // if we have a container, return it
+        IItem c;
+        if (isContained()) c = find_item(loc_data());
+        return c;
+    }
     
     void resetOut()
     {
@@ -639,7 +714,15 @@ struct IItem
         return _item ? find_item(_word(_item->data + 12) & 0x3fff) : 0;
     }
 
-    void setExplored() { if (_item) _item->data[4] |= 0x10; }
+    void setExplored(bool v = true)
+    {
+        if (_item)
+        {
+            if (v) _item->data[4] |= 0x10;
+            else _item->data[4] &= ~0x10;
+        }
+    }
+    
     void setMoveable() { if (_item) _item->data[3] |= 0x10; }
 
     void setNybbleLo(int d, int v)
@@ -667,27 +750,41 @@ struct IItem
     void setHardness(int v) { setNybbleHi(1, v); }
     void setStrength(int v) { setNybbleLo(1, v); }
 
+    bool isLit() const
+    {
+        bool r = false;
+        if (_item)
+        {
+            if (isRoom()) r = (_item->data[5] & 0x04) != 0;
+            else r = (_item->data[0] & 0x80) != 0;
+        }
+        return r;
+    }
+
     void setLit()
     {
         if (_item)
         {
-            if (isRoom())
-            {
-                _item->data[5] |= 0x04; // not dark
-            }
-            else
-            {
-                _item->data[0] |= 0x80; // alight
-            }
+            if (isRoom()) _item->data[5] |= 0x04; // not dark
+            else _item->data[0] |= 0x80; // alight
         }
     }
 
     void setLocation(int room)
     {
-        if (_item)
+        if (_item && !pseudo())
         {
             _item->data[6] = 0; // loc head simple room#
             _setWord(&_item->data[8], room);
+        }
+    }
+
+    void setBroken(bool v = true)
+    {
+        if (_item)
+        {
+            if (v) _item->data[0] |= 0x04;
+            else _item->data[0] &= ~0x04;
         }
     }
     
@@ -714,15 +811,53 @@ struct IItem
         // get list of things currently carried (including worn)
         // ignores things that are inseparable (eg jeans pocket)
         // ignore intrinsic (eg hands, feet etc).
-        // always include things worn, even if inseparable (wristband)
+        // always include things worn, even if inseparable (eg wristband)
+        // allow intrinsic edibles (eg chewing gum).
             
         for (size_t i = 1; i <= itemCount; ++i)
         {
             IItem ii(find_item(i));
-            assert(ii);
 
             if (!ii.isOut() &&
-                (ii.isWorn() || (!ii.isInseparable() && !ii.isIntrinsic() && ii.carried())))
+                (ii.isWorn() || (ii.isIntrinsic() && ii.isEdible()) || (!ii.isInseparable() && !ii.isIntrinsic() && ii.carried())))
+                items.push_back(ii);
+        }
+    }
+
+    void getItemsInRoom(IItems& items,
+                        bool onlyExplored = false,
+                        bool onlyCarrable = false,
+                        bool noLiveNPC = false)
+    {
+        uint rn = roomNumber();
+        if (!rn) return; // bail if not a room
+        
+        for (size_t i = 1; i <= itemCount; ++i)
+        {
+            IItem ii(find_item(i));
+
+            // is item simply in the room?
+            bool ok = !ii.loc_head() && ii.loc_data() == rn;
+
+            if (ok && onlyExplored)
+            {
+                // disregard non-explored items
+                if (!ii.isExplored()) ok = false;
+            }
+
+            if (ok && onlyCarrable)
+            {
+                // disregard things that aren't gettable
+                if (!ii.couldGet()) ok = false;
+            }
+
+            if (ok && noLiveNPC)
+            {
+                // disregard any live NPC
+                if (ii.isNPC() && !ii.isDead()) ok = false;
+            }
+            
+            if (ok)
                 items.push_back(ii);
         }
     }
@@ -770,7 +905,7 @@ struct IItem
         return items.size();
     }
 
-    int roomNumber() const { return isRoom() ? loc_data() : 0; }
+    uint roomNumber() const { return isRoom() ? loc_data() : 0; }
 
     int getExitRooms(int* elist) const
     {
@@ -815,14 +950,16 @@ struct IItem
         return n;
     }
 
-    IItem getExit(int direction) const
+    IItem getExit(uint direction) const
     {
         IItem ex;
         if (_item)
         {
-            assert(direction >= 0 && direction < (int)bytesPerRoom);
-            size_t ei = _item->exitData[direction];
-            if (ei > 0 && ei <= maxRoom) ex = getRoom(ei);
+            if (direction < bytesPerRoom)
+            {
+                size_t ei = _item->exitData[direction];
+                if (ei > 0 && ei <= maxRoom) ex = getRoom(ei);
+            }
         }
         return ex;
     }
@@ -871,22 +1008,43 @@ struct IItem
         return room;
     }
 
-    bool reachable() const
+    bool reachable(bool xray = false) const
     {
         // reachable by player?
         // used also as noun resolution
-
-        bool res = false;
-        
-        IItem cr = currentRoom();
-        if (cr) res = spine(cr); 
-
-        return res;
+        return spine(currentRoom(), xray); 
     }
 
     bool carried(bool xray = false) const
     {
         return spine(IItem(), xray);
+    }
+
+    bool simplyAt(uint n) const
+    {
+        return !pseudo() && !loc_head() && loc_data() == n;
+    }
+
+    bool isRelatedTo(uint n) const
+    {
+        // not pseudo, not out nor room, but related to n
+        return !pseudo() && ((loc_head() & 0xc1) == 1) && loc_data() == n;
+    }
+
+    void setRelatedTo(int id)
+    {
+        if (_item && !pseudo() && !isRoom())
+        {
+            resetOut(); // bring item in if been set "out".
+            _item->data[6] |= 1;
+            _setWord(_item->data + 8, id);
+        }
+    }
+
+    bool simplyCarried() const
+    {
+        // object is directly on inventory, not inside something carried etc.
+        return simplyAt(0);
     }
 
     static IItem currentRoom() { return IItem::getRoom(get_current_room()); }
@@ -917,9 +1075,19 @@ struct IItem
     static int findAdjective(const char* word)
     {
         // NB: some adjectives in the table have spaces,
-        // these won't be matched (correct) 
+        // these won't be matched (correct).
+        
+        // correct because only the collection of words is the "adjective"
+        // otherwise you'd get things like "the" being an adjective!
+
+        // however, so that we can lookup these things (eg from puzzles)
+        // allow `word` to contain underscores.
+
+        string w(word);
+        w = replaceAll(w, '_', ' ');
+
         Diction::Words words;
-        return _adjectives.findMatches(word, words) ? words[0]._id : 0;
+        return _adjectives.findMatches(w, words) ? words[0]._id : 0;
     }
 
     static void resolveAdjective(IItems& items, int adj)
@@ -935,12 +1103,13 @@ struct IItem
         }
     }
     
-    static void resolveLocal(IItems& items)
+    static void resolveLocal(IItems& items, bool xray = false)
     {
         // remove any non-local items
+        // xray will allow items inside closed containers etc.
         for (IItems::iterator it = items.begin(); it != items.end(); )
         {
-            if (it->reachable()) ++it; else it = items.erase(it);
+            if (it->reachable(xray)) ++it; else it = items.erase(it);
         }
     }
 
@@ -964,7 +1133,7 @@ struct IItem
         int head = loc_head();
         int parent = loc_data();
 
-        std::cout << "psuedo: " << (pseudo() ? "yes" : "no") << std::endl;
+        std::cout << "pseudo: " << (pseudo() ? "yes" : "no") << std::endl;
 
         std::cout << "location: " << std::hex << head << " " << parent
                   << std::dec << " ";

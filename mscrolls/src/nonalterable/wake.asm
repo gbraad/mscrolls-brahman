@@ -185,7 +185,7 @@ V.LEVER
 
 	IFEQ	THE_PAWN
 
-	XDEF	V.SHAKE
+	XDEF	V.SHAKE,ShakeIt
 *
 * Shaking objects:
 *  Liquids spill out of open objects
@@ -255,15 +255,20 @@ V.SHAKE
 	DO	SETOUT
 	BRA.S	90$			;exit
 50$
-	CLR.W	GLOBAL.F(A4)		;back
 	MOVE.W	D2,D0
-	DO	P.SUB
+        BRA.S   ShakeIt
+90$
+	RET
+
+ShakeIt
+        
+	CLR.W	GLOBAL.F(A4)		;back
+        DO	P.SUB
 	MOVE.W	#VNSHAKE,D1
 	DO	P.VERB
 	DO	P.TN
 	MSG	VIGOUR			;<'vigourously for a few moments.'>
-90$
-	RET
+        RET
 
 	ENDC
 

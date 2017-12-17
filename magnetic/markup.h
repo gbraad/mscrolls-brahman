@@ -182,8 +182,10 @@ struct Markup
 
             { "up", IItem::dir_u },
             { "upward", IItem::dir_u },
+            { "upwards", IItem::dir_u },
 
             { "downward", IItem::dir_d },
+            { "downwards", IItem::dir_d },
             { "down", IItem::dir_d },
         };
 

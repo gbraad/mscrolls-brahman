@@ -109,16 +109,12 @@ L.DIREC
 	DC.B   'PRONOUN',$53+$80
 	
 	IFNE     YCHEAT
-	
 	DC.B   'AD',$4A+$80
-	
 	ENDC
 
 	IFNE	M68000
-	
 	DC.B   'LEF',$54+$80
 	DC.B   'RIGH',$54+$80
-
 	ENDC
 	
 	IFNE     YCHEAT
@@ -131,31 +127,23 @@ L.DIREC
 	ENDC
 	
 	IFNE	M68000
-
 	DC.B   'CONTRAS',$54+$80
-
 	ENDC
  
 	IFNE     YCHEAT
-	
 	DC.B   'WOR',$44+$80
 	DC.B   'ME',$4D+$80
 	DC.B   'MO',$44+$80
-  
 	ENDC
 
       IFNE     AMIGA512&YCHEAT
-
 	DC.B    'BPO',$4E+$80
 	DC.B    'BPOF',$46+$80
 	DC.B    'MIS',$43+$80
-
       ENDC
 
       IFNE    Graphics
-
 	DC.B   'GRAPHIC',$53+$80
-
       IFNE   YCHEAT
 
 	DC.B    'PICTUR',$45+$80
@@ -163,86 +151,64 @@ L.DIREC
       ENDC
 
       IFNE	AMIGA512!ST520	  
-
 	DC.B   'TEXTSIZ',$45+$80
-
       ENDC
 	
 	IFNE    Mono_Possible
-
 	DC.B   'STIPPL',$45+$80
 	DC.B   'DITHE',$52+$80
 	DC.B   'FREEHAN',$44+$80
-
 	ENDC
 
       ENDC
 
       IFNE    SpoolLen
-
 	DC.B   'PRINTE',$52+$80
-
       ENDC
 
       IFNE    FunctionKeys
-
 	DC.B   'FUNCTIO',$4E+$80
 	DC.B   'FUNC',$54+$80
-
       ENDC
 
 	DC.B    'CREDIT',$53+$80
 	DC.B    'HIN',$54+$80
 
       IFNE     Wimp
-
 	DC.B    'FOREGROUN',$44+$80
 	DC.B    'BACKGROUN',$44+$80
 	DC.B    'SCROL',$4C+$80
-
       ENDC
 
       IFNE     YCHEAT
-
 	DC.B    'coun',$54+$80
-
       ENDC
 
       IFNE     SpeechAvail
-
 	DC.B    'speec',$68+$80
-
       ENDC
 
       IFNE	PCW8256
-
        DC.B   'STIPPL',$45+$80
        DC.B   'DITHE',$52+$80
-
       ENDC
 
       IFNE	IBM
-
 	DC.B	'TITL',$45+$80
 	DC.B	'MOR',$45+$80
 	DC.B	'PICTUR',$45+$80
 	DC.B	'TEX',$54+$80
 	DC.B	'FASTE',$52+$80
 	DC.B	'SLOWE',$52+$80
-      
       ENDC
 
       IFNE	YCHEAT
-
 	DC.B	'SY',$6E+$80	;syn - list synonyms of xyzzy
 	DC.B	'VNE',$54+$80	;vnet - verify network
-
       ENDC
        
       IFD	C64Pict
-
 	DC.B    'PICTUR',$45+$80
-      
       ENDC
 	
 	DC.B    $82              ;END OF SECTION
@@ -274,8 +240,8 @@ L.DIREC
 *
 
 SynText
-	include	"wtable11misc.asm"
-	include "wtable11noun.asm"
+	include	"wtable11misc.i"
+	include "wtable11noun.i"
 
 
 	DC.B    $82                      ;END OF SECTION
@@ -349,7 +315,7 @@ INSULT
 *  SECTION #18  'sets' or multiples
 *
 
-	include	"wtable18.asm"
+	include	"wtable18.i"
 
 	DC.B    $82              ;END OF SECTION
 

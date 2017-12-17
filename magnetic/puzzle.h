@@ -78,7 +78,7 @@ struct PuzzleBase
         IItem::parse(items, s);
 
         // must also be local
-        IItem::resolveLocal(items);
+        IItem::resolveLocal(items, true); // allow items inside closed
         return items.size() > 0 ? items[0] : IItem();
     }
     
@@ -107,9 +107,14 @@ struct PuzzleBase
     static bool connected(IItem a, IItem b) 
     {
         // are two things connected
-        IItems items;
-        a.getConnectedSystem(items);
-        return contains(items, b);
+        bool r = a && b;
+        if (r)
+        {
+            IItems items;
+            a.getConnectedSystem(items);
+            r = contains(items, b);
+        }
+        return r;
     }
 
     static bool notConnected(IItem a, IItem b)
@@ -133,6 +138,23 @@ struct PuzzleBase
         return a.getConnectedSystem(items) - 1;
     }
 
+    static bool relatedTo(IItem a, IItem b)
+    {
+        return a && b && a.isRelatedTo(b.id());
+    }
+
+    static IItem closedContainer(IItem a)
+    {
+        // if item a is in a closed (non-transparent) container
+        IItem c = a.container();
+        if (c)
+        {
+            // not closed of if so, local content
+            if (!c.isClosed() || c.isLocalContents()) c.invalidate();
+        }
+        return c;
+    }
+
     // no checking
     void _action(const char* s);
     void _action(const string& s) { _action(s.c_str()); }
@@ -152,7 +174,7 @@ struct PuzzleBase
 
         IItems items;        
         _res = a;
-        if (a.getConnectedSystem(items) > 1)
+        if (_res && a.getConnectedSystem(items) > 1)
         {
             // break apart by untying tie-ables
             for (size_t i = 0; i < items.size() && _res; ++i)
@@ -162,13 +184,23 @@ struct PuzzleBase
             }
         }
         
-        if (a.isWorn()) action(string("remove ") + a.toString());
+        if (_res && a.isWorn())
+        {
+            action(string("remove ") + a.toString());
+            if (a.isWorn()) _res = false; // remove failed
+        }
     }
 
     void actGet(IItem a)
     {
         _res = a;
-        if (!a.carried(true)) action(string("get ") + a.toString());
+        if (_res && !a.simplyCarried())
+        {
+            IItem cc = closedContainer(a);
+            if (cc) action(string("open ") + cc.toString());
+            action(string("get ") + a.toString());
+            if (!a.carried(false)) _res = false; // get failed
+        }
     }
 
     IItem actIsoGet(IItem a)
@@ -181,7 +213,7 @@ struct PuzzleBase
     void actWear(IItem a)
     {
         actGet(a);
-        if (!a.isWorn()) action(string("wear ") + a.toString());
+        if (_res && !a.isWorn()) action(string("wear ") + a.toString());
     }
 
     void actDrop(IItem a, bool force = false)
@@ -247,7 +279,7 @@ struct Puzzle: public PuzzleBase
     // game perform action
     void _action(const char* s, int st = 0)
     {
-        parentT::action(s);
+        parentT::action(s); // call the checking version
         if (_res) state(st);
     }
     
@@ -313,17 +345,21 @@ struct PuzzleManager: public PuzzleBase
     IFMagnetic*         _host;
     bool                _triggerUndo = false;
     PChooser            _pchooser;
+    bool                _enabled = true;
 
     ~PuzzleManager() { purge(_puzzles); }
 
     void start(IFMagnetic* host);
+    void enabled(bool v);
 
     Puzzle* find(const char* name) const
     {
-        for (Puzzles::const_iterator it = _puzzles.cbegin();
-             it != _puzzles.cend(); ++it)
-            if ((*it)->match(name)) return *it;
-        
+        if (_enabled)
+        {
+            for (Puzzles::const_iterator it = _puzzles.cbegin();
+                 it != _puzzles.cend(); ++it)
+                if ((*it)->match(name)) return *it;
+        }
         return 0;
     }
 
@@ -338,10 +374,10 @@ struct PuzzleManager: public PuzzleBase
     void text(const char* s);
     bool action(const char*);
     bool goroom(int);
-    void moveUpdate();
+    void moveUpdate(int moveCount);
     
     // handle game specific message triggers
-    const char* messageHook(int m);
+    string messageHook(int m, const char*);
 
     void reset()
     {
@@ -355,7 +391,10 @@ struct PuzzleManager: public PuzzleBase
         _pchooser.clear();
     }
 
-    string evalUseXwithYSpecial(IItem xi, IItem yi);
+    string evalUseXwithYSpecial(IItem xi, IItem yi, bool& done);
+
+    bool allowSuggestOpen(IItem);
+    bool allowSuggestGet(IItem);
 
     // like IItem.toString(), but game specific
     string itemToStringSpecial(IItem);

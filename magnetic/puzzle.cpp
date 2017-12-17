@@ -37,640 +37,11 @@
 #include "ifproduct.h"
 #endif
 
-struct BoulderPuzzle: public Puzzle
-{
-    /*
-      1: intro
-      2: hoe
-      4: rake
-      8: suggest tied
-    */
-
-    BoulderPuzzle() : Puzzle("boulders") {}
-
-    bool precondition() override
-    {
-        return has(_name).isExplored() && !way(28, 31); // foothills->track
-    }
-
-    void action(int act) override
-    {
-        // perform activities as a result of the puzzle state
-        switch (act)
-        {
-        case 2: _action("lever boulders with hoe.", act); break;
-        case 4: _action("lever boulders with rake.", act); break;
-        case 16:
-            {
-                actIsoGet(has("black shirt"));
-                _action("tie hoe and rake together with the shirt.");
-                if (connected(has("hoe"), has("rake"))) state(act);
-            }
-            break;
-        case 32:
-            _action("lever boulders with rake.", act);
-            break;
-        }
-    }
-
-    void run() override
-    {
-        // run the puzzle
-
-        if (state(0, ~1))
-        {
-            text("Looks like you need to lever the [boulder](do boulders) out of the way with something.", 1);
-        }
-        if (state(1, 2) && has("hoe"))
-        {
-            text("Try to [lever](do boulders 2) the boulder with the hoe.");
-        }
-        if (state(1, 4) && has("rake"))
-        {
-            text("Try to [lever](do boulders 4) the boulder with the rake.");
-        }
-        if (state(7, 8))
-        {
-            text("Maybe if the hoe and rake were tied together it might be strong enough to lever the [boulder](do boulders).", 8);
-            return;
-        }
-        if (state(8, 0) && notConnected(has("hoe"), has("rake")) && has("black shirt"))
-        {
-            text("How about [tying](do boulders 16) the hoe and rake together with the shirt");
-        }
-        if (state(8, 0) && connected(has("hoe"), has("rake")))
-        {
-            text("Now try [levering](do boulders 32) the boulder with both the hoe and rake together.");
-            return;
-        }
-    }
-};
-
-struct GuruPuzzle: public Puzzle
-{
-    GuruPuzzle() : Puzzle("guru") {}
-
-    bool precondition() override
-    {
-        // wearing the wristband with nothing tied to it.
-        IItem w("wristband");
-        return Puzzle::precondition() && w.isWorn() && !connections(w);
-    }
-
-    void action(int act) override
-    {
-        switch (act)
-        {
-        case 4: // hide wristband
-            {
-                IItem s = actIsoGet(has("black shirt"));
-                _action("cover wristband with black shirt");
-                if (connected(s, "wristband")) state(act);
-            }
-            break;
-        }
-    }
-
-    void run() override
-    {
-        if (state(0, 1))
-        {
-            text("the guru is laughing at the wristband you're wearing.", 1);
-            return;
-        }
-        if (state(1, 2))
-        {
-            text("Perhaps, if you could hide the wristband somehow.", 2);
-            return;
-        }
-        if (state(2, 4) && has("black shirt"))
-        {
-            text("try [covering](do guru 4) the wristband with the shirt");
-        }
-    }
-};
-
-struct RocksPuzzle: public Puzzle
-{
-    RocksPuzzle() : Puzzle("rocks") {}
-
-    void run() override
-    {
-        if (state(0, 1)) text("maybe [climb](climb rocks) rocks.", 1);
-    }
-};
-
-struct SnowPuzzle: public Puzzle
-{
-    SnowPuzzle() : Puzzle("snow") {}
-
-    bool precondition() override
-    {
-        // does not have to be explored
-        return has(_name);
-    }
-
-    bool match(const char* name) const override
-    {
-        // can click on snow or plateau
-        return equalsIgnoreCase(_name, name)
-            || equalsIgnoreCase(name, "plateau");
-    }
-
-    void action(int act) override
-    {
-        switch (act)
-        {
-        case 1:
-            actIsoGet(has("black shirt"));
-            _action("wear black shirt", act); 
-            break;
-        case 2:
-            actIsoGet(has("jeans"));
-            _action("wear jeans", act); 
-            break;
-        }
-    }
-
-    void run() override
-    {
-        if (state(0, 0)) 
-        {
-            IItem s = has("black shirt");
-            if (s && !s.isWorn()) text("maybe [wear](do snow 1) the shirt");
-
-            IItem j = has("jeans");
-            if (j && !j.isWorn()) text("maybe [wear](do snow 2) the jeans");
-            
-        }
-    }
-};
-
-struct KronosPuzzle: public Puzzle
-{
-    KronosPuzzle() : Puzzle("magician") {}
-
-    void action(int act) override
-    {
-        switch (act)
-        {
-        case 1:
-            actIsoGet(has("aerosoul"));
-            _action("press nozzle", act);
-        }
-    }
-
-    void run() override
-    {
-        if (has("magician").isDead())
-        {
-            if (has("aerosoul"))
-            {
-                if (state(0, 1))
-                {
-                    text("maybe press [aerosoul nozzle](do magician 1)");
-                }
-            }
-            else
-            {
-                text("You need the aerosoul!\n");
-            }
-        }
-    }
-};
-
-
-struct AdventurerPuzzle: public Puzzle
-{
-    AdventurerPuzzle() : Puzzle("adventurer") {}
-
-    bool precondition() override
-    {
-        IItem a = has(_name);
-        return a.isExplored() && !a.isDead();
-    }
-
-    void run() override
-    {
-        if (state(0, 1)) text("maybe [say](adventurer, hello) hello", 1);
-        if (state(0, 2))
-        {
-            if (has("chest").carried())
-                text("maybe [give](give chest to adventurer) the chest to the adventurer");
-        }
-    }
-};
-
-struct HorsePuzzle: public Puzzle
-{
-    HorsePuzzle() : Puzzle("horse") {}
-
-    bool precondition() override
-    {
-        IItem a = has(_name);
-        return a.isExplored() && !a.isDead() && IItem("adventurer").isDead();
-    }
-
-    void run() override
-    {
-        if (IItem("princess").carried())
-            text("maybe [put](put princess on horse) princess on horse.");
-        
-        if (state(0, 1)) text("maybe [say](horse, hello) hello", 1);
-        if (state(0, 2))
-        {
-            LOG3("player on ", get_object_player_on());
-            IItem ploc(find_item(get_object_player_on()));
-            if (ploc)
-            {
-                if (ploc == has("horse"))
-                {
-                    text("maybe [get off](get off horse) horse");
-                }
-            }
-            else
-            {
-                text("maybe [ride](ride horse) the horse");
-            }
-        }
-    }
-};
-
-struct WallPuzzle: public Puzzle
-{
-    WallPuzzle() : Puzzle("low wall") {}
-
-    void run() override
-    {
-        if (state(0, 1)) text("you could probably [break](break wall) the wall");
-    }
-};
-
-struct PedestalPuzzle: public Puzzle
-{
-    PedestalPuzzle() : Puzzle("pedestal") {}
-
-    void run() override
-    {
-        if (state(0, 1)) text("maybe you can [move](push pedestal) the pedestal", 1);
-    }
-};
-
-struct SlopePuzzle: public Puzzle
-{
-    SlopePuzzle() : Puzzle("slope") {}
-
-    void action(int act) override
-    {
-        switch (act)
-        {
-        case 1:
-            actWear("boots");
-            _action("climb slope", act);
-            break;
-        }
-    }
-
-    void run() override
-    {
-        if (state(0, 1)) text("maybe try to [climb](do slope 1) the slope");
-    }
-};
-
-struct PrincessPuzzle: public Puzzle
-{
-    PrincessPuzzle() : Puzzle("princess") {}
-
-    void action(int act) override
-    {
-        switch (act)
-        {
-        case 1:
-            actIsoGet(has("black shirt"));
-            _action("tie shirt to bed", act);
-            break;
-        }
-    }
-
-    void run() override
-    {
-        IItem p("princess");
-        if (!p.carried()) text("maybe [get princess](get princess), ready for a daring rescue.");
-        else
-        {
-            IItem bed, shirt;
-            if ((bed = has("poster bed")) && ((shirt = has("shirt"))))
-            {
-                text("maybe [tie](do princess 1) shirt to bed", 1);
-            }
-            else if (get_current_room() == 41 && has("shirt"))
-            {
-                text("maybe [untie](untie shirt then wear it) the shirt.");
-            }
-        }
-    }
-};
-
-struct BoardsPuzzle: public Puzzle
-{
-    BoardsPuzzle() : Puzzle("varnished boards") {}
-
-    void run() override
-    {
-        if (state(0,1)) text("maybe you can [move](move boards) the boards.", 1);
-        if (state(1,2))
-        {
-            IItem wd("wooden door");
-            if (wd.isOpen())
-            {
-                text("maybe the door is in the way, try [closing](close door) the door.");
-            }
-        }
-    }
-};
-
-struct LiftButtonPuzzle: public Puzzle
-{
-    LiftButtonPuzzle() : Puzzle("lift door") {}
-
-    void run() override
-    {
-        text("maybe [slide](slide lift door) the lift door");
-    }
-};
-
-
-struct LiftDoorPuzzle: public Puzzle
-{
-    LiftDoorPuzzle() : Puzzle("lift button") {}
-
-    void run() override
-    {
-        if (state(0,1)) text("maybe [press](press lift button) the lift button.", 1);
-    }
-};
-
-struct LumpsPuzzle: public Puzzle
-{
-    LumpsPuzzle() : Puzzle("lumps") {}
-
-    void run() override
-    {
-        if (get_current_room() == 87)
-        {
-            IItem l(has("lumps"));
-            if (l && !l.carried())
-            {
-                if (has("trowel"))
-                {
-                    text("maybe [dig](get lumps with trowel) them out with the trowel");
-                }
-                else
-                {
-                    text("you're going to need something like a trowel to dig them out.");
-                }
-            }
-        }
-    }
-};
-
-struct PaperWallPuzzle: public Puzzle
-{
-    PaperWallPuzzle() : Puzzle("paper wall") {}
-
-    void run() override
-    {
-        text("maybe [lean](lean on paper wall) on the wall.");
-
-        if (has("paper wall"))
-        {
-            if (has("trowel"))
-            {
-                text("maybe [tear paper wall](tear paper wall with trowel) with the trowel.");
-            }
-            else
-            {
-                text("you need something to tear the paper wall");
-            }
-        }
-    }
-};
-
-struct SpellPuzzle: public Puzzle
-{
-    SpellPuzzle() : Puzzle("spell") {}
-
-    void run() override
-    {
-        if (has("tomes"))
-            text("why not cast [spell](cast spell on tomes) on tomes");
-    }
-};
-
-struct TomesPuzzle: public Puzzle
-{
-    TomesPuzzle() : Puzzle("tomes") {}
-
-    void run() override
-    {
-        if (!has("tomes").isClosed())
-            text("why not [read](read tomes) the tomes");
-    }
-};
-
-
-struct KnockerPuzzle: public Puzzle
-{
-    KnockerPuzzle() : Puzzle("knocker") {}
-
-    void run() override
-    {
-        text("maybe [knock](knock on doors) on doors");
-    }
-};
-
-struct RopePuzzle: public Puzzle
-{
-    RopePuzzle() : Puzzle("hook") {}
-
-    void action(int act) override
-    {
-        switch (act)
-        {
-        case 1:
-            actGet(IItem("rope"));
-            _action("climb down then drop rope");
-            break;
-        }
-    }
-
-    void run() override
-    {
-        IItem rope("rope"); // can be non-local
-        IItem hook(has("hook"));
-        IItem pw(has("paper wall"));
-        
-        if (connected(rope, hook))
-        {
-            if (!pw)
-            {
-                text("maybe [climb down](do hook 1)");
-            }
-        }
-        else if (rope)
-        {
-            text("maybe [tie](tie rope to hook) the rope to the [hook](do hook)", 1);
-        }
-        else text("You need a rope or something to tie to this [hook](do hook)");
-    }
-};
-
-static uchar* atDragon2()
-{
-    if (prog_format)
-    {
-        static int addr;
-        if (!addr) addr = get_sym_value("F_DRAG2");
-        assert(addr);
-        return getcode() + addr;
-    }
-    else
-    {
-        return getcode() + 0x1a57;
-    }
-}
-
-static uchar* atKmeet3()
-{
-    if (prog_format)
-    {
-        static int addr;
-        if (!addr) addr = get_sym_value("F_KMEET3");
-        assert(addr);
-        return getcode() + addr;
-    }
-    else
-    {
-        return getcode() + 0x1a52;
-    }
-}
-
-struct DragonPuzzle: public Puzzle
-{
-    DragonPuzzle() : Puzzle("dragon") {}
-
-    /*
-    bool match(const char* name) const override
-    {
-    // allow other items to be clicken on to progress dragon puzzle
-    // BUT, then you can never get their descriptions!
-        return equalsIgnoreCase(_name, name)
-            || equalsIgnoreCase(name, "shapes")
-            || equalsIgnoreCase(name, "shadows");
-    }
-    */
-
-    void run() override
-    {
-        IItem white("white");
-        if (white.carried(true)) // x-ray
-        {
-            uchar* flagDragon2 = atDragon2();
-            LOG3("puz dragon ", (unsigned int)*flagDragon2);
-            
-            if (has("pouch").isClosed())
-            {
-                text("maybe [open pouch](open pouch)");
-                
-                if (*flagDragon2 && *flagDragon2 != 0xff)
-                {
-                    LOG3("puz ", "extra dragon turn");
-                    --*flagDragon2; // give them an extra move to open pouch
-                }
-                return;
-            }
-            
-            if (state(0, 1))
-            {
-                text("maybe [illuminate](shine white at shadows) the shadows with the [white].", 1);
-                return;
-            }
-            else if (state(1, 2))
-            {
-                text("maybe [point out](point at shapes) the hobbits hiding in the shadows.", 2);
-            }
-        }
-    }
-};
-
-struct CreamDoorPuzzle: public Puzzle
-{
-    CreamDoorPuzzle() : Puzzle("cream door") {}
-
-    void action(int act) override
-    {
-        switch (act)
-        {
-        case 1:
-            _action("knock on cream door", act);
-            break;
-        }
-    }
-    
-    void run() override
-    {
-        if (has("cream door").isClosedOrLocked())
-        {
-            if (state(0,1))
-            {
-                text("maybe [knock](do cream door 1) on the door");
-            }
-            if (state(1, 2))
-            {
-                text("maybe [say no](say no)");
-            }
-        }
-    }
-};
-
-struct PotPuzzle: public Puzzle
-{
-    PotPuzzle() : Puzzle("pot") {}
-
-    void action(int act) override
-    {
-        switch (act)
-        {
-        case 1:
-            actIsoGet(has("trowel"));
-            _action("plant the pot plant in the plant pot with the trowel");
-            break;
-        }
-    }
-    
-    void run() override
-    {
-        if (has("trowel"))
-        {
-            text("maybe [plant](do pot 1) the [pot plant] in the [plant pot] with the [trowel]");
-        }
-    }
-};
-
-struct SafePuzzle: public Puzzle
-{
-    SafePuzzle() : Puzzle("safe") {}
-
-    void run() override
-    {
-        if (has("safe").isOpen())
-        {
-            text("maybe [search](search safe) the safe");
-        }
-    }
-};
-
-
+// puzzles for The Pawn
+#include "puzpawn.h"
+
+// puzzles for The Guild
+#include "puzguild.h"
 
 // PuzzleManager functions that are ifmagnetic independent
 // see also puzman.cpp
@@ -707,6 +78,55 @@ void PuzzleManager::start(IFMagnetic* host)
         add(new PotPuzzle);
         add(new SafePuzzle);
         break;
+    case 2: // the guild
+        add(new JettyPuzzle);
+        add(new OldManPuzzle);
+        add(new JunkPuzzle);
+        add(new CoalPuzzle);
+        add(new LampPuzzle);
+        add(new PipePuzzle);
+        add(new StopcockPuzzle);
+        add(new blackboardPuzzle);
+        add(new paperbackPuzzle);
+        add(new booksPuzzle);
+        add(new diaryPuzzle);
+        add(new NightSafePuzzle);
+        add(new BarsPuzzle);
+        add(new BilliardsPuzzle);
+        add(new FishPuzzle);
+        add(new PoisonPuzzle);
+        add(new WindowPuzzle);
+        add(new HorseshoePuzzle);
+        add(new LadderPuzzle);
+        add(new SandPuzzle);
+        add(new ButtonPuzzle);
+        add(new MillPuzzle);
+        add(new BedPuzzle);
+        add(new WaxPuzzle);
+        add(new StatuePuzzle);
+        add(new noticePuzzle);
+        add(new signPuzzle);
+        add(new PalmTreePuzzle);
+        add(new BoatPuzzle);
+        add(new YellowDiePuzzle);
+        add(new GreenDiePuzzle);
+        add(new BlueDiePuzzle);
+        add(new RedDiePuzzle);
+        add(new SmallDoorPuzzle);
+        add(new GumPuzzle);
+        add(new HoorayPuzzle);
+        add(new PlasticDiePuzzle);
+        add(new LutePuzzle);
+        add(new ShorterQueuePuzzle);
+        add(new LongerQueuePuzzle);
+        //add(new BottlePuzzle);
+        add(new PillarPuzzle);
+        add(new MachinePuzzle);
+
+        // considering making these a second-level help
+        // add(new CoconutPuzzle);
+        // add(new SarcophagusPuzzle);
+        // add(new FeetPuzzle);
     }
 
     applyGameFixes();
@@ -719,11 +139,14 @@ void PuzzleManager::start(IFMagnetic* host)
     _a[1] = (_v);               \
 }
 
-const char* PuzzleManager::messageHook(int m)
+std::string PuzzleManager::messageHook(int m, const char* msg)
 {
     // NB: game thread
+
+    string cmd;
+                
+    //LOG3("msg# ", m << " \"" << msg << "\"\n");
     
-    //LOG3("msg# ", m);
     switch (get_game())
     {
     case 1: // the pawn
@@ -787,7 +210,7 @@ const char* PuzzleManager::messageHook(int m)
             // bright light
             if (has("pouch"))
             {
-                return "%s. maybe put [white back](put white in pouch then close pouch) in its pouch";
+                return "%s. Maybe put [white back](put white in pouch then close pouch) in its pouch";
             }
         }
         if (m == 995)
@@ -802,12 +225,61 @@ const char* PuzzleManager::messageHook(int m)
         {
             // game end message
         }
+        break;
+    case 2: // guild
+
+        // WARNING: testing message numbers assumes they don't change.
+        // this will happen if any objects are added etc.
+
+        // This has to agree with the version in guild/last/msginfo.i
+        // to use MSG(n) find the line number in guild.text, subtract MsgMSGBASE
+#define MsgMSGBASE      462
+#define MSG(_n)  (MsgMSGBASE-1 + _n)
+
+        if (!_enabled) break; // don't then! :P
+        
+        if (m == MSG(85)) // too dark to see
+        {
+            IItem lamp = has("lamp");
+            if (lamp)
+            {
+                GrowString gs;
+                IItem cc = closedContainer(lamp);
+                if (cc)
+                {
+                    //LOG3("lamp inside ", cc.toString());
+                    gs.append("open ");
+                    gs.append(cc.tnWord());
+                }
+
+                if (!lamp.isLit())
+                {
+                    if (!gs.isEmpty()) gs.append(" then ");
+                    gs.append("light the Lamp");
+                }
+
+                if (!gs.isEmpty())
+                {
+                    gs.add(0);
+                    string s = gs.start();
+                    cmd = "%s Maybe [" + s + "](" + s + ").";
+                }
+            }
+        }
+        break;
     }
-    return 0;
+
+    if (!cmd.empty())
+    {
+        LOG3("message hook cmd: ", cmd);
+    }
+      
+    return cmd;
 }
 
-std::string PuzzleManager::evalUseXwithYSpecial(IItem xi, IItem yi)
+std::string PuzzleManager::evalUseXwithYSpecial(IItem xi, IItem yi, bool& done)
 {
+    // set `done` to abort passing command forward.
     string cmd;
 
     switch (get_game())
@@ -833,6 +305,103 @@ std::string PuzzleManager::evalUseXwithYSpecial(IItem xi, IItem yi)
             }
         }
         break;
+    case 2: // Guild
+        {
+            if (xi.isMoney())
+            {
+                // drag coin to gate not slot, make it work
+                if (xi.wordIs("coin") && yi.wordIs("barrier"))
+                {
+                    cmd = "put " + xi.toString() + " in slot"; 
+                }
+                else if (yi.wordIs("gatekeeper"))
+                {
+                    // if ratrace in progress
+                    if (has("grey rat"))
+                    {
+                        text("Try betting on a specific rat.");
+                        done = true;
+                    }
+                }
+                else if (yi.wordIs("rat"))
+                {
+                    // if race in progress
+                    if (has("grey rat"))
+                        cmd = "bet " + xi.toString() + " on " + yi.toString();
+                }
+
+                if (!done && cmd.empty() && (yi.isNPC() && !yi.wordIs("teller")))
+                {
+                    // thieves do not give their money away!!
+                    text("You decide not to give your money away.");
+                    done = true;
+                }
+            }
+            else if (yi.wordIs("button") && (xi.isHard() && xi.size() > 2))
+            {
+                // generic press button with something
+                cmd = "press " + yi.toString() + " with " + xi.toString();
+            }
+
+            else if (xi.wordIs("spade") && yi.wordIs("grave"))
+            {
+                cmd = "dig " + yi.toString() + " with " + xi.toString();
+            }
+            else if (xi.wordIs("succulents") && yi.wordIs("feet"))
+            {
+                cmd = "rub " + xi.toString() + " on " + yi.toString();
+            }
+            else if (xi.hardness() == 11 && (yi.isHard() && !yi.isSurface()))
+            {
+                // hit coconut with cue/pick/spade
+                // hit mineral with cue/pick/spade
+                // hit billiard ball with cue etc
+                cmd = "hit " + yi.toString() + " with " + xi.toString();
+            }
+            else if (xi.wordIs("bone") && yi.isLocked())
+            {
+                cmd = "pick " + yi.toString() + " with " + xi.toString() + " then open it";
+            }
+            else if ((xi.wordIs("bird") && yi.wordIs("cage")) ||
+                     (xi.wordIs("cage") && yi.wordIs("bird")))
+            {
+                if (has("mynah bird") && has("bird cage"))
+                {
+                   cmd = "put mynah bird in bird cage";
+                }
+            }
+            else if (xi.wordIs("card") && yi.wordIs("teller"))
+            {
+                if (has("plastic card")) cmd = "show plastic card to teller";
+            }
+            else if ((xi.wordIs("die") && yi.wordIs("anticube")) || (xi.wordIs("anticube") && yi.wordIs("die")))
+            {
+                IItem pd = has("plastic die");
+                IItem ac = has("anticube");
+                if (pd && ac)
+                {
+                   pd.setRelatedTo(ac.id());
+                   text("Carefully you staple the anticube onto the die and try to keeping it balanced. ");
+                   done = true;
+                }
+            }
+            else if ((xi.wordIs("die") || xi.wordIs("anticube")) && yi.wordIs("machine"))
+            {
+                IItem pd = has("plastic die");
+                IItem ac = has("anticube");
+                IItem wm = has("weighing machine");
+                if (pd && ac && wm && pd.isRelatedTo(ac.id()))
+                {
+                   pd.setRelatedTo(0);
+                   cmd = "put plastic die and anticube on weighing machine";
+                }
+            }
+        }
+    }
+
+    if (!cmd.empty())
+    {
+        LOG3("special command; ", cmd);
     }
     
     return cmd;
@@ -843,11 +412,12 @@ void PuzzleManager::applyGameFixes()
     int g = get_game();
     if (!g) return;
     
-    LOG3("Puzzman, ", "applying game fixes");
     switch (g)
     {
     case 1:
         {
+            LOG3("Puzzman, ", "applying game fixes");
+
             IItem("wooden workbench").setMoveable(); // so auto look under works
 
             // you could get the fridge!!
@@ -905,7 +475,7 @@ std::string PuzzleManager::itemToStringSpecial(IItem ii)
     return s;
 }
 
-void PuzzleManager::moveUpdate()
+void PuzzleManager::moveUpdate(int moveCount)
 {
     switch(get_game())
     {
@@ -942,8 +512,52 @@ void PuzzleManager::moveUpdate()
         //uchar* outmode = getcode() + 0x1942;
         //LOG3("outmode, ", (int)*outmode);
         break;
+    case 2: // Guild
+        if (get_current_room() == RNBLACKSQUARE)
+        {
+            // when you reach the back square, mark all squares as
+            // visible on the map.
+            for (int i = RNBLACKSQUARE; i <= RNSQUAREDEATH; ++i)
+            {
+                IItem ri = IItem::getRoom(i);
+                assert(ri);
+                ri.setVisibleOnMap();
+            }
+        }
+        break;
     }
 }
+
+bool PuzzleManager::allowSuggestOpen(IItem ii)
+{
+    bool r = true; // default to allow
+    switch (get_game())
+    {
+    case 1:
+        break;
+    case 2:
+        if (ii == IItem("bird cage")) r = false;
+        else if (ii == IItem("champagne bottle")) r = false;
+        else if (ii == IItem("plastic bag")) r = false;
+        break;
+    }
+    return r;
+}
+
+bool PuzzleManager::allowSuggestGet(IItem ii)
+{
+    bool r = true; // default to allow
+    switch (get_game())
+    {
+    case 1:
+        break;
+    case 2:
+        if (ii == IItem("ivory cube")) r = false;
+        break;
+    }
+    return r;
+}
+
 
 #ifndef STANDALONE
 static void builderEmitter(char c, void* ctx)
@@ -951,7 +565,6 @@ static void builderEmitter(char c, void* ctx)
     GrowString* buf = (GrowString*)ctx;
     buf->add(c);
 }
-
 
 static void buildCommonProductInfo(ProductInfoBuilder& build)
 {
@@ -981,6 +594,9 @@ void PuzzleManager::buildProductInfoJSON(GrowString& buf,
         {
             build.productTitle("The Pawn");
             build.productAuthor("by Magnetic Scrolls");
+
+            build.productMarketAndroid("market://details?id=com.voidware.brahmanpawn");
+            build.productMarketIOS("https://itunes.apple.com/us/app/the-pawn-by-magnetic-scrolls/id1265982535?ls=1&mt=8");
 
             GrowString gs;
             const char* c = 
@@ -1091,6 +707,10 @@ void PuzzleManager::buildProductInfoJSON(GrowString& buf,
             build.productTitle("The Guild of Thieves");
             build.productAuthor("by Magnetic Scrolls");
 
+            build.productMarketAndroid("market://details?id=com.voidware.theguild");
+            // XXX not correct link, fix when page created
+            build.productMarketIOS("https://itunes.apple.com/us/app/the-guild-of-thieves/id1265982535?ls=1&mt=8");
+
             GrowString gs;
             const char* c = 
                 "<h1>The Guild of Thieves<br/><em>by Magnetic Scrolls</em></h1>"
@@ -1100,7 +720,9 @@ void PuzzleManager::buildProductInfoJSON(GrowString& buf,
                 "<ul>"
                 "<li>Hugh Steers</li>"
                 "<li>Stefan Meier</li>"
-                "<li>Rob Steggles</li>"
+                
+                // put back in when he contributes!
+                //"<li>Rob Steggles</li>"
                 "</ul>"
         
                 "<h4>Emulator Team</h4>"
@@ -1136,7 +758,7 @@ void PuzzleManager::buildProductInfoJSON(GrowString& buf,
 
                 "<h4>Music</h4>"
                 "<ul>"
-                "<li>John Molloy</li>"
+                "<li>John Molloy (new music, thanks John!)</li>"
                 "</ul>"
         
                 "<h4>Testing</h4>"
@@ -1192,11 +814,32 @@ void PuzzleManager::buildProductInfoJSON(GrowString& buf,
             build.productThemeContrastColor(MatCol::get(MatCol::getContrastName(colname)).toString());
             
             // cover page
-            build.productCoverTextColor("black");
+
+            //build.productCoverTextColor("black");
+            //build.productCoverEffect("River"); 
+
+#if 1
+            // water ripples against logo
+            build.productCoverTextColor("white");
             build.productCoverTextFont("Kanit Light");
-            //build.productCoverTextWeight(300);
-            build.productCoverEffect("River"); 
-            //build.productCoverEffect("Oceanic");
+            build.productCoverEffect("Ripple"); 
+#endif
+
+#if 0
+            // the bright colour plasma
+            build.productCoverTextColor("white");
+            build.productCoverTextFont("Kanit Light");
+            build.productCoverEffect("Plasma"); 
+#endif
+
+
+#if 0
+            // the plasma blobs
+            build.productCoverTextColor("white");
+            build.productCoverTextFont("Kanit Thin");
+            build.productCoverTextWeight(100);
+            build.productCoverEffect("Plasma2"); 
+#endif
 
             // add features common to magnetic games
             buildCommonProductInfo(build);
@@ -1211,6 +854,23 @@ void PuzzleManager::buildProductInfoJSON(GrowString& buf,
     buf.add(0);  // terminate string
 }
 #endif
+
+void PuzzleManager::enabled(bool v)
+{
+    if (v != _enabled)
+    {
+        _enabled = v;
+        if (_enabled) reset();
+
+        int r = set_REMASTER(v ? 1 : 0);
+        if (!r)
+        {
+            LOG2("MS Puzzle; WARNING: remaster mode failed ", r);
+        }
+        
+        LOG3("PuzzleManager enabled, ", _enabled);
+    }
+}
 
 
 #ifdef STANDALONE

@@ -93,7 +93,7 @@ bool PuzzleManager::goroom(int n)
         else d = dirTable[ti++];
         
         IItem di = cr.getExit(d);
-        if (di.roomNumber() == n)
+        if (di.roomNumber() == (uint)n)
         {
             res = action(IItem::dirName(d)); // go NW etc.
             if (res)

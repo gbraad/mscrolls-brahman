@@ -51,7 +51,7 @@
  
 	include	"equates.asm"
 	include	"macros.asm"
-	include	"nounequ2.asm"      ;FOR NOUNNUM
+	include	"nounequ2.i"      ;FOR NOUNNUM
 	include "verbequ.asm"
 
 	 XREF    ERRHOLD,ERR1,ERR4,VERB,W.BTINA,W.NO.TNG,PLURAL
@@ -810,16 +810,13 @@ P.Refresh
 	DO	P.NOUN
 
    IFNE	   Graphics&C64
-
 	XREF	CAMEOS
 	CALL	CAMEOS		   ;NB takes D0/A0 as current room!
 				   ;and wants to look at D1 !! 
 				   ;sneeky call to PICTURES
-
    ENDC
 
 	CALL    SATMSG
-
 	CMP.W   #2,SCRPNT(A4)	   ;did we do a look last go?
 	BEQ.S   30$	       	   ;EQ=> yes so force room desc etc.
 
@@ -835,21 +832,16 @@ P.Refresh
 30$
 
       IFEQ	THE_PAWN
-
 	XREF	FirstGlance,OtherDescription
-
 	CALL	OtherDescription		;ne => was one, kill others
 	BNE.S	35$
-
       ENDC
 
 	CALL	FMSG			;'real' desc
 
       IFEQ	THE_PAWN
-
 	CALL	FirstGlance
 	CALL	UntilDisturbed
-
       ENDC
 
 	PRINT	<'. '>		;350 nouns * 1 full stop = lots of memory
@@ -858,9 +850,7 @@ P.Refresh
 	GETINFO                    ;      ->A0
 
       IFNE     Graphics
-
 	CALL    PICTURES
-
       ENDC
 	 
 40$
@@ -868,16 +858,12 @@ P.Refresh
 	CALL    FINRELNPC
 
       IFNE    YCHEAT               ;If able to be in REAL DB mode
-
 	TEST_W  CHEAT(A4)          ;and in it
 	BNE.S   50$                ;then do all the (invis) junk anyhow
-
       ENDC
 
       IFNE	THE_PAWN!YCHEAT
-	
 	XREF	SUSSINV
-	
 	TEST_W  USER.DB(A4)        ;THEY WON & 'DBING'?
 	BEQ.S   60$                ;EQ => no, don't do (invis) stuff
 50$

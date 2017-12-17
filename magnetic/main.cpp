@@ -314,19 +314,14 @@ type8 ms_getchar(type8 trans)
     return (type8)c;
 }
 
-void ms_showpic(type32 c,type8 mode, type8 ver, float* profile)
+void ms_showpic(type32 c, type32 picAddr, type8 mode, type8 ver, float* profile)
 {
     /* Insert your favourite picture viewing code here
        mode: 0 gfx off, 1 gfx on (thumbnails), 2 gfx on (normal) */
 
+    printf("Display picture [%d]\n",c);
     if (ver == 2)
-    {
-        printf("Display picture at [%04X]\n",c);  
-    }
-    else
-    {
-        printf("Display picture [%d]\n",c);
-    }
+        printf("Display picture at [%04X]\n",picAddr);  
 
     /* Small bitmap retrieving example */
 
@@ -536,6 +531,7 @@ int main(int argc, char **argv)
 
 void game_state_notify(int movecount) {}
 void update_game_save_area(unsigned char* ptr, size_t size) {}
+void ms_undo_signal() {}
 
 #endif // STANDALONE
 

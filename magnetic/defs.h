@@ -85,7 +85,7 @@ typedef signed   int  type32s;
 * Note: You probably want to put in a file requester!
 \****************************************************************************/
 
-type8 ms_load_file(type8s * name, type8 * ptr, type16 size);
+type8 ms_load_file(type8s * name, type8 * ptr, type16 size, unsigned int pos);
 
 /****************************************************************************\
 * Function: ms_save_file
@@ -102,7 +102,7 @@ type8 ms_load_file(type8s * name, type8 * ptr, type16 size);
 * Note: You probably want to put in a file requester!
 \****************************************************************************/
 
-type8 ms_save_file(type8s * name, type8 * ptr, type16 size);
+type8 ms_save_file(type8s * name, type8 * ptr, type16 size, unsigned int pos);
 
 /****************************************************************************\
 * Function: ms_statuschar
@@ -175,7 +175,7 @@ type8 ms_getchar(type8 trans);
 * Note: For retrieving the raw data of a picture call ms_extract (see below)
 \****************************************************************************/
 
-void ms_showpic(type32 c, type8 mode, type8 ver, float*);
+void ms_showpic(type32 picnum, type32 picAddr, type8 mode, type8 ver, float*);
 
 /****************************************************************************\
 * Function: ms_fatal
@@ -545,9 +545,22 @@ extern type16 get_game();
 extern const type8* get_psudat();
 extern type16 get_object_player_on();
 extern type8* getcode();
+extern type16 get_stopron();
+extern type16 get_cantsave();
+extern void ms_restart_request();
+
+extern type8 get_OUTMODE();
+extern int set_OUTMODE(int v);
+
+extern type8 get_REMASTER();
+extern int set_REMASTER(int v);
+
+extern type8 get_PICTNUM();
+extern int set_PICTNUM(int v);
 
 void game_state_notify(int movecount);
-void update_game_save_area(unsigned char* ptr, size_t size);
+void update_game_save_area(unsigned char* ptr, size_t size, unsigned int addr);
+void ms_undo_signal();
 
 typedef int (*ms_hook)(int, void*, int);
 void set_stop_or_restart_hook(ms_hook hook, void* ctx);

@@ -163,7 +163,9 @@ V.DRINK
     
    
 EDTS.CONSUME
-	
+
+        XREF    CANTSAVE
+        
 	MOVE.W  D0,-(A7)
 	CALL_S  V.TASTE
 	MOVE.W  (A7)+,D0
@@ -173,17 +175,15 @@ EDTS.CONSUME
 	CMP.B   #4,D1              ;POISON ETC ?
 	BMI.S   20$                ;BRANCH IF BAD NEWS
    
-	SUBQ.L  #4,D1              ;VALUE OF FOOD
+	SUBQ.W  #4,D1              ;VALUE OF FOOD
 	ADD.W   D1,C.HP(A4)
- 
 	BRA.S   30$
- 
 20$
 	TEST_B  TIMERA(A4)         ;ALREADY POISONED ?
 	BNE.S   30$                ;NE= YES, SO NO MORE
-	MOVE.B  D1,C.STATUS(A4)
+	MOVE.W  D1,C.STATUS(A4)    ;D1 = 1,2,3
 	MOVE.B  #3,TIMERA(A4)
-   
+        BSET    #0,CANTSAVE(A4)    ;bit 0 reserved for fatals
 30$
 					;IN CASE IT WAS IN CONTAINER 
 	DOGO	SETOUT	            	;OUT OF ADVENTURE + ABOVE

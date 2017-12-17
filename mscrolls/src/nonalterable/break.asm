@@ -65,6 +65,7 @@
 
 	XDEF	V.BREAK
 	XREF	SP.BREAK
+        XREF    REMASTER
 
 V.BREAK
 
@@ -92,6 +93,13 @@ V.BREAK
 	EXG     D0,D5
 	EXG     A0,A5              ;TO CHECK MAIN NOUN
 	CALL    BRKSUB             ;PC OF MAIN
+
+        TEST_B  REMASTER(A4)
+        BNE.S   90$
+
+        ;; BRKSUB breaks brittle things, but here the strongest
+        ;; wins. but we no longer break ordinary things, onlt breakables
+        
 	MOVE.B  1(A5),D1           ;PC OF X
 	AND.B   #$F,D1             ;STR OF X
 	MOVE.B  1(A0),D2           ;PC OF Y
@@ -100,7 +108,9 @@ V.BREAK
 	BHI     BRKD0              ;Y BREAKS (HUH)
 	EXG     D0,D5
 	BRA     BRKD0              ;ELSE X BREAKS
-
+90$        
+	MSGGO	NHAP               ;nothing happens
+        
 
 	ENDC
 
@@ -110,12 +120,14 @@ BRKSUB
 	
 *CHECK OUT BREAKING POTENTIAL OF D5/A5
 	
+        ;;  brittle things break
+
 	MOVE.L  (A7)+,A2           ;RTS, MIGHT NOT RETURN?
 	MOVE.B  1(A5),D1           ;GET PC
 	LSR.B   #4,D1              ;GET HARDNESS
 	BNE.S   08$
 	MOVE.W  D5,D0
-	DOGO	DBS
+	DOGO	DBS                ;hardness void
 08$
 	CMP.B   #1,D1              ;LIQUID?
 	BEQ.S   09$                ;YES  
@@ -125,14 +137,16 @@ BRKSUB
 	DO	P.SUBV
 	MSGGO	UNABLE
 10$
-	CALL    PCOK               ;TOO SOFT??
+	CALL    PCOK               ;TOO SOFT or already broken?
 	BNE.S   99$                ;YES, ERROR PRINTED
-	MOVE.B  1(A5),D1 
+	MOVE.B  1(A5),D1
+      	LSR.B   #4,D1              ;get hardness
 	CMP.B   #$0A,D1            ;BRITTLE?
 	BNE.S   20$
 	EXG     D0,D5
 	CALL    BRKD0              ;D0 BREAKS (PROPERLY THIS TIME!)
 	EXG     D0,D5              ;BAK
+        BRA.S   99$                ;do not return
 20$ 
 	MOVE.L  A2,-(A7)           ;RTS BAK
 99$
@@ -150,12 +164,9 @@ BRKD0
 	BNE.S   20$                ;ALREADY
     
       IFEQ	THE_PAWN
-
 	XREF	SP.BRKD0
-
 	CALL	SP.BRKD0
 	BEQ.S	10$		;EQ => we've said something, be quiet
-
       ENDC
 
 	DO	P.TN
@@ -166,7 +177,6 @@ BRKD0
 20$
 	PULL_L  D1/a0-a2
 	RET
-
 
 BRKQ
 	

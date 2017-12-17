@@ -62,18 +62,14 @@
       XREF     LAST.CH,BIOSA6,BIOS.COU,SPACE
 
      IFNE   SpoolLen
-
       XREF     SPOOLOUT
-
      ENDC
 
     ENDC
 
 
      IFEQ      THE_PAWN
-
       XREF     VERT_BAR
-
      ENDC
 
  
@@ -222,12 +218,10 @@ CHAROUT2
 80$
 
       IFEQ    THE_PAWN
-	
 	CMP.B	#'_',D1
 	BNE.S	81$
 	MOVEQ	#' ',D1
 81$
-
       ENDC
 
 
@@ -305,12 +299,10 @@ DO.JUSTI
 CHAR.SUB
 
       IFEQ	THE_PAWN
-
 	CMP.B	#'_',D1
 	BNE.S	01$
 	MOVEQ	#' ',D1
 01$
-
       ENDC
 
 	CMP.B   #$0A,D1            ;LINE FEED?
@@ -328,10 +320,8 @@ CHAR.SUB
 	PUSH_L  A4/A6        ;SAVE A4 - COUT SAVES LOTS TOO
 
       IFNE     SpoolLen
-
 	LEA     SPOOLOUT,A6        ;deal with printer spool
 	JSR     0(A4,A6.L)
-
       ENDC
 
 	BSR	BIOSA6

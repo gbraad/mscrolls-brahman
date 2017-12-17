@@ -36,6 +36,9 @@
 #include "map.h"
 #include "emux.h"
 
+// room ids for The Guild
+#include "roomsguild.h"
+
 using namespace std;
 
 #define MAP_ROWS 24
@@ -65,31 +68,32 @@ static int gmaps[10][MAP_ROWS][MAP_COLS] = {
                             {  0,  0,  0, 81, 80, 88, 90,  0,  0,  0,  0,  0},
                             { 84, 83, 82,  0,  0,  0,  0,  0,  0,  0,  0,  0}
                         },
-                        { // Guild 0f Thieves
-                            {  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 34, 38, 39,  0,  0},
-                            {  0,  0,  0,  0,  0,  0,  0,  0,  0, 33, 29, 30, 31,  0,  0},
-                            {  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 32,  0, 36,  0,  0},
-                            {  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 35, 37, 20, 21, 27},
-                            { 92,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 22, 18, 17, 26},
-                            {  0, 97,  0, 93,  0,  0,  0,  0,  0,  0,  0, 23, 19, 16, 25},
-                            { 91, 90, 95,  0,  0,  0,  0,  0,  0,  0,  0, 24, 13, 15, 28},
-                            {  0, 96,  0, 94,  0,  0, 76, 73, 75,  0,  0,  0,  0, 14, 68},
-                            {  0,  0, 70,  0, 71,  0, 72, 80,  0,  0,  0,  3,  0,  0,  0},
-                            {  0, 89,  0, 69, 67,  0,  0,  0,  0, 11,  5,  4,  2,  1,  0},
-                            {  0,  0, 86,  0, 81, 77, 74,  0, 79,  7,  6, 10,  0,  0,  0},
-                            {  0, 88, 87,122, 82, 85,  0, 78,  0,  9,  8, 12,  0,  0,  0},
-                            {  0, 65,  0,  0, 83,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0},
-                            {  0,  0,  0,  0, 84,  0,  0, 43,  0,  0,  0, 48,  0,  0,  0},
-                            {  0,  0,  0,123,125,  0,  0, 47,  0, 40,  0, 44,  0,  0,  0},
-                            {  0,  0, 60,124,  0,117,  0, 50, 51, 42,  0, 49,  0,  0,  0},
-                            {  0, 61, 59,  0,  0,  0,  0, 46,  0, 41,  0, 45,  0,  0,  0},
-                            {  0, 62, 58, 55,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0},
-                            {  0,  0, 56,  0,  0,  0,  0, 98,109,107,106,114,  0,  0,  0},
-                            { 64, 63, 66, 57,  0,  0,  0,101,112,105,110,104,  0,  0,  0},
-                            {  0,  0,  0,  0,  0,  0,  0,114,103,108,113,102,  0,  0,  0},
-                            {  0,  0,  0,  0,  0,  0,  0,114,114,111,100, 99,  0,  0,  0},
-                            {  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 52, 53, 54}
-                        },
+   { // Guild 0f Thieves
+       {  0     ,  0      ,  0     ,  0    ,  0        ,  0         ,  0     ,  0      ,  0            ,  0             ,  0             , RNBATHROOM     , RNROOM3        , RNROOM4    ,  0      ,  0},
+       {  0     ,  0      ,  0     ,  0    ,  0        ,  0         ,  0     ,  0      ,  0            ,  0             , RNLIBRARY      , RNCORRIDOR1    , RNCORRIDOR2    , RNCORRIDOR3,  0      ,  0},
+       {  0     ,  0      ,  0     ,  0    ,  0        ,  0         ,  0     ,  0      ,  0            ,  0             ,  0             , RNCORRIDOR4    ,  0             , RNBEDROOM3 ,  0      ,  0},
+       {  0     ,  0      ,  0     ,  0    ,  0        ,  0         ,  0     ,  0      ,  0            ,  0             ,  0             , RNBEDROOM2     , RNLAB          ,  0         ,  0      ,  0},
+       {  0     , RNBHSE  ,  0     ,  0    ,  0        ,  0         ,  0     ,  0      ,  0            ,  0             ,  0             , RNPATH         , RNSTABLE       , RNCELLAR   ,  0      ,  0},
+       {  0     ,  0      , RNDRM5 ,  0    , RNDRM1    ,  0         ,  0     ,  0      ,  0            ,  0             , RNLOUNGE       , RNHALL2        , RNHALL1        , RNSWAY5    ,  0      ,  0},
+       {  0     ,  0      ,  0     , RNDRM3,  0        ,  0         ,  0     ,  0      ,  0            ,  0             , RNGALLERY      , RNYARD         , RNKITCHEN      , RNPASSAGE1 ,  0      ,  0},
+       {  0     ,  0      , RNDRM4 ,  0    , RNDRM2    ,  0         , RNGDN2 , RNTJUNC2, RNAVRE        , RNCAGE         , RNROOM1        , RNGATEHOUSE    , RNQUARTERS     , RNROOM2    ,  0      ,  0},
+       {  0     , RNSTPS  , RNFNRM ,  0    ,  0        ,  0         , RNPSG4 , RNTJUNC1,  0            ,  0             , RNPSG7         ,  0             , RNBEDROOM1     , RNPASSAGE3 ,  0      ,  0},
+       {  0     , RNSHAFT1,  0     , RNPSG2,  0        ,  0         , RNHSE  , RNTJUNC3,  0            , RNOFFIS        ,  0             ,  0             , RNSCRUB1       ,  0         ,  0      ,  0},
+       {  0     , RNCRAB1 , RNRMUD ,  0    , RNROOM9   ,  0         ,  0     ,  0      ,  0            , RNENTR         , RNHGROUND      , RNSCRUB3       , RNSCRUB2       , RNJETTY    , RNBOAT  ,  0},
+       { RNFACE , RNCAVE2 , RNCAVE3, RNRRM ,  0        , RNFRK      ,  0     ,  0      ,  0            ,  0             , RNFOREST2      , RNFOREST1      , RNFIELD        ,  0         ,  0      ,  0},
+       {  0     , RNCAVE1 , RNTPWFL, RNRVR , RNKBANK   , RNSHOP1    , RNCEMTR,  0      ,  0            ,  0             , RNFOREST4      , RNFOREST3      , RNMILL1        ,  0         ,  0      ,  0},
+       {  0     , RNBANK  ,  0     ,  0    ,  0        , RNSHOP2    ,  0     ,  0      ,  0            ,  0             ,  0             ,  0             ,  0             ,  0         ,  0      ,  0},
+       {  0     , RNSUMP  ,  0     ,  0    ,  0        , RNSHOP3    ,  0     ,  0      , RNSTAIR1      ,  0             ,  0             , RNSWAY2        ,  0             ,  0         ,  0      ,  0},
+       {  0     , RNTUNNEL,  0     ,  0    , RNINBANK  , RNTILL1    ,  0     ,  0      , RNSWAY1       ,  0             , RNACHAM        , RNSTAIR2       ,  0             ,  0         ,  0      ,  0},
+       { RNWELL3, RNWELL2 , RNWELL1,  0    , RNMANOFFIS, RNTHREEROOM,  0     ,  0      , RNSWAY4       , RNORGANROOM    , RNTEMPLE       , RNSWAY3        ,  0             ,  0         ,  0      ,  0},
+       {  0     ,  0      ,  0     ,  0    ,  0        , RNTWOROOM  ,  0     ,  0      ,  0            ,  0             , RNGDN1         , RNSTAIR3       ,  0             ,  0         ,  0      ,  0},
+       {  0     ,  0      ,  0     ,  0    ,  0        , RNONEROOM  ,  0     ,  0      , RNSTAIR4      ,  0             ,  0             ,  0             ,  0             ,  0         ,  0      ,  0},
+       {  0     ,  0      ,  0     ,  0    ,  0        , RNSIXROOM  ,  0     ,  0      , RNBLACKSQUARE , RNINDIGOSQUARE1, RNBLUESQUARE1  , RNGREENSQUARE1 , RNREDSQUARE3   ,  0         ,  0      ,  0},
+       {  0     ,  0      ,  0     ,  0    ,  0        , RNFIVEROOM ,  0     ,  0      , RNREDSQUARE2  , RNVIOLETSQUARE1, RNYELLOWSQUARE2, RNINDIGOSQUARE2, RNYELLOWSQUARE1,  0         ,  0      ,  0},
+       {  0     ,  0      ,  0     ,  0    ,  0        , RNFOURROOM ,  0     ,  0      , RNORANGESQURE3, RNORANGESQUARE2, RNBLUESQUARE3  , RNVIOLETSQUARE2, RNORANGESQUARE1,  0         ,  0      ,  0},
+       {  0     ,  0      ,  0     ,  0    ,  0        ,  0         ,  0     ,  0      , RNGREENSQUARE2, RNYELLOWSQUARE3, RNINDIGOSQUARE3, RNREDSQUARE1   , RNWHITESQUARE  ,  0         ,  0      ,  0},
+       {  0     ,  0      ,  0     ,  0    ,  0        ,  0         ,  0     ,  0      ,  0            ,  0             ,  0             ,  0             ,  0             , RNCRYPT    , RNSHRINE, RNLIBRARY2}
+    },
                         { // Jinxter
                             {  0,  0,  9,  0,  0, 12,  0,  0,  0,  0,  0,  0,  0,  0,  0},
                             {  0,  0,  8,  0,  0, 13, 15, 17,  0,  0, 72,  0, 77,  0,  0},

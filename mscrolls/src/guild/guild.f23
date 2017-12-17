@@ -131,12 +131,15 @@ synonym "pee" { piss verb }
 synonym "toss" { roll verb }
 synonym "beat" { hit verb }
 synonym "drag" { pull verb }
+synonym "strum" { play verb }
+synonym "dive" { swim verb }
 
 synonym "gold" { golden adj }
 synonym "gray" { grey adj }
 synonym "tip" { empty verb }
 synonym "unzip" { open verb }
 synonym "unscrew" { open verb }
+synonym "towards" { TO conj }
 
 
 room boat "In.the.Boat" {
@@ -179,7 +182,7 @@ looking, knot
 room jetty "On.the.jetty" {
 	desc {
 The joints of this rickety old jetty are becoming rotten and warped with
-constant lapping of the river water. The small boat is moored here off the east
+constant lapping of the river water. The small boat is moored here by a rope off the east
 end of the jetty; westward is a tract of uncultivated land and to the southwest
 lies a field of golden wheat
 	}
@@ -256,7 +259,7 @@ room scrub3 "Scrub" {
 	desc {
 This part of the scrub seems a lot healthier than the regions which lie to the
 northeast and east; there is actually some grass growing here amongst the
-tangled undergrowth! Southwestward leads into a wood, southward to a copse and
+tangled undergrowth. Southwestward leads into a [wood], southward to a copse and
 southeastward to a field of golden wheat. Westward takes you onto the side of
 a hill which rises up above the scrub and to the north is the moat of a homely
 castle and its drawbridge
@@ -283,7 +286,7 @@ castle and its drawbridge
 
 room forest1 "Copse" {
 	desc {
-This copse, full of strong saplings, each about chest height, continues south
+This copse, full of strong saplings, each about [chest] height, continues south
 and west, where the trees become taller and more densely populated
 forming a forest of sorts. Northwestward lies a hill which rises up out of the
 scrub area to the north and northeast, and eastward is a field of
@@ -382,7 +385,7 @@ copse to the northeast
 room field "Golden.Wheatfield" {
 	desc {
 Golden wheat, rippling gently in the breeze, surrounds you in this picturesque
-field. Sitting in the southern end of the field is a windmill, its vanes
+field. Sitting in the southern end of the field is a [windmill](do mill), its vanes
 shimmering in the bright sunlight. To the northeast is the jetty, to the north
 and northwest, scrub, and a wood lies westward
 	}
@@ -400,7 +403,7 @@ and northwest, scrub, and a wood lies westward
 		west       forest1
 		northwest  scrub3
 		south	   mill1
-		up	   mill1
+#		up	   mill1
 		in	   mill1
 		out	   jetty
 	}
@@ -468,7 +471,7 @@ furnished
 		northeast  nway_wall
 		west       nway_wall
 		east       nway_wall
-		down	   field
+#		down	   field
 		out	   field
 	}
 	no_article
@@ -478,7 +481,7 @@ room gatehouse "Gatehouse" {
 	desc {
 The gatehouse is a tall, airy room built from large blocks of stone.
 The drawbridge leads to the south, and another exit leads north. A lever
-in the south wall is used to raise and lower the drawbridge
+in the [south] [wall] is used to raise and lower the drawbridge
 	}
 	scen_noun_a blocks 
 #	scen_noun_a stone	# also an adj/noun
@@ -501,9 +504,9 @@ in the south wall is used to raise and lower the drawbridge
 
 room bedroom1 "Bedroom" {
 	desc {
-This is the gatekeeper's room which smells rather strongly of feet. Amongst the
-general mess a small bed stands against the south wall, opposite the
-room's only exit
+This is the gatekeeper's room which smells rather strongly of [feet]. Amongst the
+general mess a small bed stands against the far [wall], opposite the
+room's only exit north
 	}
 	scen_noun_a mess 
 
@@ -526,7 +529,7 @@ room's only exit
 room quarters "quarters" {
 	desc {
 The servant's quarters are sparsely furnished and a trifle on the cold side.
-An antique cabinet stands against the east wall and there are exits leading
+An antique cabinet stands against one [wall] and there are exits leading
 north and south
 	}
 	lit_room
@@ -549,7 +552,7 @@ room kitchen "castle Kitchen" {
 	desc {
 The cleanliness and hygiene of the castle kitchen gives you hope for the guests
 at the forthcoming banquet. Apart from the usual utensils there is a sink with
-a cupboard underneath it and a worktop against the west wall. Also, there are
+a cupboard underneath it and a worktop against the side [wall]. Also, there are
 exits in the north, south and east walls
 	}
 	scen_noun_a utensils 
@@ -559,7 +562,7 @@ exits in the north, south and east walls
 	net {
 		north      hall1
 		south      quarters
-		down       passage1
+#		down       passage1
 		east       passage1
 		northeast  nway_wall
 		southeast  nway_wall
@@ -602,8 +605,8 @@ room hall2 "entrance Hall" {
 	desc {
 All visitors are brought to this entrance hall on arrival at the castle. The
 floor is covered with a vast rug, woven in traditional Kerovnian style, and a
-wooden staircase leads up to the top floor. There are also exits in all four
-walls
+wooden staircase leads up to the top [floor]. There are also exits in all four
+walls; north,south,east and west
 	}
 
 	lit_room
@@ -674,8 +677,8 @@ south to the entrance hall
 
 room stable "stable" {
 	desc {
-Straw is strewn about all over the floor in this stable. The place smells
-heavily of manure and flies are buzzing around everywhere
+Straw is strewn about all over the [floor] in this stable. The place smells
+heavily of manure and flies are buzzing around everywhere. West gets you out of here
 	}
 	scen_noun_a manure 
 #	scen_noun_a straw	# hmmm... as its real as well!
@@ -727,7 +730,7 @@ room gallery "gallery" {
 	desc {
 Once upon a time, this gallery held the finest collection of art in all
 Kerovnia. However, during these days of financial hardship, most of the
-classics have been sold and only a few paintings by obscure contemporary
+classics have been sold and only a few [paintings](look paintings) by obscure contemporary
 artists remain. An exit leads north into the lounge and an ornately carved
 archway provides an exit south
 	}
@@ -754,8 +757,8 @@ room room1 "drawing Room" {
 	desc {
 The Kerovnian ladies retire here after banquets and other functions at the
 castle. The room is mainly decorated in a pale yellow colour but there is an
-antique red leather settee against the south wall that clashes violently. The
-only exit from here is back through the archway into the gallery
+antique red leather settee against one [wall] that clashes violently. The
+only exit from here is north through the archway into the gallery
 	}
 	scen_noun_c colour 
 	scen_noun_c archway 
@@ -781,8 +784,8 @@ room passage1 "gloomy Passage" {
 	desc {
 This damp and gloomy passage is full of dust and cobwebs with small beetles
 scuttling around everywhere. Some steps at its west end lead up to the
-kitchen. There is also a door in the north wall and an opening in the south
-wall
+kitchen. There is also a door in the north [wall] and an opening in the south
+[wall]
 	}
 	scen_noun_a cobwebs 
 	scen_noun_a beetles 
@@ -793,7 +796,7 @@ wall
 		north      nway_door
 		west       kitchen
 		south      room2
-		up         kitchen
+#		up         kitchen
 		northeast  nway_wall
 		east       nway_wall
 		southeast  nway_wall
@@ -808,7 +811,7 @@ wall
 room sway5 "flight_of_steps" {
 	desc {
 You are at the top of a small flight of steps leading down to the wine
-cellar. Behind you in the south wall is part of the castle drainage system 
+cellar. Behind you in the south [wall] is part of the castle drainage system 
 and a door leading back into the passage
 	}
 
@@ -906,7 +909,8 @@ room corridor2 "wooden tiled Corridor" {
 	desc {
 In this part of the corridor the wooden tiles form a mosaic of a huge galleon,
 laden with exotic goods from far-away lands. The corridor runs east-west and
-there is also an entrance to a room in the north wall
+there is also an entrance to a room in the north [wall]
+
 	}
 	scen_noun_a tiles 
 	scen_noun_a mosaic 
@@ -959,7 +963,7 @@ from here into rooms and the corridor continues westward
 room corridor4 "wooden tiled Corridor" {
 	desc {
 The mosaic on the floor in this part of the corridor depicts an outrageous
-party where the guests are all bears and a man in a cage is provided for their
+party where the guests are all bears and a man in a [cage] is provided for their
 entertainment. The corridor continues northward and there is an entrance to
 one of the castle's bedrooms at the southern end of the corridor
 	}
@@ -984,10 +988,10 @@ one of the castle's bedrooms at the southern end of the corridor
 
 room library "castle Library" {
 	desc {
-There seems to be no classification system for the hundreds of tomes in this
+There seems to be no classification system for the hundreds of [tomes](do books) in this
 library; for they appear to have been put away at random. A simple reading
 desk stands in the midst of this wealth of acquired knowledge and there is an
-exit in the east wall back into the corridor
+exit east back into the corridor
 	}
 
 	lit_room
@@ -1032,9 +1036,9 @@ exit is south into the corridor
 
 room bedroom2 "main Bedroom" {
 	desc {
-In the castle owner's bedroom you find a walnut cabinet against the east wall,
-which is obviously used as a bedside table. There is a single exit in the
-north wall which takes you back into the corridor
+In the castle owner's bedroom you find a walnut cabinet against the east [wall],
+which is obviously used as a bedside table. There is a single exit north
+which takes you back into the corridor
 	}
 
 	lit_room
@@ -1057,7 +1061,7 @@ room bedroom3 "spare Bedroom" {
 	desc {
 The spare bedroom has numerous small embroideries fixed to the walls that
 convey such pearls of wisdom as 'Home Sweet Home' and 'A Kerovnian's home is
-his (or her) castle' and 'Rubbing a horse shoe brings good luck'. There is a bed in here and a large wardrobe stands against the south wall. The only exit is northward, into the corridor
+his (or her) [castle]' and '\_Rubbing a horse shoe brings good luck_\'. There is a bed in here and a large wardrobe stands against the south wall. The only exit is northward, into the corridor
 	}
 	scen_noun_a embroideries 
 
@@ -1081,8 +1085,8 @@ room lab "secret Laboratory" {
 	desc {
 You find yourself in a laboratory that would be the envy of many an aspiring
 magician. Indeed, the gothic magnificence which manifests itself here demands
-the attention of even the most casual observer. Occupying the south wall is
-a bookshelf while the room's only exit takes the form of an opening to
+the attention of even the most casual observer. Occupying the one [wall] is
+a bookshelf while the room's only exit takes the form of an [opening] to
 the west which appears to resonate to the whims of some unknown agency
 	}
 
@@ -1104,8 +1108,8 @@ the west which appears to resonate to the whims of some unknown agency
 
 room room3 "billiard Room" {
 	desc {
-This is a large room with dim lighting, dominated by a billiard table that is
-kept in superb condition. A cue rack and blackboard are on the west wall and
+This is a large room with dim lighting, dominated by a [billiard](play billiards) table that is
+kept in superb condition. A cue rack and blackboard are on the west [wall] and
 there are exits in the south and east walls
 	}
 	scen_noun_c lighting 
@@ -1180,7 +1184,7 @@ breeze through the north exit
 
 room gdn1 "temple Garden" {
 	desc {
-Bees buzz lazily around their hive in this sedate little garden. Austere 
+Bees buzz lazily around their [hive](do beehive) in this sedate little garden. Austere 
 railings which section the temple off from the rest of the wood detract from
 the general summery atmosphere. The temple is back north
 	}
@@ -1208,7 +1212,7 @@ room temple "temple" {
 Frescoes depicting the religious exploits of the temple's most respected
 followers adorn the altar and walls, making the otherwise sombre process of
 worship an exciting and colourful spectacle. Stairways are situated in the
-four corners of the temple (NE, SE, SW, NW) and there are also exits south and north
+four corners of the temple (northeast, southeast, southwest and northwest) and there are also exits south and north
 	}
 	scen_noun_c frescoes 
 
@@ -1223,7 +1227,6 @@ four corners of the temple (NE, SE, SW, NW) and there are also exits south and n
 		northwest  stair1
 		east       nway_wall
 		west       nway_wall
-#		down	   well1	Through the trapdoor!
 		out	   acham
 	}
 }
@@ -1333,6 +1336,7 @@ above it
 	scen_noun_c word 
 	scen_noun_c letters 
 
+        lit_room
 	location sway1
 	net {
 		southeast  blacksquare
@@ -1448,9 +1452,9 @@ this room which overlooks the frescoes of the main temple and west leads back ou
 room crypt "Crypt" {
 	desc {
 Damp moss covers a huge stone sarcophagus in the centre of this crypt. Earth
-covers the floor with heavy footprints between an east exit in the wall
+covers the [floor] with heavy footprints between an east exit
 and the entrance. Engraved in large letters above the northwest exit is
-the word 'WOBNIAR'
+the word '**WOBNIAR**'
 	}
 	scen_noun_a moss 
 	scen_noun_a earth 
@@ -1477,8 +1481,8 @@ room shrine "shrine" {
 	desc {
 Draped in black, this shrine contains many sacrosanct objects of the dark side
 of religion. Expecting some evil demon to startle you at any moment, you
-cautiously look around and notice the exit west in the wall as well as a shiny
-black door, neatly concealed behind the drapes, in the east wall
+cautiously look around and notice the exit west in the [wall] as well as a shiny
+black door, neatly concealed behind the drapes, in the east [wall]
 	}
 	scen_noun_a objects 
 	scen_noun_a drapes 
@@ -1500,7 +1504,7 @@ black door, neatly concealed behind the drapes, in the east wall
 
 room library2 "black Library" {
 	desc {
-A deathly hush hangs in the air in this cramped little library. A few black,
+A deathly hush hangs in the [air] in this cramped little library. A few black,
 leather-bound books (with their titles also written in black) sit on shelves
 against the wall. The door west leads back to the shrine
 	}
@@ -1529,11 +1533,11 @@ against the wall. The door west leads back to the shrine
 
 room well1 "Well" {
 	desc {
-It is too dark to see anything much here. The only thing of which you can
-be sure is that you are underwater
+It is too dark to see anything much here even if the [lamp] worked. **The only thing of which you can be sure is that you are underwater**
 	}
 	location well1
 	lit_room
+        wet
 	net {
 		down       well2
 		north      nway_wall
@@ -1549,13 +1553,14 @@ be sure is that you are underwater
 
 room well2 "Well" {
 	desc {
-Panic-stricken in this underwater nightmare, you notice that to the north is a
-tunnel which seems slightly less dark than your present location
+**Panic-stricken in this underwater nightmare, you notice that to the north is a
+tunnel which seems slightly less dark than your present location**
 	}
 #	scen_noun_d tunnel 		;is 3 nouns!!!
 
 	lit_room
 	location well2
+        wet
 	net {
 		north      tunnel
 		up         well1
@@ -1574,13 +1579,14 @@ tunnel which seems slightly less dark than your present location
 
 room well3 "Well" {
 	desc {
-Here, near the bottom of the well, your limbs are becoming numb with the cold
-and you are fast running out of oxygen. Your situation seems hopeless
+Here, near the bottom of the well, **your limbs are becoming numb with the cold
+and you are fast running out of oxygen. Your situation seems hopeless unless you can swim back up**
 	}
 	scen_noun_e limbs 
 
 	lit_room
 	location well3
+        wet
 	net {
 		up         well2
 		down       well3
@@ -1599,11 +1605,12 @@ and you are fast running out of oxygen. Your situation seems hopeless
 
 room tunnel "Tunnel" {
 	desc {
-The water is slightly warmer here and some light at the north end of the
-tunnel brings hope to your flagging morale
+**The water is slightly warmer here and some light at the north end of the
+tunnel brings hope to your flagging morale**
 	}
 	location tunnel
 	lit_room
+        wet
 	net {
 		north      sump
 		south      well2
@@ -1636,8 +1643,8 @@ the well
 	net {
 		north      bank
 		south      tunnel
-		up         bank
-		down       tunnel
+#		up         bank
+#		down       tunnel
 		out	   tunnel
 		in	   bank
 	}
@@ -1664,7 +1671,7 @@ and has some very extraordinary lumps in it. Making the sump to the south look i
 room shaft1 "thin Shaft" {
 	desc {
 Clambering about and wedging yourself between the walls of this slippery shaft,
-you can see that it continues upwards, and below, drops you onto a thin,
+you can see that it continues upwards, and [below](down), drops you onto a thin,
 twisting passage
 	}
 
@@ -1713,8 +1720,8 @@ passageway narrowing to only a crack northwards
 room cave2 "claustrophobic small Chamber" {
 	desc {
 The crabwalk leads off north from this small chamber and a wet rope,
-fixed to the wall, provides access to a passage high up in the east [wall].
-Leading west is a small opening at ground level through which you could probably
+fixed to the [wall], provides access to a passage higher in the east [wall].
+Leading west is a small [opening] at ground level through which you could probably
 just crawl and, through an exit in the south [wall], you can hear the sound of
 gushing water
 	}
@@ -1728,7 +1735,7 @@ gushing water
 		east       cave3
 		south      cave1
 		west       face
-		up         cave3
+#		up         cave3
 		northeast  nway_rockface
 		southeast  nway_rockface
 		southwest  nway_rockface
@@ -1777,19 +1784,20 @@ Refreshing though it may be, it still drenches you. After falling to the
 	}
 
 	location cave1
+        lit_room
 	net {
 		north      cave2
 		up         nway_misc3
-		out      cave2
+		out        cave2
 		in         nway_misc3
 	}
 }
 
 room cave3 "craggy Cave" {
 	desc {
-Fixed to the floor at the west edge of this cave is a rope which provides
+Fixed to the [floor] at the west edge of this cave is a rope which provides
 the only escape. With just enough room to manoeuvre without banging your head,
-you can see you are in a rough, craggy cave. Water drips from the ceiling and
+you can see you are in a rough, craggy cave. [Water] drips from the ceiling and
 streams out by the rope
 	}
 #	scen_noun_a stream			#this is a noun
@@ -1799,7 +1807,7 @@ streams out by the rope
 	location cave3
 	net {
 		west       cave2
-		down	cave2
+#		down	   cave2
 		north      nway_rockface
 		northeast  nway_rockface
 		east       nway_rockface
@@ -1874,6 +1882,7 @@ off to the southwest
 	synonyms { junction }
 
 	force_adj
+        lit_room
 	location room9
 	net {
 		southwest      nway_ironbars
@@ -1886,9 +1895,9 @@ off to the southwest
 
 room psg2 "hot Passage" {
 	desc {
-A hot, white glow from the northwest end of this tunnel burns your face and
-all but takes your breath away. Halfway along, a fault in the southwest wall
-allows escape from the heat
+A hot, white glow from the northwest end of this tunnel burns your [face] and
+all but takes your breath away. Halfway along, a fault in the southwest [wall]
+allows escape from the heat. Southeast heads back to the junction
 	}
 	scen_noun_c glow 
 	scen_noun_c fault 
@@ -1906,12 +1915,13 @@ allows escape from the heat
 
 room psg4 "Passage" {
 	desc {
-'ZOOLOGICAL AND BOTANICAL GARDENS' is written above a toll gate at the east
+'\_Zoological And Botanical Gardens_\' is written above a [toll gate](do barrier) at the east
 end of this passage which also turns southwest to a junction. Next to the
-toll gate in the north wall of the passage is a night safe
+toll gate in the north [wall] of the passage is a night safe
 	}
 
 	location psg4
+        lit_room
 	net {
 		east       tjunc1
 		southwest  room9
@@ -1927,11 +1937,12 @@ room tjunc1 "Crossroads" {
 	desc {
 The smells and sounds of the zoo remind you of the happy times of your youth.
 Northward, you can hear the cackle of talking birds and southward is the
-familiar stench of the animals' food
+familiar stench of the animals' food, and west exits the zoo
 	}
 #	scen_noun_e zoo		# is an adj
 #	scen_noun_b food 	# is a noun
 
+        lit_room
 	location tjunc1
 	net {
 		north      tjunc2
@@ -1942,7 +1953,7 @@ familiar stench of the animals' food
 
 room tjunc2 "t-junction" {
 	desc {
-On the north wall here are directions east to the aviary and west to the hot
+On the [wall] here are directions east to the aviary and west to the hot
 house, the only other exit being south
 	}
 
@@ -1951,6 +1962,7 @@ house, the only other exit being south
 
 	synonyms { junction }
 
+        lit_room
 	location tjunc2
 	net {
 		east       avre
@@ -1961,13 +1973,13 @@ house, the only other exit being south
 
 room tjunc3 "t-junction" {
 	desc {
-This junction leads west to the jungle house, while in the east wall is a door
-marked 'PRIVATE'
+This junction leads west to the jungle house, while in the east [wall] is a door
+marked '\_Private_\', while north leads back to the crossroads
 	}
 #	scen_noun_d house 		# is a noun (or 2)
 
 	synonyms { junction }
-
+        lit_room
 	location tjunc3
 	net {
 		north      tjunc1
@@ -1997,7 +2009,7 @@ room gdn2 "hot House" {
 	desc {
 Sweating profusely in the humid atmosphere ideal for cultivating tropical
 plants, you see that, amongst the weird and wonderful flora, is a palm tree,
- a bed of succulents and some spiny cacti
+ a bed of succulents and some spiny cacti. The exit is east
 	}
 	scen_noun_c atmosphere 
 	scen_noun_a plants 
@@ -2015,9 +2027,9 @@ plants, you see that, amongst the weird and wonderful flora, is a palm tree,
 room hse "insect reptile jungle House" {
 	desc {
 This dimly lit collection of insects and reptiles comes from all corners of
-Kerovnia, but two cages in particular (one small and one large) catch your eye
+Kerovnia, but two [cages](look cages) in particular (one small and one large) catch your [eye]
 as they have had their glass fronts removed, allowing the creatures that were
-there to escape. A plaque is hanging near the larger cage
+there to escape. A plaque is hanging near the larger [cage](do large cage) and east leads back out
 	}
 	scen_noun_b fronts 
 	scen_noun_a creatures 
@@ -2032,10 +2044,9 @@ there to escape. A plaque is hanging near the larger cage
 
 room offis "zoo Office" {
 	desc {
-A scruffy workplace with scraps of food slung across the floor along with
-various offical papers. Against the south wall is an old desk that has been
-continually knocked about during its stay here. There is also a door in the
-northeast corner of the room
+A scruffy workplace with scraps of food slung across the [floor] along with
+various offical papers. Against the far [wall] is an old desk that has been
+continually knocked about during its stay here. There is also a white door in the northeast corner of the room and the office door west
 	}
 #	scen_noun_a food 	# is a noun
 	scen_noun_a papers 
@@ -2083,10 +2094,10 @@ southwest
 
 room cage "In.The.Cage" {
 	desc {
-A paltry little food tray and droppings on the floor are the only comforts
-provided for the mynah bird in this pitifully small cage. Looking out onto the
+A paltry little [food] tray and droppings on the [floor] are the only comforts
+provided for the mynah bird in this pitifully small [cage]. Looking out onto the
 aviary from inside, you get a vivid idea of what prison life would be like if
-you were ever caught practising your chosen profession
+you were ever caught practising your chosen profession. The small door behind you leads back to the passage
 	}
 	scen_noun_a tray 
 	scen_noun_a droppings 
@@ -2107,6 +2118,7 @@ leads off south
 	}
 	synonyms { fork }
 
+        lit_room
 	location frk
 	net {
 		southeast  nway_misc1
@@ -2120,14 +2132,14 @@ room shop1 "Outside_the_shop" {
 The shop which confronts you is sombre and black: it is an undertaker's,
 catering for family bereavements and untimely ends (or so it says on the board
 hanging above the shop). There is an 'out to lunch' sign on the front door to
-the south. A path leads off to the west
+the south. A path leads off to the west and back north
 	}
 #	scen_noun_a sign 		#is 2 nouns
 #	scen_noun_a board		# ditto
 	scen_noun_a path
 
 	synonyms { shop }
-	!lit_room
+	lit_room
 	location shop1
 	net {
 		north      frk
@@ -2139,13 +2151,14 @@ the south. A path leads off to the west
 
 room shop2 "shop Front" {
 	desc {
-Most of the shop floor is covered in black furnishings and a casket rests next
+Most of the shop [floor] is covered in black furnishings and a casket rests next
 to a polished counter to the south
 	}
 	scen_noun_a furnishings 
 	scen_noun_e hiding_place	#This is relevant
 	scen_noun_f corpse		#Hmm,'THE' corpse?? No,'A' corpse!!
 
+        lit_room
 	synonyms {shop}
 	force_adj
 	location shop2
@@ -2166,9 +2179,10 @@ room shop3 "behind.the.counter" {
 	desc {
 To a morally sound person, there is little of interest behind this
 beautifully polished counter; but to you, a professional thief, there is a
-till which certainly catches your eye
+till which certainly catches your [eye]
 	}
 	location shop3
+        lit_room
 	net {
 		north      shop2
 		northeast  nway_wall
@@ -2184,10 +2198,9 @@ till which certainly catches your eye
 
 room cemtr "Cemetery" {
 	desc {
-Overgrown with underground weeds, the three most prominent graves have
-impressive headstones, each larger than the last. A yew tree solemnly
-overlooks the whole scene from its location by the iron gate which leads to
-this place. A gravedigger is hard at work here
+Overgrown with underground weeds, the three most prominent [graves](look graves) have
+impressive [headstones](look headstones), each larger than the last. A yew tree solemnly
+overlooks the whole scene from its location by the iron gate which leads northwest from this place. A gravedigger is hard at work here
 	}
 	scen_noun_a weeds 
 
@@ -2208,13 +2221,13 @@ northeast
 	}
 	scen_noun_c edge 
 	scen_noun_c echoes 
-
+        lit_room
 	force_adj
 	location rrm
 	net {
 		northeast  nway_ironbars
 		south      rvr
-		down       rvr
+#		down       rvr
 	}
 }
 
@@ -2228,11 +2241,11 @@ it westward through a high opening
 # I think its a bit better now -Bob
 
 	scen_noun_e knees 
-
+        lit_room
 	location rvr
 	net {
 		west	tpwfl
-		up	rrm
+#		up	rrm
 		north	rrm
 	}
 	no_article
@@ -2247,7 +2260,7 @@ still manage to go eastward, upstream, thanks to your balance training
 	scen_noun_c spume 
 	scen_noun_c abyss		#Relevant!
 	scen_noun_f skis		# Ditto
-
+        lit_room
 	location tpwfl
 	net {
 		east       rvr
@@ -2269,7 +2282,7 @@ The heat from the passage through the fault in the northeast corner can hardly
 be felt at all in here. Instead, a thin beam of light which traverses the room
 from east to west, heats it and provides illumination. A mud pool in the
 middle of the room, about a metre in diameter, occasionally lets out a 'glop'
-noise when a bubble bursts at its surface
+noise when a bubble bursts at its [surface]
 	}
 	scen_noun_c heat 
 	scen_noun_c fault 
@@ -2287,10 +2300,7 @@ noise when a bubble bursts at its surface
 
 room fnrm "room_of_hot_coals" {
 	desc {
-White hot coals cover the floor of the western half of this room, creating a
-powerful glow which singes the few hairs on your arms. The glow forces you to
-avert your eyes before they are permanently damaged, but not before you notice
-a set of steps on the other side of the coals
+**White hot coals cover the [floor] of the western half of this room**, creating a powerful glow which singes the few hairs on your arms and melts your feet. The glow forces you to avert your eyes before they are permanently damaged, but not before you notice a set of steps on the other side of the coals
 	}
 	scen_noun_e hairs 
 	scen_noun_c glow 
@@ -2300,15 +2310,15 @@ a set of steps on the other side of the coals
 	net {
 		southeast       psg2
 		west       stps
-		up	stps		
+#		up	stps		
 	}
 }
 
 room stps "flight_of_steps" {
 	desc {
-On this flight of steps you can see the glow and feel the heat of the coals
-below, but upward leads into more familiar territory; cold, unwelcoming
-darkness
+On this flight of steps you can see the **glow and feel the heat of the coals
+[below](down) stinging your feet**, but upward leads into more familiar territory; unwelcoming
+coldness
 	}
 	scen_noun_c glow 
 	scen_noun_c heat 
@@ -2319,35 +2329,35 @@ darkness
 	net {
 		up         bhse
 		east	   fnrm
-		down       fnrm
+#		down       fnrm
 	}
 }
 
 room bhse "boathouse" {
 	desc {
 The lake which lies to the east of this damp old boathouse silently laps
-against the ramp down which many small vessels must have entered the
-waters in days gone by. Westward are a set of steps leading down into the room
-of hot coals while a route to the southeast leads into darkness
+against the ramp [down] which many small vessels must have entered the
+waters in days gone by. In one corner a set of steps leads back down into the room of hot coals while a route to the southeast leads into darkness
 	}
 #	scen_noun_b coals 		#is a noun
 	scen_noun_f snorkel		#is relevant!
 	scen_noun_c ramp
 
+        lit_room
 	location bhse
 	net {
 		east       nway_fridge		#really nway_lake
 		northeast  nway_fridge
 		southeast	drm5		# yellow room	
-		west       stps
+#		west       stps
 		down       stps
 	}
 }
 
 room drm1 "blue room" {
 	desc {
-This room is covered in blue velvet from wall to wall apart from a small
-opening leading southwest into the white room. In the centre of the room
+This room is covered in blue velvet from [wall] to [wall] apart from a small
+[opening] leading southwest into the white room. In the centre of the room
 stands a podium, also blue
 	}
 	scen_noun_a velvet 
@@ -2369,7 +2379,7 @@ stands a podium, also blue
 
 room drm2 "red room" {
 	desc {
-Red velvet covers every surface of this small room, including the podium at
+Red velvet covers every [surface] of this small room, including the podium at
 its centre. The only exit from here is northwestward into the white room
 	}
 	scen_noun_a velvet 
@@ -2391,9 +2401,9 @@ its centre. The only exit from here is northwestward into the white room
 
 room drm3 "white room" {
 	desc {
-An opaque case with four coloured slots in it stands on a podium at the
-centre of this room. White velvet covers the walls, floor and ceiling here
-with four openings in the corners of the room providing exits
+An opaque case with four coloured [slots](look slots) in it stands on a podium at the
+centre of this room. White velvet covers the walls, [floor] and [ceiling] here
+with four openings in the corners of the room providing exits; Northeast, Southeast, Southwest & Northwest
 	}
 	scen_noun_a velvet 
 
@@ -2439,7 +2449,7 @@ enveloped in the same material
 room drm5 "yellow room" {
 	desc {
 Although yellow velvet covers this room, it is mostly damp and bedraggled due
-to constant lapping of the lake's grim waters to the north. In the centre
+to constant lapping of the lake's grim waters. In the centre
 stands a podium, also yellow, while exits lead southeast and northwest
 	}
 	scen_noun_a velvet 
@@ -2476,7 +2486,6 @@ npc miller "miller" {
 	desc {
 is a friendly chap, more than happy with his simple existence
 	}
-#	synonyms { millar }	# a likely typo. Oh, really????
 
 	strength 5
 	weight 5
@@ -2486,7 +2495,7 @@ is a friendly chap, more than happy with his simple existence
 	location mill1
 }
 
-npc gatekeeper "gate gatekeeper" {
+npc gatekeeper "castle gate gatekeeper" {
 	desc {
 is short and squat. He takes great pride in his work and hates those who think they can do better
 	}
@@ -2533,7 +2542,7 @@ helping matters one little bit
 npc spider "jumper king spider" {
 	desc {
 is hand-sized and covered in thick, brown hair. Its beady eyes and incessant
-leg twitches make your skin crawl
+leg twitches make your [skin] crawl
 	}
 	scen_noun_a hair 
 	scen_noun_a eyes 
@@ -2581,7 +2590,7 @@ is squeezing the living daylights out of you
 
 item boat2 "small boat" {
 	desc {
-is called 'RAGE RIDER THANKS YOU' and is just big enough to carry two passengers with their equipment
+is called '\_Rage Rider Thanks You_\' and is just big enough to carry two passengers with their equipment
 	}
 	pseudo
 	location {
@@ -2611,9 +2620,9 @@ is wide and deep, cutting its way decisively across the land
 	}
 }
 
-item water "water" {
+item water "river water" {
 	desc {
-looks pure and clean to the naked eye, but may have been contaminated on its way here
+looks pure and clean to the naked [eye], but may have been contaminated on its way here
 	}
 	wet
 	force_plural
@@ -2644,7 +2653,7 @@ item moat "castle moat" {
 	desc {
 is really a stream running down from the hill into the river but its course
 has been diverted by man to encircle the castle. A sign has been erected by the
-side of the moat
+side of the [moat]
 	}
 	scen_noun_c course 
 
@@ -2719,7 +2728,7 @@ are probably hundreds of years old and still sprouting leaves
 item fishingsign "sign" {
 	desc {
 reads:^
-No unauthorized fishing in these waters.^
+No unauthorized [fishing](do fish) in these waters.^
 Poachers will be fed to the bear
           
 	}
@@ -2813,7 +2822,8 @@ is a large black sack; standard issue for the Reknaught Raiders
 	size 5
 	texture soft
 	combustable 1
-	contr_vol 4
+	contr_vol 4     # contains lamp size 3
+        npc_refuses
 	another_noun
 	location inventory
 	set bags
@@ -2835,6 +2845,7 @@ is part of your official Reknaught Raiders uniform
 	texture soft
 	wearable 1
 	combustable 1
+        npc_refuses
 	location inventory
 	set clothes
 }
@@ -2855,6 +2866,7 @@ have a pocket in the front
 	texture soft
 	wearable 1
 	combustable 1
+        npc_refuses
 	location inventory
 	set clothes
 }
@@ -2871,15 +2883,16 @@ is part of the thieves kit you were given on joining the guild
 	hardness 5
 	strength 5
 	weight 1
-	size 1
+	size 3
 	texture hard
+        npc_refuses
 	contained
 	location bag1
 }
 
 item pocket1 "jeans pocket" {
 	desc {
-is a small bag sewn into your jeans for carrying loose change and the like
+is a small [bag] sewn into your jeans for carrying loose change and the like
 	}
 	inseparable
 	related
@@ -2895,7 +2908,7 @@ is a small bag sewn into your jeans for carrying loose change and the like
 
 item mill2 "wind mill" {
 	desc {
-is wooden, and has four large rotating vanes obscuring the entrance
+is wooden, and has four large rotating vanes obscuring the [entrance]
 	}
 	synonyms { windmill }
 	hardness 15
@@ -2965,6 +2978,7 @@ is a string instrument with a delightful, airy tone
 	texture smooth
 	value 55
 	combustable 1
+        npc_refuses             # prevents giving it away
 	location miller
 }
 
@@ -2983,7 +2997,7 @@ is the size of a thumb nail and used to pluck the lute strings
 	size 1
 	texture smooth
 	location lute
-#	set treasure
+	set treasure
 }
 
 item gum "chewing gum" {
@@ -2991,12 +3005,14 @@ item gum "chewing gum" {
 is lemon flavour and made by Hurligan, a provincial confectioner
 	}
 	force_plural
+        force_adj
 	moveable
 	hardness 2
 	strength 5
 	weight 1
 	size 1
 	texture sticky
+        npc_refuses
 	edible 5	# tasty ?
 	out
 	location inventory
@@ -3046,6 +3062,7 @@ is a small plastic container used by the gatekeeper to keep fishing bait
 	size 2
 	texture smooth
 	combustable 2
+        npc_refuses
 	contr_vol 2
 	location bed1
 }
@@ -3061,7 +3078,8 @@ is a little grubby, and looks rather lonely
 	size 1
 	texture clammy
 	combustable 3
-	edible 3
+	edible 3                # ill and die
+        npc_refuses
 	contained
 	location tub
 #	animal
@@ -3092,6 +3110,7 @@ has been painted gold
 	weight 1
 	size 1
 	texture hard
+        npc_refuses
 	contained
 	location cabinet1
 	another_noun
@@ -3155,8 +3174,9 @@ is of a new type, designed only to kill rats (and other such vermin)
 	strength 5
 	weight 1
 	size 1
+        npc_refuses
 	texture sticky
-	edible 2
+	edible 3        # ill and die
 	contained
 	location cupboard
 }
@@ -3176,6 +3196,7 @@ has a picture of a white rabbit on it
 	weight 1
 	size 2
 	texture smooth
+        npc_refuses
 	contr_vol 2
 	contained
 	location cupboard
@@ -3192,8 +3213,9 @@ is strawberry flavoured and now mixed with essence of dead fly
 	strength 5
 	weight 1
 	size 1
+        npc_refuses
 	texture sticky
-	edible 1
+	edible 3                # die eventually
 	out
 	location inventory
 }
@@ -3211,13 +3233,14 @@ is strawberry flavour
 	size 1
 	texture sticky
 	edible 6
+        npc_refuses
 	contained
 	location jar
 }
 
 item cage3 "cubic golden cage" {
 	desc {
-is five metres on each side but still too small to comfortably
+is three metres on each side but still too small to comfortably
 hold the grizzly bear
 	}
 	short_look
@@ -3271,7 +3294,7 @@ is engraved with tiny figures enacting an ancient religious festival
 	texture hard
 	contained
 	location cage3
-#	set treasure
+	set treasure
 }
 
 item rug "vast rug" {
@@ -3295,7 +3318,7 @@ must have taken months to weave
 
 item cage4 "bird cage" {
 	desc {
-will hold one small bird
+will hold one small bird and can be [opened](open bird cage) and [closed](close bird cage)
 	}
 	closed
 	local_contents
@@ -3308,6 +3331,7 @@ will hold one small bird
 	size 2
 	texture hard
 	contr_vol 2
+        npc_refuses
 	location yard
 	set cages
 }
@@ -3414,6 +3438,7 @@ has been parted from its original owner for quite some time
 	weight 1
 	size 1
 	texture smooth
+        npc_refuses
 	location hse 
 	set ingredients
 }
@@ -3429,6 +3454,7 @@ is pretty old and pongy
 	weight 1
 	size 12
 	texture rough
+        npc_refuses
 	combustable 1
 	related
 	location stable
@@ -3546,6 +3572,7 @@ has a slight fracture marring it's otherwise unremarkable surface
 	weight 1
 	size 1
 	texture rough
+        npc_refuses
 	contained
 	location bucket
 }
@@ -3560,13 +3587,13 @@ is an extremely well preserved specimen of a prehistoric mollusc
 	moveable
 	out
 	related 
-	hardness 10
+	hardness 5
 	strength 5
 	weight 1
 	size 1
 	texture rough
 	location coal
-#	set treasure
+	set treasure
 }
 
 # this is a treasure
@@ -3587,13 +3614,13 @@ is a classic, painted by Ripov during his dead period
 	location wall1
 	sl gallery
 	set paintings
-#	set treasure
+	set treasure
 }
 
 item painting2 "watercolour" {
 	desc {
 depicts a wandering minstrel, playing a lute and floating above the
-ground, singing the words 'urfanore pendra'
+ground whenever he sang the words '\_Urfanore [Pendra]_\'
 	}
 	scen_noun_a minstrel 
 
@@ -3621,7 +3648,7 @@ is an object lesson in how to fail as an artist
 	force_adj
 	hardness 5
 	strength 3
-	weight 1
+	weight 2
 	size 2
 	texture smooth
 	location wall1
@@ -3691,6 +3718,7 @@ is used to give the cushion its shape
 	size 1
 	texture soft
 	combustable 2
+        npc_refuses
 	contained
 	location cushion
 }
@@ -3812,7 +3840,7 @@ THINK of drinking it
 item system "drainage system" {
 	desc {
 carries water from the castle and dumps it in the moat. The visible parts here
-normally consist of a stopcock above some pipework
+normally consist of a stopcock above some [pipework](do pipe)
 	}
 	force_adj
 	hardness 5
@@ -3829,6 +3857,7 @@ item pipe "lead pipe" {
 	desc {
 is a metre long and five centimetres wide
 	}
+        force_adj
 	synonyms { pipework }
 	moveable
 	hardness 5
@@ -3837,6 +3866,7 @@ is a metre long and five centimetres wide
 	size 3
 	texture smooth
 	contr_vol 2
+        npc_refuses
 	inseparable
 	related
 	location system
@@ -3875,7 +3905,6 @@ is overpowering in its fruitiness
 }
 
 
-
 item champagne "champagne" {
 	desc {
 comes from the celebrated wine region of Enker Marsh
@@ -3891,9 +3920,9 @@ comes from the celebrated wine region of Enker Marsh
 	location bottle4
 }
 
-item bottle1 "red wine bottle" {
+item bottle1 "wine red bottle" {
 	desc {
-has been kept for decades
+is a fine red vintage, kept for decades and would be highly sought after by the connoisseur
 	}
 	synonyms { bottle_of_red }
 	closed
@@ -3912,7 +3941,7 @@ has been kept for decades
 
 item bottle4 "champagne bottle" {
 	desc {
-has a label on it that reads:^Shake me, say 'Hooray' and I will explode
+has a label on it that reads:^[Open](open champagne bottle) on special occasions, [Shake](shake champagne bottle) me, say '\_[Hooray](do hooray)_\' and I will explode
 	}
 	scen_noun_a label 
 	synonyms { bottle_of_champagne }
@@ -3925,6 +3954,7 @@ has a label on it that reads:^Shake me, say 'Hooray' and I will explode
 	weight 1
 	size 3
 	texture smooth
+        npc_refuses
 	contr_vol 2
 	location racks
 	set bottles
@@ -3942,7 +3972,7 @@ has been superbly cut in the shape of a one ferg coin
 	texture smooth
 	contained
 	location bottle1
-#	set treasure
+	set treasure
 }
 
 item junk "old broken junk" {
@@ -4106,13 +4136,13 @@ has been carefully decorated with small paintings of ferocious beasts
 	texture smooth
 	contr_vol 2
 	location bed3		# Moved from bed2 to make Roddys bit easier
-#	set treasure
+	set treasure
 }
 
 item cabinet2 "walnut cabinet" {
 	desc {
-Your professional eye tells you that the walnut cabinet dates from the Erik XV
-period and is an extremely valuable example of the cabinet maker's art.
+Your professional [eye] tells you that the walnut cabinet dates from the Erik XV
+period and is an extremely valuable example of the [cabinet] maker's art.
 Fortunately you know better than to believe it
 	}
 	desc_only
@@ -4140,7 +4170,7 @@ is an antique masterpiece
 	wearable 1
 	texture hard
 	location bank
-#	set treasure
+	set treasure
 }
 
 item blackboard "black blackboard" {
@@ -4162,9 +4192,10 @@ has not been slept in for some time
 	sittable
 	hardness 5
 	strength 5
-	weight 5
-	size 5
+	weight 15
+	size 10
 	texture soft
+        moveable
 	related
 	location bedroom3
 	set beds
@@ -4204,10 +4235,11 @@ is a daringly low cut affair with swathes of black chiffon hanging from the back
 	texture soft
 	wearable 1
 	combustable 1
+        npc_refuses
 	contained
 	location wardrobe
 	set clothes
-#	set treasure
+	set treasure
 }
 
 item box1 "sewing box" {
@@ -4219,10 +4251,11 @@ is decorated with embroideries of cuddly white rats
 	force_adj
 	hardness 5
 	strength 5
-	weight 2
+	weight 1
 	size 2
 	texture hard
 	contr_vol 1
+        npc_refuses
 	related
 	location bed3
 	set boxes
@@ -4238,6 +4271,7 @@ would be very difficult to thread
 	strength 5
 	weight 1
 	size 1
+        npc_refuses
 #	sittable	#tooo much hassle!!! SP.PUTON will catch maggot
 #	sharpness 2   ; risky - hugh.
 	contained
@@ -4256,6 +4290,7 @@ is strong and white
 	weight 1
 	size 1
 	texture soft
+        npc_refuses
 	combustable 1
 	contained
 	location box1
@@ -4313,8 +4348,8 @@ is very tattered and leather bound
 
 item sachet "paper sachet" {
 	desc {
-has 'WARNING - sachet will dissolve as contents are exposed to the air,
-beware when opening!' written on it
+has '**Warning** - [sachet] will dissolve as contents are exposed to the [air],
+beware when [opening]!' written on it
 	}
 	closed
 	short_look
@@ -4324,6 +4359,7 @@ beware when opening!' written on it
 	weight 1
 	size 1
 	texture smooth
+        npc_refuses
 	combustable 1
 	contr_vol 1
 	contained
@@ -4342,7 +4378,8 @@ is an electric blue colour and very finely cut
 	size 1
 	texture soft
 	combustable 1
-	edible 3
+        npc_refuses
+	edible 3        # ill and die
 	contained
 	location sachet
 	set ingredients
@@ -4361,6 +4398,7 @@ is two metres long with its tip chalked, ready for a game
 	strength 7
 	weight 1
 	size 3
+        npc_refuses
 	texture smooth
 	location rack1
 }
@@ -4410,6 +4448,7 @@ seems completely smooth
 	weight 1
 	size 2
 	texture smooth
+        npc_refuses
 	contr_vol 1
 	location table2
 	set balls
@@ -4466,7 +4505,7 @@ is cut in the most modern of designs
 	texture hard
 	contained
 	location ball2
-#	set treasure
+	set treasure
 }
 
 item piano "polished highly piano" {
@@ -4517,7 +4556,7 @@ is entitled 'Fading Fugue' by the legendary composer Trogar Manner
 	weight 1
 	size 1
 	texture smooth
-	edible 4
+	edible 4                # !
 	contained
 	location bag2
 #	set treasure
@@ -4525,7 +4564,7 @@ is entitled 'Fading Fugue' by the legendary composer Trogar Manner
 
 item bag2 "plastic bag" {
 	desc {
-is air-tight when closed
+is [air]-tight when closed
 	}
 	closed
 	local_contents
@@ -4540,13 +4579,15 @@ is air-tight when closed
 	contained
 	contr_vol 1
 	location stool
+        npc_refuses
 	another_noun
 	set bags
+	set treasure
 }
 
 item board "notice board" {
 	desc {
-is divided into two [sections](read notice board): laity and clergy
+is divided into two [sections](read notice board): \_laity_ and _clergy_\
 	}
 	scen_noun_a laity
 	scen_noun_a clergy
@@ -4582,7 +4623,7 @@ is adorned with the same colourful frescoes as the temple walls
 
 item statue "statue" {
 	desc {
-resembles one of the temple's greatest zealots: **Hurligan the Sweet**
+resembles one of the temple's greatest zealots: \_Hurligan the Sweet_\
 	}
 	moveable
 	hardness 5
@@ -4611,8 +4652,9 @@ burning incense to escape
 	weight 1
 	size 2
 	texture smooth
+        npc_refuses
 	location altar
-#	set treasure
+	set treasure
 }
 
 item hive "beehive" {
@@ -4650,7 +4692,7 @@ seem incredibly protective of their honey
 
 item gloves "gloves" {
 	desc {
-would be ideal for winter
+have a good grip and would be ideal for winter
 	}
 	plural
 	moveable
@@ -4660,6 +4702,7 @@ would be ideal for winter
 	weight 1
 	size 1
 	texture furry
+        npc_refuses
 	combustable 1
 	location hive
 #	covers { arms }	#cos of hassle with hacks to invent (was vanishing
@@ -4818,7 +4861,7 @@ item whitesquarep "white square" {
 
 room blacksquare "black square" {
 	desc {
-^
+A five by four grid of coloured squares makes up the [floor] of this bright room. Each of the squares is a colour of the rainbow and, reading from west to [east], starting with the northernmost row, the colours are:^^\_black, indigo, blue, green, red_\^\_red, violet, yellow, indigo, yellow_\^\_orange, orange, blue, violet, orange_\^\_green, yellow, indigo, red, white_\.^^From here you can go east, south and southeast, or northwest to the stairway
 	}
 	force_adj
 	lit_room
@@ -4840,7 +4883,8 @@ room blacksquare "black square" {
 
 room whitesquare "white square" {
 	desc {
-^
+You're at the far side of the five by four [grid] of coloured squares. Each of the squares is a colour of the rainbow and, reading from [west] to [east], starting with the northernmost row, the colours are:^^\_black, indigo, blue, green, red_\^\_red, violet, yellow, indigo, yellow_\^\_orange, orange, blue, violet, orange_\^\_green, yellow, indigo, red, white_\.^^From here you can go north, west and northwest as well as through an [opening] southeast
+
 	}
 	force_adj
 	lit_room
@@ -4862,7 +4906,7 @@ room whitesquare "white square" {
 
 room redsquare1 "red square" {
 	desc {
-measures one metre square, strangely enough it does not contain Lenin's tomb
+measures one metre square, strangely enough it does not contain Lenin's tomb. You can step north, northeast, east, west or northwest
 	}
 	force_adj
 	lit_room
@@ -5117,11 +5161,11 @@ room indigosquare3 "indigo square" {
 		north		bluesquare3
 		northeast	squaredeath
 		east		squaredeath
-		southeast	squaredeath
+		southeast	nway_wall
 		south		nway_wall
 		southwest	nway_wall
-		west		nway_wall
-		northwest	nway_wall
+		west		squaredeath
+		northwest	squaredeath
 		in		nway_misc4	#too confusing!
 		out		nway_misc4
 	}
@@ -5171,6 +5215,54 @@ room violetsquare2 "violet square" {
 	}
 }
 
+room redsquare3 "red square" {
+	desc {
+This is the top right red square
+	}
+	force_adj
+	lit_room
+	texture hard
+	location redsquare3
+	net {
+	}
+}
+
+room orangesqure3 "orange square" {
+	desc {
+This is the 4th row oramge square
+	}
+	force_adj
+	lit_room
+	texture hard
+	location orangesqure3
+	net {
+	}
+}
+
+room greensquare2 "green square" {
+	desc {
+This is the bottom left green square
+	}
+	force_adj
+	lit_room
+	texture hard
+	location greensquare2
+	net {
+	}
+}
+
+room yellowsquare3 "yellow square" {
+	desc {
+This is the bottom row yellow square
+	}
+	force_adj
+	lit_room
+	texture hard
+	location yellowsquare3
+	net {
+	}
+}
+
 room squaredeath "place_of_death" {
 	desc {
 This is a place where fools come to die
@@ -5213,6 +5305,7 @@ looks like a stage prop from 'Hamlet'
 	size 2
 	texture smooth
 	contr_vol 1
+        npc_refuses
 	contained
 	location sarcophagus
 }
@@ -5228,6 +5321,7 @@ winks back as you look at it
 	size 1
 	texture clammy
 	contained
+        npc_refuses
 	location skull
 	set ingredients
 	}
@@ -5247,7 +5341,7 @@ have a sardonic glint in them
 	size 1
 	texture smooth
 	location shrine
-#	set treasure
+	set treasure
 }
 
 
@@ -5278,9 +5372,9 @@ is the normal entrance to the shrine
 
 item pamphlet "pamphlet" {
 	desc {
-is a paper by Dr. Jenks, explaining a new method of '**fire walking**'. In the
+is a paper by Dr. Jenks, explaining a new method of '\_fire walking_\'. In the
 pamphlet he studies the incredible ritual of the tribe of Swelk nomads and
-discovers that the feat is achieved by rubbing the succulent **Gerominitus** on
+discovers that the feat is achieved by rubbing the succulent \_Gerominitus_\ on
 the soles of the feet before commencing the walk across hot coals
 	}
 	moveable
@@ -5304,6 +5398,7 @@ is a deep, rich black
 	strength 5
 	weight 1
 	size 1
+        npc_refuses
 	texture hard
 	location organ
 	another_noun
@@ -5322,6 +5417,7 @@ is exquisitely carved
 	weight 1
 	size 1
 	texture hard
+        npc_refuses
 	location organ
 	another_noun
 	set keys
@@ -5359,6 +5455,7 @@ are made of rubber and have very grippy soles
 	strength 5
 	weight 1
 	size 1
+        npc_refuses
 	texture cold
 	wearable 1
 	hidden
@@ -5408,6 +5505,7 @@ rockface
 	strength 3
 	weight 4
 	size 4
+        npc_refuses
 	texture hard
 	sharpness 1
 	location cave3
@@ -5430,8 +5528,8 @@ look unbreakable
 
 item signpost "signpost" {
 	desc {
-has directions as follows:^northeast - beasts^northwest - fire
-^southeast - death^east - out
+has directions as follows:^Northeast - \_Beasts_\^Northwest - \_Fire_\
+^Southeast - \_Death_\^East - \_Out_\
 	}
 	synonyms { post sign }
 	inseparable
@@ -5506,6 +5604,7 @@ seems chirpy and lively despite his obvious dislike of confinement
 	size 1
 	texture soft
 	animal
+        npc_refuses
 	location cage 
 	another_noun
 	set birds
@@ -5557,6 +5656,7 @@ are of the Gerominitus family
 	hardness 5
 	strength 5
 	weight 1
+        npc_refuses
 	size 1
 	texture smooth
 	location gdn2
@@ -5568,11 +5668,12 @@ reminds you of the bear - brown and hairy
 	}
 	moveable
 	related
-	hardness 5
+	hardness 10
 	strength 9
 	weight 1
 	size 1
 	edible 4
+        npc_refuses
 	texture furry
 	location tree1
 }
@@ -5664,7 +5765,7 @@ is in little better shape than the rest of the desk
 
 item spade "small spade" {
 	desc {
-is a spade
+is a [spade]
 	}
 	moveable
 	another_noun
@@ -5673,6 +5774,7 @@ is a spade
 	weight 2
 	size 2
 	texture hard
+        npc_refuses
 	sharpness 1
 	location offis
 }
@@ -5691,6 +5793,7 @@ is a mixture of various types of grain
 	weight 1
 	size 1
 	texture soft
+        npc_refuses
 	edible 4
 	location offis
 }
@@ -5795,7 +5898,7 @@ has a single button on it
 	location shop3
 }
 
-item button "button" {
+item button "till button" {
 	desc {
 is marked "No Sale"
 	}
@@ -5875,7 +5978,7 @@ is a slightly grander than those around it
 
 item headstone1 "small headstone" {
 	desc {
-has 'R.I.P. Baby Bear' on it
+has '\_R.I.P. Baby Bear_\' on it
 	}
 	force_adj
 	related
@@ -5890,7 +5993,7 @@ has 'R.I.P. Baby Bear' on it
 
 item headstone2 "medium headstone" {
 	desc {
-has 'R.I.P. Mummy Bear' on it
+has '\_R.I.P. Mummy Bear_\' on it
 	}
 	force_adj
 	related
@@ -5905,7 +6008,7 @@ has 'R.I.P. Mummy Bear' on it
 
 item headstone3 "large headstone" {
 	desc {
-has 'R.I.P. Daddy Bear' on it
+has '\_R.I.P. Daddy Bear_\' on it
 	}
 	force_adj
 	related
@@ -5946,7 +6049,8 @@ are red and emit a sticky substance when squashed
 	strength 2
 	weight 1
 	size 1
-	edible 2
+	edible 3        # ill and die
+        npc_refuses
 	texture sticky
 	set ingredients
 	location tree2
@@ -5978,6 +6082,7 @@ is jagged along one edge
 	strength 5
 	weight 1
 	size 1
+        npc_refuses
 	texture hard
 	location chest
 }
@@ -6008,8 +6113,9 @@ is alive and beating loudly
 	strength 4
 	weight 1
 	size 1
+        npc_refuses
 	texture clammy
-	edible 5
+	edible 4
 	contained
 	location chest
 	set ingredients
@@ -6102,7 +6208,7 @@ is very large and, though uncut at the moment, certainly of great value
 	size 1
 	texture hard
 	location rmud
-#	set treasure
+	set treasure
 }
 
 item mirror "mirror" {
@@ -6115,6 +6221,7 @@ allows you to sate your vanity at your leisure
 	weight 1
 	size 1
 	texture hard
+        npc_refuses
 	related
 	location cabinet2
 }
@@ -6139,7 +6246,7 @@ would certainly fry you if you tried to traverse them without some protection
 item cube2 "ivory cube" {
 	desc {
 is the same size as the die. It also appears to weigh a similar amount, but
-looks very, very valuable
+looks \_very, very_\ valuable
 	}
 	another_noun
 	hardness 5
@@ -6166,6 +6273,7 @@ once entertained the Baron in his childhood
 	weight 2
 	size 1
 	texture hard
+        npc_refuses
 	location room2
 	set cubes
 }
@@ -6333,7 +6441,8 @@ has
 
 item die5 "plastic die" {
 	desc {
-closely resembles the one found in your packaging
+looks like this:^\![](qrc:///images/plastic_die.jpg)\
+
 	}
 #	scen_noun_a diamonds 		#Is a noun
 	scen_noun_a spots 
@@ -6345,6 +6454,7 @@ closely resembles the one found in your packaging
 	weight 1
 	size 1
 	texture hard
+        npc_refuses
 	contained
 	location case
 	set dice
@@ -6352,8 +6462,8 @@ closely resembles the one found in your packaging
 
 item case "opaque plastic case" {
 	desc {
-is a cube, half a metre on each side, that rests atop the podium.
-There are four small slots in it
+is a [cube], half a metre on each side, that rests atop the podium.
+There are four small [slots](look slots) in it
 	}
 	locked
 #	local_contents
@@ -6481,7 +6591,7 @@ is brilliantly carved, depicting the mythical beast beautifully
 	size 1
 	texture smooth
 	location sway3
-#	set treasure
+	set treasure
 }
 
 item blackbooks "black leather-bound books" {
@@ -6621,7 +6731,7 @@ whistles past you
 	moveable
 }
 
-item suit"suit" {
+item suit "suit" {
 	desc {
 is a smart pin-stripe one commonly worn by bankers
 	}
@@ -6654,7 +6764,7 @@ corridor3 corridor4 library bathroom bedroom2 bedroom3 passage3
 	}
 }
 
-item wratrace "shout.by.gatekeeper" {
+item wratrace "gatekeeper.shout" {
 	desc { cannot be seen }
 	size 0
 	strength 0
@@ -6747,6 +6857,7 @@ looks as though it hasn't been washed since the day it was cut
 	weight 1
 	size 1
 	texture hard
+        npc_refuses
 	contained
 	location drawer1
 	another_noun
@@ -6831,6 +6942,7 @@ is of a species less common in Kerovnian rivers than it used to be
 	size 1
 	weight 1
 	texture slippery
+        npc_refuses
 	edible 5
 	set fish
 	set fishes
@@ -6847,7 +6959,8 @@ has been smeared with rat poison, these are never found in Kerovnian rivers
 	size 1
 	weight 1
 	texture sticky
-	edible 1
+	edible 3                # ill and die
+        npc_refuses
 	set fish
 	set fishes
 }
@@ -6940,7 +7053,7 @@ item plaque2  "plaque" {
 	desc {
 bears the inscription:
 ^"Grunchkev Folding Bed Company - Max load: Three persons"^
-Below the plaque are two buttons
+Below the plaque are two [buttons](look buttons)
 	}
 	inseparable
 	contained
@@ -6949,7 +7062,7 @@ Below the plaque are two buttons
 
 item upbutton "top first button" {
 	desc {
-has 'Up' engraved on it
+has '\_Raise_\' engraved on it. Maybe [press it](press top button)
 	}
 	force_adj
 	hardness 15
@@ -6962,7 +7075,7 @@ has 'Up' engraved on it
 
 item downbutton "bottom second button" {
 	desc {
-has 'Down' engraved on it
+has '\_Lower_\' engraved on it. Maybe [press it](press bottom button)
 	}
 	force_adj
 	hardness 15
@@ -6975,8 +7088,8 @@ has 'Down' engraved on it
 
 item abstract "abstract painting" {
 	desc {
-is a strange abstract by the well-known Kerovnian artist Kweeley, founder of
-the neo-surrealist school. The title 'Path leading to snow-capped mountains'
+is a strange work by the well-known Kerovnian artist Kweeley, founder of
+the neo-surrealist school. The title '\_Path leading to snow-capped mountains_\'
 bears little resemblance to the blood-red splodges on the canvas. Looking more closely, you realise that it isn't canvas at all, but a 
 thin sheet of steel
 	}
@@ -6986,8 +7099,8 @@ thin sheet of steel
 	another_noun
 	texture	smooth
 	hardness 5
-	weight	10
-	size	10
+	weight	5
+	size	5
 	texture	smooth
 	moveable
 	related
@@ -6998,7 +7111,7 @@ thin sheet of steel
 
 item bed2up "kingsize king size sized bed" {
 	desc {
-is folded up into the wall, and would be undetectable if the wallpaper on its
+is folded up into the [wall], and would be undetectable if the wallpaper on its
 underside was as faded as the rest
 	}
 	scen_noun_a wallpaper
@@ -7059,12 +7172,13 @@ abstract concepts from solid matter
 	location inventory
 }
 
-item chips "mineral chips_of_mineral" {
+item chips "mineral chips" {
 	desc {
 sparkle impressively as you look at them
 	}
-	synonyms { chips stone }
+	synonyms { stone }
 	plural
+        force_adj
 	moveable
 	strength 14
 	hardness 12 
@@ -7073,7 +7187,7 @@ sparkle impressively as you look at them
 	texture hard
 	hidden
 	out
-#	set treasure
+	set treasure
 	location face
 }
 
@@ -7095,7 +7209,7 @@ is really too large for one person to carry around
 
 item sash "white sash" {
 	desc {
-reads:^Third Kerovnian Defenders' Reunion Banquet
+reads, '\_Third Kerovnian Defenders' Reunion Banquet_\'
 	}
 	moveable
 	inseparable
@@ -7129,7 +7243,7 @@ allows easy travel between the floors of the castle
 	}
 	synonyms { stairs steps }
 	pseudo
-	sittable
+#	sittable
 	location { hall2 corridor1 }
 }
 
@@ -7345,22 +7459,24 @@ is rather non-descript, and rather less flat than one might have hoped
 	texture hard
 }
 
-room oneroom "cubical Room" {
+room oneroom "cubical Vault" {
 	desc {
-This is a large, white, cubic shaped room. There is an exit leading down in
+This is a large, [white], cubic shaped room. There is an exit leading down in
 the centre of the room
 	}
+        synonyms { room }
 	force_adj
 	lit_room 
 	net {
 	down	dummy
 	}
 }
-room tworoom "cubical Room" {
+room tworoom "cubical Vault" {
 	desc {
-This is a large, white, cubic shaped room. There are exits leading down in
+This is a large, [white], cubic shaped room. There are exits leading down in
 the northwest and southeast corners
 	}
+        synonyms { room }
 	force_adj
 	lit_room
 	net {
@@ -7368,12 +7484,13 @@ the northwest and southeast corners
 	southeast dummy
 	}
 }
-room threeroom "cubical Room" {
+room threeroom "cubical Vault" {
 	desc {
-This is a large, white, cubic shaped room. There are exits leading down in
+This is a large, [white], cubic shaped room. There are exits leading down in
 the northwest and southeast corners also one in the centre. An opening in
 the west wall leads back to the bank manager's office
 	}
+        synonyms { room }
 	force_adj
 	lit_room
 	net {
@@ -7383,13 +7500,14 @@ the west wall leads back to the bank manager's office
 	west manoffis
 	}
 }
-room fourroom "cubical Room" {
+room fourroom "cubical Vault" {
 	desc {
-This is a large, white, cubic shaped room. There are exits leading down in
+This is a large, [white], cubic shaped room. There are exits leading down in
 the northwest, northeast, southeast and southwest corners. A signpost
 pointing to each of the exits is in the centre of the room next to a short
 white pillar
 	}
+        synonyms { room }
 	force_adj
 	net {
 	northwest dummy
@@ -7412,7 +7530,7 @@ upon it change
 
 item pillar "short white pillar" {
 	desc {
-is carved from fine white marble. Firmly secured to it's top is a weighing
+is carved from fine [white] marble. Firmly secured to it's top is a weighing
 machine
 	    }
 	texture hard
@@ -7424,10 +7542,10 @@ machine
 item signpost3 "white signpost" {
 	desc {
 has four arrows pointing at the four exits.
-These read: ^Northwest Spades
-	    ^Northeast Diamonds
-	    ^Southwest Clubs
-	    ^Southeast Hearts
+These read: ^Northwest \_Spades_\
+	    ^Northeast \_Diamonds_\
+	    ^Southwest \_Clubs_\
+	    ^Southeast \_Hearts_\
 	    }
 	synonyms { post arrows }
 	texture hard
@@ -7437,12 +7555,13 @@ These read: ^Northwest Spades
 }
 
 
-room fiveroom "cubical Room" {
+room fiveroom "cubical Vault" {
 	desc {
-This is a large, white, cubic shaped room. There are exits leading down in
+This is a large, [white], cubic shaped room. There are exits leading down in
 the northwest, northeast, southeast and southwest corners. There is also an
 exit leading down in the centre of the room
 	}
+        synonyms { room }
 	force_adj
 	lit_room
 	net {
@@ -7453,12 +7572,13 @@ exit leading down in the centre of the room
 	down dummy
 	}
 }
-room sixroom "cubical Room" {
+room sixroom "cubical Vault" {
 	desc {
-This is a large, white, cubic shaped room. There are exits leading down in
+This is a large, [white], cubic shaped room. There are exits leading down in
 the northwest, northeast, southeast and southwest corners. There are also
 exits leading down near the west and east walls
 	}
+        synonyms { room }
 	force_adj
 	lit_room
 	net {
@@ -7470,10 +7590,11 @@ exits leading down near the west and east walls
 	east dummy
 	}
 }
-room dummy "cubical Room" {
+room dummy "cubical Vault" {
 	desc {
-This is a large, white, cubical shaped room. There are no exits
+This is a large, [white], cubical shaped room. There are no exits
 	}
+        synonyms { room }
 	force_adj
 	lit_room
 	net {
@@ -7482,8 +7603,8 @@ This is a large, white, cubical shaped room. There are no exits
 
 item cardbox "wooden small card box" {
 	desc {
-Enamelled on the surface of this wooden box are the outlines of a heart,
-spade, diamond and club
+Enamelled on the [surface] of this wooden box are the outlines of a [heart],
+[spade], diamond and club
 	}
 	moveable
 	combustable 1
@@ -7493,6 +7614,7 @@ spade, diamond and club
 	contr_vol 1
 	size 4
 	weight 4
+        npc_refuses
 	related
 	location desk1
 	another_noun
@@ -7501,7 +7623,7 @@ spade, diamond and club
 
 item card5 "playing joker joker" { #I know this looks silly, but it's right
 	desc {
-One of the cards is the joker
+One of the cards is the Joker
 	}
 	synonyms {card}
 	combustable 1
@@ -7518,7 +7640,7 @@ One of the cards is the joker
 }
 item card4 "playing diamond queen_of_diamonds" {
 	desc {
-One of the cards has the Queen of Diamonds printed on it
+One of the cards has the Queen of Diamonds shown on it
 	}
 	synonyms {card}
 	combustable 1
@@ -7606,13 +7728,13 @@ cannot be seen
 
 item dbox1 "night safe" {
 	desc {
-is set in the north wall of the passage. It bears the inscription 'Bank of Kerovnia' on the front
+is set in the north wall of the passage. It bears the inscription '\_Bank of Kerovnia_\' on the front
 	}
 	synonyms { nightsafe }
 	force_adj
 	closed
 	texture hard
-	contr_vol 5
+	contr_vol 6
 	inseparable
 	moveable
 	related
@@ -7621,13 +7743,13 @@ is set in the north wall of the passage. It bears the inscription 'Bank of Kerov
 
 item dbox2 "night safe" {
 	desc {
-is set in the castle wall. It bears the inscription 'Bank of Kerovnia' on the front
+is set in the castle wall. It bears the inscription '\_Bank of Kerovnia_\' on the front
 	}
 	synonyms { nightsafe }
 	force_adj
 	closed
 	texture hard
-	contr_vol 5
+	contr_vol 6
 	inseparable
 	moveable
 	related
@@ -7636,13 +7758,13 @@ is set in the castle wall. It bears the inscription 'Bank of Kerovnia' on the fr
 
 item dbox3 "night safe" {
 	desc {
-is set in the west wall of the chamber. It bears the inscription 'Bank of Kerovnia' on the front
+is set in the west wall of the chamber. It bears the inscription '\_Bank of Kerovnia_\' on the front
 	}
 	synonyms { nightsafe }
 	force_adj
 	closed
 	texture hard
-	contr_vol 5
+	contr_vol 6
 	inseparable
 	moveable
 	related
@@ -7651,13 +7773,13 @@ is set in the west wall of the chamber. It bears the inscription 'Bank of Kerovn
 
 item dbox4 "night safe" {
 	desc {
-is set in the wall of the bank. It bears the inscription 'Bank of Kerovnia' on the front
+is set in the wall of the bank. It bears the inscription '\_Bank of Kerovnia_\' on the front
 	}
 	synonyms { nightsafe }
 	force_adj
 	closed
 	texture hard
-	contr_vol 5
+	contr_vol 6
 	inseparable
 	moveable
 	related
@@ -7712,7 +7834,7 @@ undertakers' shop is to the east
 	scen_noun_a letters
 
 	synonyms { bank building }
-	!lit_room
+	lit_room
 	location kbank
 	net {
 	south nway_door
@@ -7762,9 +7884,9 @@ A cursory glance at the notice persuades you that it is of great importance
 
 room inbank "In_The_Bank" {
 	desc {
-Inside the bank is brightly lit, with a counter off to the east and a door
-to the south marked 'Manager. Mr Peckham'. Of the five tills in the counter
-only two are open, each with a queue before it. The nearer queue is the
+Inside the [bank] is brightly lit, with a counter off to the east and a [door](do office door)
+to the south marked 'Manager \_Mr Peckham_\'. Of the five tills in the counter
+only two are open, each with a [queue](look queues) before it. The nearer queue is the
 shorter of the two
 	}
 	lit_room
@@ -7824,7 +7946,7 @@ is a line of eight people waiting for service at the further till
 
 item mandoor "office door" {
 	desc {
-prevents unauthorised access to the bank managers office
+prevents unauthorised access to the [bank] manager's office
 	}
 	force_adj
 	closed
@@ -7841,7 +7963,7 @@ prevents unauthorised access to the bank managers office
 
 item counter2 "bank wooden counter" {
 	desc {
-is a wooden barrier along the east side of the bank to prevent you from getting at the bank staff. It is topped by some bullet proof glass in which there are
+is a wooden barrier along the [east] side of the [bank] to prevent you from getting at the [bank] staff. It is topped by some bullet proof glass in which there are
 five tills for serving customers
 	}
 	synonyms { barrier }
@@ -7855,8 +7977,8 @@ five tills for serving customers
 room manoffis "manager''s office" {
 	desc {
 This is a well lit, smartly furnished room. The main item of furniture is a large desk covered with papers. A comfortable reclining chair lies behind the desk
-and a drinks cabinet stands against the west wall. There is a door to the
-bank vault set in the east wall
+and a drinks cabinet stands against the far [wall]. There is a steel door to the
+bank vault set in the east [wall]
 	}
 
 	lit_room
@@ -8024,9 +8146,9 @@ is a cheap imitation of the designer dress you found in the castle
 
 item finbank "bank" {
 	desc {
-is brightly lit, with a counter off to the east and a door
-to the south marked 'Manager. Mr Peckham'. Of the five tills in the counter
-only two are open, each with a queue before it. The nearer queue is the
+is brightly lit, with a counter off to the east and a [door](do office door)
+to the south marked 'Manager \_Mr Peckham_\'. Of the five tills in the counter
+only two are open, each with a [queue](look queues) before it. The nearer queue is the
 shorter of the two
 	}
 	inseparable
@@ -8036,9 +8158,9 @@ shorter of the two
 	location { till1 inbank }
 }
 
-item key5 "plastic bank card" {
+item key5 "bank plastic card" {
 	desc {
-is like the one in your packaging
+looks like this:^\![](qrc:///images/plastic_card.png)\
 	}
 	moveable
 	combustable 2
@@ -8048,6 +8170,7 @@ is like the one in your packaging
 	weight 1
 	size 1
 	texture hard
+        npc_refuses
 	contained
 	location pocket1
 	set cards
@@ -8055,7 +8178,7 @@ is like the one in your packaging
 
 item bglass "bullet proof bullet.proof.glass" {
 	desc {
-is a transparent shield to protect the bank staff from the likes of you
+is a transparent shield to protect the [bank] staff from the likes of you
 	}
 	synonyms { glass }
 	hardness 5
@@ -8079,15 +8202,17 @@ are the usual motley collection of people who frequent banks
 	location { inbank till1 }
 }
 
-npc manager "bank mr mister manager" {
+npc manager "bank mr mister the_bank_manager" {
 	desc {
-is a fat, cigar smoking capitalist with a top hat
+is a fat, cigar smoking capitalist
 	}
-	scen_noun_a hat
+#	scen_noun_a hat
 	scen_noun_b cigar
 
-	synonyms { peckham capitalist }
+	synonyms { peckham capitalist manager }
+
 	!sup_clothing
+        article
 	strength 5
 	weight 5
 	size 6
@@ -8103,7 +8228,7 @@ item manthing "man.thing" {
 	location manager
 }
 
-item white "white white" {
+item white "bright white" {
 	desc {
 is subtlely tinged with turquoise
 	}

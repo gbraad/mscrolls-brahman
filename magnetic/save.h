@@ -38,7 +38,7 @@
 #include        "crc32.h"
 
 #define SAVE_VERSION_MAJOR      1
-#define SAVE_VERSION_MINOR      2
+#define SAVE_VERSION_MINOR      5
 
 #define SAVE_TYPE_MEMIMAGE      1
 #define SAVE_TYPE_ENGINE        2
@@ -57,13 +57,24 @@ struct SaveGameHeader
     ushort       _type;
     uint         _crc32;
 
+    // of the game image
+    ushort       _dataSize;
+    ushort       _dataAddr;
+
+    uint         _extraDataSize;
+    ushort       _gameid;
+
     SaveGameHeader()
     {
         _magic = SAVE_MAGIC;
         _versionMajor = SAVE_VERSION_MAJOR;
         _versionMinor = SAVE_VERSION_MINOR;
         _type = 0;
-        _size = 4 + 2*4 + 4;
+        _size = 4 + 2*4 + 4 + 2+2 + 4 + 2;    // of header
+        _dataSize = 0;
+        _dataAddr = 0;
+        _extraDataSize = 0;
+        _gameid = 0;
     }
 
     bool write(FD& fd)
@@ -75,6 +86,10 @@ struct SaveGameHeader
             && f.putshort(_size)
             && f.putshort(_type) 
             && f.putint(_crc32)
+            && f.putshort(_dataSize)
+            && f.putshort(_dataAddr)
+            && f.putint(_extraDataSize)
+            && f.putshort(_gameid)
             && f.flush();
     }
 
@@ -87,6 +102,10 @@ struct SaveGameHeader
         _size = f.getshort();
         _type = f.getshort();
         _crc32 = f.getint();
+        _dataSize = f.getshort();
+        _dataAddr = f.getshort();
+        _extraDataSize = f.getint();
+        _gameid = f.getint();
         return _magic == SAVE_MAGIC && !f._eof;
     }
 
@@ -98,7 +117,12 @@ struct SaveGameHeader
     
     bool versionOver(int m1, int m2) const
     {
-        return m1 > _versionMajor || (m1 == _versionMajor && m2 >= _versionMinor);
+        return _versionMajor > m1 || (_versionMajor == m1 && _versionMinor >= m2);
+    }
+
+    bool oldVersion() const
+    {
+        return !versionOver(SAVE_VERSION_MAJOR, SAVE_VERSION_MINOR);
     }
     
 };
@@ -194,4 +218,37 @@ private:
     // save game path
     string      _path;
     
+};
+
+struct SaveContext
+{
+    // region of memory to save
+    uchar*              _ptr;
+    size_t              _size;
+    uint                _addr; // corresponding emu address
+    
+    bool                _clearPic;
+    bool                _forceLook;
+    bool                _neverLook;
+
+    uchar*              _extraLoadData = 0;
+    size_t              _extraLoadDataSize = 0;
+
+    ~SaveContext() { dropLoad(); }
+
+    void setLoad(uchar* data, size_t size)
+    {
+        // take ownership
+        dropLoad();
+        _extraLoadData = data;
+        _extraLoadDataSize = size;
+    }
+
+    void dropLoad()
+    {
+        delete _extraLoadData;
+        _extraLoadData = 0;
+        _extraLoadDataSize = 0;
+    }
+
 };

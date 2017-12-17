@@ -138,6 +138,7 @@ score.o		\
 timer.o		\
 prspcmd.o	\
 setmode.o	\
+m2special.o	\
 special0.o	\
 special2.o	\
 special4.o	\
@@ -160,6 +161,8 @@ m2pawn.o : $S/m2pawn.asm
 	$(AS) $S/m2pawn.asm $(FLAGS) -o m2pawn.o $O
 network.o : $S/network.asm
 	$(AS) $S/network.asm $(FLAGS) -o network.o $O
+m2special.o : $S/m2special.asm
+	$(AS) $S/m2special.asm $(FLAGS) -o m2special.o $O
 special0.o : $S/special0.asm
 	$(AS) $S/special0.asm $(FLAGS) -o special0.o $O
 special4.o : $S/special4.asm

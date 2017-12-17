@@ -61,15 +61,11 @@
 	XREF	BIOSA6
 
      IFNE    Wimp
-
 	XREF     MS_END,GRA_EXIT
-
      ENDC
 
      IFNE    ST520
-
 	XREF    CONTERM
-
      ENDC
  
 *--------------------------------
@@ -87,14 +83,12 @@
 STWINDOW
  
       IFNE     QL128
-
 	LEA     $20000,A0
 	LEA     $28000,A1
 10$
 	CLR.L   (A0)+
 	CMP.L   A0,A1
 	BNE.S   10$
-
       ENDC
  
 	RET
@@ -115,20 +109,16 @@ INPUT
 	MSG    LINE
 	LEA     INBUFF(A4),A6
 
-     IFNE    YCHEAT
-	
+     IFNE    YCHEATMORE
 	CMP.B   #'*',(A6)          ;GO MONITOR?
 	BNE.S   10$
-
+        
       IFNE    ST520
-
 	PULL_L  D0-D7/A0/A2-A5       ;Restore regs,so SID gets 'em.
 	CALL	BIOSA6
 
     IFNE	Wimp
-
 	CALL    MS_END                     ;END OF MOUSE
-
     ENDC
 
 	CLR.L   -(SP)
@@ -139,9 +129,7 @@ INPUT
 	MOVE.L  D0,-(SP)
 
     IFNE	Wimp
-
 	CALL    GRA_EXIT
-
     ENDC
 
 	MOVE.W  #$20,-(SP)
@@ -153,22 +141,16 @@ INPUT
     
 
       IFNE    QL128
-
 	DC.W     $4AFC
-
       ENDC
 
       IFEQ     M68000
-
 	DC.W     $4AFC
-
       ENDC
 
 
       IFNE     AMIGA512!MAC512
-
 	DC.W     $4AFC
-
       ENDC
 
 

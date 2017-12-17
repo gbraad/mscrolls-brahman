@@ -51,7 +51,7 @@
 
 	include	"equates.asm"
 	include	"macros.asm"
-	include	"nounequ2.asm"       ;JUST FOR NOUNNUM
+	include	"nounequ2.i"       ;JUST FOR NOUNNUM
 
 
 

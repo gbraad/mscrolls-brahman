@@ -68,28 +68,21 @@ BUFLEN   EQU   BUFFLEN-1
 	XREF    COUT,GETCHAR2,INBUFF,BIOS,CHAR.SUB,BIOSA6
 	
       IFNE	M68000				;Very long cond bit! 
-	
 	XREF	CURSTIME,CUR.CHAR
 
 
       IFNE    Wimp
-
 	XREF    SCR_PNTR,SCR_BUF,SCR_IGNO,LOCK_M,UNLOCK_M
 	XREF    WH_SCR,SCROLLIT,END_MENU
- 
       ENDC
 
 
       IFNE    ESC_edit
-
 	XREF    VOLDBUF
-
       ENDC
 
       IFNE     SpeechAvail
-
 	XREF    InGetLn
-
       ENDC
 
 
@@ -99,14 +92,11 @@ GETLINE
 	PUSH_L  D0-D7/A0/A2-A5  
 
       IFNE     SpeechAvail
-
 	LEA     InGetLn(A6),A0     ;so we don't try to say things mid
 	ST      (A0)               ;edit 
-
       ENDC
 
 	
- 
 	MOVEQ   #$20,D5            ;D5 = SPACE   
  
 	LEA     INBUFF(A6),A0      ;GET BUFFER BASE POINTER
@@ -120,11 +110,9 @@ GETLINE
 	DBRA    D0,10$
 
       IFNE    Wimp
-
 	TEST_L  SCR_PNTR(A6)       ;Is there a half typed command pending?
 	BEQ.S   20$                ;Nope, carry on as normal
 	CALL    SCROLL_RECOVER
- 
       ENDC
 
 20$
@@ -175,14 +163,12 @@ GETCHAR
 	CALL	BIOSA6 		     ;Cos RUSURE & stuff use this
 
       IFNE    Wimp
-
 	ST      SCR_IGNO(A6)       ;else VERY embarasing when u select a scroll
 	MOVE.L  SCR_PNTR(A6),-(A7) ;Better not forget about any pending scroll
 	CALL_S  GETCHAR_GETLINE
 	MOVE.L  (A7)+,SCR_PNTR(A6)
 	SF      SCR_IGNO(A6)      ;hmm had best avoid using this if SCR_IGNO set
 	RET
-
       ENDC
 
 
@@ -191,13 +177,9 @@ GETCHAR_GETLINE
 *      PUSH_L  D6/D7        ;NOT REALLY NEEDED
 
       IFEQ    AMIGA512
-
       IFNE    Wimp
-
 	CALL    UNLOCK_M           ;Liberate the mouse
-
       ENDC
-
       ENDC
 
 	MOVEQ   #-1,D7             ;SET CURSOR 'ON' INITIALLY
@@ -211,15 +193,12 @@ GETCHAR_GETLINE
 	CALL    GETCHAR2     ;CHARIN             ;GET A CHAR - INTO D1.B
 
       IFNE    Wimp
-
 	TEST_B  SCR_IGNO(A6)       ;Are we ignoring the pulldown scrolls?
 	BEQ.S   40$                ;NE => we are, so lets FOD any that are there
 	CLR.L   SCR_PNTR(A6)
-
 40$
 	TEST_L  SCR_PNTR(A6)       ;Have the silly sods hit a SCROLL command?
 	BNE     SCROLL_COMMAND
-
       ENDC
 
 	TEST_B  D1                 ;WAS A KEY PRESSED?
@@ -233,7 +212,6 @@ GETCHAR_GETLINE
  
 90$
 	 IFNE    Wimp
-
 * no scrolls allowed to be pulled down when there is a character pressed!
 
 	TEST_B  WH_SCR(A6)
@@ -255,13 +233,9 @@ GETCHAR_GETLINE
 95$
 
       IFEQ    AMIGA512
-
       IFNE    Wimp
-
 	CALL    LOCK_M             ; Lock out the mouse
-
       ENDC
-
       ENDC
 
 *      PULL_L  D6/D7        ;RECOVER REG'S - NOT NEEDED!
@@ -448,12 +422,10 @@ ENDLINE
 	CLR.B   (A1)               ;Mark end of line
 
       IFNE    ESC_edit
-
 	LEA     VOLDBUF(A6),A3     ;Save a copy of the buffer for use via ESC
 10$
 	MOVE.B  (A0)+,(A3)+
 	BNE.S   10$
-
       ENDC
 
 20$
@@ -468,10 +440,8 @@ EXIT_GETLINE
 	CLR.B   (A1)+              ;END LINE WITH A #00
 
       IFNE     SpeechAvail
-
 	LEA     InGetLn(PC),A0     ;back to '.' => time to speak
 	MOVE.B  #1,(A0)            ;Flag next LF = do speech
-
       ENDC
 
 	PULL_L  D0-D7/A0/A2-A5
@@ -527,14 +497,10 @@ REEDIT.30
 
 	MOVE.B  (A3)+,(A1)+        ;Copy very old buffer into INBUFF
 	BNE.S   REEDIT.30          ;Until zero term.
-
 	MOVE.B  D5,-(A1)           ;Zap the zero
-
 	SUB.L   A1,D0              ;Calculate no. of spaces needed
 	BMI     REPRINT            ;Neg => recovered line longer, so no spaces
-
 	BRA     REPRINT2           ;Display line, + spaces to cover old line
-
       ENDC
 
       IFNE     Wimp

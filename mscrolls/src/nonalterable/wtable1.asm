@@ -119,9 +119,7 @@ CONJST
 	DC.B   'TOGETHE',$52+$80
 
       IFEQ	THE_PAWN
-
 	DC.B	'UNTI',$4C+$80
-
       ENDC
 
 	DC.B    $82              ;END OF SECTION

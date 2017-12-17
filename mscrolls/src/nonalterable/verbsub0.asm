@@ -53,9 +53,7 @@
 	include	"macros.asm"
 
       IFNE     Graphics
-
 	 XREF    PICTURES
-
       ENDC
 
 
@@ -213,9 +211,7 @@ P.DESC
 	BEQ.S   05$
 
       IFNE     Graphics
-
 	CALL    PICTURES           ;Suss if we should display a picture
-
       ENDC
 
 	ST      CAPITAL(A4)        ;FORCE CAPS FOR ROOM NAME/ADJ
@@ -223,34 +219,25 @@ P.DESC
 	MSG	LINE
 
       IFND	WindUp
-
 	BRA.S   10$
-
       ENDC
 05$
       IFND	WindUp
       IFEQ	THE_PAWN
-
 	BTST	#1,4(A0)		;suppress 'the' xyzzy?
 	BNE.S	10$			;NE => yes
-
       ENDC
 
 	DO	P.TN
-
       ENDC
 10$
 	MOVE.W	D0,STOPRON(A4)
 	CALL    FMSG
 
      IFEQ	THE_PAWN
-
-
 	XREF	UntilDisturbed
-
 	CALL	FirstGlance
 	CALL	UntilDisturbed
-
      ENDC
 
 	DO	FULLSTOP
@@ -386,7 +373,7 @@ P.NOUN2
 	TEST_W  D0                 ;PRINT NOUN #0?
 	BNE.S   05$
 
-      IFNE    YCHEAT
+      IFNE    YCHEATMORE
 	PRINT   <'WHOOPS NOUN # ZERO!!^'>
       ENDC
 
@@ -517,7 +504,6 @@ P.TN
 	GETINFO        
 
       IFEQ	THE_PAWN
-
 	BTST	#6,6(A0)		;is it a room?
 	BEQ.S	05$
 	BTST	#7,10(A0)		;rooms cannot be clothing
@@ -527,7 +513,7 @@ P.TN
       ENDC				;looks really silly!
 
 05$
-	BTST    #6,4(A0)
+	BTST    #6,4(A0)                ; NPC?
 	BEQ.S   10$
 	CALL	GETNPC	   		;CALL for SPEED
 	BTST    #3,2(A3)           ;MISS ARTICLE?
@@ -897,9 +883,7 @@ P.XFERGS
 	MOVE.W	D1,D6
 
       IFNE	THE_PAWN
-
 	AND.W	#$000F,D6
-
       ENDC
 
 	CALL	PRTNUM

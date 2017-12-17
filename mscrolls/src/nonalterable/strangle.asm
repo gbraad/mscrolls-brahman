@@ -52,8 +52,8 @@
 	include	"equates.asm"
 	include	"macros.asm"
 	include	"verbequ.asm"
-	include	"nounequ1.asm"
-	include	"nounequ2.asm"
+	include	"nounequ1.i"
+	include	"nounequ2.i"
 
       XREF     CONJ,W.IDFY,YCANTW,FIGHT,SP.PLANT,YCANT,DBS,CHKNPC,GETNPC
       XREF     W.SQLCH,P.SUB,W.GIVE,P.OBJPRN,W.ABSKIS

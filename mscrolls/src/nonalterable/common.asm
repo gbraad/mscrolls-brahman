@@ -60,15 +60,13 @@
  
 	include	"equates.asm"
 	include	"macros.asm"
-	include	"nounequ1.asm"
-	include	"nounequ2.asm"
-	include	"verbequ.asm"
-	include	"roomequ.asm"
+	include	"nounequ1.i"
+	include	"nounequ2.i"
+	include	"verbequ.i"
+	include	"roomequ.i"
 
 	IFEQ	THE_PAWN
-
-	include "adjequ.asm"
-
+	include "adjequ.i"
 	ENDC
 
 
@@ -224,7 +222,7 @@ SYNMACRO2	MACRO
 SYN_L
 
 	INCLUDE	"miscsyms.asm"
-	INCLUDE	"nounsyms.asm"
+	INCLUDE	"nounsyms.i"
 
 	XDEF	SYN_L_Len
 SYN_L_Len	EQU	(*-SYN_L)/2
@@ -243,7 +241,7 @@ SYN_L_Len	EQU	(*-SYN_L)/2
 
 MULT.TAB
 
-	INCLUDE	"sets.asm"
+	INCLUDE	"sets.i"
 
 
 *--------------------------------
@@ -841,7 +839,7 @@ VLEN_NBVerb	EQU	*-NearbyVerbs-1
 *--------------------------------------- 
 
 	ALIGN
-	INCLUDE	"scendata.asm"
+	INCLUDE	"scendata.i"
 
 
 	 END

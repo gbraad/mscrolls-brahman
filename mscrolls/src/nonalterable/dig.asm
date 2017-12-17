@@ -57,6 +57,7 @@
 	XREF	DBS,P.TN,W.YCNDTT,P.SUB,P.VERB,VERB,P.MHAV,BSFULLSTOP
 	XREF	P.IDFY,PRTTXT,ADVERB,NPCINRM,NOUNBUF3,CHK4PT,CONJ,WHOOPS
 	XREF	V.EAT,V.SHINE,GET_,ISARE,CARRIED,W.NOONE,P.TNSTOP
+        XREF    P.MHAVSTOP
 
 *
 * V.DIG
@@ -155,7 +156,6 @@ V.BET
 	MOVE.L	NOUNBUF3(A4),D1		;get bookie
 
 
-
 Bet_CallSP
 
 	ST	WHOOPS(A4)		;no multiple betting!
@@ -200,25 +200,32 @@ V.STOP
 	XREF	SP.PLAY
 
 V.PLAY
+        TEST_L  6(A0)                   ; object must be in hands
+	BNE	P.MHAVSTOP		;NO
 	CALL	SP.PLAY
 	DOGO	DBS
 
 	ENDC
 
+*--------------------------------
+
+*  ORIGINAL VERSION        
 *
 * V.SWIM
 *
-	IfVerb	SWIM
+*	IfVerb	SWIM
+*
+*	XDEF	V.SWIM
+*	XREF	SP.SWIM
+*
+*V.SWIM
+*
+*	CALL	SP.SWIM
+*	DOGO	DBS
+*
+*	ENDC
 
-	XDEF	V.SWIM
-	XREF	SP.SWIM
-
-V.SWIM
-
-	CALL	SP.SWIM
-	DOGO	DBS
-
-	ENDC
+*--------------------------------
 
 *
 * V.FLUSH

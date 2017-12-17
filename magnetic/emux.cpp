@@ -54,8 +54,11 @@ void IItem::parse(IItems& items, const string& phrase)
     size_t n = words.size();
     if (n > 0)
     {
-        findItems(words[n-1], items);   
-        if (n > 1)
+        findItems(words[n-1], items);
+
+        //LOG4("IItem::parse1 \"", words[n-1] << "\"-> " << items << ", " << items.size() << " items");
+
+        if (items.size() > 1)
         {
             // foreach item, check it has this adjective, if given
             for (size_t i = 0; i < n-1; ++i)
@@ -127,7 +130,7 @@ bool IItem::_spine(IItem x, IItem y, bool xray)
             const uchar* pp = get_psudat();
             if (pp)
             {
-                pp += parent;
+                pp += parent; // parent is data offset
                 while (*pp)
                 {
                     IItem ri = IItem::getRoom(*pp);
@@ -183,10 +186,30 @@ bool IItem::_spine(IItem x, IItem y, bool xray)
                     bool inClosed = false;
 
                     if (!xray)
-                        inClosed = x.isContained() && p.isClosed();
+                    {
+                        inClosed = x.isContained() && p.isClosed() && !p.isLocalContents();
+                    }
                     
                     // if we're in a closed container, stop the spine
-                    if (!inClosed) return _spine(p, y, xray);
+                    if (!inClosed)
+                    {
+                        bool r = _spine(p, y, xray);
+                        if (r)
+                        {
+                            // if parented to a pseudo, we can have a secondary locator
+                            // this means it is only in one of the rooms of the pseudo.
+                            if (p.pseudo())
+                            {
+                                uint ps = x.loc_pseudo();
+                                if (ps && y.isRoom())
+                                {
+                                    r = ps == y.roomNumber();
+                                }
+                            }
+                            
+                        }
+                        return r;
+                    }
 
                 }
                 else
@@ -207,11 +230,12 @@ void IItem::initDiction()
     {
         Item* ii = items + i;
 
-        // some dictionary "words" have spaces like "jerry lee lewis"
-        // disregard these initial words
+        // some dictionary "words" have spaces (or underscore)
+        // like "jerry lee lewis". disregard the initial words
         const char* w = (const char*)ii->word.name;
         const char* w1 = strrchr(w, ' ');
-        if (w1) w = w1 + 1; // word after last space
+        if (!w1) w1 = strrchr(w, '_');
+        if (w1) w = w1 + 1; // word after last space or underscore
         _nouns.add(Diction::WordOwn(w, ii->id));
     }
 

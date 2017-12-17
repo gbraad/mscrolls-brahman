@@ -59,9 +59,9 @@
 wtablestart
 
 	include	"wtable1.asm"     ;ignored,specials,conj,adverbs
-	include "wtable4.asm"		;verbs
-	include	"wtable5.asm"     ;adjectives
-	include	"wtable6.asm"     ;nouns
+	include "wtable4.i"		;verbs
+	include	"wtable5.i"     ;adjectives
+	include	"wtable6.i"     ;nouns
 	include	"wtable7.asm"     ;misc, including synonyms & multiples
 
 
@@ -74,7 +74,7 @@ wtablestart
 
 Section24
 
-	include	"wtable24.asm"
+	include	"wtable24.i"
 
     ENDC
 

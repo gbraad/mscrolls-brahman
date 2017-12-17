@@ -119,7 +119,7 @@ PULL.PNT
 
 	CMP.B   #$11,6(A0)         ;insep rel?
 	BEQ.S   DBS_CLOSE
-	BTST    #1,5(A0)           ;pseudo?
+	BTST    #0,5(A0)           ;pseudo?
 	BNE.S   DBS_CLOSE
 	MOVE.B  1(A0),D2           ;Get hardness & strength  
 	MOVE.B  D2,D1

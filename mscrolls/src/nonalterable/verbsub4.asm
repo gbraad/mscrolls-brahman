@@ -353,16 +353,19 @@ CALCNET2
   
 PCOK
 
-* TEST D5,A5
+* TEST D5,A5 for Physical Characteristics ok
 
+        ;;  return d1 == 1 => failed, d1 == 0, ok
+        ;; ok if (hardness > 3, != 12, != 0 and item not broken)
+        
 	PUSH_L  D0/A0
 	MOVE.B  1(A5),D1
-	LSR.B   #4,D1
+	LSR.B   #4,D1             ;get hardness
 	BNE.S   05$
-	DO	DBS
+	DO	DBS               ;hardness void
 	BRA.S   30$               ;EXIT W ERROR
 05$
-	CMP.B   #3,D1
+	CMP.B   #3,D1             ; <=3 => too soft
 	BHI.S   10$
 
 	BeSure	M.TSOFT
@@ -379,7 +382,7 @@ PCOK
 	MOVEQ   #1,D1
 	BRA.S   99$
 10$
-	CMP.B   #12,D1
+	CMP.B   #12,D1           ; flexible, also too soft
 	BEQ.S   20$
 	MOVEQ	#0,D1
 
@@ -387,7 +390,6 @@ PCOK
 	BEQ.S	99$
 	
 	BeSure	M.BROKEN
-
 	MOVE.W	#M.BROKEN,D1
 	BRA.S	25$
 
@@ -821,10 +823,8 @@ DOSCORE
 	EXT.L   D0
       
       IFEQ	THE_PAWN
-
 	XREF	ScoreList
 	LEA	ScoreList(A4),A2	;so we avoid pc-rel range hassles
-
       ENDC
 
 	ADD.L   D0,A2

@@ -54,19 +54,6 @@
 	include	"verbequ.asm"
 
 
-
-      IFNE     Graphics
-
-	XREF    PICTURES
-
-      IFNE	C64
-
-	XREF	Cameos
-
-      ENDC
-
-      ENDC
-
 	XREF    GETNPC,P.SCN,GETDATA,VERB,INIT.TAB,W.EH,YESERR
 	XREF    W.IDFY,EXTRA,GETVECT,RIDPRT,SCRPNT,R.NOUN,DECODE,PEND2
 	XREF    GETPRON,LINE,PRTHEX,ADDNOUN,ADVERB,CONJ,CHEAT,CHEAT2
@@ -75,8 +62,8 @@
 	XREF    USE,REP1,TWOPV,W.THERE,W.I2DARK,LIGHT,NPCINRM
 	XREF    LASTNPC,GETRELN,DNOUNBUF,P.LIST,CHAROUT,NOUN
 	XREF    UTIL.BS,EXTRAPNT,DO.DEATH,DIED,SPECIALS
-	XREF    W.ARE,W.HERE,W.IS,ISARE,ONLYREL,ISANYREL,USER.DB
-	XREF    OUTMODE,SATMSG,P.NOUN,SINGV.TB,VLN.SING
+	XREF    W.ARE,W.HERE,W.IS,ISARE,ONLYREL,ISANYREL
+	XREF    SATMSG,P.NOUN,SINGV.TB,VLN.SING
 	XREF    CAPITAL,P.LOC,SP.LIGHT,ROOM,NOTOUT,PRTTXT
 	XREF    EVALWHT,ENERGY,CLOCK,BIOS,VLN.DARK,VLT.DARK,FMSG
 	XREF	DO.GOIN,PADV,PVERB,INTEXT,DECODE.LAB,SING.EX,P.VERB
@@ -108,7 +95,6 @@ REALBAD
 SCREEN
 
       IFNE	VAX&YCHEAT
-
 	CMP.L	#$1F400,A7
 	BEQ.S	05$
 	PRINT	<'Waaaa - unhealthy sp!!!!!!^'>
@@ -116,7 +102,6 @@ SCREEN
       ENDC
  
 	CALL	BIOSA4        ;SO THAT  *32698G WONT KILL MACHINE! 
-  
   
 	DO	YESERR             ;INCASE FROZEN
 	MSG     LINE
@@ -132,13 +117,9 @@ SCREEN
 	CALL    SP.LIGHT           ;! - CALC 'LIGHT' FOR THIS GO
 
       IFEQ	THE_PAWN
-
 	XREF	SPECIALS_Before
-
 	CALL	SPECIALS_Before
-
       ENDC
-
 
 	TEST_W  SCRPNT(A4)		;CHANGED ROOM?
 	BEQ.S	10$			;nope, only do top line
@@ -159,8 +140,7 @@ NOTNEWROOM
 	BNE	DO.FINAL
 
 
-      IFNE    YCHEAT
-	
+      IFNE    YCHEATMORE
 	TEST_W  CHEAT2(A4)         ;'DEBUG BAND' info
 	BEQ.S   10$
 	MSG     LINE
@@ -177,9 +157,8 @@ NOTNEWROOM
 	CALL    NOTOUT             ;Entry into DECODE after new cmd line fetch
 	BRA     PROCESS            ;Process a single verb
 SC70
-	DO	DECODE             ;Get new command line and parse first verb
+        DO	DECODE             ;Get new command line and parse first verb
 	BRA     PROCESS            ;process the verb
-
 
 
       IFNE	THE_PAWN!YCHEAT
@@ -192,7 +171,6 @@ SC70
 *--------------------------------
 
 	XDEF	SUSSINV
-	  
  
 SUSSINV
  
@@ -402,9 +380,6 @@ DOKILL
 PROCESS
 
 	
-	XREF	MakeUndoDiff
-	CALL	MakeUndoDiff
-
  
 	CLR.W   REP1(A4)           
 
@@ -471,16 +446,12 @@ PROC.LAB
 20$
 
       IFNE    YCHEAT
-
 	TEST_W  CHEAT(A4)
 	BNE.S   21$
-
       ENDC
 
       IFEQ	THE_PAWN
-
 	XREF	CanReach
-
 	CALL	CanReach		;returns EQ if D0 may be got at from
 	BEQ.S	21$			;where we are sitting
 
@@ -502,10 +473,8 @@ PROC.LAB
 	GETINFO        
 	
       IFNE    YCHEAT
-
 	TEST_W  CHEAT(A4)          ;CHEATING?
 	BNE.S   23$
-
       ENDC
 	
 	CALL    VERBOWN            ;CHKOWN APPLIES TO THIS VERB?
@@ -522,8 +491,7 @@ PROC.LAB
 	MOVE.W  VERB(A4),D2
 	DO	GETVECT
 	
-      IFNE    YCHEAT
-	
+      IFNE    YCHEATMORE
 	TEST_W  CHEAT2(A4)         ;THIS CHEAT DOES NOT NOBBLE VALID
 	BEQ     MISSINFO           ;DONT PRINT DEBUG INFO   
 	PUSH_L  D0-D7/A0-A6  ;CAN'T BE TOO SURE..
@@ -548,7 +516,6 @@ PROC.LAB
 	CALL    PRTHEX
 	MSG     LINE
 	PULL_L  D0-D7/A0-A6
-
       ENDC
 
 MISSINFO
@@ -558,12 +525,9 @@ MISSINFO
 	CALL    GETPRON            ;SET PRONOUNS - BUT LET VERB ALTER THEM
 
       IFEQ	THE_PAWN
-
 	XREF	ProcessSpecials		;to be found in special0
-
 	CALL	ProcessSpecials		;check noun interference
 	BNE.S	10$			;thou shalt not proceed (john)
-
       ENDC
 
 	MOVE.B  (A0),D1
@@ -813,6 +777,7 @@ SETPAUSE
 *--------------------------------
 
 	XREF	DO.QUIT
+        
 * well chaps - the player has won - we shall see what he wishes to do now
 
 DO.FINAL	

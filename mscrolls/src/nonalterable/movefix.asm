@@ -51,8 +51,8 @@
 
 	include	"equates.asm"
 	include	"macros.asm"
-	include	"nounequ1.asm"
-	include	"nounequ2.asm"
+	include	"nounequ1.i"
+	include	"nounequ2.i"
 	include	"verbequ.asm"
 
 
@@ -126,11 +126,8 @@ MVE.PNT
 V.JOIN
 
       IFEQ	THE_PAWN
-
 	XREF	SP.JOIN
-
 	CALL	SP.JOIN
-
       ENDC
 
 *
@@ -140,11 +137,8 @@ V.JOIN
 FIX
 
       IFEQ	THE_PAWN
-
 	XREF	SP.FIX
-
 	CALL	SP.FIX
-
       ENDC
  
 	MOVEQ	#0,D6			;use as a flag
@@ -159,13 +153,10 @@ FIX
         IfVerb	MEND
 
       IFEQ	THE_PAWN        
-
 	XREF	SP.MEND
-
 	TEST_W	CONJ(A4)		;with?
 	BNE.S	010$
 	CALL	SP.MEND			;fix x with y == mend x wi y
-        
       ENDC
 
 010$
