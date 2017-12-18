@@ -1,0 +1,18 @@
+*--------------------------------
+*
+*   ADJEQU.ASM  adjective equates
+*
+*--------------------------------
+
+ADJDEF             MACRO  * adjname
+
+ADJ_\1             EQU   current_adj_number
+current_adj_number SET   current_adj_number+1
+
+                   ENDM
+
+current_adj_number SET   4         ;Adjectives start at 4
+
+
+
+

@@ -1,0 +1,61 @@
+
+
+     DC.L    0                   ;long word terminator
+
+
+*--------------------------------
+*
+* NPC ADDITIONAL DATA:
+*
+* BYTE #0 - MOTIVATION MODIFIER
+*           FOR NPC, THRESHOLD 7F
+*           (NOT USED (YET)) 
+*
+* BYTE #1 - NO. OF QUESTIONS TILL
+*           NPC GETS PISSED OFF
+*           (ALSO N/A (YET))
+*
+* BYTE #2 - EMOTION,ARTICLE,
+*           CLOTHING & SEX
+*
+*     TOP NIBBLE - 0-F
+*  
+* 0 - NULL     1 - HAPPY
+* 2 - ANGRY    3 - VIOLENT
+* 4 - ASLEEP   5 - UNCONSIOUS
+* 6 - PEACEFUL 7 - EXCITED
+* 8 - FRIENDLY 9 - DRUNK
+* A - SAD      B - TIRED
+* C - SUFFERING
+*
+*
+*     BOTTOM NIBBLE:
+*
+* BIT #0 - SEX: MALE=1,FEMALE=0
+* BIT #1 - CLOTHING: 1=SUPPRESS
+* BIT #2 - 1=> is animal
+* BIT #3 - ARTICLE - 
+*
+* 1 - NONE E.G. HONEST JOHN,ERIK
+* 0 - NORM E.G. A GURU/THE GURU
+*
+*
+* BYTE #3 - NPC PAUSED (IF <0)
+*
+*
+*--------------------------------
+ 
+   
+NPC.DATA
+ 
+       include "npcdata.i"
+        
+	DC.L	0
+
+NPC.LIST
+
+	include	"npclist.i"
+	DC.L	0
+      END
+
+

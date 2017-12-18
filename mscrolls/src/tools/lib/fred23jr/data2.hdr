@@ -1,0 +1,65 @@
+		SECTION		"ADV",CODE
+
+*--------------------------------
+*
+*  SRC.ADV.DATA2
+*
+*--------------------------------
+ 
+	include "equates.i"
+	include	"macros.i"
+	include	"roomequ.i"
+	include	"nounequ1.i"
+
+
+	XDEF	PSUDAT,NPC.DATA,NPC.LIST
+
+	XDEF	ValueTable
+
+
+
+
+* Pseudo define (starts list of rooms containing object)
+
+PS_DEF      MACRO    * noun identifier
+
+            DC.B     0                    ;terminate previous list
+			IFNE	GENERIC
+	    DC.B	N\1>>8
+	    DC.B	N\1&$FF
+			ENDC
+P_\1        EQU      *-PSUDAT             ;data to go in noundata
+            XDEF     P_\1                 ;for linker
+
+            ENDM
+
+* Pseudo continue (the actual list of rooms)
+
+PS_CONT     MACRO    * room [,room..]     ;NB max 9 rooms per line!
+
+            PS_ROOM  \1
+            PS_ROOM  \2
+            PS_ROOM  \3
+            PS_ROOM  \4
+            PS_ROOM  \5
+            PS_ROOM  \6
+            PS_ROOM  \7
+            PS_ROOM  \8
+            PS_ROOM  \9
+
+            ENDM
+
+PS_ROOM     MACRO    * room               ;encode for one room (if there)
+
+           IFNC     '\1',''
+
+            DC.B     RN\1
+
+           ENDC
+
+            ENDM
+
+
+PSUDAT
+
+

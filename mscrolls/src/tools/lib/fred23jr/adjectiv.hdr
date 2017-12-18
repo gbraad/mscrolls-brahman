@@ -1,0 +1,33 @@
+		SECTION		"ADV",CODE
+
+*--------------------------------
+*
+* SRC.ADV.ADJECTIVES1
+*
+*--------------------------------
+  
+	include "equates.i"
+	include	"macros.i"
+	include	"adjequ.i"
+
+      XDEF        ADJ.TBL
+
+ADJ      MACRO    * adjname,adjname....
+
+         IFC      '','\1'
+         DC.B     0
+         MEXIT
+         ENDC
+         DC.B     ADJ_\1
+         ADJ      \2,\3,\4,\5,\6
+
+         ENDM
+
+
+
+
+ADJ.TBL
+
+
+
+

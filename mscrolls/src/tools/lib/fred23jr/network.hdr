@@ -1,0 +1,21 @@
+		SECTION	"ADV",code
+
+*--------------------------------
+*
+*  SRC.ADV.NETWORK
+*
+*--------------------------------
+
+       XDEF       NETWORK,NET_END,NET_LEN
+
+
+	include	"roomequ.i"
+	include "nway.i"
+
+
+ 
+*                  N   NE  E   SE  S   SW  W   NW  U   D
+
+NETWORK
+
+

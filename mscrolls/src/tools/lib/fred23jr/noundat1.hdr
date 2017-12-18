@@ -1,0 +1,30 @@
+		SECTION		"ADV",CODE
+
+*--------------------------------
+*
+*  SRC.ADV.NOUNDATA1
+*
+*--------------------------------
+
+	include	"equates.i"
+	include	"nounequ1.i"
+	include	"roomequ.i"
+
+
+    XDEF       D.NOUNS,N_LAST
+
+ 
+    DC.W       $0000,$0000,$0000,$0000,$0000,$0000,$0000
+                                           ;THE 'PLAYER' - ONLY HERE
+*                                          ;TO STOP SAVE PREVIOUS STUFF
+
+
+
+
+
+
+ 
+
+
+D.NOUNS:
+

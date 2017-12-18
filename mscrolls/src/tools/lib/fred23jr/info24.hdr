@@ -1,0 +1,19 @@
+		SECTION		"ADV",CODE
+
+*--------------------------------
+*
+* INFO24.ASM	- location+type info for scenary nouns
+*
+*--------------------------------
+ 
+	include "equates.i"
+	include	"nounequ1.i"
+
+	XDEF	Info24Table
+
+INFO24	MACRO	* type,location
+	DC.W	\1<<12!N\2
+	ENDM
+
+Info24Table
+

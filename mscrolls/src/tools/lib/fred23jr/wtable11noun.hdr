@@ -1,0 +1,20 @@
+	IFNE	YCHEAT
+
+IFYCHEAT	MACRO	* DC.B 'dsvdafsg',$23+$80
+		DC.B	\2,\3
+		ENDM
+
+	ENDC
+
+
+	IFEQ	YCHEAT
+
+IFYCHEAT	MACRO	* ditto
+
+		ENDM
+
+	ENDC
+
+
+	
+

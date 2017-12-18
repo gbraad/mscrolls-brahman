@@ -1,0 +1,3 @@
+	DC.W	0		;terminate list (for printing)
+
+	END

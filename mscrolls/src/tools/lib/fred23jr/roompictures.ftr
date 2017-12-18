@@ -1,0 +1,10 @@
+
+
+	XDEF	PictureResources
+
+	CNOP	0,2
+
+PictureResources
+
+	include	"roompicttab.i"
+
