@@ -1,0 +1,45 @@
+
+WrenchPipe:
+        CALL   StartFlood
+
+OpenStopcock
+        BRA   StartFlood
+
+
+StartFlood:
+        Timer6 = 1
+        Flooding = true
+        FGT_System1 = 408 + HI
+        CANTSAVE |= 1   *NEW*
+
+Timer.asm/SP.Flood:
+
+        if (!Flooding) return;
+        timer6 = 1
+        ++FloodClock
+        if (FloodClock == 1)
+        {
+                FGT_Steps = 410 + HI
+                resetOut(water)
+        }
+        else if (FloodClock == 2)
+        {
+                kill rats
+        }
+        else // turn3
+        {
+             Flooding = false
+             FloodClock = 0
+             GO DEAD
+        }
+
+CloseStopcock:
+
+        if (FloodClock == 2)
+        {
+              Flooded = true
+        }
+        Flooding = false;
+        FGT_System1 = 398 + HI
+        CANTSAVE &= ~1   *NEW*
+        

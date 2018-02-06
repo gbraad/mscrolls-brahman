@@ -1,0 +1,59 @@
+----------------------------------------------------
+timer.asm
+----------------------------------------------------
+
+RatRaceTime:
+
+        // waits until due
+
+        if (FlagRaceDue)
+        {
+                if (FlagRatRace & 1)
+                {
+                        // part2
+                }
+                FlagRatRace |= 1;
+                FlagRRAnnounced = true;
+                put gatekeeper in yard;
+
+                resetOut(all in Bet_RatList)
+
+                if (current room == gatehouse) msg("see gatekeeper go courtyard")
+                if (current room == courtyard) msg("gatekeeper arrives with rats")
+
+                timer1 = 1; // ready for part2
+        }
+        else
+        {
+                resetOut(RatRace);
+        }
+
+----------------------------------------------------
+special0
+----------------------------------------------------
+
+RatRaceCall:
+
+        // triggers due
+
+        if (!FlagGK1) return;  // not past keeper
+        if (FlagRaceDue) return; // done already
+        if (race out) return; // not yet in (see above)
+        if (race local) msg("keeper shouts race ready")   
+
+        timer1 = 10; // in 10 moves
+
+        REMASTER; changes above to 0
+        
+        FlagRaceDue = true
+        FlagRRAnnounced = true
+
+----------------------------------------------------
+setmode.asm
+----------------------------------------------------
+
+called when moving any->yard
+
+ForceRace:
+
+        if (FlagRRAnnounced) timer1 = 1; 

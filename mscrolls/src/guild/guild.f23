@@ -2480,6 +2480,7 @@ is a shifty character with an expressionless 'poker' face
 	texture npc
 	related
 	location boat
+        m2icon "thief.svg"
 }
 
 npc miller "miller" {
@@ -2493,6 +2494,7 @@ is a friendly chap, more than happy with his simple existence
 	texture npc
 	related
 	location mill1
+        m2icon "miller.svg"
 }
 
 npc gatekeeper "castle gate gatekeeper" {
@@ -2506,6 +2508,7 @@ is short and squat. He takes great pride in his work and hates those who think t
 	texture npc
 	related
 	location gatehouse
+        m2icon "gatekeeper.svg"
 }
 
 npc bear "grizzly bear" {
@@ -2521,6 +2524,7 @@ looks rather unhappy about his confinement - he would much prefer to be roaming 
 	size 8
 	animal
 	location cage3
+        m2icon "bear.svg"
 }
 
 npc guest "old frail man" {
@@ -2537,6 +2541,7 @@ helping matters one little bit
 	texture npc
 	related
 	location scrub2
+        m2icon "oldman.svg"
 }
 
 npc spider "jumper king spider" {
@@ -2555,6 +2560,7 @@ leg twitches make your [skin] crawl
 	animal
 	texture furry
 	location gdn2
+        m2icon "spider.svg"
 }
 
 npc gravedigger "gravedigger" {
@@ -2567,6 +2573,7 @@ is very down to earth and incredibly ordinary
 	texture npc
 	related
 	location cemtr
+        m2icon "gravedigger.svg"
 }
 
 npc snake "ice constricting snake" {
@@ -2586,6 +2593,7 @@ is squeezing the living daylights out of you
 	inseparable
 	intrinsic
 	location inventory
+        m2icon "snake.svg"
 }
 
 item boat2 "small boat" {
@@ -2827,6 +2835,7 @@ is a large black sack; standard issue for the Reknaught Raiders
 	another_noun
 	location inventory
 	set bags
+        m2icon "swagbag2.svg"
 }
 
 item sweatshirt "striped sweatshirt" {
@@ -2848,6 +2857,7 @@ is part of your official Reknaught Raiders uniform
         npc_refuses
 	location inventory
 	set clothes
+        m2icon "sweatshirt2.svg"
 }
 
 item jeans "black jeans" {
@@ -2869,6 +2879,7 @@ have a pocket in the front
         npc_refuses
 	location inventory
 	set clothes
+        m2icon "jeans3.svg"
 }
 
 item lamp "lamp" {
@@ -2888,6 +2899,7 @@ is part of the thieves kit you were given on joining the guild
         npc_refuses
 	contained
 	location bag1
+        m2icon "lamp.svg"
 }
 
 item pocket1 "jeans pocket" {
@@ -2904,6 +2916,7 @@ is a small [bag] sewn into your jeans for carrying loose change and the like
 	combustable 1
 	contr_vol 2		#starts life wi a card in it
 	location jeans
+        m2icon "pocket.svg"
 }
 
 item mill2 "wind mill" {
@@ -2949,6 +2962,7 @@ is very simple in design
 	combustable 1
 	related
 	location miller
+        m2icon "easychair2.svg"
 }
 
 item chaff "chaff" {
@@ -2980,6 +2994,7 @@ is a string instrument with a delightful, airy tone
 	combustable 1
         npc_refuses             # prevents giving it away
 	location miller
+        m2icon "lute.svg"
 }
 
 # a treasure
@@ -2998,6 +3013,7 @@ is the size of a thumb nail and used to pluck the lute strings
 	texture smooth
 	location lute
 	set treasure
+        m2icon "plectrum.svg"
 }
 
 item gum "chewing gum" {
@@ -3016,6 +3032,7 @@ is lemon flavour and made by Hurligan, a provincial confectioner
 	edible 5	# tasty ?
 	out
 	location inventory
+        m2icon "gum.svg"
 }
 
 item lever "lever" {
@@ -3065,6 +3082,7 @@ is a small plastic container used by the gatekeeper to keep fishing bait
         npc_refuses
 	contr_vol 2
 	location bed1
+        m2icon "tub2.svg"
 }
 
 item maggot "lonely maggot" {
@@ -3083,6 +3101,7 @@ is a little grubby, and looks rather lonely
 	contained
 	location tub
 #	animal
+        m2icon "maggot.svg"
 }
 
 item cabinet1 "antique cabinet" {
@@ -3115,7 +3134,9 @@ has been painted gold
 	location cabinet1
 	another_noun
 	set keys
+        m2icon "goldenkey.svg"
 }
+
 
 item sink "kitchen sink" {
 	desc {
@@ -3179,6 +3200,7 @@ is of a new type, designed only to kill rats (and other such vermin)
 	edible 3        # ill and die
 	contained
 	location cupboard
+        m2icon "poison.svg"
 }
 
 item jar "jam jar" {
@@ -3200,6 +3222,7 @@ has a picture of a white rabbit on it
 	contr_vol 2
 	contained
 	location cupboard
+        m2icon "jamjar.svg"
 }
 
 item jam2 "fly-infested jam" {
@@ -3218,6 +3241,7 @@ is strawberry flavoured and now mixed with essence of dead fly
 	edible 3                # die eventually
 	out
 	location inventory
+        m2icon "fly.svg"
 }
 
 item jam "jam" {
@@ -3236,6 +3260,7 @@ is strawberry flavour
         npc_refuses
 	contained
 	location jar
+        m2icon "jamblob.svg"
 }
 
 item cage3 "cubic golden cage" {
@@ -3295,6 +3320,7 @@ is engraved with tiny figures enacting an ancient religious festival
 	contained
 	location cage3
 	set treasure
+        m2icon "chalice2.svg"
 }
 
 item rug "vast rug" {
@@ -3310,6 +3336,7 @@ must have taken months to weave
 	sittable
 	texture soft
 	location hall2
+        m2icon "rug2.svg"
 }
 
 
@@ -3334,6 +3361,7 @@ will hold one small bird and can be [opened](open bird cage) and [closed](close 
         npc_refuses
 	location yard
 	set cages
+        m2icon "birdcage.svg"
 }
 
 item cheque "cheque" {
@@ -3352,6 +3380,7 @@ is made out for the sum of
 	money
         attribute ismoney
 	location inventory
+        m2icon "cheque.svg"
 }
 
 npc rat1 "black rat" {
@@ -3370,6 +3399,7 @@ is the champion sprinter of the Obakanga valley
 	location gatekeeper
 	animal
 	set rats
+        m2icon "blackrat.svg"
 }
 
 npc rat2 "white rat" {
@@ -3388,6 +3418,7 @@ is a long distance specialist from Swelk
 	location gatekeeper
 	animal
 	set rats
+        m2icon "whiterat.svg"
 }
 
 npc rat3 "grey rat" {
@@ -3406,6 +3437,7 @@ looks a bit mangy and under the weather
 	location gatekeeper
 	animal
 	set rats
+        m2icon "greyrat.svg"
 }
 
 npc rat4 "brown rat" {
@@ -3424,6 +3456,7 @@ recently came second in the Reknaught Handicap Chase
 	location gatekeeper
 	animal
 	set rats
+        m2icon "greyrat.svg"
 }
 
 item bone "snake skin" {
@@ -3441,6 +3474,7 @@ has been parted from its original owner for quite some time
         npc_refuses
 	location hse 
 	set ingredients
+        m2icon "snakeskin.svg"
 }
 
 item straw "straw" {
@@ -3458,6 +3492,7 @@ is pretty old and pongy
 	combustable 1
 	related
 	location stable
+        m2icon "straw.svg"
 }
 
 item flies "live flies" {
@@ -3555,6 +3590,7 @@ is made of iron
 	texture warm
 	contr_vol 2
 	location lounge
+        m2icon "ironbucket3.svg"
 }
 
 item coal "black lump_of_coal" {
@@ -3575,6 +3611,7 @@ has a slight fracture marring it's otherwise unremarkable surface
         npc_refuses
 	contained
 	location bucket
+        m2icon "coal.svg"
 }
 
 # a treasure
@@ -3594,6 +3631,7 @@ is an extremely well preserved specimen of a prehistoric mollusc
 	texture rough
 	location coal
 	set treasure
+        m2icon "fossil.svg"
 }
 
 # this is a treasure
@@ -3615,6 +3653,7 @@ is a classic, painted by Ripov during his dead period
 	sl gallery
 	set paintings
 	set treasure
+        m2icon "oilpainting.svg"
 }
 
 item painting2 "watercolour" {
@@ -3636,6 +3675,7 @@ ground whenever he sang the words '\_Urfanore [Pendra]_\'
 	location wall1
 	sl gallery
 	set paintings
+        m2icon "watercolourpainting.svg"
 }
 
 item painting3 "gaudy painting" {
@@ -3654,6 +3694,7 @@ is an object lesson in how to fail as an artist
 	location wall1
 	sl gallery
 	set paintings
+        m2icon "gaudypainting.svg"
 }
 
 item safe "safe" {
@@ -3702,6 +3743,7 @@ is the handiwork of a complete amateur
 	texture furry
 	contr_vol 1
 	location couch
+        m2icon "cushion3.svg"
 }
 
 
@@ -3721,6 +3763,7 @@ is used to give the cushion its shape
         npc_refuses
 	contained
 	location cushion
+        m2icon "foam2.svg" 
 }
 
 item note "five.ferg five ferg note" {
@@ -3746,6 +3789,7 @@ five ferg notes and coins
 	location cushion
 	set money
 	set fergs
+        m2icon "5fergnote.svg"
 }
 
 item door1 "wooden door" {
@@ -3870,6 +3914,7 @@ is a metre long and five centimetres wide
 	inseparable
 	related
 	location system
+        m2icon "pipe.svg"
 }
 
 item stopcock "stopcock" {
@@ -3902,6 +3947,7 @@ is overpowering in its fruitiness
 	edible 6
 	contained
 	location bottle1
+        m2icon "winebottle2.svg"
 }
 
 
@@ -3918,6 +3964,7 @@ comes from the celebrated wine region of Enker Marsh
 	edible 6
 	contained
 	location bottle4
+        m2icon "champagnebottle.svg"
 }
 
 item bottle1 "wine red bottle" {
@@ -3937,6 +3984,7 @@ is a fine red vintage, kept for decades and would be highly sought after by the 
 	contr_vol 1
 	location racks
 	set bottles
+        m2icon "winebottle2.svg"
 }
 
 item bottle4 "champagne bottle" {
@@ -3958,6 +4006,7 @@ has a label on it that reads:^[Open](open champagne bottle) on special occasions
 	contr_vol 2
 	location racks
 	set bottles
+        m2icon "champagnebottle.svg"
 }
 
 item ruby "superb beautiful red ruby" {
@@ -3973,6 +4022,7 @@ has been superbly cut in the shape of a one ferg coin
 	contained
 	location bottle1
 	set treasure
+        m2icon "redruby.svg"
 }
 
 item junk "old broken junk" {
@@ -3993,6 +4043,7 @@ The junk, boxes and bottles are all covered with a thick layer of dust
 	location { room2 passage3 }
 	set boxes
 	set bottles
+        m2icon "junk3.svg"            
 }
 
 item book1 "books" {
@@ -4045,6 +4096,7 @@ Becoming rather tatty now, this book has obviouly been read by many people
 	combustable 1
 	location desk1
 #	set books  NOT A BOOK, otherwise library gets confusing
+        m2icon "paperback.svg"
 }
 
 item device "yellow pale device" {
@@ -4079,6 +4131,7 @@ is pale yellow in colour
 	combustable 1
 	contained
 	location device
+        m2icon "toiletpaper2.svg"
 }
 
 item toilet "yellow pale toilet" {
@@ -4137,6 +4190,7 @@ has been carefully decorated with small paintings of ferocious beasts
 	contr_vol 2
 	location bed3		# Moved from bed2 to make Roddys bit easier
 	set treasure
+        m2icon "chinapot2.svg"
 }
 
 item cabinet2 "walnut cabinet" {
@@ -4171,6 +4225,7 @@ is an antique masterpiece
 	texture hard
 	location bank
 	set treasure
+        m2icon "brooch.svg"
 }
 
 item blackboard "black blackboard" {
@@ -4240,6 +4295,7 @@ is a daringly low cut affair with swathes of black chiffon hanging from the back
 	location wardrobe
 	set clothes
 	set treasure
+        m2icon "dress.svg"
 }
 
 item box1 "sewing box" {
@@ -4259,6 +4315,7 @@ is decorated with embroideries of cuddly white rats
 	related
 	location bed3
 	set boxes
+        m2icon "sewingbox.svg"
 }
 
 item needle "sharp needle" {
@@ -4277,6 +4334,7 @@ would be very difficult to thread
 	contained
 	fixed_num cotton
 	location box1
+        m2icon "needle2.svg"
 }
 
 item cotton "cotton" {
@@ -4294,6 +4352,7 @@ is strong and white
 	combustable 1
 	contained
 	location box1
+        m2icon "cotton2.svg"
 }
 
 item cauldron "cast iron cauldron" {
@@ -4344,6 +4403,7 @@ is very tattered and leather bound
 	location bookshelf
 	another_noun
 #	set books	Can be confusing in librarys
+        m2icon "diary.svg"
 }
 
 item sachet "paper sachet" {
@@ -4364,6 +4424,7 @@ beware when [opening]!' written on it
 	contr_vol 1
 	contained
 	location cauldron
+        m2icon "sachet3.svg"
 }
 
 item powder "magic electric blue powder" {
@@ -4383,6 +4444,7 @@ is an electric blue colour and very finely cut
 	contained
 	location sachet
 	set ingredients
+        m2icon "powder.svg"
 }
 
 item cue "billiard cue" {
@@ -4401,6 +4463,7 @@ is two metres long with its tip chalked, ready for a game
         npc_refuses
 	texture smooth
 	location rack1
+        m2icon "cue.svg"
 }
 
 item table2 "billiard table" {
@@ -4432,6 +4495,7 @@ is completely smooth
 	texture smooth
 	location table2
 	set balls
+        m2icon "spotball2.svg"
 }
 
 item ball2 "red billiard ball" {
@@ -4452,6 +4516,7 @@ seems completely smooth
 	contr_vol 1
 	location table2
 	set balls
+        m2icon "spotball2.svg"
 }
 
 item ball3 "spot billiard ball" {
@@ -4468,6 +4533,7 @@ has a tiny black spot to distinguish it from the white ball
 	texture smooth
 	location table2
 	set balls
+        m2icon "spotball2.svg"
 }
 
 item rack1 "cue rack" {
@@ -4506,6 +4572,7 @@ is cut in the most modern of designs
 	contained
 	location ball2
 	set treasure
+        m2icon "diamondring3.svg"
 }
 
 item piano "polished highly piano" {
@@ -4560,6 +4627,7 @@ is entitled 'Fading Fugue' by the legendary composer Trogar Manner
 	contained
 	location bag2
 #	set treasure
+        m2icon "musicsheet.svg"
 }
 
 item bag2 "plastic bag" {
@@ -4583,6 +4651,7 @@ is [air]-tight when closed
 	another_noun
 	set bags
 	set treasure
+        m2icon "musicsheet.svg" 
 }
 
 item board "notice board" {
@@ -4632,6 +4701,7 @@ resembles one of the temple's greatest zealots: \_Hurligan the Sweet_\
 	size 6
 	texture smooth
 	location temple
+        m2icon "statue.svg"
 }
 
 # this is a treasure
@@ -4655,6 +4725,7 @@ burning incense to escape
         npc_refuses
 	location altar
 	set treasure
+        m2icon "incenseburner.svg"
 }
 
 item hive "beehive" {
@@ -4672,6 +4743,7 @@ has a delicious smell emanating from it
 	texture hard
 	contr_vol 2
 	location gdn1
+        m2icon "beehive.svg"
 }
 
 item bees "bees" {
@@ -4708,6 +4780,7 @@ have a good grip and would be ideal for winter
 #	covers { arms }	#cos of hassle with hacks to invent (was vanishing
 #							under sweatshirt)
 	wearable 1
+        m2icon "gloves.svg"
 }
 
 # don't change the loc info of the honey without changing SP.BeeSting (special0)
@@ -4726,6 +4799,7 @@ would be just the thing for Winnie-the-Pooh
 	edible 6
 	contained
 	location hive
+        m2icon "honey.svg"
 }
 
 item door2 "black door" {
@@ -5308,6 +5382,7 @@ looks like a stage prop from 'Hamlet'
         npc_refuses
 	contained
 	location sarcophagus
+        m2icon "skull2.svg"
 }
 
 item eye "eye" {
@@ -5324,6 +5399,7 @@ winks back as you look at it
         npc_refuses
 	location skull
 	set ingredients
+        m2icon "eye.svg"
 	}
 
 item statuette "obsidian statuette" {
@@ -5342,6 +5418,7 @@ have a sardonic glint in them
 	texture smooth
 	location shrine
 	set treasure
+        m2icon "statuette.svg"
 }
 
 
@@ -5385,6 +5462,7 @@ the soles of the feet before commencing the walk across hot coals
 	size 1
 	texture smooth
 	location library2
+        m2icon "pamphlet.svg"
 }
 
 
@@ -5403,6 +5481,7 @@ is a deep, rich black
 	location organ
 	another_noun
 	set keys
+        m2icon "ebonykey.svg"
 }
 
 
@@ -5421,6 +5500,7 @@ is exquisitely carved
 	location organ
 	another_noun
 	set keys
+        m2icon "ivorykey.svg"
 }
 
 item sand "crunchy sand" {
@@ -5461,6 +5541,7 @@ are made of rubber and have very grippy soles
 	hidden
 	out
 	location sand
+        m2icon "boots.svg"
 }
 
 item rope "wet rope" {
@@ -5476,6 +5557,7 @@ was left here by a kind-hearted potholer
 	pseudo
 	location { cave2 cave3 }
 	another_noun
+        m2icon "rope2.svg"
 }
 
 item mineral "semi_precious mineral" {
@@ -5509,6 +5591,7 @@ rockface
 	texture hard
 	sharpness 1
 	location cave3
+        m2icon "pick2.svg"
 }
 
 item bars "iron bars" {
@@ -5589,6 +5672,7 @@ is bright and colourful
 	animal
 	location cage5
 	set birds
+        m2icon "macaw.svg"
 }
 
 npc bird3 "mynah bird" {
@@ -5608,6 +5692,7 @@ seems chirpy and lively despite his obvious dislike of confinement
 	location cage 
 	another_noun
 	set birds
+        m2icon "mynah.svg"
 }
 
 item cage5 "large cage" {
@@ -5660,6 +5745,7 @@ are of the Gerominitus family
 	size 1
 	texture smooth
 	location gdn2
+        m2icon "succulents.svg"
 }
 
 item coconut "brown hairy coconut" {
@@ -5676,6 +5762,7 @@ reminds you of the bear - brown and hairy
         npc_refuses
 	texture furry
 	location tree1
+        m2icon "coconut_open.svg"
 }
 
 item cage6 "small cage" {
@@ -5777,6 +5864,7 @@ is a [spade]
         npc_refuses
 	sharpness 1
 	location offis
+        m2icon "spade.svg"
 }
 
 item foods "food" {
@@ -5796,6 +5884,7 @@ is a mixture of various types of grain
         npc_refuses
 	edible 4
 	location offis
+        m2icon "birdfood.svg"
 }
 
 synonym "zoo" {zoological adj}
@@ -5814,6 +5903,7 @@ has a special feature on macaws which says that they like eating fresh coconut b
 	combustable 1
 	contained
 	location drawer1
+        m2icon "magazine.svg"
 }
 
 item door6 "small door" {
@@ -5930,6 +6020,7 @@ bears the monarch's likeness, and is worth two fergs
 	set coins
 	set fergs
 	synonyms { piece }
+        m2icon "coin3.svg"
 }
 
 item grave1 "small grave" {
@@ -6054,6 +6145,7 @@ are red and emit a sticky substance when squashed
 	texture sticky
 	set ingredients
 	location tree2
+        m2icon "berries.svg"
 }
 
 item skeleton "skeleton" {
@@ -6067,6 +6159,7 @@ has one of its finger bones resting on a chest
 	size 5
 	texture hard
 	location rrm
+        m2icon "fingerbone3.svg" # just the hand
 }
 
 item finger "finger bone" {
@@ -6085,6 +6178,7 @@ is jagged along one edge
         npc_refuses
 	texture hard
 	location chest
+        m2icon "fingerbone.svg" # looks like a femur
 }
 
 item chest "wooden chest" {
@@ -6102,6 +6196,7 @@ is about twenty centimetres by fifteen by ten
 	texture hard
 	contr_vol 1
 	location rrm
+        m2icon "chest.svg"
 }
 
 item heart "heart" {
@@ -6119,6 +6214,7 @@ is alive and beating loudly
 	contained
 	location chest
 	set ingredients
+        m2icon "heart.svg"
 }
 
 item spike "spike" {
@@ -6209,6 +6305,7 @@ is very large and, though uncut at the moment, certainly of great value
 	texture hard
 	location rmud
 	set treasure
+        m2icon "gem.svg"
 }
 
 item mirror "mirror" {
@@ -6224,6 +6321,7 @@ allows you to sate your vanity at your leisure
         npc_refuses
 	related
 	location cabinet2
+        m2icon "mirror.svg"
 }
 
 item coals "hot coals" {
@@ -6258,6 +6356,7 @@ looks \_very, very_\ valuable
 	moveable
 	location wmachine
 	set cubes
+        m2icon "cube2.svg"
 }
 
 item cube1 "wooden red cube" {
@@ -6276,6 +6375,7 @@ once entertained the Baron in his childhood
         npc_refuses
 	location room2
 	set cubes
+        m2icon "cube2.svg"
 }
 
 
@@ -6383,6 +6483,7 @@ has
 	related
 	location podium1
 	set dice
+        m2icon "die2.svg"
 }
 
 item die2 "green die" {
@@ -6401,6 +6502,7 @@ has
 	related
 	location podium2
 	set dice
+        m2icon "die2.svg"
 }
 
 item die3 "blue die" {
@@ -6419,6 +6521,7 @@ has
 	related
 	location podium3
 	set dice
+        m2icon "die2.svg"
 }
 
 item die4 "yellow die" {
@@ -6437,6 +6540,7 @@ has
 	related
 	location podium4
 	set dice
+        m2icon "die2.svg"
 }
 
 item die5 "plastic die" {
@@ -6458,6 +6562,7 @@ looks like this:^\![](qrc:///images/plastic_die.jpg)\
 	contained
 	location case
 	set dice
+        m2icon "die.svg"
 }
 
 item case "opaque plastic case" {
@@ -6592,6 +6697,7 @@ is brilliantly carved, depicting the mythical beast beautifully
 	texture smooth
 	location sway3
 	set treasure
+        m2icon "rhinoceros2.svg"
 }
 
 item blackbooks "black leather-bound books" {
@@ -6862,6 +6968,7 @@ looks as though it hasn't been washed since the day it was cut
 	location drawer1
 	another_noun
 	set keys
+        m2icon "key.svg"
 }
 
 item flap "counter flap" {
@@ -6929,6 +7036,7 @@ are of a species common in Kerovnian rivers
 	texture slippery
 	set fish
 	set fishes
+        m2icon "fish.svg"
 }
 
 item dfish "dead fish" {
@@ -6946,6 +7054,7 @@ is of a species less common in Kerovnian rivers than it used to be
 	edible 5
 	set fish
 	set fishes
+        m2icon "fish.svg"
 }
 
 item pfish "dead fish" {
@@ -6963,6 +7072,7 @@ has been smeared with rat poison, these are never found in Kerovnian rivers
         npc_refuses
 	set fish
 	set fishes
+        m2icon "fish.svg"
 }
 
 item plaque1 "plaque" {
@@ -7107,6 +7217,7 @@ thin sheet of steel
 	location wall1
 	sl bedroom2
 	set paintings
+        m2icon "abstractpainting.svg"
 }
 
 item bed2up "kingsize king size sized bed" {
@@ -7189,6 +7300,7 @@ sparkle impressively as you look at them
 	out
 	set treasure
 	location face
+        m2icon "minerals2.svg"
 }
 
 item trunk "heavy trunk" {
@@ -7619,6 +7731,7 @@ Enamelled on the [surface] of this wooden box are the outlines of a [heart],
 	location desk1
 	another_noun
 	set boxes
+        m2icon "sewingbox2.svg"
 }
 
 item card5 "playing joker joker" { #I know this looks silly, but it's right
@@ -7637,7 +7750,9 @@ One of the cards is the Joker
 	contained
 	location cardbox
 	set cards
+        m2icon "joker.svg"
 }
+
 item card4 "playing diamond queen_of_diamonds" {
 	desc {
 One of the cards has the Queen of Diamonds shown on it
@@ -7654,6 +7769,8 @@ One of the cards has the Queen of Diamonds shown on it
 	contained
 	location cardbox
 	set cards
+#        m2icon "queendiamonds.svg"
+        m2icon "diamondsuit.svg"
 }
 item card3 "playing club ace_of_clubs" {
 	desc {
@@ -7671,7 +7788,10 @@ One of the cards is the Ace of Clubs
 	contained
 	location cardbox
 	set cards
+#        m2icon "aceclubs.svg"
+        m2icon "clubsuit.svg"
 }
+
 item card2 "playing heart five_of_hearts" {
 	desc 
 	{
@@ -7689,7 +7809,10 @@ One of the cards is obviously the Five of Hearts
 	contained
 	location cardbox
 	set cards
+#        m2icon "5hearts.svg"
+        m2icon "heartsuit.svg"
 }
+
 item card1 "playing spade king_of_spades" {
 	desc {
 One of the cards has a picture of the King of Spades printed on it
@@ -7706,6 +7829,8 @@ One of the cards has a picture of the King of Spades printed on it
 	contained
 	location cardbox
 	set cards
+#        m2icon "kingspades.svg"
+        m2icon "spadesuit.svg"
 }
 
 npc hooray "hooray" {
@@ -7806,6 +7931,7 @@ is a rusty, U-shaped piece of iron with evenly spaced holes along its length
 	related
 	location stabledoor
 	sl path
+        m2icon "horseshoe.svg"
 }
 
 item stabledoor "stable old mangy door" {
@@ -7914,6 +8040,7 @@ is not
 	out
 	contained
 	location cauldron
+        m2icon "anticube.svg"
 }
 
 #--------------------------------------
@@ -7931,6 +8058,7 @@ is a line of five people waiting for service at the nearer till
 	pseudo
 	location { inbank till1 }
 	set queues
+        m2icon "queue.svg"
 }
 
 npc queue2 "longer long other further second queue" {
@@ -7942,6 +8070,7 @@ is a line of eight people waiting for service at the further till
 	pseudo
 	location { inbank till1 }
 	set queues
+        m2icon "queue.svg"
 }
 
 item mandoor "office door" {
@@ -8035,6 +8164,7 @@ are about things you couldn't possibly understand
 	combustable 1
 	related
 	location desk3
+        m2icon "documents.svg"
 }
 
 item chair2 "comfortable reclining chair" {
@@ -8124,6 +8254,7 @@ is a frosty looking middle-aged woman who will clearly stand no nonsense
 	related
 	!sup_clothing
 	location till1
+        m2icon "tellerwoman.svg"
 }
 
 item dress1 "cheap imitation dress" {
@@ -8142,6 +8273,7 @@ is a cheap imitation of the designer dress you found in the castle
 	combustable 1
 	location teller
 	set clothes
+        m2icon "cheapdress2.svg"
 }
 
 item finbank "bank" {
@@ -8174,6 +8306,7 @@ looks like this:^\![](qrc:///images/plastic_card.png)\
 	contained
 	location pocket1
 	set cards
+        m2icon "bankcard.svg"
 }
 
 item bglass "bullet proof bullet.proof.glass" {
@@ -8200,6 +8333,7 @@ are the usual motley collection of people who frequent banks
 	plural
 	pseudo
 	location { inbank till1 }
+        m2icon "customers.svg"
 }
 
 npc manager "bank mr mister the_bank_manager" {
@@ -8219,6 +8353,7 @@ is a fat, cigar smoking capitalist
 	texture npc
 	related
 	location manoffis
+        m2icon "manager.svg"
 }
 
 item manthing "man.thing" {
@@ -8242,6 +8377,7 @@ is subtlely tinged with turquoise
 	texture warm
 	related
 	location fourroom
+        m2icon "bright.svg"
 }
 
 

@@ -1,0 +1,42 @@
+// called before changing room
+SPECIALS_Before:
+        CALL SP.Underwater
+
+SP.Underwater:
+
+        if (room != well 1,2,3 or tunnel)
+        {
+                UWClock = 0;
+                CANTSAVE &= ~2;
+                return;
+        }
+        CANTSAVE |= 2;
+        if (UWClock) // miss 1st turn
+        {
+                if (statue carried)
+                {
+                        move deeper in well
+                        "statue drags you down"
+                }
+        }                
+        UWClock++;
+        if (UWClock < 5) return;
+        drown;
+        UWClock = 0
+
+SP.GET
+        if (statue && room==RNTEMPLE)
+        CALL SP.MOVE.STATUE
+
+SP.PULL
+        if (statue && room==RNTEMPLE)
+        CALL SP.MOVE.STATUE
+
+SP.MOVE.STATUE:
+        statue location = 0
+        "statue falls over"
+        ROOM = RNWELL1
+        connect temple->well (down)
+        SETEQ
+
+

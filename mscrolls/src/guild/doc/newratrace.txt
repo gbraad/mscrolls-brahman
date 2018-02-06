@@ -1,0 +1,81 @@
+
+A1: new (remaster) rat race proposal:
+
+rather than miller saying he wants exactly 55F for the lute (somewhat strange number), he now says he, "won't take less than 50 Fergs for it."
+
+So he'll accept a cheque for >= 50F and won't give change.
+
+   rat odds:
+       black = evens = v*2
+       brown = 2:1 = v*3
+       white = 5:1 = v*6
+       grey = 10:1 = v*11
+       
+if you bet the 5F note, you ALWAYS win and are paid in a cheque for the win & get the 5F note back. so the cheque could be:
+
+CASE1:
+       black = 5
+       brown = 10
+       white = 25
+       grey = 50
+
+once you've won >= 50F, the rat race ends and never repeats (the gatekeeper has lost too much!).
+
+If, in the above, you bet on grey, your 50F cheque will buy the lute. You also get to keep the 5F note.
+
+If you've won 5,10,25, then you still have the 5F note and there is another rate race a bit later.
+
+If you're betting the 5F note and you already have the cheque (from last time);
+
+CASE2A:
+if you're carrying the cheque (or in the room);
+
+   miller takes the old cheque, tears it up and writes a new one:
+
+   old cheque value: 5,10,25
+   new cheque value:
+       black (+5): 10,15,30
+       brown (+10): 15,20,35
+       white (+25): 30,35,50
+       grey (+50): 55,60,75
+
+if the old cheque is destroyed (eg put in bank safe), the miller writes you a cheque just as before and the value is in CASE1.
+
+if the old cheque is somewhere else, the miller says "beware of leaving money around, there are thieves everywhere these days.", so that the "old cheque" is lost (wherever it is) and the miller writes you a cheque as above in CASE1.
+
+You also get the 5F note back again.
+
+CASE2B:
+
+You can bet a second time with the cheque instead of the note. In this case you can lose, because you still have the note so you can start over.
+
+if you lose the miller will say something like, "You can't win 'em all. perhaps try again later."
+
+If you win, the miller will tear up the old cheque and write a new one.
+
+   old cheque value: 5,10,25
+   new cheque value:
+       black (*2): 10,20,50
+       brown (*3): 15,30,LOSE
+       white (*6): 30,60,LOSE
+       grey (*11): 55,LOSE,LOSE
+
+Note that you still have the 5F note.
+
+If your cheque < 50F, you can keep playing at the next rat race.
+
+* if bet the cheque and if win would make it >60F, you lose (we can make threshold depend on luck if we're keen here).
+
+* if the cheque becomes worth >=50F, no more races.
+
+Now for CASE3, third time bet with the note. from case2A we have;
+
+   old cheque value: 10,15,20,30,35
+   
+   new cheque value:
+       black (+5): 15,20,25,35,40
+       brown (+10): 20,25,30,40,45
+       white (+25): 35,40,45,55,60
+       grey (+50): 60,65,70,80,85
+
+And so on if you repeat this. So it's possible to make the cheque worth 45 and win 50, max cheque value is therefore 95F.

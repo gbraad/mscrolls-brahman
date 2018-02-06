@@ -824,6 +824,17 @@ struct IItem
         }
     }
 
+    static void getCarryableItems(IItems& items)
+    {
+        // all things gettable in the game
+            
+        for (size_t i = 1; i <= itemCount; ++i)
+        {
+            IItem ii(find_item(i));
+            if (ii.couldGet()) items.push_back(ii);
+        }
+    }
+
     void getItemsInRoom(IItems& items,
                         bool onlyExplored = false,
                         bool onlyCarrable = false,

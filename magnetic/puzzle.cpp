@@ -708,13 +708,12 @@ void PuzzleManager::buildProductInfoJSON(GrowString& buf,
             build.productAuthor("by Magnetic Scrolls");
 
             build.productMarketAndroid("market://details?id=com.voidware.theguild");
-            // XXX not correct link, fix when page created
-            build.productMarketIOS("https://itunes.apple.com/us/app/the-guild-of-thieves/id1265982535?ls=1&mt=8");
+            build.productMarketIOS("https://itunes.apple.com/us/app/the-guild-of-thieves/id1341785644?ls=1&mt=8");
 
             GrowString gs;
             const char* c = 
-                "<h1>The Guild of Thieves<br/><em>by Magnetic Scrolls</em></h1>"
-                "<h3>Remastered for 2017</h3>"
+                "<h1>The Guild of Thieves<br/><em>by Magnetic Scrolls 1987</em></h1>"
+                "<h3>Restored for 2018</h3>"
         
                 "<h4>Strand Games Team</h4>"
                 "<ul>"

@@ -1,0 +1,45 @@
+SP.SHAKE
+        if (bottle4) // champagne
+        {
+            if (FlagChampers & 2) return; // opened
+            if (FlagChampers & 1) return; // shaken already
+            FlagChampers |= 1
+            if (!remaster)
+              setout(champagne) // empty it
+        }
+
+
+SP.HOORAY
+
+        if (bottle4 broken) return;
+        if (FlagChampers == 1) // shaken & not opened
+        {
+                "explodes"
+                DEAD
+        }
+        "nothng happens"
+        return
+
+SP.OPEN
+        if (bottle4) OpenChampers();
+
+SP.CLOSE
+        if (remaster && bottle4) "you cant"
+        
+OpenChampers
+
+        if (FlagChampers & 2) return; // already
+        FlagChampers |= 2;
+        if (FlagChampers & 1) // shaken
+        {
+                "goes everywhere"
+        }
+        else
+        {
+                "celebration POP"
+        }
+        return
+
+
+TIMER8
+resets FlagChampers &~ 1

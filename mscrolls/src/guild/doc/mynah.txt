@@ -1,0 +1,69 @@
+mynah = bird3
+
+      TIMER4 -> MynahFlies
+
+MynahFlies
+        if (!FlagMynah) FlagMynah = 2
+
+// called every move
+SPECIALS -> SP.Mynah
+
+SP.Mynah
+       if (FlagMynah == 2)
+       {
+          d7 = COUNTEXIT
+          if (d7 == 0) return; // no exits to fly
+          if (bird3.carried) "struggling free from your grasp" #420
+
+          "flies off never to be seen" #116
+          -> BirdFlies
+       }
+
+BirdFlies
+        if (!remaster) -> freebird
+        else
+        {
+                FlagMynah = 0; // reset
+                move bird3 to TJUNC2
+        }
+
+SP.GET
+        if (bird3) -> MynahStart
+        
+TBL.ATTA
+	DC.W	NBIRD3,91+HI		;bird eats itself
+        // will then call SP.ATTAC
+        
+setmode:
+	RRSAFE		PSG7,CAGE,MynahStart
+
+MynahStart
+        TIMERB = 2 // start squawk
+        TIMER4 = 3 // start fly
+
+SP.CLOSE
+        if (cage4)
+        {
+             if (bird3 in cage4)
+             {
+                FlagMynah = 1
+             }
+        }
+        
+SP.OPEN
+OPENOthers
+        if (cage4) OpenCage4
+
+OpenCage4
+        if (FlagMynah == 1) FlagMynah = 2
+        
+
+SP.ATTAC
+        attack bird3 -> freebird
+
+FreeBird
+        setout(bird3)
+        TIMER4 = 0 // stop fly
+        TIMER8 = 0 // top squawk
+        FlagMynah = -1
+        

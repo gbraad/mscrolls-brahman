@@ -1,0 +1,99 @@
+
+timer10 = bankmanager
+        -> BankManager
+
+        #555 = "i see you are GOT account"
+        #556 = "if there's anything else"
+        #557 = "excuse me"
+        #558 = "lots to do"
+        
+BankManager: (timer10)
+        message ManagerMessage(a4)
+        if (ManagerMessage == #558 "lots to do, shown out")
+        {
+             d7 = 1
+             remaster change D7 = 3
+             call showOut
+             put player RNINBANK
+             clear SEATED
+        }
+        else
+        {
+                ++ManagerMessage;
+                TIMER10 = 1
+        }
+
+ShowOut:
+        closedoor(#mandoor)
+        if (gum in keyhole)
+        {
+                // when you've put gum in the keyhole from inside the office.
+                "tries to lock the door and finds gum"
+                timer14 = d7
+        }           
+        else
+        {
+                "and locks the door behind him"
+                timer11 = d7
+                set(mandoor) locked
+        }
+        setout(manthing);
+        put manager INBANK
+        RET
+
+Timer11 = Bankmanager1
+
+BankManager1: (timer11)
+        if (gum in keyhole)
+        {
+                // shown out then put gum in keyhole before he goes back in
+                #564 "tries to go back, but gum prevents him"
+                timer12 = 1
+        }
+        else ManInfoOffice
+        ret
+
+timer12 = GetGumUnlock
+
+GetGumUnlock: (timer12)
+        // gum in keyhole *after* shown out
+        if (RNINBANK == ROOM)
+        {
+            #565 "he removes the gum"
+        }
+        goto GoGum
+
+
+GoGum:
+        setout(gum)
+        goto ManInfoOffice;
+
+timer14 = GetGumEnter
+
+GetGumEnter: (timer14)
+        if (RNINBANK == ROOM)
+        {
+             #82 "with some fiddling he removes the gum"
+        }
+        goto GoSum
+
+ManInfoOffice:
+
+        if (room == rninbank)
+        {
+            #562 "manager goes into office and locks door"
+        }
+        room = RNMANOFFIS;   // temp
+        put manager in NMANOFFIS
+        scan for items in RNMANOFFIS and related to manager
+        put them in RNINBANK
+        if (any)
+        {
+               #559 "i believe these are yours.."
+               #560 "returns and locks door"
+        }
+        restore original ROOM
+        lock(mandoor)
+        goto closeDoor
+
+        

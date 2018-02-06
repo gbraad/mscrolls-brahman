@@ -1,0 +1,61 @@
+
+setmode
+        any to SQUAREDEATH -> RainbowDeath
+        black to violet1 -> DimSquares
+        white to violet2 -> DimSquares
+        sway1 to  blacksquare -> StartSquares
+        blacksquare to sway1 -> EndSquares
+        RRENTRY		CRYPT,WHITESQUARE,StartSquares
+        RRENTRY		WHITESQUARE,CRYPT,EndSquares
+        
+RainbowDeath:
+        DOGO DEAD
+
+DimSquares:
+        "squares dim"
+
+StartSquares:
+        CANTSAVE #4
+
+----- OLD MODEL ---
+
+BLACK           INDIGO          BLUE            GREEN           RED
+98              109             107             106
+BLACKSQUARE     INDIGOSQUARE1   BLUESQUARE1     GREENSQUARE1
+
+RED             VIOLET          YELLOW          INDIGO          YELLOW
+101             112             105             110             104
+REDSQUARE2      VIOLETSQUARE1   YELLOWSQUARE2   INDOGOSQUARE2   YELLOWSQUARE1
+                BLUESQUAREP     BLUESSQUAREP
+ORANGESQUAREP   ORANGESQUAREP                   ORANGESQUAREP
+
+ORANGE          ORANGE          BLUE            VIOLET          ORANGE
+                103             108             113             102
+                ORANGESQUARE2   BLUESQUARE3     VILOETSQUARE2   ORANGESQUARE1
+                BLUESQUAREP
+                                ORANGESQUAREP   ORANGESQUAREP
+
+GREEN           YELLOW          INDIGO          RED             WHITE
+                                111             100             99
+                                INDIGOSQUARE3   REDSQUARE1      WHITESQUARE
+                                                BLUESQUAREP
+                                ORANGESQUAREP                   ORANGESQUAREP
+
+
+----- NEW MODEL ---
+
+BLACK           INDIGO          BLUE            GREEN           RED
+98              109             107             106             114
+BLACKSQUARE     INDIGOSQUARE1   BLUESQUARE1     GREENSQUARE1    REDSQUARE3
+
+RED             VIOLET          YELLOW          INDIGO          YELLOW
+101             112             105             110             104
+REDSQUARE2      VIOLETSQUARE1   YELLOWSQUARE2   INDOGOSQUARE2   YELLOWSQUARE1
+
+ORANGE          ORANGE          BLUE            VIOLET          ORANGE
+115             103             108             113             102
+ORANGESQUARE3   ORANGESQUARE2   BLUESQUARE3     VILOETSQUARE2   ORANGESQUARE1
+
+GREEN           YELLOW          INDIGO          RED             WHITE
+116             117             111             100             99
+GREENSQUARE2    YELLOWSQUARE3   INDIGOSQUARE3   REDSQUARE1      WHITESQUARE

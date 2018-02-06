@@ -1,0 +1,168 @@
+
+
+
+FlagLute	DC.B	0	;bit 0=1 => lute damaged
+				;bit 1=1 => lute fixed again (now N/A)
+				;bit 2=1 => lute already offered by miller
+				;bit 3=1 => was played in last 2 moves
+				;bit 4=1 => sang urfanore in last 2 moves
+
+FlagFell	DC.B	0	;bit 0 => have fallen out of windmill
+
+OfferLute (timerC)
+          if (lute at miller)
+          {
+                if (!given to miller)
+                {
+                     "offer to sell lute" #467    
+                }
+          }
+          FlagLute |= 4;
+          return;
+
+
+EnterMill
+        if (FlagLute & 1)
+        {
+                if (lute carried)
+                {
+                     "miller wouldnt like to see the lute broken"
+                     return;
+                }
+        }
+        if ((FlagLute & 4) == 0) // not yet offered lute
+        {
+            TIMERC = 5;    
+        }
+
+LeaveMill
+        TIMERC = 0
+        if (lute carried)
+        {
+             if (FlagFell & 1) return;  // done already
+             FlagFell |= 1;
+
+             if (remaster || "carefully")
+             {
+                score outmill
+                return;
+             }
+             
+             "trip and fall"
+             if (lute in swag bag)
+             {
+                "bag protects it"
+                score outmill
+             }
+             else
+             {
+                if ((FlagLute & 1) == 0)
+                {
+                    FlagLute |= 1;
+                    "landed on lute"
+                }
+             }
+             "watch your step"
+        }
+
+PlaySingTime (timer9)
+         if (FlagInAir == 0)
+         {
+                FlagLute &= ~8;
+                FlagLute &= ~16
+                return;
+         }
+         if (!underwater)
+         {
+               "fall back with a bump"
+         }
+         FlagInAir = 0
+         if (!RoomMod) return; // not changed room
+         if (room == by the moat #passage3)
+         {
+                "drown in moat"
+                DEAD
+         }
+         if (!ExplodeBankFlag) 
+         {
+              if (room == by the till #rntill1)
+              {
+                  TIMER7 = 1 // start teller sequenced
+              }
+         }
+         return
+         
+SP.BREAK
+        if (lute)
+        {
+           FlagLute |= 1
+           "breaks beyond repair"
+        }
+        
+SP.PLAY
+        if (lute)
+        {
+              if (underwater)
+              {
+                "your attemps fail dismally"
+                return;
+              }
+
+              if (FlagLute & 1) // broken?
+              {
+                     "makes a noise" john cage etc.
+                     return;
+              }
+              else
+              {
+                        FlagLute |= 8;
+                        if (FlagLute & 16) goto SP.SING
+                        TIMER9 = 3
+                        "produce a soud that lifts your spirits"
+                        return;
+              }
+        }
+
+SP.SPEECH
+        if (pendra) call SP.SING
+
+SP.SING
+
+        if ((FlagLute & 8) == 0)
+        {
+                "a moments lift"
+                TIMER9 = 2  // two moves to play lute
+                FlagLute |= 16
+                return;
+        }
+        if (FlagLute & 1)
+        {
+                // happens if you play lute, break lute, then sing
+                "lute cacophany"
+                DEAD
+        }
+        if (!lute local) { "nothing happens" return }
+        setout(lute)
+        "disintegrates"
+
+        drop everything
+        if (dropped something) "nothing you are carrying stays with you"
+        FlagInAir = -1
+        SEATED = 0
+        TIMER9 = 2
+        connect some rooms
+
+---
+
+places where you can FlagInAir;
+
+from jetty to boat (and back).
+from boat outwards (land back in boat).
+into mill (msg only)
+walk over coals
+from thin shaft to crabwalk, rather than wear the boots (although you drop the lamp)
+sandy bank to thin shaft #shaft1
+crabwalk to thin shaft
+
+
+

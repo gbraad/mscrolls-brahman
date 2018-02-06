@@ -52,7 +52,7 @@ FILE *logfile1 = 0, *logfile2 = 0;
 char filename[256];
 
 #ifdef STANDALONE
-type8 ms_load_file(type8s *name, type8 *ptr, type16 size)
+type8 ms_load_file(type8s *name, type8 *ptr, type16 size, unsigned int pos)
 {
     FILE *fh;
     char* realname;
@@ -76,7 +76,7 @@ type8 ms_load_file(type8s *name, type8 *ptr, type16 size)
     return 0;
 }
 
-type8 ms_save_file(type8s *name, type8 *ptr, type16 size)
+type8 ms_save_file(type8s *name, type8 *ptr, type16 size, unsigned int pos)
 {    
 
     FILE *fh;
@@ -532,6 +532,7 @@ int main(int argc, char **argv)
 void game_state_notify(int movecount) {}
 void update_game_save_area(unsigned char* ptr, size_t size) {}
 void ms_undo_signal() {}
+void update_game_save_area(unsigned char* ptr, size_t size, unsigned int addr) {}
 
 #endif // STANDALONE
 

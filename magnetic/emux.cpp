@@ -469,6 +469,12 @@ int handle_test_commands(const char* cmd)
         ms_seed(atoi(cmd+5));
         cout << "Seed defined" << "\n";
     }
+    else if ((res = !strcmp("gettables", cmd) != 0))
+    {
+        IItem::IItems items;
+        IItem::getCarryableItems(items);
+        cout << items << "\n";
+    }
 #ifdef DISASM
     else if ((res = !strncmp("dasm", cmd, 4) != 0))
     {

@@ -1,0 +1,46 @@
+ClearBeam:
+        FlagBeam = 0
+
+Leave mud room -> calls ClearBeam
+
+SP.MELT
+        if (FlagBeam == 1) && "with mirror" -> SP.Beam
+
+SP.POINT
+        if (FlagBeam == 1)  -> SP.Beam
+
+SP.TURN
+        if (FlagBeam == 1) -> SP.Beam
+
+SP.HOLD
+        // mirror in beam (also put mirror in beam)
+        FlagBeam = 1
+
+SP.Beam:
+        if (FlagBeam == -1) return;
+        "wax melts"
+        setout(wax)
+        GemReachStart = 0
+        FlagBeam = -1
+        FlagGem = -1
+        TIMER5 = 2  // time to hit pool
+        put gem in mud room   NEW
+        make gem moveable     NEW 
+
+SP.CATCH
+        if (FlagGem)
+        {
+           FlagGem = 0
+           put gem in mud room   OLD
+           make gem moveable     OLD 
+        }
+
+        // when timer5 kicks
+GemFalling:
+        if (FlagGem)
+        {
+             FlagGem = 0;
+             setout(gem)             
+        }
+
+        

@@ -1,0 +1,99 @@
+mynah = bird3
+
+SP.ODREP:
+        -> teachbird
+
+BirdText1, 2 & 3 are 20 byte buffers
+
+TeachBird:
+
+ExitTeachBird:
+        set up timerB
+
+GoOffice // managers office
+         TIMERB = 6  // set squawk timer
+
+MynahSquawk: (timerb)
+        if out(bird3) return;
+        if (!room of bird3 is quietroom)
+        {
+                if (current room = room of bird)
+                {
+                        // not shaken
+                        if (FlagChampers != 1 || bottle not local)
+                        {
+                                Call MynahSays
+                        }
+                        else
+                        {       // bottle shaken, not open & local
+                                Call MynahSays
+                                if (said hooray) dead
+                        }
+                }
+                else
+                {
+                    if (FlagChampers == 1)
+                    {
+                        if (random number == BirdKnowsHooray)
+                        {
+                             if (find room of bird == Find room of bottle4)
+                             {
+                                find all objects located in room of bird
+                                if (not pseudo && not room && not related)
+                                {
+                                        setout(object)
+                                }
+                                "explosion"
+                                setout(bird3)
+                                setout(bottle4)
+                                FlagMynah = -1 // stop fly
+                                if (room == Manager office) goto ExplodingOffice
+                                if (room == in bank) goto ExplodingInbank
+                                if (room = at till) goto ExplodingAtTill
+                                return;
+                             }
+                        }
+                    }
+                }
+        }
+        set up random squawk interval to timerb
+        return;
+
+MynahSays:
+
+        random 0-3
+        Choose either BirdText1,2 or 3
+        "the mynah bird squawks loudly"
+        if (BirdText)
+        {
+                '"'
+                print text in chosen BirdText
+                if (last char == ' ') backspace
+                '"'
+        }
+        else
+        {
+                "."
+        }
+        "\n"
+        test BirdKnowsHooray // set flag for return NE=>said hooray
+        return
+        
+
+ExplodeBank:
+        manager is out in office
+        PeopleGo
+
+ExplodingInbank:
+        till devestated
+        goto ExplodeBank
+
+PeopleGo
+        ExplodeBankFlag = -1;
+        setout( Manager,teller,queue1,queue2,staff,npeople)
+        TIMER7,8,9, = 0
+        GoOfficeFlag = 0
+
+ExplodingOffice
+        office devestated
+        PeopleGo
