@@ -31,60 +31,41 @@
  */
 
 
-#include <iostream>
-#include <string>
 #include "ificlient.h"
-#include "ifihost.h"
 
-//// dummy game
+extern bool IFIStart(IFIClient* client);
 
+static IFIClient* ifi;
 
-bool mainloop(IFIClient* ifi)
+static char my_getchar()
+{
+    return ifi->getchar();
+}
+
+static void my_putchar(char c)
+{
+    ifi->putchar(c);
+}
+
+void mainloop()
 {
     for (;;)
     {
-        char c = ifi->getchar();
-        if (c) ifi->putchar(c);
-        else ifi->putstring(" (end)");
+        char c = my_getchar();
+        
+        if (c) my_putchar(c);
+        else my_putchar(0);
     }
+}
+
+// exported
+bool IFIStart(IFIClient* client)
+{
+    ifi = client;
+
+    mainloop();
+    
     return true;
 }
 
-void setupBack(IFIClient& c)
-{
-    c.setMainLoop(mainloop);
-}
 
-///// dummy front
-
-void setupFront(IFIHost& host, IFI* client)
-{
-    using std::placeholders::_1;
-    client->setEmitter(std::bind(&IFIHost::emitterHandler, &host, _1));
-    client->start();
-
-    host.start();
-}
-
-int main()
-{
-    IFIClient ificlient;
-    setupBack(ificlient);
-
-    IFIHost host;
-    setupFront(host, &ificlient);
-
-    for (;;)
-    {
-        std::string cmd;
-        std::cout << "> "; std::cout.flush();
-        std::cin >> cmd;
-        if (cmd == "quit") break;
-
-        GrowString gs;
-        IFIClient::makeCommand(gs, cmd.c_str());
-        ificlient.eval(gs.start());
-    }
-
-    return 0;
-}

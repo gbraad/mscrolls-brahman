@@ -37,6 +37,7 @@
 #include <string>
 #include <deque>
 #include "worker.h"
+#include "jsonwalker.h"
 
 struct IFIHost: public Worker
 {
@@ -58,7 +59,24 @@ struct IFIHost: public Worker
 
     void handleJSON(const char* json)
     {
-        std::cout << "JSON:" << json << std::endl;
+        //std::cout << "JSON:" << json << std::endl;
+
+        JSONWalker jw(json);
+
+        string key;
+        for (jw.begin(); !(key = jw.getKey()).empty(); jw.next())
+        {
+            bool isObject;
+            var v = jw.getValue(isObject);
+
+            if (v)
+            {
+                if (key == "text")
+                {
+                    std::cout << "'" << v << "'\n";
+                }
+            }
+        }
     }
 
     void handleQueue()

@@ -31,36 +31,49 @@
  */
 
 
-#include "ificlient.h"
 #include <iostream>
-#include "jsonwalker.h"
+#include <string>
+#include "ificlient.h"
+#include "ifihost.h"
 
-using namespace std;
+extern bool IFIStart(IFIClient* client);
 
-bool IFIClient::eval(const char* json)
+void setupBack(IFIClient& c)
 {
-    // on host thread
-    
-    bool r = true;
-    JSONWalker jw(json);
-
-    string key;
-    for (jw.begin(); !(key = jw.getKey()).empty(); jw.next())
-    {
-        cout << key << ": ";
-        bool isObject;
-        var v = jw.getValue(isObject);
-        if (v) cout << v;
-        else if (isObject) cout << "{}";
-        else cout << "NULL";
-        cout << endl;
-
-        if (v)
-        {
-            if (key == "command") r = evalCommand(v.toString());
-        }
-    }
-    
-    return r;
+    c.setMainLoop(IFIStart);
 }
 
+void setupFront(IFIHost& host, IFI* client)
+{
+    using std::placeholders::_1;
+    client->setEmitter(std::bind(&IFIHost::emitterHandler, &host, _1));
+    client->start();
+
+    host.start();
+}
+
+int main()
+{
+    IFIClient ificlient;
+    setupBack(ificlient);
+
+    IFIHost host;
+    setupFront(host, &ificlient);
+
+    for (;;)
+    {
+        std::string cmd;
+        std::cout << "> "; std::cout.flush();
+        std::getline(std::cin, cmd);
+        if (cmd == "quit") break;
+
+        GrowString gs;
+        IFIClient::makeCommand(gs, cmd.c_str());
+        ificlient.eval(gs.start());
+
+        // needed if output is in same window as input
+        if (ificlient.sync()) ificlient.release();
+    }
+
+    return 0;
+}

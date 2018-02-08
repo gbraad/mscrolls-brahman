@@ -37,6 +37,7 @@
 #include "ifi.h"
 #include "growbuf.h"
 #include "worker.h"
+#include "jsonwalker.h"
 
 struct IFIClient: public IFI, public Worker
 {
@@ -58,7 +59,35 @@ struct IFIClient: public IFI, public Worker
         _emitter = e;
     }
     
-    virtual bool eval(const char* json) override;
+    virtual bool eval(const char* json) override
+    {
+        // on host thread
+    
+        bool r = true;
+        JSONWalker jw(json);
+
+        string key;
+        for (jw.begin(); !(key = jw.getKey()).empty(); jw.next())
+        {
+            bool isObject;
+            var v = jw.getValue(isObject);
+
+            /*
+            cout << key << ": ";
+            if (v) cout << v;
+            else if (isObject) cout << "{}";
+            else cout << "NULL";
+            cout << endl;
+            */
+
+            if (v)
+            {
+                if (key == "command") r = evalCommand(v.toString());
+            }
+        }
+        return r;
+    }
+    
     virtual bool start() override
     {
         return Worker::start();
