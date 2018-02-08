@@ -46,12 +46,7 @@ struct IFIHost: public Worker
     mutex       _queueLock;
     Queue       _replies;
     
-    static void emitterHandler(void* ctx, const char* json)
-    {
-        ((IFIHost*)ctx)->_emitterHandler(json);
-    }
-
-    void _emitterHandler(const char* json)
+    void emitterHandler(const char* json)
     {
         {
             std::lock_guard<mutex> lock(_queueLock);

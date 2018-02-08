@@ -39,9 +39,8 @@
 //// dummy game
 
 
-bool mainloop(void* ctx)
+bool mainloop(IFIClient* ifi)
 {
-    IFIClient* ifi = (IFIClient*)ctx;
     for (;;)
     {
         char c = ifi->getchar();
@@ -53,14 +52,15 @@ bool mainloop(void* ctx)
 
 void setupBack(IFIClient& c)
 {
-    c.setMainLoop(mainloop, &c);
+    c.setMainLoop(mainloop);
 }
 
 ///// dummy front
 
 void setupFront(IFIHost& host, IFI* client)
 {
-    client->setEmitter(&IFIHost::emitterHandler, &host);
+    using std::placeholders::_1;
+    client->setEmitter(std::bind(&IFIHost::emitterHandler, &host, _1));
     client->start();
 
     host.start();

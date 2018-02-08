@@ -33,14 +33,13 @@
 
 #pragma once
 
-struct IFITraits
-{
-    typedef void emitterFn(void*, const char*);
-};
+#include <functional>
 
-struct IFI: public IFITraits
+struct IFI
 {
-    virtual void setEmitter(emitterFn* emit, void* ctx) = 0;
+    typedef std::function<void(const char*)> Emitter;
+    
+    virtual void setEmitter(const Emitter&) = 0;
     virtual bool eval(const char* json) = 0;
     virtual bool start() = 0;
 

@@ -37,8 +37,6 @@
 
 using namespace std;
 
-//////// Host features
-
 bool IFIClient::eval(const char* json)
 {
     // on host thread

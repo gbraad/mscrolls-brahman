@@ -42,12 +42,10 @@ struct IFIClient: public IFI, public Worker
 {
     typedef std::string string;
     typedef bool mainLoopFn(void* ctx);
-
-    emitterFn*          _emitter = 0;
-    void*               _emitterCtx = 0;
-
-    mainLoopFn*         _mainLoop = 0;
-    void*               _mainCtx = 0;
+    typedef std::function<bool(IFIClient*)> MainLoop;
+    
+    Emitter             _emitter;
+    MainLoop            _mainLoop;
 
     GrowString          _inBuffer;
     int                 _inPos = 0;
@@ -55,10 +53,9 @@ struct IFIClient: public IFI, public Worker
     GrowString          _outBuffer;
 
     // Compliance
-    virtual void setEmitter(emitterFn* emit, void* ctx) override
+    virtual void setEmitter(const Emitter& e) override
     {
-        _emitter = emit;
-        _emitterCtx = ctx;
+        _emitter = e;
     }
     
     virtual bool eval(const char* json) override;
@@ -85,16 +82,12 @@ struct IFIClient: public IFI, public Worker
         gs.add(0);
     }
 
-    void setMainLoop(mainLoopFn* mf, void* ctx)
-    {
-        _mainLoop = mf;
-        _mainCtx = ctx;
-    }
+    void setMainLoop(const MainLoop& m) { _mainLoop = m; }
 
     bool workHandler() override
     {
         assert(_mainLoop);
-        return (*_mainLoop)(_mainCtx);
+        return _mainLoop(this);
     }
 
     bool evalCommand(const string& s)
@@ -140,7 +133,7 @@ struct IFIClient: public IFI, public Worker
             GrowString json;
             json.appendf("{channel:0,text:\"%s\"}", _outBuffer.start());
             json.add(0);
-            (*_emitter)(_emitterCtx, json.start());
+            _emitter(json.start());
             _outBuffer.clear();
         }
     }
