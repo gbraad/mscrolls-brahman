@@ -33,6 +33,7 @@
 
 #include <string>
 #include <stdarg.h>
+#include <string.h>
 
 class GrowBufBase
 {
