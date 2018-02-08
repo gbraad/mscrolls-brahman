@@ -31,10 +31,11 @@
  */
 
 
-#include "ificlient.h"
 #include <iostream>
 #include <string>
-#include <stdio.h>
+//#include <stdio.h>
+#include "ificlient.h"
+#include "ifihost.h"
 
 //// dummy game
 
@@ -45,35 +46,34 @@ bool mainloop(void* ctx)
     for (;;)
     {
         char c = ifi->getchar();
-        if (c) putchar(c);
-        else printf(" (end)\n");
+        if (c) ifi->putchar(c);
+        else ifi->putstring(" (end)");
     }
     return true;
 }
 
-void setupBack(IFIClient* c)
+void setupBack(IFIClient& c)
 {
-    c->setMainLoop(mainloop, c);
+    c.setMainLoop(mainloop, &c);
 }
 
 ///// dummy front
 
-void emitterHandler(void* ctx, const char* s)
+void setupFront(IFIHost& host, IFI* client)
 {
-    printf("%s\n", s);
-}
+    client->setEmitter(&IFIHost::emitterHandler, &host);
+    client->start();
 
-void setupFront(IFI* ifi)
-{
-    ifi->setEmitter(emitterHandler, 0);
-    ifi->start();
+    host.start();
 }
 
 int main()
 {
     IFIClient ificlient;
-    setupBack(&ificlient);
-    setupFront(&ificlient);
+    setupBack(ificlient);
+
+    IFIHost host;
+    setupFront(host, &ificlient);
 
     for (;;)
     {

@@ -34,52 +34,48 @@
 #pragma once
 
 #include <assert.h>
-#include <thread>
-#include <chrono>
-#include <mutex>
-#include <condition_variable>
-#include "ifihelper.h"
+#include "ifi.h"
+#include "growbuf.h"
+#include "worker.h"
 
-struct IFIClient: public IFI
+struct IFIClient: public IFI, public Worker
 {
     typedef std::string string;
-    typedef std::thread thread;
-    typedef std::mutex mutex;
-    typedef std::condition_variable condition_variable;
-
     typedef bool mainLoopFn(void* ctx);
 
-    IFIIOHelper         _ifiHelper;
-    emitterFn*          _upEmitter = 0;
+    emitterFn*          _emitter = 0;
+    void*               _emitterCtx = 0;
 
-    thread              _task;
-    bool                _running = false;
-    bool                _starting = false;
     mainLoopFn*         _mainLoop = 0;
     void*               _mainCtx = 0;
 
     GrowString          _inBuffer;
     int                 _inPos = 0;
-    
-    bool                _inputReady = false;
-    bool                _waiting = false;
-    bool                _shutdown = false;
-    mutex               _syncLock;
-    condition_variable  _waiter;
+
+    GrowString          _outBuffer;
 
     // Compliance
     virtual void setEmitter(emitterFn* emit, void* ctx) override
     {
-        bool begin = !_upEmitter;
-        _upEmitter = emit;
-        if (begin) _ifiHelper.start(this, emit);
+        _emitter = emit;
+        _emitterCtx = ctx;
     }
     
     virtual bool eval(const char* json) override;
-    virtual bool start() override;
-    virtual bool sync(int timeoutms = 0) override;
-    virtual void release() override;
+    virtual bool start() override
+    {
+        return Worker::start();
+    }
+    
+    virtual bool sync(int timeoutms = 0) override
+    {
+        return Worker::sync(timeoutms);
+    }
 
+    virtual void release() override
+    {
+        Worker::release();
+    }
 
     //////////////////////// Host Helpers
     
@@ -95,30 +91,12 @@ struct IFIClient: public IFI
         _mainCtx = ctx;
     }
 
-    void runTask()
+    bool workHandler() override
     {
-        _running = true;
-        _starting = false; // we've started now we're runnning
-
         assert(_mainLoop);
-
-        //LOG3("MS ", "running");    
-
-        while (_running)
-        {
-            _running = !_shutdown && (*_mainLoop)(_mainCtx);
-        }
-        
-        //LOG3("MS ", "shutdown");
+        return (*_mainLoop)(_mainCtx);
     }
 
-    void stop()
-    {
-        //LOG3("MS ", "stopping");
-        _shutdown = true;
-        _task.join();
-    }
-    
     bool evalCommand(const string& s)
     {
         if (!sync()) return false;
@@ -128,10 +106,7 @@ struct IFIClient: public IFI
         _inBuffer.add(0); // signal end of input
         _inPos = 0;
 
-        _inputReady = true;
-
-        // wake it up.
-        _waiter.notify_one();
+        signal();
 
         release();
         
@@ -140,25 +115,9 @@ struct IFIClient: public IFI
 
     //////////////////////////// Client Helpers
     
-    void waitForInput()
-    {
-        std::unique_lock<mutex> lock(_syncLock);
-        
-        _waiting = true;
-        
-        //LOG4("MS, ", "waiting for input");
-
-        while (!_inputReady && !_shutdown)
-            _waiter.wait_for(lock, std::chrono::milliseconds(500));
-
-        _inputReady = false;
-        _waiting = false;
-    }
-
     char getchar()
     {
         char c;
-
         while (!_shutdown)
         {
             if (_inPos < _inBuffer.size())
@@ -167,12 +126,49 @@ struct IFIClient: public IFI
                 break;
             }
 
-            waitForInput();
+            waitForSignal();
         }
         
         return c;
     }
-    
+
+    void flush()
+    {
+        assert(_emitter);
+        if (_outBuffer.size())
+        {
+            GrowString json;
+            json.appendf("{channel:0,text:\"%s\"}", _outBuffer.start());
+            json.add(0);
+            (*_emitter)(_emitterCtx, json.start());
+            _outBuffer.clear();
+        }
+    }
+
+    void putchar(char c)
+    {
+        if (c == '\b')
+        {
+            _outBuffer.unadd();
+        }
+        else
+        {
+            _outBuffer.add(c);
+        }
+
+        if (!c)
+        {
+            // flush
+            flush();
+        }
+    }
+
+    void putstring(const char* s)
+    {
+        while (*s) putchar(*s++);
+        putchar(0); // terminate
+    }
+
 };
 
 
