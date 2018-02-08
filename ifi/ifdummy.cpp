@@ -33,7 +33,6 @@
 
 #include <iostream>
 #include <string>
-//#include <stdio.h>
 #include "ificlient.h"
 #include "ifihost.h"
 

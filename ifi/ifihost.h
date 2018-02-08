@@ -1,3 +1,35 @@
+/*
+ *
+ *
+ *   ______              _
+ *   | ___ \            | |
+ *   | |_/ / _ __  __ _ | |__   _ __ ___    __ _  _ __
+ *   | ___ \| '__|/ _` || '_ \ | '_ ` _ \  / _` || '_ \
+ *   | |_/ /| |  | (_| || | | || | | | | || (_| || | | |
+ *   \____/ |_|   \__,_||_| |_||_| |_| |_| \__,_||_| |_|
+ *
+ *
+ *  "The creative principle which lies realized in the whole world"
+ *
+ *  Copyright (c) Strand Games 2018.
+ *
+ *  This program is free software: you can redistribute it and/or modify it
+ *  under the terms of the GNU Lesser General Public License (LGPL) as published
+ *  by the Free Software Foundation, either version 3 of the License, or (at
+ *  your option) any later version.
+ * 
+ *  This program is distributed in the hope that it will be useful, but WITHOUT
+ *  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ *  FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License
+ *  for more details.
+ * 
+ *  You should have received a copy of the GNU Lesser General Public License
+ *  along with this program. If not, see <http://www.gnu.org/licenses/>.
+ *
+ *  contact@strandgames.com
+ *
+ */
+
 
 #pragma once
 
@@ -9,7 +41,7 @@
 struct IFIHost: public Worker
 {
     typedef std::string string;
-    typedef std::deque<string>  Queue;
+    typedef std::deque<char*>  Queue;
 
     mutex       _queueLock;
     Queue       _replies;
@@ -21,11 +53,9 @@ struct IFIHost: public Worker
 
     void _emitterHandler(const char* json)
     {
-        //std::cout << json << std::endl;
-
         {
             std::lock_guard<mutex> lock(_queueLock);
-            _replies.emplace_back(json);
+            _replies.push_back(strdup(json));
         }
         
         signal();
@@ -38,14 +68,28 @@ struct IFIHost: public Worker
 
     void handleQueue()
     {
-        std::lock_guard<mutex> lock(_queueLock);
+        std::unique_lock<mutex> lock(_queueLock, std::defer_lock);
 
-        while (!_replies.empty())
+        for (;;)
         {
-            handleJSON(_replies.front().c_str());
-            _replies.pop_front();
+            char* json = 0;
+            
+            lock.lock();
+            
+            if (!_replies.empty())
+            {
+                json = _replies.front();
+                _replies.pop_front();
+            }
+
+            lock.unlock();
+
+            if (!json) break;
+
+            handleJSON(json);
+
+            delete [] json;
         }
-        
     }
 
     virtual bool workHandler() override
