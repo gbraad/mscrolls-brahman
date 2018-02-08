@@ -36,6 +36,7 @@
 #include <string>
 #include <ctype.h>
 #include "var.h"
+#include "growbuf.h"
 
 struct JSONWalker
 {
@@ -113,14 +114,27 @@ struct JSONWalker
 
     void skipValue()
     {
-        // leaves pos at  character that ended the value
+        // leaves pos at character that ended the value
         int level = 1;
         bool inquote = false;
+        bool esc = false;
         char c;
         for (;;)
         {
             c = _get();
             if (!c) break;
+            if (esc)
+            {
+                esc = false;
+                continue;
+            }
+
+            if (c == '\\')
+            {
+                esc = true;
+                continue;
+            }
+            
             if (c == '"')
             {
                 inquote = !inquote;
@@ -149,12 +163,6 @@ struct JSONWalker
         const char* st = _pos;
         skipValue();
 
-        if (0) {
-            string v(st, _pos - st);
-            printf("value '%s'\n", v.c_str());
-        }
-        
-
         if (st != _pos)
         {
             char c = *st;
@@ -162,7 +170,26 @@ struct JSONWalker
             else if (c == '"')
             {
                 ++st;
-                r = var(st, _pos - st);
+                // [st, _pos) represents the string without quotes
+
+                // decode string
+                GrowString gs;
+                bool esc = false;
+                while (st != _pos)
+                {
+                    if (!esc && *st == '\\')
+                    {
+                        esc = true;
+                    }
+                    else
+                    {
+                        esc = false;
+                        gs.add(*st);
+                    }
+                    ++st;
+                }
+                gs.add(0);
+                r = var(gs.start());
             }
             else
             {
@@ -183,4 +210,19 @@ struct JSONWalker
         }
         return true;
     }
+
+    // helpers
+    
+    static void addString(GrowString& gs, const char* p)
+    {
+        // encode string
+        gs.add('"');
+        while (*p)
+        {
+            if (*p == '"' || *p == '\\') gs.add('\\');
+            gs.add(*p++);
+        }
+        gs.add('"');
+    }
+
 };

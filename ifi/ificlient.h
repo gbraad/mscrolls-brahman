@@ -35,7 +35,6 @@
 
 #include <assert.h>
 #include "ifi.h"
-#include "growbuf.h"
 #include "worker.h"
 #include "jsonwalker.h"
 
@@ -65,6 +64,8 @@ struct IFIClient: public IFI, public Worker
     
         bool r = true;
         JSONWalker jw(json);
+
+        //std::cout << "eval: '" << json << "'\n";
 
         string key;
         for (jw.begin(); !(key = jw.getKey()).empty(); jw.next())
@@ -104,10 +105,12 @@ struct IFIClient: public IFI, public Worker
     }
 
     //////////////////////// Host Helpers
-    
+
     static void makeCommand(GrowString& gs, const char* cmd)
     {
-        gs.appendf("{command:\"%s\"}", cmd);
+        gs.append("{command:");
+        JSONWalker::addString(gs, cmd);
+        gs.add('}');
         gs.add(0);
     }
 
@@ -121,7 +124,10 @@ struct IFIClient: public IFI, public Worker
 
     bool evalCommand(const string& s)
     {
+        //std::cout << "evalCommand: '" << s << "'\n";
+            
         if (!sync()) return false;
+
         
         // fill input buffer
         _inBuffer = s.c_str();
@@ -159,10 +165,12 @@ struct IFIClient: public IFI, public Worker
         assert(_emitter);
         if (_outBuffer.size())
         {
-            GrowString json;
-            json.appendf("{channel:0,text:\"%s\"}", _outBuffer.start());
-            json.add(0);
-            _emitter(json.start());
+            GrowString gs;
+            gs.append("{channel:0,text:");
+            JSONWalker::addString(gs, _outBuffer.start());
+            gs.add('}');
+            gs.add(0);
+            _emitter(gs.start());
             _outBuffer.clear();
         }
     }
