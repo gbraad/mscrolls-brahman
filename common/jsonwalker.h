@@ -33,6 +33,7 @@
 
 #pragma once
 
+#include <iostream>
 #include <string>
 #include <ctype.h>
 #include "var.h"
@@ -45,9 +46,20 @@ struct JSONWalker
     const char*         _json;
     const char*         _pos;
 
-    JSONWalker(const char* json)
+    // current key
+    string              _key;
+    bool                _end;
+    bool                _error;
+    int                 _level = 0;
+
+    JSONWalker(const char* json) { _json = json; begin(); }
+    JSONWalker(const string& j) { _json = j.c_str(); begin(); }
+
+    bool ok() const { return _error == false; }
+
+    friend std::ostream& operator<<(std::ostream& os, const JSONWalker& jw)
     {
-        _json = json;
+        return os << string(jw._json, jw._pos - jw._json);
     }
 
     char _get()
@@ -64,15 +76,35 @@ struct JSONWalker
 
     void begin()
     {
+        _end = false;
+        _error = false;
         _pos = _json;
-        for (;;)
+
+        skipSpace();
+        char c = _get();
+        if (c != '{')
         {
-            char c = _get();
-            if (!c || c == '{') break;
+            _error = true;
+        }
+        else
+        {
+            ++_level;
+            skipSpace();
+            c = _get();
+            if (c == '}')  
+            {
+                // empty json {}
+                --_level;
+                _end = true;
+            }
+            else
+            {
+                _unget(c);
+            }
         }
     }
     
-    void _skipSpace()
+    void skipSpace()
     {
         for (;;)
         {
@@ -85,28 +117,53 @@ struct JSONWalker
         }
     }
 
-    string getKey()
+    void unskipSpace()
     {
-        string k;
-        _skipSpace();
-        const char* st = _pos;
-        for (;;)
+        while (_json != _pos)
         {
-            char c = _get();
-            if (!c || isspace(c) || c == ':')
-            {
-                _unget(c);
-                
-                // end of key
-                k = string(st, _pos - st);
+            if (!isspace(_pos[-1])) break;
+            --_pos;
+        }
+    }
 
-                // eat any spaces
-                do
+    bool nextKey()
+    {
+        _key = _getKey();
+        return !_key.empty();
+    }
+
+    string _getKey()
+    {
+        // leaves position next char after ':"
+        string k;
+        if (!_end && !_error)
+        {
+            skipSpace();
+            const char* st = _pos;
+            for (;;)
+            {
+                char c = _get();
+                if (c == '}')
                 {
-                    c = _get();
-                } while (c && c != ':');
+                    // {aaa}
+                    _error = true;
+                    break;
+                }
+                else if (!c || isspace(c) || c == ':')
+                {
+                    _unget(c);
                 
-                break;
+                    // end of key
+                    k = string(st, _pos - st);
+
+                    // eat any spaces
+                    do
+                    {
+                        c = _get();
+                    } while (c && c != ':');
+                
+                    break;
+                }
             }
         }
         return k;
@@ -114,8 +171,8 @@ struct JSONWalker
 
     void skipValue()
     {
-        // leaves pos at character that ended the value
-        int level = 1;
+        // leaves pos next char after that which ended value
+        int level0 = _level;
         bool inquote = false;
         bool esc = false;
         char c;
@@ -142,15 +199,21 @@ struct JSONWalker
             }                        
             else if (!inquote)
             {
-                if (c == '{') ++level;
+                if (c == '{') ++_level;
                 else if (c == '}')
                 {
-                    if (!--level) break;
+                    --_level;
+                    if (_level == level0) break;
+                    else if (_level < level0)
+                    {
+                        // must have ended
+                        _end = true;
+                        break;
+                    }
                 }
-                else if (c == ',' && level == 1) break;
+                else if (c == ',' && _level == level0) break;
             }
         }
-        _unget(c);
     }
 
     var getValue(bool& isObject)
@@ -159,23 +222,27 @@ struct JSONWalker
         var r;
 
         isObject = false;
-        _skipSpace();
+        skipSpace();
         const char* st = _pos;
         skipValue();
 
-        if (st != _pos)
+        if (st != _pos && !_error)
         {
             char c = *st;
             if (c == '{') isObject = true;
             else if (c == '"')
             {
+                // pos is end quote + 1
+                const char* ep = _pos - 1;
+                assert(*ep == '"');
+
                 ++st;
-                // [st, _pos) represents the string without quotes
+                // [st, _pos-1) represents the string without quotes
 
                 // decode string
                 GrowString gs;
                 bool esc = false;
-                while (st != _pos)
+                while (st != ep)
                 {
                     if (!esc && *st == '\\')
                     {
@@ -199,16 +266,39 @@ struct JSONWalker
         return r;
     }
 
-    bool next()
+    void next()
     {
-        char c;
-        for (;;)
+        // assume at end char of last value + 1
+
+        if (_end || _error) return;
+
+        assert(_json != _pos);
+
+        const char* ep = _pos - 1;
+        if (*ep == ',')
         {
-            c = _get();
-            if (!c) return false;
-            if (c == ',') break;
+            // last term ended with comma, OK
         }
-        return true;
+        else if (*ep == '"')
+        {
+            // ended of quote, now expect comma
+            skipSpace();
+            char c = _get();
+            if (c == '}')
+            {
+                // must be final }
+                _end = true;
+                if (--_level != 0) _error = true;
+            }
+            else if (c != ',')
+            {
+                _error = true;
+            }
+        }
+        else
+        {
+            _error = true;
+        }
     }
 
     // helpers
@@ -223,6 +313,30 @@ struct JSONWalker
             gs.add(*p++);
         }
         gs.add('"');
+    }
+
+
+    static void addStringValue(GrowString& gs,
+                               const char* key, const char* v)
+    {
+        _toAdd(gs);
+        gs.append(key);
+        gs.add(':');
+        addString(gs, v);
+    }
+
+    static void addStringValue(GrowString& gs,
+                               const char* key, const string& v)
+    {
+        addStringValue(gs, key, v.c_str());
+    }
+
+protected:
+    
+    static void _toAdd(GrowString& gs)
+    {
+        char c = gs.last();
+        if (c && c != ',' && c != '{') gs.add(',');
     }
 
 };

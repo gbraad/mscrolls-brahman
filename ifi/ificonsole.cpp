@@ -36,10 +36,10 @@
 #include "ificlient.h"
 #include "ifihost.h"
 
-extern bool IFIStart(IFIClient* client);
 
 void setupBack(IFIClient& c)
 {
+    extern bool IFIStart(IFIClient* client);
     c.setMainLoop(IFIStart);
 }
 
@@ -67,8 +67,43 @@ int main()
         std::getline(std::cin, cmd);
         if (cmd == "quit") break;
 
+        if (cmd.empty()) continue; // blank line
+
+        const char* cmdp = cmd.c_str();
+
         GrowString gs;
-        IFIClient::makeCommand(gs, cmd.c_str());
+
+        if (*cmdp == '{')
+        {
+            // incorporate some direct json
+            JSONWalker jw(cmdp);
+            for (; jw.nextKey(); jw.next()) jw.skipValue();
+            if (!jw.ok())
+            {
+                std::cout << "malformed JSON in input: '" << jw << "'\n";
+                continue;
+            }
+            else
+            {
+                //std::cout << "parsed: '" << jw << "'\n";
+                
+                // append { ... but NOT closing "}"
+                gs.append(jw._json, jw._pos - jw._json - 1);
+                jw.skipSpace();
+                cmdp = jw._pos; // any remainder is command
+            }
+        }
+        else
+        {
+            gs.add('{');
+        }
+
+
+        if (*cmdp)
+            JSONWalker::addStringValue(gs, IFI_COMMAND, cmdp);
+        
+        gs.add('}');
+        gs.add(0);
         ificlient.eval(gs.start());
 
         // needed if output is in same window as input

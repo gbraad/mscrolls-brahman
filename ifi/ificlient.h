@@ -37,6 +37,7 @@
 #include "ifi.h"
 #include "worker.h"
 #include "jsonwalker.h"
+#include "ifischema.h"
 
 struct IFIClient: public IFI, public Worker
 {
@@ -48,9 +49,13 @@ struct IFIClient: public IFI, public Worker
     MainLoop            _mainLoop;
 
     GrowString          _inBuffer;
-    int                 _inPos = 0;
+    bool                _inBufferReady = false;
+    
+    GrowString          _cmdBuffer;
+    int                 _cmdPos = 0;
 
     GrowString          _outBuffer;
+    bool                _madeRequest = false;
 
     // Compliance
     virtual void setEmitter(const Emitter& e) override
@@ -63,12 +68,16 @@ struct IFIClient: public IFI, public Worker
         // on host thread
     
         bool r = true;
-        JSONWalker jw(json);
 
-        //std::cout << "eval: '" << json << "'\n";
+        std::cout << "eval: '" << json << "'\n";
 
-        string key;
-        for (jw.begin(); !(key = jw.getKey()).empty(); jw.next())
+        // be sure client is not using input buffers
+        if (!sync()) return false;
+
+        _inBuffer = json;
+        _inBufferReady = true;
+
+        for (JSONWalker jw(json); jw.nextKey(); jw.next())
         {
             bool isObject;
             var v = jw.getValue(isObject);
@@ -83,9 +92,17 @@ struct IFIClient: public IFI, public Worker
 
             if (v)
             {
-                if (key == "command") r = evalCommand(v.toString());
+                if (jw._key == IFI_COMMAND)
+                {
+                    _cmdBuffer = v.toString();
+                    _cmdPos = 0;
+                }
             }
         }
+
+        signal();
+        release();
+        
         return r;
     }
     
@@ -106,58 +123,67 @@ struct IFIClient: public IFI, public Worker
 
     //////////////////////// Host Helpers
 
-    static void makeCommand(GrowString& gs, const char* cmd)
-    {
-        gs.append("{command:");
-        JSONWalker::addString(gs, cmd);
-        gs.add('}');
-        gs.add(0);
-    }
-
     void setMainLoop(const MainLoop& m) { _mainLoop = m; }
 
     bool workHandler() override
     {
+        // return true to continue
         assert(_mainLoop);
         return _mainLoop(this);
     }
 
-    bool evalCommand(const string& s)
-    {
-        //std::cout << "evalCommand: '" << s << "'\n";
-            
-        if (!sync()) return false;
-
-        
-        // fill input buffer
-        _inBuffer = s.c_str();
-        _inBuffer.add(0); // signal end of input
-        _inPos = 0;
-
-        signal();
-
-        release();
-        
-        return true;
-    }
 
     //////////////////////////// Client Helpers
     
-    char getchar()
+    int getchar()
     {
-        char c;
+        int c = 0;
         while (!_shutdown)
         {
-            if (_inPos < _inBuffer.size())
+            if (_cmdPos < _cmdBuffer.size())
             {
-                c = _inBuffer.start()[_inPos++];
+                c = _cmdBuffer.start()[_cmdPos++];
                 break;
             }
 
+            // only block is we didn't fill from `getRequest`
+            if (_madeRequest) break;
             waitForSignal();
         }
-        
+
+        if (!c)
+        {
+            c = '\n';
+            if (_shutdown) c = EOF;
+
+            // subsequent calls to getchar will block unless getRequest
+            _madeRequest = false;
+        }
         return c;
+    }
+
+    const char* getRequest()
+    {
+        const char* r = 0;
+
+        _madeRequest = true;
+        
+        while (!_shutdown)
+        {
+            if (_inBufferReady) break;
+            waitForSignal();
+        }
+
+        if (_inBufferReady)
+        {
+            r = _inBuffer.start();
+
+            // buffer has been used now
+            _inBufferReady = false;
+        }
+        
+        return r;
+        
     }
 
     void flush()
@@ -166,7 +192,7 @@ struct IFIClient: public IFI, public Worker
         if (_outBuffer.size())
         {
             GrowString gs;
-            gs.append("{channel:0,text:");
+            gs.append("{" IFI_TEXT ":");
             JSONWalker::addString(gs, _outBuffer.start());
             gs.add('}');
             gs.add(0);
@@ -175,22 +201,29 @@ struct IFIClient: public IFI, public Worker
         }
     }
 
-    void putchar(char c)
+    int putchar(int c)
     {
         if (c == '\b')
         {
             _outBuffer.unadd();
+        }
+        else if (c == '\n' || c <= 0)
+        {
+            // newline, 0 or EOF ?
+            // flushes imply newline, so no need to add it.
+
+            if (_outBuffer.size())
+            {
+                _outBuffer.add(0);
+                flush();
+            }
         }
         else
         {
             _outBuffer.add(c);
         }
 
-        if (!c)
-        {
-            // flush
-            flush();
-        }
+        return c;
     }
 
     void putstring(const char* s)

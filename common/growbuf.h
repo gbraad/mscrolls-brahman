@@ -89,11 +89,16 @@ public:
         }
     }
 
-    void operator=(const char* s)
+    void _assign(const char* s)
     {
         purge();
         append(s);
+        add(0);
     }
+
+    void operator=(const char* s) { _assign(s); }
+    void operator=(const std::string& s) { _assign(s.c_str()); }
+
     
     T* add(const T& v)
     {

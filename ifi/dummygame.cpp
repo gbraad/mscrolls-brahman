@@ -30,42 +30,119 @@
  *
  */
 
+#include <stdio.h>
+
+#ifdef IFI_BUILD
 
 #include "ificlient.h"
 
-extern bool IFIStart(IFIClient* client);
-
 static IFIClient* ifi;
 
-static char my_getchar()
+#undef getchar
+#undef putchar
+
+#define main IFIMain
+
+// forward
+int main(int argc, char** argv);
+
+static int getchar()
 {
     return ifi->getchar();
 }
 
-static void my_putchar(char c)
+static int putchar(int c)
 {
     ifi->putchar(c);
+    return c;
 }
 
-void mainloop()
+static int fflush(FILE* fp)
 {
-    for (;;)
-    {
-        char c = my_getchar();
-        
-        if (c) my_putchar(c);
-        else my_putchar(0);
-    }
+    ifi->putchar(0);
+    return 0;
 }
 
-// exported
 bool IFIStart(IFIClient* client)
 {
     ifi = client;
 
-    mainloop();
+    int argc = 0;
+    char* arg1 = 0;
+    char** argv = &arg1;
     
-    return true;
+    main(argc, argv);
+    return false; // over
 }
+
+#endif
+
+static char* getline()
+{
+    static char buf[4096];
+    char* p = buf;
+    int c;
+    
+    while ((c = getchar()) != EOF && c != '\n')
+        if (p - buf < sizeof(buf)-1) *p++ = c;
+
+    *p = 0;
+    return c == EOF && p == buf ? 0 : buf;
+}
+
+#ifdef IFI_BUILD
+static void prompt() {}
+
+static void handleRequests()
+{
+    const char* json = ifi->getRequest();
+    if (!json) return;
+
+    //std::cout << "handle requests '" << json << "'\n";
+
+    for (JSONWalker jw(json); jw.nextKey(); jw.next())
+    {
+        jw.skipValue();
+        if (jw._key != IFI_COMMAND)
+        {
+            std::cout << "request, " << jw._key << std::endl;
+        }
+    }
+}
+
+#else
+static void prompt()
+{
+    putchar('>');
+    putchar(' ');
+    fflush(stdout);
+}
+
+static void handleRequests() {}
+#endif
+
+int main(int argc, char** argv)
+{
+    for (;;)
+    {
+        prompt();
+
+        handleRequests();
+        
+        char* s = getline();
+        if (!s) break;
+
+        while (*s)
+        {
+            putchar(*s);
+            ++s;
+        }
+
+        putchar('\n');
+    }
+
+    return 0;
+}
+
 
 

@@ -38,6 +38,7 @@
 #include <deque>
 #include "worker.h"
 #include "jsonwalker.h"
+#include "ifischema.h"
 
 struct IFIHost: public Worker
 {
@@ -61,17 +62,14 @@ struct IFIHost: public Worker
     {
         //std::cout << "JSON:" << json << std::endl;
 
-        JSONWalker jw(json);
-
-        string key;
-        for (jw.begin(); !(key = jw.getKey()).empty(); jw.next())
+        for (JSONWalker jw(json); jw.nextKey(); jw.next())
         {
             bool isObject;
             var v = jw.getValue(isObject);
 
             if (v)
             {
-                if (key == "text")
+                if (jw._key == IFI_TEXT)
                 {
                     std::cout << "'" << v << "'\n";
                 }
