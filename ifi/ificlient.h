@@ -193,7 +193,7 @@ struct IFIClient: public IFI, public Worker
         {
             GrowString gs;
             gs.append("{" IFI_TEXT ":");
-            JSONWalker::addString(gs, _outBuffer.start());
+            JSONWalker::encodeString(gs, _outBuffer.start());
             gs.add('}');
             gs.add(0);
             _emitter(gs.start());

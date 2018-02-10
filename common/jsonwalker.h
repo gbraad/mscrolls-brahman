@@ -233,29 +233,12 @@ struct JSONWalker
             else if (c == '"')
             {
                 // pos is end quote + 1
-                const char* ep = _pos - 1;
-                assert(*ep == '"');
+                // [st+1, _pos-1) represents the string without quotes
+                
+                assert(_pos[-1] == '"');
 
-                ++st;
-                // [st, _pos-1) represents the string without quotes
-
-                // decode string
                 GrowString gs;
-                bool esc = false;
-                while (st != ep)
-                {
-                    if (!esc && *st == '\\')
-                    {
-                        esc = true;
-                    }
-                    else
-                    {
-                        esc = false;
-                        gs.add(*st);
-                    }
-                    ++st;
-                }
-                gs.add(0);
+                decodeString(gs, st+1, _pos-1);
                 r = var(gs.start());
             }
             else
@@ -302,15 +285,55 @@ struct JSONWalker
     }
 
     // helpers
-    
-    static void addString(GrowString& gs, const char* p)
+
+    static void decodeString(GrowString& gs,
+                             const char* st,
+                             const char* ep)
     {
-        // encode string
+        bool esc = false;
+        while (st != ep)
+        {
+            char c = *st++;
+
+            if (!esc)
+            {
+                if (c == '\\')
+                {
+                    esc = true;
+                    continue;
+                }
+            }
+            else
+            {
+                esc = false;
+                if (c == 'n') c = '\n';
+            }
+            gs.add(c);
+        }
+        gs.add(0);
+    }
+    
+    static void decodeString(GrowString& gs, const char* p)
+    {
+        decodeString(gs, p, p + strlen(p));
+    }
+
+    static void encodeString(GrowString& gs, const char* p)
+    {
         gs.add('"');
         while (*p)
         {
-            if (*p == '"' || *p == '\\') gs.add('\\');
-            gs.add(*p++);
+            char c = *p++;
+            if (c == '\n')
+            {
+                gs.add('\\');
+                gs.add('n');
+            }
+            else
+            {
+                if (c == '"' || c == '\\') gs.add('\\');
+                gs.add(c);
+            }
         }
         gs.add('"');
     }
@@ -322,7 +345,7 @@ struct JSONWalker
         _toAdd(gs);
         gs.append(key);
         gs.add(':');
-        addString(gs, v);
+        encodeString(gs, v);
     }
 
     static void addStringValue(GrowString& gs,
