@@ -34,6 +34,7 @@
 #pragma once
 
 #include <assert.h>
+#include <stdarg.h>
 #include "ifi.h"
 #include "worker.h"
 #include "jsonwalker.h"
@@ -229,9 +230,30 @@ struct IFIClient: public IFI, public Worker
     void putstring(const char* s)
     {
         while (*s) putchar(*s++);
-        putchar(0); // terminate
     }
 
+    void printf(const char* m, ...)
+    {
+        // buffer used for small strings
+        static char buf[256];
+        
+        va_list args;
+        va_start(args, m);
+        int n = vsnprintf(0, 0, m, args);
+        va_end(args);
+
+        // if we fit in small buffer, use it, otherwise allocate
+        char* tbuf = n < sizeof(buf) ? buf : new char[n+1];
+
+        va_start(args, m);
+        vsprintf(tbuf, m, args);
+        va_end(args);
+
+        putstring(tbuf);
+
+        // if we allocated
+        if (n >= sizeof(buf)) delete [] tbuf;
+    }
 };
 
 

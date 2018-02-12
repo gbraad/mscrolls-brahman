@@ -32,73 +32,60 @@
 
 #include <stdio.h>
 
+/* Here we have a dummy back-end "game". All it does is echo back what
+ * it has received.
+ *
+ * The code here can compile on it's own, and will make a (simple) console
+ * program. However, if IFI_BUILD is defined, it will attach to IFI
+ *
+ * The first part under IFI_BUILD is glue to attach to IFIClient.
+ *
+ */
+
 #ifdef IFI_BUILD
 
 #include "ificlient.h"
 
 static IFIClient* ifi;
 
+// do some (somewhat unreliable) tricks to hijack IO into IFI 
 #undef getchar
 #undef putchar
 
+#define getchar ifi->getchar
+#define putchar ifi->putchar
+#define printf ifi->printf
+
+// need to move the original "main" out of the way, since there will be
+// other main somewhere else when linking with IFI.
 #define main IFIMain
 
 // forward
 int main(int argc, char** argv);
 
-static int getchar()
-{
-    return ifi->getchar();
-}
-
-static int putchar(int c)
-{
-    ifi->putchar(c);
-    return c;
-}
-
-static int fflush(FILE* fp)
-{
-    ifi->putchar(0);
-    return 0;
-}
-
 bool IFIStart(IFIClient* client)
 {
+    // Called by IFI at the start.
+    // We're given the IFIClient object
     ifi = client;
 
+    // call our original main. Fake args here, in case it looks at them.
     int argc = 0;
     char* arg1 = 0;
     char** argv = &arg1;
-    
+
     main(argc, argv);
     return false; // over
 }
 
-#endif
-
-static char* getline()
-{
-    static char buf[4096];
-    char* p = buf;
-    int c;
-    
-    while ((c = getchar()) != EOF && c != '\n')
-        if (p - buf < sizeof(buf)-1) *p++ = c;
-
-    *p = 0;
-    return c == EOF && p == buf ? 0 : buf;
-}
-
-#ifdef IFI_BUILD
-static void prompt() {}
-
 static void handleRequests()
 {
+    // This optional function exists to hook whole JSON from IFI
+    // we walk the terms, but ignore IFI_COMMAND, since that also goes to
+    // `getchar` and is handled elsewhere.
+    
     const char* json = ifi->getRequest();
     if (!json) return;
-
-    //std::cout << "handle requests '" << json << "'\n";
 
     for (JSONWalker jw(json); jw.nextKey(); jw.next())
     {
@@ -110,35 +97,51 @@ static void handleRequests()
     }
 }
 
-#else
-static void prompt()
-{
-    putchar('>');
-    putchar(' ');
-    fflush(stdout);
-}
+#endif // IFI_BUILD
 
-static void handleRequests() {}
-#endif
+/* The remainder of this file can compile standalone and run as a console
+ * program.
+ */
+
+static char* getline()
+{
+    // a somewhat pedestrian getline
+    static char buf[4096];
+    char* p = buf;
+    int c;
+    
+    while ((c = getchar()) != EOF && c != '\n')
+        if (p - buf < sizeof(buf)-1) *p++ = c;
+
+    *p = 0;
+    return c == EOF && p == buf ? 0 : buf;
+}
 
 int main(int argc, char** argv)
 {
+    // OK, not much of a game :-)
     for (;;)
     {
-        prompt();
+#ifdef IFI_BUILD
 
+        // here is one difference. If we want to handle JSON requests
+        // as well as regular "commands", there has to be a handler somewhere.
         handleRequests();
-        
+#else
+
+        // we also only need to prompt in the standalone case, because
+        // when connected to the IFI, the front end may have the input
+        // in a totally different window, which may (or may not) prompt
+        // the user in its own way.
+        putchar('>');
+        putchar(' ');
+        fflush(stdout);
+#endif        
+
         char* s = getline();
         if (!s) break;
 
-        while (*s)
-        {
-            putchar(*s);
-            ++s;
-        }
-
-        putchar('\n');
+        printf("You said; \"%s\"\n", s);
     }
 
     return 0;

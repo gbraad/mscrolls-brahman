@@ -69,10 +69,7 @@ struct IFIHost: public Worker
 
             if (v)
             {
-                if (jw._key == IFI_TEXT)
-                {
-                    std::cout << "'" << v << "'\n";
-                }
+                if (jw._key == IFI_TEXT) std::cout << v << std::endl;
             }
         }
     }
