@@ -35,9 +35,7 @@
  */
  
 
-#pragma once
+#include "ificlient.h"
 
-#define IFI_COMMAND     "command"
-#define IFI_TEXT        "text"
-
+IFIClient* IFIClient::_theIFI;
 

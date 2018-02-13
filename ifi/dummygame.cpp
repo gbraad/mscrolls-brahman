@@ -13,22 +13,27 @@
  *
  *  Copyright (c) Strand Games 2018.
  *
- *  This program is free software: you can redistribute it and/or modify it
- *  under the terms of the GNU Lesser General Public License (LGPL) as published
- *  by the Free Software Foundation, either version 3 of the License, or (at
- *  your option) any later version.
+ *  Permission is hereby granted, free of charge, to any person obtaining a copy
+ *  of this software and associated documentation files (the "Software"), to
+ *  deal in the Software without restriction, including without limitation the
+ *  rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+ *  sell copies of the Software, and to permit persons to whom the Software is
+ *  furnished to do so, subject to the following conditions:
  * 
- *  This program is distributed in the hope that it will be useful, but WITHOUT
- *  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- *  FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License
- *  for more details.
+ *  The above copyright notice and this permission notice shall be included in
+ *  all copies or substantial portions of the Software.
  * 
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with this program. If not, see <http://www.gnu.org/licenses/>.
- *
+ *  THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ *  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ *  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ *  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ *  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ *  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+ *  IN THE SOFTWARE.
+ * 
  *  contact@strandgames.com
- *
  */
+ 
 
 #include <stdio.h>
 
@@ -46,8 +51,6 @@
 
 #include "ificlient.h"
 
-static IFIClient* ifi;
-
 // do some (somewhat unreliable) tricks to hijack IO into IFI 
 #undef getchar
 #undef putchar
@@ -56,34 +59,18 @@ static IFIClient* ifi;
 #define putchar ifi->putchar
 #define printf ifi->printf
 
-// need to move the original "main" out of the way, since there will be
-// other main somewhere else when linking with IFI.
-#define main IFIMain
+// need to move main into the main loop for IFIClient
+#define main IFIClient::main
 
-// forward
-int main(int argc, char** argv);
-
-bool IFIStart(IFIClient* client)
-{
-    // Called by IFI at the start.
-    // We're given the IFIClient object
-    ifi = client;
-
-    // call our original main. Fake args here, in case it looks at them.
-    int argc = 0;
-    char* arg1 = 0;
-    char** argv = &arg1;
-
-    main(argc, argv);
-    return false; // over
-}
+// set this up in main
+static IFIClient* ifi;
 
 static void handleRequests()
 {
     // This optional function exists to hook whole JSON from IFI
     // we walk the terms, but ignore IFI_COMMAND, since that also goes to
     // `getchar` and is handled elsewhere.
-    
+
     const char* json = ifi->getRequest();
     if (!json) return;
 
@@ -106,7 +93,7 @@ static void handleRequests()
 static char* getline()
 {
     // a somewhat pedestrian getline
-    static char buf[4096];
+    static char buf[1024];
     char* p = buf;
     int c;
     
@@ -120,6 +107,10 @@ static char* getline()
 int main(int argc, char** argv)
 {
     // OK, not much of a game :-)
+
+    // set up local pointer for convenience
+    ifi = IFIClient::_theIFI;
+    
     for (;;)
     {
 #ifdef IFI_BUILD
