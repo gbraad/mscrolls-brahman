@@ -43,6 +43,7 @@
 #include "worker.h"
 #include "jsonwalker.h"
 #include "ifischema.h"
+#include "opt.h"
 
 struct IFIHost: public Worker
 {
@@ -114,6 +115,36 @@ struct IFIHost: public Worker
         } while (!_shutdown);
         
         return false;
+    }
+
+    virtual bool start(int argc, char** argv) 
+    {
+        handleOptions(argc, argv);
+        return Worker::start();
+    }
+
+    void setLogLevel(int level)
+    {
+        if (level >= 0 && level < 100)
+        {  
+            Logged::_logLevel = level;
+            LOG2("IFIHost, setting log level to ", level);
+        }
+    }
+
+    virtual void handleOptions(int argc, char** argv)
+    {
+        Logged initLog;
+
+        for (int i = 1; i < argc; ++i)
+        {
+            if (argv[i][0] == '-')
+            {
+                char* arg;
+                if ((arg = Opt::isOptArg(argv + i, "-d")) != 0)
+                    setLogLevel(atoi(arg));
+            }
+        }
     }
     
 };

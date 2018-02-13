@@ -43,6 +43,8 @@
 #include "worker.h"
 #include "jsonwalker.h"
 #include "ifischema.h"
+#include "logged.h"
+#include "opt.h"
 
 #ifdef _WIN32
 #define DLLEXPORT __declspec(dllexport)
@@ -72,6 +74,11 @@ struct DLL IFIClient: public IFI, public Worker
 
     static IFIClient*   _theIFI;
 
+    IFIClient()
+    {
+        Logged initLog;
+    }
+
     // Compliance
     virtual void setEmitter(const Emitter& e) override
     {
@@ -84,7 +91,7 @@ struct DLL IFIClient: public IFI, public Worker
     
         bool r = true;
 
-        std::cout << "eval: '" << json << "'\n";
+        LOG3("eval: '", json << "'\n");
 
         // be sure client is not using input buffers
         if (!sync()) return false;
@@ -121,9 +128,11 @@ struct DLL IFIClient: public IFI, public Worker
         return r;
     }
     
-    virtual bool start() override
+    virtual bool start(int argc, char** argv) override
     {
         // called by host to start the client (on host thread)
+        handleOptions(argc, argv);
+        
         return Worker::start();
     }
 
@@ -135,6 +144,28 @@ struct DLL IFIClient: public IFI, public Worker
     virtual void release() override
     {
         Worker::release();
+    }
+
+    void setLogLevel(int level)
+    {
+        if (level >= 0 && level < 100)
+        {  
+            Logged::_logLevel = level;
+            LOG2("IFIClient, setting log level to ", level);
+        }
+    }
+
+    virtual void handleOptions(int argc, char** argv)
+    {
+        for (int i = 1; i < argc; ++i)
+        {
+            if (argv[i][0] == '-')
+            {
+                char* arg;
+                if ((arg = Opt::isOptArg(argv + i, "-d")) != 0)
+                    setLogLevel(atoi(arg));
+            }
+        }
     }
 
     /////////////////////// Client thread
@@ -260,20 +291,25 @@ struct DLL IFIClient: public IFI, public Worker
         
         va_list args;
         va_start(args, m);
-        int n = vsnprintf(0, 0, m, args);
+        int n = vsnprintf(buf, sizeof(buf), m, args);
         va_end(args);
 
-        // if we fit in small buffer, use it, otherwise allocate
-        char* tbuf = n < sizeof(buf) ? buf : new char[n+1];
+        char* tbuf = buf;
 
-        va_start(args, m);
-        vsprintf(tbuf, m, args);
-        va_end(args);
+        if (n >= sizeof(buf))
+        {
+            // didn't fit
+            tbuf = new char[n+1];
+
+            va_start(args, m);
+            vsprintf(tbuf, m, args);
+            va_end(args);
+        }
 
         putstring(tbuf);
 
         // if we allocated
-        if (n >= sizeof(buf)) delete [] tbuf;
+        if (tbuf != buf) delete [] tbuf;
     }
 };
 

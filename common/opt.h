@@ -37,20 +37,41 @@
 
 #pragma once
 
-#include <functional>
+#include <ctype.h>
+#include <string.h>
 
-struct IFI
+struct Opt
 {
-    typedef std::function<void(const char*)> Emitter;
+    static bool isOpt(char* opt, const char* val)
+    {
+        // test option and if so, remove it
+        bool r = !strcmp(opt, val);
+        if (r) *opt = 0;
+        return r;
+    }
 
-    virtual ~IFI() {}
+    static char* isOptArg(char** opt, const char* val)
+    {
+        char* arg = 0;
+        static char dummy[1] = { 0 };
     
-    virtual void setEmitter(const Emitter&) = 0;
-    virtual bool eval(const char* json) = 0;
-    virtual bool start(int argc, char** argv) = 0;
+        // test option and if so, remove it
+        if (!strcmp(*opt, val))
+        {
+            arg = opt[1];
+            if (arg)
+            {
+                opt[0] = dummy;
+                opt[1] = dummy;
 
-    virtual bool sync(int timeoutms = 500) = 0;
-    virtual void release() = 0;
-
+                // clean arg, sometimes they can have spaces
+                while (isspace(*arg)) ++arg;
+                char* p = arg;
+                while (*p && !isspace(*p)) ++p;
+                *p = 0;
+            }
+        }
+        return arg;
+    }
+    
 };
-

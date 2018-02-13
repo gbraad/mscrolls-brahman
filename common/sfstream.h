@@ -37,20 +37,75 @@
 
 #pragma once
 
-#include <functional>
+#include <string.h>
+#include "sstream.h"
 
-struct IFI
+class StdFStream: public StdStream
 {
-    typedef std::function<void(const char*)> Emitter;
+public:
 
-    virtual ~IFI() {}
+    typedef std::string string;
+
+    // Constructors
+    StdFStream()
+    {
+        using std::placeholders::_1;
+        _buf.emitter(std::bind(&StdFStream::_emit, this, _1));
+        _fp = 0;
+        _also = 0;
+    }
     
-    virtual void setEmitter(const Emitter&) = 0;
-    virtual bool eval(const char* json) = 0;
-    virtual bool start(int argc, char** argv) = 0;
+    ~StdFStream() { close(); }
 
-    virtual bool sync(int timeoutms = 500) = 0;
-    virtual void release() = 0;
+    bool ok() const { return _fp != 0; }
+    const string&       filename() const { return _filename; }
+
+    bool open(const char* filename, const char* mode = "w")
+    {
+        close();
+        _filename = filename;
+        _fp = fopen(filename, mode);
+        return _fp != 0;
+    }
+
+    void close()
+    {
+        if (_fp)
+        {
+            fclose(_fp);
+            _fp = 0;
+        }
+    }
+
+    void setAlso(std::ostream* os)
+    {
+        _also = os;
+    }
+
+protected:
+
+    bool _emit(StdStreamBuf* buf)
+    {
+        size_t n = 1;
+        if (_fp)
+        {
+            n = fwrite(*buf, buf->size(), 1, _fp);
+            fflush(_fp);
+        }
+        
+        if (_also)
+        {
+            _also->write(*buf, buf->size());
+            _also->flush();
+        }
+        return n == 1;
+    }
+
+    string                                      _filename;
+    FILE*                                       _fp;
+
+    // optional addition output (eg cout)
+    std::ostream*                               _also;
 
 };
 

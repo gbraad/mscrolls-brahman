@@ -40,21 +40,23 @@
 #include "ificlient.h"
 #include "ifihost.h"
 
-int main()
+int main(int argc, char** argv)
 {
     IFIClient client;
     IFIHost host;
 
     // start the host thread
-    host.start();
+    host.start(argc, argv);
+
+    // pass to client
+    client.setLogLevel(Logged::_logLevel);
 
     // plug the host handler into the client
     using std::placeholders::_1;
     client.setEmitter(std::bind(&IFIHost::emitterHandler, &host, _1));
 
     // start the back-end
-    client.start();
-
+    client.start(argc, argv);
 
     for (;;)
     {
@@ -76,7 +78,7 @@ int main()
             for (; jw.nextKey(); jw.next()) jw.skipValue();
             if (!jw.ok())
             {
-                std::cout << "malformed JSON in input: '" << jw << "'\n";
+                LOG1("malformed JSON in input: '", jw << "'\n");
                 continue;
             }
             else
