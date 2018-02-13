@@ -139,30 +139,34 @@ struct JSONWalker
         if (!_end && !_error)
         {
             skipSpace();
-            const char* st = _pos;
-            for (;;)
+            char c = _get();
+            if (c)
             {
-                char c = _get();
-                if (c == '}')
+                if (c != '"') _error = true;
+                else 
                 {
-                    // {aaa}
-                    _error = true;
-                    break;
-                }
-                else if (!c || isspace(c) || c == ':')
-                {
-                    _unget(c);
-                
-                    // end of key
-                    k = string(st, _pos - st);
-
-                    // eat any spaces
-                    do
+                    const char* st = _pos;
+                    for (;;)
                     {
                         c = _get();
-                    } while (c && c != ':');
-                
-                    break;
+                        if (!c)
+                        {
+                            _error = true;
+                            break;
+                        }
+                        else if (c == '"')
+                        {
+                            // ASSUME we can't escape " inside keys
+                            // end of key
+
+                            k = string(st, _pos - st - 1);
+                            
+                            skipSpace();
+                            c = _get();
+                            if (c != ':') _error = true;
+                            break;
+                        }
+                    }
                 }
             }
         }
@@ -338,13 +342,19 @@ struct JSONWalker
         gs.add('"');
     }
 
+    static void addKey(GrowString& gs, const char* key)
+    {
+        gs.add('"');
+        gs.append(key);
+        gs.add('"');
+        gs.add(':');
+    }
 
     static void addStringValue(GrowString& gs,
                                const char* key, const char* v)
     {
         _toAdd(gs);
-        gs.append(key);
-        gs.add(':');
+        addKey(gs,key);
         encodeString(gs, v);
     }
 

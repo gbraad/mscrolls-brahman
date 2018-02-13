@@ -245,8 +245,8 @@ struct DLL IFIClient: public IFI, public Worker
         if (_outBuffer.size())
         {
             GrowString gs;
-            gs.append("{" IFI_TEXT ":");
-            JSONWalker::encodeString(gs, _outBuffer.start());
+            gs.add('{');
+            JSONWalker::addStringValue(gs, IFI_TEXT, _outBuffer.start());
             gs.add('}');
             gs.add(0);
             _emitter(gs.start());
