@@ -7,7 +7,7 @@
 #
 ###############################################################################
 
-CFLAGS	= -O -Wall -m32 #-arch i386
+CFLAGS	= -O -Wall #-m32 #-arch i386
 LINK = link
 CFLAGS_MSC	= -Zi
 LDFLAGS_MSC = //DEBUG

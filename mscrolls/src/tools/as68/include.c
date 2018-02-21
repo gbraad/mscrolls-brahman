@@ -37,6 +37,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <assert.h>
 #include "alloc.h"
 #include "vfiles.h"
 #include "errors.h"
@@ -130,6 +131,8 @@ void add_include_dirs(char* list)
     p = list;
     while ((q = strchr(p, ',')) != 0)
     {
+        assert(n_include_dirs < MAXINCLUDEDIRS);
+        
         *q = 0;	/* fod the comma */
         include_dir[n_include_dirs] = allocstr(p);
         strcpy(include_dir[n_include_dirs], p);	/* copy it into list */
@@ -138,5 +141,6 @@ void add_include_dirs(char* list)
     }
     include_dir[n_include_dirs] = allocstr(p);
     strcpy(include_dir[n_include_dirs], p);	/* copy it into list */
+    assert(n_include_dirs < MAXINCLUDEDIRS);
     n_include_dirs++;
 }

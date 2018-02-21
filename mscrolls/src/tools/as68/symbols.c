@@ -152,18 +152,21 @@ void init_symbols()
     struct token *tp;
     char opname[20];
 
-    for (i=0; i<HASHSIZE; i++)
-        hash_table[i] = 0;
-    for (i=0, op=m68k_opcodes; i<numopcodes;) {
+    for (i=0; i<HASHSIZE; i++) hash_table[i] = 0;
+    
+    for (i=0, op=m68k_opcodes; i<numopcodes;)
+    {
         insert_opcode(op->name, i);
-        (void)strcpy(opname, op->name);
-        while (i<numopcodes && !strcmp(opname, op->name)) {
+        strcpy(opname, op->name);
+        while (i<numopcodes && !strcmp(opname, op->name))
+        {
             i++;
             op++;
         }
     }
     for (i=0, tp=tokens; i<N_TOKENS; i++, tp++)
         insert_token(tp->name, tp->token);
+    
     last_chunk = first_chunk = alloc(struct symbol_chunk);
     first_chunk->n_free = CHUNKSIZE;
     first_chunk->first_free = first_chunk->syms;
@@ -183,7 +186,7 @@ void insert_opcode(char* name, inttype index)
     sp->next = hash_table[i];
     hash_table[i] = sp;
     sp->name = allocstr(name);
-    (void)strcpy(sp->name, name);
+    strcpy(sp->name, name);
     sp->type = S_OPCODE;
     sp->svalue = index;
 }
@@ -198,7 +201,7 @@ void insert_token(char* name, inttype token)
     sp->next = hash_table[i];
     hash_table[i] = sp;
     sp->name = allocstr(name);
-    (void)strcpy(sp->name, name);
+    strcpy(sp->name, name);
     sp->type = S_TOKEN;
     sp->svalue = token;
 }
@@ -213,7 +216,7 @@ void insert_control(char* name, inttype code)
     sp->next = hash_table[i];
     hash_table[i] = sp;
     sp->name = allocstr(name);
-    (void)strcpy(sp->name, name);
+    strcpy(sp->name, name);
     sp->type = S_CONTROL;
     sp->svalue = code;
 }
@@ -225,9 +228,9 @@ struct symbol* find_symbol(char* s)
     char temp[100];
 
     if (isdigit(s[0]))
-        (void)sprintf(temp, "%s%d", s, local_index);
+        sprintf(temp, "%s%d", s, local_index);
     else
-        (void)strcpy(temp, s);
+        strcpy(temp, s);
 
     i = hashfn(temp);
     sp = hash_table[i];
@@ -250,9 +253,9 @@ struct symbol* add_symbol(char* s)
 
     n_symbols++;
     if (isdigit(s[0]))	/* local label ? */
-        (void)sprintf(temp, "%s%d", s, local_index);	/* tack on a number */
+        sprintf(temp, "%s%d", s, local_index);	/* tack on a number */
     else
-        (void)strcpy(temp, s);
+        strcpy(temp, s);
 
     i = hashfn(temp);
     sp = last_chunk->first_free++;
@@ -267,7 +270,7 @@ struct symbol* add_symbol(char* s)
     hash_table[i] = sp;
     sp->section_index = current_index;
     sp->name = allocstr(temp);
-    (void)strcpy(sp->name, temp);
+    strcpy(sp->name, temp);
     sp->type = S_UNDF;
     sp->othersym = 0;
     sp->svalue = 0;

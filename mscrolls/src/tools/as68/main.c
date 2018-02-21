@@ -33,7 +33,6 @@
 #include <stdio.h>
 #include <ctype.h>
 #include <setjmp.h>
-#include <signal.h>
 #include <string.h>
 #include "inttype.h"
 #include "alloc.h"
@@ -155,6 +154,7 @@ int main(int argc, char** argv)
                 sourcefile = 0;
                 i = argc;
                 break;
+            case 'd':
             case 'D':
                 debug = 1;
                 break;
@@ -188,7 +188,7 @@ int main(int argc, char** argv)
         exit(-1);
     }
 
-    signal(SIGINT, tidy_exit);
+    //signal(SIGINT, tidy_exit);
     
     mktemp(tempfile);
     if (memorytemp)
@@ -272,7 +272,12 @@ int main(int argc, char** argv)
 #else
         sp->size = sp->pc;
 #endif
-        if (sp->type != BSS) sp->space = malloc((unsigned)sp->pc);
+        if (sp->type != BSS)
+        {
+            size_t sz = sp->pc;
+            sp->space = malloc(sz);
+            memset(sp->space, 0, sz);
+        }
         if (sp->pc) sp->hunk_num = hunk++;
         sp->pc = 0;
     }

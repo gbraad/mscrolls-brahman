@@ -56,7 +56,8 @@ void init_reloc()
 {
     inttype i;
 
-    for (i=0; i<MAXSECTIONS; i++) {
+    for (i=0; i<MAXSECTIONS; i++)
+    {
         reloc32[i] = 0;
         reloc16An[i] = 0;
         ref32[i] = 0;

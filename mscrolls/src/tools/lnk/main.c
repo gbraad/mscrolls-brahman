@@ -32,6 +32,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <ctype.h>
+#include <assert.h>
 
 #include "symbols.h"
 #include "linkit.h"
@@ -165,6 +166,7 @@ int main(int argc, char** argv)
             
             while (!isspace(c) && c != EOF)
             {
+                assert(p - s < sizeof(s));
                 *p++ = c;
                 c = getfromlinkfile(fp);
             }

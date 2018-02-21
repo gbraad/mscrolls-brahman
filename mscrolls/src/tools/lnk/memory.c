@@ -34,20 +34,20 @@
 #include "patch.h"
 #include "errors.h"
 
-extern BYTE *fileptr;	/* points to current byte of current file */
-extern BYTE *fileend;	/* points to 1+ last char in current file */
-extern int patch;	/* !=0 if range error patching enabled */
+extern BYTE *fileptr;   /* points to current byte of current file */
+extern BYTE *fileend;   /* points to 1+ last char in current file */
+extern int patch;       /* !=0 if range error patching enabled */
 
-#define getch()		((fileptr==fileend)?EOF:*fileptr++)
+#define getch()         ((fileptr==fileend)?EOF:*fileptr++)
 
 /* space to store code and data */
 BYTE Code[MAXCODE];
 BYTE Data[MAXDATA];
 
-int code_load_base=0;			/* address to add to ALL code refs */
-int code_address_base=0;		/* address to add to code base */
-int data_address_base=0;		/* address to add to data base */
-int bss_address_base=0;			/* address to add to bss base */
+int code_load_base=0;                   /* address to add to ALL code refs */
+int code_address_base=0;                /* address to add to code base */
+int data_address_base=0;                /* address to add to data base */
+int bss_address_base=0;                 /* address to add to bss base */
 
 void loadcode(int amount)
 {
@@ -58,27 +58,29 @@ void loadcode(int amount)
 #endif
     
     code_address_base += amount;
+    
 #ifdef MS_BIG_ENDIAN
     bcopy(fileptr, p, amount);
     fileptr += amount;
-    if (patch) {
-	*p++ = 0x60;
-	*p++ = 0x00;
-	*p++ = 0x00;
-	*p++ = 0x00;
-	add_tunnel(code_address_base);
-	code_address_base += 4;	/* space for the tunnel */
+    if (patch)
+    {
+        *p++ = 0x60;
+        *p++ = 0x00;
+        *p++ = 0x00;
+        *p++ = 0x00;
+        add_tunnel(code_address_base);
+        code_address_base += 4; /* space for the tunnel */
     }
 #else
-    for (; amount; amount--)
-	*p-- = getch();
-    if (patch) {
-	*p-- = 0x60;
-	*p-- = 0x00;
-	*p-- = 0x00;
-	*p-- = 0x00;
-	add_tunnel(code_address_base);
-	code_address_base += 4; /* space for the patch */
+    for (; amount; amount--) *p-- = getch();
+    if (patch)
+    {
+        *p-- = 0x60;
+        *p-- = 0x00;
+        *p-- = 0x00;
+        *p-- = 0x00;
+        add_tunnel(code_address_base);
+        code_address_base += 4; /* space for the patch */
     }
 #endif
 }
@@ -95,7 +97,7 @@ void loaddata(int amount)
 
     data_address_base += amount;
     for (; amount; amount--)
-	*p-- = getch();
+        *p-- = getch();
 #endif
 }
 
@@ -105,14 +107,14 @@ void addtolong(int type, int ad, int value)
 
 #ifdef MS_BIG_ENDIAN
     if (type == N_TEXT)
-	lp = (LONG *)(Code + (ad - code_load_base));
+        lp = (LONG *)(Code + (ad - code_load_base));
     else
-	lp = (LONG *)(Data + ad);
+        lp = (LONG *)(Data + ad);
 #else
     if (type == N_TEXT)
-	lp = (LONG *)(Code + MAXCODE-4 - (ad-code_load_base));
+        lp = (LONG *)(Code + MAXCODE-4 - (ad-code_load_base));
     else if (type == N_DATA)
-	lp = (LONG *)(Data + MAXDATA-4 - ad);
+        lp = (LONG *)(Data + MAXDATA-4 - ad);
 #endif
     
     if (lp) *lp += value;
@@ -124,14 +126,14 @@ int addtoword(char* symname, int type, int ad, int value)
 
 #ifdef MS_BIG_ENDIAN
     if (type == N_TEXT)
-	wp = (WORD *)(Code + (ad - code_load_base));
+        wp = (WORD *)(Code + (ad - code_load_base));
     else
-	wp = (WORD *)(Data + ad);
+        wp = (WORD *)(Data + ad);
 #else
     if (type == N_TEXT)
-	wp = (WORD *)(Code + MAXCODE-2 - (ad-code_load_base));
+        wp = (WORD *)(Code + MAXCODE-2 - (ad-code_load_base));
     else if (type == N_DATA)
-	wp = (WORD *)(Data + MAXDATA-2 - ad);
+        wp = (WORD *)(Data + MAXDATA-2 - ad);
 #endif
 
     if (wp)
@@ -154,14 +156,14 @@ void addtobyte(char* symname, int type, int ad, int value)
 
 #ifdef MS_BIG_ENDIAN
     if (type == N_TEXT)
-	bp = Code + (ad - code_load_base);
+        bp = Code + (ad - code_load_base);
     else
-	bp = Data + ad;
+        bp = Data + ad;
 #else
     if (type == N_TEXT)
-	bp = Code + MAXCODE-1 - (ad-code_load_base);
+        bp = Code + MAXCODE-1 - (ad-code_load_base);
     else if (type == N_DATA)
-	bp = Data + MAXDATA-1 - ad;
+        bp = Data + MAXDATA-1 - ad;
 #endif
 
     if (bp)

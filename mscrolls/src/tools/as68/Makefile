@@ -10,7 +10,7 @@
 CC = gcc
 LEX = flex
 
-FLAGS=	-O -DDEBUG -Wall -m32 #-arch i386
+FLAGS=	-O -DDEBUG -Wall #-m32 #-arch i386
 OPTIONS= -DEMU
 CFLAGS=	$(FLAGS) $(OPTIONS)
 LDFLAGS= 

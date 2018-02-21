@@ -33,6 +33,6 @@
 
 #include <stdlib.h>
 
-#define alloc(type)		((type *)malloc((unsigned)sizeof(type)))
-#define allocstr(s)		(malloc((unsigned)(strlen(s)+1)))
+#define alloc(type)		((type *)malloc(sizeof(type)))
+#define allocstr(s)		(malloc(strlen(s)+1))
 

@@ -39,6 +39,7 @@
 
 extern char *code_name, *data_name, *bss_name;
 extern int printtotalsize;
+extern int debug;
 
 int code_hunk;		/* hunk number of code section */
 int data_hunk;		/* hunk number of data section */
@@ -115,17 +116,24 @@ void output_loadfile(char* name)
     putlong(0, fp);				/* 1st hunk = 0 */
     putlong(n_hunks-1, fp);		/* last hunk */
     /* sizes */
-    for (i=0; i<n_hunks; i++)
-        putlong(hunk_size[i], fp);
+    for (i=0; i<n_hunks; i++) putlong(hunk_size[i], fp);
+
+    if (debug) fflush(fp);
 
     /* code section */
     output_section(N_TEXT, 0, fp);
 
+    if (debug) fflush(fp);
+
     /* data section */
     output_section(N_DATA, 0, fp);
 
+    if (debug) fflush(fp);
+
     /* bss section */
     output_section(N_BSS, 0, fp);
+
+    if (debug) fflush(fp);
 
     if (printtotalsize)
         printf("total running size = $%08x (%d)\n",
@@ -164,27 +172,31 @@ void output_object(char* name)
 }
 
 
+#define RELOC_N 500
+
 static void output_reloc(int section, int want16, FILE* fp)
 {
     /* want16 true if reloc16An info wanted */
     int i;
     struct reloc_item *rp;
     int target;
-    int *reloc32_c, size32_c=500, n32_c=0;
-    int *reloc32_d, size32_d=500, n32_d=0;
-    int *reloc32_b, size32_b=500, n32_b=0;
-    int *reloc16_c = 0, size16_c=500, n16_c=0;
-    int *reloc16_d = 0, size16_d=500, n16_d=0;
-    int *reloc16_b = 0, size16_b=500, n16_b=0;
 
-    reloc32_c = (int *)malloc(500*sizeof(int));
-    reloc32_d = (int *)malloc(500*sizeof(int));
-    reloc32_b = (int *)malloc(500*sizeof(int));
+    int *reloc32_c, size32_c=RELOC_N, n32_c=0;
+    int *reloc32_d, size32_d=RELOC_N, n32_d=0;
+    int *reloc32_b, size32_b=RELOC_N, n32_b=0;
+    int *reloc16_c = 0, size16_c=RELOC_N, n16_c=0;
+    int *reloc16_d = 0, size16_d=RELOC_N, n16_d=0;
+    int *reloc16_b = 0, size16_b=RELOC_N, n16_b=0;
+
+    reloc32_c = (int *)malloc(RELOC_N*sizeof(int));
+    reloc32_d = (int *)malloc(RELOC_N*sizeof(int));
+    reloc32_b = (int *)malloc(RELOC_N*sizeof(int));
+    
     if (want16)
     {
-        reloc16_c = (int *)malloc(500*sizeof(int));
-        reloc16_d = (int *)malloc(500*sizeof(int));
-        reloc16_b = (int *)malloc(500*sizeof(int));
+        reloc16_c = (int *)malloc(RELOC_N*sizeof(int));
+        reloc16_d = (int *)malloc(RELOC_N*sizeof(int));
+        reloc16_b = (int *)malloc(RELOC_N*sizeof(int));
     }
 
     /* separate out the different types of relocation info */
@@ -198,31 +210,32 @@ static void output_reloc(int section, int want16, FILE* fp)
                 /* work out which section the absolute value
                  * points to */
                 if (rp->info.r_extern)
-                    target = nlist_array[rp->info.r_symbolnum].n_type &
-                        N_TYPE;
+                    target = nlist_array[rp->info.r_symbolnum].n_type & N_TYPE;
                 else
                     target = rp->info.r_symbolnum;
-                switch (target) {
+                
+                switch (target)
+                {
                 case N_TEXT :
-                    if (n32_c == size32_c) {
-                        reloc32_c = (int *)
-                            realloc(reloc32_c, 2*size32_c*sizeof(int));
+                    if (n32_c == size32_c)
+                    {
+                        reloc32_c = (int *)realloc(reloc32_c, 2*size32_c*sizeof(int));
                         size32_c *= 2;
                     }
                     reloc32_c[n32_c++] = rp->info.r_address-code_load_base;
                     break;
                 case N_DATA :
-                    if (n32_d == size32_d) {
-                        reloc32_d = (int *)
-                            realloc(reloc32_d, 2*size32_d*sizeof(int));
+                    if (n32_d == size32_d)
+                    {
+                        reloc32_d = (int *)realloc(reloc32_d, 2*size32_d*sizeof(int));
                         size32_d *= 2;
                     }
                     reloc32_d[n32_d++] = rp->info.r_address;
                     break;
                 case N_BSS :
-                    if (n32_b == size32_b) {
-                        reloc32_b = (int *)
-                            realloc(reloc32_b, 2*size32_b*sizeof(int));
+                    if (n32_b == size32_b)
+                    {
+                        reloc32_b = (int *)realloc(reloc32_b, 2*size32_b*sizeof(int));
                         size32_b *= 2;
                     }
                     reloc32_b[n32_b++] = rp->info.r_address;
@@ -238,16 +251,16 @@ static void output_reloc(int section, int want16, FILE* fp)
                 /* work out which section the absolute value
                  * points to */
                 if (rp->info.r_extern)
-                    target = nlist_array[rp->info.r_symbolnum].n_type &
-                        N_TYPE;
+                    target = nlist_array[rp->info.r_symbolnum].n_type & N_TYPE;
                 else
                     target = rp->info.r_symbolnum;
-                switch (target) {
+                
+                switch (target)
+                {
                 case N_TEXT :
                     if (n16_c == size16_c)
                     {
-                        reloc16_c = (int *)
-                            realloc(reloc16_c, 2*size16_c*sizeof(int));
+                        reloc16_c = (int *)realloc(reloc16_c, 2*size16_c*sizeof(int));
                         size16_c *= 2;
                     }
                     reloc16_c[n16_c++] = rp->info.r_address-code_load_base;
@@ -255,8 +268,7 @@ static void output_reloc(int section, int want16, FILE* fp)
                 case N_DATA :
                     if (n16_d == size16_d)
                     {
-                        reloc16_d = (int *)
-                            realloc(reloc16_d, 2*size16_d*sizeof(int));
+                        reloc16_d = (int *)realloc(reloc16_d, 2*size16_d*sizeof(int));
                         size16_d *= 2;
                     }
                     reloc16_d[n16_d++] = rp->info.r_address;
@@ -264,8 +276,7 @@ static void output_reloc(int section, int want16, FILE* fp)
                 case N_BSS :
                     if (n16_b == size16_b)
                     {
-                        reloc16_b = (int *)
-                            realloc(reloc16_b, 2*size16_b*sizeof(int));
+                        reloc16_b = (int *)realloc(reloc16_b, 2*size16_b*sizeof(int));
                         size16_b *= 2;
                     }
                     reloc16_b[n16_b++] = rp->info.r_address;
@@ -283,22 +294,19 @@ static void output_reloc(int section, int want16, FILE* fp)
         {
             putlong(n32_c, fp);
             putlong(code_hunk, fp);
-            for (i=0; i<n32_c; i++)
-                putlong(reloc32_c[i], fp);
+            for (i=0; i<n32_c; i++) putlong(reloc32_c[i], fp);
         }
         if (n32_d)
         {
             putlong(n32_d, fp);
             putlong(data_hunk, fp);
-            for (i=0; i<n32_d; i++)
-                putlong(reloc32_d[i], fp);
+            for (i=0; i<n32_d; i++) putlong(reloc32_d[i], fp);
         }
         if (n32_b)
         {
             putlong(n32_b, fp);
             putlong(bss_hunk, fp);
-            for (i=0; i<n32_b; i++)
-                putlong(reloc32_b[i], fp);
+            for (i=0; i<n32_b; i++) putlong(reloc32_b[i], fp);
         }
         putlong(0, fp);		/* zterm the 32 bit info */
     }
@@ -370,8 +378,7 @@ static void output_section(int section, int ext, FILE* fp)
 #ifdef MS_BIG_ENDIAN
             fwrite(Code, 4, section_len, fp);
 #else
-            for (i=0; i<4*section_len; i++)
-                putc(Code[MAXCODE-1-i], fp);
+            for (i=0; i<4*section_len; i++) putc(Code[MAXCODE-1-i], fp);
 #endif
             break;
         case N_DATA :
@@ -382,8 +389,7 @@ static void output_section(int section, int ext, FILE* fp)
 #ifdef MS_BIG_ENDIAN
             fwrite(Data, 4, section_len, fp);
 #else
-            for (i=0; i<4*section_len; i++)
-                putc(Data[MAXDATA-1-i], fp);
+            for (i=0; i<4*section_len; i++) putc(Data[MAXDATA-1-i], fp);
 #endif
             break;
         case N_BSS :
