@@ -50,20 +50,23 @@
 #ifdef IFI_BUILD
 
 #include "ificlient.h"
+#include "ifiglue.h"
 
-// do some (somewhat unreliable) tricks to hijack IO into IFI 
-#undef getchar
-#undef putchar
+// so that we can get it from glue
+IFIClient* ifi;
 
-#define getchar ifi->getchar
-#define putchar ifi->putchar
-#define printf ifi->printf
+IFI* IFI::create()
+{
+    ifi = new IFIClient();
+    return ifi;
+}
 
-// need to move main into the main loop for IFIClient
-#define main IFIClient::main
-
-// set this up in main
-static IFIClient* ifi;
+int IFIClient::client_main(int argc, char** argv)
+{
+  // arrive here, then go to the original main, which is renamed to ifi_main
+  // to avoid conflict with ::main in the front end.
+  return ::main(argc, argv);
+}
 
 static void handleRequests()
 {
@@ -90,27 +93,10 @@ static void handleRequests()
  * program.
  */
 
-static char* getline()
-{
-    // a somewhat pedestrian getline
-    static char buf[1024];
-    char* p = buf;
-    int c;
-    
-    while ((c = getchar()) != EOF && c != '\n')
-        if (p - buf < sizeof(buf)-1) *p++ = c;
-
-    *p = 0;
-    return c == EOF && p == buf ? 0 : buf;
-}
-
 int main(int argc, char** argv)
 {
     // OK, not much of a game :-)
 
-    // set up local pointer for convenience
-    ifi = IFIClient::_theIFI;
-    
     for (;;)
     {
 #ifdef IFI_BUILD
@@ -127,12 +113,13 @@ int main(int argc, char** argv)
         putchar('>');
         putchar(' ');
         fflush(stdout);
-#endif        
+#endif
 
-        char* s = getline();
-        if (!s) break;
+        char buf[1024];
+        char* s = gets_s(buf, sizeof(buf));
+        if (!s || !strcmp(s, "q")) break;
 
-        printf("You said; \"%s\"\n", s);
+        printf("You said, \"%s\".\n", s);
     }
 
     return 0;

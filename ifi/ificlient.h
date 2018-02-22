@@ -46,18 +46,7 @@
 #include "logged.h"
 #include "opt.h"
 
-#ifdef _WIN32
-#define DLLEXPORT __declspec(dllexport)
-#define DLLIMPORT __declspec(dllimport)
-
-#ifdef IFI_IMPORT
-#define DLL DLLIMPORT
-#else
-#define DLL DLLEXPORT
-#endif
-#endif // _WIN32
-
-struct DLL IFIClient: public IFI, public Worker
+struct IFIClient: public IFI, public Worker
 {
     typedef std::string string;
     
@@ -67,16 +56,17 @@ struct DLL IFIClient: public IFI, public Worker
     bool                _inBufferReady = false;
     
     GrowString          _cmdBuffer;
-    int                 _cmdPos = 0;
+    uint                _cmdPos = 0;
 
     GrowString          _outBuffer;
     bool                _madeRequest = false;
 
-    static IFIClient*   _theIFI;
+    int                 _argc;
+    char**              _argv;
 
-    IFIClient()
+    ~IFIClient()
     {
-        Logged initLog;
+        LOG4("~IFIClient", "");
     }
 
     // Compliance
@@ -93,7 +83,7 @@ struct DLL IFIClient: public IFI, public Worker
 
         LOG3("eval: '", json << "'\n");
 
-        // be sure client is not using input buffers
+        // be sure client is running & not using input buffers
         if (!sync()) return false;
 
         _inBuffer = json;
@@ -130,6 +120,9 @@ struct DLL IFIClient: public IFI, public Worker
     
     virtual bool start(int argc, char** argv) override
     {
+        _argc = argc;
+        _argv = argv;
+        
         // called by host to start the client (on host thread)
         handleOptions(argc, argv);
         
@@ -155,16 +148,15 @@ struct DLL IFIClient: public IFI, public Worker
         }
     }
 
-    virtual void handleOptions(int argc, char** argv)
+    void handleOptions(int argc, char** argv)
     {
-        for (int i = 1; i < argc; ++i)
+        Logged initLog;
+        
+        for (char**& ap = ++argv; *ap; ++ap)
         {
-            if (argv[i][0] == '-')
-            {
-                char* arg;
-                if ((arg = Opt::isOptArg(argv + i, "-d")) != 0)
-                    setLogLevel(atoi(arg));
-            }
+            char* arg;
+            if ((arg = Opt::nextOptArg(ap, "-d")) != 0)
+                setLogLevel(atoi(arg));
         }
     }
 
@@ -173,18 +165,15 @@ struct DLL IFIClient: public IFI, public Worker
     bool workHandler() override
     {
         // on client thread
+
+        Opt::rebuildArgs(_argc, _argv);
         
-        _theIFI = this;
-
-        int argc = 0;
-        char* arg1 = 0;
-        char** argv = &arg1;
-
-        // 0 => continue, else stop
-        return main(argc, argv) ? false : true;
+        // once main returns (eg shutdown), we're done
+        client_main(_argc, _argv);
+        return false; 
     }
 
-    virtual int main(int argc, char** argv);
+    virtual int client_main(int argc, char** argv);
 
     //////////////////////////// Client Helpers
     
@@ -284,32 +273,42 @@ struct DLL IFIClient: public IFI, public Worker
         while (*s) putchar(*s++);
     }
 
-    void printf(const char* m, ...)
+    int vprintf(const char* m, va_list args)
     {
         // buffer used for small strings
         static char buf[256];
         
-        va_list args;
-        va_start(args, m);
-        int n = vsnprintf(buf, sizeof(buf), m, args);
-        va_end(args);
+        va_list a0;
+        va_copy(a0, args);
+        int n = vsnprintf(buf, sizeof(buf), m, a0);
+        va_end(a0);
 
         char* tbuf = buf;
 
-        if (n >= sizeof(buf))
+        if (n >= (int)sizeof(buf))
         {
             // didn't fit
             tbuf = new char[n+1];
-
-            va_start(args, m);
             vsprintf(tbuf, m, args);
-            va_end(args);
         }
 
         putstring(tbuf);
 
         // if we allocated
         if (tbuf != buf) delete [] tbuf;
+
+        return n;
+    }
+
+    int printf(const char* m, ...)
+    {
+        // buffer used for small strings
+        
+        va_list args;
+        va_start(args, m);
+        int n = vprintf(m, args);
+        va_end(args);
+        return n;
     }
 };
 

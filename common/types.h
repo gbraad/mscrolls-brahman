@@ -38,20 +38,16 @@ typedef unsigned char uchar;
 
 #include <stdint.h>
 
-#if defined(_WIN32)
+#ifdef _WIN32
 
 #ifdef __MINGW32__
 
-// these are missing from mingw64 (currently)
-# if __WORDSIZE == 64
-#define _PRId64 "ld"
-#define _PRIX64 "lX"
-#define _PRIx64 "lx"
-#else
-#define _PRId64 "lld"
-#define _PRIX64 "llX"
-#define _PRIx64 "llx"
-#endif
+#define __STDC_FORMAT_MACROS
+#include <inttypes.h>
+
+#define _PRId64 PRId64
+#define _PRIX64 PRIX64
+#define _PRIx64 PRIx64
 
 #elif defined(_MSC_VER)
 
@@ -66,7 +62,7 @@ typedef unsigned char uchar;
 
 #else
 #error unknown WIN32 compiler
-#endif
+#endif // MINGW
 
 #elif defined(__GNUC__)
 
@@ -91,11 +87,11 @@ typedef unsigned char uchar;
 #define _PRIx64 "llx"
 #endif
 
-#endif
+#endif // PRIX64
 
 #else
 #error compiler unknown
-#endif 
+#endif  // WIN32
 
 typedef uint64_t uint64;
 typedef int64_t int64;

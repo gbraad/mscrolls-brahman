@@ -42,6 +42,7 @@
 #include <chrono>
 #include <mutex>
 #include <condition_variable>
+#include "logged.h"
 
 struct Worker
 {
@@ -51,7 +52,10 @@ struct Worker
     
     thread              _task;
     bool                _running = false;
-    bool                _starting = false;
+
+    // between start and running
+    bool                _starting;
+
     bool                _shutdown = false;
 
     mutex               _waitLock;
@@ -73,9 +77,10 @@ struct Worker
     {
         if (_running)
         {
+            LOG4("worker, ", "stopping");
             _shutdown = true;
-            _task.join();
         }
+        _task.join();
     }
 
     void waitForSignal()
@@ -139,10 +144,7 @@ struct Worker
         _waitLock.unlock();
     }
 
-    virtual bool workHandler()
-    {
-        return false;
-    }
+    virtual bool workHandler() { return false; }
 
 protected:
     
@@ -156,6 +158,9 @@ protected:
             _running = !_shutdown && workHandler();
             
         } while (_running);
+
+        LOG4("Worker, ", "finished");
+
     }
 };
 

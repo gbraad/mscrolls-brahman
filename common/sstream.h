@@ -33,7 +33,6 @@
  * 
  *  contact@strandgames.com
  */
- 
 
 #pragma once
 
@@ -79,15 +78,23 @@ protected:
     Emitter     _emitter;
 };
 
-class StdStream: public std::ostream
+struct StdStream: public std::ostream
 {
-public:
-
     // Constructors
-    StdStream() : std::ostream(&_buf) {}
+    StdStream() : std::ostream(&_buf)
+    {
+        using std::placeholders::_1;
+        _buf.emitter(std::bind(&StdStream::_emit, this, _1));
+    }
+
+    virtual ~StdStream() {}
     
     operator const      char*() const { return _buf; }
     size_t              size() const { return _buf.size(); }
+    
+    virtual const char* filename() const { return 0; }
+    virtual bool ok() const { return true; }
+    virtual bool _emit(StdStreamBuf* buf) = 0;
 
     int printf(const char* fmt, ...)
     {
@@ -121,20 +128,9 @@ protected:
 
 };
 
-class StdOStream: public StdStream
+struct StdOStream: public StdStream
 {
-public:
-
-    // Constructors
-    StdOStream() 
-    {
-        using std::placeholders::_1;
-        _buf.emitter(std::bind(&StdOStream::_emit, this, _1));
-    }
-
-protected:
-
-    bool _emit(StdStreamBuf* buf)
+    bool _emit(StdStreamBuf* buf) override
     {
         // stdout emitter
         const char* p = *buf;

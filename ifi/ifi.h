@@ -39,11 +39,32 @@
 
 #include <functional>
 
-struct IFI
+#ifdef _WIN32
+#define DLLEXPORT __declspec(dllexport)
+#define DLLIMPORT __declspec(dllimport)
+
+#ifdef IFI_STATIC
+#define DLL
+#else
+
+#ifdef IFI_IMPORT
+#define DLL DLLIMPORT
+#else
+#define DLL DLLEXPORT
+#endif
+
+#endif // IFI_STATIC
+#else
+#define DLL
+#endif // _WIN32
+
+struct DLL IFI
 {
     typedef std::function<void(const char*)> Emitter;
 
     virtual ~IFI() {}
+
+    static IFI* create();
     
     virtual void setEmitter(const Emitter&) = 0;
     virtual bool eval(const char* json) = 0;

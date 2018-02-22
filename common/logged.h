@@ -33,7 +33,6 @@
  * 
  *  contact@strandgames.com
  */
- 
 
 #pragma once
 

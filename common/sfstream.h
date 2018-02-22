@@ -33,33 +33,28 @@
  * 
  *  contact@strandgames.com
  */
- 
 
 #pragma once
 
 #include <string.h>
 #include "sstream.h"
 
-class StdFStream: public StdStream
+struct StdFStream: public StdStream
 {
-public:
-
     typedef std::string string;
 
     // Constructors
     StdFStream()
     {
-        using std::placeholders::_1;
-        _buf.emitter(std::bind(&StdFStream::_emit, this, _1));
         _fp = 0;
         _also = 0;
     }
     
     ~StdFStream() { close(); }
 
-    bool ok() const { return _fp != 0; }
-    const string&       filename() const { return _filename; }
-
+    const char* filename() const override { return _filename.c_str(); }
+    bool ok() const override { return _fp != 0; }
+    
     bool open(const char* filename, const char* mode = "w")
     {
         close();
@@ -82,9 +77,8 @@ public:
         _also = os;
     }
 
-protected:
 
-    bool _emit(StdStreamBuf* buf)
+    bool _emit(StdStreamBuf* buf) override
     {
         size_t n = 1;
         if (_fp)
@@ -100,6 +94,9 @@ protected:
         }
         return n == 1;
     }
+
+protected:
+
 
     string                                      _filename;
     FILE*                                       _fp;

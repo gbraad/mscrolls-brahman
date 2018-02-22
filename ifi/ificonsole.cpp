@@ -37,26 +37,29 @@
 
 #include <iostream>
 #include <string>
-#include "ificlient.h"
+#include "ifi.h"
 #include "ifihost.h"
 
 int main(int argc, char** argv)
 {
-    IFIClient client;
+    IFI* ifi = IFI::create();
+    if (!ifi)
+    {
+        std::cout << "Failed to create IFI\n";
+        return -1;
+    }
+
     IFIHost host;
 
     // start the host thread
     host.start(argc, argv);
-
-    // pass to client
-    client.setLogLevel(Logged::_logLevel);
-
+    
     // plug the host handler into the client
     using std::placeholders::_1;
-    client.setEmitter(std::bind(&IFIHost::emitterHandler, &host, _1));
+    ifi->setEmitter(std::bind(&IFIHost::emitterHandler, &host, _1));
 
     // start the back-end
-    client.start(argc, argv);
+    ifi->start(argc, argv);
 
     for (;;)
     {
@@ -102,11 +105,17 @@ int main(int argc, char** argv)
         
         gs.add('}');
         gs.add(0);
-        client.eval(gs.start());
+        ifi->eval(gs.start());
 
         // needed if output is in same window as input
-        if (client.sync()) client.release();
+        if (!ifi->sync()) break;
+        ifi->release();
     }
+
+    // release
+    delete ifi;
+
+    LOG3("IFIConsole, ", "finished");
 
     return 0;
 }

@@ -73,5 +73,55 @@ struct Opt
         }
         return arg;
     }
+
+    static char* nextOptArg(char**& optAddr, const char* val, bool keep = false)
+    {
+        char* arg = 0;
+        static char dummy[1] = { 0 };
+
+        char** opt = optAddr;
+
+        // test option and if so, remove it unless `keep`
+        if (!strcmp(*opt, val))
+        {
+            ++optAddr; // skip arg
+            
+            arg = opt[1];
+            if (arg)
+            {
+                if (!keep)
+                {
+                    opt[0] = dummy;
+                    opt[1] = dummy;
+                }
+
+                // clean arg, sometimes they can have spaces
+                while (isspace(*arg)) ++arg;
+                char* p = arg;
+                while (*p && !isspace(*p)) ++p;
+                *p = 0;
+            }
+        }
+        return arg;
+    }
+
+    static void rebuildArgs(int& argc, char** argv)
+    {
+        int n = 0;
+        char** p = argv;
+        char** q = p;
+
+        while (*q)
+        {
+            if (**q)
+            {
+                *p++ = *q;
+                ++n;
+            }
+            ++q;
+        }
+        *p = 0;
+        argc = n;
+    }
     
 };

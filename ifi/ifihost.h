@@ -42,6 +42,7 @@
 #include <deque>
 #include "worker.h"
 #include "jsonwalker.h"
+#include "logged.h"
 #include "ifischema.h"
 #include "opt.h"
 
@@ -52,6 +53,11 @@ struct IFIHost: public Worker
 
     mutex       _queueLock;
     Queue       _replies;
+
+    ~IFIHost()
+    {
+        LOG4("~IFIHost", "");
+    }
     
     void emitterHandler(const char* json)
     {
@@ -136,14 +142,11 @@ struct IFIHost: public Worker
     {
         Logged initLog;
 
-        for (int i = 1; i < argc; ++i)
+        for (char**& ap = ++argv; *ap; ++ap)
         {
-            if (argv[i][0] == '-')
-            {
-                char* arg;
-                if ((arg = Opt::isOptArg(argv + i, "-d")) != 0)
-                    setLogLevel(atoi(arg));
-            }
+            char* arg;
+            if ((arg = Opt::nextOptArg(ap, "-d", true)) != 0)
+                setLogLevel(atoi(arg));
         }
     }
     
