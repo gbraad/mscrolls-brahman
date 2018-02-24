@@ -37,6 +37,12 @@
 
 #include <stdio.h>
 #include <assert.h>
+#include "random.h"
+#include "rc4.h"
+
+#define VERSION  0
+
+static RC4 rc4;
 
 int getLen(FILE* in)
 {
@@ -53,31 +59,137 @@ void putLen(int v, FILE* out)
     putc(b, out);
 }
 
+bool extractDat(FILE* in, FILE* out, size_t sz, int cc)
+{
+    // extract block# `cc` of  `sz` bytes
+
+    if (!cc)
+    {
+        // this is the prologue
+        int pos = ftell(in);
+
+        // check magic
+        bool ok = getc(in) == 'J';
+        ok = ok && (getc(in) == 'C');
+        ok = ok && (getc(in) == 'O');
+        ok = ok && (getc(in) == 'M');
+
+        if (!ok)
+            printf("Files does not contain embedded data\n");
+        else
+        {
+            // get version
+            int v = getc(in);
+            
+            if (v > VERSION)
+            {
+                printf("file contains a newer version than this program!\n");
+                ok = false;
+            }
+            else
+            {
+                printf("embedded data version %d, current %d\n", v, VERSION);
+
+                // read key
+                char key[256];
+                for (int i = 0; i < sizeof(key); ++i) key[i] = getc(in);
+                memcpy(rc4.SBox, key, sizeof(key));
+
+                int mused = ftell(in) - pos;
+
+                // remaining data
+                sz -= mused;
+            }
+        }
+
+        if (!ok)
+        {
+            // rewind and reject
+            fseek(in, pos, 0);
+            return false;
+        }
+    }
+
+    while (sz--)
+    {
+        int c = getc(in) ^ rc4.next();
+        putc(c, out);
+    }
+
+    return true;
+}
+
 void insertDat(FILE* out, FILE* dat)
 {
-    int msize = 0xffff - 2;
-    char* buf = new char[msize];
+    char buf[0xffff-2]; // max COM payload
+    
+    // insert prologue
+    
+    putc(0xff, out);
+    putc(0xfe, out); // com
+
+    int pos = ftell(out);
+    putLen(0, out); // dummy
+
+    putc('J', out);
+    putc('C', out);
+    putc('O', out);
+    putc('M', out);
+
+    putc(VERSION, out);
+
+    char key[256];
+    bool v = randombytes_sysrandom_buf(key, sizeof(key));
+    assert(v);
+
+    for (int i = 0; i < sizeof(key); ++i) putc(key[i], out);
+    memcpy(rc4.SBox, key, sizeof(key));
+
+    int mused = ftell(out) - pos;
+    int msize = 0xffff - mused;
+    int cc = 0;
 
     size_t n;
-    do
+    
+    for (;;)
     {
         n = fread(buf, 1, msize, dat);
-        if (n > 0)
+        if (!n) break; // done
+        
+        if (cc)
         {
             putc(0xff, out);
             putc(0xfe, out); // com
             putLen(n + 2, out);
-
-            for (int i = 0; i < n; ++i)
-            {
-                putc(buf[i], out);
-            }
-
-            printf("wrote APP %d bytes\n", n);
         }
-    } while (n == msize);
+        else
+        {
+            // go back and correct first block size
+            int here = ftell(out);
+            int v = fseek(out, pos, 0);
+            assert(!v);
+            assert(n + mused <= 0xffff);
+            putLen(n + mused, out);
+            
+            v = fseek(out, here, 0);
+            assert(!v);
+        }
 
-    delete [] buf;
+        for (int i = 0; i < n; ++i)
+        {
+            int a = buf[i] ^ rc4.next();
+            putc(a, out);
+        }
+
+        ++cc;
+        printf("(%d) wrote APP %d bytes\n", cc, n + mused);
+
+        if (n < msize) break; 
+
+        // subsequent blocks max size
+        mused = 2;
+        msize = 0xffff - mused;
+    }
 }
 
 void scan(FILE* in, FILE* out, FILE* dat)
@@ -86,6 +198,8 @@ void scan(FILE* in, FILE* out, FILE* dat)
     bool esc = false;
     bool insdata = false;
     bool donedata = false;
+    int ec = 0;
+    
     while ((c = getc(in)) != EOF)
     {
         if (esc)
@@ -116,17 +230,26 @@ void scan(FILE* in, FILE* out, FILE* dat)
             case 0xFE:
                 {
                     int l = getLen(in);
+                    printf("COM size %d\n", l);
                     assert(l >= 2);
                     l -= 2;
-                    printf("COM size %d\n", l);
-
-                    while (l--)
+                    
+                    bool v = false;
+                    
+                    if (out && !dat && ec >= 0)
                     {
-                        int c = getc(in);
-                        if (out && !dat)
+                        v = extractDat(in, out, l, ec++);
+                        if (!v)
                         {
-                            putc(c, out);
+                            // reject for all subsequent
+                            ec = -1;
                         }
+                    }
+
+                    if (!v)
+                    {
+                        // skip comment
+                        while (l--) getc(in);
                     }
                     continue;
                 }
@@ -155,7 +278,6 @@ void scan(FILE* in, FILE* out, FILE* dat)
                 if (dat && out) putc(c, out);
             }
         }
-
     }
 }
 
