@@ -49,17 +49,58 @@ int main(int argc, char** argv)
         return -1;
     }
 
+    const char* configdir = ".";
+    const char* datadir = "."; // default;
+    const char* story = 0;
+    
+    char** args = argv+1;
+    for (char**& ap = args; *ap; ++ap)
+    {
+        char* arg;
+        if ((arg = Opt::nextOptArg(ap, "-configdir")) != 0) configdir = arg;
+        if ((arg = Opt::nextOptArg(ap, "-datadir")) != 0) datadir = arg;
+        if ((arg = Opt::nextOptArg(ap, "-story")) != 0) story = arg;
+    }
+    Opt::rebuildArgs(argc, argv);
+
+    if (!story)
+    {
+        std::cout << "Usage: " << argv[0] << "[-d <level>] [-configdir <path>] [-datadir <path>] -story <storyname>\n";
+        return 0;
+    }
+
+    // build simple json for startup
+    GrowString js;
+    js.add('{');
+    JSONWalker::addStringValue(js, IFI_CONFIGDIR, configdir);
+    JSONWalker::addStringValue(js, IFI_DATADIR, datadir);
+    JSONWalker::addStringValue(js, IFI_STORY, story);
+    js.add('}');
+    js.add(0);
+
+
     IFIHost host;
 
     // start the host thread
     host.start(argc, argv);
     
+    // duplicate existing argc/argv with making space for more args
+    // NB: copy must be deleted later
+    argv = Opt::copyArgs(argc, argv, 2);
+    LOG2("IFIConsole, passing start json, ", js.start());
+    
+    Opt::addArg(argc, argv, "-e", js.start());
+
     // plug the host handler into the client
     using std::placeholders::_1;
     ifi->setEmitter(std::bind(&IFIHost::emitterHandler, &host, _1));
-
+    
     // start the back-end
     ifi->start(argc, argv);
+
+    // perform initial sync to allow game to start
+    if (ifi->sync()) ifi->release();
+    if (host.sync()) host.release();
 
     for (;;)
     {
@@ -110,7 +151,11 @@ int main(int argc, char** argv)
         // needed if output is in same window as input
         if (!ifi->sync()) break;
         ifi->release();
+
+        if (host.sync()) host.release();
     }
+
+    Opt::deleteCopyArgs(argv);
 
     // release
     delete ifi;

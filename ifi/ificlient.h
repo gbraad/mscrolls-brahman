@@ -126,6 +126,8 @@ struct IFIClient: public IFI, public Worker
         // called by host to start the client (on host thread)
         handleOptions(argc, argv);
         
+        Opt::rebuildArgs(_argc, _argv);
+        
         return Worker::start();
     }
 
@@ -166,8 +168,6 @@ struct IFIClient: public IFI, public Worker
     {
         // on client thread
 
-        Opt::rebuildArgs(_argc, _argv);
-        
         // once main returns (eg shutdown), we're done
         client_main(_argc, _argv);
         return false; 

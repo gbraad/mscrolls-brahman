@@ -39,5 +39,8 @@
 
 #define IFI_COMMAND     "command"
 #define IFI_TEXT        "text"
+#define IFI_CONFIGDIR   "configdir"
+#define IFI_DATADIR     "datadir"
+#define IFI_STORY       "story"
 
 

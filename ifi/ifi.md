@@ -1,10 +1,36 @@
+# IFI - Interactive Fiction Interface
+
+_IFI_ is the point of connection between a GUI and an IF _back-end_, _engine_ or _interpreter_ (whatever you prefer to call it).
+
+The purpose of _IFI_ is to convey instructions from the GUI to the _back-end_ and to convey elements of the world state from the _back-end_ to the GUI. These conveyances encode information according to an _implementation independent_ schema.
+
+Specifically, messages in both directions are `json` strings whose schema and term meanings are detailed below. Consequently, the interface itself, needed only for passing strings is especially terse. These few functions are the interface between the GUI and the IF back-end;
+
+```
+struct IFI
+{
+    typedef std::function<void(const char*)> Emitter;
+
+    virtual ~IFI() {}
+    static IFI* create();
+    
+    virtual void setEmitter(const Emitter&) = 0;
+    virtual bool eval(const char* json) = 0;
+    virtual bool start(int argc, char** argv) = 0;
+
+    virtual bool sync(int timeoutms = 500) = 0;
+    virtual void release() = 0;
+
+};
+```
+
+In practice, an adapter called `IFIClient` is linked with your back-end to make your interpreter IFI compatible. `IFIClient` contains a lot of helper functions (json parsing etc.). There's also a "C" interface (called `ifiglue`) that allows, an otherwise console interpreter, to become an IFIClient simply by redefining stdio function calls (such as `getchar`, `putchar` etc.).
+
 ## Requests and Replies
 
 The back-end (`IFIClient`) receives json _requests_ together with game commands. The back-end then replies by sending a _reply_ json, this reply contains the answers to data requested and also text result from the game command.
 
-`IFI::setEmitter` is called by the front-end to the back-end to give the back-end the `Emitter` function through which to reply.
-
-The back-end will use `IFIClient` as "glue" to help the connection
+`IFI::setEmitter` is called by the front-end to the back-end to give the back-end the `Emitter` function through which to reply. The back-end will use `IFIClient` as "glue" to help the connection.
 
 The back-end can call `IFIClient::getRequest()` to **block** on the next request from the front-end. This will return the next json request. Additionally the back-end can call `IFIClient::getchar()` which will **block** until the next character of game command is returned.
 
@@ -17,7 +43,7 @@ These are the json tags that may appear in a _request_. See the _Replies_ sectio
 * `configdir: "path"`  
   Directory where game assets are stored. This directory is not necessarily writable.
 
-* `datadir: "path"`
+* `datadir: "path"`  
    Directory where user specific data is stored. eg save games.
    
 * `story: "name"`  
@@ -27,10 +53,15 @@ These are the json tags that may appear in a _request_. See the _Replies_ sectio
    Request the game objects map. 
 
 * `command: "get lamp"`  
-  text typed by the player.
-  
-* `save: "filename"`
-* `load: "filename"`
+   Text typed by the player, or constructed by the GUI.
+
+* `loaddata: "game-state"`  
+   The entire game state is sent to restore a game position. The string "game-state" is _entirely_ back-end specific, for example base64 encoded binary data, whose content and meaning is only known to the back-end. This will include any internal headers, formatting, version numbers etc.
+
+   The "game-state" string will correspond _exactly_ to one previously sent through `savedata` earlier.
+
+* `savedata: true`  
+   Request entire game state.
 
 * `location: true`  
    Return `location` reply if `true`. If `false`, unsolicited updates are not needed.
@@ -83,6 +114,8 @@ Game objects are associated with an _ID_, which is an arbitrary `int`. The front
 * `scoremax:` int  
    _Optional_. Max game score. When provided we can either display score/maxscore or score%, otherwise just the score is given.
 
+*  `savedata: "game-state"`  
+   The entire game state encoded as a string (eg base64) that can later be accommodated by a `loaddata` request to completely restore a position (see also request `loaddata`).
 
 * `items: [{item}...]`  
    item details for the sidebar (eg inventory).
@@ -224,7 +257,21 @@ Same meanings as `item`.
 * `textcol: int`  
   _Optional.
 
-## Functions
+## Interface Functions
+
+### bool start(int argc, char** argv)
+
+Called after `setEmitter` but before any `eval`. Tells the back-end to perform startup and initialisation. When linked through `ifiglue`, `start` will wind up calling into the original console `main`.
+
+Arguments passed are from the original invocation (if any).
+
+Additionally, the argument `-e <json>` will be included in order to send the back-end necessary information it needs to start up. In theory, this can be _any_ allowable _request_ json, but in practice it will be limited to the following terms;
+
+* `configdir`
+* `datadir`
+* `story`
+
+See the _requests_ section for description of these terms.
 
 
 

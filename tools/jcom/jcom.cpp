@@ -64,14 +64,14 @@ static const char* algoName[] =
     "RC4"
 };
 
-int getLen(FILE* in)
+static int getLen(FILE* in)
 {
     int a = getc(in);
     int b = getc(in);
     return b + (a<<8);
 }
 
-void putLen(int v, FILE* out)
+static void putLen(int v, FILE* out)
 {
     int a = v >> 8;
     int b = v & 0xff;
@@ -266,6 +266,10 @@ bool extractDat(FILE* in, FILE* out, size_t sz, int cc)
         {
             // now we have the correct key
             aes.start();
+
+            // skip preamble padding
+            int pn = getc(in);
+            while (pn--) getc(in);
             
             int mused = ftell(in) - pos;
 
@@ -387,6 +391,14 @@ void insertDat(FILE* out, FILE* dat, int work)
         // emit hash
         for (int j = 0; j < sizeof(hashout); ++j) putc(hashout[j], out);
     }
+
+    // emit preamble padding
+    unsigned char pad[256];
+    v = randombytes_sysrandom_buf(pad, sizeof(pad));
+    assert(v);
+
+    // emit n followed by n values
+    for (int i = 0; i <= pad[0]; ++i) putc(pad[i], out);
 
     int mused = ftell(out) - pos;
     int msize = 0xffff - mused;

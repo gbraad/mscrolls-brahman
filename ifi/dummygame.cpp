@@ -36,6 +36,7 @@
  
 
 #include <stdio.h>
+#include <string.h>
 
 /* Here we have a dummy back-end "game". All it does is echo back what
  * it has received.
