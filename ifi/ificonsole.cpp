@@ -39,9 +39,27 @@
 #include <string>
 #include "ifi.h"
 #include "ifihost.h"
+#include "logged.h"
+#include "opt.h"
+
+struct Handler: public IFIHandler
+{
+    bool ifiText(const string& s) override
+    {
+        std::cout << s << std::endl;
+        return true;
+    }
+    bool ifiMovesResponse(int moveCount) override
+    {
+        std::cout << "current move count " << moveCount << std::endl;
+        return true;
+    }
+};
 
 int main(int argc, char** argv)
 {
+    Logged initLog;
+    
     IFI* ifi = IFI::create();
     if (!ifi)
     {
@@ -60,6 +78,8 @@ int main(int argc, char** argv)
         if ((arg = Opt::nextOptArg(ap, "-configdir")) != 0) configdir = arg;
         if ((arg = Opt::nextOptArg(ap, "-datadir")) != 0) datadir = arg;
         if ((arg = Opt::nextOptArg(ap, "-story")) != 0) story = arg;
+        if ((arg = Opt::nextOptArg(ap, "-d", true)) != 0)
+            Logged::_logLevel = atoi(arg);
     }
     Opt::rebuildArgs(argc, argv);
 
@@ -81,8 +101,8 @@ int main(int argc, char** argv)
 
     IFIHost host;
 
-    // start the host thread
-    host.start(argc, argv);
+    Handler h;
+    host.setHandler(&h);
     
     // duplicate existing argc/argv with making space for more args
     // NB: copy must be deleted later
@@ -99,8 +119,11 @@ int main(int argc, char** argv)
     ifi->start(argc, argv);
 
     // perform initial sync to allow game to start
-    if (ifi->sync()) ifi->release();
-    if (host.sync()) host.release();
+    if (ifi->sync())
+    {
+        host.drainQueue();
+        ifi->release();
+    }
 
     for (;;)
     {
@@ -150,9 +173,11 @@ int main(int argc, char** argv)
 
         // needed if output is in same window as input
         if (!ifi->sync()) break;
+
+        host.drainQueue();
+
         ifi->release();
 
-        if (host.sync()) host.release();
     }
 
     Opt::deleteCopyArgs(argv);

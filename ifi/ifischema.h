@@ -38,9 +38,26 @@
 #pragma once
 
 #define IFI_COMMAND     "command"
-#define IFI_TEXT        "text"
 #define IFI_CONFIGDIR   "configdir"
 #define IFI_DATADIR     "datadir"
 #define IFI_STORY       "story"
+#define IFI_OBJECTS     "objects"
 
+#define IFI_LOADDATA    "loaddata"
+#define IFI_SAVEDATA    "savedata"
+#define IFI_LOCATION    "location"
+#define IFI_MAP         "map"
+#define IFI_PICTURE     "picture"
+#define IFI_ITEMS       "items"
+#define IFI_PEOPLE      "people"
+#define IFI_META        "meta"
+#define IFI_MOVES       "moves"
+#define IFI_VALUES      "values"
 
+// reply only
+
+#define IFI_TEXT        "text"
+#define IFI_TITLE       "title"
+#define IFI_SCORE       "score"
+#define IFI_SCOREMAX    "scoremax"
+#define IFI_EXITS       "exits"

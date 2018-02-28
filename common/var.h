@@ -182,6 +182,9 @@ struct var
 
     bool isVoid() const { return _type == var_null; }
     bool isString() const { return _type == var_string; }
+    bool isDouble() const { return _type == var_double; }
+    bool isInt() const { return _type == var_int; }
+    bool isNumber() const { return isDouble() || isInt(); }
     
     // true if not void
     explicit operator bool() const { return !isVoid(); }

@@ -245,6 +245,15 @@ struct JSONWalker
                 decodeString(gs, st+1, _pos-1);
                 r = var(gs.start());
             }
+            else if (_pos - st == 5 && !strncmp(st, "true", 4)) // "true" + 1
+            {
+                // convert true and false to strings
+                r = var("true");
+            }
+            else if (_pos - st == 6 && !strncmp(st, "false", 5))
+            {
+                r = var("false");
+            }
             else
             {
                 r.parse(&st);
@@ -348,6 +357,20 @@ struct JSONWalker
         gs.append(key);
         gs.add('"');
         gs.add(':');
+    }
+
+    static void addKeyValue(GrowString& gs, const char* key, const var& v)
+    {
+        _toAdd(gs);
+        addKey(gs,key);
+        if (v.isString())
+        {
+            encodeString(gs, v.toString().c_str());
+        }
+        else
+        {
+            gs.append(v.toString());
+        }
     }
 
     static void addStringValue(GrowString& gs,

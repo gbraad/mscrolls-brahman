@@ -52,9 +52,27 @@
 
 #include "ificlient.h"
 #include "ifiglue.h"
+#include "ifihandler.h"
 
 // so that we can get it from glue
 IFIClient* ifi;
+static int moveCount;
+
+struct Handler: public IFIHandler
+{
+    bool ifiCommand(const string&) override { return true; }
+    bool ifiMoves(const string& s) override
+    {
+        if (s == "true")
+        {
+            ifi->emitSingleResponse(IFI_MOVES, var(moveCount));
+        }
+        return true;
+    }
+        
+};
+
+Handler ifiHandler;
 
 IFI* IFI::create()
 {
@@ -69,30 +87,24 @@ int IFIClient::client_main(int argc, char** argv)
   return ::main(argc, argv);
 }
 
-static void handleRequests()
-{
-    // This optional function exists to hook whole JSON from IFI
-    // we walk the terms, but ignore IFI_COMMAND, since that also goes to
-    // `getchar` and is handled elsewhere.
-
-    const char* json = ifi->getRequest();
-    if (!json) return;
-
-    for (JSONWalker jw(json); jw.nextKey(); jw.next())
-    {
-        jw.skipValue();
-        if (jw._key != IFI_COMMAND)
-        {
-            std::cout << "request, " << jw._key << std::endl;
-        }
-    }
-}
-
 #endif // IFI_BUILD
 
 /* The remainder of this file can compile standalone and run as a console
  * program.
  */
+
+static void prompt()
+{
+#ifndef IFI_BUILD    
+    // only need to prompt in the standalone case, because
+    // when connected to the IFI, the front end may have the input
+    // in a totally different window, which may (or may not) prompt
+    // the user in its own way.
+    putchar('>');
+    putchar(' ');
+    fflush(stdout);
+#endif
+}
 
 int main(int argc, char** argv)
 {
@@ -104,17 +116,12 @@ int main(int argc, char** argv)
 
         // here is one difference. If we want to handle JSON requests
         // as well as regular "commands", there has to be a handler somewhere.
-        handleRequests();
-#else
-
-        // we also only need to prompt in the standalone case, because
-        // when connected to the IFI, the front end may have the input
-        // in a totally different window, which may (or may not) prompt
-        // the user in its own way.
-        putchar('>');
-        putchar(' ');
-        fflush(stdout);
+        ifiHandler.handle(ifi->getRequest());
 #endif
+
+        prompt();
+
+        ++moveCount;
 
         char buf[1024];
         char* s = gets_s(buf, sizeof(buf));

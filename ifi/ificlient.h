@@ -74,6 +74,31 @@ struct IFIClient: public IFI, public Worker
     {
         _emitter = e;
     }
+
+    void emitResponse(const char* json)
+    {
+        _emitter(json);
+    }
+
+    void emitSingleResponse(const char* key, const char* val)
+    {
+        GrowString gs;
+        gs.add('{');
+        JSONWalker::addStringValue(gs, key, val);
+        gs.add('}');
+        gs.add(0);
+        emitResponse(gs.start());
+    }
+
+    void emitSingleResponse(const char* key, const var& val)
+    {
+        GrowString gs;
+        gs.add('{');
+        JSONWalker::addKeyValue(gs, key, val);
+        gs.add('}');
+        gs.add(0);
+        emitResponse(gs.start());        
+    }
     
     virtual bool eval(const char* json) override
     {
@@ -93,14 +118,6 @@ struct IFIClient: public IFI, public Worker
         {
             bool isObject;
             var v = jw.getValue(isObject);
-
-            /*
-            cout << key << ": ";
-            if (v) cout << v;
-            else if (isObject) cout << "{}";
-            else cout << "NULL";
-            cout << endl;
-            */
 
             if (v)
             {
@@ -233,12 +250,7 @@ struct IFIClient: public IFI, public Worker
         assert(_emitter);
         if (_outBuffer.size())
         {
-            GrowString gs;
-            gs.add('{');
-            JSONWalker::addStringValue(gs, IFI_TEXT, _outBuffer.start());
-            gs.add('}');
-            gs.add(0);
-            _emitter(gs.start());
+            emitSingleResponse(IFI_TEXT, _outBuffer.start());
             _outBuffer.clear();
         }
     }

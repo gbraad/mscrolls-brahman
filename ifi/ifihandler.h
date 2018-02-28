@@ -33,73 +33,72 @@
  * 
  *  contact@strandgames.com
  */
- 
 
 #pragma once
 
-#include <iostream>
 #include <string>
-#include <deque>
-#include <mutex>
 #include "jsonwalker.h"
 #include "logged.h"
 #include "ifischema.h"
-#include "ifihandler.h"
 
-struct IFIHandler;
-
-struct IFIHost
+struct IFIHandler
 {
-    typedef std::mutex mutex;
-    
     typedef std::string string;
-    typedef std::deque<char*>  Queue;
-
-    mutex       _queueLock;
-    Queue       _replies;
-    IFIHandler* _handler = 0;
-
-    virtual ~IFIHost() {}
     
-    void emitterHandler(const char* json)
+    void handle(const char* json)
     {
-        // on client thread, queue json
-        //std::lock_guard<mutex> lock(_queueLock);
-        _replies.push_back(strdup(json));
-    }
-
-    void setHandler(IFIHandler* h)
-    {
-        _handler = h;
-    }
-
-    void drainQueue()
-    {
-        //std::unique_lock<mutex> lock(_queueLock, std::defer_lock);
-
-        for (;;)
+        if (!json) return;
+        for (JSONWalker jw(json); jw.nextKey(); jw.next())
         {
-            char* json = 0;
-            
-            //lock.lock();
-            
-            if (!_replies.empty())
+            bool isObject;
+            var v = jw.getValue(isObject);
+
+            if (v)
             {
-                json = _replies.front();
-                _replies.pop_front();
+                ifiKey(jw._key, v);
             }
-
-            //lock.unlock();
-
-            if (!json) break;
-
-            if (_handler)
+            else
             {
-                _handler->handle(json);
+                LOG("Bad IFI ", jw._key);
             }
-
-            delete [] json;
         }
     }
     
+    virtual void ifiKey(const string& key, const var& v)
+    {
+        LOG3("IFI request, ", key << " " << v);
+
+        bool r = false;
+        if (key == IFI_COMMAND) r = ifiCommand(v.toString());
+        else if (key == IFI_CONFIGDIR) r = ifiConfigDir(v.toString());
+        else if (key == IFI_DATADIR) r = ifiDataDir(v.toString());
+        else if (key == IFI_STORY) r = ifiStory(v.toString());
+        else if (key == IFI_TEXT) r = ifiText(v.toString());
+        else if (key == IFI_MOVES)
+        {
+            if (v.isNumber()) r = ifiMovesResponse(v.toInt());
+            else r = ifiMoves(v.toString());
+        }
+
+        if (!r) ifiDefault(key, v);
+    }
+    
+    virtual bool ifiCommand(const string&) { return false; }
+    virtual bool ifiConfigDir(const string&) { return false; }
+    virtual bool ifiDataDir(const string&) { return false; }
+    virtual bool ifiStory(const string&) { return false; }
+    virtual bool ifiText(const string&) { return false; }
+
+    virtual bool ifiMoves(const string&) { return false; } // req
+    virtual bool ifiMovesResponse(int) { return false; }
+
+    virtual void ifiDefault(const string& key, const var& v)
+    {
+        LOG1("IFI unhandled ", key << " " << v);
+    }
+      
+
 };
+
+
+

@@ -84,11 +84,11 @@ struct Opt
         // test option and if so, remove it unless `keep`
         if (!strcmp(*opt, val))
         {
-            ++optAddr; // skip arg
-            
             arg = opt[1];
             if (arg)
             {
+                ++optAddr; // skip arg
+
                 if (!keep)
                 {
                     opt[0] = dummy;
@@ -122,6 +122,48 @@ struct Opt
         }
         *p = 0;
         argc = n;
+    }
+
+    static char** copyArgs(int argc, char** argv, int xtra = 0)
+    {
+        size_t sz = 0;
+        int i;
+        for (i = 0; i < argc; ++i) sz += strlen(argv[i]) + 1;
+
+        char** argv1 = new char*[argc+1+xtra];
+        char* p = new char[sz];
+
+        for (i = 0; i < argc; ++i)
+        {
+            argv1[i] = p;
+            sz = strlen(argv[i]) + 1;
+            memcpy(p, argv[i], sz);
+            p += sz;
+        }
+        argv1[i] = 0;
+        return argv1;
+    }
+
+    static void addArg(int& argc, char** argv, const char* arg)
+    {
+        // ASSUME `argv` is the result of `copyArgs`
+        // ASSUME that `xtra` space is preallocated
+        
+        argv[argc++] = (char*)arg;
+        argv[argc] = 0;
+    }
+    
+    static void addArg(int& argc, char** argv, const char* opt, const char* arg)
+    {
+        addArg(argc, argv, opt);
+        addArg(argc, argv, arg);
+    }
+
+    static void deleteCopyArgs(char** argv)
+    {
+        // ASSUME `argv` is the result of `copyArgs`
+        delete [] argv[0];
+        delete [] argv;
     }
     
 };
