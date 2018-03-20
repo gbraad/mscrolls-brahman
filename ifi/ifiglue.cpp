@@ -89,4 +89,16 @@ int ifi_scanf(const char* f, ...)
    return 0;
 }
 
+const char* ifi_getRequest()
+{
+    // C version 
+    return ifi->getRequest();
+}
+
+void ifi_emitResponse(const char* json)
+{
+    // C version
+    ifi->emitResponse(json);
+}
+
 } // extern C

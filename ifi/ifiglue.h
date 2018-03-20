@@ -34,7 +34,9 @@ extern char* ifi_gets_s(char* s, size_t sz);
 extern char* ifi_fgets(char* s, int n, FILE*);
 extern int ifi_puts(const char*);
 extern int ifi_scanf(const char*,...);
-extern int ifi_main(int, char**); 
+extern int ifi_main(int, char**);
+extern const char* ifi_getRequest();
+extern void ifi_emitResponse(const char* json);
 C_END
 
 // need to move main into the main loop for IFIClient

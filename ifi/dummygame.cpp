@@ -110,6 +110,15 @@ int main(int argc, char** argv)
 {
     // OK, not much of a game :-)
 
+#ifdef IFI_BUILD
+    // handle any initial JSON
+    for (int i = 1; i < argc; ++i)
+    {
+        if (!strcmp(argv[i], "-e") && i < argc-1)
+            ifiHandler.handle(argv[++i]);
+    }
+#endif
+
     for (;;)
     {
 #ifdef IFI_BUILD

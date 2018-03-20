@@ -106,13 +106,18 @@ struct Worker
         _waiter.notify_one();
     }
 
-    bool sync(int timeoutms = 0)
+    int sync(int timeoutms = 0)
     {
         // call from outside to wait for task to block on signal
         // if true, caller MUST call `release`
 
-        //TimeReport syncm("sync");
-        int cc1 = 0, cc2 = 0;
+        // return -1 if cannot sync
+        // return 0 if timeout yield
+        // return 1 if sync ok
+
+        int dt = 20; // 20 millisecond chunks
+        int cc = 0;
+        int ccmax = timeoutms/dt;
         for (;;)
         {
             _waitLock.lock();
@@ -125,18 +130,17 @@ struct Worker
             {
                 _waitLock.unlock();
 
-                if (!_running && !_starting) return false;
-            
-                if (++cc1 >= 25)
+                if (!_running && !_starting) return -1; 
+                if (ccmax && ++cc >= ccmax)
                 {
-                    ++cc2;
-                    //LOG3("_sync, too long ", cc2*500);
-                    cc1 = 0;
+                    LOG3("Worker, timeout ", cc*dt);
+                    return 0;
                 }
-                std::this_thread::sleep_for(std::chrono::milliseconds(20));
+                
+                std::this_thread::sleep_for(std::chrono::milliseconds(dt));
             }
         }
-        return true;
+        return 1;
     }
 
     void release()

@@ -39,6 +39,7 @@
 
 #include <ctype.h>
 #include <string.h>
+#include <assert.h>
 
 struct Opt
 {
@@ -126,6 +127,8 @@ struct Opt
 
     static char** copyArgs(int argc, char** argv, int xtra = 0)
     {
+        // call `deleteCopyArgs` on result
+        
         size_t sz = 0;
         int i;
         for (i = 0; i < argc; ++i) sz += strlen(argv[i]) + 1;
@@ -142,6 +145,19 @@ struct Opt
         }
         argv1[i] = 0;
         return argv1;
+    }
+
+    static char** createArgs(int argc, const char* argv0)
+    {
+        // call `deleteCopyArgs` on result
+        assert(argc >= 1);
+        
+        size_t sz = strlen(argv0) + 1;
+        char** argv = new char*[argc+1];
+        argv[0] = new char[sz];
+        strcpy(argv[0], argv0);
+        argv[1] = 0;
+        return argv;
     }
 
     static void addArg(int& argc, char** argv, const char* arg)

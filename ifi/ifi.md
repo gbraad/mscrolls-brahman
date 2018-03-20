@@ -9,16 +9,16 @@ Specifically, messages in both directions are `json` strings whose schema and te
 ```
 struct IFI
 {
-    typedef std::function<void(const char*)> Emitter;
+    typedef void charEmitFn(void*, const char*);
 
     virtual ~IFI() {}
     static IFI* create();
     
-    virtual void setEmitter(const Emitter&) = 0;
+    virtual void setEmitter(charEmitFn* emitter, void* ctx) = 0;
     virtual bool eval(const char* json) = 0;
     virtual bool start(int argc, char** argv) = 0;
 
-    virtual bool sync(int timeoutms = 500) = 0;
+    virtual int sync(int timeoutms) = 0;
     virtual void release() = 0;
 
 };
@@ -48,6 +48,9 @@ These are the json tags that may appear in a _request_. See the _Replies_ sectio
    
 * `story: "name"`  
    Prefix name of the story. Files `story`.???  will be in `configdir`
+
+* `randomseed:` int64  
+   Send random seed to back-end. This happens at startup and can be ignored. However, if the back-end uses psuedo-random numbers and needs a seed, this can be used.
 
 * `objects: true`  
    Request the game objects map. 
@@ -83,9 +86,6 @@ These are the json tags that may appear in a _request_. See the _Replies_ sectio
    
 * `moves: true`  
    Reply the current game move count (or game time) if `true`. If `false`, unsolicited updates are not needed.
-
-* `values: true`  
-   Reply any game specific key-value pairs for use in extensions and to be incorporated in save games.
 
 ## Replies
 
@@ -139,6 +139,12 @@ Game objects are associated with an _ID_, which is an arbitrary `int`. The front
    Game meta data. This will only be requested once, usually at the start.
 
 * `values: {key:value,...}`
+
+* `prompt: ">"`  
+  Set the prompt to the given string. The new prompt will be used in any UI entry box until subqeuently changed.
+
+* `autolink: true`
+  Switch on or off the _autolinking_ feature of the GUI. This is the process of automatically converting the output text into markdown using the `objects` table.
 
 ### pictureobj
 
@@ -227,9 +233,12 @@ Same meanings as `item`.
 
 * `title: "name"`
 * `author: "name"`
-* `covertext: "text"`
+* `organisation: "name"`
 * `covertext: {text}` 
 * `credits: "by Larry Biggs"`
+
+* `version: "1.2.0"`  
+  The string should contain a number of this format X.Y.Z.
 
 * `android_market: ""`  
    _Optional_. Google Play marketplace link.
@@ -237,25 +246,34 @@ Same meanings as `item`.
 * `ios_market: ""`  
   _Optional_. Apple Store marketplace link.
   
-* `coverimage: "filepath"`  
-   Image to display on game cover, path relative to `configdir`.
+* `backimage: "filename"`  
+   _Optional_. Background Image to display on game cover, path relative to `configdir`.
 
-* `covereffect: "filepath"`  
+* `effect: "filepath"`  
    _Optional_. Filename containing shader to display on cover, path relative to `configdir`.
-   
 
+* `ui_sidebar: true`  
+  _Optional_. enable sidebar.
+
+* `ui_textinput: true`  
+  _Optional_. Enable text input.
+
+* `ui_compass: true`  
+  _Optional_. Enable UI compass.
+   
 ### text
 
-* `text: "string"`
+* `text: "string"`  
+  _Optional_.
 
 * `font: "name"`  
-  _Optional.
+  _Optional_.
   
-* `fontweight: int`  
-  _Optional.
+* `weight: int`  
+  _Optional_.
   
-* `textcol: int`  
-  _Optional.
+* `color: "blue"`  
+  _Optional_.
 
 ## Interface Functions
 
@@ -265,13 +283,18 @@ Called after `setEmitter` but before any `eval`. Tells the back-end to perform s
 
 Arguments passed are from the original invocation (if any).
 
-Additionally, the argument `-e <json>` will be included in order to send the back-end necessary information it needs to start up. In theory, this can be _any_ allowable _request_ json, but in practice it will be limited to the following terms;
+Additionally, the argument `-e <json>` will be included in order to send the back-end necessary information it needs to start up. This can be _any_ allowable _request_ json, and is likely to contain:
 
 * `configdir`
 * `datadir`
 * `story`
+* `randomseed`
 
 See the _requests_ section for description of these terms.
+
+After calling `start`, the host will call `eval` with additional `json` _before_ any `command`. This allows the back-end to perform a secondary startup, before producing output.
+
+For example, the first `eval` may contain a `loaddata` request so that the game can continue from a save.
 
 
 

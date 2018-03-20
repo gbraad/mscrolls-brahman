@@ -111,7 +111,7 @@ Logged::_stream << _msg << _x << std::endl << std::flush;       \
 #define LOGN(_n, _msg, _x) if (Logged::_logLevel >= _n) LOG(_msg, _x)
 #define LOG1(_msg, _x) LOGN(1, _msg, _x)
 
-#if defined(_DEBUG) || defined(LOGGING)
+#if defined(LOGGING)
 
 #define LOG2(_msg, _x) LOGN(2, _msg, _x)
 #define LOG3(_msg, _x) LOGN(3, _msg, _x)

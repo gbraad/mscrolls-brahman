@@ -37,8 +37,6 @@
 
 #pragma once
 
-#include <functional>
-
 #ifdef _WIN32
 #define DLLEXPORT __declspec(dllexport)
 #define DLLIMPORT __declspec(dllimport)
@@ -60,17 +58,21 @@
 
 struct DLL IFI
 {
-    typedef std::function<void(const char*)> Emitter;
+    typedef void charEmitFn(void*, const char*);
 
     virtual ~IFI() {}
 
     static IFI* create();
     
-    virtual void setEmitter(const Emitter&) = 0;
+    virtual void setEmitter(charEmitFn* emitter, void* ctx) = 0;
     virtual bool eval(const char* json) = 0;
     virtual bool start(int argc, char** argv) = 0;
 
-    virtual bool sync(int timeoutms = 500) = 0;
+    // return -1 if cannot sync
+    // return 0 if timeout yield
+    // return 1 if sync ok
+    virtual int sync(int timeoutms = 0) = 0;
+    
     virtual void release() = 0;
 
 };

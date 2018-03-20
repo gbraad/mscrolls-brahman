@@ -60,14 +60,16 @@ struct IFIHost
     IFIHandler* _handler = 0;
 
     virtual ~IFIHost() {}
-    
-    void emitterHandler(const char* json)
-    {
-        // on client thread, queue json
-        //std::lock_guard<mutex> lock(_queueLock);
-        _replies.push_back(strdup(json));
-    }
 
+    static void emitter(void* ctx, const char* json)
+    {
+        IFIHost* host = (IFIHost*)ctx;
+        assert(host);
+
+        std::lock_guard<mutex> lock(host->_queueLock);
+        host->_replies.push_back(strdup(json));
+    }
+    
     void setHandler(IFIHandler* h)
     {
         _handler = h;
@@ -75,13 +77,16 @@ struct IFIHost
 
     void drainQueue()
     {
-        //std::unique_lock<mutex> lock(_queueLock, std::defer_lock);
+        // NB: client thread can still be running when this is called
+        // during a sync timeout
+
+        std::unique_lock<mutex> lock(_queueLock, std::defer_lock);
 
         for (;;)
         {
             char* json = 0;
             
-            //lock.lock();
+            lock.lock();
             
             if (!_replies.empty())
             {
@@ -89,7 +94,7 @@ struct IFIHost
                 _replies.pop_front();
             }
 
-            //lock.unlock();
+            lock.unlock();
 
             if (!json) break;
 
@@ -100,6 +105,22 @@ struct IFIHost
 
             delete [] json;
         }
+    }
+
+    bool sync(IFI* ifi, int timeoutms = 200)
+    {
+        int v;
+
+        do
+        {
+            v = ifi->sync(timeoutms);
+
+            // perform work if sync ok or timeout yield
+            if (v >= 0) drainQueue();
+
+        } while(!v); // try again while timeout
+
+        return v > 0;
     }
     
 };

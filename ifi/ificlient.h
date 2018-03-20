@@ -50,7 +50,8 @@ struct IFIClient: public IFI, public Worker
 {
     typedef std::string string;
     
-    Emitter             _emitter;
+    charEmitFn*         _emitter;
+    void*               _eCtx;
 
     GrowString          _inBuffer;
     bool                _inBufferReady = false;
@@ -64,20 +65,18 @@ struct IFIClient: public IFI, public Worker
     int                 _argc;
     char**              _argv;
 
-    ~IFIClient()
-    {
-        LOG4("~IFIClient", "");
-    }
-
     // Compliance
-    virtual void setEmitter(const Emitter& e) override
+    virtual void setEmitter(charEmitFn* e, void* ctx)
     {
         _emitter = e;
+        _eCtx = ctx;
     }
 
     void emitResponse(const char* json)
     {
-        _emitter(json);
+        assert(_emitter && json && *json);
+        LOG4("response, ", json);
+        (*_emitter)(_eCtx, json);
     }
 
     void emitSingleResponse(const char* key, const char* val)
@@ -103,13 +102,11 @@ struct IFIClient: public IFI, public Worker
     virtual bool eval(const char* json) override
     {
         // on host thread
+        // NB: expect to be in SYNC state
     
         bool r = true;
 
-        LOG3("eval: '", json << "'\n");
-
-        // be sure client is running & not using input buffers
-        if (!sync()) return false;
+        LOG4("eval: '", json << "'\n");
 
         _inBuffer = json;
         _inBufferReady = true;
@@ -130,7 +127,6 @@ struct IFIClient: public IFI, public Worker
         }
 
         signal();
-        release();
         
         return r;
     }
@@ -148,7 +144,7 @@ struct IFIClient: public IFI, public Worker
         return Worker::start();
     }
 
-    virtual bool sync(int timeoutms = 0) override
+    virtual int sync(int timeoutms = 0) override
     {
         return Worker::sync(timeoutms);
     }
@@ -261,22 +257,23 @@ struct IFIClient: public IFI, public Worker
         {
             _outBuffer.unadd();
         }
-        else if (c == '\n' || c <= 0)
+        else
         {
-            // newline, 0 or EOF ?
-            // flushes imply newline, so no need to add it.
+            bool f = c <= 0; // flush
+            if (!f)
+            {
+                f = (c == '\n');
+                _outBuffer.add(c);
+            }
 
-            if (_outBuffer.size())
+            if (f && _outBuffer.size())
             {
                 _outBuffer.add(0);
                 flush();
             }
+            
         }
-        else
-        {
-            _outBuffer.add(c);
-        }
-
+        
         return c;
     }
 

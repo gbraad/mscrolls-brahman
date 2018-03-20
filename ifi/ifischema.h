@@ -53,6 +53,7 @@
 #define IFI_META        "meta"
 #define IFI_MOVES       "moves"
 #define IFI_VALUES      "values"
+#define IFI_RANDOMSEED  "randomseed"
 
 // reply only
 
@@ -61,3 +62,44 @@
 #define IFI_SCORE       "score"
 #define IFI_SCOREMAX    "scoremax"
 #define IFI_EXITS       "exits"
+#define IFI_PROMPT      "prompt"
+#define IFI_NAME        "name"
+#define IFI_BRIGHTNESS  "brightness"
+#define IFI_CONTRAST    "contrast"
+#define IFI_SATURATION  "saturation"
+#define IFI_LIGHTNESS   "lightness"
+#define IFI_GAMMA       "gamma"
+#define IFI_ID          "id"
+#define IFI_WORN        "worn"
+#define IFI_ICON        "icon"
+#define IFI_PLACES      "places"
+#define IFI_BACKIMAGE   "backimage"
+#define IFI_GX          "gx"
+#define IFI_GY          "gy"
+#define IFI_DARK        "dark"
+#define IFI_SHOWUP      "up"
+#define IFI_SHOWDOWN    "down"
+
+// metaobj
+//#define IFI_TITLE       "title"
+#define IFI_AUTHOR      "author"
+#define IFI_ORGANISATION "organisation"
+#define IFI_CREDITS     "credits"
+#define IFI_COVERTEXT   "covertext"
+#define IFI_VERSION     "version"
+#define IFI_ANDROID_MARKET "android_market"
+#define IFI_IOS_MARKET  "ios_market"
+#define IFI_EFFECT      "effect"
+#define IFI_UI_SIDEBAR  "ui_sidebar"
+#define IFI_UI_TEXTINPUT "ui_textinput"
+#define IFI_UI_COMPASS  "ui_compass"
+//#define IFI_BACKIMAGE   "backimage"
+
+// textobj
+//#define IFI_TEXT      "text"
+#define IFI_FONT        "font"
+#define IFI_FONTWEIGHT  "fontweight"
+#define IFI_COLOR       "color"
+
+
+

@@ -46,7 +46,8 @@ struct Handler: public IFIHandler
 {
     bool ifiText(const string& s) override
     {
-        std::cout << s << std::endl;
+        std::cout << s;
+        std::cout.flush();
         return true;
     }
     bool ifiMovesResponse(int moveCount) override
@@ -69,7 +70,7 @@ int main(int argc, char** argv)
 
     const char* configdir = ".";
     const char* datadir = "."; // default;
-    const char* story = 0;
+    const char* story = "story"; // stub default
     
     char** args = argv+1;
     for (char**& ap = args; *ap; ++ap)
@@ -89,20 +90,20 @@ int main(int argc, char** argv)
         return 0;
     }
 
-    // build simple json for startup
-    GrowString js;
-    js.add('{');
-    JSONWalker::addStringValue(js, IFI_CONFIGDIR, configdir);
-    JSONWalker::addStringValue(js, IFI_DATADIR, datadir);
-    JSONWalker::addStringValue(js, IFI_STORY, story);
-    js.add('}');
-    js.add(0);
+    Handler h;
 
+    h.setProp(IFI_CONFIGDIR, configdir);
+    h.setProp(IFI_DATADIR, datadir);
+    h.setProp(IFI_STORY, story);
 
     IFIHost host;
-
-    Handler h;
     host.setHandler(&h);
+
+    // initial json tells back-end various directories & story
+    GrowString js;
+    h.buildJSONStart(js);
+    h.buildInitialJSON();
+    h.buildJSONEnd();
     
     // duplicate existing argc/argv with making space for more args
     // NB: copy must be deleted later
@@ -112,78 +113,64 @@ int main(int argc, char** argv)
     Opt::addArg(argc, argv, "-e", js.start());
 
     // plug the host handler into the client
-    using std::placeholders::_1;
-    ifi->setEmitter(std::bind(&IFIHost::emitterHandler, &host, _1));
+    ifi->setEmitter(&IFIHost::emitter, &host);
     
     // start the back-end
     ifi->start(argc, argv);
 
     // perform initial sync to allow game to start
-    if (ifi->sync())
+    if (host.sync(ifi)) ifi->release();
+    else LOG1("IFIConsole, ", "start sync failed");
+
+    // we guarantee the back-end will receive some prologue json
+    // *before* any commands. This allows the back-end to get ready
+    // after it has been started, but *also* to allow the back-end to
+    // hold off from properly starting until the first eval (if necessary).
+    h.buildJSONStart(js);
+    h.buildPrologueJSON();
+    h.buildJSONEnd();
+
+    if (host.sync(ifi))
     {
-        host.drainQueue();
+        ifi->eval(js.start());
         ifi->release();
+
+        // allow it to process
+        if (host.sync(ifi)) ifi->release();
     }
 
     for (;;)
     {
         std::string cmd;
-        std::cout << "> "; std::cout.flush();
+        std::cout << h.getProp(IFI_PROMPT); std::cout.flush();
         std::getline(std::cin, cmd);
         if (cmd == "quit") break;
 
         if (cmd.empty()) continue; // blank line
 
-        const char* cmdp = cmd.c_str();
-
-        GrowString gs;
-
-        if (*cmdp == '{')
+        GrowString js;
+        h.buildJSONStart(js);
+        if (h.buildCmdJSON(cmd.c_str()))
         {
-            // incorporate some direct json
-            JSONWalker jw(cmdp);
-            for (; jw.nextKey(); jw.next()) jw.skipValue();
-            if (!jw.ok())
-            {
-                LOG1("malformed JSON in input: '", jw << "'\n");
-                continue;
-            }
-            else
-            {
-                //std::cout << "parsed: '" << jw << "'\n";
-                
-                // append { ... but NOT closing "}"
-                gs.append(jw._json, jw._pos - jw._json - 1);
-                jw.skipSpace();
-                cmdp = jw._pos; // any remainder is command
-            }
+            h.buildJSONEnd();
+            
+            if (!host.sync(ifi)) break;
+            ifi->eval(js.start());
+            ifi->release();
+
+            // needed if output is in same window as input
+            if (!host.sync(ifi)) break;        
+            ifi->release();
         }
-        else
-        {
-            gs.add('{');
-        }
-
-
-        if (*cmdp)
-            JSONWalker::addStringValue(gs, IFI_COMMAND, cmdp);
-        
-        gs.add('}');
-        gs.add(0);
-        ifi->eval(gs.start());
-
-        // needed if output is in same window as input
-        if (!ifi->sync()) break;
-
-        host.drainQueue();
-
-        ifi->release();
-
     }
 
     Opt::deleteCopyArgs(argv);
 
-    // release
+    // will stop client thread and release engine
     delete ifi;
+
+    // finish any remaining output
+    host.drainQueue();
 
     LOG3("IFIConsole, ", "finished");
 

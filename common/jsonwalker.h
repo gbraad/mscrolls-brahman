@@ -46,6 +46,9 @@ struct JSONWalker
     const char*         _json;
     const char*         _pos;
 
+    // start of subobject, valid after `getValue`
+    const char*         _obj;
+
     // current key
     string              _key;
     bool                _end;
@@ -199,7 +202,7 @@ struct JSONWalker
             if (c == '"')
             {
                 inquote = !inquote;
-                if (!inquote) break;
+                if (!inquote && _level == level0) break;
             }                        
             else if (!inquote)
             {
@@ -233,7 +236,13 @@ struct JSONWalker
         if (st != _pos && !_error)
         {
             char c = *st;
-            if (c == '{') isObject = true;
+            if (c == '{')
+            {
+                isObject = true;
+
+                // remember the start of the sub-object
+                _obj = st;
+            }
             else if (c == '"')
             {
                 // pos is end quote + 1
@@ -363,14 +372,13 @@ struct JSONWalker
     {
         _toAdd(gs);
         addKey(gs,key);
-        if (v.isString())
-        {
-            encodeString(gs, v.toString().c_str());
-        }
-        else
-        {
-            gs.append(v.toString());
-        }
+        if (v.isString()) encodeString(gs, v.toString().c_str());
+        else gs.append(v.toString());
+    }
+    
+    static void addKeyValue(GrowString& gs, const string& key, const var& v)
+    {
+        addKeyValue(gs, key.c_str(), v);
     }
 
     static void addStringValue(GrowString& gs,
@@ -385,6 +393,21 @@ struct JSONWalker
                                const char* key, const string& v)
     {
         addStringValue(gs, key, v.c_str());
+    }
+
+    static void addKeyObject(GrowString& gs, const char* key, const char* json)
+    {
+        // add a json object as value of `key`
+        // ASSUME `json` is valid!
+
+        _toAdd(gs);
+        addKey(gs, key);
+        gs.append(json);
+    }
+
+    static void addKeyObject(GrowString& gs, const string& key, const char* json)
+    {
+        addKeyObject(gs, key.c_str(), json);
     }
 
 protected:
