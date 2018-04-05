@@ -262,10 +262,10 @@ Same meanings as `item`.
    Current exit locations from this place. This is a list of outgoing location IDs. ie places where this location can lead to, and is **not** a list of directional exits.
 
 * `gx:` int   
-   X grid coordinate. Place locations are set on an integer X-Y grid. Imagine all locations are points on this grid and (currently) are all the same size. The map renderer will automatically figure the scale and relative offsets for the map and its consequent plot coordinates.
+   X grid coordinate. Place locations are set on an integer X-Y grid. Imagine all locations are points on this grid and (currently) are all the same size. The map renderer will automatically figure the scale and relative offsets for the map and its consequent plot coordinates. `X` coordinates are left-right.
    
 * `gy:` int  
-  Y grid coordinate.
+  Y grid coordinate. `Y` coordinates are `top-down` the page and **not** up.
   
 * `dark: true`  
   _Optional_. Map location is _dark_. If set this will draw the map box in a darker shade.
