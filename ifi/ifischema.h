@@ -45,7 +45,6 @@
 
 #define IFI_LOADDATA    "loaddata"
 #define IFI_SAVEDATA    "savedata"
-#define IFI_LOCATION    "location"
 #define IFI_MAP         "map"
 #define IFI_PICTURE     "picture"
 #define IFI_ITEMS       "items"
@@ -79,6 +78,7 @@
 #define IFI_DARK        "dark"
 #define IFI_SHOWUP      "up"
 #define IFI_SHOWDOWN    "down"
+#define IFI_LOCATION    "location"
 
 // metaobj
 //#define IFI_TITLE       "title"
@@ -94,6 +94,9 @@
 #define IFI_UI_TEXTINPUT "ui_textinput"
 #define IFI_UI_COMPASS  "ui_compass"
 //#define IFI_BACKIMAGE   "backimage"
+#define IFI_PRIME_COL   "primary_color"
+#define IFI_CONTRAST_COL "contrast_color"
+#define IFI_AUTOLINK    "autolink"
 
 // textobj
 //#define IFI_TEXT      "text"
@@ -101,5 +104,18 @@
 #define IFI_FONTWEIGHT  "fontweight"
 #define IFI_COLOR       "color"
 
+// masks for directions
+#define IFI_DIR_N       1
+#define IFI_DIR_NE      2
+#define IFI_DIR_E       4
+#define IFI_DIR_SE      8
+#define IFI_DIR_S       16
+#define IFI_DIR_SW      32
+#define IFI_DIR_W       64
+#define IFI_DIR_NW      128
+#define IFI_DIR_UP      256
+#define IFI_DIR_DOWN    512
+#define IFI_DIR_IN      1024
+#define IFI_DIR_OUT     2048
 
 

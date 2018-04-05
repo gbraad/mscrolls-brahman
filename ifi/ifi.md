@@ -1,6 +1,6 @@
 # IFI - Interactive Fiction Interface
 
-_IFI_ is the point of connection between a GUI and an IF _back-end_, _engine_ or _interpreter_ (whatever you prefer to call it).
+_IFI_ is the point of connection between a GUI and an IF _back-end_, _engine_ or _interpreter_, depending on your terminology.
 
 The purpose of _IFI_ is to convey instructions from the GUI to the _back-end_ and to convey elements of the world state from the _back-end_ to the GUI. These conveyances encode information according to an _implementation independent_ schema.
 
@@ -24,7 +24,7 @@ struct IFI
 };
 ```
 
-In practice, an adapter called `IFIClient` is linked with your back-end to make your interpreter IFI compatible. `IFIClient` contains a lot of helper functions (json parsing etc.). There's also a "C" interface (called `ifiglue`) that allows, an otherwise console interpreter, to become an IFIClient simply by redefining stdio function calls (such as `getchar`, `putchar` etc.).
+In practice, an adapter called `IFIClient` is linked with your back-end to make your interpreter IFI compatible. `IFIClient` contains a lot of helper functions. There's also a "C" interface called `ifiglue` that allows, an otherwise console interpreter, to become an IFIClient simply by redefining `stdio` function calls such as `getchar`, `putchar` etc.
 
 ## Requests and Replies
 
@@ -34,7 +34,53 @@ The back-end (`IFIClient`) receives json _requests_ together with game commands.
 
 The back-end can call `IFIClient::getRequest()` to **block** on the next request from the front-end. This will return the next json request. Additionally the back-end can call `IFIClient::getchar()` which will **block** until the next character of game command is returned.
 
-NOTE that the `getRequest` json will contain the `command:`, so that `getchar` is not necessary (but convenient). If `getRequest` is called, a subsequent `getchar` will not block (essentially returning characters of the `command:` already obtained by `getRequest`).
+NOTE that the `getRequest` json will contain any `command`, so that `getchar` is not necessary (but convenient). If `getRequest` is called, a subsequent `getchar` will not block (essentially returning characters of the `command` already obtained by `getRequest`).
+
+## IDs
+
+Game objects are associated with an _ID_. For the purposes of _IFI_ `json`, an _ID_ is to be regarded as a unique term. For the type of _ID_, the `json` may use integer numbers or strings. If numbers are used, the value _zero_ is reserved and should not be associated with an object, if strings are used, an empty string is invalid and should not be used.
+
+The front end makes no assumptions about the meaning of this ID, except that equal IDs mean identical objects. 
+
+## Startup
+
+See _Interface_ section for details, but startup has the following sequence;
+
+* `create`
+* `setEmitter`
+* `start`  
+   Sends essential directories and name of story to back-end. The engine will need this information to open any game story files which will contain information subsequently requested. 
+
+   The back-end will not be expected to reply to the start `json`, but if it chooses to do so, it should not issue any `text`.
+   
+* `eval`  
+   Sending the _request prologue_ to the back-end. This _prologue_ `json` will **not** contain any `command` terms, but will consist of requests for state such as the game `meta` information as well as requests for `map`, `items` etc. It also provides a random number.
+
+   Example prologue:
+   ```
+   {"meta":true,"objects":true,"map":true,"picture":true,"items":true,"people":true,"moves":true,"randomseed":2394829048}'
+   ```
+
+   Note, that when automatically continuing a previous game, this _prologue_ `json` may contain `loaddata` which will send a complete game state to the back-end. Consequently, the back-end should not have issued any `text` until this point.
+
+   The back-end should reply with responses to the prologue requests such as game `meta` details, colour theme, `objects` map and anything else it wishes to send including the game initial (or restored) `text`.
+
+   Example prologue `meta` reply:
+  ```
+  {"meta":{"author":"by John Doe","backimage":"assets/cover.jpg","covertext":{"color":"blue","font":"Kanit Thin","weight":100},"credits":"<h1>The Guild2<br/><em>by Strand Games</em></h1><h4>Thanks to</h4><ul><li><p>Contributors to the <a href=\\\"https://strandgames.com/community\\\">Strand forum</a>.</p></li></ul>","organisation":"Strand Games","primary_color":"red","title":"KLIF","ui_compass":1,"ui_sidebar":1,"ui_textinput":1,"version":"1.0"}}
+  ```
+
+  Example `objects` map reply:  
+  `{"objects":[{"id":1,"name":"Cute Dog"},{"id":2,"name":"Top Hat"}]}`
+
+  Example sidebar `items` reply:  
+  `{"items":[{"id":1,"name":"Cute Dog, Wagging tail"},{"id":2,"worn":1}]}`
+
+  Note that the `name` can be omitted in an `items` reply if the display label is to be the same as the `objects` map entry.
+
+* `eval`  
+  Subsequent evals may contain any IFI request terms, including `command`. It is not essential that the back-end respond to these requests immediately and it is not an error for no `text` to be issued in response. 
+
 
 ## Requests
 
@@ -66,9 +112,6 @@ These are the json tags that may appear in a _request_. See the _Replies_ sectio
 * `savedata: true`  
    Request entire game state.
 
-* `location: true`  
-   Return `location` reply if `true`. If `false`, unsolicited updates are not needed.
-   
 * `map: true`  
    Return `map` data reply if `true`. If `false`, unsolicited updates are not needed.
    
@@ -91,7 +134,6 @@ These are the json tags that may appear in a _request_. See the _Replies_ sectio
 
 The _reply_ json, sent from the back-end to the front-end, can have these terms at the top level. Some of the terms have values that are (optionally) json objects. In these cases, consult the subsequent json object definitions.
 
-Game objects are associated with an _ID_, which is an arbitrary `int`. The front end makes no assumptions about the meaning of this ID, except that equal IDs mean identical objects.
 
 * `text: "You are in a maze of twisty passages all alike."`  
    Block of text from the game to be formatted and shown in the transcript window. A newline will be added to the end when displayed. The `text` may contain a subset of [Markdown](https://daringfireball.net/projects/markdown/) and HTML.
@@ -143,8 +185,6 @@ Game objects are associated with an _ID_, which is an arbitrary `int`. The front
 * `prompt: ">"`  
   Set the prompt to the given string. The new prompt will be used in any UI entry box until subqeuently changed.
 
-* `autolink: true`
-  Switch on or off the _autolinking_ feature of the GUI. This is the process of automatically converting the output text into markdown using the `objects` table.
 
 ### pictureobj
 
@@ -168,22 +208,29 @@ Game objects are associated with an _ID_, which is an arbitrary `int`. The front
 
 ### object
 
-* `id:` ID
+* `id:` ID  
+   The object _ID_ (eg a symbolic string).
+
 * `name: "game name"`  
    The _game name_ is a string that the game parser will accept to identify the object. For example, if there are several _keys_ in the game "key" is insufficient, the _game name_ must therefore be "small key", "brass key" etc. as appropriate.
+
+* `icon: "filepath"`  
+  _Optional_. Name of the default icon file (eg .svg) for this object.
 
 ### item 
 
 * `id:` ID
 
 * `name: "label"`  
-  The text displayed for the item (usually in the sidebar). This can be a _friendly_ name rather than a name that will parse. For example, "A small dog asleep", or "Dr. Livingstone (you presume)". This name can change, whereas the ID _game name_ cannot.
+  _Optional_. The text displayed for the item (usually in the sidebar). This can be a _friendly_ name rather than a name that will parse. For example, "A small dog asleep", or "Dr. Livingstone (you presume)". This name can change, whereas the ID _game name_ cannot.
+
+  If omitted, the label is taken from the objects table, looking up the ID.
   
 * `worn:` bool  
   _Optional_. If provided, the GUI will indicate the item is worn (usually in the sidebar).
   
 * `icon: "filepath"`  
-  _Optional_. Icon to display in sidebar for item. This is usually a `.SVG` file. If a filepath is given, it is assumed relative to `configdir`. Alternatively, a resource name can be given.
+  _Optional_. Icon to display in sidebar for item. This is usually a `.SVG` file. 
 
 ### person
 
@@ -197,9 +244,12 @@ Same meanings as `item`.
 
 * `places: [{place}...]`  
    Array of known places.
+
+* `location:` ID    
+   _Optional_. ID of current location.
    
 * `backimage: "filepath"`  
-  _Optional_. background image for map page, relative to `configdir`.
+  _Optional_. background image for map page.
 
 ### place
 
@@ -211,7 +261,7 @@ Same meanings as `item`.
 * `exits: [ID...]`  
    Current exit locations from this place.
 
-* `gx:` int 
+* `gx:` int   
    X grid coordinate. Place locations are set on an integer X-Y grid. Imagine all locations are points on this grid and (currently) are all the same size. The map renderer will automatically figure the scale and relative offsets for the map and its consequent plot coordinates.
    
 * `gy:` int  
@@ -246,20 +296,29 @@ Same meanings as `item`.
 * `ios_market: ""`  
   _Optional_. Apple Store marketplace link.
   
-* `backimage: "filename"`  
+* `backimage: "filepath"`  
    _Optional_. Background Image to display on game cover, path relative to `configdir`.
 
 * `effect: "filepath"`  
-   _Optional_. Filename containing shader to display on cover, path relative to `configdir`.
+   _Optional_. Filename containing shader to display on cover page.
 
 * `ui_sidebar: true`  
-  _Optional_. enable sidebar.
+  _Optional_. enable sidebar. Default is false.
 
 * `ui_textinput: true`  
-  _Optional_. Enable text input.
+  _Optional_. Enable text input. Default is false.
 
 * `ui_compass: true`  
-  _Optional_. Enable UI compass.
+  _Optional_. Enable UI compass. Default is false.
+
+* `primary_color: "deep orange"`  
+  _Optional_. Set theme primary colour from Material Design palette.
+
+* `contrast_color: "indigo"`  
+  _Optional_. Set theme contrasting colour from Material Design palette.
+
+* `autolink: true`
+  Switch on or off the _autolinking_ feature of the GUI. This is the process of automatically converting the output text into markdown using the `objects` table.
    
 ### text
 
@@ -277,32 +336,41 @@ Same meanings as `item`.
 
 ## Interface Functions
 
-### bool start(int argc, char** argv)
+#### `IFI* create()`
+
+Is the first function to be called. Note this is not an interface function, but statically linked. The `create` function pulls in linkage to `ifigame.dll` and creates the `IFIClient` internal to the back-end.
+
+#### `void setEmitter(charEmitFn* emitter, void* ctx)`
+
+This will be called shortly after `create`, but _before_ anything else. `setEmitter` is passed a callback function to that the back-end can send JSON.
+
+#### `bool start(int argc, char** argv)`
 
 Called after `setEmitter` but before any `eval`. Tells the back-end to perform startup and initialisation. When linked through `ifiglue`, `start` will wind up calling into the original console `main`.
 
 Arguments passed are from the original invocation (if any).
 
-Additionally, the argument `-e <json>` will be included in order to send the back-end necessary information it needs to start up. This can be _any_ allowable _request_ json, and is likely to contain:
+Additionally, the argument `-e <json>` will be included in order to send the back-end necessary information it needs to start up. This is limited to the following terms:
 
 * `configdir`
 * `datadir`
 * `story`
-* `randomseed`
 
 See the _requests_ section for description of these terms.
 
-After calling `start`, the host will call `eval` with additional `json` _before_ any `command`. This allows the back-end to perform a secondary startup, before producing output.
+After calling `start`, the host will call `eval` with additional `json` _before_ any `command`. This is known as the request _prologue_ and  allows the back-end to perform a secondary startup, before producing output.
 
-For example, the first `eval` may contain a `loaddata` request so that the game can continue from a save.
+For example, the request prologue may contain a `loaddata` request so that the game can continue from a save.
 
+#### `bool eval(const char* json)`
 
+Send request `json` to back-end.
 
-### sync
+#### `int sync(int timeoutms)`
 
-Wait `timeoutms` for engine to stop. return `true` is engine stopped, in which case engine is now waiting for `release`. Return `false` if timeout reached and engine not ready.
+Wait `timeoutms` for engine to block. return `true` if engine sucesfully blocked, in which case engine is now waiting for `release`. Return `false` if timeout reached and engine not ready.
 
-### release
+#### `void release()`
 
 Release back-end to execution after `sync`.
 

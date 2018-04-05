@@ -63,6 +63,7 @@ struct SBuf
     // Destructor
     ~SBuf() { _purge(); }
 
+    // NB: can return null
     operator const      char*() const { return _buf; }
     size_t              size() const { return _pos; }
     char                last() const { return _buf[_pos-1]; }

@@ -38,6 +38,7 @@
 #include <ctype.h>
 #include "var.h"
 #include "growbuf.h"
+#include "logged.h"
 
 struct JSONWalker
 {
@@ -53,8 +54,10 @@ struct JSONWalker
     string              _key;
     bool                _end;
     bool                _error;
-    int                 _level = 0;
+    int                 _level;
+    int                 _blevel;
 
+    JSONWalker() {}
     JSONWalker(const char* json) { _json = json; begin(); }
     JSONWalker(const string& j) { _json = j.c_str(); begin(); }
 
@@ -77,13 +80,19 @@ struct JSONWalker
         if (c) --_pos;
     }
 
-    void begin()
+    void _init()
     {
+        _level = 0;
+        _blevel = 0;
         _end = false;
         _error = false;
         _pos = _json;
-
         skipSpace();
+    }
+
+    void begin()
+    {
+        _init();
         char c = _get();
         if (c != '{')
         {
@@ -98,6 +107,32 @@ struct JSONWalker
             {
                 // empty json {}
                 --_level;
+                _end = true;
+            }
+            else
+            {
+                _unget(c);
+            }
+        }
+    }
+
+    void beginArray()
+    {
+        _init();
+        char c = _get();
+        if (c != '[')
+        {
+            _error = true;
+        }
+        else
+        {
+            ++_blevel;
+            skipSpace();
+            c = _get();
+            if (c == ']')  
+            {
+                // empty array []
+                --_blevel;
                 _end = true;
             }
             else
@@ -178,12 +213,17 @@ struct JSONWalker
 
     void skipValue()
     {
+        // skips over one json value, which can be a whole {object} or
+        // a whole [array]
         // leaves pos next char after that which ended value
+        
         int level0 = _level;
+        int blevel0 = _blevel;
         bool inquote = false;
         bool esc = false;
         char c;
-        for (;;)
+        
+        while (!_error)
         {
             c = _get();
             if (!c) break;
@@ -210,15 +250,39 @@ struct JSONWalker
                 else if (c == '}')
                 {
                     --_level;
-                    if (_level == level0) break;
-                    else if (_level < level0)
+
+                    if (_level < level0)
                     {
                         // must have ended
                         _end = true;
+
+                        // [] should be level
+                        if (_blevel != blevel0) _error = true;
                         break;
                     }
+
+                    if (_level == level0 && _blevel == blevel0) break;
                 }
-                else if (c == ',' && _level == level0) break;
+                else if (c == '[')
+                {
+                    ++_blevel;
+                }
+                else if (c == ']')
+                {
+                    --_blevel;
+                    if (_blevel < blevel0)
+                    {
+                        // ended or error
+                        _end = true;
+                        if (_level != level0) _error = true;
+                        break;
+                    }
+                    
+                    if (_level == level0 && _blevel == blevel0) break;
+
+                }
+                else if (c == ',' &&
+                         _level == level0 && _blevel == blevel0) break;
             }
         }
     }
@@ -233,14 +297,26 @@ struct JSONWalker
         const char* st = _pos;
         skipValue();
 
-        if (st != _pos && !_error)
+        if (_error)
         {
+            LOG1("Bad JSON at ", st);
+        }
+        else if (st != _pos)
+        {
+            //string v(st, _pos - st);
+            //LOG3("VALUE '", v << '\'');
+            
             char c = *st;
             if (c == '{')
             {
                 isObject = true;
 
                 // remember the start of the sub-object
+                _obj = st;
+            }
+            else if (c == '[')
+            {
+                isObject = true;
                 _obj = st;
             }
             else if (c == '"')
@@ -256,12 +332,12 @@ struct JSONWalker
             }
             else if (_pos - st == 5 && !strncmp(st, "true", 4)) // "true" + 1
             {
-                // convert true and false to strings
-                r = var("true");
+                // convert true and false to int
+                r = var(1);
             }
             else if (_pos - st == 6 && !strncmp(st, "false", 5))
             {
-                r = var("false");
+                r = var(0);
             }
             else
             {
@@ -293,7 +369,15 @@ struct JSONWalker
             {
                 // must be final }
                 _end = true;
-                if (--_level != 0) _error = true;
+                --_level;
+                if (_level || _blevel) _error = true;
+            }
+            else if (c == ']')
+            {
+                // final ] of array
+                _end = true;
+                --_blevel;
+                if (_level || _blevel) _error = true;
             }
             else if (c != ',')
             {
@@ -368,12 +452,25 @@ struct JSONWalker
         gs.add(':');
     }
 
+    static void addValue(GrowString& gs, const var& v)
+    {
+        if (v)
+        {
+            toAdd(gs);
+            if (v.isString()) encodeString(gs, v.toString().c_str());
+            else gs.append(v.toString());        
+        }
+    }
+
     static void addKeyValue(GrowString& gs, const char* key, const var& v)
     {
-        _toAdd(gs);
-        addKey(gs,key);
-        if (v.isString()) encodeString(gs, v.toString().c_str());
-        else gs.append(v.toString());
+        if (v)
+        {
+            toAdd(gs);
+            addKey(gs,key);
+            if (v.isString()) encodeString(gs, v.toString().c_str());
+            else gs.append(v.toString());
+        }
     }
     
     static void addKeyValue(GrowString& gs, const string& key, const var& v)
@@ -384,7 +481,7 @@ struct JSONWalker
     static void addStringValue(GrowString& gs,
                                const char* key, const char* v)
     {
-        _toAdd(gs);
+        toAdd(gs);
         addKey(gs,key);
         encodeString(gs, v);
     }
@@ -395,12 +492,19 @@ struct JSONWalker
         addStringValue(gs, key, v.c_str());
     }
 
+    static void addBoolValue(GrowString& gs, const char* key, bool v)
+    {
+        toAdd(gs);
+        addKey(gs,key);
+        gs.append(v ? "true" : "false");
+    }
+
     static void addKeyObject(GrowString& gs, const char* key, const char* json)
     {
         // add a json object as value of `key`
         // ASSUME `json` is valid!
 
-        _toAdd(gs);
+        toAdd(gs);
         addKey(gs, key);
         gs.append(json);
     }
@@ -410,12 +514,12 @@ struct JSONWalker
         addKeyObject(gs, key.c_str(), json);
     }
 
-protected:
     
-    static void _toAdd(GrowString& gs)
+    static void toAdd(GrowString& gs)
     {
         char c = gs.last();
-        if (c && c != ',' && c != '{') gs.add(',');
+        if (c && c != ',' && c != '{' && c != '[') gs.add(',');
     }
+
 
 };

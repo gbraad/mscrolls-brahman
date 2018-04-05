@@ -79,6 +79,12 @@ struct IFIHandler
             bool isObject;
             var v = jw.getValue(isObject);
 
+            if (jw._error)
+            {
+                LOG1("IFI, bad json ", json);
+                return;
+            }
+
             string p = extendPrefix(prefix, jw._key);
             
             if (v)
@@ -88,20 +94,45 @@ struct IFIHandler
             }
             else if (isObject)
             {
-                // `obj` is start of object, ie "{
-                // `pos` is end of object + 1, ie one past "}"
-                assert(jw._obj && *jw._obj == '{' && jw._pos[-1] == '}');
-
                 bool r = false;
                 
-                if (p == IFI_META)
+                // `obj` is start of object, ie "{
+                // `pos` is end of object + 1, ie one past "}"
+
+                if (*jw._obj == '{')
                 {
+                    assert(jw._pos[-1] == '}');
                     string subjs(jw._obj, jw._pos - jw._obj);
-                    r = ifiMetaResponse(subjs);
+                    //LOG3("IFI subjs ", subjs);
+
+                    if (p == IFI_META)
+                    {
+                        r = ifiMetaResponse(subjs);
+                    }
+                    else if (p == IFI_MAP)
+                    {
+                        r = ifiMapResponse(subjs);
+                    }
+                    
+                    if (!r)
+                        handleAux(jw._obj, p);
                 }
-                
-                if (!r)
-                    handleAux(jw._obj, p);
+                else 
+                {
+                    // array
+                    assert(jw._obj[0] == '[' && jw._pos[-1] == ']');
+                    
+                    string jlist(jw._obj, jw._pos - jw._obj);
+                        
+                    if (p == IFI_OBJECTS)
+                        r = ifiObjectsResponse(jlist);
+                    else if (p == IFI_ITEMS)
+                        r = ifiItemsResponse(jlist);
+                    else if (p == IFI_MAP "/" IFI_PLACES)
+                    {
+                        r = ifiMapPlacesResponse(jlist);
+                    }
+                }
             }
             else
             {
@@ -140,18 +171,25 @@ struct IFIHandler
         else if (key == IFI_TEXT) r = ifiText(v.toString());
         else if (key == IFI_MOVES)
         {
-            if (v.isNumber()) r = ifiMovesResponse(v.toInt());
-            else r = ifiMoves(v.toString());
+            int n;
+            if (v.isNumber()) n = v.toInt();
+            else n = isTrue(v) ? 1 : 0;
+            r = ifiMoves(n);
         }
         else if (key == IFI_PROMPT) r = ifiPromptResponse(v.toString());
         else if (key == IFI_RANDOMSEED) r = ifiRandomSeed(v.toInt());
-        else if (key == IFI_LOCATION) // requester
-            r = ifiLocation(isTrue(v));
         else if (key == IFI_MAP) // requester
             r = ifiMap(isTrue(v));
         else if (key == IFI_META)
             r = ifiMeta(isTrue(v)); // requester
-
+        else if (key == IFI_LOCATION || key == IFI_MAP "/" IFI_LOCATION)
+        {
+            r = ifiLocationResponse(v.toString());
+        }
+        else if (key == IFI_EXITS && v.isNumber())
+        {
+            r = ifiExitsResponse(v.toInt());
+        }
 
         if (!r) ifiDefault(key, v);
     }
@@ -161,17 +199,22 @@ struct IFIHandler
     virtual bool ifiDataDir(const string&) { return false; }
     virtual bool ifiStory(const string&) { return false; }
     virtual bool ifiText(const string&) { return false; }
+    virtual bool ifiLocationResponse(const string& id) { return false; }
+    virtual bool ifiExitsResponse(int mask) { return false; }
 
-    virtual bool ifiMoves(const string&) { return false; } // req
-    virtual bool ifiMovesResponse(int) { return false; }
+    // request & response
+    virtual bool ifiMoves(int n) { return false; } 
 
     // these return true since they're optional
     virtual bool ifiPromptResponse(const string& p) { return true; }
     virtual bool ifiRandomSeed(int64) { return true; }
-    virtual bool ifiLocation(bool) { return true; }
     virtual bool ifiMap(bool) { return true; }
     virtual bool ifiMeta(bool) { return true; }
     virtual bool ifiMetaResponse(const string& js) { return false; }
+    virtual bool ifiObjectsResponse(const string& js) { return false; }
+    virtual bool ifiItemsResponse(const string& js) { return false; }
+    virtual bool ifiMapResponse(const string& js) { return false; }
+    virtual bool ifiMapPlacesResponse(const string& js) { return false; }
 
     virtual void ifiDefault(const string& key, const var& v)
     {
@@ -203,7 +246,6 @@ struct IFIHandler
         JSONWalker::addKeyValue(*_js, IFI_CONFIGDIR, getProp(IFI_CONFIGDIR));
         JSONWalker::addKeyValue(*_js, IFI_DATADIR, getProp(IFI_DATADIR));
         JSONWalker::addKeyValue(*_js, IFI_STORY, getProp(IFI_STORY));
-        JSONWalker::addKeyValue(*_js, IFI_RANDOMSEED, var(0));
     }
 
     void buildPrologueJSON()
@@ -211,28 +253,29 @@ struct IFIHandler
         assert(_js);
         
         // request meta data
-        JSONWalker::addStringValue(*_js, IFI_META, "true");
+        JSONWalker::addBoolValue(*_js, IFI_META, true);
 
         // request object map
-        JSONWalker::addStringValue(*_js, IFI_OBJECTS, "true");
-
-        // signal we want location updates
-        JSONWalker::addStringValue(*_js, IFI_LOCATION, "true");
+        JSONWalker::addBoolValue(*_js, IFI_OBJECTS, true);
 
         // signal we want map updates
-        JSONWalker::addStringValue(*_js, IFI_MAP, "true");
+        JSONWalker::addBoolValue(*_js, IFI_MAP, true);
 
         // signal we want pictures updates
-        JSONWalker::addStringValue(*_js, IFI_PICTURE, "true");
+        JSONWalker::addBoolValue(*_js, IFI_PICTURE, true);
 
         // signal we want items updates
-        JSONWalker::addStringValue(*_js, IFI_ITEMS, "true");
+        JSONWalker::addBoolValue(*_js, IFI_ITEMS, true);
 
         // signal we want people updates
-        JSONWalker::addStringValue(*_js, IFI_PEOPLE, "true");
+        JSONWalker::addBoolValue(*_js, IFI_PEOPLE, true);
 
         // signal we want move count updates
-        JSONWalker::addStringValue(*_js, IFI_MOVES, "true");
+        JSONWalker::addBoolValue(*_js, IFI_MOVES, true);
+
+        // include random number
+        JSONWalker::addKeyValue(*_js, IFI_RANDOMSEED, var(0));
+
     }
 
     GrowString& buildJSONEnd()
@@ -251,6 +294,7 @@ struct IFIHandler
         if (v) JSONWalker::addKeyValue(js, key, v);
     }
 
+#if 0
     bool metaReplyObj(GrowString& js)
     {
         string prefix = IFI_META;
@@ -286,6 +330,7 @@ struct IFIHandler
         }
         return r;
     }
+#endif
 
     bool buildCmdJSON(const char* cmdp)
     {

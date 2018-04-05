@@ -105,6 +105,44 @@ static inline char* u_strchr(const char* s, int c)
     return 0;
 }
 
+static inline char* u_strcpyn(char* dst, const char* src, size_t n)
+{
+    // strncpy variant that copyies at most `n` chars
+    char* p = dst;
+    while (n)
+    {
+        --n;
+        if ((*p = *src) == 0) break;
+        ++p;
+        ++src;
+    }
+    return dst;    
+}
+
+static inline size_t u_strlenz(const char* s)
+{
+    // strlen that copes also with null
+    size_t sz = 0;
+    if (s)
+        while (*s++) ++sz;
+    return sz;
+}
+
+static inline int u_strcmpz(const char * s1, const char * s2)
+{
+    // strcmp that handles null
+    if (s1 == s2) return 0;
+    if (!s1) return -1;
+    if (!s2) return 1;
+    
+    for(; *s1 == *s2; ++s1, ++s2)
+        if(*s1 == 0)
+            return 0;
+    return *(const unsigned char*)s1 - *(const unsigned char*)s2;
+}
+
+
+
 #ifdef __cplusplus
 
 inline void u_strdub(char*& dst, const char* src)

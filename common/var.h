@@ -496,7 +496,7 @@ struct var
             break;
         case var_int:
             {
-                double v(a1._i);
+                double v = (double)a1._i;
                 if (b1._type == var_double) v /= b1._d;
                 else if (b1._type == var_int) v /= b1._i;
 

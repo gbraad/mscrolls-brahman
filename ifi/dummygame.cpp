@@ -61,9 +61,9 @@ static int moveCount;
 struct Handler: public IFIHandler
 {
     bool ifiCommand(const string&) override { return true; }
-    bool ifiMoves(const string& s) override
+    bool ifiMoves(int n) override
     {
-        if (s == "true")
+        if (n)
         {
             ifi->emitSingleResponse(IFI_MOVES, var(moveCount));
         }
@@ -135,8 +135,10 @@ int main(int argc, char** argv)
         char buf[1024];
         char* s = gets_s(buf, sizeof(buf));
         if (!s || !strcmp(s, "q")) break;
-
-        printf("You said, \"%s\".\n", s);
+        if (*s)
+        {
+            printf("You said, \"%s\".\n", s);
+        }
     }
 
     return 0;

@@ -50,7 +50,7 @@ struct Handler: public IFIHandler
         std::cout.flush();
         return true;
     }
-    bool ifiMovesResponse(int moveCount) override
+    bool ifiMoves(int moveCount) override
     {
         std::cout << "current move count " << moveCount << std::endl;
         return true;
