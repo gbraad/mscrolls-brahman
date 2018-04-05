@@ -259,7 +259,7 @@ Same meanings as `item`.
   Text to be displayed in map location box.
   
 * `exits: [ID...]`  
-   Current exit locations from this place.
+   Current exit locations from this place. This is a list of outgoing location IDs. ie places where this location can lead to, and is **not** a list of directional exits.
 
 * `gx:` int   
    X grid coordinate. Place locations are set on an integer X-Y grid. Imagine all locations are points on this grid and (currently) are all the same size. The map renderer will automatically figure the scale and relative offsets for the map and its consequent plot coordinates.
