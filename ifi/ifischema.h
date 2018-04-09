@@ -58,8 +58,6 @@
 
 #define IFI_TEXT        "text"
 #define IFI_TITLE       "title"
-#define IFI_SCORE       "score"
-#define IFI_SCOREMAX    "scoremax"
 #define IFI_EXITS       "exits"
 #define IFI_PROMPT      "prompt"
 #define IFI_NAME        "name"

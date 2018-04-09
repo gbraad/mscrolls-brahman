@@ -150,12 +150,6 @@ The _reply_ json, sent from the back-end to the front-end, can have these terms 
 * `objects: [{object}...]`  
    The objects in the game. This is primarily the _invariant_ mapping between ID and game name.
 
-* `score:` int  
-   Current game store (this may be displayed on the title bar).
-   
-* `scoremax:` int  
-   _Optional_. Max game score. When provided we can either display score/maxscore or score%, otherwise just the score is given.
-
 *  `savedata: "game-state"`  
    The entire game state encoded as a string (eg base64) that can later be accommodated by a `loaddata` request to completely restore a position (see also request `loaddata`).
 

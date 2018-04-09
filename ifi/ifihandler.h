@@ -192,6 +192,10 @@ struct IFIHandler
             r = ifiLocationResponse(v.toString());
         }
         else if (key == IFI_EXITS) r = ifiExitsResponse(v.toInt());
+        else if (key == IFI_TITLE) // top-level
+        {
+            r = ifiTitleTextResponse(v.toString());
+        }
 
         if (!r) ifiDefault(key, v);
     }
@@ -203,6 +207,7 @@ struct IFIHandler
     virtual bool ifiText(const string&) { return false; }
     virtual bool ifiLocationResponse(const string& id) { return false; }
     virtual bool ifiExitsResponse(int mask) { return false; }
+    virtual bool ifiTitleTextResponse(const string&) { return false; }
 
     // request & response
     virtual bool ifiMoves(int n) { return false; } 
@@ -274,7 +279,7 @@ struct IFIHandler
         JSONWalker::addBoolValue(*_js, IFI_PEOPLE, true);
 
         // signal we want move count updates
-        JSONWalker::addBoolValue(*_js, IFI_MOVES, true);
+        //JSONWalker::addBoolValue(*_js, IFI_MOVES, true);
 
         // include random number
         JSONWalker::addKeyValue(*_js, IFI_RANDOMSEED, var(0));
@@ -296,44 +301,6 @@ struct IFIHandler
         var v = getProp(prefix, key);
         if (v) JSONWalker::addKeyValue(js, key, v);
     }
-
-#if 0
-    bool metaReplyObj(GrowString& js)
-    {
-        string prefix = IFI_META;
-        var v;
-        
-        js.add('{');
-        addKeyProp(js, prefix, IFI_TITLE);
-        addKeyProp(js, prefix, IFI_AUTHOR);
-        addKeyProp(js, prefix, IFI_COVERTEXT);
-        addKeyProp(js, prefix, IFI_CREDITS);
-        addKeyProp(js, prefix, IFI_VERSION);
-        addKeyProp(js, prefix, IFI_ANDROID_MARKET);
-        addKeyProp(js, prefix, IFI_IOS_MARKET);
-        addKeyProp(js, prefix, IFI_BACKIMAGE);
-        addKeyProp(js, prefix, IFI_EFFECT);
-        js.add('}');
-        js.add(0);
-
-        // did we add anything?
-        return js.size() > 3;
-    }
-    
-    bool metaReplyJSON(GrowString& js)
-    {
-        GrowString js1;
-        bool r = metaReplyObj(js1);
-        if (r)
-        {            
-            js.add('{');
-            JSONWalker::addKeyObject(js, IFI_META, js1.start());
-            js.add('}');
-            js.add(0);
-        }
-        return r;
-    }
-#endif
 
     bool buildCmdJSON(const char* cmdp)
     {
