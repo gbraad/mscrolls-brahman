@@ -54,6 +54,8 @@ struct IFIHandler
     IFIHandler()
     {
         setProp(IFI_PROMPT, "> ");
+        setProp(IFI_UNUSE, IFI_UNUSE_DEFAULT);
+        setProp(IFI_USEWITH, IFI_USEWITH_DEFAULT);
     }
 
     static string extendPrefix(const string& prefix, const char* key)
@@ -77,22 +79,27 @@ struct IFIHandler
         for (JSONWalker jw(json); jw.nextKey(); jw.next())
         {
             bool isObject;
-            var v = jw.getValue(isObject);
+            const char* st = jw.checkValue(isObject);
 
-            if (jw._error)
-            {
-                LOG1("IFI, bad json ", json);
-                return;
-            }
+            if (!st) break; // bad json
 
             string p = extendPrefix(prefix, jw._key);
-            
-            if (v)
+
+            if (!isObject)
             {
-                if (p != IFI_TEXT) setProp(p, v);
-                ifiKey(p, v);
+                var v = jw.collectValue(st);
+                
+                if (v)
+                {
+                    if (p != IFI_TEXT) setProp(p, v);
+                    ifiKey(p, v);
+                }
+                else
+                {
+                    LOG("Bad IFI ", jw._key);
+                }
             }
-            else if (isObject)
+            else // object
             {
                 bool r = false;
                 
@@ -128,15 +135,13 @@ struct IFIHandler
                         r = ifiObjectsResponse(jlist);
                     else if (p == IFI_ITEMS)
                         r = ifiItemsResponse(jlist);
+                    else if (p == IFI_PEOPLE)
+                        r = ifiPeopleResponse(jlist);
                     else if (p == IFI_MAP "/" IFI_PLACES)
                     {
                         r = ifiMapPlacesResponse(jlist);
                     }
                 }
-            }
-            else
-            {
-                LOG("Bad IFI ", jw._key);
             }
         }
     }
@@ -186,10 +191,7 @@ struct IFIHandler
         {
             r = ifiLocationResponse(v.toString());
         }
-        else if (key == IFI_EXITS && v.isNumber())
-        {
-            r = ifiExitsResponse(v.toInt());
-        }
+        else if (key == IFI_EXITS) r = ifiExitsResponse(v.toInt());
 
         if (!r) ifiDefault(key, v);
     }
@@ -213,6 +215,7 @@ struct IFIHandler
     virtual bool ifiMetaResponse(const string& js) { return false; }
     virtual bool ifiObjectsResponse(const string& js) { return false; }
     virtual bool ifiItemsResponse(const string& js) { return false; }
+    virtual bool ifiPeopleResponse(const string& js) { return false; }
     virtual bool ifiMapResponse(const string& js) { return false; }
     virtual bool ifiMapPlacesResponse(const string& js) { return false; }
 

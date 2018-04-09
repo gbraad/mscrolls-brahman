@@ -167,6 +167,10 @@ struct JSONWalker
     bool nextKey()
     {
         _key = _getKey();
+        if (_error)
+        {
+            LOG2("Json error ", _json << " at " << _pos);
+        }
         return !_key.empty();
     }
 
@@ -242,6 +246,8 @@ struct JSONWalker
             if (c == '"')
             {
                 inquote = !inquote;
+
+                // pos at endquote + 1
                 if (!inquote && _level == level0) break;
             }                        
             else if (!inquote)
@@ -281,31 +287,31 @@ struct JSONWalker
                     if (_level == level0 && _blevel == blevel0) break;
 
                 }
-                else if (c == ',' &&
-                         _level == level0 && _blevel == blevel0) break;
+                else
+                {
+                    // can leave post at comma + 1
+                    if (c == ',' &&
+                        _level == level0 && _blevel == blevel0) break;
+                }
             }
         }
     }
 
-    var getValue(bool& isObject)
+    const char* checkValue(bool& isObject)
     {
-        // does not get objects
-        var r;
-
-        isObject = false;
         skipSpace();
         const char* st = _pos;
         skipValue();
 
-        if (_error)
+        isObject = false;
+
+        if (_error || st == _pos)
         {
             LOG1("Bad JSON at ", st);
+            st = 0;
         }
-        else if (st != _pos)
+        else
         {
-            //string v(st, _pos - st);
-            //LOG3("VALUE '", v << '\'');
-            
             char c = *st;
             if (c == '{')
             {
@@ -319,30 +325,66 @@ struct JSONWalker
                 isObject = true;
                 _obj = st;
             }
-            else if (c == '"')
-            {
-                // pos is end quote + 1
-                // [st+1, _pos-1) represents the string without quotes
-                
-                assert(_pos[-1] == '"');
+        }
+        
+        return st;
+    }
 
-                GrowString gs;
-                decodeString(gs, st+1, _pos-1);
-                r = var(gs.start());
-            }
-            else if (_pos - st == 5 && !strncmp(st, "true", 4)) // "true" + 1
-            {
-                // convert true and false to int
-                r = var(1);
-            }
-            else if (_pos - st == 6 && !strncmp(st, "false", 5))
-            {
-                r = var(0);
-            }
-            else
-            {
-                r.parse(&st);
-            }
+    var getValue(bool& isObject)
+    {
+        var v;
+        const char* st = checkValue(isObject);
+        if (st && !isObject)
+            v = collectValue(st);
+        
+        return v;
+    }
+
+    const char* collectStringBounds(const char* st, size_t& size)
+    {
+        assert(*st == '"');
+        
+        // pos is end quote + 1
+        // [st+1, _pos-1) represents the string without quotes
+                
+        assert(_pos[-1] == '"');
+
+        ++st;
+        size = (_pos - 1) - st;
+        return st;
+    }
+
+    var collectValue(const char* st)
+    {
+        // does not get objects
+        var r;
+
+        assert(!_error);
+        assert(st != _pos);
+        assert(*st != '{' && *st != '[');
+        
+        char c = *st;
+        if (c == '"')
+        {
+            size_t size;
+            st = collectStringBounds(st, size);
+            
+            GrowString gs;
+            decodeString(gs, st, size);
+            r = var(gs.start());
+        }
+        else if (_pos - st == 5 && !strncmp(st, "true", 4)) // "true" + 1
+        {
+            // convert true and false to int
+            r = var(1);
+        }
+        else if (_pos - st == 6 && !strncmp(st, "false", 5))
+        {
+            r = var(0);
+        }
+        else
+        {
+            r.parse(&st);
         }
         return r;
     }
@@ -355,14 +397,16 @@ struct JSONWalker
 
         assert(_json != _pos);
 
-        const char* ep = _pos - 1;
-        if (*ep == ',')
+        // char that ended term
+        char c = _pos[-1];
+        
+        if (c == ',')
         {
             // last term ended with comma, OK
         }
-        else if (*ep == '"')
+        else if (c == '"' || c == ']' || c == '}')
         {
-            // ended of quote, now expect comma
+            // ended of quote or object, now expect comma
             skipSpace();
             char c = _get();
             if (c == '}')
@@ -394,9 +438,10 @@ struct JSONWalker
 
     static void decodeString(GrowString& gs,
                              const char* st,
-                             const char* ep)
+                             size_t size)
     {
         bool esc = false;
+        const char* ep = st + size;
         while (st != ep)
         {
             char c = *st++;
@@ -421,7 +466,7 @@ struct JSONWalker
     
     static void decodeString(GrowString& gs, const char* p)
     {
-        decodeString(gs, p, p + strlen(p));
+        decodeString(gs, p, strlen(p));
     }
 
     static void encodeString(GrowString& gs, const char* p)

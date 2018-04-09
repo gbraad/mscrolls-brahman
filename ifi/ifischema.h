@@ -79,6 +79,8 @@
 #define IFI_SHOWUP      "up"
 #define IFI_SHOWDOWN    "down"
 #define IFI_LOCATION    "location"
+#define IFI_UNUSE       "unuse"
+#define IFI_USEWITH     "usewith"
 
 // metaobj
 //#define IFI_TITLE       "title"
@@ -117,5 +119,13 @@
 #define IFI_DIR_DOWN    512
 #define IFI_DIR_IN      1024
 #define IFI_DIR_OUT     2048
+
+///// Eval Special Commands
+
+// drop from menu
+#define IFI_UNUSE_DEFAULT "unuse {1:name}"
+
+// for use X with Y
+#define IFI_USEWITH_DEFAULT "use {1:name} with {2:name}"
 
 

@@ -185,6 +185,13 @@ The _reply_ json, sent from the back-end to the front-end, can have these terms 
 * `prompt: ">"`  
   Set the prompt to the given string. The new prompt will be used in any UI entry box until subqeuently changed.
 
+* `unuse: "unuse {1:name}"`  
+  Set the `unuse` command, for menu-drop, to the given format string. The string is any text with allowable embedded substitution codes. These codes are of the following format:
+  `{` _number_ `:` _key_ `}` where _number_ is the argument number (always 1 in this case), and _key_ is any of `id` or `name`. If `id` is specified, the object ID is sent. For `name`, the name is found from the `objects` table using the ID. The string above is the default.
+
+* `usewith: "use {1:name} with {2:name}"`  
+  Set the "use X with Y" command, for drag-and-drop, to the given format string. The string is any text with allowable embedded substitution codes. For the allowable codes see `unuse`. The string above is the default.
+
 
 ### pictureobj
 
@@ -373,4 +380,49 @@ Wait `timeoutms` for engine to block. return `true` if engine sucesfully blocked
 #### `void release()`
 
 Release back-end to execution after `sync`.
+
+## Special Eval Commands
+
+Within an `eval`, some `command`s are sent from the GUI that have special meaning and correspond to user operations;
+
+These commands work like game "verbs";
+
+### `use` _object_  
+Is normally passed back when an object is clicked on. This may be the direct result of the text given in the first place and therefore may be adjusted to anything. For example;
+
+```
+"There is a [key](use key) here"
+```
+
+If previously sent within the text stream will cause the `command` `"use key"` to be sent to eval when clicked.
+
+### `unuse` _object_
+
+Sent when an object is dragged from the sidebar menu and dropped onto a blank text area. This corresponds to a "drop" command, but the verb `"unuse"` is sent so as to allow the back-end to act differently if needed. In most cases, `unuse` may be safely mapped to `drop`.
+
+The command `"unuse X"` is formed where `X` is taken from the `name` within the `objects` table, found from the `id` given to the `items` list. Note that the `name` label within the original `items` list is ignored, as this is taken as a display string rather than a valid parsable object reference.
+
+The command string generate for an `unuse` event may be changed, see `unuse` reply.
+
+### `use` _X_ `with` _Y_
+
+When an item `X` is dragged from the sidebar menu onto item `Y` in the text. See `usewith` reply for details of how the command is built.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

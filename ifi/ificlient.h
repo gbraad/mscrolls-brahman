@@ -108,21 +108,23 @@ struct IFIClient: public IFI, public Worker
 
         LOG4("eval: '", json << "'\n");
 
+        // this will copy the input json
         _inBuffer = json;
         _inBufferReady = true;
 
         for (JSONWalker jw(json); jw.nextKey(); jw.next())
         {
-            bool isObject;
-            var v = jw.getValue(isObject);
+            // we don't need to decode values, just look for
+            // any command key and decode just THAT value.
 
-            if (v)
+            bool isObject;
+            const char* st = jw.checkValue(isObject);
+            
+            if (st && !isObject && jw._key == IFI_COMMAND)
             {
-                if (jw._key == IFI_COMMAND)
-                {
-                    _cmdBuffer = v.toString();
-                    _cmdPos = 0;
-                }
+                var v = jw.collectValue(st);
+                _cmdBuffer = v.toString();
+                _cmdPos = 0;
             }
         }
 
@@ -219,6 +221,7 @@ struct IFIClient: public IFI, public Worker
 
     const char* getRequest()
     {
+        // returns pointer to our `inBuffer (when ready).
         const char* r = 0;
 
         _madeRequest = true;
