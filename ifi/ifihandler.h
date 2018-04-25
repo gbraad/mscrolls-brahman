@@ -56,6 +56,8 @@ struct IFIHandler
         setProp(IFI_PROMPT, "> ");
         setProp(IFI_UNUSE, IFI_UNUSE_DEFAULT);
         setProp(IFI_USEWITH, IFI_USEWITH_DEFAULT);
+        setProp(IFI_COMPASSGO, IFI_COMPASSGO_DEFAULT);
+        setProp(IFI_MENU_USE, IFI_MENU_USE_DEFAULT);
     }
 
     static string extendPrefix(const string& prefix, const char* key)

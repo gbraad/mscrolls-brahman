@@ -371,6 +371,7 @@ struct JSONWalker
             
             GrowString gs;
             decodeString(gs, st, size);
+            gs.add(0);
             r = var(gs.start());
         }
         else if (_pos - st == 5 && !strncmp(st, "true", 4)) // "true" + 1
@@ -440,6 +441,7 @@ struct JSONWalker
                              const char* st,
                              size_t size)
     {
+        // NB: does not terminate gs buffer
         bool esc = false;
         const char* ep = st + size;
         while (st != ep)
@@ -461,7 +463,6 @@ struct JSONWalker
             }
             gs.add(c);
         }
-        gs.add(0);
     }
     
     static void decodeString(GrowString& gs, const char* p)

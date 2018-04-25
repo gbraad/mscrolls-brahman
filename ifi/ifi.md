@@ -63,20 +63,20 @@ See _Interface_ section for details, but startup has the following sequence;
 
    Note, that when automatically continuing a previous game, this _prologue_ `json` may contain `loaddata` which will send a complete game state to the back-end. Consequently, the back-end should not have issued any `text` until this point.
 
-   The back-end should reply with responses to the prologue requests such as game `meta` details, colour theme, `objects` map and anything else it wishes to send including the game initial (or restored) `text`.
+   The back-end should reply with responses to the prologue requests such as game `meta` details, colour theme, `objects` table and anything else it wishes to send including the game initial (or restored) `text`.
 
    Example prologue `meta` reply:
   ```
   {"meta":{"author":"by John Doe","backimage":"assets/cover.jpg","covertext":{"color":"blue","font":"Kanit Thin","weight":100},"credits":"<h1>The Guild2<br/><em>by Strand Games</em></h1><h4>Thanks to</h4><ul><li><p>Contributors to the <a href=\\\"https://strandgames.com/community\\\">Strand forum</a>.</p></li></ul>","organisation":"Strand Games","primary_color":"red","title":"KLIF","ui_compass":1,"ui_sidebar":1,"ui_textinput":1,"version":"1.0"}}
   ```
 
-  Example `objects` map reply:  
+  Example `objects` table reply:  
   `{"objects":[{"id":1,"name":"Cute Dog"},{"id":2,"name":"Top Hat"}]}`
 
   Example sidebar `items` reply:  
   `{"items":[{"id":1,"name":"Cute Dog, Wagging tail"},{"id":2,"worn":1}]}`
 
-  Note that the `name` can be omitted in an `items` reply if the display label is to be the same as the `objects` map entry.
+  Note that the `name` can be omitted in an `items` reply if the display label is to be the same as the `objects` table entry.
 
 * `eval`  
   Subsequent evals may contain any IFI request terms, including `command`. It is not essential that the back-end respond to these requests immediately and it is not an error for no `text` to be issued in response. 
@@ -99,7 +99,7 @@ These are the json tags that may appear in a _request_. See the _Replies_ sectio
    Send random seed to back-end. This happens at startup and can be ignored. However, if the back-end uses psuedo-random numbers and needs a seed, this can be used.
 
 * `objects: true`  
-   Request the game objects map. 
+   Request the game objects table.
 
 * `command: "get lamp"`  
    Text typed by the player, or constructed by the GUI.
@@ -186,6 +186,8 @@ The _reply_ json, sent from the back-end to the front-end, can have these terms 
 * `usewith: "use {1:name} with {2:name}"`  
   Set the "use X with Y" command, for drag-and-drop, to the given format string. The string is any text with allowable embedded substitution codes. For the allowable codes see `unuse`. The string above is the default.
 
+* `compassgo: "{1:id}"`  
+   Set the `command` sent when a valid compass direction is clicked. `id` in this case is one of the words; "north", "northeast", "east", "southeast", "south", "southwest", "west", "northwest", "up", "down", "in" or "out". The default is to send just the word. For example if you wished to receive the `command`, `go` _direction_, the `compassgo` string would be `"go {1:id}"`.
 
 ### pictureobj
 

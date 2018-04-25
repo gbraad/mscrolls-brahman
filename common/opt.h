@@ -106,6 +106,20 @@ struct Opt
         return arg;
     }
 
+    static bool nextOpt(char** opt, const char* val, bool keep = false)
+    {
+        static char dummy[1] = { 0 };
+
+        // test option and if so, remove it unless `keep`
+        bool r = !strcmp(*opt, val);
+
+        if (r)
+        {
+            if (!keep) opt[0] = dummy;
+        }
+        return r;
+    }
+
     static void rebuildArgs(int& argc, char** argv)
     {
         int n = 0;
