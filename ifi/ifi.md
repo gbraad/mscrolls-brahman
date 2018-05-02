@@ -6,7 +6,7 @@ The purpose of _IFI_ is to convey instructions from the GUI to the _back-end_ an
 
 Specifically, messages in both directions are `json` strings whose schema and term meanings are detailed below. Consequently, the interface itself, needed only for passing strings is especially terse. These few functions are the interface between the GUI and the IF back-end;
 
-```
+```cpp
 struct IFI
 {
     typedef void charEmitFn(void*, const char*);
@@ -24,7 +24,7 @@ struct IFI
 };
 ```
 
-In practice, an adapter called `IFIClient` is linked with your back-end to make your interpreter IFI compatible. `IFIClient` contains a lot of helper functions. There's also a "C" interface called `ifiglue` that allows, an otherwise console interpreter, to become an IFIClient simply by redefining `stdio` function calls such as `getchar`, `putchar` etc.
+In practice, an adapter called `IFIClient` is linked with your back-end to make your interpreter IFI compatible. `IFIClient` contains a lot of helper functions. There's also a "C" interface called `ifiglue` that allows, an otherwise console interpreter, to become an *IFIClient* simply by redefining `stdio` function calls such as `getchar`, `putchar` etc.
 
 ## Requests and Replies
 
@@ -49,7 +49,7 @@ See _Interface_ section for details, but startup has the following sequence;
 * `create`
 * `setEmitter`
 * `start`  
-   Sends essential directories and name of story to back-end. The engine will need this information to open any game story files which will contain information subsequently requested. 
+   Sends `configDir`, `dataDir` and name of story to back-end. The engine will need this information to open any game story files which will contain information subsequently requested. 
 
    The back-end will not be expected to reply to the start `json`, but if it chooses to do so, it should not issue any `text`.
    
@@ -81,6 +81,23 @@ See _Interface_ section for details, but startup has the following sequence;
 * `eval`  
   Subsequent evals may contain any IFI request terms, including `command`. It is not essential that the back-end respond to these requests immediately and it is not an error for no `text` to be issued in response. 
 
+
+## Paths
+
+Two directories are sent with the first `json`;
+
+* `configDir` = directory where game assets and files live  
+* `dataDir` = writable direction where per-user files can live.
+
+Things like save games and user preferences live in `dataDir`. For example, on Windows 10, this directory is `c:/user/whomever/appdata/roaming/brahman/nameofgame/`
+
+In general, back-ends do not need `dataDir`. One such use would be a location to cache images.
+
+`configDir` is the root of read-only assets such as game data files, pictures, audio files, icons etc. By default this directory is an `assets` subdirectory below the location of the EXE.
+
+Both `configDir` and `dataDir` may be changed on the command line, do their locations should not be assumed anywhere. Neither should be any specific current woring directory.
+
+Where requests and replies specify `"filepath"`, this will be a path relative, either to `configDir` or `dataDir`, depending on the nature of the operation.
 
 ## Requests
 
@@ -140,9 +157,9 @@ The _reply_ json, sent from the back-end to the front-end, can have these terms 
 
 * `title: "In the Lounge"`  
   Game text to be displayed in any GUI title bar.
-   
+  
 * `picture: "filepath"`  
-   Path relative to `datadir` for picture file (.jpg,.png) to be displayed.
+   Path relative to `configDir` for picture file (.jpg,.png) to be displayed.
    
 * `picture: {pictureobj}`  
    Version of `picture` with more details. NB: either use this form or the above.
@@ -192,7 +209,7 @@ The _reply_ json, sent from the back-end to the front-end, can have these terms 
 ### pictureobj
 
 * `name: "filepath"`  
-  path relative to `datadir` for image file.
+  path relative to `configDir` for image file.
   
 * `brightness: 0.0`  
   _Optional_. 0.0-1.0. Applied to picture dynamically.
@@ -202,7 +219,7 @@ The _reply_ json, sent from the back-end to the front-end, can have these terms 
   
 * `saturation: 0.0`  
   _Optional_. 0.0-1.0. Applied to picture dynamically.
- 
+
 * `lightness: 0.0`  
   _Optional_. 0.0-1.0. Applied to picture dynamically.
   
@@ -322,7 +339,7 @@ Same meanings as `item`.
 
 * `autolink: true`
   Switch on or off the _autolinking_ feature of the GUI. This is the process of automatically converting the output text into markdown using the `objects` table.
-   
+  
 ### text
 
 * `text: "string"`  

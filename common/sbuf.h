@@ -65,6 +65,8 @@ struct SBuf
 
     // NB: can return null
     operator const      char*() const { return _buf; }
+    operator char*() { return _buf; }
+    
     size_t              size() const { return _pos; }
     char                last() const { return _pos ? _buf[_pos-1] : 0; }
     bool                truncated() const { return _truncated; }

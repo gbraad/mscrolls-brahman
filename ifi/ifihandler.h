@@ -122,6 +122,11 @@ struct IFIHandler
                     {
                         r = ifiMapResponse(subjs);
                     }
+                    else if (p == IFI_PICTURE)
+                    {
+                        // picture as object
+                        r = ifiPictureResponse(subjs);
+                    }
                     
                     if (!r)
                         handleAux(jw._obj, p);
@@ -166,6 +171,26 @@ struct IFIHandler
         if (v.isString()) return v.toString() == "true";
         return v.isTrue();
     }
+
+    static bool isBool(const var& v)
+    {
+        // some terms can be bool or something else
+        // such as "picture:true"
+
+        if (v.isString())
+        {
+            // are we a bool masquerading as a string?
+            string vs = v.toString();
+            if (vs == "true" || vs == "false") return true;
+        }
+        else
+        {
+            // non-strings are interpreted as bool
+            return true;
+        }
+        
+        return false;
+    }
     
     virtual void ifiKey(const string& key, const var& v)
     {
@@ -195,8 +220,18 @@ struct IFIHandler
         }
         else if (key == IFI_EXITS) r = ifiExitsResponse(v.toInt());
         else if (key == IFI_TITLE) // top-level
-        {
             r = ifiTitleTextResponse(v.toString());
+        else if (key == IFI_PICTURE)
+        {
+            if (isBool(v))
+            {
+                // we are a request
+                r = ifiPicture(isTrue(v));
+            }
+            else
+            {
+                r = ifiPictureResponse(v.toString());
+            }
         }
 
         if (!r) ifiDefault(key, v);
@@ -210,6 +245,8 @@ struct IFIHandler
     virtual bool ifiLocationResponse(const string& id) { return false; }
     virtual bool ifiExitsResponse(int mask) { return false; }
     virtual bool ifiTitleTextResponse(const string&) { return false; }
+    virtual bool ifiPicture(bool v) { return false; }
+    virtual bool ifiPictureResponse(const string&) { return false; }
 
     // request & response
     virtual bool ifiMoves(int n) { return false; } 
@@ -228,7 +265,7 @@ struct IFIHandler
 
     virtual void ifiDefault(const string& key, const var& v)
     {
-        LOG3("IFI unhandled ", key << " " << v.toString(true));
+        LOG4("IFI unhandled ", key << " " << v.toString(true));
     }
 
     var getProp(const string& key) const
