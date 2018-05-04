@@ -235,7 +235,7 @@ The _reply_ json, sent from the back-end to the front-end, can have these terms 
    The _game name_ is a string that the game parser will accept to identify the object. For example, if there are several _keys_ in the game "key" is insufficient, the _game name_ must therefore be "small key", "brass key" etc. as appropriate.
 
 * `icon: "filepath"`  
-  _Optional_. Name of the default icon file (eg .svg) for this object.
+  _Optional_. Name of the default icon file for this object. Icons can be .svg or .png, but if PNG, they must have a transparency.
 
 ### item 
 
