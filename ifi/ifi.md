@@ -49,7 +49,7 @@ See _Interface_ section for details, but startup has the following sequence;
 * `create`
 * `setEmitter`
 * `start`  
-   Sends `configDir`, `dataDir` and name of story to back-end. The engine will need this information to open any game story files which will contain information subsequently requested. 
+   Sends `configDir`, `dataDir` and name of `story` to back-end. The engine will need this information to open any game story files which will contain information subsequently requested. 
 
    The back-end will not be expected to reply to the start `json`, but if it chooses to do so, it should not issue any `text`.
    
@@ -95,7 +95,7 @@ In general, back-ends do not need `dataDir`. One such use would be a location to
 
 `configDir` is the root of read-only assets such as game data files, pictures, audio files, icons etc. By default this directory is an `assets` subdirectory below the location of the EXE.
 
-Both `configDir` and `dataDir` may be changed on the command line, do their locations should not be assumed anywhere. Neither should be any specific current woring directory.
+Both `configDir` and `dataDir` may be changed on the command line, do their locations should not be assumed anywhere. Neither should be any specific current working directory.
 
 Where requests and replies specify `"filepath"`, this will be a path relative, either to `configDir` or `dataDir`, depending on the nature of the operation.
 
@@ -159,7 +159,7 @@ The _reply_ json, sent from the back-end to the front-end, can have these terms 
   Game text to be displayed in any GUI title bar.
   
 * `picture: "filepath"`  
-   Path relative to `configDir` for picture file (.jpg,.png) to be displayed.
+   Path relative to `configDir` for picture file (.jpg,.png) to be displayed. PNG files may be animated (ie [APNG](https://en.wikipedia.org/wiki/APNG)).
    
 * `picture: {pictureobj}`  
    Version of `picture` with more details. NB: either use this form or the above.
