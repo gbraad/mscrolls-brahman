@@ -79,7 +79,7 @@
 #define IFI_LOCATION    "location"
 #define IFI_UNUSE       "unuse"
 #define IFI_USEWITH     "usewith"
-#define IFI_MENU_USE    "use"
+#define IFI_USE         "use"
 #define IFI_COMPASSGO   "compassgo"
 
 // metaobj
@@ -129,7 +129,7 @@
 #define IFI_USEWITH_DEFAULT "use {1:name} with {2:name}"
 
 // click on sidebar
-#define IFI_MENU_USE_DEFAULT "use {1:name}"
+#define IFI_USE_DEFAULT "use {1:name}"
 
 #define IFI_COMPASSGO_DEFAULT "{1:id}"
 

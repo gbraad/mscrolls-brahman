@@ -36,6 +36,7 @@
 
 
 #define DIM(_x)  (sizeof(_x)/sizeof(_x[0]))
+#define ASIZE(_x)  ((int)(sizeof(_x)/sizeof(_x[0])))
 
 // define our own set here
 #define u__tolower(_c)    ( (_c)-'A'+'a' )

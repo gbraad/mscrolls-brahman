@@ -57,7 +57,7 @@ struct IFIHandler
         setProp(IFI_UNUSE, IFI_UNUSE_DEFAULT);
         setProp(IFI_USEWITH, IFI_USEWITH_DEFAULT);
         setProp(IFI_COMPASSGO, IFI_COMPASSGO_DEFAULT);
-        setProp(IFI_MENU_USE, IFI_MENU_USE_DEFAULT);
+        setProp(IFI_USE, IFI_USE_DEFAULT);
     }
 
     static string extendPrefix(const string& prefix, const char* key)
@@ -271,6 +271,11 @@ struct IFIHandler
     var getProp(const string& key) const
     {
         return _props.find(key);
+    }
+
+    bool propTrue(const string& key) const
+    {
+        return isTrue(getProp(key));
     }
 
     var getProp(const string& prefix, const string& key) const

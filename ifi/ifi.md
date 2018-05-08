@@ -332,10 +332,10 @@ Same meanings as `item`.
   _Optional_. Enable UI compass. Default is false.
 
 * `primary_color: "deep orange"`  
-  _Optional_. Set theme primary colour from Material Design palette.
+  _Optional_. Set theme primary colour from Material Design palette. See section on "Themes and Colours".
 
 * `contrast_color: "indigo"`  
-  _Optional_. Set theme contrasting colour from Material Design palette.
+  _Optional_. Set theme contrasting colour from Material Design palette. **important:** You do not need to send this value, simply provide the `primary_color` and the `contrast_color` will be automatically selected.
 
 * `autolink: true`
   Switch on or off the _autolinking_ feature of the GUI. This is the process of automatically converting the output text into markdown using the `objects` table.
@@ -353,6 +353,61 @@ Same meanings as `item`.
   
 * `color: "blue"`  
   _Optional_.
+
+## Themes and Colours
+
+The GUI uses the [_Material Design_](https://material.io/design/color/) colour palette.
+
+Each of the colour themes has a primary colour and a secondary contrasting colour, and all choices also come in light or dark - that's to say against a light background or a dark one.
+
+The colours are all chosen from the Material Design spectrum. Each primary colour is matched with a corresponding contrasting colour from the same spectrum but darkened in shade.
+
+![](matwheel.png)
+
+Each color comes in a number of light to dark shades. Many of these shades are used in parts of the user interface, chosen automatically from the theme base primary color (signified by shade 500).
+
+Here are three swatches from the wheel above;
+
+![](colors1.png)
+
+counting clockwise from _red_, the base colour names are as follows;
+
+* red
+* pink
+* purple
+* deep purple
+* indigo
+* blue
+* light blue
+* cyan
+* teal
+* green
+* light green
+* lime
+* yellow
+* amber
+* orange
+* deep orange
+* brown
+* blue grey
+* grey
+
+Also added are:
+
+* black
+* white
+
+If the above names are used for `primary_color`, the appropriate material design colour (shade 500) is selected together with a suitable contrasting colour. Note that `contrast_color` does not have to be specified.
+
+Alternatively a `primary_color` can be chosen **not** from the _Material_ palette, but from the [SVG Color Names](https://www.w3.org/TR/SVG/types.html#ColorKeywords), or _even_ as a hex string `"#rrggbb"`
+
+_However_, it is important to understand that the user can only select colours from the _Material_ palette, as shown by this theme picker:
+
+![](themes.png)
+
+If you provide custom colours to `primary_color` and/or `contrast_color`, they will be used initially, but the user has _no way_ to revert to them if a replacement theme is subsequently selected.
+
+
 
 ## Interface Functions
 
