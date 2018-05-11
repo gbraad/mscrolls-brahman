@@ -66,7 +66,6 @@ LOAD_PIC
         ENDC
 
         IFNE    NAMEDPICS
-
         include  "pictnames.asm"
         ALIGN
         

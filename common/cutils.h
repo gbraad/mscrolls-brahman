@@ -55,8 +55,8 @@
 #define u_isalnum(_c) (u_isalpha(_c) || u_isdigit(_c))
 #define u_isintchar(_c) ((_c) == '-' || u_isdigit(_c))
 
-static inline int u_isnumchar(int c)
-{ return u_isintchar(c) || c == '.' || c == 'e' || c == 'E' || c == '+'; }
+#define u_isnumchar(_c) \
+    (u_isintchar(_c) || _c == '.' || _c == 'e' || _c == 'E' || _c == '+')
 
 #define u_isprint(_c)  (((_c) >= 0x20) && ((_c) <= 127))
 
@@ -67,6 +67,8 @@ static inline int u_isnumchar(int c)
 #define u_hex(_v) ((char)((_v) < 10 ? '0' + (_v) : 'A' - 10 + (_v)))
 #define u_isquote(_v) ((_v) == '"' || (_v) == '\'')
 
+
+#ifdef __cplusplus
 
 static inline int u_stricmp(const char* s1, const char* s2)
 {
@@ -141,10 +143,6 @@ static inline int u_strcmpz(const char * s1, const char * s2)
             return 0;
     return *(const unsigned char*)s1 - *(const unsigned char*)s2;
 }
-
-
-
-#ifdef __cplusplus
 
 inline void u_strdub(char*& dst, const char* src)
 {

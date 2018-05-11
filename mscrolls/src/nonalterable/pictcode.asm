@@ -89,7 +89,7 @@ PICTURES
 	                             ;array of pointers to the start of the
 	 IFNE	THE_PAWN
 	MOVE.B   -1(A0,D0.W),D0       ;pictures on the disk itself.
-        BRA.S   80$                   ;draw pic D0 (if zero, no pic).
+        BRA     80$                   ;draw pic D0 (if zero, no pic).
 	 ENDC
 
 	 IFEQ	THE_PAWN
