@@ -334,7 +334,7 @@ What can you say about a gate?
 	attribute nofullstop
 }
 
-item deckchair "striped orange yellow deck deck-chair"
+item deckchair "striped orange yellow deck deckchair"
 {
 	desc {
 is striped in orange and yellow, with occasional small bloodstains where
@@ -342,7 +342,7 @@ fools have attempted to
 fold or unfold the damned thing
 	}
 	scen_noun_c bloodstains
-	synonyms {chair deckchair}
+	synonyms {chair}
 	weight 6
 	size 5
 	hardness 15
@@ -714,6 +714,7 @@ The yellow plastic key is standard Post Office issue
 	set keys
 	another_noun
 	attribute floats
+        covers { gui_show_inv }
 }
 
 item key2 "iron metal key"
@@ -732,6 +733,7 @@ fits ordinary household locks
 	location keyring
 	set keys
 	another_noun
+        covers { gui_show_inv }
 }
 
 item key3 "rusty metal old key"
@@ -750,6 +752,7 @@ doesn't look as if it gets much use
 	location keyring
 	set keys
 	another_noun
+        covers { gui_show_inv }
 }
 
 
@@ -757,7 +760,7 @@ room bathroom1 "bathroom"
 {
 	desc {
 In harmony with the bedroom, the bathroom is plainly-furnished; a fine old
-claw-footed bathtub, a throne-like lavatory and a rather nice basin creak
+claw-footed bathtub, a throne-like lavatory and a rather nice washbasin creak
 gently and harmoniously in this temple of hygiene, whose door leads
 southwest
 }
@@ -1857,7 +1860,7 @@ room kitchen2 "messy Kitchen"
 	desc {
 Damned place is a shambles. Shocking. Rubbish all over the floor, empty cartons
 and packets, definitely needs a woman's touch but all it's got is the mad
-gardener's touch and a trap door in the floor. Northeast takes you back
+gardener's touch and a trapdoor in the floor. Northeast takes you back
 to the garden, and an exit leads west; frankly, either direction would
 be a relief
 	}
@@ -5050,7 +5053,7 @@ herringbone overcoat
 
 item ticket "bus ticket" {
 	desc {
-has 'Aquitanian District Bus Company' in bold lettering at the top.
+has '\_Aquitanian District [Bus] Company_\' in bold lettering at the top.
 Further down it specifies the destination as Neverending Lane
 	}
 	moveable
@@ -5200,8 +5203,8 @@ is bright yellow, with the Aquata Postal Service logo stamped on it
 	set keys
 	another_noun
 	attribute floats
+        covers { gui_show_inv }
 }
-
 
 
 item smoke "tobacco smoke" {

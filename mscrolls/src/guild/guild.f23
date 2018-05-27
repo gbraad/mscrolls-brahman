@@ -3137,7 +3137,6 @@ has been painted gold
         m2icon "goldenkey.svg"
 }
 
-
 item sink "kitchen sink" {
 	desc {
 is stainless steel, and absolutely spotless
@@ -7769,7 +7768,6 @@ One of the cards has the Queen of Diamonds shown on it
 	contained
 	location cardbox
 	set cards
-#        m2icon "queendiamonds.svg"
         m2icon "diamondsuit.svg"
 }
 item card3 "playing club ace_of_clubs" {
@@ -7788,7 +7786,6 @@ One of the cards is the Ace of Clubs
 	contained
 	location cardbox
 	set cards
-#        m2icon "aceclubs.svg"
         m2icon "clubsuit.svg"
 }
 
@@ -7809,7 +7806,6 @@ One of the cards is obviously the Five of Hearts
 	contained
 	location cardbox
 	set cards
-#        m2icon "5hearts.svg"
         m2icon "heartsuit.svg"
 }
 
@@ -7829,7 +7825,6 @@ One of the cards has a picture of the King of Spades printed on it
 	contained
 	location cardbox
 	set cards
-#        m2icon "kingspades.svg"
         m2icon "spadesuit.svg"
 }
 
@@ -8344,7 +8339,6 @@ is a fat, cigar smoking capitalist
 	scen_noun_b cigar
 
 	synonyms { peckham capitalist manager }
-
 	!sup_clothing
         article
 	strength 5

@@ -78,6 +78,7 @@ THE_PAWN EQU      TRUE
 
 
 YCHEAT   EQU      TRUE            ;Debug bits on?
+YCHEATMORE   EQU      FALSE
 PROD     EQU      TRUE
 
 PROD_TEST EQU     FALSE           ;nearly production!
@@ -300,5 +301,4 @@ SIGCHAR        EQU  7             ;no of chars search looks at
 BIGWRD         EQU  26            ;size of left just buffer
 SLIM           EQU  3             ;no. of chars nec. for plural checks
 Remastered     EQU  TRUE
-
 

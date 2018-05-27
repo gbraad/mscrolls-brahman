@@ -40,9 +40,7 @@ INIT
 
       IFNE	BookProtection
 	XREF	ProtEnd,ProtData,ProtSize,ProtList
-
 	LEA	ProtEnd(PC),A7
-
 	CALL	BIOSA4
 	TEST_L	ProtData(A4)
 	BNE.S	20$
@@ -62,8 +60,8 @@ INIT
 
 	MOVE.L	(A0),ProtData(A4)
 20$      
-      ENDC  ; BookProtection
-      ENDC
+      ENDC	;BookProtection
+      ENDC	;!68k
 
 *	LEA     BIOS(PC),A4
 	CALL	BIOSA4

@@ -53,10 +53,13 @@
 	include  "equates.asm"
 	include  "macros.asm"
 
-        XDEF SP.DEATH
+        XDEF SP.DEATH,SP.PICTURES
 
 SP.DEATH
         RET
 
+SP.PICTURES
+        RET
+        
 *--------------------------------
         END

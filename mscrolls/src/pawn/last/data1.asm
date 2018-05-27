@@ -90,7 +90,7 @@
        XDEF   F_TRADE,F_ADVCOL,F_COLOUR,F_PRFOLL,F_LIFT,KM.ROOM
        XDEF   KM.TIME,TBL.ATTA,SP.AT.HJ,SP.AT.AD,SP.AT.DE,SUM.CHK
        XDEF   EOR.CHK,MULT.CHK,ZERO.CHK,SUML.CHK
-       XDEF   REMASTER
+       XDEF   REMASTER,CANTSAVE
 
 	 IFEQ	INOUTLINK
 
@@ -166,6 +166,7 @@ REMASTER              DC.B    -1  ; remaster/modern mode
 M_STACK               DC.L    0   ;MSGWRITE PUTS RETURN ADDRESS HERE
 LJPOS                 DC.W    0    
 PLURAL                DC.W    0
+CANTSAVE        DC.W    0       ; suspend autosave
   
         
        IFNE     YCHEAT

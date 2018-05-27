@@ -143,7 +143,7 @@ void catchsig(int sig)
 #endif
         
 #ifdef C
-# ifdef BIG_ENDIAN
+#if defined(BIG_ENDIAN) && !defined(__APPLE__)
     PC = oldPC - (long)memory;
 # else
     PC = (long)memory_end - oldPC - 1;
