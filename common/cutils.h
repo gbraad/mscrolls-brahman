@@ -108,6 +108,24 @@ static inline char* u_strchr(const char* s, int c)
     return 0;
 }
 
+static inline char* u_strstr(const char* s1, const char* s2)
+{
+    do {
+        const char* s_1 = s1;
+        const char* s_2 = s2;
+        while (tolower((unsigned char) *s_1) == tolower((unsigned char ) *s_2) && *s_2)
+        {
+            s_1++;
+            s_2++;
+        }
+        if (*s_2 == 0)
+        {
+            return (char *) s1;
+        }
+    } while (*s1++);
+    return 0;
+}
+
 static inline char* u_strcpyn(char* dst, const char* src, size_t n)
 {
     // strncpy variant that copyies at most `n` chars

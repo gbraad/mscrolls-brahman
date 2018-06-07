@@ -108,46 +108,53 @@ struct IFIHandler
                 // `obj` is start of object, ie "{
                 // `pos` is end of object + 1, ie one past "}"
 
+                string subjs(jw._obj, jw._pos - jw._obj);
+
                 if (*jw._obj == '{')
                 {
-                    assert(jw._pos[-1] == '}');
-                    string subjs(jw._obj, jw._pos - jw._obj);
-                    //LOG3("IFI subjs ", subjs);
-
-                    if (p == IFI_META)
+                    if (jw._pos[-1] == '}')
                     {
-                        r = ifiMetaResponse(subjs);
+                        if (p == IFI_META)
+                            r = ifiMetaResponse(subjs);
+                        else if (p == IFI_MAP)
+                            r = ifiMapResponse(subjs);
+                        else if (p == IFI_PICTURE) // picture as object
+                            r = ifiPictureResponse(subjs);
+                        else if (p == IFI_SAVEDATA)
+                            r = ifiSaveDataResponse(subjs);
+                        
+                        if (!r)
+                            handleAux(jw._obj, p);
                     }
-                    else if (p == IFI_MAP)
+                    else
                     {
-                        r = ifiMapResponse(subjs);
+                        LOG1("IFI, malformed json object; ", p << ":" << subjs);
                     }
-                    else if (p == IFI_PICTURE)
-                    {
-                        // picture as object
-                        r = ifiPictureResponse(subjs);
-                    }
-                    
-                    if (!r)
-                        handleAux(jw._obj, p);
                 }
-                else 
+                else if (*jw._obj == '[')
                 {
                     // array
-                    assert(jw._obj[0] == '[' && jw._pos[-1] == ']');
-                    
-                    string jlist(jw._obj, jw._pos - jw._obj);
-                        
-                    if (p == IFI_OBJECTS)
-                        r = ifiObjectsResponse(jlist);
-                    else if (p == IFI_ITEMS)
-                        r = ifiItemsResponse(jlist);
-                    else if (p == IFI_PEOPLE)
-                        r = ifiPeopleResponse(jlist);
-                    else if (p == IFI_MAP "/" IFI_PLACES)
+                    if (jw._pos[-1] == ']')
                     {
-                        r = ifiMapPlacesResponse(jlist);
+                        if (p == IFI_OBJECTS)
+                            r = ifiObjectsResponse(subjs);
+                        else if (p == IFI_ITEMS)
+                            r = ifiItemsResponse(subjs);
+                        else if (p == IFI_PEOPLE)
+                            r = ifiPeopleResponse(subjs);
+                        else if (p == IFI_MAP "/" IFI_PLACES)
+                        {
+                            r = ifiMapPlacesResponse(subjs);
+                        }
                     }
+                    else
+                    {
+                        LOG1("IFI, malformed json array; ", p << ":" << subjs << "\n\n");
+                    }
+                }
+                else
+                {
+                    LOG1("IFI expected object; ", p << ":" << subjs);
                 }
             }
         }
@@ -233,6 +240,23 @@ struct IFIHandler
                 r = ifiPictureResponse(v.toString());
             }
         }
+        else if (key == IFI_SAVEDATA)
+        {
+            // should be a request. response should be saveobj
+            if (isBool(v) && isTrue(v))
+            {
+                // is a request to provide save data
+                r = ifiSaveData();
+            }
+            else
+            {
+                LOG3("IFI savedata request ignored :", v);
+            }
+        }
+        else if (key == IFI_LOADDATA)
+        {
+            r = ifiLoadData(v.toString());
+        }
 
         if (!r) ifiDefault(key, v);
     }
@@ -247,7 +271,70 @@ struct IFIHandler
     virtual bool ifiTitleTextResponse(const string&) { return false; }
     virtual bool ifiPicture(bool v) { return false; }
     virtual bool ifiPictureResponse(const string&) { return false; }
+    virtual bool ifiSaveData()
+    {
+        // request
+        LOG3("IFI save data request not implemented", "");
+        return true;
+    }
 
+    virtual bool ifiSave(const string& data, const string& name)
+    {
+        LOG3("ifiSave not implemented ", name);
+        return false;
+    }
+
+    virtual bool ifiSaveDataResponse(const string& js)
+    {
+        string filename;
+        string data;
+
+        for (JSONWalker jw(js.c_str()); jw.nextKey(); jw.next())
+        {
+            bool isObject;
+            const char* st = jw.checkValue(isObject);
+
+            if (!st) break; // bad json
+
+            if (!isObject)
+            {
+                if (jw._key == IFI_NAME)
+                {
+                    filename = jw.collectValue(st).toString();
+                }
+                else if (jw._key == IFI_DATA)
+                {
+                    data = jw.collectRawStringValue(st);
+                }
+                else
+                {
+                    LOG2("IFI, unknown key in savedata obj: ", jw._key);
+                }
+            }
+        }
+
+        if (data.empty())
+        {
+            LOG1("ifiSaveDataResponse, missing data key in ", js);
+        }
+        else
+        {
+            ifiSave(data, filename);
+        }
+
+        return true;
+    }
+
+    virtual bool ifiLoadData(const string& s)
+    {
+        // NB: this can be a request or a response.
+        // when a request: `s` is the data
+        // when a response: `s` is optionally, a filename
+        
+        LOG3("IFI loaddata not implemented", "");
+        return true;
+    }
+    
     // request & response
     virtual bool ifiMoves(int n) { return false; } 
 

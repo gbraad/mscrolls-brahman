@@ -53,6 +53,7 @@
 #define IFI_MOVES       "moves"
 #define IFI_VALUES      "values"
 #define IFI_RANDOMSEED  "randomseed"
+#define IFI_DATA        "data"
 
 // reply only
 

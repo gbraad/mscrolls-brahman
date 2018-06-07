@@ -354,6 +354,24 @@ struct JSONWalker
         return st;
     }
 
+    string collectRawStringValue(const char* st)
+    {
+        // expect string value
+        
+        assert(!_error);
+        assert(st != _pos);
+        assert(*st != '{' && *st != '[');
+        
+        char c = *st;
+        if (c == '"')
+        {
+            size_t size;
+            st = collectStringBounds(st, size);
+            return string(st, size);
+        }
+        return string();
+    }
+
     var collectValue(const char* st)
     {
         // does not get objects

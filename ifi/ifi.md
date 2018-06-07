@@ -125,9 +125,9 @@ These are the json tags that may appear in a _request_. See the _Replies_ sectio
    The entire game state is sent to restore a game position. The string "game-state" is _entirely_ back-end specific, for example base64 encoded binary data, whose content and meaning is only known to the back-end. This will include any internal headers, formatting, version numbers etc.
 
    The "game-state" string will correspond _exactly_ to one previously sent through `savedata` earlier.
-
+ 
 * `savedata: true`  
-   Request entire game state.
+   Request back-end to emit `savedata` with current game state.
 
 * `map: true`  
    Return `map` data reply if `true`. If `false`, unsolicited updates are not needed.
@@ -167,8 +167,11 @@ The _reply_ json, sent from the back-end to the front-end, can have these terms 
 * `objects: [{object}...]`  
    The objects in the game. This is primarily the _invariant_ mapping between ID and game name.
 
-*  `savedata: "game-state"`  
-   The entire game state encoded as a string (eg base64) that can later be accommodated by a `loaddata` request to completely restore a position (see also request `loaddata`).
+* `savedata: {saveobj}`
+   Provide current game state _save_ to UI.
+
+* `loaddata: "filepath"`  
+   Initiate `savedata` load from the back-end. 
 
 * `items: [{item}...]`  
    item details for the sidebar (eg inventory).
@@ -339,6 +342,17 @@ Same meanings as `item`.
 
 * `autolink: true`
   Switch on or off the _autolinking_ feature of the GUI. This is the process of automatically converting the output text into markdown using the `objects` table.
+
+* `saveload: true`  
+   Enable save/load UI in app.
+
+### saveobj
+
+*  `data: "game-state"`  
+   The entire game state encoded as a string (eg base64) that can later be accommodated by a `loaddata` request to completely restore a position (see also request `loaddata`).
+
+*  `name: "filepath"` 
+    _Optional_. path relative to datadir.
   
 ### text
 
