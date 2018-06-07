@@ -167,7 +167,7 @@ The _reply_ json, sent from the back-end to the front-end, can have these terms 
 * `objects: [{object}...]`  
    The objects in the game. This is primarily the _invariant_ mapping between ID and game name.
 
-* `savedata: {saveobj}`
+* `savedata: {saveobj}`  
    Provide current game state _save_ to UI.
 
 * `loaddata: "filepath"`  
@@ -348,11 +348,11 @@ Same meanings as `item`.
 
 ### saveobj
 
-*  `data: "game-state"`  
+* `data: "game-state"`  
    The entire game state encoded as a string (eg base64) that can later be accommodated by a `loaddata` request to completely restore a position (see also request `loaddata`).
 
-*  `name: "filepath"` 
-    _Optional_. path relative to datadir.
+* `name: "filepath"`  
+   _Optional_. path relative to datadir.
   
 ### text
 
