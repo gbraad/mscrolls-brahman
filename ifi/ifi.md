@@ -121,13 +121,15 @@ These are the json tags that may appear in a _request_. See the _Replies_ sectio
 * `command: "get lamp"`  
    Text typed by the player, or constructed by the GUI.
 
+* `savedata: true`  
+   Request back-end to emit `savedata` with current game state.
+
 * `loaddata: "game-state"`  
    The entire game state is sent to restore a game position. The string "game-state" is _entirely_ back-end specific, for example base64 encoded binary data, whose content and meaning is only known to the back-end. This will include any internal headers, formatting, version numbers etc.
 
    The "game-state" string will correspond _exactly_ to one previously sent through `savedata` earlier.
- 
-* `savedata: true`  
-   Request back-end to emit `savedata` with current game state.
+
+   See section "Save and Load".
 
 * `map: true`  
    Return `map` data reply if `true`. If `false`, unsolicited updates are not needed.
@@ -171,7 +173,9 @@ The _reply_ json, sent from the back-end to the front-end, can have these terms 
    Provide current game state _save_ to UI.
 
 * `loaddata: "filepath"`  
-   Initiate `savedata` load from the back-end. 
+   Initiate `savedata` load from the back-end.
+
+   See section "Save and Load".
 
 * `items: [{item}...]`  
    item details for the sidebar (eg inventory).
