@@ -378,6 +378,10 @@ The actual saving and loading of data to files is performed by the front-end. In
 
 The game state can be arbitrary back-end data. _IFI_ treats this data as an opaque _blob_ which it saves and loads to files. It is therefore vital that the back-end can accept it's own save data back in the exact same form and format as it gave out in the first place.
 
+Although the data "blob" may well start and end it's journey as binary data, for the purposes of _IFI_, it has to be transmitted within a JSON string. For that to be possible the data in question needs to be encoded into allowable JSON string ASCII. Example encodings are base64 and base85.
+
+`IFIHandler` provides a suitable base85 codec to make this easy. However, the particular choice of encoding is entirely up to the back-end engine, since _it_ is the only entity that needs to make sense of this data. 
+
 Save and Load is usually initiated from the GUI, but if command line input is provided by the game, it can start there. The sequence of events is slightly different in each case;
 
 ### Save Initiated by the GUI
@@ -417,10 +421,12 @@ In this variant, the name of the file, relative to `dataDir` is provided by the 
 
 If the file is located, it is read and the save data "blob" sent to the back-end. Is is assumed that this is valid and will be accepted.
 
+If an empty _filepath_ is provided, the GUI will prompt the user for the file to load, since unless the "save" was previously issued by the engine, there would be no way for the engine to know the filename. Nevertheless, the _filename_ can be given if known.
+
 
 | Direction | Message |
 |-----------|---------|
-| back → front | `loaddata:"filepath"` |
+| back → front | `loaddata:"filepath"` or `loaddata:""` |
 | front → back | `loaddata:"blob"` |
 
 ## Themes and Colours
