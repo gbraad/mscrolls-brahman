@@ -278,8 +278,9 @@ struct IFIHandler
         return true;
     }
 
-    virtual bool ifiSave(const string& data, const string& name)
+    virtual bool ifiSave(const uchar* data, int size, const string& name)
     {
+        // called with data to save and optional file name
         LOG3("ifiSave not implemented ", name);
         return false;
     }
@@ -319,7 +320,7 @@ struct IFIHandler
         }
         else
         {
-            ifiSave(data, filename);
+            ifiSave((uchar*)data.c_str(), data.size(), filename);
         }
 
         return true;

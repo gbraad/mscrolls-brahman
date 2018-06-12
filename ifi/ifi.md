@@ -368,6 +368,55 @@ Same meanings as `item`.
 * `color: "blue"`  
   _Optional_.
 
+## Save and Load
+
+The actual saving and loading of data to files is performed by the front-end. In order to do this, the back-end must be able to send and receive a complete game state across _IFI_.
+
+The game state can be arbitrary back-end data. _IFI_ treats this data as an opaque _blob_ which it saves and loads to files. It is therefore vital that the back-end can accept it's own save data back in the exact same form and format as it gave out in the first place.
+
+Save and Load is usually initiated from the GUI, but if command line input is provided by the game, it can start there. The sequence of events is slightly different in each case;
+
+### Save Initiated by the GUI
+
+Note here that the reply does not contain a `name`, any filename given in the reply will be ignored since the GUI has already been given the filename by the user (or is implied).
+
+If the save fails for any reason the user will be notified via the GUI.
+
+| Direction | Message |
+| ----------|---------|
+| front → back | `savedata:true` |
+| back → front | `savedata:{data:"blob"}` |
+
+### Load Initiated by the GUI
+
+Here, the back-end is sent a new game state directly. This can happen at any time. There is no expected reply to this since it is assumed to always be valid.
+
+| Direction | Message |
+|-----------|---------|
+| front → back | `loaddata:"blob"` |
+
+### Save Initiated by the Engine
+
+In this version a `name` is also supplied. The given filepath will be relative to the `dataDir`. Note: that any filename confict with an existing file will be overwritten.
+
+If the save fails for any reason the user will be notified via the GUI.
+
+| Direction | Message |
+|-----------|---------|
+| back → front | `savedata:{data:"blob",name:"filepath"}` |
+
+### Load Initiated by the Engine
+
+In this variant, the name of the file, relative to `dataDir` is provided by the engine. If the file does not exist or cannot be opened, or is not a save file or for _any_ other reason, the user is notified via the GUI.
+
+If the file is located, it is read and the save data "blob" sent to the back-end. Is is assumed that this is valid and will be accepted.
+
+
+| Direction | Message |
+|-----------|---------|
+| back → front | `loaddata:"filepath"` |
+| front → back | `loaddata:"blob"` |
+
 ## Themes and Colours
 
 The GUI uses the [_Material Design_](https://material.io/design/color/) colour palette.

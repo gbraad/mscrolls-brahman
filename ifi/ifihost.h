@@ -111,6 +111,7 @@ struct IFIHost
     {
         int v;
 
+        // sync client and drain queue of any replies
         do
         {
             v = ifi->sync(timeoutms);
