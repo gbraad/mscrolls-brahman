@@ -41,6 +41,35 @@
 #include "ifihost.h"
 #include "logged.h"
 #include "opt.h"
+#include "strutils.h"
+#include "fd.h"
+
+static std::string makePath(const std::string& prefix, const std::string& name) 
+{
+    std::string path;
+    if (!name.empty())
+    {
+        // windows style or linux style absolute path given
+        // then do not apply prefix
+        if (name.find(':') != std::string::npos || name.at(0) == '/')
+        {
+            // if we have a prefix like C: or https:// then
+            // assume `name` is an absolute path.
+            path = name;
+        }
+        else
+        {
+            path = prefix;
+            if (!path.empty()) path += '/';
+            path += name;
+        }
+
+        // enough backslashes! windows files work forwards too!
+        replaceCharsInplace(path, '\\', '/');
+    }
+
+    return path;
+}
 
 struct Handler: public IFIHandler
 {
@@ -54,6 +83,42 @@ struct Handler: public IFIHandler
     {
         std::cout << "current move count " << moveCount << std::endl;
         return true;
+    }
+
+    bool ifiSave(const uchar* data, int size, const string& name) 
+    {
+        // any suggested name?
+        string f = name;
+
+        // otherwise invent our own
+        if (f.empty()) f = "save";
+
+        string dataDir = getProp(IFI_DATADIR).toString();
+        string path = changeSuffix(makePath(dataDir, f), ".sav");
+
+        LOG3("ifiSave ", f);
+
+        FD fd;
+        bool r = fd.open(path.c_str(), FD::fd_new);
+
+        if (r)
+        {
+            r = fd.write(data, size);
+            if (r)
+            {
+                LOG3("saved ", path);
+            }
+            else
+            {
+                LOG("ifiSave, cannot write to file '", path << "'\n");
+            }
+        }
+        else
+        {
+            LOG("ifiSave, can't open save file '", path << "'\n");
+        }
+        
+        return r;
     }
 };
 

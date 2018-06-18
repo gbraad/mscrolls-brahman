@@ -287,6 +287,9 @@ struct IFIHandler
 
     virtual bool ifiSaveDataResponse(const string& js)
     {
+        // called from the handler, this can be overridden or
+        // let it call `ifiSave`
+        
         string filename;
         string data;
 

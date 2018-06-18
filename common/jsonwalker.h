@@ -550,6 +550,18 @@ struct JSONWalker
         encodeString(gs, v);
     }
 
+    static void addRawStringValue(GrowString& gs,
+                                  const char* key, const char* v)
+    {
+        // do not encode string
+        // only use if you _know_ the string is clean
+        toAdd(gs);
+        addKey(gs,key);
+        gs.add('"');
+        gs.append(v);
+        gs.add('"');
+    }
+
     static void addStringValue(GrowString& gs,
                                const char* key, const string& v)
     {

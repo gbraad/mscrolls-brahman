@@ -95,6 +95,8 @@ struct var
         case var_int:
             _i = v._i;
             break;
+        default:
+            break;
         }
     }
 
@@ -112,6 +114,8 @@ struct var
             break;
         case var_int:
             v._i = _i;
+            break;
+        default:
             break;
         }
         return v;
@@ -134,6 +138,8 @@ struct var
                 break;
             case var_int:
                 res = _i == v._i;
+                break;
+            default:
                 break;
             }
         }
@@ -205,6 +211,8 @@ struct var
         case var_int:
             val = _i;
             break;
+        default:
+            break;
         }
         return val;
     }
@@ -223,6 +231,8 @@ struct var
             break;
         case var_int:
             val = (double)_i;
+            break;
+        default:
             break;
         }
         return val;
@@ -256,6 +266,8 @@ struct var
                 return buf;
             }
             break;
+        default:
+            break;
         }
         return "null";
     }
@@ -285,6 +297,8 @@ struct var
         case var_double:
             v._d = -v._d;
             break;
+        default:
+            break;
         }
         return v;
     }
@@ -300,6 +314,8 @@ struct var
             break;
         case var_int:
             res = _i == 0;
+            break;
+        default:
             break;
         }   
         return res;
@@ -435,6 +451,8 @@ struct var
             if (b1._type == var_double) a1._i += (int)b1._d;
             else if (b1._type == var_int) a1._i += b1._i;
             break;
+        default:
+            break;
         }
         return a1;
     }
@@ -454,6 +472,8 @@ struct var
         case var_int:
             if (b1._type == var_double) a1._i -= (int)b1._d;
             else if (b1._type == var_int) a1._i -= b1._i;
+            break;
+        default:
             break;
         }
         return a1;
@@ -475,6 +495,8 @@ struct var
         case var_int:
             if (b1._type == var_double) a1._i *= (int)b1._d;
             else if (b1._type == var_int) a1._i *= b1._i;
+            break;
+        default:
             break;
         }
         return a1;
@@ -513,6 +535,8 @@ struct var
                     a1._type = var_double;
                 }
             }
+            break;
+        default:
             break;
         }
         return a1;

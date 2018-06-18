@@ -44,6 +44,7 @@
 
 #define u_isupper(_c) ((_c) >= 'A' && (_c) <= 'Z')
 #define u_islower(_c) ((_c) >= 'a' && (_c) <= 'z')
+#define u_ishyphen(_c) ((_c) == '-')
 #define u_isalpha(_c) (u_isupper(_c) || u_islower(_c))
 #define u_tolower(_c) (u_isupper(_c) ? u__tolower(_c) : (_c))
 #define u_toupper(_c) (u_islower(_c) ? u__toupper(_c) : (_c))
@@ -108,6 +109,8 @@ static inline char* u_strchr(const char* s, int c)
     return 0;
 }
 
+#if 0
+// is this used??
 static inline char* u_strstr(const char* s1, const char* s2)
 {
     do {
@@ -125,6 +128,7 @@ static inline char* u_strstr(const char* s1, const char* s2)
     } while (*s1++);
     return 0;
 }
+#endif
 
 static inline char* u_strcpyn(char* dst, const char* src, size_t n)
 {
