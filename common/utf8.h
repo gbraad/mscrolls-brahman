@@ -177,7 +177,8 @@ bad:
 
     static int UtoUtf8(char *str, unsigned long c)
     {
-	/* Runes are signed, so convert to unsigned for range check. */
+        // return number of bytes
+        /* Runes are signed, so convert to unsigned for range check. */
         
 	/*
 	 * one character sequence
@@ -233,11 +234,11 @@ bad:
     {
         // logical character length of utf8 string
         
-	int n = 0;
-	uint rune;
+        int n = 0;
+        uint rune;
 
         const char* s = _s;
-	for(;;)
+        for(;;)
         {
             int c = *(uchar*)s;
             if(c < Runeself)
@@ -247,8 +248,8 @@ bad:
             } else
                 s += utf8toU(&rune, s);
             n++;
-	}
-	return 0;
+        }
+        return 0;
     }
 
     uint lastChar() const

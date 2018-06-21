@@ -185,7 +185,12 @@ int main(int argc, char** argv)
 
     // perform initial sync to allow game to start
     if (host.sync(ifi)) ifi->release();
-    else LOG1("IFIConsole, ", "start sync failed");
+    else
+    {
+        LOG1("IFIConsole, client not running; ", js.start());
+        delete ifi;
+        return -1;
+    }
 
     // we guarantee the back-end will receive some prologue json
     // *before* any commands. This allows the back-end to get ready
