@@ -1,0 +1,45 @@
+
+# XVAN Starter Kit 1.2
+# Object and timer for "it"
+
+$OBJECT o_it
+ DESCRIPTIONS
+  d_sys "it"
+
+ CONTAINED in o_player
+
+ FLAGS
+  f_hidden    = 1
+  f_bypass    = 1
+  f_update_it = 1  # to determine if auto update
+
+ ATTRIBUTES
+  r_it = %none
+
+ TRIGGERS
+  t_update_it
+    if testflag(f_update_it) then
+      if not(equal(o_subject, o_it) or equal(o_subject, %none)) then
+        r_it = o_subject
+      endif
+      # some object already updated r_it
+      setflag(f_update_it)
+    endif
+    m_update_it = 0
+
+END_OBJ
+
+
+$TIMERS
+ # timer m_update_it is fired at the end of every move.
+ # It calls t_update_it that will update the value of
+ # the it-object
+
+ m_update_it
+  init       -1
+  step       1
+  direction  up
+  interval   1
+  state      go
+  trigger_at 1
+  execute    o_it.t_update_it

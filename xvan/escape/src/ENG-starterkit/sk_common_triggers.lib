@@ -1,0 +1,103 @@
+
+# XVAN Starter Kit version 1.2
+
+
+$COMMON_TRIGGERS
+
+t_entrance
+  if not(islit(o_player)) then
+    printcr("It is pitch black.")
+    disagree()
+  endif
+
+  # part for location
+  if equal(%this, l_location) then
+    printcrbold(%this)
+    if not(testflag(%this.f_seenbefore)) or testflag(o_player.f_verbose) then
+      printcr(%this.d_entr_long)
+      setflag(f_seenbefore)
+    else
+      printcr(%this.d_entr_short)
+    endif
+    agree()
+  endif
+
+  # part for objects
+  indent(2)
+  if cansee(o_player, %this) then
+    if equal(owner(%this), owner(o_player)) then
+      # same containment level
+      if testflag(%this.f_seenbefore) then
+        printcr(%this.d_entr_short)
+      else
+        printcr(%this.d_entr_long)
+        setflag(%this.f_seenbefore)
+    else
+      if not(owns(o_player, %this, 0)) then
+        indent()
+        print("[this.r_preposition] [the] ")
+        print(owner(%this))
+        printcr(" is [a] [this].")
+      endif
+    endif
+    setflag(%this.f_seenbefore)
+  endif
+  indent(-2)
+  agree()
+
+
+t_i
+  if owns(o_player, %this, 1) then
+    indent()
+    printcr("[a] [this]")
+  else
+    if owns(o_player, %this, 0) and cansee(o_player, %this) then
+      indent(2)
+      print("[this.r_preposition] [the] ")
+      print(owner(%this))
+      printcr(" is [a] [this]")
+      indent(-2)
+    else
+      nomatch()
+    endif
+  endif
+
+
+t_reveal
+  # trigger used by verb 'open'
+  o_player.r_nr_to_reveal -= 1
+  if cansee(o_player, %this) then
+    if testflag(o_player.f_first) then
+      clearflag(o_player.f_first)
+      print("Opening [the] [o_subject] reveals ")
+      if equal(o_player.r_nr_to_reveal, 0) then
+        printcr("[a] [this].")
+      else
+        print("[a] [this]")
+      endif
+    else
+      # not the first to reply
+      if equal(o_player.r_nr_to_reveal, 0) then
+        printcr(" and [a] [this].")
+      else
+        print(", [a] [this]")
+      endif
+    endif
+  endif
+  if equal(o_player.r_nr_to_reveal, 0) and testflag(o_player.f_first) then
+    # all invisible to the player, nobody printed something
+    printcr("[the] [o_subject] is now open.")
+
+
+t_talk_to_dead
+  o_player.r_random = rnd(1,3)
+  if equal(o_player.r_random, 1) then
+    printcr("Do you realize that you are talking to [a] [o_actor]?")
+  else
+    if equal(o_player.r_random, 2) then
+      printcr("Do you often talk to liveless objects?")
+    else
+      printcr("You don't really expect [the] [o_actor] to react, do you?")
+    endif
+  endif
+  agree()

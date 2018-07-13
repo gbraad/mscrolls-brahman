@@ -1,0 +1,47 @@
+
+$VERB close
+ PROLOGUE
+   if not(testflag(o_actor.f_alive)) then
+     if trigger(o_actor.t_talk_to_dead) then
+       disagree()
+     endif
+   endif
+
+   if not(equal(o_subject, %none)) then
+     if not(testflag(o_subject.f_openable)) then
+       printcr("[the] [o_subject] is not something that can be closed.")
+       disagree()
+     else
+       if not(testflag(o_subject.f_open)) then
+         printcr("But [the] [o_subject] is already closed.")
+         disagree()
+     endif
+
+ EPILOGUE
+   # check if they closed something with the light source in it
+   if not(islit(o_player)) then
+     printcr("It is now pitch black.")
+
+ "close"
+   if equal(o_actor, o_player) then
+     printcr("What do you want to close?")
+   else
+     printcr("What do you want [the] [o_actor] to close?")
+   endif
+   getsubject()
+
+ "close [o_subject]"
+   DISAMBIGUATION_RULES
+     if testflag(o_subject.f_open) then
+       score(5)
+   END_RULES
+
+   clearflag(o_subject.f_open)
+   setflag(o_subject.f_opaque)
+   printcr("[the] [o_subject] is now closed.")
+
+ DEFAULT
+   printcr("I only understood you as far as willing to close something.")
+
+ENDVERB
+

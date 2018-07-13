@@ -1,0 +1,43 @@
+
+# XVAN Starter Kit version 1.2
+
+$DIRECTIONS
+north     SYNONYM n,
+south     SYNONYM s,
+east      SYNONYM e,
+west      SYNONYM w,
+northeast SYNONYM ne,
+northwest SYNONYM nw,
+southeast SYNONYM se,
+southwest SYNONYM sw,
+up        SYNONYM u,
+down      SYNONYM d
+
+
+$NOUNS
+$insert ".\\ENG-starterkit\\dictionary\\nouns.txt"
+
+
+$ADJECTIVES
+$insert ".\\ENG-starterkit\\dictionary\\adjectives.txt"
+
+
+$PREPOSITIONS
+about, at, behind, below, from, in, off, on, out, over, 
+through, to, under, with
+
+
+$ADVERBS
+slowly
+
+
+$ARTICLES
+a, an, the
+
+
+$Q_WORDS
+how, what, where, which, who
+
+
+$CONJUNCTION
+and

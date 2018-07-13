@@ -1,0 +1,17 @@
+
+$VERB unuse
+ "unuse [o_subject]"
+   if owns(o_player,o_subject) then
+     if try(l_location, 0, "drop [o_subject]") then
+       agree()
+     endif
+   endif
+
+ DEFAULT
+   agree() # do nothing
+
+ENDVERB
+
+
+
+   

@@ -1,0 +1,40 @@
+
+$VERB tie
+ PROLOGUE
+   if not(testflag(o_actor.f_alive)) then
+     if trigger(o_actor.t_talk_to_dead) then
+       disagree()
+     endif
+   endif
+
+ "tie"
+   if equal(o_actor, o_player) then
+     printcr("What do you want to tie?")
+   else
+     printcr("What do you want [the] [o_actor] to tie?")
+   endif
+   getsubject()
+
+ "tie [o_subject]"
+   if equal(o_actor, o_player) then
+     printcr("Where do you want to tie [the] [o_subject]?")
+   else
+     printcr("Where do you want [the] [o_actor] to tie [the] [o_subject]?")
+   endif
+   getsubject()
+
+ "tie [o_subject] to [o_spec]"
+   printcr("[o_actor] can't tie [the] [o_subject] to [the] [o_spec]")
+
+ DEFAULT
+   printcr("I only understood you as far as wanting to tie something.")
+     if testflag(o_player.f_verb_help) then
+       printcr("")
+       Printcr("Examples of syntaxes I understand are:")
+       printcr("  'tie'")
+       printcr("  'tie the rope'")
+       printcr("  'tie the rope to the hook'")
+       printcr("(to turn off these help messages, type 'help')")
+
+ENDVERB
+

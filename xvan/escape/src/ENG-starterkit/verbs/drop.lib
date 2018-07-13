@@ -1,0 +1,71 @@
+
+$VERB drop SYNONYM put
+ PROLOGUE
+   if not(testflag(o_actor.f_alive)) then
+     if trigger(o_actor.t_talk_to_dead) then
+       disagree()
+     endif
+   endif
+
+  if equal(o_subject, %none) then
+    agree()
+  endif
+
+  if equal(o_actor, o_nst) then       # no such thing
+    print("No one is holding ")
+    if equal(o_subject, o_nst) then
+      print("[o_nst.d_any].")         # any such thing
+    else
+      print("[the] [o_subject].")
+    endif
+    disagree()
+  else
+    if equal(o_subject, o_nst) then
+      # no such thing
+      print("[the] [o_actor] [o_actor.r_is] holding [o_nst.d_no] than can be dropped.")
+      disagree()
+    endif
+  endif
+  agree()
+
+ "drop"
+   if equal(o_actor, o_player) then
+     printcr("What do you want to drop?")
+   else
+     printcr("What do you want [the] [o_actor] to drop?")
+   endif
+   getsubject()
+
+ "drop [o_subject]"
+   DISAMBIGUATION_RULES
+    if owns(o_actor, o_subject) then score(5) endif
+   END_RULES
+
+   if owns(o_actor, o_subject) then
+     clearflag(o_subject.f_bypass)
+     move(o_subject, owner(owner(o_subject)))
+     print("[the] [o_actor]")
+     if equal(o_actor, o_player) then
+       print(" drop ")
+     else
+       print(" drops ")
+     endif
+     printcr("[the] [o_subject].")
+   else
+     if testflag(o_subject.f_takeable) then
+       printcr("[the] [o_actor] [o_actor.r_is] not holding the [o_subject].")
+     else
+       printcr("[the] [o_subject] cannot be dropped.")
+
+ "drop [o_subject] [prepos] [o_spec]"
+   DISAMBIGUATION_RULES
+     if owns(o_actor, o_subject) then score(5) endif
+     if testflag(o_spec.f_container) then score(5) endif
+   END_RULES
+
+   printcr("[the] [o_actor] cannot drop [the] [o_subject] [prepos] [the] [o_spec].")
+
+ DEFAULT
+   printcr("I only understood you as far as willing to drop something.")
+ENDVERB
+

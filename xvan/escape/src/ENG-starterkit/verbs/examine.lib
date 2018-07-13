@@ -1,0 +1,30 @@
+
+$VERB examine SYNONYM x SYNONYM investigate
+ PROLOGUE
+   if not(testflag(o_actor.f_alive)) then
+     if trigger(o_actor.t_talk_to_dead) then
+       disagree()
+     endif
+   endif
+
+ "examine"
+   if equal(o_actor, o_player) then
+     printcr("What do you want to examine?")
+   else
+     printcr("What do you want [the] [o_actor] to examine?")
+   endif
+   getsubject()
+
+ "examine [o_subject]"
+   if equal(o_subject, l_location) then
+     entrance(l_location)
+   else
+     printcr("[o_subject.d_exa]")
+     setflag(o_subject.f_seenbefore)
+     contents(o_subject)
+
+ DEFAULT
+   printcr("I only understood you as far as willing to examine something.")
+
+ENDVERB
+

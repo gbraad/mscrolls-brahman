@@ -1,0 +1,42 @@
+
+$VERB kill
+ PROLOGUE
+   if not(testflag(o_actor.f_alive)) then
+     if trigger(o_actor.t_talk_to_dead) then
+       disagree()
+     endif
+   endif
+
+ "kill"
+   if equal(o_actor, o_player) then
+     printcr("What do you want to kill?")
+   else
+     printcr("What do you want [the] [o_actor] to kill?")
+   endif
+   getsubject()
+
+ "kill [o_subject]",
+ "kill [o_subject] with [o_spec]"
+   DISAMBIGUATION_RULES
+    if testflag(o_subject.f_alive) then score(5)
+   END_RULES
+
+   if not(testflag(o_subject.f_alive)) then
+     printcr("[the] [o_subject] is not alive.")
+     disagree()
+   endif
+
+   if not(equal(o_actor, o_player)) then
+     print("[the] [o_subject] looks at you and says: ")
+     if equal(o_actor, o_subject) then
+       printcr("'Are you asking me to commit suicide? I don't think so...'")
+     else
+       printcr("'Killing [the] [o_subject] is not the answer'.")
+   else
+     printcr("Killing [the] [o_subject] is not the answer.")
+
+ DEFAULT
+   printcr("I only understood you as far as willing to kill something.")
+
+ENDVERB
+

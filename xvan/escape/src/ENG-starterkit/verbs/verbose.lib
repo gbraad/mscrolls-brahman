@@ -1,0 +1,16 @@
+
+$VERB verbose SYNONYM v
+ EPILOGUE
+  notimers()
+
+ "[o_player], verbose"
+   if testflag(o_player.f_verbose) then
+     clearflag(o_player.f_verbose)
+   else
+     setflag(o_player.f_verbose)
+
+ DEFAULT
+   printcr("I don't understand that sentence.")
+
+ENDVERB
+

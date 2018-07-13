@@ -1,0 +1,19 @@
+
+$VERB inventory SYNONYM i
+ PROLOGUE
+   if not(equal(o_actor, o_player)) then
+     printcr("The inventory command works only for the player.")
+     disagree()
+   endif
+
+   printcr("You are carrying:")
+   indent(2)
+
+ EPILOGUE
+   indent(-2)
+
+ DEFAULT
+   printcr("Nothing, you are empty-handed.")
+
+ENDVERB
+  

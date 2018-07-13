@@ -1,0 +1,45 @@
+
+$VERB break
+ PROLOGUE
+   if not(testflag(o_actor.f_alive)) then
+     if trigger(o_actor.t_talk_to_dead) then
+       disagree()
+     endif
+   endif
+
+   if not(equal(o_spec, %none)) then
+     if not(owns(o_actor, o_spec)) then
+       if testflag(o_spec.f_takeable) then
+         printcr("[[taking [the] [o_spec] first].")
+         move(o_spec, o_actor)
+       else
+         printcr("[the] [o_actor] cannot take [the] [o_spec] to break [the] [o_subject].")
+         disagree()
+       endif
+     endif
+   endif
+
+ "break"
+   if equal(o_actor, o_player) then
+     printcr("What do you want to break?")
+   else
+     printcr("What do you want [the] [o_actor] to break?")
+   endif
+   getsubject()
+
+ "break [o_subject]",
+ "break [o_subject] with [o_spec]"
+   printcr("Breaking [the] [o_subject] isn't particularly helpful.")
+    
+  DEFAULT
+    printcr("I only understood you as far as wanting to break something.")
+    if testflag(o_player.f_verb_help) then
+      printcr("")
+      Printcr("Examples of syntaxes I understand are:")
+      printcr("  'break'")
+      printcr("  'break the window'")
+      printcr("  'break the window with the brick'")
+      printcr("(to turn off these help messages, type 'help')")
+
+ENDVERB
+

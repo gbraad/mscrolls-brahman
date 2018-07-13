@@ -1,0 +1,57 @@
+
+$VERB give
+ PROLOGUE
+   if not(testflag(o_actor.f_alive)) then
+     if trigger(o_actor.t_talk_to_dead) then
+       disagree()
+     endif
+   endif
+
+  if equal(o_subject, %none) then
+    agree()
+  endif
+
+  if equal(o_actor, o_nst) then       # no such thing
+    print("No one is holding ")
+    if equal(o_subject, o_nst) then
+      print("[o_nst.d_any].")         # any such thing
+    else
+      print("[the] [o_subject].")
+    endif
+    disagree()
+  else
+    if equal(o_subject, o_nst) then
+      # no such thing
+      print("[the] [o_actor] [o_actor.r_is] holding [o_nst.d_no] than can be dropped.")
+      disagree()
+    endif
+  endif
+  agree()
+
+  if not(owns(o_actor, o_subject)) then
+    printcr("But [the] [o_actor] [o_actor.r_do] not have [the] [o_subject]!")
+    disagree()
+  endif
+  agree() # is default, may be omitted.
+
+ "give [o_subject] to [o_spec]"
+  DISAMBIGUATION_RULES
+   if testflag(o_spec.f_alive) then score(5) endif
+   if owns(o_actor, o_subject) AND not(equal(o_subject, o_nst)) then score(5) endif
+  END_RULES
+
+   if testflag(o_spec.f_alive) then
+     printcr("[the] [o_spec] kindly refuses your offer.")
+   else
+     printcr("There's no use giving [the] [o_subject] to [the] [o_spec].")
+
+ DEFAULT
+   printcr("I only understood you as far as wanting to give something.")
+   if testflag(o_player.f_verb_help) then
+     printcr("")
+     Printcr("An example of the syntax I understand is:")
+     printcr("  'give the ball to Fred'")
+     printcr("(to turn off these help messages, type 'help')")
+
+ENDVERB
+

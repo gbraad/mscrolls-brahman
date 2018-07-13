@@ -1,0 +1,52 @@
+
+$VERB turn
+ PROLOGUE
+   if not(testflag(o_actor.f_alive)) then
+     if trigger(o_actor.t_talk_to_dead) then
+       disagree()
+     endif
+   endif
+
+ "turn"
+   if equal(o_actor, o_player) then
+     printcr("What do you want to turn?")
+   else
+     printcr("What do you want [the] [o_actor] to turn?")
+   endif
+   getsubject()
+
+ "turn [o_subject]"
+   if testflag(o_subject.f_fixed) then
+     printcr("[the] [o_subject] is fixed in place.")
+   else
+     printcr("Turning [the] [o_subject] accomplishes nothing.")
+
+ "turn [o_subject] [dir]",
+ "turn [o_subject] to [dir]"
+   if testflag(o_subject.f_fixed) then
+     printcr("[the] [o_subject] is fixed in place.")
+   else
+     print("That doesn't make sense, turning [the] [o_subject] [dir].")
+
+ "turn on [o_subject]",
+ "turn [o_subject] on"
+   printcr("[the] [o_subject] is not something that can be turned on.")
+
+ "turn off [o_subject]",
+ "turn [o_subject] off"
+   printcr("[the] [o_subject] is not something that can be turned off.")
+
+ DEFAULT
+  printcr("I only understood you as far as wanting to turn something.")
+   if testflag(o_player.f_verb_help) then
+     printcr("")
+     Printcr("Examples of syntaxes I understand are:")
+     printcr("  'turn'")
+     printcr("  'turn the arrow'")
+     printcr("  'turn the arrow to the north'")
+     printcr("  'turn on themachine'")
+     printcr("  'turn the machine off'")
+     printcr("(to turn off these help messages, type 'help')")
+
+ENDVERB
+

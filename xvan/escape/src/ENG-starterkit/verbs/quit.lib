@@ -1,0 +1,13 @@
+
+$VERB quit SYNONYM q
+
+ "[o_player], quit"
+   print("Do you really want to quit? ")
+   if yesno() then
+     quit()
+
+ DEFAULT
+   printcr("If you want to quit the game, just type 'quit'.")
+  
+ENDVERB
+

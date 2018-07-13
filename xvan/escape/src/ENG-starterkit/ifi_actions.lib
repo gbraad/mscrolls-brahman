@@ -1,0 +1,322 @@
+
+$LOCATION l_json  # needed as a home for the flag
+ DESCRIPTIONS
+   d_dummy ""
+   d_map_backimage "images\\\\mapback.jpg"
+
+ FLAGS
+   f_first_json  = 1
+   f_first_place = 1
+
+ ATTRIBUTES
+   r_exits = 0
+
+ TRIGGERS
+   t_ifi
+     if try(l_json, 0, "ifi_update_gui") then endif
+
+     # reset timer
+     m_ifi = 0
+END_LOC
+
+$COMMON_ATTRIBUTES
+ r_ifi_gx      = 0
+ r_ifi_gy      = 0
+ r_ifi_picture = ""
+ r_ifi_icon    = ""
+
+$TIMERS
+ m_ifi
+   init       0   # when first fired, do nothing
+   step       1
+   direction  up
+   interval   1
+   state      go
+   trigger_at 1
+   execute    l_json.t_ifi
+
+
+$VERB ifi_update_gui
+ "ifi_update_gui"
+    if try(l_json, 0, "ifi_picture") then endif
+    if try(l_json, 0, "ifi_exits") then endif
+    if try(l_json, 0, "ifi_items") then endif
+    if try(l_json, 0, "ifi_people") then endif
+    if try(l_json, 0, "ifi_loc") then endif
+    if try(l_json, 0, "ifi_map") then endif
+ENDVERB
+
+
+$VERB ifi_exits
+ PROLOGUE
+   clearjson()
+   addjson("{\"exits\":")
+ EPILOGUE
+   addjson("}")
+   sendjson()
+   clearjson()
+ DEFAULt
+   if trigger(l_location.t_ifi_exits) then
+     agree()
+ENDVERB
+
+
+$VERB ifi_items
+ SCOPE actor_only
+ PROLOGUE
+   clearjson()
+   addjson("{\"items\":[[")
+   setflag(l_json.f_first_json)
+ EPILOGUE
+   addjson("]}")
+   sendjson()
+   clearjson()
+ DEFAULT
+   # next line means xeq trigger t_ifi_items for all objects that
+   # are held by the player and have flag f_takeable set to 1
+   # '0' means unlimited depth.
+
+   synchronize(o_player, o_player.t_ifi_items, o_player.f_takeable, 1, 0)
+   agree()
+ENDVERB
+
+
+$VERB ifi_people
+ SCOPE ALL_LOCS
+ PROLOGUE
+   clearjson()
+   addjson("{\"people\":[[")
+   setflag(l_json.f_first_json)
+ EPILOGUE
+   addjson("]}")
+   sendjson()
+   clearjson()
+ DEFAULT
+   # no replies, they met nobody, yet
+   agree()
+ENDVERB
+
+
+$VERB ifi_loc
+ DEFAULT
+   clearjson()
+   addjson("{\"location\":", l_location)
+   addjson("}")
+   sendjson()
+   clearjson()
+ENDVERB
+
+
+$VERB ifi_map
+ SCOPE all_locs
+ PROLOGUE
+   clearjson()
+   setflag(l_json.f_first_json)
+   setflag(l_json.f_first_place)
+   addjson("{\"map\":{\"backimage\":\"[l_json.d_map_backimage]\",")
+   addjson("\"location\":", l_location)
+   addjson(",\"places\":[[")
+ EPILOGUE
+   addjson("]}}")
+   sendjson()
+   clearjson()
+ENDVERB
+
+
+$VERB ifi_picture
+ DEFAULT
+   clearjson()
+   addjson("{\"picture\":{\"name\":")
+   addjson("\"[l_location.r_ifi_picture]\"}}")
+   sendjson()
+   clearjson()
+ENDVERB
+
+
+$COMMON_TRIGGERS
+ t_ifi_items
+   if owns(o_player, %this) and (cansee(o_player, %this) or testflag(%this.f_bypass)) then
+     if testflag(l_json.f_first_json) then
+       clearflag(l_json.f_first_json)
+     else
+       addjson(",")
+     endif
+     addjson("{\"id\":", %this)  # will add numerical id, not text
+     addjson(",\"name\":\"[this]\",\"icon\":\"[this.r_ifi_icon]\"}")
+   endif
+
+ t_ifi_items_id
+   if isobject(%this) then
+     if not(isobject(owner(%this)) and cansee(owner(%this), %this)) then
+       if testflag(l_json.f_first_json) then
+         clearflag(l_json.f_first_json)
+         addjson("", %this)
+       else
+         addjson(",", %this)
+
+ t_ifi_people
+   if testflag(%this.f_seenbefore) then
+     if testflag(l_json.f_first_json) then
+       clearflag(l_json.f_first_json)
+     else
+       addjson(",")
+     endif
+     addjson("{\"id\":", %this)  # will add numerical id, not text
+     addjson(",\"name\":\"[this]\",\"icon\":\"[this.r_ifi_icon]\"}")
+   endif
+
+ t_ifi_place
+   # makes the following object:
+   # { "id":int,"name":"locname","gx":int,
+   #  "gy":int,"dark":true,"exits":[id,id,...],"items":[int, int, ... ] }
+
+   if not(testflag(%this.f_seenbefore)) then
+     # do not show on map, yet
+     agree()
+   endif
+
+   if testflag(l_json.f_first_place) then
+     clearflag(l_json.f_first_place)
+   else
+     addjson(",")
+   endif
+
+   addjson("{\"id\":",%this)
+   addjson(",\"name\":\"[this]\",\"gx\":[this.r_ifi_gx],\"gy\":[this.r_ifi_gy]")
+   if not(islit(%this)) then
+     addjson(",\"dark\":true")
+   endif
+
+   addjson(",\"exits\":[[")
+   setflag(l_json.f_first_json)
+
+   if valdir(%this, n) then
+     if testflag(l_json.f_first_json) then
+       clearflag(l_json.f_first_json)
+     else
+       addjson(",")
+     endif
+     addjson("", dest(%this, n))
+   endif
+
+   if valdir(%this, ne)  then
+     if testflag(l_json.f_first_json) then
+       clearflag(l_json.f_first_json)
+     else
+       addjson(",")
+     endif
+     addjson("", dest(%this, ne))
+   endif
+
+   if valdir(%this, e)  then
+     if testflag(l_json.f_first_json) then
+       clearflag(l_json.f_first_json)
+     else
+       addjson(",")
+     endif
+     addjson("", dest(%this, e))
+   endif
+
+   if valdir(%this, se)  then
+     if testflag(l_json.f_first_json) then
+       clearflag(l_json.f_first_json)
+     else
+       addjson(",")
+     endif
+     addjson("", dest(%this, se))
+   endif
+
+   if valdir(%this, s)  then
+     if testflag(l_json.f_first_json) then
+       clearflag(l_json.f_first_json)
+     else
+       addjson(",")
+     endif
+     addjson("", dest(%this, s))
+   endif
+
+   if valdir(%this, sw)  then
+     if testflag(l_json.f_first_json) then
+       clearflag(l_json.f_first_json)
+     else
+       addjson(",")
+     endif
+     addjson("", dest(%this, sw))
+   endif
+
+   if valdir(%this, w)  then
+     if testflag(l_json.f_first_json) then
+       clearflag(l_json.f_first_json)
+     else
+       addjson(",")
+     endif
+     addjson("", dest(%this, w))
+   endif
+
+   if valdir(%this, nw)  then
+     if testflag(l_json.f_first_json) then
+       clearflag(l_json.f_first_json)
+     else
+       addjson(",")
+     endif
+     addjson("", dest(%this, nw))
+   endif
+
+   if valdir(%this, u)  then
+     if testflag(l_json.f_first_json) then
+       clearflag(l_json.f_first_json)
+     else
+       addjson(",")
+     endif
+     addjson("", dest(%this, u))
+   endif
+
+   if valdir(%this, d)  then
+     if testflag(l_json.f_first_json) then
+       clearflag(l_json.f_first_json)
+     else
+       addjson(",")
+     endif
+     addjson("", dest(%this, d))
+   endif
+
+   addjson("]")
+
+   setflag(l_json.f_first_json)
+
+   # don't know if the following works
+   addjson(",\"items\":[[")
+   setflag(l_json.f_first_json)
+   synchronize(%this, o_player.t_ifi_items_id, o_player.f_seenbefore, 1)
+   addjson("]}")
+ 
+
+ t_ifi_exits
+   # list all possible exits for a location
+   # and stores them in l_json.r_exits
+   # must deliver an integer (bitmask) with
+   # lsb -> msb oder of:
+   # n-ne-e-se-s-sw-w-nw-up-down-in-out
+   # Note: we don't use in and out
+
+   # this trigger makes an {"exits":number} object
+
+   if isobject(%this) then
+     agree()
+   endif
+
+   # ok, it's a location
+   l_json.r_exits = 0
+
+   if valdir(%this, n)  then l_json.r_exits +=    1 endif
+   if valdir(%this, ne) then l_json.r_exits +=    2 endif
+   if valdir(%this, e)  then l_json.r_exits +=    4 endif
+   if valdir(%this, se) then l_json.r_exits +=    8 endif
+   if valdir(%this, s)  then l_json.r_exits +=   16 endif
+   if valdir(%this, sw) then l_json.r_exits +=   32 endif
+   if valdir(%this, w)  then l_json.r_exits +=   64 endif
+   if valdir(%this, nw) then l_json.r_exits +=  128 endif
+   if valdir(%this, u)  then l_json.r_exits +=  256 endif
+   if valdir(%this, d)  then l_json.r_exits +=  512 endif
+
+   addjson("[l_json.r_exits]")

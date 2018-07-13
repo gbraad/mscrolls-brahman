@@ -10,6 +10,5 @@ object_script.*
 *.dll
 *.exp
 *.a
-*.lib
 
 

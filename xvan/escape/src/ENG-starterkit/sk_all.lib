@@ -1,0 +1,59 @@
+
+# XVAN Starter Kit 1.2
+# Object and common triggers for "all"
+
+$OBJECT o_all
+ DESCRIPTIONS
+  d_sys "all", "everything"
+
+ CONTAINED in o_player
+
+ FLAGS
+  f_hidden = 1
+  f_bypass = 1
+  f_fixed  = 0
+
+ TRIGGERS
+  "drop [o_all]"               -> t_drop_all
+  "take [o_all]"               -> t_take_all
+  "take [o_all] from [o_spec]" -> t_take_all_from
+  "[action] [o_all]"           -> t_other
+
+  t_drop_all
+    if equal(synchronize(o_actor, t_drop, f_takeable, 1), 0) then
+      printcr("There is nothing to drop.")
+
+  t_take_all
+    if equal(synchronize(owner(o_actor), t_take, f_takeable, 1, 0), 0) then
+      printcr("There is nothing to take.")
+
+  t_take_all_from
+    if equal(synchronize(o_spec, t_take, f_takeable, 1, 0), 0) then
+      printcr("There is nothing to take from [the] [o_spec].")
+
+  t_other
+    printcr("All cannot be used with [action]. You must address objects individually.")
+
+END_OBJ
+
+
+$COMMON_TRIGGERS
+ t_drop
+   if not(testflag(f_hidden)) then
+     move(%this, owner(o_actor))
+     printcr("[this]: dropped.")
+   else
+     nomatch()
+
+ t_drop_all_prepos
+   # called by specifier from 'drop all [prepos] [o_spec]' command
+   if not(testflag(f_hidden)) then
+     printcr("[this]: dropped [prepos] [the] [o_spec]")
+     move(%this, o_spec, %prepos)
+
+ t_take
+   if cansee(o_actor, %this) and not(owns(o_actor, %this)) then
+     move(%this, o_actor)
+     printcr("[this]: taken.")
+   else
+     nomatch()

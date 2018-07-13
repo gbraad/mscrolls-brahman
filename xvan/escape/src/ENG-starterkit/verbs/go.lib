@@ -1,0 +1,18 @@
+
+$verb go
+ PROLOGUE
+   if not(testflag(o_actor.f_alive)) then
+     if trigger(o_actor.t_talk_to_dead) then
+       disagree()
+     endif
+   endif
+
+  "go [dir]",
+  "go to [dir]"
+    printcr("You can't go that way.")
+
+  DEFAULT
+    printcr("I do not understand that sentence.")
+
+ENDVERB
+

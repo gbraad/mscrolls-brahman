@@ -1,0 +1,61 @@
+
+$VERB open
+ PROLOGUE
+   if not(testflag(o_actor.f_alive)) then
+     if trigger(o_actor.t_talk_to_dead) then
+       disagree()
+     endif
+   endif
+
+   if not(equal(o_subject, %none)) then
+     if not(testflag(o_subject.f_openable)) then
+       printcr("[the] [o_subject] is not something that can be opened.")
+       disagree()
+     else
+       if testflag(o_subject.f_locked) then
+         printcr("[the] [o_subject] seems to be locked.")
+         disagree()
+       else
+         if testflag(o_subject.f_open) then
+           printcr("But [the] [o_subject] is already open.")
+           disagree()
+         endif
+       endif
+
+ "open"
+   if equal(o_actor, o_player) then
+     printcr("What do you want to open?")
+   else
+     printcr("What do you want [the] [o_actor] to open?")
+   endif
+   getsubject()
+
+ "open [o_subject]"
+   DISAMBIGUATION_RULES
+    if testflag(o_subject.f_openable) then
+      if not(testflag(o_subject.f_locked)) then
+        if not(testflag(o_subject.f_open)) then
+          score(15)
+        else
+          score(10)
+      else
+        score(5)
+   END_RULES
+
+   setflag(o_subject.f_open)
+   clearflag(o_subject.f_opaque)
+
+   o_player.r_nr_to_reveal = count(o_subject, o_subject.f_any, 1)
+   if equal(o_player.r_nr_to_reveal, 0) then
+     printcr("[the] [o_subject] is now open.")
+     disagree()
+   endif
+   setflag(o_player.f_first)
+   synchronize(o_subject, o_subject.t_reveal, o_subject.f_any, 1)
+   agree()  # otherwise returns number of objects from sync
+
+ DEFAULT
+   printcr("I only understood you as far as willing to open something.")
+
+ENDVERB
+

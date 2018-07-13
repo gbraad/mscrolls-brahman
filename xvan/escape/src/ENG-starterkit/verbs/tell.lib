@@ -1,0 +1,49 @@
+
+$VERB tell
+ SCOPE all_locs
+
+ PROLOGUE
+   if not(testflag(o_actor.f_alive)) then
+     if trigger(o_actor.t_talk_to_dead) then
+       disagree()
+     endif
+   endif
+
+   if equal(o_subject, %none) then
+     agree()
+   endif
+
+   if not(cansee(o_actor, o_subject)) then
+     printcr("There is no [o_subject] here.")
+     disagree()
+   endif
+
+ "[o_player], tell [o_subject] about [o_spec]"
+   if equal(o_subject, o_actor) then
+     printcr("Talking to yourself is a sign of pending mental collapse.")
+   else
+     if not(testflag(o_subject.f_alive)) then
+       printcr("Not surprisingly, [the] [o_subject] does not respond.")
+     else
+       printcr("Thanks for sharing that.")
+
+ "[o_actor], tell [o_subject] about [o_spec]"
+   if equal(o_actor, o_subject) then
+     printcr("That means I would be telling myself something I already know...")
+   else
+     if not(testflag(o_subject.f_alive)) then
+       printcr("You don't really expect me to talk to [a] [o_subject], do you?")
+     else
+       printcr("Really, there's nothing to tell about [the] [o_spec].")
+  
+  DEFAULT
+    printcr("I only understood you as far as wanting to tell something.")
+    if testflag(o_player.f_verb_help) then
+      printcr("")
+      Printcr("Examples of the syntaxes I understand are:")
+      printcr("  'tell Fred about the brass key'")
+      printcr("  'Fred, tell me about the brass key'")
+      printcr("(to turn off these help messages, type 'help')")
+
+ENDVERB
+

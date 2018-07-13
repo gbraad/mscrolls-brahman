@@ -1,0 +1,35 @@
+
+$VERB look SYNONYM l
+ PROLOGUE
+   if not(testflag(o_actor.f_alive)) then
+     if trigger(o_actor.t_talk_to_dead) then
+       disagree()
+     endif
+   endif
+
+  if not(islit(o_player)) then
+    printcr("It is pitch black.")
+    disagree()
+  endif
+
+ "look"
+   if not(equal(owner(o_player), l_location)) then
+     # the player is in some other object
+     print("[o_player.r_preposition] [the] ")
+     print(owner(o_player))
+     printcr(".")
+   endif
+   clearflag(l_location.f_seenbefore)
+   entrance(l_location)
+
+ "look at [o_subject]"
+   printcr(o_subject.d_exa)
+
+ "look [prepos] [o_subject]"
+   printcr("There is nothing special [prepos] [the] [o_subject].")
+
+ DEFAULT
+   printcr("I only understood you as far as willing to look.")
+
+ENDVERB
+

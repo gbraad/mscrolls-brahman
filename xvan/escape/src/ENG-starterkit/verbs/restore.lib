@@ -1,0 +1,23 @@
+
+$VERB restore
+ EPILOGUE
+  notimers()
+
+ "[o_player], restore"
+   restore()
+
+   # timers are not called after a restore
+
+   # update the status window
+   if trigger(o_status_window.t_update) then endif
+
+   # ifi GUI update will be done after loaddata from front-end
+
+ DEFAULT
+   printcr("If you want to restore the progress you saved earlier, type 'restore'.")
+
+   # return disagree, in case they came here thru runverb()
+   disagree()
+
+ENDVERB
+

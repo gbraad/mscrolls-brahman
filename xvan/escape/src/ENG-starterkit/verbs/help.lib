@@ -1,0 +1,16 @@
+
+$VERB help
+ EPILOGUE
+  notimers()
+
+ "[o_player], help"
+   if testflag(o_player.f_verb_help) then
+     clearflag(o_player.f_verb_help)
+   else
+     setflag(o_player.f_verb_help)
+
+ DEFAULT
+   printcr("I don't understand that sentence.")
+
+ENDVERB
+

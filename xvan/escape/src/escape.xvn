@@ -53,6 +53,9 @@ $LOCATION l_chest_room
  EXITS
    e  -> l_dial_room
 
+ FLAGS
+   f_seenbefore = 1
+
  ATTRIBUTES
    r_ifi_gx      = 0
    r_ifi_gy      = 1
@@ -464,10 +467,7 @@ $OBJECT o_player
    "zwoosh"                   -> t_zwoosh     # placeholder trigger to use for debugging the story
 
    t_zwoosh # special command for testing
-     printcr("hoi")
-     clearjson()
-     addjson("[this].d_sys")
-     clearjson()
+     printcr("hoihoi [o_npc]") debug()
 
    t_init
      # This trigger initializes things. It is started by timer
@@ -480,6 +480,9 @@ $OBJECT o_player
      hitanykey()
      clearscreen()
      printcr(d_init1)
+
+     # restore f_seenbefore for chest room (was set to 1 for ifi-xvan
+     clearflag(l_chest_room.f_seenbefore)
 
      entrance(owner(%this)) # act as if the player just entered the room
      stoptimer(m_init)      # served its purpose
@@ -1065,7 +1068,7 @@ END_OBJ
 $OBJECT o_chest
 
  DESCRIPTIONS
-   d_sys         "the old wooden chest"
+   d_sys         "chest"
 
    d_entr_long   "There is [a] [o_chest] here."
 

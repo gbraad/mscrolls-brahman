@@ -1,0 +1,20 @@
+
+$VERB listen
+ PROLOGUE
+   if not(testflag(o_actor.f_alive)) then
+     if trigger(o_actor.t_talk_to_dead) then
+       disagree()
+     endif
+   endif
+
+ "listen"
+   printcr("There's only the usual environment sounds.")
+
+ "listen to [o_subject]"
+   printcr("There's no sound from [the] [o_subject].")
+
+ DEFAULT
+   printcr("I only understood you as far as wanting to listen.")
+
+ENDVERB
+

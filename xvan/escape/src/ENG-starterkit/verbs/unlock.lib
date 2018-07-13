@@ -1,0 +1,55 @@
+
+$VERB unlock
+ PROLOGUE
+   if not(testflag(o_actor.f_alive)) then
+     if trigger(o_actor.t_talk_to_dead) then
+       disagree()
+     endif
+   endif
+
+   if not(equal(o_subject, %none)) then
+     if not(testflag(o_subject.f_lockable)) then
+       printcr("[the] [o_subject] is not something that can be unlocked.")
+       disagree()
+     else
+       if not(testflag(o_subject.f_locked)) then
+         printcr("But [the] [o_subject] is already unlocked.")
+         disagree()
+     endif
+
+ "unlock"
+   if equal(o_actor, o_player) then
+     printcr("What do you want to unlock?")
+   else
+     printcr("What do you want [the] [o_actor] to unlock?")
+   endif
+   getsubject()
+
+ "unlock [o_subject]"
+   DISAMBIGUATION_RULES
+    if testflag(o_subject.f_locked) then score(5) endif
+    END_RULES
+
+   if owns(o_actor, o_subject.r_key) then
+     printcr("[[with [the] [o_subject.r_key]].")
+     clearflag(o_subject.f_locked)
+     printcr("[the] [o_subject] is now unlocked.")
+   else
+     printcr("[the] [o_actor] [o_actor.r_do] not seem to have the right key.")
+
+ "unlock [o_subject] with [o_spec]"
+  DISAMBIGUATION_RULES
+   if testflag(o_subject.f_locked) then score(5) endif
+   END_RULES
+
+   if not(owns(o_actor, o_spec)) then
+     printcr("But [the] [o_actor] [o_actor.r_is] not holding [the] [o_spec].")
+   else
+     if equal(o_spec, o_subject.r_key) then
+       clearflag(o_subject.f_locked)
+       printcr("[the] [o_subject] is now unlocked.")
+     else
+       printcr("Apparently, [the] [o_spec] is not the key for [the] [o_subject].")
+
+ENDVERB
+

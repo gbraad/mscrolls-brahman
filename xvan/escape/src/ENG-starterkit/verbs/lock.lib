@@ -1,0 +1,67 @@
+
+$VERB lock
+ PROLOGUE
+   if not(testflag(o_actor.f_alive)) then
+     if trigger(o_actor.t_talk_to_dead) then
+       disagree()
+     endif
+   endif
+
+   if not(equal(o_subject, %none)) then
+     if not(testflag(o_subject.f_lockable)) then
+       printcr("[the] [o_subject] is not something that can be locked.")
+       disagree()
+     else
+       if testflag(o_subject.f_locked) then
+         printcr("But [the] [o_subject] is already locked.")
+         disagree()
+     endif
+
+ "lock"
+   if equal(o_actor, o_player) then
+     printcr("What do you want to lock?")
+   else
+     printcr("What do you want [the] [o_actor] to lock?")
+   endif
+   getsubject()
+
+ "lock [o_subject]"
+   DISAMBIGUATION_RULES
+    if testflag(o_subject.f_lockable) then
+      if not(testflag(o_subject.f_locked)) then
+        score(10)
+      else
+        score(5)
+   END_RULES
+
+   if owns(o_actor, o_subject.r_key) then
+     if testflag(o_subject.f_open) then
+       printcr("[[closing [the] [o_subject] first].")
+       clearflag(o_subject.f_open)
+     endif
+     printcr("[[with [the] [o_subject.r_key]].")
+     setflag(o_subject.f_locked)
+     printcr("[the] [o_subject] is now locked.")
+   else
+     printcr("[the] [o_actor] [o_actor.r_do] not seem to have the right key.")
+
+ "lock [o_subject] with [o_spec]"
+   DISAMBIGUATION_RULES
+    if testflag(o_subject.f_lockable) then
+      if not(testflag(o_subject.f_locked)) then
+        score(10)
+      else
+        score(5)
+   END_RULES
+
+   if not(owns(o_actor, o_spec)) then
+     printcr("But [the] [o_actor] [o_actor.r_is] not holding [the] [o_spec].")
+   else
+     if equal(o_spec, o_subject.r_key) then
+       setflag(o_subject.f_locked)
+       printcr("[the] [o_subject] is now locked.")
+     else
+       printcr("Apparently, [the] [o_spec] is not the key for [the] [o_subject].")
+
+ENDVERB
+

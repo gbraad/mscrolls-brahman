@@ -1,0 +1,31 @@
+
+# XVAN Starter Kit version 1.2
+
+$COMMON_DESCRS
+  d_entr_long, d_entr_short, d_exa
+
+
+$COMMON_FLAGS
+  f_seenbefore = 0  # To select long or short room description
+  f_takeable   = 0  # tells whether objects may be picked up.
+  f_openable   = 0
+  f_open       = 0
+  f_lockable   = 0
+  f_locked     = 0
+  f_wearable   = 0
+  f_worn       = 0
+  f_container  = 0
+  f_alive      = 0
+  f_fixed      = 1
+  f_any        = 1
+
+
+$COMMON_ATTRIBUTES
+  r_is   = is   # default is 3rd person.
+  r_have = has  # default is 3rd person.
+  r_do   = does # default is 3rd person
+  r_key  = %none
+
+
+
+  
