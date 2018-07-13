@@ -1,0 +1,95 @@
+
+
+$VERB charge
+ "charge [o_all]"
+   printcr("You cannot use all in combination with charge.")
+
+ DEFAULT
+   printcr("[the] [o_actor] cannot charge that.")
+ENDVERB
+
+
+$VERB enter 
+  DEFAULT
+    printcr("I only understood you as far as wanting to enter something.")
+ENDVERB
+
+
+$VERB follow
+ SCOPE all_locs
+  "follow"
+    print("Who do you want to follow?")
+    getsubject()
+
+  "follow [o_subject]"
+    if testflag(o_actor.f_alive) then
+      printcr("not possible, yet")
+      # follow(o_actor, o_subject) # This function not yet implemented
+    else
+      print("[the] [o_actor] cannot follow [the] [o_subject]")
+    
+  DEFAULT
+    printcr("You don't need that in this story.")
+ENDVERB
+
+
+$VERB light
+  DEFAULT
+    printcr("[o_actor] can't light that")
+ENDVERB
+
+
+$VERB pull
+  "pull"
+    printcr("What do you want to [action]?")
+    getsubject()
+
+  "pull [o_subject]"
+    printcr("[o_actor] cannot pull [the] [o_subject].")
+
+  DEFAULT
+    printcr("That's not going to accomplish anything.")
+ENDVERB
+
+
+$VERB set
+  "set"
+    printcr("What do you want to [action]?")
+    getsubject()
+
+  "set [o_subject]"
+    printcr("What do you want to [action] [the] [o_subject] to?")
+    getspec()
+
+ DEFAULT
+   printcr("You can't set [the] [o_subject] to [the] [o_spec]!")
+ENDVERB
+
+$VERB push SYNONYM press
+  "push"
+    printcr("What do you want to press?")
+    getsubject()
+
+  "push [o_subject]"
+    DISAMBIGUATION_RULES
+      if testflag(o_subject.f_pressable) then score(5)
+    END_RULES
+    printcr("You cannot press the [o_subject].")
+
+  DEFAULT
+    printcr("Nothing happens.")
+ENDVERB
+
+$REDEFINE_VERB actie2 SYNONYM actie4 SYNONYM actie1
+ DEFAULT
+   printcr("Default 2: [action]")
+ENDVERB
+
+$VERB actie1 SYNONYM actie2 SYNONYM actie3
+ DEFAULT
+   printcr("Default 1: [action]")
+ENDVERB
+
+
+$VERB zwoosh "zwoosh" printcr("zwoosh") ENDVERB
+# Used for cheating

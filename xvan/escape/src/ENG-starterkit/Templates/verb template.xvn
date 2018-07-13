@@ -1,0 +1,26 @@
+
+$VERB <name1> SYNONYM <name2> SYNONYM <name3>
+ PROLOGUE
+   # this code is always executed first in commands with this verb
+
+ EPILOGUE
+   # this code is executed last in commands with this verb
+
+ DISAMBIGUATION_RULES
+   # just delete this section. if you want to know what it
+   # is for, check the "ambiguities in user input" section
+   # in the XVAN introduction.
+ END_RULES
+
+ "user command1"
+   # code to be executed for command 1
+
+ "user command2"
+ "user command3"
+   # code to be executed for command 2 and command 3
+
+ DEFAULT
+   # this code is executed when nothing else was executed (except for the prologue)
+
+ENDVERB
+

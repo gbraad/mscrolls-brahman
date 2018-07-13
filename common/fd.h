@@ -114,8 +114,7 @@ struct FDBase
     // interface
     virtual void close() = 0;
     virtual bool read(unsigned char* buf, size_t amt, size_t& nread) = 0;
-    virtual bool write(const unsigned char* buf, size_t amt, size_t& nwrote) 
-    { return false; }
+    virtual bool write(const unsigned char* buf, size_t amt, size_t& nwrote)  = 0;
 
 protected:
 
@@ -137,15 +136,18 @@ struct FD: public FDBase
     {
         close();
 
+        mode_t mode = S_IRUSR | S_IWUSR;
+ 
 #ifdef _WIN32
         /* even though the data files are text, we must open in binary
          * so that the logical offsets match the physical offsets.
          */
         flags |= O_BINARY;
+#else
+        // these are present for mingw but not always, so leave them out.
+        mode |= S_IRGRP | S_IROTH | S_IWGRP | S_IWOTH;
 #endif
 
-        mode_t mode = S_IRUSR | S_IRGRP | S_IROTH | S_IWUSR | S_IWGRP | S_IWOTH;
-        
         _fd = ::open(path, flags, mode); 
         bool res = isOpen();
         if (!res) WinError();
@@ -159,6 +161,10 @@ struct FD: public FDBase
         return stat(path, &sbuf) == 0;
     }
 
+    static bool exists(const std::string& path) { return exists(path.c_str()); }
+    bool open(const std::string& path, int flags = fd_read)
+    { return open(path.c_str(), flags); }
+    
     static bool existsFile(const char* path)
     {
         // exists and is a file
@@ -293,8 +299,8 @@ struct FD: public FDBase
         if (res)
         {
             nread = ::read(_fd, buf, amt);
-            _pos += nread;
             res = nread != (size_t)-1;
+            if (res) _pos += nread;
         }
         return res;
     }
@@ -316,8 +322,8 @@ struct FD: public FDBase
         if (res)
         {
             nwrote = ::write(_fd, buf, amt);
-            _pos += nwrote;
-            res = nwrote > 0;
+            res = nwrote == amt;
+            if (nwrote != (size_t)-1) _pos += nwrote;
         }
         return res;
     }
@@ -325,7 +331,7 @@ struct FD: public FDBase
     bool write(const unsigned char* buf, size_t amt)
     {
         size_t nw;
-        return write(buf, amt, nw) && nw == amt;
+        return write(buf, amt, nw);
     }
 
     unsigned char* readAll(Pos* fsize = 0, bool removeDOS = false)

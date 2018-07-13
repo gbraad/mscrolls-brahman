@@ -1,0 +1,4 @@
+
+$COMMON_FLAGS
+ f_tieable   = 0
+ f_pressable = 0

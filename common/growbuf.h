@@ -171,6 +171,25 @@ public:
         _size += n;
     }
 
+    void remove(uint pos, int n)
+    {
+        // remove characters from buffer at `pos` for `n` chars
+        if (pos < _size)
+        {
+            uint endp = pos + n;
+            if (endp >= _size)
+            {
+                // remove from pos onwards
+                _size = pos;
+            }
+            else
+            {
+                memmove(_v + pos, _v + endp, (_size - endp)*sizeof(*_v));
+                _size -= n;
+            }
+        }
+    }
+
     void prepend(const char* s)
     {
         // for use when T is char

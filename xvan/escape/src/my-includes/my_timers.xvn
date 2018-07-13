@@ -1,0 +1,88 @@
+
+$TIMERS
+
+ m_moves
+  init      0
+  step      1
+  direction up
+  interval  1
+  state     go
+
+ m_npc
+  init       0
+  step       1
+  direction  up
+  interval   1
+  state      go
+  trigger_at 1 OR_MORE
+  execute    o_npc.t_move
+
+ m_battery
+   init       250
+   step       1
+   direction  down
+   interval   1
+   state      go
+   trigger_at 0
+   execute    o_lamp.t_empty
+
+# The following timers are used in the dial puzzle.
+# All three dials must be set to 8 at the same time.
+
+
+ m_red_dial
+   init      0
+   step      1
+   direction up
+   interval  1
+   state     stop
+
+ m_red_hand
+   init       0
+   step       1
+   direction  up
+   interval   1
+   state      go
+   trigger_at 1
+   execute    o_red_hand.t_print_value
+
+ m_green_dial
+   init      0
+   step      2
+   direction up
+   interval  1
+   state     stop
+
+ m_green_hand
+   init       0
+   step       1
+   direction  up
+   interval   1
+   state      go
+   trigger_at 1
+   execute    o_green_hand.t_print_value
+
+ m_blue_dial
+   init      0
+   step      3
+   direction up
+   interval  1
+   state     stop
+
+ m_blue_hand
+   init       0
+   step       1
+   direction  up
+   interval   1
+   state      go
+   trigger_at 1
+   execute    o_blue_hand.t_print_value
+
+ m_check_dials
+   init       0
+   step       1
+   direction  up
+   interval   1
+   state      go
+   trigger_at 1
+   execute    l_dial_room.t_check_dials

@@ -67,8 +67,12 @@ template<class T> struct LogFiler: public LogBase<T>
 
     LogFiler()
     {
-        // default we copy to console
+#ifndef NDEBUG
+        // default we copy to console, except for release build which
+        // is not attached to console. instead use "-log" option to write 
+        // to file in release mode
         setAlso(&std::cout);
+#endif
     }
     
     static void setAlso(std::ostream* os)

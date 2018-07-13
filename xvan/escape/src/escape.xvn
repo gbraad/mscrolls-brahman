@@ -1,0 +1,2330 @@
+#===============================================
+# Sample story for XVAN 2.3.4 interpreter (IFI).
+#===============================================
+
+#=====================
+# Story info 
+#=====================
+
+TITLE         "You Must Escape!"
+VERSION       "1.0"
+AUTHOR        "Marnix van den Bos"
+ORGANIZATION  "XVAN"
+COVERTEXT     "A sample XVAN story"
+BACKIMAGE     "images\\\\coverimage.jpg"  # need '\\' in json string
+PRIMARY_COLOR "blue"
+
+#=====================
+# Use the starter kit 
+#=====================
+
+$insert ".\\ENG-starterkit\\starterkit.xvn"
+
+#========================
+# Story specific includes 
+#========================
+
+$insert ".\\my-includes\\my_dictionary.xvn"
+$insert ".\\my-includes\\my_commons.xvn"
+$insert ".\\my-includes\\my_verbs.xvn"
+$insert ".\\my-includes\\my_timers.xvn"
+$insert ".\\my-includes\\my_common_triggers.xvn"
+
+#===========================     
+# Locations part
+#===========================
+
+#-------------------------------------------------------------------------------
+$LOCATION l_chest_room
+
+ DESCRIPTIONS
+   d_picture_closed "images\\\\Chestroom closed.Png"
+   d_picture_open   "images\\\\Chestroom open.Png"
+
+   d_sys         "the chest room"
+
+   d_entr_long   "This is a room with an exit leading east."
+
+   d_entr_short  "There is an exit to the east."
+
+   d_no_go       "When you want to exit the room you feel there is a force /
+                  holding you back. The [o_key] vibrates slightly."
+
+ EXITS
+   e  -> l_dial_room
+
+ ATTRIBUTES
+   r_ifi_gx      = 0
+   r_ifi_gy      = 1
+   r_ifi_picture = d_picture_closed
+
+ TRIGGERS
+   "go east" -> t_go
+   "ifi_map" -> t_ifi_place
+
+   t_go
+     if owns(o_player, o_key) then
+       printcr(d_no_go)
+       disagree()        # stop further processing. If we omit this,
+                         # the user will be moved to the dial room
+                         # with the key and cannot return
+     else
+       nomatch()         # act as if there was no match.
+
+END_LOC
+#-------------------------------------------------------------------------------
+
+#-------------------------------------------------------------------------------
+$LOCATION l_dial_room
+
+ DESCRIPTIONS
+   d_picture       "images\\\\Dialroom.Png"
+
+   d_sys           "the dial room"
+
+   d_entr_long     "This is a room with exits leading west, southwest /
+                    and northeast."
+                   "On the wall are three dials: [a] [o_red_dial], [a] /
+                    [o_green_dial] and [a] [o_blue_dial]\n."
+                   "Below the dials are [a] [o_red_button], a [o_green_button] /
+                    and [a] o_red_button]. The buttons are engraved.\n"
+                   "There is also [a] [o_black_button] here, with an engraving."
+
+   d_entr_short    "There are exits to the west, southwest and northeast."
+
+   d_solved_dials1 "You hear a squeeking noise. Looking at the [o_dials], you /
+                    see that all three hands point to the number 8. At the /
+                    same time, the door in the south wall moves back a few /
+                    inches and slides away to the left, revealing a passage..."
+
+   d_solved_dials2 "You hear a squeeking noise. It looks like it's coming from [the] /
+                    [l_dial_room]. Maybe you better check it out..."
+
+ EXITS
+   w  -> l_chest_room
+   sw -> l_passageway
+   ne -> l_vault_room
+
+ FLAGS
+   f_solved_dials   = 0
+   f_tried_with_key = 0
+
+ ATTRIBUTES
+   r_ifi_gx      = 1
+   r_ifi_gy      = 1
+   r_ifi_picture = d_picture
+
+ TRIGGERS
+   "look"    -> t_entrance
+   "ifi_map" -> t_ifi_place
+
+   t_entrance
+     # remove the south wall because o_door will handle it
+     if not(testflag(o_door.f_open)) then
+       move(o_south_wall, l_storage)
+     endif
+     nomatch()
+
+   t_exit
+     # restore the south wall
+     move(o_south_wall, o_player)
+     agree()
+
+   t_check_dials
+     # This trigger is fired each move by timer m_check_dials, until the
+     # dial puzzle is solved.
+     
+     # Dials count from 0 to 9, so correct the timer value when necessary
+
+     #######################################################################################
+     # one solution: press green button, press red button, wait, press blue button, wait 5 #
+     #######################################################################################
+
+     # now check if they solved the puzzle
+     if equal(m_red_dial, 8) and equal (m_green_dial, 8) and equal (m_blue_dial,8) then
+       newexit(l_dial_room, south, l_escape_room)
+       setflag(o_door.f_open)
+       move(o_south_wall, o_player)
+       
+       # Hide the door, so it will no longer get action records. We want
+       # the door to stop responding to entrance and exit and so on.
+       # We can also not hide the door but then we have to redefine
+       # all its common triggers with a check whether it's opened.
+       setflag(o_door.f_hidden)
+
+       setflag(f_solved_dials)
+       stoptimer(m_red_dial)
+       stoptimer(m_green_dial)
+       stoptimer(m_blue_dial)
+       stoptimer(m_red_hand)
+       stoptimer(m_green_hand)
+       stoptimer(m_blue_hand)
+       stoptimer(m_check_dials)     # no more checking, they solved it
+
+       setflag(o_door.f_hidden)     # hide the door
+       
+       if owns(%this, o_player) then
+         # player is in the room
+         printcr("")
+         printcr(d_solved_dials1)
+       else
+         printcr(d_solved_dials2)
+       endif
+       # increase the score
+       printcr("")
+       printcritalic("Your score just went up by 50 points.")
+       o_player.r_score += 50
+     endif
+     # reset m_check_dials for next check
+     m_check_dials = 0
+     settimer(m_check_dials, 0)
+     agree()
+
+END_LOC
+#-------------------------------------------------------------------------------
+
+#-------------------------------------------------------------------------------
+$LOCATION l_escape_room
+
+ DESCRIPTIONS
+   d_picture     "images\\\\Escaperoom.Png"
+
+   d_sys         "the escape room"
+
+   d_entr_long   "This is a room with an exit leading south."
+
+   d_entr_short  "There is an exit to the south."
+
+ EXITS
+   s  -> l_passageway
+
+ ATTRIBUTES
+   r_ifi_gx      = 1
+   r_ifi_gy      = 2
+   r_ifi_picture = d_picture
+
+ TRIGGERS
+   "look up" -> t_look_up
+   "ifi_map" -> t_ifi_place
+
+   t_look_up
+     printcr("There is [a] [o_hole] in the ceiling.")
+     agree()
+
+END_LOC
+#-------------------------------------------------------------------------------
+
+#-------------------------------------------------------------------------------
+$LOCATION l_passageway
+
+ DESCRIPTIONS
+   d_picture     "images\\\\Passageway.Png"
+   d_sys         "a passageway"
+   d_entr_long   "This is a small passageway, with exits leading north and northeast."
+   d_entr_short  ""
+
+ EXITS
+   n  -> l_chest_room
+   ne -> l_dial_room
+
+ FLAGS
+   f_tried_with_key = 0
+
+ ATTRIBUTES
+   r_ifi_gx      = 0
+   r_ifi_gy      = 2
+   r_ifi_picture = d_picture
+
+ TRIGGERS
+   "ifi_map" -> t_ifi_place
+
+END_LOC
+#-------------------------------------------------------------------------------
+
+#-------------------------------------------------------------------------------
+$LOCATION l_vault_room
+
+ DESCRIPTIONS
+   d_picture_closed "images\\\\Vaultroom closed.Png"
+   d_picture_open   "images\\\\Vaultroom open.Png"
+
+   d_sys            "the vault room"
+
+   d_entr_long      "This is a room with an exit leading south."
+
+   d_entr_short     "To the south is an exit."
+
+ EXITS
+   s -> l_dial_room
+
+ FLAGS
+   f_lit            = 1   # otherwise Fred cannot see the vault when he is alone
+   f_player_visited = 0   # player has not been here yet
+
+ ATTRIBUTES
+   r_ifi_gx      = 2
+   r_ifi_gy      = 0
+   r_ifi_picture = d_picture_closed
+
+ TRIGGERS
+   "ifi_map" -> t_ifi_place
+
+   t_exit
+     setflag(f_player_visited)     
+
+END_LOC
+#-------------------------------------------------------------------------------
+
+#-------------------------------------------------------------------------------
+$LOCATION l_exit
+
+ # When the player reaches this location, the story is over
+ DESCRIPTIONS
+   d_picture    "images\\\\Exit.Png"
+
+   d_sys        "the roof"
+
+   d_entr_long  "You're on the roof of a white building, basking in sunshine. Around you, /
+                 you see green meadows and a small river meandering through the meadows."
+                "To the west is [a] [o_ladder]."
+
+   d_entr_short "There is [a] [o_ladder] to the west."
+
+   d_fred_calls "\n\nYou hear Fred calling you from below in [the] [l_escape_room]."
+
+   d_give_watch "Looking down the hole, you see Fred looking back at you. Congratulations, /
+                 you made it out of here. As a reward, I will give you this fine [o_watch]. /
+                 Fred takes the watch off his wrist and ties it to the other end of the /
+                 rope. This is for you. It was nice meeting you, I hope you enjoyed this /
+                 little sample XVAN game. I'll go now and wait for the next adventurer.\n\n"
+                "Fred leaves the room."
+
+   d_rope       "Looking down the hole, you see that Fred is gone. [the] [o_watch] is tied /
+                 to the end of the rope."
+
+   d_no_pull    "The rope seems to be stuck. It is like someone in [the] [l_escape_room] /
+                 is pulling it back."
+
+   d_pull       "Slowly, so the watch won't fall off, you pull up the rope. You untie the /
+                 watch and put it on your wrist. When you move your arm, [the] [o_watch] /
+                 sparkles in the sunshine. It really is a beautiful watch.\n\n"
+                "You can't help but feel a bit sorry for Fred. He has to stay in this /
+                 small sample story. But - you tell yourself - he seems to like it here /
+                 and you ask yourself whether he would be able to survive in the real /
+                 world outside his seven test locations..."
+   d_exit       "\n\n\nYou made it!\n"
+                "Here should be a section with proze congratulating you and drawing /
+                 your attention to the sequel. But as I said in the description /
+                 document, I am not an author. It was my intention to give an /
+                 impression of XVAN's possibilities with this sample story /
+                 and I hope I succeeded.\n\n"
+                 "-- thank you for playing --"  
+
+ FLAGS
+   f_fred_gone   = 0
+
+ ATTRIBUTES
+   r_ifi_gx      = 2
+   r_ifi_gy      = 1
+   r_ifi_picture = d_picture
+
+ TRIGGERS
+   "look down"     -> t_look_down
+   "pull [o_rope]" -> t_pull
+   "go down"       -> t_down
+   "go west"       -> t_west
+   "ifi_map"       -> t_ifi_place
+
+   t_entrance
+     clearstatus()
+     setcursor(0,2)
+     printcrbold(d_entr_short)
+     printcr(d_entr_long)
+     if not(testflag(f_fred_gone)) then
+       printcr(d_fred_calls)
+     endif
+     move(o_rope, %this)  # must be able to refer to the rope
+     agree()
+
+   t_down
+     printcr("You've just escaped from there. There's no need going back...")
+
+   t_west
+     printcr("That would make this sample story too large...")
+
+   t_look_down
+     if not(testflag(f_fred_gone)) then
+       printcr(d_give_watch)
+       move(o_npc, l_storage)
+       setflag(f_fred_gone)
+     else
+       printcr(d_rope)
+
+   t_pull
+     if not(testflag(f_fred_gone)) then
+       printcr(d_no_pull)
+       disagree()         # o_rope also has a t_pull trigger
+     else
+       printcr(d_pull)
+       printcr(d_exit)
+       quit()
+
+END_LOC
+#-------------------------------------------------------------------------------
+
+#-------------------------------------------------------------------------------
+$LOCATION l_storage
+
+ # This location is used to store objects that are removed
+ # from the story. It is not accessible to the player.
+ DESCRIPTIONS
+   d_ifi_picture ""
+
+   d_sys         "Storage" 
+
+END_LOC
+
+
+#======================
+# OBJECTS part
+#======================
+
+#-------------------------------------------------------------------------------
+$OBJECT o_player
+
+ # The o_player object is mandatory and represents the human player.
+
+ DESCRIPTIONS
+   d_sys  "you"
+
+   d_help "The source file for this game is part of the distribution. If you are /
+           really stuck, cheat by checking the source code."
+
+   d_init "Suddenly you are here. You have no recollection of anything. Your /
+           mind is empty, like it just started.\n\n"
+          "You are in some sort of a building, but you can also see through it. /
+           You faintly see meadows and a blue sky. The building somehow merges /
+           with the outside world. It's like your surroundings are not yet /
+           finished."
+          "You can also make out blue, red and green objects in the near /
+           distance and a shiny object that looks like gold.\n\n"
+          "Very weird...\n\n"
+          "Someone walks into the room. A big nondescript guy. He is carrying /
+           a tablet. When he sees you he looks surprised and a bit confused.\n\n"
+          "'What's going on? Who put you in here already? The world isn't even /
+           finished. They all know that the player object should only be /
+           enabled during he final test cases and regression tests.' We're /
+           not that far yet!\n\n"
+          "He looks at you and smiles. 'I'm sorry buddy. This shouldn't have /
+           happened. I'm going to fix this right away."
+          "After a few swipes on the tablet screen he starts typing. You hear /
+           him mumbling something about 'commenting out' and 'recompiling'.\n\n"
+         "And then everything goes black again....\n\n"
+
+   d_init1 "\n========================= I N T R O D U C I N G  X V A N ======================\n\n"
+           "This is a short sample story for XVAN 2.1."
+           "It has 7 rooms and 29 objects, including the player and one /
+            npc named Fred."
+           "The story contains several puzzles and you need to interact with /
+            Fred to solve some of them. You have one goal: escape.\n\n"
+           "Disclaimer: I wrote this story to illustrate XVAN's possibilities from /
+            a technical perspective. It was not my intention to produce a high /
+            level piece of prose.\n\n"
+          "==============================================================================="
+
+   d_tie  "You try to tie [the] [o_rope] to [the] [o_hook], but you are way /
+           too clumsy. However, tying [the] [o_rope] to [the] [o_hook] /
+           definitely seems possible. Maybe you should ask someone else....."
+
+ CONTAINED in l_chest_room
+
+ FLAGS
+   f_alive       = 1
+   f_may_save    = 1
+   f_verbose     = 0
+   f_first       = 1
+   f_verb_help   = 1
+   f_cheater     = 0  # tells whether the player cheats with the vault code.
+
+ ATTRIBUTES
+   r_is           = are
+   r_do           = do
+   r_nr_to_reveal = 0
+   r_random       = 0
+   r_score        = 0
+   r_max_score    = 0
+   r_last_loc     = l_chest_room
+   r_key_blocked  = 0
+
+ TRIGGERS
+   "help"                     -> t_help
+   "[dir]"                    -> t_move
+   "tie [o_rope] to [o_hook]" -> t_tie
+   "follow [o_npc]"           -> t_follow
+   "zwoosh"                   -> t_zwoosh     # placeholder trigger to use for debugging the story
+
+   t_zwoosh # special command for testing
+     printcr("hoi")
+     clearjson()
+     addjson("[this].d_sys")
+     clearjson()
+
+   t_init
+     # This trigger initializes things. It is started by timer
+     # m_init that goes off right away.
+
+     background(blue)       # blue background with white text
+     printcr(d_init)        # print opening message
+
+     print("Hit a key...")
+     hitanykey()
+     clearscreen()
+     printcr(d_init1)
+
+     entrance(owner(%this)) # act as if the player just entered the room
+     stoptimer(m_init)      # served its purpose
+     starttimer(m_moves)    # start counting moves
+
+   t_help
+     printcr(d_help)
+     agree()          # Maybe someone else wants to say something about this.
+                      # With disagree() as a return value that would not be possible.
+
+   t_entrance
+     agree() # prevents calling default t_entrance for player.
+          
+   t_move
+     if valdir(l_location, %dir) then
+       if exit(l_location) then
+         move(o_player, %dir) # move updates current location
+         o_it.r_it = %none    # reset 'it'-object
+         entrance(l_location)
+       endif
+     else
+       nomatch()  # let other objects or verb default code react.
+     endif
+     agree()
+
+   t_tie
+     # verb prologue checks whether actor holds the subject
+     # cansee() part could also be moved to the verb prologue.
+     if not(owns(o_actor, o_hook)) then
+       printcr("[[Taking [the] [o_hook] first]")
+       move(o_hook, o_player)
+     endif
+     printcr(d_tie)
+     disagree()
+
+   t_follow
+     if equal(o_npc.r_last_loc, l_location) then
+       move(o_player, o_npc.r_last_dir)  # also updates l_location
+       entrance(l_location)
+     else
+       printcr("You cannot follow [the] [o_npc]")
+     endif
+     disagree()
+    
+   t_entrance_dark
+     agree()
+
+ 
+END_OBJ
+#-------------------------------------------------------------------------------
+
+#-------------------------------------------------------------------------------
+$OBJECT o_npc
+
+ DESCRIPTIONS
+   d_sys             "Fred", "the nondescript guy", "an npc"
+   d_exa             "He's just a nondescript guy."
+   d_entr            "Fred enters the room."
+   d_leave           "Fred leaves the room."
+   d_not_met_before  "\n\nSomeone walks into the room. It's a big nondescript guy. /
+                      He starts talking to you. Hi there, you must be the new /
+                      adventurer. I'm Fred. I'm a non playing character. I live /
+                      here. Although this is a sample story with only a few /
+                      locations, I like it here. It's my home. In case you want /
+                      to look me up in the source file and see what I can do, /
+                      my object id is o_npc.\n\n"
+                     "I know your goal is to escape from this story. In order /
+                      to pull that off, you will need my help with some things.\n\n"
+                     "I'll be walking around here between locations. Look at the /
+                      t_move trigger in my code to see where I will go /
+                      under what circumstances. If you want me to stay, say /
+                      'fred, wait'. To let me go again, just say 'Fred, go'. /
+                      Otherwise, I'll stay forever and you may need me in another /
+                      room."
+                     "You may ask me about things and I might give a clue.\n\n"
+                     "Happy adventuring!"
+
+   d_ask_chest       "I'm not allowed to disclose information about [the] [o_chest] /
+                      as it's a crucial item in your quest. Hmmm, maybe I just /
+                      did disclose information that I'm not entitled to do..."
+
+   d_ask_hole        "Fred looks up at the ceiling. It's a large hole. I think /
+                      you will fit through it. If.... you can reach it."
+
+   d_ask_dials       "That's funny, all three dials have a hand that points to /
+                      a number and on each dial the number 8 is highlighted. /
+                      I wonder what that means..."
+
+   d_ask_watch1      "Fred looks at you suspiciously. You are running ahead a /
+                      bit. You're not supposed to know about the watch yet..."
+
+   d_ask_watch2      "Pretty nice watch, huh? With each new adventurer there's /
+                      another surprise in the vault. Too bad I never get to keep it."
+
+   d_ask_door        "It's part of your assignment to open this door. Oh, and /
+                      there's no way to open it with force."
+
+   d_throw_hook      "With a tremendous swing, Fred throws [the] [o_hook] /
+                      through the hole."
+
+   d_no_throw        "Fred looks at you. I thought you would have figured it /
+                      out by now. Throwing the hook at this moment is not a /
+                      good idea. Nice rope, by the way."
+
+   d_rope_attach     "As [the] [o_rope] is tied to the hook, the rope is /
+                      pulled through the hole by the weight of the /
+                      hook. Apparently, [the] [o_hook] got stuck behind /
+                      something outside the room."
+
+   d_dangling        "[the] [o_rope] is dangling from the ceiling."
+
+   d_sees_vault1     "You hear a voice in one of the other rooms saying Hey, /
+                      there's the good old vault. I almost forgot it was there. /
+                      Maybe can remember the code. It was something like 5489. /
+                      Yes! I never forget numbers."
+
+   d_sees_vault2     "[o_npc] sees [the] [o_vault] and says hey, there's the /
+                      good old vault. I almost forgot it was there. Maybef I /
+                      can remember the code. It was something like 5489. I'll /
+                      try that. Yes! I never forget numbers."
+
+   d_tip_from_author "\n\nNow that you know the vault code, enter it yourself in a /
+                      new game and see what happens..."
+                      
+   d_takes_watch1    "The voice continues. Oh my, that's a beautifull watch in there!"
+
+   d_takes_watch2    "Opening the vault reveals [a] [o_watch] and [a] [o_key]. /
+                      Before you can do anything, [o_npc] snatches the watch out of /
+                      the vault and puts it around his wrist."
+
+   d_key             "\n\nFred looks at you carefully. Ah, I see you've got [the] [o_key]! /
+                      Also noticed you got some trouble getting into the chest room with /
+                      the key. Hmmm, what's going on here?\n\n"
+                     "Fred takes a tablet from one of his pockets and starts swiping /
+                      on the screen. Let's see if I can find this story's source file. /
+                      They always store them in different places. Ah, got it!. Let's /
+                      check the source to see see what they did this time."
+                     "Oh no, they gave your code an extra check. You'll never be able /
+                      to enter the chest room when you have the key. Hmmm, maybe I /
+                      can remove the check. fred's typing on the screen. Hmmm, this /
+                      should work.\n\n"
+                     "Darn! They made the file read only. They must have found out I /
+                      changed it for the guy that was here last week. This is not /
+                      going to work."
+                     "Oh, wait! This extra check is not in my code!! So... Well, /
+                      you do the math, buddy..."
+
+   d_give_key        "Fred looks at you and smiles from ear to ear. Cool! You /
+                      figured it out. Let's meet in [the] [l_chest_room]. Fred takes /
+                      the key and wanders off,,,"
+
+   d_fred_curious    "Fred says, I'm so curious about what's in the chest! Please open it!!"
+
+   d_refuse_rope     "Fred is about to accept the gift, but seeing that [the] [o_rope] /
+                      is tied to [the] [o_rope.r_tied_to], Fred refuses your offer."
+
+   d_icon            "icons\\\\Fred.Png"
+
+ CONTAINED in l_escape_room
+
+ FLAGS
+   f_alive         = 1
+#   f_met_before    = 0
+   f_will_take_key = 0
+
+ ATTRIBUTES
+   r_last_loc    = l_escape_room
+   r_last_dir    = %none
+   r_loc_next    = l_dial_room
+   r_prev_route  = %none
+   r_ifi_icon    = d_icon
+
+ TRIGGERS
+   "examine [o_npc]"                          -> t_exa
+   "ask [o_npc] about [o_chest]"              -> t_ask_chest
+   "ask [o_npc] about [o_hole]"               -> t_ask_hole
+   "ask [o_npc] about [o_red_dial]"           -> t_ask_dials
+   "ask [o_npc] about [o_green_dial]"         -> t_ask_dials
+   "ask [o_npc] about [o_blue_dial]"          -> t_ask_dials
+   "ask [o_npc] about [o_dials]"              -> t_ask_dials
+   "ask [o_npc] about [o_watch]"              -> t_ask_watch
+   "ask [o_npc] about [o_door]"               -> t_ask_door
+   # cover all of the above in the next line, in case they use 'tell'
+   "[o_npc], tell [o_player] about [o_spec]"  -> t_tell_subject
+   "give [o_rope] to [o_npc]"                 -> t_give_rope
+   "give [o_hook] to [o_npc]"                 -> t_give_hook
+   "give [o_key] to [o_npc]"                  -> t_give_key
+   "[o_npc], wait"                            -> t_wait
+   "[o_npc], go"                              -> t_go
+   "[o_npc], tie [o_rope] to [o_hook]"        -> t_tie
+   "[o_npc], throw [o_hook] through [o_hole]" -> t_throw
+   "[o_npc], [action] [o_subject]"            -> t_do_self
+   "ifi_people"                               -> t_ifi_people
+
+   t_entrance
+     if cansee(o_player, o_npc) then
+       if not(testflag(f_seenbefore)) then
+         printcr(d_not_met_before)
+         setflag(f_seenbefore)
+       else
+         if equal(m_npc, 1) then
+           print("\n")
+           print(d_entr)
+         else
+           print("\n")
+           print("Fred is here.")
+         endif
+       endif
+       if owns(o_npc, o_watch) then
+         printcr(" On his wrist is a beautiful [o_watch].")
+       else
+         print("\n")
+       endif
+       if gt(o_player.r_key_blocked, 2) and not(testflag(f_will_take_key)) then
+         printcr(d_key)
+         setflag(f_will_take_key)
+         o_player.r_key_blocked = 0    # proberen
+       endif
+     endif
+
+   t_exa
+     printcr(d_exa)
+     if owns(o_npc, o_watch) then
+       printcr("[the] [o_npc] wears [a] [o_watch].")
+     endif
+
+   t_ask_chest
+     printcr(d_ask_chest)
+
+   t_ask_hole
+     printcr(d_ask_hole)
+
+   t_ask_dials
+     printcr(d_ask_dials)
+
+   t_ask_watch
+     if not(owns(o_npc, o_watch)) then
+       printcr(d_ask_watch1)
+     else
+       printcr(d_ask_watch2)
+     endif
+
+   t_ask_door
+     printcr(d_ask_door)
+
+   t_tell_subject
+     if try(l_location, 0, "ask [o_npc] about [o_spec]") then endif
+
+   t_move
+     # Trigger for moving around Fred.
+     # Initially Fred travels between the dial room and the passageway.
+     # After the player has been in the vault room and left it, Fred
+     # will travel between the dial room and the vault room.
+     # When the escape room is accessible (after solving the dial puzzel), Fred
+     # will travel between the vault room and the escape room.
+
+     # if the player gave fred the key, Fred will move to the chest room and 
+     # stay there until the player takes the key again.
+
+     if equal(owner(o_npc), r_loc_next) then
+       # Fred is at his destination
+       if equal(owner(o_npc), l_chest_room) then
+         # this is the brass key scenario
+         if owns(o_npc, o_key) then
+           if cansee(o_npc, o_player) then
+             printcr(d_fred_curious)
+             printcr("Fred offers you the key.")
+             # stay in the chest room until the player opened the chest
+             settimer(m_npc, 0)
+             agree()
+           endif
+         else
+           # player has the key or it's on the floor or so.
+           if not(testflag(o_chest.f_open)) then
+             if cansee(o_npc, o_player) then     # @@@        
+               printcr(d_fred_curious)           # @@@
+             endif                               # @@@
+             #stay in the room
+             settimer(m_npc, 0)
+             agree()
+           else
+             # player unlocked and opened the chest
+             # continue with Fred's route from before he got the key
+             r_loc_next = r_prev_route
+           endif
+         endif
+       
+       else         
+         if equal(r_loc_next, l_escape_room) then
+           # this is the escape room <-> vault room scenario
+           r_loc_next = l_vault_room
+         else
+           if equal(r_loc_next, l_vault_room) then
+             if testflag(l_dial_room.f_solved_dials) then
+               # the escape room is open, this is vault room <-> escape room scenario
+               r_loc_next = l_escape_room
+             else
+               # escape room still closed, this is the vault room <-> dial room scenario
+               r_loc_next = l_dial_room
+             endif
+             # We're in the vault room, Fred takes the watch if he hasn't done so already
+             # Check if Fred can see the vault and doesn't have the watch yet
+             if cansee(o_npc, o_vault) and not(owns(o_npc, o_watch)) then
+               setflag(o_watch.f_seenbefore)
+               if cansee(o_player, o_vault) then
+                 printcr(d_sees_vault2)
+                 printcr(d_takes_watch2)
+                 printcr(d_tip_from_author)
+               else
+                 printcr(d_sees_vault1)
+                 printcr(d_takes_watch1)
+                 printcr(d_tip_from_author)
+               endif
+               move(o_watch, o_npc)
+               clearflag(o_vault.f_locked)
+               clearflag(o_vault.f_opaque)
+               setflag(o_vault.f_open)
+               l_vault_room.r_ifi_picture = l_vault_room.d_picture_open
+               o_keypad.r_set_to = 5489
+             endif
+           else
+             if equal(r_loc_next, l_dial_room) then
+               # either dial room <-> passageway or dial room <-> vault room scenario
+               if testflag(l_vault_room.f_player_visited) then
+                 # Fred may open the vault and take the watch
+                 # This is the dial room <-> vault room scenario
+                 r_loc_next = l_vault_room
+               else
+                 # this is the dial room <-> passageway scenario
+                 r_loc_next = l_passageway
+               endif
+             else
+               # last option, Fred is passageway, the passageway <-> dial room scenario
+               r_loc_next = l_dial_room
+             endif
+           endif
+         endif
+       endif
+     endif
+     if cansee(o_player, o_npc) then
+       print("\n")
+       printcr(d_leave)
+     endif               # assumes there is a path to destination
+     if not(equal(r_loc_next, owner(%this))) then
+       # if equal, then loc_next is current location and goto() will give a no route msg
+       goto(%this, r_loc_next)
+     endif
+     if trigger(t_entrance) then
+       settimer(m_npc, 0)
+       agree()
+
+   t_wait # tells fred to stop moving around
+     printcr("Huh? Ok, I'll wait, then.")
+     stoptimer(m_npc)
+   
+   t_go # tells Fred to start moving again
+     printcr("Ok, see you around. Bye!")
+     settimer(m_npc, 0) # in case it stopped at value 1
+     starttimer(m_npc)
+
+   t_give_rope
+     if equal(o_rope.r_tied_to, %none) then
+       printcr("[the] [o_npc] takes [the] [o_rope].")
+       move(o_rope, o_npc)
+     else
+       printcr(d_refuse_rope)
+     endif                     # endif not necessary.
+     agree()
+
+   t_give_hook
+     printcr("[the] [o_npc] accepts the gift.")
+     move(o_hook, o_npc)
+     agree()    
+
+   t_give_key
+     if testflag(o_chest.f_locked) then
+       if testflag(f_will_take_key) then
+         printcr(d_give_key)
+         move(o_key, o_npc)
+         clearflag(f_will_take_key)
+         # Fred will now go to the chest room, so save his current target location
+         r_prev_route = r_loc_next
+         r_loc_next   = l_chest_room
+         # in case Fred was told to wait, cancel the wait
+         starttimer(m_npc)
+       else
+         printcr("[the] [o_npc] looks at you suspiciously. What's up? Just go and open [the] [o_chest].")
+       endif
+     endif
+     agree()
+
+   t_give_watch
+     if owns(o_npc, o_watch) then
+       printcr("Not yet...")
+     else
+       printcr("What watch?")
+     endif
+     
+   t_tie
+     # Prologue of tie will check whether Fred holds the rope already.
+     if cansee(o_npc, o_hook) then
+       if not(equal(o_rope.r_tied_to, o_hook)) then
+         if not(owns(o_npc, o_hook)) then
+           printcr("[the] [o_npc] takes [the] [o_hook] first.")
+           move(o_hook, o_npc)
+         endif
+         if trigger(o_rope.t_tie_to_hook) then # Cannot access o_rope's local attribute
+           printcr("[the] [o_npc] ties [the] [o_rope] to [the] [o_hook].")
+         endif
+       else
+         printcr("But [the] [o_rope] is already tied to [the] [o_hook]!")
+     else
+       printcr("[the] [o_npc] looks for [the] [o_hook], but does not see it.")
+
+   t_throw
+     if cansee(o_npc, o_hook) then
+       if equal(o_rope.r_tied_to, o_hook) then
+         if not(owns(o_npc, o_hook)) then
+           printcr("[the] [o_npc] takes [the] [o_hook] first]")
+           move(o_hook, o_npc) # not necessary
+         endif
+         printcr(d_throw_hook)
+         move(o_hook, l_storage) # remove the hook from the story
+         newexit(l_escape_room, u, l_exit)
+         move(o_rope, l_escape_room)
+         setflag(o_rope.f_dangling)
+         printcr(d_rope_attach)
+         printcr(d_dangling)
+         if not(trigger(o_rope.t_no_tied_to)) then
+           disagree()
+         endif
+       else
+         printcr(d_no_throw)
+       endif
+     else
+       printcr("[the] [o_npc] looks for [the] [o_hook], but does not see it.")
+
+   t_do_self
+     print("Why don't you [action] [the] [o_subject] yourself?")
+     disagree()
+END_OBJ
+#-------------------------------------------------------------------------------
+
+#-------------------------------------------------------------------------------
+$OBJECT o_dials
+
+ DESCRIPTIONS
+  d_sys "the colored dials"
+
+ CONTAINED in l_dial_room
+
+ FLAGS
+  f_hidden   = 1 # must be invisible
+  f_bypass   = 1 # must also work when not visible
+
+ TRIGGERS
+   "examine [o_dials]"  -> t_exa_dials
+   "use [o_dials]"      -> t_exa_dials
+   "[action] [o_dials]" -> t_individual
+
+  t_entrance
+    agree()      # do not use default t_entrance code
+ 
+  t_exit         # do not use default t_exit code
+    agree()
+
+  t_exa_dials
+    printbold("\n[o_red_dial]: ")
+    printcr(o_red_dial.d_exa)
+    printbold("\n[o_green_dial]: ")
+    printcr(o_green_dial.d_exa)
+    printbold("\n[o_blue_dial]: ")
+    printcr(o_blue_dial.d_exa)
+    
+  t_individual
+    if not(equal(%action, examine)) then
+      printcr("In order to [action] [the] [o_dials], you must address them individually.")
+    disagree()
+
+END_OBJ
+#-------------------------------------------------------------------------------
+
+#-------------------------------------------------------------------------------
+$OBJECT o_door
+
+ DESCRIPTIONS
+   d_sys        "the smooth door", "the south wall"
+   d_entr_long  "\n\nHardly visible in the south wall is [a] [o_door]. You /
+                 almost missed it."
+
+   d_entr_short "\n\nIn the south wall is [a] [o_door]."
+
+   d_exa        "The door fits seamlessly into the wall. You don't see how /
+                 you could ever open it manually. There is a large 8 printed /
+                 on the door."
+
+   d_look_under "There's light on the other side of [the] [o_door]"
+
+   d_dontgetit  "Really, you cannot open this door manually."
+
+ CONTAINED in l_dial_room
+
+ FLAGS
+   f_open         = 0
+   f_tried_before = 0
+
+ TRIGGERS
+   "s"                   -> t_south
+   "open [o_door]"       -> t_open
+   "look"                -> t_entrance
+   "look under [o_door]" -> t_look_under
+
+   t_entrance
+     if testflag(f_hidden) then
+       print("\n")
+       printcr("There is a passage in the south wall.")
+     else
+       #clearflag(l_location.f_seenbefore)
+       nomatch()
+     endif
+
+   t_exa_south
+     if trigger(t_entrance) then
+       disagree()
+     else
+       disagree()
+
+   t_south
+     if not(testflag(f_open)) then
+       printcr("You must find a way to open [the] [o_door] first.")
+     else
+       nomatch()     
+
+   t_open
+     if not(testflag(f_tried_before)) then
+       setflag(f_tried_before)
+       printcr(d_exa)
+     else
+       printcr(d_dontgetit)
+
+   t_look_under
+     printcr(d_look_under)
+
+END_OBJ
+#-------------------------------------------------------------------------------
+
+#-------------------------------------------------------------------------------
+$OBJECT o_south_wall
+
+ DESCRIPTIONS
+   d_sys     "the south wall"
+             # south wall is a separate object because of the
+             # door in the dial room (in the south wall)
+   d_passage "There is a passage in the south wall."
+
+ CONTAINED in o_player
+
+ TRIGGERS
+   "examine [o_south_wall]" -> t_exa
+
+   t_exa
+     if owns(l_dial_room, %this, 0) and testflag(o_door.f_open) then
+       printcr(d_passage)
+     else
+       if trigger(o_generic_wall.t_exa) then
+         agree()
+
+   t_default
+     if equal(o_subject, %this) then
+       print("[the] [o_actor] cannot [action] ")
+       if not(equal(%prepos, %none)) then
+         print(%prepos)
+       endif
+       printcr(" [the] [this].")
+       disagree()
+     else
+       nomatch()
+
+END_OBJ
+#-------------------------------------------------------------------------------
+
+#-------------------------------------------------------------------------------
+$OBJECT o_chest
+
+ DESCRIPTIONS
+   d_sys         "the old wooden chest"
+
+   d_entr_long   "There is [a] [o_chest] here."
+
+   d_entr_short  "There is [a] [o_chest] here."
+
+   d_exa         "The chest looks very old and worn."
+
+   d_locked      "You try to open [the] [o_chest] but find that it is locked."
+
+   d_take        "You try to take [the] [o_chest] but it is mounted to the /
+                  floor. It would have been too heavy to carry around anyway,"
+
+   d_icon_open    "icons\\\\Chest open.Png"
+   d_icon_closed  "icons\\\\Chest closed.Png"
+
+ CONTAINED in l_chest_room
+
+ FLAGS
+   f_openable  = 1
+   f_lockable  = 1
+   f_locked    = 1
+   f_opaque    = 1
+   f_takeable  = 0
+   f_container = 1
+
+ ATTRIBUTES
+   r_ifi_icon = d_icon_closed
+
+ TRIGGERS
+   "open [o_chest]"                     -> t_open_chest
+   "close [o_chest]"                    -> t_close_chest
+   "look in [o_chest]"                  -> t_look_in
+   "examine [o_chest]"                  -> t_exa
+   "take [o_chest]"                     -> t_take
+   "unlock [o_chest]"                   -> t_unlock
+   "unlock [o_chest] with [o_key]"      -> t_unlock
+   "put [o_subject] [prepos] [o_chest]" -> t_put
+
+   t_entrance
+     if not(owns(l_location, o_chest) and cansee(o_actor, o_chest)) then
+       agree()
+     endif
+     setflag(f_seenbefore)
+     print("There is [a] [o_chest] here, which is ")
+     if testflag(f_open) then
+       printcr("open.")
+     else
+       printcr("closed.")
+     endif
+     agree()
+  
+   t_exa
+     printcr(d_exa)
+     print("On the front of [the] [o_chest] is [a] [o_keyhole].")
+     if owns(o_keyhole, o_key) then
+       printcr(" with [a] [o_key] in it.")
+     else
+       printcr(".")
+     endif
+     print("[the] [o_chest] is")
+     if testflag(f_open) then
+       printcr(" open.")
+       indent(2)
+       contents(o_chest)
+       indent(-2)
+     else
+       printcr(" closed.")
+     endif
+     agree()
+
+   t_open_chest
+     if runverb() then endif
+     if testflag(o_chest.f_open) then
+       # cannot test for runverb() because may return disagree()
+       l_chest_room.r_ifi_picture = l_chest_room.d_picture_open
+     endif
+
+   t_close_chest
+     if runverb() then
+       l_chest_room.r_ifi_picture = l_chest_room.d_picture_closed
+
+   t_look_in
+     if not(testflag(f_open)) then
+       if not(testflag(f_locked)) then
+         printcr("Opening [the] [o_chest] first...")
+         setflag(f_open)
+         clearflag(f_opaque)
+         contents(%this)
+       else
+         printcr(d_locked)
+       endif
+     else
+       contents(%this)
+     endif
+     agree()
+
+   t_unlock
+     if owns(o_player, o_key) then
+       if not(testflag(f_locked)) then
+         printcr("[the] [o_chest] is already unlocked.")
+       else
+         if equal(o_spec, %none) then
+           printcr("[[with [the] [o_key]]")
+         endif
+         printcr("You put [the] [o_key] into [the] [o_keyhole] and turn it.")
+         printcr("Ok, the chest is now unlocked.")
+         move(o_key, o_keyhole)
+         clearflag(f_locked)
+       endif
+     else
+       if owns(o_keyhole, o_key) then
+         printcr("You reach for [the] [o_key] that is in [the] /
+                  [o_keyhole] and turn it to unlock [the] [o_chest].")
+         clearflag(f_locked)
+       else
+         printcr("But you don't have the key...")
+       endif
+     endif
+     agree()
+
+   t_take
+     printcr(d_take)
+     printcr("On second thought, you try to open [the] [o_chest].")
+     if (try(l_location, 0, "open [o_chest]")) then
+       agree()
+     
+   t_put
+     # this trigger must be executed after the 
+     # trigger from o_subject.
+     
+     if testflag(f_locked) then
+       printcr("[the] [o_chest] seems to be locked.")
+     else     
+       if not(testflag(f_open)) then
+         printcr("[[opening [the] [o_chest] first]")
+         setflag(f_open)
+         clearflag(f_opaque)
+       endif
+       move(o_subject, o_chest)
+       o_subject.r_preposition = %prepos
+       clearflag(o_subject.f_bypass)
+     endif
+     agree() # for lamp
+END_OBJ
+#-------------------------------------------------------------------------------
+
+#-------------------------------------------------------------------------------
+$OBJECT o_keyhole
+
+ DESCRIPTIONS
+   d_sys        "the keyhole", "the lock"
+
+ CONTAINED in l_chest_room
+
+ TRIGGERS
+   "put [o_subject] in [o_keyhole]" -> t_put
+
+   t_put
+     if not(equal(o_subject, o_key)) then
+       printcr("Better try a key...")
+     endif
+     # subject = key will be handled by t_put trigger from o_key
+     agree()
+
+   t_entrance  # avoid printing an extra <CR> by default t_entrance
+     agree() 
+
+END_OBJ
+#-------------------------------------------------------------------------------
+
+#-------------------------------------------------------------------------------
+$OBJECT o_key
+
+ DESCRIPTIONS
+   d_sys        "an old brass key"
+
+   d_entr_long  "There is [a] [o_key] here."
+
+   d_entr_short "There is [a] [o_key] here."
+
+   d_exa        "It's just [a] [o_key]."
+
+   d_cannot_go  "The moment you want to enter the room you feel there is /
+                 some force holding you back. [the] [o_key] vibrates slightly."
+
+   d_throw      "You throw [the] [o_key] to the [dir], but as it's about to /
+                 leave the room it bounces back on what seems an invisible /
+                 shield and lands on the floor."
+
+   d_icon       "icons\\\\Brass key.Png"
+
+ CONTAINED in o_vault
+
+ FLAGS
+   f_takeable = 1
+
+ ATTRIBUTES
+   r_ifi_icon = d_icon
+
+ TRIGGERS
+   "put [o_key] in [o_keyhole]" -> t_put
+   "throw [o_key] [dir]"        -> t_throw
+   "throw [o_key] to  [dir]"    -> t_throw
+
+   t_exit
+     # if the player has the key he may not enter the chest room
+     if owns(o_player, %this) and ((equal(l_location, l_dial_room) AND equal(%dir, w)) 
+                             OR (equal(l_location, l_passageway) AND equal(%dir, n))) then
+       printcr(d_cannot_go)
+       o_player.r_key_blocked += 1   # must try at least 3 times until Fred helps
+       disagree()
+     else
+       agree()
+
+   t_put
+     if owns(o_player, o_key) then
+       printcr("You put [the] [o_key] into [the] [o_keyhole].")
+       move(o_key, o_keyhole)
+     else
+       printcr("But you don't have the key!")
+     endif
+     agree()
+     
+   t_throw
+     # check if player has the key is done by verb prologue
+     if (equal(l_location, l_dial_room) AND equal(%dir, w)) OR
+        (equal(l_location, l_passageway) AND equal(%dir, n)) then
+       move(o_key, l_location)
+       printcr(d_throw)
+     else
+       nomatch()   # let verb default code handle this
+     endif
+     agree()
+
+END_OBJ
+#-------------------------------------------------------------------------------
+
+#-------------------------------------------------------------------------------
+$OBJECT o_rope
+
+ DESCRIPTIONS
+   d_sys "the rope"
+   d_entr_long  "There is a long piece of [o_rope] here."
+
+   d_entr_short "There is a piece of [o_rope] here."
+
+   d_exa        "The rope is about 4 meters long."
+
+   d_take       "You pull [the] [o_rope] and try to take it, but it /
+                 does not give in. It seems to be attached to /
+                 something."
+
+   d_no_time    "[the] [o_npc] looks at you. We don't have time for /
+                 this. We need to get you out of here!"
+
+   d_tie        "Ok [the] [o_rope] is now tied to [o_spec]."
+
+   d_dangling   "There is [a] [o_rope] dangling from [the] [o_hole] /
+                 in the ceiling."
+
+   d_pull       "You pull [the] [o_rope], but it doesn't give in. /
+                 Apparently, the hook it is tied to is stuck /
+                 behind something."
+
+   d_icon       "icons\\\\Rope.Png"
+
+ CONTAINED in o_chest
+
+ FLAGS
+   f_takeable = 1
+   f_fixed    = 0
+   f_dangling = 0
+
+ATTRIBUTES
+   r_tied_to  = %none
+   r_ifi_icon = d_icon
+
+ TRIGGERS
+   "look"                     -> t_look
+   "inventory"                -> t_i
+   "examine [o_rope]"         -> t_exa
+   "take [o_rope]"            -> t_take
+   "pull [o_rope]"            -> t_pull
+   "take [o_all]"             -> t_take_all
+   "drop [o_all]"             -> t_drop_all
+   "tie [o_rope] to [o_spec]" -> t_tie
+   
+   t_entrance
+     if not(equal(r_tied_to, %none)) then
+       if cansee(o_player, o_rope) and owns(owner(o_player), o_rope) then
+         printcr("There is [a] [o_rope] tied to [the] [o_rope.r_tied_to].")
+       endif
+     else
+       if testflag(f_dangling) then
+         printcr(d_dangling)
+       else
+         nomatch() # use default t_entrance
+       
+   t_exa
+     if not(equal(r_tied_to, %none)) then
+       printcr("[the] [o_rope] is tied to [the] [o_rope.r_tied_to].")
+     else
+       nomatch()
+
+   t_i
+     if owns(o_player, %this) then
+       indent()
+       print("[a] [o_rope]")
+       if equal(r_tied_to, %none) then
+         printcr(".")
+       else
+         print(", tied to the")
+         print(r_tied_to)
+         printcr(".")
+     else
+       nomatch()
+
+   t_look
+     if testflag(f_dangling) then
+       printcr("There is [a] [o_rope] dangling from [the] [o_hole].")
+     else
+       nomatch() # execute common trigger
+     endif
+     agree()
+
+   t_take
+     if owns(o_npc, %this) then
+       printcr(d_no_time)
+     else
+       if testflag(f_dangling) then
+         printcr(d_take)
+       else
+         nomatch()
+       endif
+     endif
+
+   t_pull
+     if testflag(f_dangling) then
+       printcr(d_pull)
+     else
+       if owns(o_npc, o_rope) then
+         printcr(d_no_time)
+       else
+         printcr("You pull [the] [o_rope]. But why?")
+       endif
+     endif
+     agree()
+
+   t_tie
+     if testflag(o_spec.f_tieable) then
+       if not(equal(r_tied_to, o_spec)) then
+         r_tied_to = o_spec
+         printcr("Ok, the [o_rope] is now tied to the [o_spec].")
+       else
+         printcr("But the [o_rope] is already tied to the [o_spec].")
+         disagree()
+       endif
+     else
+       # let verb handle this one, therefore return nomatch()
+       nomatch()
+     endif
+
+   t_tie_to_hook
+     r_tied_to = o_hook
+
+   t_no_tied_to
+     r_tied_to = %none
+
+END_OBJ
+#-------------------------------------------------------------------------------
+
+#-------------------------------------------------------------------------------
+$OBJECT o_hook
+
+ DESCRIPTIONS
+   d_sys         "the hook", "the eye"
+
+   d_entr_long   "There is [a] [o_hook] here"
+
+   d_entr_short  "There is [a] [o_hook] here."
+
+   d_exa         "This is a metal hook, about two feet long. On one side "
+                 "is an eye to tie something to."
+
+   d_fred_enters "Just as you are about to throw [the] [o_hook],all of a /
+                  sudden [the] [o_npc] rushes into the room and shouts /
+                  at you..... "
+
+   d_throw_1     "Don't throw that [o_hook]! If it gets lost you'll never /
+                  escape!"
+
+   d_throw_2     "[the] [o_npc] holds your arm... I wouldn't do that if /
+                  I were you. You really need that hook to get out of here."
+
+   d_icon        "icons\\\\Hook.Png"
+
+ CONTAINED in l_escape_room
+
+ FLAGS
+   f_takeable = 1
+   f_fixed    = 0
+
+ ATTRIBUTES
+   r_ifi_icon = d_icon
+
+ TRIGGERS
+   "take [o_hook]"                   -> t_take
+   "take [o_all]"                    -> t_take_all
+   "drop [o_all]"                    -> t_drop_all
+   "throw [o_hook] through [o_hole]" -> t_throw
+
+   t_throw
+     if not(equal(o_rope.r_tied_to, %this)) then
+       if not(equal(owner(o_npc), l_location)) then
+         move(o_npc, l_location)
+         print(d_fred_enters)
+         printcr(d_throw_1)
+       else
+         # Fred is in the room
+         printcr(d_throw_2)
+
+   t_take
+     if owns(o_npc, %this) then
+       printcr("[the] [o_npc] looks at you. We don't have time for /
+                this. We need to get you out of here!")
+     else
+       nomatch()  # let verb code handle this
+     endif
+
+END_OBJ
+#-------------------------------------------------------------------------------
+
+#-------------------------------------------------------------------------------
+$OBJECT o_hole
+
+ DESCRIPTIONS
+   d_sys        "the hole"
+
+   d_entr_long  "There is [a] [o_hole] in the ceiling."
+
+   d_entr_short "There is [a] [o_hole] in the ceiling."
+
+   d_exa        "[the] [o_hole] seems large enough to climb through. /
+                 if only you could reach it..."
+
+ CONTAINED in l_escape_room
+
+ # There are no local flags.
+
+END_OBJ
+#-------------------------------------------------------------------------------
+
+#-------------------------------------------------------------------------------
+$OBJECT o_ladder
+
+ DESCRIPTIONS
+   d_sys "metal ladder"
+
+ CONTAINED in l_exit
+
+END_OBJ
+#-------------------------------------------------------------------------------
+
+#-------------------------------------------------------------------------------
+$OBJECT o_vault
+
+ DESCRIPTIONS
+   d_sys        "the metal vault"
+
+   d_entr_long  "There is [a] [o_vault] here. It's about three feet high, /
+                 two feet wide and one feet deep.The vault looks pretty /
+                 new and you can see it's very heavy."
+
+   d_entr_short "There is [a] [o_vault] here."
+
+   d_exa        "On [the] [o_vault] is [a] [o_keypad]."
+
+   d_vault_closed "icons\\\\Vault closed.Png"
+   d_vault_open   "icons\\\\Vault open.Png"
+
+ CONTAINED in
+   l_vault_room
+
+ FLAGS
+   f_openable  = 1
+   f_lockable  = 1
+   f_locked    = 1
+   f_opaque    = 1
+   f_takeable  = 0
+   f_container = 1
+
+ ATTRIBUTES
+   r_ifi_icon = d_vault_closed
+
+ TRIGGERS
+   "examine [o_vault]"                  -> t_exa
+   "look in the [o_vault]"              -> t_exa
+   "put [o_subject] [prepos] [o_vault]" -> t_put
+   "unlock [o_vault]"                   -> t_unlock
+   "close [o_vault]"                    -> t_close
+   "open [o_vault]"                     -> t_open
+   
+   t_entrance
+     if not(owns(l_location, o_vault) and cansee(o_actor, o_vault)) then
+       agree()
+     endif
+     setflag(f_seenbefore)
+     print("There is [a] [o_vault] here, which is ")
+     if testflag(f_open) then
+       printcr("open.")
+     else
+       printcr("closed.")
+     endif
+     agree()
+  
+   t_exa
+     printcr(d_exa)
+     print("[the] [o_vault] is")
+     if testflag(f_open) then
+       printcr(" open.")
+       indent(2)
+       indent()
+       contents(o_vault)
+       indent(-2)
+     else
+       printcr(" closed.")
+     endif
+     agree()
+
+   t_put
+     # this trigger must be executed after the 
+     # trigger from o_subject.
+     
+     if not(testflag(f_open)) then
+       printcr("[the] [o_vault] is closed.")
+     else     
+       move(o_subject, o_vault)
+       printcr("You put the [o_subject] [prepos] [the] [o_vault].")
+       o_subject.r_preposition = %prepos
+       clearflag(o_subject.f_bypass)
+     agree() # for lamp
+
+   t_unlock
+     if testflag(f_seenbefore) then
+       printcr("Maybe examine [the] [o_vault] first?")
+     else
+       printcr("Just enter the correct number on [the] [o_keypad].")
+
+   t_close
+     printcr("You close the vault door and hear a click.")
+     setflag(f_opaque)
+     clearflag(f_open)
+     setflag(f_locked)
+     o_keypad.r_set_to = 0
+     r_ifi_icon = d_vault_closed
+     l_vault_room.r_ifi_picture = l_vault_room.d_picture_closed
+
+   t_open
+     # we let this handle by the verb default code, but need to do
+     # something extra first. So we must catch this user input.
+     if testflag(o_player.f_cheater) then
+       print("\n")
+       printcr("**** You are cheating. Don't expect to find a watch now ****")
+       print("\n")
+       clearflag(o_player.f_cheater) # display this message only once
+     endif
+     if runverb() then endif
+     if testflag(f_open) then
+       # cannot test for runverb() because may return disagree()
+       r_ifi_icon = d_vault_open
+       l_vault_room.r_ifi_picture = l_vault_room.d_picture_open
+     endif
+
+END_OBJ
+#-------------------------------------------------------------------------------
+
+#-------------------------------------------------------------------------------
+$OBJECT o_keypad
+
+ DESCRIPTIONS
+   d_sys        "the keypad"
+
+   d_entr_long  ""
+
+   d_entr_short ""
+
+   d_exa        "The [o_keypad] is a numerical keypad with keys from 0 /
+                 through 9. In the upper part of the keypad is a section that /
+                 reads: [r_set_to]."
+
+ CONTAINED on o_vault
+
+ FLAGS
+   f_bypass = 1
+
+ ATTRIBUTES
+   r_set_to = 0
+
+ TRIGGERS
+   "set [o_keypad] to [value]"   -> t_set
+   "enter [value]"               -> t_set
+   "enter [value] on [o_keypad]" -> t_set
+   "close [o_vault]"             -> t_reset
+     
+   t_set
+     if testflag(f_open) then
+       printcr("[the] [o_vault] door must be closed first.")
+       agree() #exit the trigger here
+     endif
+     r_set_to = %value
+     if equal(%value, 5489) then
+       printcr("you hear a click from inside the vault.")
+       clearflag(o_vault.f_locked)
+       # check if the player is cheating with the vault code
+       if (not(owns(o_npc, o_watch))) then
+         # yes, he's cheating, because Fred doesnt have the watch yet.
+         move(o_watch, o_npc)
+         setflag(o_player.f_cheater)
+       endif
+     else
+       printcr("Nothing happens.")
+     endif                              # not necessary
+     agree()                            # not necessary
+
+   t_reset
+     r_set_to = 0
+     clearflag(f_open)
+     setflag(f_locked)
+     printcr("[the] [o_keypad] beeps once.")
+
+END_OBJ
+#-------------------------------------------------------------------------------
+
+#-------------------------------------------------------------------------------
+$OBJECT o_watch
+
+ DESCRIPTIONS
+   d_sys  "the golden watch"
+
+   d_exa  "[o_npc] is wearing [the] [o_watch]. He won't let you near it."
+
+   d_icon "icons\\\\Watch.Png"
+
+ CONTAINED in o_vault
+
+ FLAGS
+   f_takeable = 1
+
+ ATTRIBUTES
+   r_ifi_icon = d_icon
+
+ TRIGGERS
+   "take [o_watch]" -> t_take
+
+   t_entrance
+     if owns(o_npc, %this) then
+       agree()
+     else
+       nomatch()
+
+   t_take
+     if owns(o_npc, %this) then
+       if equal(o_subject, o_all) then
+         print("Watch: ")
+       endif
+       printcr("[the] [o_npc] won't let you have it.")
+     else
+       # let the verb handle it
+       nomatch()
+
+END_OBJ
+#-------------------------------------------------------------------------------
+
+#-------------------------------------------------------------------------------
+$OBJECT o_lamp
+
+ DESCRIPTIONS
+   d_sys      "the lamp", "the light", "the lantern"
+
+   d_donthave "You don't have [the] [o_lamp]."
+
+   d_lit      "[the] [o_lamp] is lit. It has power for [m_battery] more /
+               moves. Because this is a sample story you may recharge the lamp /
+               with the 'charge'command."
+
+   d_empty    "The lamp just went off (use charge to reset it.)"
+
+   d_lamp_on  "icons\\\\Lamp on.Png"
+   d_lamp_off "icons\\\\Lamp off.Png"
+
+ CONTAINED in o_player
+
+ FLAGS
+   f_lit      = 1
+   f_takeable = 1
+   f_tieable  = 1
+   f_bypass   = 1     # must be able to turn it on in the dark
+   f_moveable = 1
+
+ ATTRIBUTES
+   r_ifi_icon = d_lamp_on
+
+ TRIGGERS
+   "i"                 -> t_i
+   "take [o_all]"      -> t_take_all
+   "drop [o_all]"      -> t_drop_all
+   "charge [o_lamp]"   -> t_charge
+   "light [o_lamp]"    -> t_light
+   "turn on [o_lamp]"  -> t_light
+   "turn [o_lamp] on"  -> t_light
+   "turn off [o_lamp]" -> t_off
+   "turn [o_lamp] off" -> t_off
+   "examine [o_lamp]"  -> t_exa
+   "use [o_lamp]"      -> t_use
+
+   t_entrance
+     if cansee(o_player, o_lamp) then
+       setflag(f_seenbefore)
+       if owns(l_location, o_lamp) then
+         print("There is [a] [o_lamp] ")
+         if testflag(f_lit) then
+           print("(providing light) ")
+         endif
+         printcr("here.")
+       else
+         if not(owns(o_player, o_lamp)) then
+           indent()
+           print("There is [a] [o_lamp] ")
+           if testflag(f_lit) then
+             print("(providing light) ")
+           endif
+           print(o_lamp.r_preposition)
+           print(" the ")
+           printcr(owner(o_lamp))
+       endif
+     endif
+     agree()
+          
+   t_i
+     if owns(o_player, o_lamp) then
+       indent()
+       print("[a] [o_lamp]")
+       if testflag(f_lit) then
+         printcr(", providing light")
+       else
+         printcr(".")
+     else
+       nomatch()
+     
+   t_charge
+     settimer(m_battery, 250)
+     starttimer(m_battery)
+     setflag(f_lit)
+     disagree()
+     
+   t_light
+     if not(owns(o_actor, o_lamp)) then
+       printcr(d_donthave)
+     else
+       if not(testflag(o_lamp.f_lit)) then
+         if not(equal(m_battery, 0)) then
+           setflag(o_lamp.f_lit)
+           starttimer(m_battery)
+           entrance(l_location)
+           r_ifi_icon = d_lamp_on
+         else
+           printcr("Nothing happens.")
+       else     # lamp is lit
+         printcr("But the [o_lamp] is already lit.")
+       endif
+     endif
+     disagree()
+     
+   t_off
+     if NOT(owns(o_actor, o_lamp)) then
+       printcr(d_donthave)
+     else
+       if NOT(testflag(o_lamp.f_lit)) then
+         printcr("The lamp is already off.")
+       else
+         clearflag(f_lit)
+         stoptimer(m_battery)
+         r_ifi_icon = d_lamp_off
+         if not(islit(o_actor)) then
+           printcr("It is now pitch black.")
+         endif
+       endif
+     endif
+     disagree()
+
+   t_empty
+     if cansee(o_player, o_lamp) then
+       printcr(d_empty)
+     endif
+     clearflag(o_lamp.f_lit)
+     stoptimer(m_battery)
+
+   t_exa
+     if testflag(f_lit) then
+       printcr(d_lit)
+     else
+       printcr("[the] [o_lamp] is currently turned off.")
+
+  t_use
+    if equal(m_battery, 0) then
+      if trigger(t_charge) then endif
+    else
+      nomatch()
+
+END_OBJ
+#-------------------------------------------------------------------------------
+
+
+# The following objects are used in the dial puzzle.
+# Each object has a timer associated with it
+
+
+#-------------------------------------------------------------------------------
+$OBJECT o_red_dial
+
+ DESCRIPTIONS
+   d_sys "the red dial"
+
+   d_exa "This is a red circular plate. It looks like a clock dial with one /
+          hand, with the numbers 0 through 9 printed at equal distances /
+          around the edge.The number 8 is highlighted. There is [a] [o_red_hand] /
+          on the dial, pointing towards the number [m_red_dial]."
+
+ CONTAINED in l_dial_room
+
+ TRIGGERS
+   "press [o_black_button]" -> t_reset
+
+   t_entrance
+     # t_entrance for l_dial_room also mentions the three dials
+     setflag(f_seenbefore)
+     agree()
+
+   t_reset
+     if testflag(l_dial_room.f_solved_dials) then
+       nomatch()  # let verb handle this
+     else
+       stoptimer(m_red_dial)
+       settimer(m_red_dial, 0)
+     endif
+     agree()
+
+END_OBJ
+#-------------------------------------------------------------------------------
+
+#-------------------------------------------------------------------------------
+$OBJECT o_red_button
+
+ DESCRIPTIONS
+   d_sys "the red button"
+
+   d_exa "[the] [o_red_button] has a diameter of about 2 inches, it is /
+          positioned under the [o_red_dial]."
+         "In the button is an engraving that says: delta = 1."
+
+ CONTAINED in l_dial_room
+
+ FLAGS
+   f_pressed   = 0
+   f_pressable = 1
+
+ ATTRIBUTES
+
+ TRIGGERS
+   "press [o_red_button]"   -> t_press
+   "press [o_black_button]" -> t_reset
+
+   t_entrance
+     # t_entrance for l_dial_room also mentions the three buttons.
+     setflag(f_seenbefore)
+     agree()
+
+   t_press
+     if testflag(l_dial_room.f_solved_dials) then
+       # puzzle has been solved, no special actions. Let the verb handle this further
+       nomatch()
+     else
+       if testflag(f_pressed) then
+         # They may not stop the hand once it's noving
+         printcr("Nothing happens. The hand keeps moving.")
+       else
+         setflag(f_pressed)
+         starttimer(m_red_dial)
+         printcr("[the] [o_red_hand] starts moving.")
+       endif
+     endif
+
+   t_reset
+     if testflag(l_dial_room.f_solved_dials) then
+       nomatch()  # let verb handle this
+     else
+       clearflag(f_pressed)       
+     endif
+     agree()
+
+END_OBJ
+#-------------------------------------------------------------------------------
+
+#-------------------------------------------------------------------------------
+$OBJECT o_red_hand
+
+ DESCRIPTIONS
+   d_sys "the red hand"
+
+   d_exa "[the] [o_red_hand] points to the number [m_red_dial]."
+
+ CONTAINED on o_red_dial
+
+ ATTRIBUTES
+
+ TRIGGERS
+   "press [o_black_button]" -> t_reset
+
+   t_entrance
+     setflag(f_seenbefore)
+     agree()
+
+   t_print_value
+     m_red_dial = m_red_dial rem 10
+     if testflag(o_red_button.f_pressed) and cansee(o_player, %this) then
+       printcr("The red hand is pointing towards the [m_red_dial].")
+     endif
+     m_red_hand = 0
+
+   t_reset
+     if testflag(l_dial_room.f_solved_dials) then
+       # puzzle has been solved, no special actions. Let the verb handle this further
+       nomatch()
+     else
+       printcr("The [o_red_hand] rotates a few times and then stops at 0.")
+       agree()
+     endif
+
+END_OBJ
+#-------------------------------------------------------------------------------
+
+#-------------------------------------------------------------------------------
+$OBJECT o_green_dial
+
+ DESCRIPTIONS
+   d_sys "the green dial"
+
+   d_exa "This is a green circular plate. It looks like a clock dial with one /
+          hand, with the numbers 0 throug 9 printed at equal distances around /
+          the edge. The number 8 is highlighted. There is a [o_green_hand] on /
+          the dial, pointing towards the number [m_green_dial]."
+
+
+ CONTAINED in l_dial_room
+
+ TRIGGERS
+   "press [o_black_button]" -> t_reset
+
+   t_entrance
+     # t_entrance for l_dial_room also mentions the three dials
+     setflag(f_seenbefore)
+     agree()
+
+   t_reset
+     if testflag(l_dial_room.f_solved_dials) then
+       nomatch()  # let verb handle this
+     else
+       stoptimer(m_green_dial)
+       settimer(m_green_dial, 0)
+     endif
+     agree()
+
+END_OBJ
+#-------------------------------------------------------------------------------
+
+#-------------------------------------------------------------------------------
+$OBJECT o_green_button
+
+ DESCRIPTIONS
+   d_sys "the green button"
+
+   d_exa "[the] [o_green_button] has a diameter of about 2 inches, it is /
+          positioned under the [o_green_dial]."
+         "In the button is an engraving that says: delta = 2."
+
+ CONTAINED in l_dial_room
+
+ FLAGS
+   f_pressed   = 0
+   f_pressable = 1
+
+ ATTRIBUTES
+
+ TRIGGERS
+   "press [o_green_button]" -> t_press
+   "press [o_black_button]" -> t_reset
+
+   t_entrance
+     # t_entrance for l_dial_room also mentions the three buttons.
+     setflag(f_seenbefore)
+     agree()
+
+   t_press
+     if testflag(l_dial_room.f_solved_dials) then
+       # puzzle has been solved, no special actions. Let the verb handle this further
+       nomatch()
+        else
+       if testflag(f_pressed) then
+         # They may not stop the hand once it's noving
+         printcr("Nothing happens. The hand keeps moving.")
+       else
+         setflag(f_pressed)
+         starttimer(m_green_dial)
+         printcr("The [o_green_hand] starts moving.")
+       endif
+      endif
+      agree()
+
+   t_reset
+     if testflag(l_dial_room.f_solved_dials) then
+       nomatch()  # let verb handle this
+     else
+       clearflag(f_pressed)       
+     endif
+     agree()
+
+END_OBJ
+#-------------------------------------------------------------------------------
+
+#-------------------------------------------------------------------------------
+$OBJECT o_green_hand
+
+ DESCRIPTIONS  
+   d_sys "the green hand"
+
+   d_exa "[the] [o_green_hand] points to the number [m_green_dial]."
+
+ CONTAINED on o_green_dial
+
+ TRIGGERS
+   "press [o_black_button]" -> t_reset
+
+   t_entrance
+     setflag(f_seenbefore)
+     agree()
+
+   t_print_value
+     m_green_dial = m_green_dial rem 10
+     if testflag(o_green_button.f_pressed) and cansee(o_player, %this) then
+       printcr("The green hand is pointing towards the [m_green_dial].")
+     endif
+     m_green_hand = 0
+
+   t_reset
+     if testflag(l_dial_room.f_solved_dials) then
+       # puzzle has been solved, no special actions. Let the verb handle this further
+       nomatch()
+     else
+       printcr("The [o_green_hand] rotates a few times and then stops at 0.")
+       agree()
+     endif
+
+END_OBJ
+#-------------------------------------------------------------------------------
+
+#-------------------------------------------------------------------------------
+$OBJECT o_blue_dial
+
+ DESCRIPTIONS
+   d_sys "the blue dial"
+
+   d_exa "This is a blue circular plate. It looks like a clock dial with one /
+          hand, with the numbers 0 throug 9 printed at equal distances around /
+          the edge. The number 8 is highlighted. There is a [o_blue_hand] on /
+          the dial, pointing towards the number [m_blue_dial]."
+
+ CONTAINED in l_dial_room
+
+ TRIGGERS
+   "press [o_black_button]" -> t_reset
+
+   t_entrance
+     # t_entrance for l_dial_room also mentions the three dials
+     setflag(f_seenbefore)
+     agree()
+
+   t_reset
+     if testflag(l_dial_room.f_solved_dials) then
+       nomatch()  # let verb handle this
+     else
+       stoptimer(m_blue_dial)
+       settimer(m_blue_dial, 0)
+     endif
+     agree()
+
+END_OBJ
+#-------------------------------------------------------------------------------
+
+#-------------------------------------------------------------------------------
+$OBJECT o_blue_button
+
+ DESCRIPTIONS
+   d_sys "the blue button"
+
+   d_exa "[the] [o_blue_button] has a diameter of about 2 inches, it is /
+          positioned under the [o_blue_dial]."
+         "In the button is an engraving that says: delta = 3."
+
+ CONTAINED in l_dial_room
+
+ FLAGS
+   f_pressed   = 0
+   f_pressable = 1
+
+ TRIGGERS
+   "press [o_blue_button]"   -> t_press
+   "press [o_black_button]"  -> t_reset
+
+   t_entrance
+     # t_entrance for l_dial_room also mentions the three buttons.
+     setflag(f_seenbefore)
+     agree()
+
+   t_press
+     if testflag(l_dial_room.f_solved_dials) then
+       # puzzle has been solved, no special actions. Let the verb handle this further
+       nomatch()
+     else
+       if testflag(f_pressed) then
+         # They may not stop the hand once it's noving
+         printcr("Nothing happens. The hand keeps moving.")
+       else
+         setflag(f_pressed)
+         starttimer(m_blue_dial)
+         printcr("The [o_blue_hand] starts moving.")
+       endif
+   endif
+
+   t_reset
+     if testflag(l_dial_room.f_solved_dials) then
+       nomatch()  # let verb handle this
+     else
+       clearflag(f_pressed)       
+     endif
+     agree()
+ 
+END_OBJ
+#-------------------------------------------------------------------------------
+
+#-------------------------------------------------------------------------------
+$OBJECT o_blue_hand
+
+ DESCRIPTIONS
+   d_sys "the blue hand"
+
+   d_exa "the [o_blue_hand] points to the number [m_blue_dial]."
+
+ CONTAINED on o_blue_dial
+
+ TRIGGERS
+   "press [o_black_button]" -> t_reset
+
+   t_entrance
+     setflag(f_seenbefore)
+     agree()
+
+   t_print_value
+     m_blue_dial = m_blue_dial rem 10
+     if testflag(o_blue_button.f_pressed) and cansee(o_player, %this) then
+       printcr("The blue hand is pointing towards the [m_blue_dial].")
+     endif
+     m_blue_hand = 0
+
+   t_reset
+     if testflag(l_dial_room.f_solved_dials) then
+       # puzzle has been solved, no special actions. Let the verb handle this further
+       nomatch()
+     else
+       printcr("The [o_blue_hand] rotates a few times and then stops at 0.")
+       agree()
+     endif
+
+END_OBJ
+#-------------------------------------------------------------------------------
+
+#-------------------------------------------------------------------------------
+$OBJECT o_black_button
+
+ DESCRIPTIONS
+   d_sys        "the black button"
+
+   d_exa        "[the] [o_black_button] is engraved with the word RESET."
+
+ CONTAINED in l_dial_room
+
+ TRIGGERS
+   t_entrance
+     setflag(f_seenbefore)
+     agree()
+    
+END_OBJ
+#-------------------------------------------------------------------------------
+
+#########################################################
+# Some scenery objects to make game play more realistic #
+#########################################################
+
+#-------------------------------------------------------------------------------
+$OBJECT o_generic_wall
+
+ # We set flag f_swap, so this object's printed description will
+ # be set to the one that the player's input matched with
+
+ DESCRIPTIONS
+   d_sys   "the north wall", "the east wall", "the west wall"
+           # south wall is a separate object because of the
+           # door in the dial room (in the south wall)
+
+   d_exa_1 "It looks just like a wall, nothing special."
+
+   d_exa_2 "It looks just like you expected."
+
+   d_exa_3 "A wall, allright."
+
+ CONTAINED in o_player
+
+ FLAGS
+   f_scenery = 1
+   f_swap    = 1
+
+ ATTRIBUTES
+   r_examine = 1
+
+ TRIGGERS
+   "examine [o_generic_wall]" -> t_exa
+
+   t_entrance
+     agree()
+
+   t_exa
+     r_examine = rnd(1,3)
+     if equal(r_examine, 1) then
+       printcr(d_exa_1)
+     else
+       if equal(r_examine, 2) then
+         printcr(d_exa_2)
+       else
+         printcr(d_exa_3)
+
+   t_default
+     if equal(o_subject, %this) then
+       print("[the] [o_actor] cannot [action] ")
+       if not(equal(%prepos, %none)) then
+         print(%prepos)
+       endif
+       printcr(" [the] [this].")
+       disagree()
+     else
+       nomatch()
+
+END_OBJ
+#-------------------------------------------------------------------------------

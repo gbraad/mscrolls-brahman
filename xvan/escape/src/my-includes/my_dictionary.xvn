@@ -1,0 +1,22 @@
+
+# XVAN Starter Kit version 1.0
+
+
+#=============
+# Noun section
+#=============
+
+$NOUNS
+
+dial, dials, Fred, guy, keyhole, keypad, lantern, npc, vault, walls, you SYNONYM me
+
+#==================
+# Adjective section
+#==================
+
+$ADJECTIVES
+brass, chest, colored, dial, east, escape, golden, metal, nondescript, north, red, south, vault, west,
+wooden
+
+
+

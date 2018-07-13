@@ -1,0 +1,72 @@
+<!DOCTYPE RCC>
+<RCC version="1.0">
+
+<qresource prefix="/icons/social">
+	<file alias="share.svg">social_share.svg</file>
+</qresource>
+
+<qresource prefix="/icons/alert">
+	<file alias="warning.svg">alert_warning.svg</file>
+	<file alias="error.svg">alert_error.svg</file>
+</qresource>
+
+<qresource prefix="/icons/content">
+	<file alias="add.svg">content_add.svg</file>
+	<file alias="redo.svg">content_redo.svg</file>
+	<file alias="undo.svg">content_undo.svg</file>
+	<file alias="create.svg">content_create.svg</file>
+	<file alias="cut.svg">content_cut.svg</file>
+	<file alias="paste.svg">content_paste.svg</file>
+	<file alias="copy.svg">content_copy.svg</file>
+	<file alias="link.svg">content_link.svg</file>
+</qresource>
+
+<qresource prefix="/icons/maps">
+	<file alias="my_location.svg">maps_my_location.svg</file>
+</qresource>
+
+<qresource prefix="/icons/toggle">
+	<file alias="check_box.svg">toggle_check_box.svg</file>
+	<file alias="check_box_outline_blank.svg">toggle_check_box_outline_blank.svg</file>
+	<file alias="radio_button_checked.svg">toggle_radio_button_checked.svg</file>
+	<file alias="radio_button_unchecked.svg">toggle_radio_button_unchecked.svg</file>
+	<file alias="star.svg">toggle_star.svg</file>
+	<file alias="star_border.svg">toggle_star_border.svg</file>
+</qresource>
+
+<qresource prefix="/icons/av">
+	<file alias="volume_mute.svg">av_volume_mute.svg</file>
+	<file alias="volume_off.svg">av_volume_off.svg</file>
+	<file alias="volume_up.svg">av_volume_up.svg</file>
+</qresource>
+
+<qresource prefix="/icons/action">
+	<file alias="settings.svg">action_settings.svg</file>
+	<file alias="delete.svg">action_delete.svg</file>
+	<file alias="search.svg">action_search.svg</file>
+	<file alias="build.svg">action_build.svg</file>
+	<file alias="done.svg">action_done.svg</file>
+	<file alias="help.svg">action_help.svg</file>
+	<file alias="help_outline.svg">action_help_outline.svg</file>
+</qresource>
+
+<qresource prefix="/icons/navigation">
+	<file alias="check.svg">navigation_check.svg</file>
+	<file alias="close.svg">navigation_close.svg</file>
+	<file alias="cancel.svg">navigation_cancel.svg</file>
+	<file alias="refresh.svg">navigation_refresh.svg</file>
+	<file alias="arrow_back.svg">navigation_arrow_back.svg</file>
+	<file alias="arrow_downward.svg">navigation_arrow_downward.svg</file>
+	<file alias="arrow_forward.svg">navigation_arrow_forward.svg</file>
+	<file alias="arrow_upward.svg">navigation_arrow_upward.svg</file>
+	<file alias="more_vert.svg">navigation_more_vert.svg</file>
+	<file alias="arrow_drop_down.svg">navigation_arrow_drop_down.svg</file>
+	<file alias="arrow_drop_up.svg">navigation_arrow_drop_up.svg</file>
+	<file alias="menu.svg">navigation_menu.svg</file>
+</qresource>
+
+<qresource prefix="/icons/other">
+	<file>handtap.svg</file>
+</qresource>
+
+</RCC>

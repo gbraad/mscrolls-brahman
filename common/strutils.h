@@ -93,6 +93,7 @@ inline std::string replaceAll(const std::string& source,
 inline void replaceCharsInplace(std::string& source, char sc, char dc)
 {
     // XX apparently you're not supposed to modify the internals
+    // util C++17 ?
     char* p = const_cast<char*>(source.data());
     while (*p)
     {

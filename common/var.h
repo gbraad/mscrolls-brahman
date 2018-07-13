@@ -237,6 +237,11 @@ struct var
         }
         return val;
     }
+
+    const char* rawString() const
+    {
+        return _type == var_string ? _s : 0;
+    }
     
     std::string toString(bool quoteStrings = false) const
     {

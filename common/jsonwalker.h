@@ -169,14 +169,14 @@ struct JSONWalker
         _key = _getKey();
         if (_error)
         {
-            LOG2("Json error ", _json << " at " << _pos);
+            LOG2("JSON error at '", string(_pos).substr(0,40) << "'... in:\n" << _json << "\n\n");
         }
         return !_key.empty();
     }
 
     string _getKey()
     {
-        // leaves position next char after ':"
+        // leaves position next char after ':'
         string k;
         if (!_end && !_error)
         {
@@ -262,6 +262,9 @@ struct JSONWalker
                         // must have ended
                         _end = true;
 
+                        // final } is end of value+1 in this case
+                        _unget(c);
+
                         // [] should be level
                         if (_blevel != blevel0) _error = true;
                         break;
@@ -280,12 +283,15 @@ struct JSONWalker
                     {
                         // ended or error
                         _end = true;
+
+                        // final ] is end of value+1 in this case
+                        _unget(c);
+
                         if (_level != level0) _error = true;
                         break;
                     }
                     
                     if (_level == level0 && _blevel == blevel0) break;
-
                 }
                 else
                 {
@@ -299,6 +305,8 @@ struct JSONWalker
 
     const char* checkValue(bool& isObject)
     {
+        // return the start of the value object
+        // leaves pos next char after that which ended value
         skipSpace();
         const char* st = _pos;
         skipValue();
@@ -590,12 +598,35 @@ struct JSONWalker
         addKeyObject(gs, key.c_str(), json);
     }
 
-    
     static void toAdd(GrowString& gs)
     {
         char c = gs.last();
         if (c && c != ',' && c != '{' && c != '[') gs.add(',');
     }
+
+    static bool reopenJSON(GrowString& js, const string& oldjs)
+    {
+        const char* s = oldjs.c_str();
+
+        while (u_isspace(*s)) ++s;
+        if (*s != '{') return false; // malformed
+        
+        const char* p = s + strlen(s);
+
+        // backup to find final closing "}"
+        while (p != s) if (*--p == '}') break;
+
+        if (p != s)
+        {
+            // add { ... but not closing }"
+            js.append(s, p - s);
+            return true;
+        }
+
+        return false; // malformed
+    }
+
+    
 
 
 };

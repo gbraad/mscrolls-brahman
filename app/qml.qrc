@@ -1,0 +1,47 @@
+<RCC>
+    <qresource prefix="/">
+        <file>main.qml</file>
+        <file>CoverPage.qml</file>
+        <file>MainPage.qml</file>
+        <file>GamePage.qml</file>
+        <file>Game.qml</file>
+        <file>Roller.qml</file>
+        <file>MapPage.qml</file>
+        <file>MapBox.qml</file>
+        <file>Arrow.qml</file>
+        <file>Bubble.qml</file>
+        <file>SettingsPage.qml</file>
+        <file>Compass.qml</file>
+        <file>RDrawer.qml</file>
+        <file>FontSelector.qml</file>
+        <file>SaveLoadSelector.qml</file>
+        <file>Messenger.qml</file>
+        <file>GameSidebar.qml</file>
+        <file>SidebarList.qml</file>
+        <file>SidebarItem.qml</file>
+        <file>ChoiceBox.qml</file>
+        <file>Console.qml</file>
+        <file>WordBar.qml</file>
+        <file>AnimatedImage2.qml</file>
+        <file>ThemeSelector.qml</file>
+        <file>assets/brahman_logo-256.png</file>
+        <file>assets/iphone7p_bar.png</file>
+        <file>assets/iphone7pl_bar.png</file>
+        <file>assets/ipad12_bar.png</file>
+        <file>assets/ipad12l_bar.png</file>
+        <file>fonts/Roboto-Regular.ttf</file>
+        <file>fonts/Kanit-Thin.ttf</file>
+        <file>fonts/Kanit-Light.ttf</file>
+        <file>fonts/Kanit-Regular.ttf</file>
+        <file>fonts/PT_Serif-Web-Regular.ttf</file>
+        <file>fonts/PT_Serif-Web-Italic.ttf</file>
+        <file>fonts/PxPlus_IBM_CGA.ttf</file>
+        <file>fonts/PxPlus_IBM_EGA9.ttf</file>
+        <file>fonts/PxPlus_IBM_VGA9.ttf</file>
+        <file>fonts/PxPlus_AmstradPC1512.ttf</file>
+        <file>fonts/AtariST8x16SystemFont.ttf</file>
+        <file>ImportMessage.qml</file>
+        <file>ScaleSelector.qml</file>
+        <file>FontLoad.qml</file>
+    </qresource>
+</RCC>

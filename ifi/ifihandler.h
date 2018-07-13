@@ -13,26 +13,23 @@
  *
  *  Copyright (c) Strand Games 2018.
  *
- *  Permission is hereby granted, free of charge, to any person obtaining a copy
- *  of this software and associated documentation files (the "Software"), to
- *  deal in the Software without restriction, including without limitation the
- *  rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
- *  sell copies of the Software, and to permit persons to whom the Software is
- *  furnished to do so, subject to the following conditions:
+ *  This program is free software: you can redistribute it and/or modify it
+ *  under the terms of the GNU Lesser General Public License (LGPL) as published
+ *  by the Free Software Foundation, either version 3 of the License, or (at
+ *  your option) any later version.
  * 
- *  The above copyright notice and this permission notice shall be included in
- *  all copies or substantial portions of the Software.
+ *  This program is distributed in the hope that it will be useful, but WITHOUT
+ *  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ *  FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License
+ *  for more details.
  * 
- *  THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- *  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- *  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- *  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- *  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
- *  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
- *  IN THE SOFTWARE.
- * 
+ *  You should have received a copy of the GNU Lesser General Public License
+ *  along with this program. If not, see <http://www.gnu.org/licenses/>.
+ *
  *  contact@strandgames.com
+ *
  */
+
 
 #pragma once
 
@@ -50,6 +47,23 @@ struct IFIHandler
 
     // valid whilst using builders
     GrowString*         _js = 0;
+
+    // for checking responses before game has been initialised
+    bool                _startDone = false;
+
+    struct TextF
+    {
+        string          _text;
+        int             _id = 0;
+
+        friend std::ostream& operator<<(std::ostream& os, const TextF& t)
+        {
+            os << '{' << t._text << ", id=" << t._id << '}';
+            return os;
+        }
+
+        explicit operator bool() const { return !_text.empty(); }
+    };
 
     IFIHandler()
     {
@@ -87,6 +101,11 @@ struct IFIHandler
 
             string p = extendPrefix(prefix, jw._key);
 
+            if (!_startDone)
+            {
+                LOG3("WARNING, IFI received response before started: ", p);
+            }
+
             if (!isObject)
             {
                 var v = jw.collectValue(st);
@@ -115,13 +134,15 @@ struct IFIHandler
                     if (jw._pos[-1] == '}')
                     {
                         if (p == IFI_META)
-                            r = ifiMetaResponse(subjs);
+                            r = ifiMetaResponsePrep(subjs);
                         else if (p == IFI_MAP)
                             r = ifiMapResponse(subjs);
                         else if (p == IFI_PICTURE) // picture as object
                             r = ifiPictureResponse(subjs);
                         else if (p == IFI_SAVEDATA)
                             r = ifiSaveDataResponse(subjs);
+                        else if (p == IFI_TEXT)
+                            r = ifiTextFormattedResponse(subjs);
                         
                         if (!r)
                             handleAux(jw._obj, p);
@@ -143,9 +164,7 @@ struct IFIHandler
                         else if (p == IFI_PEOPLE)
                             r = ifiPeopleResponse(subjs);
                         else if (p == IFI_MAP "/" IFI_PLACES)
-                        {
                             r = ifiMapPlacesResponse(subjs);
-                        }
                     }
                     else
                     {
@@ -266,6 +285,7 @@ struct IFIHandler
     virtual bool ifiDataDir(const string&) { return false; }
     virtual bool ifiStory(const string&) { return false; }
     virtual bool ifiText(const string&) { return false; }
+    virtual bool ifiTextFormatted(const TextF&) { return false; }
     virtual bool ifiLocationResponse(const string& id) { return false; }
     virtual bool ifiExitsResponse(int mask) { return false; }
     virtual bool ifiTitleTextResponse(const string&) { return false; }
@@ -334,8 +354,9 @@ struct IFIHandler
         // NB: this can be a request or a response.
         // when a request: `s` is the data
         // when a response: `s` is optionally, a filename
+        // and although a "response" is actually a request to load
         
-        LOG3("IFI loaddata not implemented", "");
+        LOG3("IFI loaddata not implemented ", s);
         return true;
     }
     
@@ -353,6 +374,81 @@ struct IFIHandler
     virtual bool ifiPeopleResponse(const string& js) { return false; }
     virtual bool ifiMapResponse(const string& js) { return false; }
     virtual bool ifiMapPlacesResponse(const string& js) { return false; }
+
+    bool ifiMetaResponsePrep(const string& js)
+    {
+        // fix up potential missing elements from meta response
+
+        GrowString js2;
+        js2.add('{');
+
+        static const char* extracredits = 
+                "<h2>Brahman GUI</h2>"
+                "<p>More info at <a href=\"https://strandgames.com/\">Strand Games</a></p>"
+            ;
+            
+        for (JSONWalker jw(js); jw.nextKey(); jw.next())
+        {
+            bool isObject;
+            const char* st = jw.checkValue(isObject);
+            if (!st) break;
+            
+            if (jw._key == IFI_CREDITS)
+            {
+                string v = jw.collectValue(st).toString();
+                v += extracredits;
+                JSONWalker::addStringValue(js2, jw._key.c_str(), v);
+            }
+            else
+            {
+                string v(st, jw._pos-st);
+                JSONWalker::addKeyObject(js2, jw._key, v.c_str());
+            }
+        }
+
+        js2.add('}');
+        js2.add(0);
+
+        return ifiMetaResponse(js2.start());
+    }
+    
+    virtual bool ifiTextFormattedResponse(const string& js)
+    {
+        TextF textF;
+        
+        for (JSONWalker jw(js); jw.nextKey(); jw.next())
+        {
+            bool isObject;
+            const char* st = jw.checkValue(isObject);
+
+            if (!st) break; // bad json
+
+            if (!isObject)
+            {
+                if (jw._key == IFI_TEXT)
+                {
+                    textF._text = jw.collectValue(st).toString();
+                }
+                else if (jw._key == IFI_ID)
+                {
+                    textF._id = jw.collectValue(st).toInt();
+                }
+                // ignore others
+            }
+        }
+
+        bool r = true;
+
+        if (textF)
+        {
+            if (!ifiTextFormatted(textF))
+            {
+                // fallback to non-formatted
+                r = ifiText(textF._text);
+            }
+        }
+        return r;
+    }
 
     virtual void ifiDefault(const string& key, const var& v)
     {

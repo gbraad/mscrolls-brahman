@@ -1,0 +1,51 @@
+
+$OBJECT <o_name>
+ DESCRIPTIONS
+   d_sys        "object description used to map user input to object",
+                "There may be more than 1 text string with descriptions",
+                "if there is an article (the), start with article."
+                "examples:", "the old chest", "the coffin", "the case"
+
+   d_longdescr  "long description, printed when first seen"
+
+   d_shortdescr "short description, printed when re-seen"
+
+   d_exa        "printed when the object is examined"
+
+ CONTAINED <preposition> <o_object or l_location>
+ # example: contained behind o_couch
+
+ FLAGS
+   # these are standard flags with their default values
+   # if value is ok, remove the entire line.
+   # if not, change value and remove only the comment marker ('#')
+
+   # f_alive      = 0
+   # f_any        = 1
+   # f_container  = 0
+   # f_lockable   = 0
+   # f_locked     = 0
+   # f_open       = 0
+   # f_openable   = 0
+   # f_seenbefore = 0
+   # f_takeable   = 0
+   # f_wearable   = 0
+   # f_worn       = 0
+   # f_fixed      = 1
+
+ ATTRIBUTES
+   # r_do           = does
+   # r_have         = has
+   # r_is           = is
+   # r_key          = %none
+
+ TRIGGERS
+   # when referring to an object or location in the text string,
+   # use the identifier and not the textual description.
+   # right: "open the [o_chest]"        -> t_open
+   # wrong: "open the old wooden chest" -> t_open
+
+   "text string1" -> t_trigger1
+   "text string2" -> t_trigger2
+
+END_OBJ

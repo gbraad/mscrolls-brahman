@@ -13,27 +13,23 @@
  *
  *  Copyright (c) Strand Games 2018.
  *
- *  Permission is hereby granted, free of charge, to any person obtaining a copy
- *  of this software and associated documentation files (the "Software"), to
- *  deal in the Software without restriction, including without limitation the
- *  rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
- *  sell copies of the Software, and to permit persons to whom the Software is
- *  furnished to do so, subject to the following conditions:
+ *  This program is free software: you can redistribute it and/or modify it
+ *  under the terms of the GNU Lesser General Public License (LGPL) as published
+ *  by the Free Software Foundation, either version 3 of the License, or (at
+ *  your option) any later version.
  * 
- *  The above copyright notice and this permission notice shall be included in
- *  all copies or substantial portions of the Software.
+ *  This program is distributed in the hope that it will be useful, but WITHOUT
+ *  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ *  FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License
+ *  for more details.
  * 
- *  THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- *  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- *  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- *  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- *  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
- *  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
- *  IN THE SOFTWARE.
- * 
+ *  You should have received a copy of the GNU Lesser General Public License
+ *  along with this program. If not, see <http://www.gnu.org/licenses/>.
+ *
  *  contact@strandgames.com
+ *
  */
- 
+
 
 #pragma once
 
@@ -55,9 +51,13 @@ struct IFIHost
     typedef std::string string;
     typedef std::deque<char*>  Queue;
 
+    IFI*        _ifi = 0;
     mutex       _queueLock;
     Queue       _replies;
     IFIHandler* _handler = 0;
+    bool        _inSync = false;
+    bool        _more;
+    bool        _combineReplies = true;
 
     virtual ~IFIHost() {}
 
@@ -66,15 +66,38 @@ struct IFIHost
         IFIHost* host = (IFIHost*)ctx;
         assert(host);
 
+        char* p = u_strdup(json);
+
         std::lock_guard<mutex> lock(host->_queueLock);
-        host->_replies.push_back(strdup(json));
+        host->_replies.push_back(p);
     }
     
-    void setHandler(IFIHandler* h)
-    {
-        _handler = h;
-    }
+    void setHandler(IFIHandler* h) { _handler = h; }
+    void setIFI(IFI* ifi) { _ifi = ifi; }
 
+    bool isSimpleText(const char* js, string& s)
+    {
+        // if json `js` is just one text record, return the string
+        int nr = 0;
+        int nt = 0;
+        for (JSONWalker jw(js); jw.nextKey(); jw.next())
+        {
+            bool isObject;
+            const char* st = jw.checkValue(isObject);
+            if (!st) break; // bad json
+            ++nr;
+            if (!isObject && jw._key == IFI_TEXT)
+            {
+                // do not decode string
+                s = jw.collectRawStringValue(st);
+                ++nt;
+            }
+        }
+
+        // just one text record? 
+        return nr == 1 && nt == 1;
+    }
+    
     void drainQueue()
     {
         // NB: client thread can still be running when this is called
@@ -82,39 +105,83 @@ struct IFIHost
 
         std::unique_lock<mutex> lock(_queueLock, std::defer_lock);
 
-        for (;;)
+        const int repMax = 64;
+        char* rep[repMax];
+        bool done = false;
+
+        do
         {
-            char* json = 0;
-            
+            int n = 0;
+
             lock.lock();
             
-            if (!_replies.empty())
+            while (n < repMax)
             {
-                json = _replies.front();
-                _replies.pop_front();
-            }
+                done = _replies.empty();
+                if (done) break;
 
+                rep[n++] = _replies.front();
+                _replies.pop_front();
+                
+            }
+            
             lock.unlock();
 
-            if (!json) break;
-
-            if (_handler)
+            if (n > 1 && _combineReplies)
             {
-                _handler->handle(json);
+                GrowString cjs;
+                int len = 0;
+                cjs.append("{\"" IFI_TEXT "\":\"");
+                for (int i = 0; i < n; ++i)
+                {
+                    string t;
+                    if (isSimpleText(rep[i], t))
+                    {
+                        // combine text and discard
+                        len += t.size();
+                        cjs.append(t);
+
+                        delete [] rep[i];
+                        rep[i] = 0;
+                    }
+                }
+
+                cjs.append("\"}");
+                cjs.add(0);
+
+                if (len > 0)
+                {
+                    if (_handler) _handler->handle(cjs.start());
+                }
             }
 
-            delete [] json;
-        }
+            // handle replies
+            for (int i = 0; i < n; ++i)
+            {
+                char* r = rep[i];
+                if (r)
+                {
+                    if (_handler) _handler->handle(r);
+                    delete [] r;
+                }
+            }
+        } while (!done);
     }
 
     bool sync(IFI* ifi, int timeoutms = 200)
     {
         int v;
 
+        assert(!_inSync);
+
+        _more = false;
+
         // sync client and drain queue of any replies
         do
         {
             v = ifi->sync(timeoutms);
+
+            if (v > 0) _inSync = true;
 
             // perform work if sync ok or timeout yield
             if (v >= 0) drainQueue();
@@ -122,6 +189,66 @@ struct IFIHost
         } while(!v); // try again while timeout
 
         return v > 0;
+    }
+
+    bool sync()
+    {
+        return sync(_ifi);
+    }
+
+    bool release()
+    {
+        if (_inSync)
+        {
+            _inSync = false;
+            _ifi->release();
+            return _more;
+        }
+        return false;
+    }
+
+    bool _syncRelease()
+    {
+        // sync and release, but only if not already in sync
+        if (!_inSync)
+        {
+            sync();
+            return release();
+        }
+        return false;
+    }
+
+    void syncRelease()
+    {
+        // sync and release, but only if not already in sync
+        // continue until no more.
+        if (!_inSync)
+        {
+            while (sync() && release()) ;
+        }
+    }
+
+    bool eval(const char* s)
+    {
+        bool r;
+
+        if (_inSync)
+        {
+            r = _ifi->eval(s);
+
+            // will need another syncrelease *after* current drain
+            if (r) _more = true;
+        }
+        else
+        {
+            r = sync();
+            if (r)
+            {
+                r = _ifi->eval(s);
+                release();
+            }
+        }
+        return r;
     }
     
 };

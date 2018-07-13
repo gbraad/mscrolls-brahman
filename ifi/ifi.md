@@ -49,7 +49,7 @@ See _Interface_ section for details, but startup has the following sequence;
 * `create`
 * `setEmitter`
 * `start`  
-   Sends `configDir`, `dataDir` and name of `story` to back-end. The engine will need this information to open any game story files which will contain information subsequently requested. 
+   Sends `configDir`, `dataDir` and name of `story` to back-end using `argc,argv` in `start()`. The engine will need this information to open any game story files which will contain information subsequently requested. 
 
    The back-end will not be expected to reply to the start `json`, but if it chooses to do so, it should not issue any `text`.
    
@@ -156,6 +156,9 @@ The _reply_ json, sent from the back-end to the front-end, can have these terms 
 
 * `text: "You are in a maze of twisty passages all alike."`  
    Block of text from the game to be formatted and shown in the transcript window. A newline will be added to the end when displayed. The `text` may contain a subset of [Markdown](https://daringfireball.net/projects/markdown/) and HTML.
+
+* `text:{textobj}`  
+   Supply formatted text.
 
 * `title: "In the Lounge"`  
   Game text to be displayed in any GUI title bar.
@@ -311,7 +314,7 @@ Same meanings as `item`.
 * `title: "name"`
 * `author: "name"`
 * `organisation: "name"`
-* `covertext: {text}` 
+* `covertext: {textobj}` 
 * `credits: "by Larry Biggs"`
 
 * `version: "1.2.0"`  
@@ -358,7 +361,7 @@ Same meanings as `item`.
 * `name: "filepath"`  
    _Optional_. path relative to datadir.
   
-### text
+### textobj
 
 * `text: "string"`  
   _Optional_.
@@ -371,6 +374,8 @@ Same meanings as `item`.
   
 * `color: "blue"`  
   _Optional_.
+
+* `id:` int
 
 ## Save and Load
 

@@ -13,27 +13,23 @@
  *
  *  Copyright (c) Strand Games 2018.
  *
- *  Permission is hereby granted, free of charge, to any person obtaining a copy
- *  of this software and associated documentation files (the "Software"), to
- *  deal in the Software without restriction, including without limitation the
- *  rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
- *  sell copies of the Software, and to permit persons to whom the Software is
- *  furnished to do so, subject to the following conditions:
+ *  This program is free software: you can redistribute it and/or modify it
+ *  under the terms of the GNU Lesser General Public License (LGPL) as published
+ *  by the Free Software Foundation, either version 3 of the License, or (at
+ *  your option) any later version.
  * 
- *  The above copyright notice and this permission notice shall be included in
- *  all copies or substantial portions of the Software.
+ *  This program is distributed in the hope that it will be useful, but WITHOUT
+ *  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ *  FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License
+ *  for more details.
  * 
- *  THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- *  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- *  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- *  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- *  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
- *  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
- *  IN THE SOFTWARE.
- * 
+ *  You should have received a copy of the GNU Lesser General Public License
+ *  along with this program. If not, see <http://www.gnu.org/licenses/>.
+ *
  *  contact@strandgames.com
+ *
  */
- 
+
 
 #include <iostream>
 #include <string>
@@ -73,12 +69,20 @@ static std::string makePath(const std::string& prefix, const std::string& name)
 
 struct Handler: public IFIHandler
 {
+    IFIHost*        _host;
+     
+    Handler(IFIHost* host) : _host(host) {}
+
     bool ifiText(const string& s) override
     {
-        std::cout << s;
-        std::cout.flush();
+        if (!s.empty())
+        {
+            std::cout << s;
+            std::cout.flush();
+        }
         return true;
     }
+    
     bool ifiMoves(int moveCount) override
     {
         std::cout << "current move count " << moveCount << std::endl;
@@ -94,7 +98,7 @@ struct Handler: public IFIHandler
         if (f.empty()) f = "save";
 
         string dataDir = getProp(IFI_DATADIR).toString();
-        string path = changeSuffix(makePath(dataDir, f), ".sav");
+        string path = makePath(dataDir, changeSuffix(f, ".sav"));
 
         LOG3("ifiSave ", f);
 
@@ -119,6 +123,53 @@ struct Handler: public IFIHandler
         }
         
         return r;
+    }
+
+    bool ifiLoadData(const string& s) override
+    {
+        // NB: this can be a request or a response.
+        // when a request: `s` is the data
+        // when a response: `s` is optionally, a filename
+        // and although a "response" is actually a request to load
+        
+        string f = s;
+
+        // otherwise invent our own
+        if (f.empty()) f = "save";
+
+        string dataDir = getProp(IFI_DATADIR).toString();
+        string path = makePath(dataDir, changeSuffix(f, ".sav"));
+        
+        FD fd;
+        if (fd.open(path))
+        {
+            uchar* data = fd.readAll();
+            if (data)
+            {
+                GrowString js;
+                buildJSONStart(js);        
+
+                JSONWalker::addRawStringValue(js, IFI_LOADDATA, (char*)data);
+                buildJSONEnd();
+
+                LOG3("Loading ", path);
+
+                // send
+                _host->eval(js.start());
+                _host->syncRelease(); // refresh when not in sync already
+                
+                delete [] data;
+            }
+            else
+            {
+                LOG1("IFI loadGame, error reading '", path << "'");
+            }
+        }
+        else
+        {
+            LOG2("IFI loadGame, unable to open '", path << "'");
+        }
+        return true;
     }
 };
 
@@ -155,14 +206,15 @@ int main(int argc, char** argv)
         return 0;
     }
 
-    Handler h;
+    IFIHost host;
+    Handler h(&host);
 
     h.setProp(IFI_CONFIGDIR, configdir);
     h.setProp(IFI_DATADIR, datadir);
     h.setProp(IFI_STORY, story);
 
-    IFIHost host;
     host.setHandler(&h);
+    host.setIFI(ifi);
 
     // initial json tells back-end various directories & story
     GrowString js;
@@ -174,7 +226,6 @@ int main(int argc, char** argv)
     // NB: copy must be deleted later
     argv = Opt::copyArgs(argc, argv, 2);
     LOG2("IFIConsole, passing start json, ", js.start());
-    
     Opt::addArg(argc, argv, "-e", js.start());
 
     // plug the host handler into the client
@@ -184,13 +235,15 @@ int main(int argc, char** argv)
     ifi->start(argc, argv);
 
     // perform initial sync to allow game to start
-    if (host.sync(ifi)) ifi->release();
-    else
+    if (!host.sync())
     {
         LOG1("IFIConsole, client not running; ", js.start());
         delete ifi;
         return -1;
     }
+    
+    host.release();
+    h._startDone = true;
 
     // we guarantee the back-end will receive some prologue json
     // *before* any commands. This allows the back-end to get ready
@@ -200,16 +253,15 @@ int main(int argc, char** argv)
     h.buildPrologueJSON();
     h.buildJSONEnd();
 
-    if (host.sync(ifi))
+    if (host.eval(js.start()))
     {
-        ifi->eval(js.start());
-        ifi->release();
-
         // allow it to process
-        if (host.sync(ifi)) ifi->release();
+        host.syncRelease();
     }
 
-    for (;;)
+    bool done = false;
+
+    while (!done)
     {
         std::string cmd;
         std::cout << h.getProp(IFI_PROMPT); std::cout.flush();
@@ -224,13 +276,12 @@ int main(int argc, char** argv)
         {
             h.buildJSONEnd();
             
-            if (!host.sync(ifi)) break;
-            ifi->eval(js.start());
-            ifi->release();
+            host.eval(js.start());
 
-            // needed if output is in same window as input
-            if (!host.sync(ifi)) break;        
-            ifi->release();
+            do
+            {
+                done = !host.sync();
+            } while (!done && host.release());
         }
     }
 
