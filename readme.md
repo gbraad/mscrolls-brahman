@@ -10,13 +10,16 @@ https://www1.qt.io/offline-installers/
 ### Windows
 
 Get Qt 5.9.X for Windows
-run the exe. install to eg `i:\qtandroid\qt5.9.6`
+run the exe. install to eg `c:\qt\qt5.9.6`
+
+* select: MinGW 5.3.0 32 bit
+* Also select tools/mingGW 5.3.0 if you do not already have a mingw environment.
 
 add to `PATH` (adjust according to location)
 
 eg.
 ```
-I:\Qtandroid\Qt5.9.6\5.9.6\mingw53_32\bin;i:\Qtandroid\Qt5.9.6\Tools\mingw530_32\bin;I:\Qtandroid\Qt5.9.6\Tools\QtCreator\bin
+C:\Qt\Qt5.9.6\5.9.6\mingw53_32\bin;c:\Qt\Qt5.9.6\Tools\mingw530_32\bin;C:\Qt\Qt5.9.6\Tools\QtCreator\bin
 ```
 
 ### Linux
@@ -55,8 +58,10 @@ export PATH=/Developer/Qt5.9.6/5.9.6/clang_64/bin:/Developer/Qt5.9.6:$PATH
 
 ```
 qmake
-make
+make  
 ```
+
+(or `mingw32-make` if you do not have make installed.)
 
 which will build:
 * tools/zlib
