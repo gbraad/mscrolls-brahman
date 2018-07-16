@@ -46,33 +46,57 @@ struct TextFormat
 
     TextFormat() { _init(); }
 
+    static const char* _html_char(int c)
+    {
+        static char buf[32];
+
+        buf[0] = c;
+        buf[1] = 0;
+        const char* r = buf;
+        
+        switch (c)
+        {
+        case '&': r = "&amp;"; break;
+        case '<': r = "&lt;"; break;
+        case '>': r = "&gt;"; break;
+        case '"': r = "&quot;"; break;
+        case '\'': r = "&#39;"; break;
+        }
+
+        return r;
+    }
+
     struct Emitter
     {
         TextFormat*     _host;
         
-        Emitter(TextFormat* host, string* s) : _host(host), _text(s) 
-        {
-            _lastChar = 0;
-        }
-
-        void operator()(const string& s) { (*this)(s.c_str()); }
-        void operator()(const char* s) { (*this)(s, strlen(s)); }
-    
-        void operator()(const char* s, size_t n)
-        {
-            if (n)
-            {
-                _lastChar = s[n-1];
-                _text->append(s, n);
-            }
-        }
+        Emitter(TextFormat* host, string* s) : _host(host), _text(s) {}
         
-        void operator()(char c)
+        void _add(char c)
         {
             *_text += c;
             _lastChar = c;
         }
 
+        void _add(const char* s)
+        {
+            while (*s) _add(*s++);
+        }
+
+        void _addt(char c)
+        {
+            _add(_html_char(c));
+        }
+
+        void _addt(const char* s)
+        {
+            while (*s) _addt(*s++);
+        }
+
+        void operator()(const string& s) { _add(s.c_str()); }
+        void operator()(const char* s) { _add(s); }
+        void operator()(char c) { _add(c); }
+        
         void emitLink(const string& link, 
                       const string* linktext = 0)
         {
@@ -173,12 +197,17 @@ struct TextFormat
             (*this)("<div class=\"");
             (*this)(style);
             (*this)("\">");
-            if (text) (*this)(*text);
+            if (text)
+            {
+                _add("<p>");
+                _addt(text->c_str());
+                _add("</p>");
+            }
             (*this)("</div>");
         }
         
         string*   _text;
-        char      _lastChar;
+        char      _lastChar = 0;
     };
 
     static bool looksLikeLinkMD(const char*& str,
@@ -354,24 +383,17 @@ struct TextFormat
 
     static void _html_out(char c, Emitter& out)
     {
-        // characters that need to be encoded into HTML
-        switch (c)
-        {
-        case '&': out("&amp;"); break;
-        case '<': out("&lt;"); break;
-        case '>': out("&gt;"); break;
-        case '"': out("&quot;"); break;
-        case '\'': out("&#39;"); break;
-        default:
-            out(c);
-        }
-    }
-
-    static void _html_out(const char* s, Emitter& out)
-    {
-        while (*s) _html_out(*s++, out);
+        out(_html_char(c));
     }
     
+    static void _html_out(const char* s, Emitter& out)
+    {
+        while (*s)
+        {
+            out(_html_char(*s));
+            ++s;
+        }
+    }
 
     static bool scanLineFor(const char* s, char c)
     {

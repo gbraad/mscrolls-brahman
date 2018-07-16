@@ -57,7 +57,15 @@
 // 1.2.X post ifi
 #define VERSION_STRING  "1.2.0"
 
-struct ImpIFI: public IFIHandler
+struct ControlImpBase
+{
+    // common base for both IFI and non-IFI
+
+    // so that we can combine all text, eg for recording
+    virtual void allEmitterHandler(char c, int type) = 0;
+};
+
+struct ImpIFI: public IFIHandler, public ControlImpBase
 {
     typedef std::string string;
 
@@ -184,6 +192,16 @@ struct ImpIFI: public IFIHandler
         buildJSONStart(js);
         
         string scmd = Autolink::applySubs(cmd, ctx);
+
+        const char* p = scmd.c_str();
+
+        while (*p)
+        {
+            // XX need to feed input also to common text channel
+            allEmitterHandler(*p, 2);
+            ++p;
+        }
+        allEmitterHandler(0, 2); // flush
         
         if (buildCmdJSON(scmd.c_str()))
         {
@@ -641,7 +659,7 @@ struct Control::Imp :
     // write console commands also to main text window
     bool                _echoConsoleToTranscript;
 
-        // chars echoed from console to transcript need buffering
+    // chars echoed from console to transcript need buffering
     GrowString          _cemitBuf;
 
     
@@ -706,7 +724,7 @@ struct Control::Imp :
         return s;
     }
 
-    void allEmitterHandler(char c, EmitterBase::Type type)
+    void allEmitterHandler(char c, int type) override
     {
         // all output is also copied here.
         bool recording = _recordFileBuf.isOpen();
@@ -806,6 +824,7 @@ struct Control::Imp :
                             string s = formatStyle(_cemitBuf.start(),
                                                    BRA_CONSOLE_ECHO_STYLE);
                             const char* p = s.c_str();
+
                             for (;;)
                             {
                                 _temit.send(*p); // send 0 as well.

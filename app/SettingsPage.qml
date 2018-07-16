@@ -147,7 +147,7 @@ Page
                     onCheckedChanged: QControl.prefs.consoleechoEnabled = checked
                 }
                 onClicked: consoleechoSwitch.checked = !consoleechoSwitch.checked
-                visible: app.enableClassic
+                visible: app.enableTextInput
             }
 
 
