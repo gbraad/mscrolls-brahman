@@ -193,15 +193,17 @@ struct ImpIFI: public IFIHandler, public ControlImpBase
         
         string scmd = Autolink::applySubs(cmd, ctx);
 
-        const char* p = scmd.c_str();
-
-        while (*p)
+        if (ctx._echo)
         {
-            // XX need to feed input also to common text channel
-            allEmitterHandler(*p, 2);
-            ++p;
+            const char* p = scmd.c_str();
+            while (*p)
+            {
+                // XX need to feed input also to common text channel
+                allEmitterHandler(*p, 2);
+                ++p;
+            }
+            allEmitterHandler(0, 2); // flush
         }
-        allEmitterHandler(0, 2); // flush
         
         if (buildCmdJSON(scmd.c_str()))
         {
@@ -1104,7 +1106,7 @@ struct Control::Imp :
         // from IFI meta
         var v = getProp(IFI_META, IFI_TITLE);
         return v ? v.toString() : string();
-   }
+    }
 
     string suggestedSaveName()
     {
@@ -1588,6 +1590,36 @@ struct Control::Imp :
         if (!_evalCommandSpecial(cmd, echo)) evalCommandDirect(cmd, echo);
     }
 
+    void evalClickCommand(const string& cmd)
+    {
+        // called when a link in the text is clicked issuing a command
+        
+        bool echo = false;
+
+        // try to determine whether we should echo this command (if enabled)
+        if (_echoConsoleToTranscript)
+        {
+            if (!startsWith(cmd, "use"))
+            {
+                // letters that occur in normal sentences.
+                static const char* allow = "!\"$%&-'?., ";
+                const char* p = cmd.c_str();
+                echo = true;
+                while (*p)
+                {
+                    if (!u_isalnum(*p) && !strchr(allow, *p))
+                    {
+                        echo = false;
+                        break;
+                    }
+                    ++p;
+                }
+            }
+        }
+        
+        evalCommand(cmd, echo);
+    }
+
     bool evalUseXwithY(const string& x, const string& y)
     {
         LOG3("eval use ", x << " with " << y);
@@ -1602,7 +1634,7 @@ struct Control::Imp :
             string cmd = getProp(IFI_USEWITH).toString();
             if (!cmd.empty())
             {
-                ObjectList ctx(_objects);
+                ObjectList ctx(_objects); // no echo
                 if (ctx.add(x) && ctx.add(y))
                 {
                     r = ImpIFI::evalCommand(cmd, ctx);
@@ -1629,7 +1661,7 @@ struct Control::Imp :
             string cmd = getProp(IFI_UNUSE).toString();
             if (!cmd.empty())
             {
-                ObjectList ctx(_objects);
+                ObjectList ctx(_objects); // no echo
                 if (ctx.add(x))
                 {
                     r = ImpIFI::evalCommand(cmd, ctx);
@@ -1656,7 +1688,7 @@ struct Control::Imp :
             string cmd = getProp(IFI_USE).toString();
             if (!cmd.empty())
             {
-                ObjectList ctx(_objects);
+                ObjectList ctx(_objects); // no echo
                 if (ctx.add(x))
                 {
                     r = ImpIFI::evalCommand(cmd, ctx);
@@ -1673,7 +1705,7 @@ struct Control::Imp :
 
         const char* dname = dirName(dir);
 
-        LOG3("compass direction ", dname);
+        //LOG3("compass direction ", dname);
 
         if (_be)
         {
@@ -1685,6 +1717,7 @@ struct Control::Imp :
             if (!cmd.empty())
             {
                 ObjectList ctx(_objects);
+                ctx._echo = true;
                 if (ctx.add(dname, true)) // force direction as id
                 {
                     r = ImpIFI::evalCommand(cmd, ctx);
@@ -2166,6 +2199,7 @@ string Control::currentVersion() const { return _imp->currentVersion(); }
 void Control::setLogLevel(int level) { _imp->setLogLevel(level); }
 int Control::getLogLevel() const { return _imp->getLogLevel(); }
 void Control::evalCommand(const string& cmd) { _imp->evalCommand(cmd); }
+void Control::evalClickCommand(const string& cmd) { _imp->evalClickCommand(cmd); }
 void Control::evalCommandDirect(const string& cmd, bool echo)
 { _imp->evalCommandDirect(cmd, echo); }
 bool Control::evalUseXwithY(const string& x, const string& y)

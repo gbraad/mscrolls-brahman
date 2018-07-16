@@ -184,6 +184,12 @@ public:
         Control::evalCommand(STRQ(cmd));
     }
 
+    Q_INVOKABLE void evalClickCommand(const QString& cmd)
+    {
+        // when a link in the text is clicked
+        Control::evalClickCommand(STRQ(cmd));
+    }
+
     Q_INVOKABLE bool evalUseXwithY(const QString& x, const QString& y)
     {
         return Control::evalUseXwithY(STRQ(x), STRQ(y));

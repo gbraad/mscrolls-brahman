@@ -126,6 +126,7 @@ struct DLLX Control: public APIType
 
 
     void evalCommand(const string& cmd);
+    void evalClickCommand(const string& cmd);
     void evalCommandDirect(const string& cmd, bool echo);
     bool evalUseXwithY(const string& x, const string& y);
     bool menuDrop(const string&);

@@ -125,7 +125,7 @@ C1.SplitView
                         onLinkActivated:
                         {
                             if (link.startsWith("http://")) Qt.openUrlExternally(link);
-                            else QControl.evalCommand(link)
+                            else QControl.evalClickCommand(link)
                         }
 
                         cursorPosition: length
