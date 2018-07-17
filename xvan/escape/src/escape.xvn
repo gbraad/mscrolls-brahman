@@ -90,7 +90,7 @@ $LOCATION l_dial_room
                    "On the wall are three dials: [a] [o_red_dial], [a] /
                     [o_green_dial] and [a] [o_blue_dial]\n."
                    "Below the dials are [a] [o_red_button], a [o_green_button] /
-                    and [a] o_red_button]. The buttons are engraved.\n"
+                    and [a] [o_red_button]. The buttons are engraved.\n"
                    "There is also [a] [o_black_button] here, with an engraving."
 
    d_entr_short    "There are exits to the west, southwest and northeast."
@@ -452,6 +452,7 @@ $OBJECT o_player
  ATTRIBUTES
    r_is           = are
    r_do           = do
+   r_have         = have
    r_nr_to_reveal = 0
    r_random       = 0
    r_score        = 0
@@ -1068,7 +1069,7 @@ END_OBJ
 $OBJECT o_chest
 
  DESCRIPTIONS
-   d_sys         "chest"
+   d_sys         "the chest"
 
    d_entr_long   "There is [a] [o_chest] here."
 
@@ -1122,7 +1123,7 @@ $OBJECT o_chest
   
    t_exa
      printcr(d_exa)
-     print("On the front of [the] [o_chest] is [a] [o_keyhole].")
+     print("On the front of [the] [o_chest] is [a] [o_keyhole]")
      if owns(o_keyhole, o_key) then
        printcr(" with [a] [o_key] in it.")
      else
