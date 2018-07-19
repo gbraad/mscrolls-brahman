@@ -45,7 +45,6 @@ struct DLLX Console: public API<Console>
     void _init();
 
     string text() const;
-    void appendText(const string& text);
     string lineAt(int pos) const;
 
     struct Imp;

@@ -156,7 +156,7 @@ public:
         if (w != _transcript->width())
         {
             _transcript->setWidth(w);
-            emit textChanged();
+            //emit textChanged();  
         }
     }
 

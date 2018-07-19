@@ -48,7 +48,7 @@ Item
     property alias thumbcontent: rollthumb.data
     property alias thumbColor: rollthumb.color
 
-    readonly property int yPos: height - thumbHeight
+    property int yPos: height - thumbHeight
 
     // height of drawer open 
     property int rollHeightShown: yPos - flick.contentY
@@ -85,7 +85,7 @@ Item
     {
         id: flick
         width: parent.width
-        height: (moving || ok) ? parent.height : parent.height - contentY
+        height: (moving || ok) ? item.height : item.height - contentY
 
         contentWidth: item.width
         contentHeight: item.height
@@ -98,8 +98,8 @@ Item
         flickableDirection: Flickable.VerticalFlick
         boundsBehavior: Flickable.StopAtBounds
 
-        topMargin: rollarea.childrenRect.height ? rollarea.childrenRect.height - rollarea.height : 0
-        
+        topMargin: rollarea.childrenRect.height ? Math.min(rollarea.childrenRect.height - item.yPos, 0) : 0
+
         onMovingChanged: ok = false
 
         Item
@@ -208,6 +208,7 @@ Item
 
     Item
     {
+        // game text goes here
         id: contentarea
         width: parent.width
         height: item.yPos

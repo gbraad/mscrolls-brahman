@@ -179,15 +179,15 @@ public:
         if (_updater) _updater->check(std::bind(&QControl::updateResult, this));
     }
 
-    Q_INVOKABLE void evalCommand(const QString& cmd)
+    Q_INVOKABLE bool evalCommand(const QString& cmd)
     {
-        Control::evalCommand(STRQ(cmd));
+        return Control::evalCommand(STRQ(cmd));
     }
 
-    Q_INVOKABLE void evalClickCommand(const QString& cmd)
+    Q_INVOKABLE bool evalClickCommand(const QString& cmd)
     {
         // when a link in the text is clicked
-        Control::evalClickCommand(STRQ(cmd));
+        return Control::evalClickCommand(STRQ(cmd));
     }
 
     Q_INVOKABLE bool evalUseXwithY(const QString& x, const QString& y)

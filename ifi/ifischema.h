@@ -96,6 +96,7 @@
 #define IFI_PRIME_COL   "primary_color"
 #define IFI_CONTRAST_COL "contrast_color"
 #define IFI_AUTOLINK    "autolink"
+#define IFI_UI_RESTART  "ui_restart"
 
 // textobj
 //#define IFI_TEXT      "text"

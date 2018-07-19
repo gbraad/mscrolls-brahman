@@ -92,6 +92,8 @@ C1.SplitView
                 contentHeight: Math.max(flickarea.height, height)
                 clip: true
 
+                onHeightChanged: ensureVisible(area.cursorRectangle)
+
                 function ensureVisible(r)
                 {
                     if (contentY >= r.y) contentY = r.y;

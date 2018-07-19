@@ -67,6 +67,9 @@ ApplicationWindow
     property bool enableSaveLoad: QControl.gameEnableSaveLoad()
     property bool enableClassic: QControl.gameEnableClassic()
     
+    // classic or enabled through IFI meta
+    property bool enableRestart: QControl.gameEnableClassic()
+    
     function setThemeCols(matname)
     {
         var c = QControl.colorMaterial(matname, 500);
@@ -125,6 +128,8 @@ ApplicationWindow
         if (v) setThemeCols(v)
         v = js["saveload"]
         if (v) enableSaveLoad = true
+        v = js["ui_restart"]
+        if (v) enableRestart = true
         coverImage = QControl.resolveAsset(js["backimage"])
     }
     

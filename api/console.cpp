@@ -43,6 +43,5 @@ Console::~Console() { delete _imp; }
 typedef std::string string;
 
 string Console::text() const { return _imp->_page.toString(); }
-void Console::appendText(const string& text) { return _imp->appendText(text); }
 string Console::lineAt(int pos) const { return _imp->lineAt(pos); }
 

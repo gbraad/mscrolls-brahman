@@ -133,6 +133,7 @@ Page
                     text: "Reset"
                     onClicked: resetConfirm.show()
                 }
+                visible: app.enableRestart
             }
 
             ListItem.Subtitled
@@ -183,7 +184,6 @@ Page
                     onCheckedChanged: QControl.prefs.imagescaleEnabled = checked
                 }
                 onClicked: imagescaleSwitch.checked = !imagescaleSwitch.checked
-                visible: app.enableClassic
             }
 
 

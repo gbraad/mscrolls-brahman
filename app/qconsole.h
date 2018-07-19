@@ -59,7 +59,10 @@ public:
     QConsole()
     {
         // share the console with the api controller
-        _console = QControl::theControl()->_console;
+        QControl* c = QControl::theControl();
+        
+        _control = c;
+        _console = c->_console;
         _console->_notifier = this;
     }
 
@@ -73,11 +76,9 @@ public:
         return QSTR(_console->text());
     }
 
-    Q_INVOKABLE void appendText(const QString& text)
+    Q_INVOKABLE bool evalCommand(const QString& text)
     {
-        string s = trim(STRQ(text));
-        if (!s.empty())
-            _console->appendText(s);
+        return _control->evalCommand(STRQ(text));
     }
 
     // from notifier
@@ -92,6 +93,7 @@ public:
     }
 
     Console::Ref     _console;
+    Control*        _control;
 
 signals:
 

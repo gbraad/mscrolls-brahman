@@ -73,12 +73,6 @@ struct Console::Imp : public ImpType<Console>
         int  _plevel;
     };
 
-    void appendText(const string& text)
-    {
-        // be sure to go through _cemit
-        _host->_control->evalCommandDirect(text, true);
-    }
-
     string lineAt(int pos) const
     {
         int l = _page.lineForPos(pos);

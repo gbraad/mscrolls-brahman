@@ -183,6 +183,28 @@ struct ImpIFI: public IFIHandler, public ControlImpBase
             }
         }
     }
+
+    static bool allowEcho(const string& cmd)
+    {
+        // try to determine whether we should echo this command
+        bool r = !startsWith(cmd, "use");
+        if (r)
+        {
+            // letters that occur in normal sentences.
+            static const char* allow = "!\"$%&-'?., ";
+            const char* p = cmd.c_str();
+            while (*p)
+            {
+                if (!u_isalnum(*p) && !strchr(allow, *p))
+                {
+                    r = false;
+                    break;
+                }
+                ++p;
+            }
+        }
+        return r;
+    }
     
     bool evalCommand(const string& cmd, const ObjectList& ctx)
     {
@@ -193,7 +215,9 @@ struct ImpIFI: public IFIHandler, public ControlImpBase
         
         string scmd = Autolink::applySubs(cmd, ctx);
 
-        if (ctx._echo)
+        bool echo = ctx._echo && allowEcho(scmd);
+
+        if (echo)
         {
             const char* p = scmd.c_str();
             while (*p)
@@ -1585,39 +1609,15 @@ struct Control::Imp :
         }
     }
 
-    void evalCommand(const string& cmd, bool echo = true)
+    bool evalCommand(const string& cmd, bool echo = true)
     {
-        if (!_evalCommandSpecial(cmd, echo)) evalCommandDirect(cmd, echo);
+        return _evalCommandSpecial(cmd, echo) || evalCommandDirect(cmd, echo);
     }
 
-    void evalClickCommand(const string& cmd)
+    bool evalClickCommand(const string& cmd)
     {
         // called when a link in the text is clicked issuing a command
-        
-        bool echo = false;
-
-        // try to determine whether we should echo this command (if enabled)
-        if (_echoConsoleToTranscript)
-        {
-            if (!startsWith(cmd, "use"))
-            {
-                // letters that occur in normal sentences.
-                static const char* allow = "!\"$%&-'?., ";
-                const char* p = cmd.c_str();
-                echo = true;
-                while (*p)
-                {
-                    if (!u_isalnum(*p) && !strchr(allow, *p))
-                    {
-                        echo = false;
-                        break;
-                    }
-                    ++p;
-                }
-            }
-        }
-        
-        evalCommand(cmd, echo);
+        return evalCommandDirect(cmd, true);
     }
 
     bool evalUseXwithY(const string& x, const string& y)
@@ -1728,18 +1728,23 @@ struct Control::Imp :
         return r;
     }
 
-    void postEval()
+    bool postEval()
     {
+        bool r = true;
         if (_be)
         {
             // update scene
             _be->emitScene();
         }
         
-        if (_ifi) _ifiHost.syncRelease();
+        if (_ifi)
+        {
+            r = _ifiHost.syncRelease();
+        }
         
         // refresh sidebar & map
-        updateAfterCommand();
+        if (r) updateAfterCommand();
+        return r;
     }
 
     bool updateMapInfo(MapInfo& mi)
@@ -2119,22 +2124,25 @@ struct Control::Imp :
 
     bool evalCommandDirect(const string& cmd, bool echo)
     {
+        string c = trim(cmd);
+        if (c.empty()) return true; // ignore
+        
         bool r = false;
         if (_be)
         {
             // remove any space on ends of command
             // including any newlines
-            r = _be->evalCommand(trim(cmd).c_str(), 0, echo);
+            r = _be->evalCommand(c.c_str(), 0, echo);
         }
         
         if (_ifi)
         {
             ObjectList ctx(_objects);
             ctx._echo = echo;
-            r = ImpIFI::evalCommand(cmd, ctx);
+            r = ImpIFI::evalCommand(c, ctx);
         }
 
-        if (r) postEval();
+        if (r) r = postEval();
         return r;
     }
 
@@ -2198,10 +2206,10 @@ typedef std::string string;
 string Control::currentVersion() const { return _imp->currentVersion(); }
 void Control::setLogLevel(int level) { _imp->setLogLevel(level); }
 int Control::getLogLevel() const { return _imp->getLogLevel(); }
-void Control::evalCommand(const string& cmd) { _imp->evalCommand(cmd); }
-void Control::evalClickCommand(const string& cmd) { _imp->evalClickCommand(cmd); }
-void Control::evalCommandDirect(const string& cmd, bool echo)
-{ _imp->evalCommandDirect(cmd, echo); }
+bool Control::evalCommand(const string& cmd) { return _imp->evalCommand(cmd); }
+bool Control::evalClickCommand(const string& cmd) { return _imp->evalClickCommand(cmd); }
+bool Control::evalCommandDirect(const string& cmd, bool echo)
+{ return _imp->evalCommandDirect(cmd, echo); }
 bool Control::evalUseXwithY(const string& x, const string& y)
 { return _imp->evalUseXwithY(x, y); }
 
