@@ -9,7 +9,7 @@
 TITLE         "You Must Escape!"
 VERSION       "1.0"
 AUTHOR        "Marnix van den Bos"
-ORGANIZATION  "XVAN"
+ORGANIZATION  "XVAN testversie"
 COVERTEXT     "A sample XVAN story"
 BACKIMAGE     "images\\\\coverimage.jpg"  # need '\\' in json string
 PRIMARY_COLOR "blue"
