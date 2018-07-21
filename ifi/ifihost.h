@@ -198,6 +198,7 @@ struct IFIHost
 
     bool release()
     {
+        // return true if more to do
         if (_inSync)
         {
             _inSync = false;
@@ -218,14 +219,21 @@ struct IFIHost
         return false;
     }
 
-    void syncRelease()
+    bool syncRelease()
     {
         // sync and release, but only if not already in sync
         // continue until no more.
+        bool r = true;
         if (!_inSync)
         {
-            while (sync() && release()) ;
+            for (;;)
+            {
+                r = sync();
+                if (!r) break;
+                if (!release()) break;
+            }
         }
+        return r;
     }
 
     bool eval(const char* s)
@@ -237,7 +245,12 @@ struct IFIHost
             r = _ifi->eval(s);
 
             // will need another syncrelease *after* current drain
-            if (r) _more = true;
+            // eg "restore/load" from command line
+            if (r)
+            {
+                _more = true;
+                //LOG3("eval more needed", "");
+            }
         }
         else
         {

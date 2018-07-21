@@ -353,6 +353,9 @@ Same meanings as `item`.
 * `saveload: true`  
    Enable save/load UI in app.
 
+* `ui_restart: true`  
+   Enable restart button in app.
+
 ### saveobj
 
 * `data: "game-state"`  

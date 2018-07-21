@@ -36,6 +36,7 @@ import QtQuick.Controls 2.2
 
 import QtQuick.Controls 1.4 as C1
 import QtQuick.Controls.Styles 1.4 as C1
+import QtQuick.Dialogs 1.2 as C1
 import Material 0.3 as M
 import QtQml 2.2
 
@@ -61,6 +62,8 @@ FocusScope
     property color bgColor: theme.backgroundShade
     property int wbh: textinput.activeFocus ? wordbarHeight : 0
 
+    readonly property int dialogWidth: app.width/2
+    readonly property int dialogHeight: app.height/2
 
     Column
     {
@@ -97,7 +100,7 @@ FocusScope
             {
                 var t = text
                 text = "";
-                qconsole.appendText(t)
+                if (!qconsole.evalCommand(t)) quitDialog.show();
             }
         }
   
@@ -140,5 +143,21 @@ FocusScope
                 }
             }
         }
+    }
+
+    Dialog 
+    {
+        id: quitDialog
+        backgroundColor: app.theme.dialogColor
+        
+        title: "Game Over"
+        negativeButtonText: ""
+        positiveButtonText: "OK"
+        
+        width: dialogWidth
+        height: dialogHeight
+
+        text: "The game has ended and the application will now terminate"
+        onAccepted: Qt.quit()
     }
 }
