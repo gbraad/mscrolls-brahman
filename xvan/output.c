@@ -412,8 +412,9 @@ void PrintId(id, use_json)
  int   use_json;
 {
   int32_t offset;
-  int32_t type = NO_TYPE;
-  int32_t num = 0;
+  int32_t type             = NO_TYPE;
+  int32_t num              = 0;
+  int32_t remember_capital = 0;
 
   /* Remember whether it's a number. */
   if (id == VALUE || id == ORDINAL)
@@ -428,7 +429,10 @@ void PrintId(id, use_json)
     offset = id - FIRST_LOCATION_ID;
     if (loc_dir[offset].nr_of_dsys != 0) {
       if (!story_info.autolink && !use_json) {
+        /* remember the capital status */
+        remember_capital = capital;
         PrintString("[", 0);
+        capital = remember_capital;
       }
       PrintExtendedSysDescr(&(loc_dir[offset].descr[0]), use_json);
       if (!story_info.autolink && !use_json) {
@@ -444,7 +448,10 @@ void PrintId(id, use_json)
     offset = id - FIRST_OBJECT_ID;
     if (obj_dir[offset].nr_of_dsys != 0) {
       if (!story_info.autolink && !use_json) {
+        /* remember the capital status */
+        remember_capital = capital;
         PrintString("[", 0);
+        capital = remember_capital;
       }
       PrintExtendedSysDescr(&(obj_dir[offset].descr[0]), use_json);
       if (!story_info.autolink && !use_json) {
