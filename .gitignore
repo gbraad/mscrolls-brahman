@@ -17,6 +17,7 @@ build-android-x86-debug
 build-android-x86-release
 *.pro.user
 brahman.log
+/Makefile
 
 
 app/brahman_plugin_import.cpp
