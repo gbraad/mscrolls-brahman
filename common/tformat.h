@@ -417,6 +417,7 @@ struct TextFormat
             out("</ul>\n");
             out("<p>");
             _inList = false;
+            _inP = true;
         }
     }
 
@@ -434,22 +435,21 @@ struct TextFormat
 
         for (s = st;*s;++s)
         {
-            if (!_inP)
+            if (!_inP && !_inList)
             {
-                if (!u_isspace(*s))
-                {
-                    out("<p>");
-                    _inP = true;
-                }
+                if (u_isspace(*s)) continue;
+
+                out("<p>");
+                _inP = true;
             }
 
-            if (_inP)
+            if (_inP || _inList)
             {
                 string link;
                 string linktext;
                 string extra;
                 
-                // blank lines end a paragraph
+                // blank lines end a paragraph and list
                 if (startsWith(s, "\n\n"))
                 {
                     if (!_inList)
@@ -478,12 +478,16 @@ struct TextFormat
                         out("</li>\n");
                     }
                 }
-                else if (startofline && *s == '*')
+                else if (startofline && *s == '*' && s[1] != '*')
                 {
                     // "*" on start of line => list item
                     if (!_inList)
                     {
-                        out("</p>\n"); // drop out of current para
+                        if (_inP)
+                        {
+                            out("</p>\n"); // drop out of current para
+                            _inP = false;
+                        }
                         out("<ul>");
                         _inList = true;
                     }
@@ -592,6 +596,7 @@ struct TextFormat
             startofline = (last == '\n');
         }
 
+        if (_inList) out("</ul>");
         if (_inP) out("</p>\n");
     }
 

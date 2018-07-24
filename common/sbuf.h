@@ -85,6 +85,18 @@ struct SBuf
         }
     }
 
+    void insert(char c, unsigned int at)
+    {
+        if (at >= _pos) add(c);
+        else if (_spaceFor(1))
+        {
+            // include existing terminator
+            memmove(_buf + at + 1, _buf + at, _pos - at + 1);
+            
+            _buf[at] = c;
+        }
+    }
+
     void add(const char* s)
     {
         // will terminate

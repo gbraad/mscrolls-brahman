@@ -58,11 +58,7 @@ struct Transcript::Imp : public ImpType<Transcript>
     void charEmit(char c)
     {
         if (c) _segmentText += c;
-        else
-        {
-            //LOG3("transcript, ", "flush");
-            finish();
-        }
+        else finish();
     }
 
     static string imagePathToJSON(const string& imagepath)

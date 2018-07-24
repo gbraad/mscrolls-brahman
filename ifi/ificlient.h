@@ -258,7 +258,7 @@ struct IFIClient: public IFI, public Worker
         }
         else
         {
-            bool f = c <= 0; // flush
+            bool f = c == 0 || c == -1; // flush
             if (!f)
             {
                 f = (c == '\n');
