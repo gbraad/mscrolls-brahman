@@ -69,6 +69,8 @@ ApplicationWindow
     
     // classic or enabled through IFI meta
     property bool enableRestart: QControl.gameEnableClassic()
+
+    property string soundJSON: QControl.soundJSON
     
     function setThemeCols(matname)
     {
@@ -230,11 +232,12 @@ ApplicationWindow
         onStopped: mplayer.stop()
     }
 
-    function playMusic()
+    function playMusic(mf)
     {
-         var mf = QControl.getMusicFile()
          if (mf.length > 0 && QControl.prefs.musicEnabled)
          {
+             fadeout.stop()
+             fadein.stop()
              mplayer.source = mf
              mplayer.volume = 0
              mplayer.play()
@@ -246,6 +249,30 @@ ApplicationWindow
     {
          fadein.stop()
          fadeout.start()
+    }
+
+    onSoundJSONChanged:
+    {
+       //console.log("sound JSON ", soundJSON)
+       var js = JSON.parse(soundJSON)
+       var d
+       d = js["duration"]
+       if (d !== undefined)
+       {
+           if (d == 0)
+           {
+               stopMusic();
+           }
+           else
+           {
+               var v = QControl.resolveAsset(js["name"])
+               if (v.length > 0)
+               {
+                   console.log("sound", v);
+                   playMusic(v)
+               }
+           }
+       }
     }
 
     Loader
@@ -283,6 +310,7 @@ ApplicationWindow
         // signal that we've started up
         QControl.uiInitialised()
 
-        playMusic()
+        playMusic(QControl.getMusicFile())
+
     }
 }

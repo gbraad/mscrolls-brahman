@@ -48,6 +48,7 @@ Page
     property int zoomboxHeight: 32*Units.dp
     readonly property real boxSizeNormal: 10*Units.dp
     property string backImage: qmapbox.backimage
+    property string mapTitle: qmapbox.mapTitle
     backgroundColor: theme.backgroundShade
 
     function selected()
@@ -76,6 +77,22 @@ Page
             anchors.fill: parent
             source: backImage
             visible: backImage.length > 0
+            z: 0
+        }
+
+        Text
+        {
+            // optional map title behind boxes 
+            width: parent.width
+            
+            text:  mapTitle
+            color: Theme.subTextColor
+            visible: mapTitle.length > 0
+            
+            horizontalAlignment: Text.AlignHCenter
+            font.pixelSize: 64*Units.dp
+            font.family: Theme.fontFamily
+            z: 1
         }
 
         Flickable
@@ -85,6 +102,7 @@ Page
             height: Math.min(parent.height - Units.dp*8, contentHeight)
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.verticalCenter: parent.verticalCenter
+            z: 2
             
             contentWidth: mapbox.width
             contentHeight: mapbox.height

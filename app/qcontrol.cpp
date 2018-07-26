@@ -426,14 +426,6 @@ void QControl::startUp(bool isMobile)
     prefs()->_isMobile = isMobile;
 }
 
-void QControl::beginGame()
-{
-    Control::beginGame();
-
-    // initialise info from the backend
-    getProductInfo();
-}
-
 bool QControl::loadEngine()
 {
     bool res = false;

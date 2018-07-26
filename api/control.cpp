@@ -943,6 +943,7 @@ struct Control::Imp :
             //LOG4("API, applying autolink, ", s);
 
             _autolink._useCmd = getProp(IFI_USE).toString();
+            _autolink._goCmd = getProp(IFI_COMPASSGO).toString();
             _autolink._currentExits = _mapinfo._currentExits;
             _autolink._scope = &_objects;
             
@@ -999,6 +1000,14 @@ struct Control::Imp :
 
         // continue into meta object to collect properties
         return false; 
+    }
+
+    bool ifiSoundResponse(const string& js) override
+    {
+        LOG3("API sound response ", js);
+        _host->soundChanged(js); // -> Qcontrol
+
+        return true; // handled
     }
 
     bool ifiItemsResponse(const string& js) override
@@ -1568,7 +1577,17 @@ struct Control::Imp :
             if (!storypath.size()) storypath = "undefined";
             LOG("unable to start story, ", storypath);
         }
+    }
 
+    void coverPageClosed()
+    {
+        if (_ifi)
+        {
+            // send additional {begin:true}
+            const char* js = "{\"" IFI_BEGIN "\":true}";
+            LOG4("Sending ifi begin, ", js);
+            if (_ifiHost.eval(js)) _ifiHost.syncRelease();
+        }
     }
 
     string currentVersion() const
@@ -1701,6 +1720,7 @@ struct Control::Imp :
 
     bool compassDirection(uint dir)
     {
+        // called from UI when click on compass
         bool r = false;
 
         const char* dname = dirName(dir);
@@ -2093,7 +2113,11 @@ struct Control::Imp :
                 else if (isOpt(argv[i], "-truedpi")) _host->_options._useAccurateDPI = true;
                 else if (isOpt(argv[i], "-log")) logfile = true;
                 else if ((arg = isOptArg(argv + i, "-w")) != 0)
-                    _host->_uiOptionWidth = atoi(arg);
+                {
+                    int w = atoi(arg);
+                    LOG3("UI option width ", w);
+                    if (w > 0 && w < 10000) _host->_uiOptionWidth = atoi(arg);
+                }
                 else if ((arg = isOptArg(argv + i, "-h")) != 0)
                     _host->_uiOptionHeight = atoi(arg);
                 else if ((arg = isOptArg(argv + i, "-fontsize")) != 0)
@@ -2236,6 +2260,7 @@ void Control::startUp(const char* dpath,
 { _imp->startUp(dpath, configDir, userSpaceID); }
 
 void Control::beginGame() { _imp->beginGame(); }
+void Control::coverPageClosed() { _imp->coverPageClosed(); }
 bool Control::updateMapInfo(MapInfo& mi) { return _imp->updateMapInfo(mi); }
 string Control::undoredo(bool undo) { return _imp->undoredo(undo); }
 void Control::postEval() { _imp->postEval(); }

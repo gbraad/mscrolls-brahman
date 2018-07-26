@@ -43,6 +43,7 @@
 #define IFI_SAVEDATA    "savedata"
 #define IFI_MAP         "map"
 #define IFI_PICTURE     "picture"
+#define IFI_SOUND       "sound"
 #define IFI_ITEMS       "items"
 #define IFI_PEOPLE      "people"
 #define IFI_META        "meta"
@@ -50,6 +51,7 @@
 #define IFI_VALUES      "values"
 #define IFI_RANDOMSEED  "randomseed"
 #define IFI_DATA        "data"
+#define IFI_BEGIN       "begin"
 
 // reply only
 
@@ -97,6 +99,7 @@
 #define IFI_CONTRAST_COL "contrast_color"
 #define IFI_AUTOLINK    "autolink"
 #define IFI_UI_RESTART  "ui_restart"
+//#define IFI_TITLE       "title"
 
 // textobj
 //#define IFI_TEXT      "text"
@@ -104,6 +107,10 @@
 #define IFI_FONT       "font"
 #define IFI_FONTWEIGHT  "fontweight"
 #define IFI_COLOR       "color"
+
+// soundobj
+//#define IFI_NAME        "name"
+#define IFI_DURATION    "duration"
 
 // masks for directions
 #define IFI_DIR_N       1

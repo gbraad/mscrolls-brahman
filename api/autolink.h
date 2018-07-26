@@ -48,6 +48,7 @@ struct Autolink
     uint                _currentExits = 0;
     const Objects*      _scope;
     string              _useCmd;
+    string              _goCmd;
     
     struct Mark
     {
@@ -344,7 +345,18 @@ struct Autolink
                 }
                 else
                 {
-                    rep = "[" + sw + "](go " + Control::dirName(mi._dir) + ")";
+                    if (!_goCmd.empty())
+                    {
+                        ObjectList ctx(*_scope);
+                        // force direction for ID
+                        ctx.add(Control::dirName(mi._dir), true);
+                        rep = "[" + sw + "](" + applySubs(_goCmd, ctx) + ")";
+                    }
+                    else
+                    {
+                        // fallback
+                        rep = "[" + sw + "](go " + Control::dirName(mi._dir) + ")";
+                    }
                 }
 
                 if (ok)

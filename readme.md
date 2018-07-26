@@ -57,7 +57,7 @@ export PATH=/Developer/Qt5.9.6/5.9.6/clang_64/bin:/Developer/Qt5.9.6:$PATH
 ## Build Instructions (all platforms)
 
 ```
-qmake
+qmake -r
 make  
 ```
 

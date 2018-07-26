@@ -144,7 +144,6 @@ TabbedPage
 
     Component.onCompleted:
     {
-        onClicked: 
         if (QControl.prefs.updateEnabled) QControl.checkForUpdates()
     }
 }

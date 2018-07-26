@@ -76,6 +76,8 @@ class QControl : public QObject, public Control
     Q_PROPERTY (bool lowMargins READ lowMargins CONSTANT)
     Q_PROPERTY(QString titleText READ titleText NOTIFY titleTextChanged);
 
+    Q_PROPERTY (QString soundJSON READ soundJSON NOTIFY soundJSONChanged)
+
     typedef Control parentT;
 
 public:
@@ -133,7 +135,24 @@ public:
 
     // initialise the control object
     void startUp(bool isMobile);
-    void beginGame();
+
+    void beginGame()
+    {
+        // mostly this will start the game, but some ifi games
+        // hold off until received {begin:true} so that they can emit
+        // output after the coverpage.
+        Control::beginGame();
+
+        // initialise info from the backend (not ifi)
+        getProductInfo();
+    }
+
+    Q_INVOKABLE void coverPageClosed()
+    {
+        // some ifi games will want to actually start here
+        Control::coverPageClosed();
+    }
+
     bool loadEngine();
     bool prepareConfigAssets(const QString& prefix, const QString& configDir);
     bool prepareDataAssets(const QString& prefix, const QString& dataDir);
@@ -436,12 +455,16 @@ public:
 
     DEF_JSON(currentImage);
     DEF_JSON(currentMeta);
+    DEF_JSON(sound);
 
     // called from transcripti
     void imageChanged(const string& js) override { currentImageJSON(js); }
 
     // from ifiMetaResponse
     void metaChanged(const string& js) override { currentMetaJSON(js); }
+
+    // trigger a sound, from ifiSoundResponse
+    void soundChanged(const string& js) override { soundJSON(js); }
 
     QString currentMessage() const { return QSTR(_currentMessage); }
     void currentMessage(const string& text) { currentMessage(text.c_str()); }
@@ -639,6 +662,7 @@ signals:
     void currentMetaJSONChanged();
     void currentMessageChanged();
     void titleTextChanged();
+    void soundJSONChanged();
 
 public:
     

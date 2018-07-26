@@ -67,3 +67,4 @@ uint Map::currentExits() const { return _imp->_currentExits; }
 string Map::backimage() const { return _imp->_backimage; }
 bool Map::pathTo(const string& place, Map::Path& p) const
 { return _imp->pathTo(place, p); }
+string Map::mapTitle() const { return _imp->_mapTitle; }

@@ -73,6 +73,7 @@ struct DLLX Map: public API<Map>
     uint        currentExits() const;
     bool        pathTo(const string& place, Path&) const;
     string      backimage() const;
+    string      mapTitle() const;
 
     void _init();
 

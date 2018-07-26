@@ -96,6 +96,7 @@ Page
                                         app.author) : ""
             color: app.coverTextColor
             readOnly: true
+            renderType: Device.isMac() ? Text.NativeRendering : Text.QtRendering
             
             background: Item {}
 
@@ -106,6 +107,7 @@ Page
                 {
                     app.stopMusic()
                     pageStack.replace(Qt.resolvedUrl("MainPage.qml"))
+                    QControl.coverPageClosed()
                 }
             }
         }

@@ -58,7 +58,7 @@ See _Interface_ section for details, but startup has the following sequence;
 
    Example prologue:
    ```
-   {"meta":true,"objects":true,"map":true,"picture":true,"items":true,"people":true,"moves":true,"randomseed":2394829048}'
+   {"meta":true,"objects":true,"map":true,"picture":true,"items":true,"people":true,"randomseed":2394829048}'
    ```
 
    Note, that when automatically continuing a previous game, this _prologue_ `json` may contain `loaddata` which will send a complete game state to the back-end. Consequently, the back-end should not have issued any `text` until this point.
@@ -135,7 +135,7 @@ These are the json tags that may appear in a _request_. See the _Replies_ sectio
    Return `map` data reply if `true`. If `false`, unsolicited updates are not needed.
    
 * `picture: true`  
-   Reply details of current `picture` if `true`. If `false`, unsolicited updates are not needed.
+   Reply details of current `picture` if `true`. 
    
 * `items: true`  
    Reply current `items` (eg inventory) if `true`. If `false`, unsolicited updates are not needed.
@@ -146,9 +146,6 @@ These are the json tags that may appear in a _request_. See the _Replies_ sectio
 * `meta: true`  
    Reply the game meta info (eg title, author etc.).
    
-* `moves: true`  
-   Reply the current game move count (or game time) if `true`. If `false`, unsolicited updates are not needed.
-
 ## Replies
 
 The _reply_ json, sent from the back-end to the front-end, can have these terms at the top level. Some of the terms have values that are (optionally) json objects. In these cases, consult the subsequent json object definitions.
@@ -168,6 +165,8 @@ The _reply_ json, sent from the back-end to the front-end, can have these terms 
    
 * `picture: {pictureobj}`  
    Version of `picture` with more details. NB: either use this form or the above.
+* `sound: {soundobj}`  
+   Play a sound.
 
 * `objects: [{object}...]`  
    The objects in the game. This is primarily the _invariant_ mapping between ID and game name.
@@ -281,6 +280,9 @@ Same meanings as `item`.
 * `backimage: "filepath"`  
   _Optional_. background image for map page.
 
+* `title: "text"`  
+  _Optional_. Title text for map.
+
 ### place
 
 * `id:` ID
@@ -379,6 +381,13 @@ Same meanings as `item`.
   _Optional_.
 
 * `id:` int
+
+### soundobj
+
+* `name: "filepath"`
+
+* `duration: int`  
+   play for `int` milliseconds. A value of 0 means; stop playing any existing sounds. A value of `-n` means play for `n` loops.
 
 ## Save and Load
 

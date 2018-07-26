@@ -89,6 +89,7 @@ struct DLLX Control: public APIType
     // JSON models
     string                      _currentImageJSON;
     string                      _currentMetaJSON;
+    string                      _soundJSON;
 
     // datapath is per user data
     string                      _dataPath;
@@ -113,6 +114,7 @@ struct DLLX Control: public APIType
                  int userSpaceID);
 
     void beginGame();
+    void coverPageClosed();
 
     bool loadEngine(IFEngineInterface*);
     bool loadIFI();
@@ -139,6 +141,7 @@ struct DLLX Control: public APIType
     // overridden by QControl
     virtual void imageChanged(const string& js) {}
     virtual void metaChanged(const string& metajs) {}
+    virtual void soundChanged(const string& js) {}
 
     bool updateMapInfo(MapInfo&);
     void evalItemList(ItemsModel::Entries&);

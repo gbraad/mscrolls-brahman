@@ -118,6 +118,7 @@ struct IFIHandler
                 else
                 {
                     LOG("Bad IFI ", jw._key);
+                    LOG3("in '", json << "'");
                 }
             }
             else // object
@@ -143,6 +144,8 @@ struct IFIHandler
                             r = ifiSaveDataResponse(subjs);
                         else if (p == IFI_TEXT)
                             r = ifiTextFormattedResponse(subjs);
+                        else if (p == IFI_SOUND)
+                            r = ifiSoundResponse(subjs);
                         
                         if (!r)
                             handleAux(jw._obj, p);
@@ -374,10 +377,12 @@ struct IFIHandler
     virtual bool ifiPeopleResponse(const string& js) { return false; }
     virtual bool ifiMapResponse(const string& js) { return false; }
     virtual bool ifiMapPlacesResponse(const string& js) { return false; }
+    virtual bool ifiSoundResponse(const string& js) { return false; }
 
     bool ifiMetaResponsePrep(const string& js)
     {
-        // fix up potential missing elements from meta response
+        // add some elements to the meta:
+        // for example the credits have to include open source attributions.
 
         GrowString js2;
         js2.add('{');

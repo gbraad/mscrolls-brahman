@@ -59,6 +59,7 @@ public:
     Q_PROPERTY(QString currentBox READ currentBox NOTIFY currentBoxChanged);
     Q_PROPERTY(int generation READ generation NOTIFY generationChanged);
     Q_PROPERTY(QString backimage READ backimage NOTIFY backimageChanged);
+    Q_PROPERTY(QString mapTitle READ mapTitle NOTIFY mapTitleChanged);
 
     Q_PROPERTY(bool gon READ gon NOTIFY directionsChanged);
     Q_PROPERTY(bool gone READ gone NOTIFY directionsChanged);
@@ -82,6 +83,7 @@ public:
     int        _generation;
     uint       _currentExits;
     string     _backimage;
+    string     _mapTitle;
 
     QMapBox()
     {
@@ -106,8 +108,9 @@ public:
     {
         setCurrentBox(_map->currentBox());
         setCurrentExits(_map->currentExits());
-        LOG3("qmapbox, changed ", _currentBox);
+        //LOG3("qmapbox, changed ", _currentBox);
         setBackimage(_map->backimage());
+        setMapTitle(_map->mapTitle());
     }
     
     int boxCount() const { return _boxCount; }
@@ -153,6 +156,7 @@ public:
     QString currentBox() const { return QSTR(_currentBox); } 
     int generation() const { return _generation; }
     QString backimage() const { return QSTR(_backimage); }
+    QString mapTitle() const { return QSTR(_mapTitle); }
 
     bool setCurrentBox(const string& id)
     {
@@ -208,7 +212,8 @@ public:
                 | setLinkCount(_map->linkCount())
                 | setCurrentBox(_map->currentBox())
                 | setCurrentExits(_map->currentExits())
-                | setBackimage(_map->backimage());
+                | setBackimage(_map->backimage())
+                | setMapTitle(_map->mapTitle());
 
             if (!r)
             {
@@ -266,6 +271,18 @@ public:
         return res;
     }
 
+    bool setMapTitle(const string& s)
+    {
+        bool res = (s != _mapTitle);
+        if (res)
+        {
+            _mapTitle = s;
+            LOG4("map, mapTitle changed ", _mapTitle);
+            emit mapTitleChanged();
+        }
+        return res;
+    }
+
     // directions
 
     bool gon() const { return _currentExits & 1; }
@@ -297,6 +314,7 @@ signals:
     void generationChanged();
     void directionsChanged();
     void backimageChanged();
+    void mapTitleChanged();
     
 private:
 

@@ -270,6 +270,7 @@ struct JSONWalker
                         break;
                     }
 
+                    // leave pos at close+1
                     if (_level == level0 && _blevel == blevel0) break;
                 }
                 else if (c == '[')
@@ -295,9 +296,13 @@ struct JSONWalker
                 }
                 else
                 {
-                    // can leave post at comma + 1
+                    // can leave pos at comma
                     if (c == ',' &&
-                        _level == level0 && _blevel == blevel0) break;
+                        _level == level0 && _blevel == blevel0) 
+                    {
+                        _unget(c);
+                        break;
+                    }
                 }
             }
         }
@@ -400,18 +405,22 @@ struct JSONWalker
             gs.add(0);
             r = var(gs.start());
         }
-        else if (_pos - st == 5 && !strncmp(st, "true", 4)) // "true" + 1
-        {
-            // convert true and false to int
-            r = var(1);
-        }
-        else if (_pos - st == 6 && !strncmp(st, "false", 5))
-        {
-            r = var(0);
-        }
         else
         {
-            r.parse(&st);
+            string v(st, _pos - st);
+            if (v == "true")
+            {
+                // convert true and false to int
+                r = var(1);
+            }
+            else if (v == "false")
+            {
+                r = var(0);
+            }
+            else
+            {
+                r.parse(&st);
+            }
         }
         return r;
     }
@@ -425,38 +434,23 @@ struct JSONWalker
         assert(_json != _pos);
 
         // char that ended term
-        char c = _pos[-1];
-        
+        char c = *_pos;
+
         if (c == ',')
         {
-            // last term ended with comma, OK
+            // OK
+            ++_pos;
         }
-        else if (c == '"' || c == ']' || c == '}')
+        else if (c == '}')
         {
-            // ended of quote or object, now expect comma
-            skipSpace();
-            char c = _get();
-            if (c == '}')
-            {
-                // must be final }
-                _end = true;
-                --_level;
-                if (_level || _blevel) _error = true;
-            }
-            else if (c == ']')
-            {
-                // final ] of array
-                _end = true;
-                --_blevel;
-                if (_level || _blevel) _error = true;
-            }
-            else if (c != ',')
-            {
-                _error = true;
-            }
+            // must be final }
+            _end = true;
+            --_level;
+            if (_level || _blevel) _error = true;
         }
         else
         {
+            LOG3("JSON next unexpected ", _pos);
             _error = true;
         }
     }

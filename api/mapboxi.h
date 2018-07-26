@@ -45,6 +45,7 @@
 #include "graph.h"
 #include "ifmap.h"
 #include "json.h"
+#include "ifischema.h"
 
 struct Map::Imp : public ImpType<Map>
 {
@@ -60,6 +61,7 @@ struct Map::Imp : public ImpType<Map>
 
     // optional map background
     string              _backimage;
+    string              _mapTitle; // optional
     
     MapInfo             _mi;
     
@@ -463,6 +465,9 @@ struct Map::Imp : public ImpType<Map>
                 // back image?
                 string bg = JSON::StringValue(*js, BRA_MAP_BACKIMAGE).toString();
                 _backimage = _host->_control->resolveAsset(bg);
+
+                // optional title text
+                _mapTitle = JSON::StringValue(*js, IFI_TITLE).toString();
             }
 
             delete js;
