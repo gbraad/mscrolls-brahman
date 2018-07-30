@@ -215,6 +215,9 @@ The _reply_ json, sent from the back-end to the front-end, can have these terms 
 * `compassgo: "{1:id}"`  
    Set the `command` sent when a valid compass direction is clicked. `id` in this case is one of the words; "north", "northeast", "east", "southeast", "south", "southwest", "west", "northwest", "up", "down", "in" or "out". The default is to send just the word. For example if you wished to receive the `command`, `go` _direction_, the `compassgo` string would be `"go {1:id}"`.
 
+* `refreshcmd: "look"`  
+  Set the `command` sent when the refresh button is pressed.
+
 ### pictureobj
 
 * `name: "filepath"`  
@@ -380,7 +383,8 @@ Same meanings as `item`.
 * `color: "blue"`  
   _Optional_.
 
-* `id:` int
+* `id:` int  
+   Used internally as channel number. `-1` clears any previous text
 
 ### soundobj
 

@@ -80,6 +80,7 @@
 #define IFI_USEWITH     "usewith"
 #define IFI_USE         "use"
 #define IFI_COMPASSGO   "compassgo"
+#define IFI_REFRESHCMD "refreshcmd"
 
 // metaobj
 //#define IFI_TITLE       "title"
@@ -138,4 +139,7 @@
 #define IFI_USE_DEFAULT "use {1:name}"
 
 #define IFI_COMPASSGO_DEFAULT "{1:id}"
+
+#define IFI_REFRESHCMD_DEFAULT "look"
+
 

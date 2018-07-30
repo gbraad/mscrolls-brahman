@@ -204,7 +204,7 @@ ApplicationWindow
 
     Audio
     {
-        id: mplayer
+        id: mplayer1
         audioRole: MediaPlayer.MusicRole
         loops: Audio.Infinite
 
@@ -213,42 +213,102 @@ ApplicationWindow
         //onStatusChanged: console.log("audio state", status)
     }
 
-    NumberAnimation
+    Audio
     {
-        id: fadein
-        target: mplayer
-        property: "volume"
-        to: 1
-        duration: 2000
+        id: mplayer2
+        audioRole: MediaPlayer.MusicRole
+        loops: Audio.Infinite
+
+        //onErrorChanged: console.log("audio, ", errorString)
+        //onPlaybackStateChanged: console.log(">>>> audio2 play ", playbackState)
+        //onStatusChanged: console.log("audio state", status)
     }
 
     NumberAnimation
     {
-        id: fadeout
-        target: mplayer
+        id: fadein1
+        target: mplayer1
+        property: "volume"
+        to: 1
+        duration: 1000
+    }
+
+    NumberAnimation
+    {
+        id: fadeout1
+        target: mplayer1
         property: "volume"
         to: 0
         duration: 500
-        onStopped: mplayer.stop()
+        onStopped: mplayer1.stop()
+    }
+
+    NumberAnimation
+    {
+        id: fadein2
+        target: mplayer2
+        property: "volume"
+        to: 1
+        duration: 1000
+    }
+
+    NumberAnimation
+    {
+        id: fadeout2
+        target: mplayer2
+        property: "volume"
+        to: 0
+        duration: 500
+        onStopped: mplayer2.stop()
     }
 
     function playMusic(mf)
     {
          if (mf.length > 0 && QControl.prefs.musicEnabled)
          {
-             fadeout.stop()
-             fadein.stop()
-             mplayer.source = mf
-             mplayer.volume = 0
-             mplayer.play()
-             fadein.start()
+             if (mplayer1.playbackState == Audio.PlayingState)
+             {
+                 fadein1.stop()
+                 fadeout1.start()
+
+                 // play on 2
+                 mplayer2.source = mf
+                 mplayer2.volume = 0
+                 mplayer2.play()
+                 fadein2.start()
+             }
+             else
+             {
+                 // play on 1
+
+                 // stop 2 if playing
+                 if (mplayer2.playbackState == Audio.PlayingState)
+                 {
+                     fadein2.stop()
+                     fadeout2.start()
+                 }
+
+                 mplayer1.source = mf
+                 mplayer1.volume = 0
+                 mplayer1.play()
+                 fadein1.start()
+             }
          }
     }
 
     function stopMusic()
     {
-         fadein.stop()
-         fadeout.start()
+        if (mplayer1.playbackState == Audio.PlayingState)
+        {
+            fadein1.stop()
+            fadeout1.start()
+        }
+
+        if (mplayer2.playbackState == Audio.PlayingState)
+        {
+            fadein2.stop()
+            fadeout2.start()
+        }
     }
 
     onSoundJSONChanged:

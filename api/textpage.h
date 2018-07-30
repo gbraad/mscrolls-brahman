@@ -94,6 +94,12 @@ struct TextPage: public TextPageHTML
 
     TextPage() { _init(); }
 
+    void clear()
+    {
+        _segments.clear();
+        _inprogress = false;
+    }
+
     string toString() const
     {
         string s;
@@ -104,16 +110,13 @@ struct TextPage: public TextPageHTML
 
     void toStringHTML(TextFormat& tf, GrowString& gs) const
     {
-        for (size_t i = 0; i < _segments.size(); ++i)
-        {
-            tf._width = _width;
-
-            // this will be the default unless specified by {width="100"}
-            tf._widthForImages = _width*7/10;
-
-            tf.setPlain(_segments[i]->_text);
-            gs.append(tf._text);
-        }
+        tf._width = _width;
+        
+        // this will be the default unless specified by {width="100"}
+        tf._widthForImages = _width*7/10;
+        
+        tf.setPlain(toString());
+        gs.append(tf._text);
     }
 
 

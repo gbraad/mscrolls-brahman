@@ -59,7 +59,7 @@ template<class T> struct Pair
     Pair operator+(const T& dt) const { return Pair(_lo + dt, _hi + dt); }
     Pair operator-(const T& dt) const { return Pair(_lo - dt, _hi - dt); }
 
-    Pair max(const T& t) const
+    Pair maximum(const T& t) const
     {
         // make all values >= t
         return Pair(u_max(_lo, t), u_max(_hi, t));

@@ -40,7 +40,6 @@
 #include "defs.h"
 #include "types.h"
 
-std::string makeFilePath(const std::string& dir, const std::string& filename);
 int DLLX getScreenDPI();
 bool DLLX createUniqueInstance(const char* name = 0);
 void DLLX destroyUniqueInstance();

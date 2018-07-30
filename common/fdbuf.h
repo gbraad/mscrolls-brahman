@@ -77,7 +77,7 @@ template<int SZ> struct FDBufN: public FDBase
         _init();
     }
 
-    FDBufN(FD& f)
+    explicit FDBufN(FD& f)
     {
         _init();
         fd(f);

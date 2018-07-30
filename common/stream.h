@@ -31,63 +31,19 @@
 
 #pragma once
 
-#include <stdio.h>
 #include <string>
 #include "cutils.h"
 #include "types.h"
 #include "sbuf.h"
+#include "fdbuf.h"
 
 struct Stream
 {
     // abstract stream
-    
-    virtual ~Stream() {}
-    virtual int operator*() const = 0;
-    virtual void operator++() = 0;
-    virtual void operator--() = 0;
-    virtual int line() const { return 1; }
-    virtual bool getline(SBuf& sb) = 0;
-};
-
-struct StreamString: public Stream
-{
-    // make a stream from a string
-    StreamString(const char* s) : _s(s)  {}
-    
-    // compliance
-    int operator*() const override { return *_s; }
-    void operator++() override { ++_s; }
-    void operator--() override { --_s; }
-
-    bool getline(SBuf& sb) override
-    {
-        int c;
-        for (;;++_s)
-        {
-            c = *_s;
-            if (!c) break;
-            if (c == '\r') continue;
-            if (c == '\n') break;
-            sb.add(c);
-        }
-        return c || sb.size();
-    }
-
-private:
-
-    const char*         _s;
-};
-
-struct StreamFile: public Stream
-{
-    // make a stream from a file
-    
-    FILE*       _fp;
-    int         _at;
-    int         _line;
 
     // have a very small hold buffer for unget
     static const int maxhold = 16; // power of 2
+    
     int         _hold[maxhold];
     int         _holdpos;
     int         _backcount;
@@ -95,6 +51,9 @@ struct StreamFile: public Stream
     bool        _inBlockComment;
     bool        _inQuote;
     bool        _esc;
+
+    int         _at;
+    int         _line;
 
     // allow # at the start of a line to comment out the line
     bool        _hashLineComments = true;
@@ -105,39 +64,68 @@ struct StreamFile: public Stream
     // c-style comments
     bool        _cComments = true;
 
-    StreamFile(FILE* fp = 0) : _fp(fp) 
-    {
-        _init();
-    }
+
+    Stream() { _init(); }
     
-    bool ok() const { return _fp != 0; }    
-    bool inComment() const { return _inLineComment || _inBlockComment; }
+    virtual ~Stream() {}
 
-    // Compliance
-    int operator*() const override { return _at; }
-    int  line() const override { return _line; }
-    void operator++() override { _bump(); }
-    void operator--() override { _unget(); }
+    int operator*() const { return _at; }
+    void operator++() { _bump(); }
+    void operator--() { _unget(); }
+    int  line() const { return _line; }
 
-    bool getline(SBuf& sb) override
+    bool getline(SBuf& sb)
     {
         // return false if no data and EOF
 
         sb.clear();
-        if (!ok()) return false;
-
+        
         for (;;)
         {
             _bump();
             if (!_at || _at == '\n') break;
-            if (_at == '\r') continue;
             sb.add((char)_at);
         }
-
+        
         return _at || sb.size();
     }
 
+    virtual const char* name() const = 0;
+
 protected:
+
+    virtual int __get() = 0;
+
+    bool inComment() const { return _inLineComment || _inBlockComment; }
+
+    void _unget()
+    {
+        ++_backcount;
+
+        _holdpos = (_holdpos - 1) & (maxhold - 1);
+
+        // restore last char from hold
+        _at = _hold[(_holdpos - 1) & (maxhold - 1)];
+    }
+
+    int _get()
+    {
+        int c;
+        if (_backcount)
+        {
+            --_backcount;
+            c = _hold[_holdpos];
+        }
+        else
+        {
+            c = __get();
+            if (c == '\r') c = __get(); // ignore DOS newlines (if any)
+            _hold[_holdpos] = c;
+        }
+
+        _holdpos = (_holdpos + 1) & (maxhold-1);
+        return c;
+    }
 
     void _bump()
     {
@@ -148,7 +136,8 @@ protected:
         for (;;)
         {
             c = _get();
-            if (c == EOF) break;
+            if (c == EOF) c = 0;
+            if (!c) break;
 
             if (!inComment())
             {
@@ -221,36 +210,7 @@ protected:
             if (!inComment()) break;
         }
 
-        if (c == EOF) c = 0;
         _at = c;
-    }
-
-    void _unget()
-    {
-        ++_backcount;
-
-        _holdpos = (_holdpos - 1) & (maxhold - 1);
-
-        // restore last char from hold
-        _at = _hold[(_holdpos - 1) & (maxhold - 1)];
-    }
-
-    int _get()
-    {
-        int c;
-        if (_backcount)
-        {
-            --_backcount;
-            c = _hold[_holdpos];
-        }
-        else
-        {
-            c = fgetc(_fp);
-            _hold[_holdpos] = c;
-        }
-
-        if (c) _holdpos = (_holdpos + 1) & (maxhold-1);
-        return c;
     }
 
     void _init()
@@ -267,32 +227,64 @@ protected:
 
 };
 
-struct StreamReader: public StreamFile
+struct StreamString: public Stream
 {
-    // read a file as a stream
+    // make a stream from a string
     
-    std::string      _name;
-    
-    ~StreamReader() { close(); }
-
-    bool open(const std::string& name)
+    void open(const char* s)
     {
-        close();
-        _name = name;
-        _fp = fopen(_name.c_str(), "r");
-        if (ok()) _bump(); // load first char
-        return ok();
+        _s = (const uchar*)s;
+        
+        // load first char
+        _bump();
     }
 
-    bool close()
+    // Compliance
+    int __get() override
     {
-        if (_fp)
+        return *_s++;
+    }
+
+    const char* name() const override { return "string"; }
+
+private:
+
+    const uchar*         _s;
+};
+
+struct StreamFile: public Stream
+{
+    // read a file as a stream
+
+    FD              _fd;
+    FDBuf           _fb;
+    std::string     _name;    
+
+    bool open(const char* name)
+    {
+        _fb.close();
+        _name = name;
+
+        bool r = _fd.open(name);
+
+        if (r)
         {
-            fclose(_fp);
-            _fp = 0;
-            return true;
+            _fb.fd(_fd);
+            _bump(); // load first char
         }
-        return false;
+        return r;
+    }
+
+    bool open(const std::string& name) { return open(name.c_str()); }
+
+    const char* name() const override { return _name.c_str(); }
+
+protected:
+
+    // Compliance
+    int __get() override
+    {
+        return _fb.getc();
     }
 
 };

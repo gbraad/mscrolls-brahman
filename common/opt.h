@@ -37,12 +37,23 @@
 
 #pragma once
 
-#include <ctype.h>
 #include <string.h>
 #include <assert.h>
+#include "cutils.h"
 
 struct Opt
 {
+    static char* cleanArg(char* arg)
+    {
+        // fix any spaces at the start or end of arg
+
+        while (u_isspace(*arg)) ++arg;
+        char* p = arg;
+        char* q = p + strlen(p);
+        while (p != q && u_isspace(q[-1])) *--q = 0;
+        return p;
+    }
+    
     static bool isOpt(char* opt, const char* val)
     {
         // test option and if so, remove it
@@ -64,12 +75,7 @@ struct Opt
             {
                 opt[0] = dummy;
                 opt[1] = dummy;
-
-                // clean arg, sometimes they can have spaces
-                while (isspace(*arg)) ++arg;
-                char* p = arg;
-                while (*p && !isspace(*p)) ++p;
-                *p = 0;
+                arg = cleanArg(arg);
             }
         }
         return arg;
@@ -96,11 +102,7 @@ struct Opt
                     opt[1] = dummy;
                 }
 
-                // clean arg, sometimes they can have spaces
-                while (isspace(*arg)) ++arg;
-                char* p = arg;
-                while (*p && !isspace(*p)) ++p;
-                *p = 0;
+                arg = cleanArg(arg);
             }
         }
         return arg;

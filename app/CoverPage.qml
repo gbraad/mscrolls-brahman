@@ -105,6 +105,7 @@ Page
                 anchors.fill: parent
                 onClicked: 
                 {
+                    enabled = false; // prevent a second click!
                     app.stopMusic()
                     pageStack.replace(Qt.resolvedUrl("MainPage.qml"))
                     QControl.coverPageClosed()

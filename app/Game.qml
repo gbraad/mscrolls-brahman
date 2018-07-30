@@ -126,7 +126,7 @@ C1.SplitView
                         // clicked on active text
                         onLinkActivated:
                         {
-                            if (link.startsWith("http://")) Qt.openUrlExternally(link);
+                            if (link.startsWith("http://") || link.startsWith("https://")) Qt.openUrlExternally(link);
                             else QControl.evalClickCommand(link)
                         }
 

@@ -259,6 +259,11 @@ int main(int argc, char** argv)
         host.syncRelease();
     }
 
+    /* some games wait until they've received a {begin:true} code */
+    const char* beginjs = "{\"" IFI_BEGIN "\":true}";
+    LOG4("Sending ifi begin, ", beginjs);
+    if (host.eval(beginjs)) host.syncRelease();
+    
     bool done = false;
 
     while (!done)

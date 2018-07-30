@@ -58,11 +58,9 @@ struct IFIHandler
 
         friend std::ostream& operator<<(std::ostream& os, const TextF& t)
         {
-            os << '{' << t._text << ", id=" << t._id << '}';
+            os << "{\"" << t._text << "\", id=" << t._id << '}';
             return os;
         }
-
-        explicit operator bool() const { return !_text.empty(); }
     };
 
     IFIHandler()
@@ -72,6 +70,7 @@ struct IFIHandler
         setProp(IFI_USEWITH, IFI_USEWITH_DEFAULT);
         setProp(IFI_COMPASSGO, IFI_COMPASSGO_DEFAULT);
         setProp(IFI_USE, IFI_USE_DEFAULT);
+        setProp(IFI_REFRESHCMD, IFI_REFRESHCMD_DEFAULT);
     }
 
     static string extendPrefix(const string& prefix, const char* key)
@@ -442,15 +441,12 @@ struct IFIHandler
             }
         }
 
-        bool r = true;
+        bool r = ifiTextFormatted(textF);
 
-        if (textF)
+        if (!r)
         {
-            if (!ifiTextFormatted(textF))
-            {
-                // fallback to non-formatted
-                r = ifiText(textF._text);
-            }
+            // fallback to non-formatted
+            r = ifiText(textF._text);
         }
         return r;
     }

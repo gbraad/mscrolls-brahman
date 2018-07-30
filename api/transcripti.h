@@ -121,98 +121,107 @@ struct Transcript::Imp : public ImpType<Transcript>
 
     void finish()
     {
-        if (!_segmentText.empty())
-        {
-            bool changed = false;
+        bool changed = false;
             
-            // test for special segment types which are UI instructions
-            if (_currentSegmentId == BRA_SEGMENT_IMAGE)
-            {
-                // we are passed the full path or JSON
-                string imagepath = trim(_segmentText);
+        // test for special segment types which are UI instructions
+        if (_currentSegmentId == BRA_SEGMENT_IMAGE)
+        {
+            // we are passed the full path or JSON
+            string imagepath = trim(_segmentText);
 
-                // unix style path for HTML
-                replaceCharsInplace(imagepath, '\\', '/');
+            // unix style path for HTML
+            replaceCharsInplace(imagepath, '\\', '/');
 
-                _segmentText.clear();
+            _segmentText.clear();
                     
-                if (!imagepath.empty())
+            if (!imagepath.empty())
+            {
+                if (imagepath[0] != '{')
                 {
-                    if (imagepath[0] != '{')
+                    // non-json image path
+                    if (_host->_inlineImages)
                     {
-                        // non-json image path
-                        if (_host->_inlineImages)
-                        {
-                            _segmentText = "![](";
-                            _segmentText += imagepath;
-                            _segmentText += ")";
-                        }
-
-                        // convert flat image path to JSON
-                        imagepath = imagePathToJSON(imagepath);
+                        _segmentText = "![](";
+                        _segmentText += imagepath;
+                        _segmentText += ")";
                     }
 
-                    LOG3("transcript JSON image ", imagepath);
+                    // convert flat image path to JSON
+                    imagepath = imagePathToJSON(imagepath);
+                }
+
+                LOG3("transcript JSON image ", imagepath);
                     
-                    // notify controller regardless of inline images
-                    // NB: parameter is JSON string
-                    _host->_control->imageChanged(imagepath);
-                }
-                else
-                {
-                    // clear picture
-                    imagepath = "{}"; // empty JSON to clear pic
-                    _host->_control->imageChanged(imagepath);
-                }
+                // notify controller regardless of inline images
+                // NB: parameter is JSON string
+                _host->_control->imageChanged(imagepath);
             }
-            else if (_currentSegmentId == BRA_SEGMENT_TITLE)
+            else
             {
-                //LOG3("title segment '", _segmentText << "'");
-
-                _host->_control->titleText(_segmentText);
-
-                _segmentText.clear();
-
-                // no longer indicated through qtransscript
-                changed = false; 
+                // clear picture
+                imagepath = "{}"; // empty JSON to clear pic
+                _host->_control->imageChanged(imagepath);
             }
-            else if (_currentSegmentId == BRA_SEGMENT_JSON)
-            {
-                //LOG3("JSON segment '", _segmentText << "'");
-                _customJSON = _segmentText;
-                _segmentText.clear();
-                changed = true;
-            }
-            else if (_currentSegmentId == BRA_SEGMENT_NULL)
-            {
-                // throw text away and ignore it!
-                _segmentText.clear();
-            }
-
-            if (!_segmentText.empty())
-            {
-                if (_currentSegmentId || !_host->_refreshOnNewline)
-                {
-                    // can erase a segment with non-empty whitespace text 
-                    changed = _page.appendSegment(_segmentText, _currentSegmentId);
-                }
-                else
-                {
-                    changed = _page.append(_segmentText.c_str());
-                }
-                
-                if (changed)
-                {
-                    //LOG3("transcript, append segment, '", _segmentText << "' (" << _currentSegmentId << ")");
-                }
-        
-                _segmentText.clear();
-            }
-            
-            // emit changed event
-            if (changed && _host->_notifier)
-                _host->_notifier->changed(_currentSegmentId);
         }
+        else if (_currentSegmentId == BRA_SEGMENT_TITLE)
+        {
+            //LOG3("title segment '", _segmentText << "'");
+
+            _host->_control->titleText(_segmentText);
+
+            _segmentText.clear();
+
+            // no longer indicated through qtransscript
+            changed = false; 
+        }
+        else if (_currentSegmentId == BRA_SEGMENT_JSON)
+        {
+            //LOG3("JSON segment '", _segmentText << "'");
+            _customJSON = _segmentText;
+            _segmentText.clear();
+            changed = true;
+        }
+        else if (_currentSegmentId == BRA_SEGMENT_NULL)
+        {
+            // throw text away and ignore it!
+            _segmentText.clear();
+        }
+            
+        if (_currentSegmentId == BRA_SEGMENT_CLEAR)
+        {
+            _currentSegmentId = 0;
+            _page.clear();
+                
+            changed = true;
+        }
+
+        if (!_segmentText.empty())
+        {
+            if (_currentSegmentId || !_host->_refreshOnNewline)
+            {
+                // NB: non-ifi is not refreshonnewline
+                // so main text goes here.
+
+                // can erase a segment with non-empty whitespace text 
+                if (_page.appendSegment(_segmentText, _currentSegmentId))
+                    changed = true;
+            }
+            else
+            {
+                if (_page.append(_segmentText.c_str())) changed = true;
+            }
+                
+            if (changed)
+            {
+                //LOG3("transcript, append segment, '", _segmentText << "' (" << _currentSegmentId << ")");
+            }
+        
+            _segmentText.clear();
+        }
+            
+        // emit changed event
+        if (changed && _host->_notifier)
+            _host->_notifier->changed(_currentSegmentId);
     }
 
     void _init() 

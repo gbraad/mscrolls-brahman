@@ -99,7 +99,7 @@ struct Compress
         Encode();
     }
 
-    void decompress(const unsigned char* data, size_t sz, unsigned int dsize)
+    void decompress(const unsigned char* data, size_t sz, unsigned int usize)
     {
         _purge();
         buffer = 0;
@@ -108,11 +108,16 @@ struct Compress
         _inp = _inbuf = data;
         _insz = sz;
 
-        _outmax = dsize;
-        _outp = _outbuf = new unsigned char[_outmax];
-        //_outsz = 0;
+        _outmax = usize;
+
+        // allocate one more byte for uncompress buffer than the size
+        _outp = _outbuf = new unsigned char[usize + 1];
 
         Decode();
+
+        // zero terminate the uncompressed buffer
+        // so that it can be used as a string
+        _outbuf[usize] = 0;
     }
 
     int get()

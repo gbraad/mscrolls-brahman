@@ -60,9 +60,9 @@ Page
     Action
     {
         iconName: "navigation/refresh"
-        name: "Look"
+        name: "Refresh"
         hoverAnimation: true
-        onTriggered: QControl.evalCommand("look")
+        onTriggered: QControl.refreshCommand()
     },
     Action
     {

@@ -118,10 +118,8 @@ struct DLLX Control: public APIType
 
     bool loadEngine(IFEngineInterface*);
     bool loadIFI();
-
-    string prefsFilePath() const { return pathTo(PREFS_FILENAME); }
+    string prefsFilePath() const;
     
-    string pathTo(const string& fname) const;
     string currentVersion() const;
     virtual void setLogLevel(int level);
     virtual int getLogLevel() const;
@@ -129,6 +127,7 @@ struct DLLX Control: public APIType
 
     bool evalCommand(const string& cmd);
     bool evalClickCommand(const string& cmd);
+    bool refreshCommand();
     bool evalCommandDirect(const string& cmd, bool echo);
     bool evalUseXwithY(const string& x, const string& y);
     bool menuDrop(const string&);

@@ -302,7 +302,8 @@ inline std::string MatCol::getContrastName(const char* name)
             { "deep orange",          "indigo" },
 
             { "brown",                "blue grey" },
-            { "blue grey",            "brown" },
+            { "blue grey",            "dark blue" }, // brown
+            { "dark blue",            "red" },
             { "grey",                 "black" },
             { "black",                "white" },
             { "white",                "black" },
@@ -416,6 +417,10 @@ inline const MatCol::MatColRec* MatCol::_getTable(size_t* size)
         { "Blue", -200, 0x448AFF },
         { "Blue", -400, 0x2979FF },
         { "Blue", -700, 0x2962FF },
+
+        // invent a new color
+        {"Dark Blue", 500, 0x008eea },
+
 
         // <!-- light Blue-->
         { "light Blue", 50, 0xE1F5FE },
@@ -588,6 +593,12 @@ inline const MatCol::MatColRec* MatCol::_getTable(size_t* size)
         { "Brown", 700, 0x5D4037 },
         { "Brown", 800, 0x4E342E },
         { "Brown", 900, 0x3E2723 },
+
+        // lies!
+        { "Brown", -100, 0x795548 },
+        { "Brown", -200, 0x795548 },
+        { "Brown", -400, 0x795548 },
+        { "Brown", -700, 0x795548 },
 
         // <!--Grey-->
         { "Grey", 50, 0xFAFAFA },
