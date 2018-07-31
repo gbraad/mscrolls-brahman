@@ -286,6 +286,11 @@ void PrintString(str, use_json)
               case COMMON_DESCRS: ;  /* common description */
               case DESCR_ID:         /* local description */
                 id1 = attributes[attribute_index].value;
+                /* Owner is the owner of the attribute, but */
+                /* since the value is a description id we   */
+                /* must also retrieve the description owner */
+                /* from the attributes struct.              */
+                owner = attributes[attribute_index].value_owner;
                 break;
               case NUMBER:
                 PrintNumber(attributes[attribute_index].value, use_json);
@@ -343,7 +348,7 @@ void PrintExtendedSysDescr(extended_sys_descr, use_json)
 
   if (extended_sys_descr->connect_prepos != NO_ID) {
     PrintString(" ", use_json);
-    PrintWord(extended_sys_descr->connect_prepos, 0);
+    PrintWord(extended_sys_descr->connect_prepos, use_json);
     PrintString(" ", use_json);
 
     /* PrintSysDescr() will not print the article for  */
@@ -379,7 +384,7 @@ void PrintSysDescr(descr, use_json)
     /* clear article, otherwise the white space */
     /* will not be printed by PrintString()     */
     article = 0;
-    PrintString(" ", 0);
+    PrintString(" ", use_json);
   }
 
   if (descr->noun != NO_ID)
