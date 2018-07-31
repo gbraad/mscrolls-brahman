@@ -37,6 +37,7 @@
 #define BRA_SEGMENT_TITLE       2
 #define BRA_SEGMENT_IMAGE       3
 #define BRA_SEGMENT_JSON        4
+#define BRA_SEGMENT_CLEAR       5
 
 // obsolete
 #define BRA_SEGMENT_ACTION      1

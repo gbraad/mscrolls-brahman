@@ -209,6 +209,12 @@ public:
         return Control::evalClickCommand(STRQ(cmd));
     }
 
+    Q_INVOKABLE bool refreshCommand()
+    {
+        // used to invoke "look"
+        return Control::refreshCommand();
+    }
+
     Q_INVOKABLE bool evalUseXwithY(const QString& x, const QString& y)
     {
         return Control::evalUseXwithY(STRQ(x), STRQ(y));

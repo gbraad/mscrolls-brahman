@@ -55,7 +55,7 @@
 
 // 1.1.X pre ifi
 // 1.2.X post ifi
-#define VERSION_STRING  "1.2.0"
+#define VERSION_STRING  "1.2.1"
 
 struct ControlImpBase
 {
@@ -78,6 +78,7 @@ struct ImpIFI: public IFIHandler, public ControlImpBase
     bool        _lastSaveOK = false;
     string      _saveFilename;
     string      _lastSaveFilename;
+    bool        _coverPageClosed = false;
 
     // data for the sidebar
     string              _itemsRoster;
@@ -742,11 +743,11 @@ struct Control::Imp :
 
     std::string formatStyle(const char* text, const char* style)
     {
-        string s = "#[";
+        string s = "\n\n#[";
         s += trim(text); // no space on ends please.
         s += "](";
         s += style;
-        s += ')';
+        s += ")\n\n";
         return s;
     }
 
@@ -890,10 +891,9 @@ struct Control::Imp :
         if (dpath && *dpath)
         {
             _host->_dataPath = dpath;
-#ifdef _WIN32
-            // if windows given path separators linux style, change them.
-            replaceCharsInplace(_host->_dataPath, '/', '\\');
-#endif
+            
+            // use linux path style always!
+            replaceCharsInplace(_host->_dataPath, '\\', '/');
         }
         else
         {
@@ -905,10 +905,7 @@ struct Control::Imp :
         if (configDir && *configDir)
         {
             _host->_assetsPath = configDir;
-#ifdef _WIN32
-            // if windows given path separators linux style, change them.
-            replaceCharsInplace(_host->_assetsPath, '/', '\\');
-#endif
+            replaceCharsInplace(_host->_assetsPath, '\\', '/');
         }
         else
         {
@@ -971,8 +968,16 @@ struct Control::Imp :
 
         char id = tf._id;
 
-        // use channel# > those originally defined to have special meaning
-        if (id) id += 10;
+        if (id == -1)
+        {
+            // code to clear text
+            id = BRA_SEGMENT_CLEAR;
+        }
+        else
+        {
+            // use channel# > those originally defined to have special meaning
+            if (id) id += 10;
+        }
 
         if (id) _semit.call(id);
         bool r = ifiText(tf._text);
@@ -1046,7 +1051,7 @@ struct Control::Imp :
 
     bool ifiLocationResponse(const string& id) override
     {
-        // Called after `mapresponse` goes into map object
+        // Called after JSON `mapresponse` goes into mapobj
         // or from top-level
         LOG3("API location response ", id);
         _mapinfo._currentLocation = id;
@@ -1313,6 +1318,11 @@ struct Control::Imp :
         return makePath(_host->_dataPath, name);
     }
 
+    string prefsFilePath() const
+    {
+        return makeDataPath(PREFS_FILENAME);
+    }
+
     string resolveAsset(const string& path) const
     {
         if (path.empty()) return path; // nothing to resolve
@@ -1381,8 +1391,7 @@ struct Control::Imp :
         if (!_host->_storyfile.empty())
         {
             // start game
-            storypath = makeFilePath(_host->_assetsPath,
-                                     _host->_storyfile);
+            storypath = makeConfigPath(_host->_storyfile);
 
             if (_host->_recordFilename.size())
                 startRecording(_host->_recordFilename);
@@ -1394,8 +1403,7 @@ struct Control::Imp :
             if (_be)
             {
             // do we have any story.json
-                string sJSONPath = makeFilePath(_host->_assetsPath,
-                                                changeSuffix(_host->_storyfile, ".json"));
+                string sJSONPath = makeConfigPath(changeSuffix(_host->_storyfile, ".json"));
 
                 FD jfile;
                 if (jfile.open(sJSONPath.c_str()))
@@ -1449,8 +1457,7 @@ struct Control::Imp :
         if (!_host->_musicFile.empty())
         {
             // change to complete path
-            _host->_musicFile = makeFilePath(_host->_assetsPath, 
-                                             _host->_musicFile);
+            _host->_musicFile = makeConfigPath(_host->_musicFile);
              
             bool found = false;
             
@@ -1581,8 +1588,11 @@ struct Control::Imp :
 
     void coverPageClosed()
     {
-        if (_ifi)
+        if (_ifi && !_coverPageClosed)
         {
+            // only send begin code once!
+            _coverPageClosed = true;
+            
             // send additional {begin:true}
             const char* js = "{\"" IFI_BEGIN "\":true}";
             LOG4("Sending ifi begin, ", js);
@@ -1637,6 +1647,28 @@ struct Control::Imp :
     {
         // called when a link in the text is clicked issuing a command
         return evalCommandDirect(cmd, true);
+    }
+
+    bool refreshCommand()
+    {
+        bool r = false;
+        if (_be)
+        {
+            r = evalCommandDirect("look", true);
+        }
+        if (_ifi)
+        {
+            string cmd = getProp(IFI_REFRESHCMD).toString();
+            if (!cmd.empty())
+            {
+                ObjectList ctx(_objects); 
+                ctx._echo = true;
+                
+                r = ImpIFI::evalCommand(cmd, ctx);
+                if (r) postEval();
+            }
+        }
+        return r;
     }
 
     bool evalUseXwithY(const string& x, const string& y)
@@ -1769,9 +1801,13 @@ struct Control::Imp :
 
     bool updateMapInfo(MapInfo& mi)
     {
+        // called in light mode every turn (non-ifi)
+        // called in full mode by performLayout when we update whole map
+
         bool r = false;
         if (_be)
         {
+            // get state from engine
             r = _be->updateMapInfo(mi);
         }
 
@@ -1780,6 +1816,8 @@ struct Control::Imp :
             r = true;
 
             // only needs to copy from latest version we've been sent
+            // `mapinfo` is maintained by IFI
+            // `changed` is set when JSON changes rather than just location
             mi._currentLocation = _mapinfo._currentLocation;
             mi._currentExits = _mapinfo._currentExits;
             mi._changed = _mapinfo._changed;
@@ -1799,6 +1837,7 @@ struct Control::Imp :
     {
         bool changed = _host->_map->updateMapLocation(mi);
 
+        // triggers update of location and exits
         if (changed && _host->_map->_notifier)
             _host->_map->_notifier->changed();
 
@@ -2010,7 +2049,7 @@ struct Control::Imp :
 
     bool deleteSaveGame(const string& name)
     {
-        string p = _host->pathTo(name);
+        string p = makeDataPath(name);
         LOG3("deleteSaveGame ", p);
         bool res = FD::existsFile(p.c_str());
         if (res)
@@ -2232,6 +2271,7 @@ void Control::setLogLevel(int level) { _imp->setLogLevel(level); }
 int Control::getLogLevel() const { return _imp->getLogLevel(); }
 bool Control::evalCommand(const string& cmd) { return _imp->evalCommand(cmd); }
 bool Control::evalClickCommand(const string& cmd) { return _imp->evalClickCommand(cmd); }
+bool Control::refreshCommand() { return _imp->refreshCommand(); }
 bool Control::evalCommandDirect(const string& cmd, bool echo)
 { return _imp->evalCommandDirect(cmd, echo); }
 bool Control::evalUseXwithY(const string& x, const string& y)
@@ -2264,12 +2304,6 @@ void Control::coverPageClosed() { _imp->coverPageClosed(); }
 bool Control::updateMapInfo(MapInfo& mi) { return _imp->updateMapInfo(mi); }
 string Control::undoredo(bool undo) { return _imp->undoredo(undo); }
 void Control::postEval() { _imp->postEval(); }
-
-string Control::pathTo(const string& fname) const
-{
-    // path to `fname' from current data path
-    return makeFilePath(_dataPath, fname);
-}
 
 int Control::getScreenDPI() const
 {
@@ -2331,3 +2365,5 @@ string Control::titleText() const { return _imp->_titleText; }
 bool Control::titleText(const string& s) { return _imp->titleText(s); }
 
 bool Control::compassDirection(uint dir) { return _imp->compassDirection(dir); }
+
+string Control::prefsFilePath() const { return _imp->prefsFilePath(); }

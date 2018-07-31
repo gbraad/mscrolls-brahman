@@ -172,6 +172,9 @@ struct FD: public FDBase
         return stat(path, &sbuf) == 0 && S_ISREG(sbuf.st_mode);
     }
 
+    static bool existsFile(const std::string& path)
+    { return existsFile(path.c_str()); }
+
     static bool existsDir(const char* path)
     {
         // exists and is a directory

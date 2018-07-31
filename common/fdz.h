@@ -36,7 +36,7 @@
 
 #define WRITEZ_VERSION 0
 
-bool writez(FDBuf& fb, const unsigned char* buf, size_t amt, size_t& nwrote)
+inline bool writez(FDBuf& fb, const unsigned char* buf, size_t amt, size_t& nwrote)
 {
     nwrote = 0;
 
@@ -68,7 +68,7 @@ bool writez(FDBuf& fb, const unsigned char* buf, size_t amt, size_t& nwrote)
     return res;
 }
 
-bool writez(FD& fd, const unsigned char* buf, size_t amt, size_t& nwrote)
+inline bool writez(FD& fd, const unsigned char* buf, size_t amt, size_t& nwrote)
 {
     FDBuf fb(fd);
     return writez(fb, buf, amt, nwrote);
@@ -80,8 +80,12 @@ inline bool writez(FD& fd, const unsigned char* buf, size_t amt)
     return writez(fd, buf, amt, nw);
 }
 
-unsigned char* readz(FDBuf& fb, size_t* fsize = 0)
+inline unsigned char* readz(FDBuf& fb, size_t* fsize = 0)
 {
+    // fsize is set to the uncompressed size
+    // but the allocated buffer is +1 and zero terminated so that it
+    // can be used a string.
+    
     uint startpos = fb._pos;
 
     // read header
@@ -129,7 +133,7 @@ unsigned char* readz(FDBuf& fb, size_t* fsize = 0)
     return data;
 }
 
-unsigned char* readz(FD& fd, size_t* fsize = 0)
+inline unsigned char* readz(FD& fd, size_t* fsize = 0)
 {
     FDBuf fb(fd);
     return readz(fb, fsize);

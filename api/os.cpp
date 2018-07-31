@@ -47,26 +47,10 @@
 
 #ifdef _WIN32
 #include <Shlobj.h> // known folders
-#define PATHSEP '\\'
-
 #include "windpi.h"
-
-#else
-#define PATHSEP '/'
 #endif
 
 typedef std::string string;
-
-string makeFilePath(const string& dir, const string& filename)
-{
-    // eg dir '/' filename
-
-    string p = dir;
-    if (!endsWith(p, PATHSEP)) p += PATHSEP;
-    p += filename;
-    return p;
-}
-
 
 #ifdef _WIN32
 static HANDLE uniqueInstanceHandle;

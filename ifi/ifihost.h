@@ -78,6 +78,7 @@ struct IFIHost
     bool isSimpleText(const char* js, string& s)
     {
         // if json `js` is just one text record, return the string
+        // NB: does not detect text objects
         int nr = 0;
         int nt = 0;
         for (JSONWalker jw(js); jw.nextKey(); jw.next())
@@ -86,6 +87,9 @@ struct IFIHost
             const char* st = jw.checkValue(isObject);
             if (!st) break; // bad json
             ++nr;
+
+            if (nr > 1) break;
+
             if (!isObject && jw._key == IFI_TEXT)
             {
                 // do not decode string
@@ -127,10 +131,12 @@ struct IFIHost
             
             lock.unlock();
 
+            // combined text record, if used
+            GrowString cjs;
+            int len = 0;
+                
             if (n > 1 && _combineReplies)
             {
-                GrowString cjs;
-                int len = 0;
                 cjs.append("{\"" IFI_TEXT "\":\"");
                 for (int i = 0; i < n; ++i)
                 {
@@ -148,11 +154,6 @@ struct IFIHost
 
                 cjs.append("\"}");
                 cjs.add(0);
-
-                if (len > 0)
-                {
-                    if (_handler) _handler->handle(cjs.start());
-                }
             }
 
             // handle replies
@@ -163,6 +164,18 @@ struct IFIHost
                 {
                     if (_handler) _handler->handle(r);
                     delete [] r;
+                }
+                else
+                {
+                    // a missing record must have been a text record that
+                    // we combined
+                    // emit the combined text here, as if it all occured at
+                    // the same point
+                    if (len > 0)
+                    {
+                        if (_handler) _handler->handle(cjs.start());
+                        len = 0; // only once!
+                    }
                 }
             }
         } while (!done);

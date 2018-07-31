@@ -359,11 +359,17 @@ struct JSONWalker
         
         // pos is end quote + 1
         // [st+1, _pos-1) represents the string without quotes
-                
-        assert(_pos[-1] == '"');
 
-        ++st;
-        size = (_pos - 1) - st;
+        if (_pos[-1] != '"')
+        {
+            LOG3("JsonWalker, malformed string '", st << "'");
+            size = 0;
+        }
+        else
+        {
+            ++st;
+            size = (_pos - 1) - st;
+        }
         return st;
     }
 

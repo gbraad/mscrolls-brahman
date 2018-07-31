@@ -252,6 +252,6 @@ ADJECTIV
 
             DC.B     $82                  ;End of section
 
-* produced on Sun Oct 29 18:58:32 2017
+* produced on Mon Jun 11 21:57:50 2018
 
 * checksum = 7d86a89a

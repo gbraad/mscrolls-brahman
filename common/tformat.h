@@ -93,9 +93,21 @@ struct TextFormat
             while (*s) _addt(*s++);
         }
 
+        void _addtEscape(const char* s)
+        {
+            while (*s)
+            {
+                if (*s == '"' || *s == '\\') _add('\\');
+                _add(*s++);
+            }
+        }
+
+
         void operator()(const string& s) { _add(s.c_str()); }
         void operator()(const char* s) { _add(s); }
         void operator()(char c) { _add(c); }
+
+        
         
         void emitLink(const string& link, 
                       const string* linktext = 0)
@@ -103,9 +115,8 @@ struct TextFormat
             // default the text of a link to the link itself
             if (!linktext) linktext = &link;
             
-            // XX need to encode any quotes in the `link' text.
             (*this)("<a href=\"");
-            (*this)(link);
+            _addtEscape(link.c_str());
             (*this)("\">");
             (*this)(*linktext);
             (*this)("</a>");
@@ -158,20 +169,20 @@ struct TextFormat
                     // use optional resolver to find path
                     string p = (_host->_resolver)(imagepath);
                     resolved = !p.empty();
-                    if (resolved) (*this)(p);
+                    if (resolved) _addtEscape(p.c_str());
                 }
                 
                 if (!resolved)
                     (*this)("file:///");
             }
 
-            if (!resolved) (*this)(imagepath);
+            if (!resolved) _addtEscape(imagepath.c_str());
             (*this)('"');
             
             if (!alt.empty())
             {
                 (*this)(" alt=\"");
-                (*this)(alt);
+                _addtEscape(alt.c_str());
                 (*this)('"');
             }
                       
@@ -192,18 +203,53 @@ struct TextFormat
             (*this)("</p>");
         }
 
-        void emitDiv(const string& style, const string* text = 0)
+        void emitDiv(const string& cssclass,
+                     const string& text,
+                     const string& style,
+                     int flags = 3)
         {
-            (*this)("<div class=\"");
-            (*this)(style);
-            (*this)("\">");
-            if (text)
+
+            // flags:
+            // 1 => emit start
+            // 2 => emit end
+
+            bool start = flags & 1;
+            bool end = flags & 2;
+            
+            if (start && end && text.empty()) return; // no text!
+
+            bool hasclass = !cssclass.empty();
+
+            if (start)
             {
-                _add("<p>");
-                _addt(text->c_str());
-                _add("</p>");
+                {(*this)("<span");
+
+                    if (hasclass)
+                    {
+                        (*this)(" class=\"");
+                        _addtEscape(cssclass.c_str());
+                        (*this)("\"");
+                    }
+
+                    if (!style.empty())
+                    {
+                        (*this)(" style=\"");
+                        _addtEscape(style.c_str());
+                        (*this)("\"");
+                    }
+                    (*this)(">");
+                }
             }
-            (*this)("</div>");
+
+            if (!text.empty())
+            {
+                (*this)(text);
+            }
+
+            if (end)
+            {
+                (*this)("</span>");
+            }
         }
         
         string*   _text;
@@ -432,7 +478,6 @@ struct TextFormat
         _inList = false;
         _inP = false;
 
-
         for (s = st;*s;++s)
         {
             if (!_inP && !_inList)
@@ -471,7 +516,13 @@ struct TextFormat
                 {
                     if (!_inList)
                     {
-                        if (s[1]) out("<br/>\n");
+                        bool atend = !s[1];
+                        bool atlist = (s[1] == '*' && s[2] != '*');
+
+                        // dont break line before start of list since
+                        // we are about to end P.
+                        // nor at the very end for the same reason
+                        if (!atend && !atlist) out("<br/>\n");
                     }
                     else
                     {
@@ -533,11 +584,35 @@ struct TextFormat
                     const char* s1 = s + 1;
                     if (looksLikeLinkMD(s1, link, linktext, extra))
                     {
+                        // [text](div-class){css-style}
                         // linktext is text string
-                        // link is div style
+                        // link is div class
                         s = s1 - 1; // -1 for loop inc
-                        trimInplace(linktext); 
-                        out.emitDiv(link, &linktext);
+                        trimInplace(linktext);
+
+                        // emit div start and end
+                        int flags = 3;
+
+                        if (linktext.empty())
+                        {
+                            // empty text will make a start or an end
+
+                            // #[] to end
+                            bool end = link.empty() && extra.empty();
+
+                            if (!end)
+                            {
+                                // emit div start
+                                flags = 1;
+                            }
+                            else
+                            {
+                                // emit div end
+                                flags = 2;
+                            }
+                        }
+                        
+                        out.emitDiv(link, linktext, extra, flags);
                     }
                     else out(*s); // #
                 }
@@ -575,7 +650,7 @@ struct TextFormat
                         inItalic = false;
                     }
                 }                    
-                else if (*s == '*' && s[1] == '*')
+                else if (startsWith(s, "**"))
                 {
                     if (startofline) closeList(out); 
                     if (!inBold) out("<b>");
