@@ -202,7 +202,7 @@ Item
             property int boxItemCount: gen, qmapbox.getBoxItemCount(index)
             property bool boxDark: gen, qmapbox.getBoxDark(index)
         
-            property string boxid: qmapbox.getBoxID(index)
+            property string boxid: gen, qmapbox.getBoxID(index)
             property bool boxActive: qmapbox.currentBox == boxid 
             property color borderColor: boxActive ? Theme.accentColor : map.boxBorderColor
             Rectangle 
