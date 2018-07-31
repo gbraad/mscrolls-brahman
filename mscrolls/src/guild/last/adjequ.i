@@ -249,6 +249,6 @@ current_adj_number SET   4         ;Adjectives start at 4
 	ADJDEF	rubbish
 	ADJDEF	key
 
-* produced on Sun Oct 29 18:58:32 2017
+* produced on Mon Jun 11 21:57:50 2018
 
 * checksum = 1da62758

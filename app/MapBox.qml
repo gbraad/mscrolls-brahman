@@ -53,6 +53,8 @@ Item
     width: qmapbox.width*sc + xw
     height: qmapbox.height*sc + xh
 
+    property int gen: qmapbox.generation;
+
     onScChanged:
     {
         animx.stop();
@@ -115,15 +117,12 @@ Item
             property int aheight: map.sc*4/3 // thickness of arrow
             property int amargin: map.sc/2 
 
-            property var from: qmapbox.getLinkFrom(index)
-            property var to: qmapbox.getLinkTo(index)
-            property bool bi: qmapbox.getLinkBi(index)
-            property int gen: qmapbox.generation;
+            property var from: gen, qmapbox.getLinkFrom(index)
+            property var to: gen, qmapbox.getLinkTo(index)
+            property bool bi: gen, qmapbox.getLinkBi(index)
 
             // triggered when map.sc changes
             onAheightChanged: relayout();
-
-            onGenChanged: link.bi =  qmapbox.getLinkBi(index)
 
             // some link are not visible, but exist to establish connectivity
             visible: qmapbox.getLinkVisible(index)
@@ -200,15 +199,12 @@ Item
             width: qmapbox.getBoxWidth(index)*map.sc
             height: qmapbox.getBoxHeight(index)*map.sc
             
-            property int boxItemCount: qmapbox.getBoxItemCount(index)
-            property int gen: qmapbox.generation;
-            property bool boxDark: qmapbox.getBoxDark(index)
+            property int boxItemCount: gen, qmapbox.getBoxItemCount(index)
+            property bool boxDark: gen, qmapbox.getBoxDark(index)
         
             property string boxid: qmapbox.getBoxID(index)
             property bool boxActive: qmapbox.currentBox == boxid 
             property color borderColor: boxActive ? Theme.accentColor : map.boxBorderColor
-            onGenChanged: boxItemCount = qmapbox.getBoxItemCount(index)
-
             Rectangle 
             {
                 id: box
@@ -262,9 +258,10 @@ Item
 
             Canvas
             {
+                // up arrow indicator
                 id: up
 
-                visible: qmapbox.getBoxIndUp(index)
+                visible: gen, qmapbox.getBoxIndUp(index)
 
                 property int size: box.height*updownSize
                 width: size
@@ -306,9 +303,10 @@ Item
 
             Canvas
             {
+                // down arrow indicator
                 id: down
 
-                visible: qmapbox.getBoxIndDown(index)
+                visible: gen, qmapbox.getBoxIndDown(index)
 
                 property int size: box.height*updownSize
                 width: size
@@ -361,7 +359,7 @@ Item
                     // (eg "claustrophobic") we have to make it slightly smaller
                     font.pixelSize: Math.floor(map.sc*13/10)
                     font.family: Theme.fontFamily
-                    text: qmapbox.boxName(index)
+                    text: gen, qmapbox.boxName(index)
                     wrapMode: Text.WordWrap
                     color: Theme.textColor
             }

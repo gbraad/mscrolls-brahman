@@ -206,6 +206,6 @@ Info24Table
 	DC.W	0		;terminate list (for printing)
 
 	END
-* produced on Fri Nov 10 15:15:36 2017
+* produced on Mon Jun 11 21:57:50 2018
 
 * checksum = 9762edc7

@@ -743,7 +743,7 @@ struct Control::Imp :
 
     std::string formatStyle(const char* text, const char* style)
     {
-        string s = "\n#[";
+        string s = "\n\n#[";
         s += trim(text); // no space on ends please.
         s += "](";
         s += style;
@@ -1051,7 +1051,7 @@ struct Control::Imp :
 
     bool ifiLocationResponse(const string& id) override
     {
-        // Called after `mapresponse` goes into map object
+        // Called after JSON `mapresponse` goes into mapobj
         // or from top-level
         LOG3("API location response ", id);
         _mapinfo._currentLocation = id;
@@ -1801,9 +1801,13 @@ struct Control::Imp :
 
     bool updateMapInfo(MapInfo& mi)
     {
+        // called in light mode every turn (non-ifi)
+        // called in full mode by performLayout when we update whole map
+
         bool r = false;
         if (_be)
         {
+            // get state from engine
             r = _be->updateMapInfo(mi);
         }
 
@@ -1812,6 +1816,8 @@ struct Control::Imp :
             r = true;
 
             // only needs to copy from latest version we've been sent
+            // `mapinfo` is maintained by IFI
+            // `changed` is set when JSON changes rather than just location
             mi._currentLocation = _mapinfo._currentLocation;
             mi._currentExits = _mapinfo._currentExits;
             mi._changed = _mapinfo._changed;
@@ -1831,6 +1837,7 @@ struct Control::Imp :
     {
         bool changed = _host->_map->updateMapLocation(mi);
 
+        // triggers update of location and exits
         if (changed && _host->_map->_notifier)
             _host->_map->_notifier->changed();
 

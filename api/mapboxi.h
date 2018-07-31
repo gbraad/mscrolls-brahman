@@ -425,11 +425,10 @@ struct Map::Imp : public ImpType<Map>
         JSON* js = updateWholeMap(_mi);
 
         // update our idea of where the player is
-        bool changed = updateMapLocation(_mi);
+        bool changed = updateMapLocation(_mi) || _mi._changed;
         
         if (js)
         {
-            changed = _mi._changed;
             if (changed)
             {
                 // rebuild graph
@@ -523,6 +522,7 @@ struct Map::Imp : public ImpType<Map>
 
     bool updateMapLocation(MapInfo& mi)
     {
+        // true if location or exits have changed
         bool changed = false;
 
         if (_currentPlace != mi._currentLocation)
