@@ -7,4 +7,7 @@ export APP=$TOP/app/debug
 export DYLD_LIBRARY_PATH=$APP
 appname=klif
 
+# make sure correct game lib is there
+cp ../debug/*.dylib $APP
+
 $APP/${appname}.app/Contents/MacOS/${appname} -d 3 -configdir . -story escape.dat 

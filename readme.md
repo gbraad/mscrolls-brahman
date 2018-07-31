@@ -180,6 +180,7 @@ export TOP=$PWD/../..
 export APP=$TOP/app/debug
 export DYLD_LIBRARY_PATH=$APP
 appname=klif
+cp ../debug/*.dylib $APP
 $APP/${appname}.app/Contents/MacOS/${appname} -d 3 -configdir . -story escape.dat
 ```
 
