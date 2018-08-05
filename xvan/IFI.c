@@ -230,7 +230,11 @@ int32_t XeqIFIrequest(request, value)
   switch (request) {
     case IFI_REQ_COMMAND:
       /* value->textstring contains the user input line */
-      result = Play(value->textstring);
+      /* copy it to interpreter_input, because Play()   */
+      /* needs a char[] an not a malloced array.        */
+      /* otherwise MoreInfo() calls will go wrong       */
+      strcpy(interpreter_input, value->textstring);
+      result = Play(interpreter_input);
       break;
 
     case IFI_REQ_CONFIGDIR:
