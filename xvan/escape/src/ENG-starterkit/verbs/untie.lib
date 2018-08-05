@@ -1,0 +1,35 @@
+
+$VERB untie
+ PROLOGUE
+   if not(testflag(o_actor.f_alive)) then
+     if trigger(o_actor.t_talk_to_dead) then
+       disagree()
+     endif
+   endif
+
+ "tie"
+   if equal(o_actor, o_player) then
+     printcr("What do you want to untie?")
+   else
+     printcr("What do you want [the] [o_actor] to untie?")
+   endif
+   getsubject()
+
+ "untie [o_subject]"
+   printcr("[o_actor] can't untie [the] [o_subject].")
+
+ "tie [o_subject] from [o_spec]"
+   printcr("[o_actor] can't untie [the] [o_subject] from [the] [o_spec].")
+
+ DEFAULT
+   printcr("I only understood you as far as wanting to untie something.")
+     if testflag(o_player.f_verb_help) then
+       printcr("")
+       Printcr("Examples of syntaxes I understand are:")
+       printcr("  'untie'")
+       printcr("  'untie the rope'")
+       printcr("  'untie the rope fromthe hook'")
+       printcr("(to turn off these help messages, type 'help')")
+
+ENDVERB
+

@@ -1,5 +1,5 @@
 
-$VERB break
+$VERB break SYNONYM smash
  PROLOGUE
    if not(testflag(o_actor.f_alive)) then
      if trigger(o_actor.t_talk_to_dead) then
