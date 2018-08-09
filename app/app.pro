@@ -32,7 +32,7 @@
 
 TEMPLATE = app
 
-QT += qml gui quick quickcontrols2 network
+QT += qml gui quick quickcontrols2 network multimedia
 
 PROJ = $$PWD/..
 include($$PROJ/app.pri)
@@ -40,7 +40,6 @@ include($$PROJ/app.pri)
 ### ////////////////// BASE ///////////////////////////////////////////
 
 ios {
-    QT += multimedia
     OBJECTIVE_SOURCES += \
         iosappdelegate.mm \
         iosshare.mm

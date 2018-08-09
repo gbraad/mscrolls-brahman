@@ -160,6 +160,27 @@ void FilenameFromJSON(json_string, filename)
       case IFI_REQ_STORY:
         strncpy(story, kv.value.textstring, MAXIMUM_PATH);
         story[MAXIMUM_PATH] = '\0';  /* just make sure */
+
+        /* XVAN data files are filename.dat
+         * but the given "story" name might not have the ".dat" suffix.
+         * If not, add it.
+         */
+        {
+            // find any end of path
+            char* p = strrchr(story, '/');
+            if (!p) p = strrchr(story, '\\');
+            if (!p) p = story;
+
+            // find suffix in story name, if any
+            p = strrchr(p, '.');
+
+            if (!p)
+            {
+                // not present, so add default extension
+                strcat(story, ".dat");
+            }
+        }
+        
         kv.key              = ResetString(kv.key);
         kv.value.textstring = ResetString(kv.value.textstring);
         break;

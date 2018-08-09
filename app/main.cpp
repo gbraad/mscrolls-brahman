@@ -77,15 +77,27 @@ int main(int argc, char *_argv[])
 
     qc->_engineName = DEFAULT_ENGINE_NAME;
 
-#ifdef DEFAULT_STORY_NAME
-    qc->_storyfile = DEFAULT_STORY_NAME;
-#endif
-    
 #if defined(Q_OS_ANDROID) && !defined(NDEBUG)
     // debug version force logging for android 
     qc->setLogLevel(3);
 #endif
+
+#ifdef DEFAULT_STORY_NAME
+    qc->_storyfile = DEFAULT_STORY_NAME;
+#else
+
+    // take the story name from the program name.
+    // remove any path and suffix
     
+    const char* p = _argv[0];
+    const char* q = strrchr(p, '/');
+    if (!q) q = strrchr(p, '\\');
+    if (q) ++q;
+    else q = p;
+    qc->_storyfile = changeSuffix(q, 0); // remove any suffix
+#endif
+
+
     char** argv = Opt::copyArgs(argc, _argv);
     qc->handleOptions(argc, argv);
     Logged::_logLevel = qc->getLogLevel(); // from API DLL
@@ -104,7 +116,7 @@ int main(int argc, char *_argv[])
 
     app.setOrganizationDomain("strandgames.com");
 
-    if (!createUniqueInstance(DEFAULT_STORY_NAME))
+    if (!createUniqueInstance(qc->_storyfile.c_str()))
     {
         // program already running
         Opt::deleteCopyArgs(argv);

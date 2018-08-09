@@ -50,7 +50,7 @@ struct Transcript::Imp : public ImpType<Transcript>
         if (id != _currentSegmentId)
         {
             //LOG3("segment id changed to ", (int)id);
-            finish();
+            if (!_segmentText.empty()) finish();
             _currentSegmentId = (int)id;
         }
     }

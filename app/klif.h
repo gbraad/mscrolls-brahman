@@ -37,8 +37,6 @@
 #define USE_ITCHxx
 #endif
 
-// used by main.cpp to select story if not provided on command line
-#define DEFAULT_STORY_NAME "story"
 
 #undef DEFAULT_ENGINE_NAME
 #define DEFAULT_ENGINE_NAME     ""

@@ -10,4 +10,4 @@ appname=klif
 # make sure correct game lib is there
 cp ../debug/*.dylib $APP
 
-$APP/${appname}.app/Contents/MacOS/${appname} -d 3 -configdir . -story escape.dat 
+$APP/${appname}.app/Contents/MacOS/${appname} -d 3 -configdir . -story escape 

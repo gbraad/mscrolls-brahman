@@ -158,7 +158,7 @@ make
 ```
 cd xvan/escape
 copy ..\debug\ifigame.dll ..\..\app\debug
-"..\..\app\debug\klif.exe" -d 3 -configdir . -story escape.dat %1 %2
+"..\..\app\debug\klif.exe" -d 3 -configdir . -story escape %1 %2
 ```
 
 **Linux**
@@ -168,7 +168,7 @@ export PWD=`dirname $0`
 export TOP=$PWD/../..
 export APP=$TOP/app/debug
 export LD_LIBRARY_PATH=$APP:$LD_LIBRARY_PATH
-$APP/klif -d 3 -configdir . -story escape.dat
+$APP/klif -d 3 -configdir . -story escape
 ```
 
 **Mac**
@@ -181,7 +181,7 @@ export APP=$TOP/app/debug
 export DYLD_LIBRARY_PATH=$APP
 appname=klif
 cp ../debug/*.dylib $APP
-$APP/${appname}.app/Contents/MacOS/${appname} -d 3 -configdir . -story escape.dat
+$APP/${appname}.app/Contents/MacOS/${appname} -d 3 -configdir . -story escape
 ```
 
 

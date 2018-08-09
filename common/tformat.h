@@ -616,13 +616,13 @@ struct TextFormat
                     }
                     else out(*s); // #
                 }
-                else if (*s == ' ' && s[1] == ' ')
+                else if (startsWith(s, "  "))
                 {
                     // two spaces convert into non-breaking space
                     // to preserve format.
                     out("&nbsp;");
                 }
-                else if (*s == '_')
+                else if (last != '_' && s[0] == '_' && s[1] != '_')
                 {
                     if (startofline) closeList(out); 
                     if (!inItalic)
@@ -650,8 +650,9 @@ struct TextFormat
                         inItalic = false;
                     }
                 }                    
-                else if (startsWith(s, "**"))
+                else if (startsWith(s, "**") && s[2] != '*' && last != '*')
                 {
+                    // exactly two asterisks are bold
                     if (startofline) closeList(out); 
                     if (!inBold) out("<b>");
                     else out("</b>");
