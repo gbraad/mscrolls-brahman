@@ -1,11 +1,4 @@
 
-# my commons for stairs.xvn
-
-
 $COMMON_FLAGS
- f_heavy      = 0  # needed for breaking things
- f_cuttable   = 0
- f_cutter     = 0
- f_moveable   = 0
- f_tieable    = 0
- f_pressable  = 0
+ f_tieable   = 0
+ f_pressable = 0

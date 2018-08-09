@@ -31,7 +31,7 @@ $VERB unlock
     END_RULES
 
    if owns(o_actor, o_subject.r_key) then
-     printcr("(with [the] [o_subject.r_key]).")
+     printcr("[[with [the] [o_subject.r_key]].")
      clearflag(o_subject.f_locked)
      printcr("[the] [o_subject] is now unlocked.")
    else

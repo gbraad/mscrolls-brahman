@@ -14,10 +14,10 @@ t_entrance
   if equal(%this, l_location) then
     printcrbold(%this)
     if not(testflag(%this.f_seenbefore)) or testflag(o_player.f_verbose) then
-      print(%this.d_entr_long)
+      printcr(%this.d_entr_long)
       setflag(f_seenbefore)
     else
-      print(%this.d_entr_short)
+      printcr(%this.d_entr_short)
     endif
     agree()
   endif
@@ -28,9 +28,9 @@ t_entrance
     if equal(owner(%this), owner(o_player)) then
       # same containment level
       if testflag(%this.f_seenbefore) then
-        print(%this.d_entr_short)
+        printcr(%this.d_entr_short)
       else
-        print(%this.d_entr_long)
+        printcr(%this.d_entr_long)
         setflag(%this.f_seenbefore)
     else
       if not(owns(o_player, %this, 0)) then

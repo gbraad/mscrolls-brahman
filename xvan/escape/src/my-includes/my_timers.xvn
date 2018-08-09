@@ -1,10 +1,4 @@
 
-# my timers for stairs.xvn
-
-#===========
-# Timer part
-#===========
-
 $TIMERS
 
  m_moves
@@ -19,25 +13,16 @@ $TIMERS
   step       1
   direction  up
   interval   1
-  state      stop
+  state      go
   trigger_at 1 OR_MORE
   execute    o_npc.t_move
-
-m_heat
-  init          3
-  step          1
-  direction  down
-  interval      1
-  state      stop
-  trigger_at    0
-  execute       l_closet.t_leave
 
  m_battery
    init       250
    step       1
    direction  down
    interval   1
-   state      stop
+   state      go
    trigger_at 0
    execute    o_lamp.t_empty
 
