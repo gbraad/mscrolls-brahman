@@ -50,7 +50,7 @@ $VERB get SYNONYM take SYNONYM grab
        move(o_subject, o_actor)
        printcr("[o_subject]: taken.")
      else
-       printcr("But [the] [o_actor] already has the [o_subject].")
+       printcr("But [the] [o_actor] already [o_actor.r_have] the [o_subject].")
      endif
    endif
 

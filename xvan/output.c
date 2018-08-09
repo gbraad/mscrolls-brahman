@@ -131,16 +131,13 @@ void PrintString(str, use_json)
   /* Syntax: <string> or                            */
   /*         [string]<-1><parameter>[string]        */
 
-  /* Printstring takes into account the output line */
-  /* length (OUTPUT_LINE_LEN) and makes sure that   */
-  /* a word does not get cut in half thru wrapping  */
-
   int32_t i    = 0;
   int32_t id1  = NO_ID;               /* Needed in case str contains an id. */
   int32_t id2  = NO_ID;
   int32_t type = NO_TYPE;             /* dummy for ConvSpecId()             */
-  int     len = strlen(str)+2;        /* hugh told +2 and not +1 */
-  char    *word_buffer = _alloca(len*sizeof(char));
+  int     len = 2*(strlen(str)+2);    /* hugh told +2 and not +1            */
+                                      /* times 2 in case we only have CRs   */
+  char    *word_buffer = _alloca(2*len*sizeof(char));
                                       /* printing it                        */
   int32_t j = 0;                      /* index for word_buffer              */
   int32_t cont = 1;
@@ -152,15 +149,14 @@ void PrintString(str, use_json)
 
   /* outputline is global and otherwise is not freed properly, so */
   /* use a local buffer                                           */
-  char *o_line = (char *) _alloca(len*sizeof(char));
+  char *o_line = (char *) _alloca(2*len*sizeof(char));
 
   if (muted == 1 && use_json == 0)
     return;
 
   word_buffer[0] = '\0';
 
-  /* Concatenate single chars to a word and then check if it still fits on  */
-  /* the current line. If not, start at the next line. ALWAYS stop at a -1. */
+  /* Concatenate single chars but ALWAYS stop at a -1 (id is coming). */
   while (cont) {
     if (str[i] == '\0')
       cont = 0;
@@ -184,16 +180,42 @@ void PrintString(str, use_json)
           /* skip the space that was already added to str[] */
           j--;
         }
-
-        /* check if the whole word fits on the remainder of the line       */
+        if (!use_json) {
+          /* this is only for 'real' text strings, not for json strings */
+          switch (str[i]) {
+            /* char was already copied, decrease j first */
+            case CR:
+              word_buffer[--j] = '\\';
+              word_buffer[++j]   = 'n';
+              j++;
+              break;
+            case '"':
+              word_buffer[--j] = '\\';
+              word_buffer[++j]   = '"';
+              j++;
+              break;
+            case '\t':
+              word_buffer[j++] = '\\';
+              word_buffer[j]   = 't';
+              j++;
+              break;
+            default:
+              /* do nothing */
+              break;
+          }
+        }
+      }
+    i++;
+    }
+    else { /* (char) -1 */
+      /* check if we have a pending string */
+      if (j != 0) {
+        /* print the string */
         word_buffer[j] = '\0';
         sprintf(o_line, "%s", word_buffer);
         Output(o_line, use_json);
         j = 0;
       }
-    i++;
-    }
-    else { /* (char) -1 */
       /* An id is coming next.                                   */
       /* Id syntax: -1 TAG MSB LSB (4 bytes/chars total length). */
       /* -1 indicates a parameter is coming.                     */
@@ -314,6 +336,14 @@ void PrintString(str, use_json)
       } /* else for NUMBER test */
     }
   } /* while */
+  /* check if we have a pending string */
+  if (j != 0) {
+    /* print the string */
+    word_buffer[j] = '\0';
+    sprintf(o_line, "%s", word_buffer);
+    Output(o_line, use_json);
+    j = 0;
+  }
 }
 
 

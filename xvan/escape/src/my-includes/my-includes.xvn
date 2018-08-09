@@ -1,0 +1,9 @@
+
+###############
+# My includes #
+###############
+
+$insert ".\\my-includes\\my_dictionary.xvn"
+$insert ".\\my-includes\\my_commons.xvn"
+$insert ".\\my-includes\\my_verbs.xvn"
+$insert ".\\my-includes\\my_timers.xvn"

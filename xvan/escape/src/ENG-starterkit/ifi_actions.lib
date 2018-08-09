@@ -1,29 +1,30 @@
 
 $LOCATION l_json  # needed as a home for the flag
  DESCRIPTIONS
-   d_dummy ""
    d_map_backimage "images\\\\mapback.jpg"
+   d_maptext_init  "initializing map ..."
 
  FLAGS
    f_first_json  = 1
    f_first_place = 1
 
  ATTRIBUTES
-   r_exits = 0
+   r_exits   = 0
+   r_maptext = d_maptext_init
 
  TRIGGERS
    t_ifi
      if try(l_json, 0, "ifi_update_gui") then endif
-
      # reset timer
      m_ifi = 0
 END_LOC
 
 $COMMON_ATTRIBUTES
- r_ifi_gx      = 0
- r_ifi_gy      = 0
- r_ifi_picture = ""
- r_ifi_icon    = ""
+ r_ifi_gx          = 0
+ r_ifi_gy          = 0
+ r_ifi_picture     = ""
+ r_ifi_icon        = ""
+ r_ifi_maplevel    = 0
 
 $TIMERS
  m_ifi
@@ -110,14 +111,18 @@ ENDVERB
 $VERB ifi_map
  SCOPE all_locs
  PROLOGUE
+   l_json.r_ifi_maplevel = l_location.r_ifi_maplevel
+#printcr("\nmaplevel is: [l_json.r_ifi_maplevel].")
    clearjson()
    setflag(l_json.f_first_json)
    setflag(l_json.f_first_place)
    addjson("{\"map\":{\"backimage\":\"[l_json.d_map_backimage]\",")
+   addjson("\"title\":\"[l_json.r_maptext]\",")
    addjson("\"location\":", l_location)
    addjson(",\"places\":[[")
  EPILOGUE
    addjson("]}}")
+#   printcr("sending map info")
    sendjson()
    clearjson()
 ENDVERB
@@ -170,11 +175,14 @@ $COMMON_TRIGGERS
    # { "id":int,"name":"locname","gx":int,
    #  "gy":int,"dark":true,"exits":[id,id,...],"items":[int, int, ... ] }
 
-   if not(testflag(%this.f_seenbefore)) then
+   if not(testflag(%this.f_seenbefore)) or 
+      not(equal(%this.r_ifi_maplevel, l_json.r_ifi_maplevel)) then
      # do not show on map, yet
+#printcr("[this] should not be visible on the map.")
      agree()
    endif
 
+#printcr("[this] should be visible on the map.")
    if testflag(l_json.f_first_place) then
      clearflag(l_json.f_first_place)
    else
