@@ -51,7 +51,11 @@ extern short     debug_mode;           /* letsplay.c */
 extern short     fire_timers;          /* timers.c   */
 
 extern int32_t   curr_loc;             /* letsplay.c */
-extern int32_t   prepos;               /* letsplay.c */
+extern int32_t   action;               /* letsplay.c */
+extern int32_t   actor;                /* letsplay.c */
+extern int32_t   subject;              /* letsplay.c */
+extern int32_t   specifier;            /* letsplay.c */
+extern int32_t   prepos;               /* letsplay.c */  /* @@@ */
 extern int32_t   indent;               /* letsplay.c */
 extern int32_t   muted;                /* letsplay.c */
 

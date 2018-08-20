@@ -508,8 +508,8 @@ int32_t XeqTry(trigger)
   int32_t      nr_of_pars;
   int32_t      result;
   int32_t      old_muted;
-  int32_t      old_prepos;
-  int          i          = 0;
+  int32_t      old_special_ids[5];
+  int          i = 0;
 
   /* Read nr of pars. */
   nr_of_pars = NextOpcode(trigger);
@@ -549,13 +549,13 @@ int32_t XeqTry(trigger)
     return(QUIT);
   }
 
-  /* 18march2018: in a 'normal' user action record    */
+  /* 18march2018: in a 'normal' user action record    */  /* @@@ */
   /* that was created from user input, there won't be */
   /* wildcards, but in a user action record that was  */
   /* created from the try() function there may be.    */
 
   /* replace wildcards in the action record */
-  ConvSpecId(&(action_rec.actor), &dummy_type);
+  ConvSpecId(&(action_rec.actor), &dummy_type);   /* @@@ */
   ConvSpecId(&(action_rec.action1), &dummy_type);
   ConvSpecId(&(action_rec.direction), &dummy_type);
   for (i=0; i<MAX_SUBJECTS; i++) {
@@ -566,15 +566,33 @@ int32_t XeqTry(trigger)
     ConvSpecId(&(action_rec.prepositions.preposition[i]), &dummy_type);
   }
 
-  old_prepos = prepos;
-  prepos = action_rec.prepositions.preposition[0];
+  /* save the current special ids */
+  old_special_ids[0] = action;
+  old_special_ids[1] = actor;
+  old_special_ids[2] = subject;
+  old_special_ids[3] = specifier;
+  old_special_ids[4] = prepos;
+
+  /* load special ids from action rec parameter */
+  action    = action_rec.action1;
+  actor     = action_rec.actor;
+  subject   = action_rec.subject[0];
+  specifier = action_rec.specifier;
+  prepos    = action_rec.prepositions.preposition[0];
+
 
   /* now execute the action record */
   old_muted = muted;
   muted     = par2;
   result    = LetsTry(par1, action_rec);
   muted     = old_muted;
-  prepos    = old_prepos;
+
+  /* restore the special ids */
+  action    = old_special_ids[0];
+  actor     = old_special_ids[1];
+  subject   = old_special_ids[2];
+  specifier = old_special_ids[3];
+  prepos    = old_special_ids[4];
 
   /* possible return values:                   */
   /* QUIT, DISAGREE, CONTINUE, NO_MATCHAGREE   */
@@ -583,16 +601,12 @@ int32_t XeqTry(trigger)
 
   switch (result) {
     case AGREE: ;
-
     case NO_MATCH:
       return(OK);
-
     case DISAGREE:
       return(ERROR);
-
     case QUIT:
       return(QUIT);
-
     default:
       PrintError(79, &((resultStruct) {VALUE,result}), "XeqTry()");
       return(QUIT);
