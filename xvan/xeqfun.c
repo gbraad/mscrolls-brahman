@@ -1401,13 +1401,13 @@ int32_t XeqGoTo(trigger)
     /* There is a route, move par1.             */
     /* par3 denotes max nr of moves, stop if 0. */
     while (i >= 0 && par3 != 0 && !stop) {
-       /* printf("%d Moving ", i);PrintId(par1, 0);printf(" to ");PrintId(route[i], 0);printf("\n"); */
-      if (!Move(par1, route[i]))
+      /* printf("%d Moving ", i);PrintId(par1);printf(" to ");PrintId(route[level-2]);printf("\n"); */
+      if (!Move(par1, route[level-2-i]))
         return(QUIT);
       if (par1 == PLAYER || Owns(par1, PLAYER, -1))
         /* Update current location. */
-        curr_loc = route[i];
-      if (route[i] == par2)
+        curr_loc = route[level-2-i];
+      if (route[level-2-i] == par2)
         stop = 1;
       i--;
       par3--;
