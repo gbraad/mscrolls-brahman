@@ -374,9 +374,10 @@ int32_t XeqRunCommon(trigger, action_rec, subject_index, com_trig)
  int32_t      subject_index;
  int32_t      *com_trig;
 {
+  int32_t result;
+
   /* RunCommon() always has 0 parameters. */
   /* Syntax in triggercode: RUNCOMMON 0   */
-
   /* Skip the number of parameters value. */
   NextOpcode(trigger);
 
@@ -397,7 +398,26 @@ int32_t XeqRunCommon(trigger, action_rec, subject_index, com_trig)
     return(QUIT);
   }
 
-  return(Execute(com_trig, action_rec, subject_index, NULL));
+  result = Execute(com_trig, action_rec, subject_index, NULL);
+
+  switch (result) {
+    case AGREE: ;
+    case NO_MATCH:
+      return(OK);
+      break;
+    case DISAGREE:
+      return(ERROR);
+      break;
+    case QUIT:
+      return(QUIT);
+      break;
+    default:
+      PrintError(79, &((resultStruct) {VALUE,result}), "XeqRunCommon()");
+      return(QUIT);
+      break;
+  }
+
+  return(result);
 }
 
 
