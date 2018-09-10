@@ -39,6 +39,8 @@ int32_t      StringToNum(char*, int32_t*);
 void         InitUsrActionrec(usrActionRec*);
 int32_t      FilledOut(extendedSysDescr*);
 int32_t      CountSubjectsInParsedInput(parsedInput*);
+int32_t      HasType(int32_t, int32_t);
+int32_t      FlipNoun(sysDescr*);
 int32_t      SplitSubject(parsedInput*, int32_t);
 int32_t      SplitSubjectAndSpecifier(parsedInput*, int32_t);
 int32_t      CompareNounsAndAdjectives(sysDescr, sysDescr);
@@ -145,6 +147,69 @@ int32_t FilledOut(descr)
     return(ERROR);
   else
     return(OK);
+}
+
+
+int32_t HasType(word_id, type)
+ int32_t word_id;
+ int32_t type;
+{
+  int i     = 0;
+  int j     = 0;
+  int found = 0;
+
+  /* Find word_id. */
+  while (i<nr_of_words && word_table[i].id != word_id) {
+    i++;
+  }
+
+  if (i == nr_of_words) {
+    /* word not found */
+    return(ERROR);
+  }
+
+  /* check if word has the requested type */
+  while (j<MAX_TYPES && !found) {
+    if (word_table[i].types[j] == type) {
+      found = 1;
+    }
+    j++;
+  }
+
+  return(found);
+}
+
+
+int32_t FlipNoun(descr)
+  sysDescr *descr;
+{
+  int i = 0;
+
+  /* if descr has a noun, check if ths noun word also has type */
+  /* adjective. If so, add the noun to the adjectives and set  */
+  /* the noun field to NO_ID.                                  */
+
+  if (descr->noun == NO_ID) {
+    return(ERROR);
+  }
+
+  if (HasType(descr->noun, ADJECTIVES)) {
+    /* check if there is room for an addtl adjective */
+    if (descr->nr_of_adjectives == MAX_PARSE_ADJ) {
+      return(ERROR);
+    }
+    for (i=descr->nr_of_adjectives-1; i>=0; i--) {
+      descr->adjectives[i+1] = descr->adjectives[i];
+    }
+    descr->adjectives[0] = descr->noun;
+    descr->nr_of_adjectives++;
+    descr->noun          = NO_ID;
+  }
+  else {
+    return(ERROR);
+  }
+
+  return(OK);
 }
 
 
@@ -741,7 +806,8 @@ int32_t Find(descr, scope, line_buf, hits)
  /* MALLOCs AND FREEs FOR hits->matched_objs      */
 
 {
-  int32_t i = 0;
+  int32_t i     = 0;
+  int32_t ready = 0;
 
   /* malloc space for hits. Theoretically - with scope ALL_LOCS - */
   /* each object and location may be a hit, therefore malloc      */
@@ -753,46 +819,53 @@ int32_t Find(descr, scope, line_buf, hits)
 
   hits->nr_of_hits = 0;
 
-  /* Determine boundaries of the search. */
-  switch (scope) {
-    case ALL_LOCS:
-      /* Jan 19th 2004: Changed "i<nr_of_locs+FIRST_LOCATION_ID-1" */
-	  /* to "i<nr_of_locs+FIRST_LOCATION_ID"                       */
-	  for (i=FIRST_LOCATION_ID; i<nr_of_locs+FIRST_LOCATION_ID; i++)
-      /* 0 means locs/objs need not be visible to the player. */
-      /* -1 means unlimited search depth.                     */
+  while (!ready) {
+    /* Determine boundaries of the search. */
+    switch (scope) {
+      case ALL_LOCS:
+        /* Jan 19th 2004: Changed "i<nr_of_locs+FIRST_LOCATION_ID-1" */
+        /* to "i<nr_of_locs+FIRST_LOCATION_ID"                       */
+        for (i=FIRST_LOCATION_ID; i<nr_of_locs+FIRST_LOCATION_ID; i++)
+        /* 0 means locs/objs need not be visible to the player. */
+        /* -1 means unlimited search depth.                     */
 
-        if (Search(i, descr, 0, -1, hits) == OVERFLOW) {
+          if (Search(i, descr, 0, -1, hits) == OVERFLOW) {
+            free(hits->matched_objs);
+            return(OVERFLOW);
+          }
+        break;
+      case CURR_LOC_ONLY:
+        /* 1 means locs/objs must be visible to the player. */
+        /* -1 means unlimited search depth.                 */
+        if (Search(curr_loc, descr, 1, -1, hits) == OVERFLOW) {
           free(hits->matched_objs);
           return(OVERFLOW);
         }
-      break;
-
-    case CURR_LOC_ONLY:
-      /* 1 means locs/objs must be visible to the player. */
-      /* -1 means unlimited search depth.                 */
-      if (Search(curr_loc, descr, 1, -1, hits) == OVERFLOW) {
+        break;
+      case ACTOR_ONLY:
+        /* -1 means unlimited search depth.                          */
+        /* 1 means locs/objs must be visible to the player.          */
+        /* Check if there is light first, since SearchObj() doesn't. */
+        if (Search(actor, descr, 1, -1, hits) == OVERFLOW) {
+          free(hits->matched_objs);
+          return(OVERFLOW);
+        }
+        break;
+      default:
+        PrintError(76, NULL, NULL);
         free(hits->matched_objs);
-        return(OVERFLOW);
+        return(ERROR);
+    } /* switch */
+
+    if (hits->nr_of_hits == 0 && descr->connect_prepos == NO_ID && !ready) {
+      if (!FlipNoun(&(descr->part1))) {
+        ready = 1;
       }
-      break;
-
-    case ACTOR_ONLY:
-      /* -1 means unlimited search depth.                          */
-      /* 1 means locs/objs must be visible to the player.          */
-      /* Check if there is light first, since SearchObj() doesn't. */
-      if (Search(actor, descr, 1, -1, hits) == OVERFLOW) {
-        free(hits->matched_objs);
-        return(OVERFLOW);
-      }
-      break;
-
-    default:
-      PrintError(76, NULL, NULL);
-      free(hits->matched_objs);
-      return(ERROR);
-  } /* switch */
-
+    }
+    else {
+      ready = 1;
+    }
+  }
   return(OK);
 }
 

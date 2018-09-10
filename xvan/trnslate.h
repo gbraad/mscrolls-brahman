@@ -30,13 +30,15 @@
 /**************************/
 
 extern storyInfo story_info;  /* init.c */
-extern dirInfo *loc_dir;
-extern dirInfo *obj_dir;
+extern dirInfo   *loc_dir;
+extern dirInfo   *obj_dir;
+extern wordTable *word_table;
 
 extern int32_t capital;       /* letsplay.c */
 extern int32_t article;       /* letsplay.c */
 extern int32_t nr_of_locs;    /* fileio.c   */
 extern int32_t nr_of_objs;    /* fileio.c   */
+extern int32_t nr_of_words;
 
 extern char *outputline;      /* init.c   */
 

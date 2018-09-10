@@ -121,7 +121,7 @@ const char *ENG_errors[] = {
   "runtime error (090): Testmode is already active",
   "runtime error (091): Switching to testmode...",
   "Transcript mode started",
-  "Turning of transcript mode",
+  "Turning off transcript mode",
   "runtime error (094): XeqIntAct(): undefined internal action opcode:",
   "runtime error (095): GetActionRecPar(): error reading action record",
   "runtime error (096): parameter missing in try() function:",
