@@ -295,9 +295,6 @@ int32_t Play(user_input)
           break;
 
         case SPECIFIER_ERROR:
-          /* In case line_buf is not empty, the user was asked */
-          /* additional information about a location or an     */
-          /* object but he entered a new sentence instead.     */
           PrintNotFound(&(parsed_input.specifier));
           break;
 

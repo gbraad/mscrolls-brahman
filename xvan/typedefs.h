@@ -181,7 +181,7 @@ typedef struct pi {
           preposInfo       prepositions;
           int32_t          value;         /* make this a long. */
           int32_t          ordinal;
-          struct pi        *next;
+          struct pi        *next;         /* DO WE REALLY NEED THIS?? */
         } parsedInput;
 
 typedef struct ar3 {

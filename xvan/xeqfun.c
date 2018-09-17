@@ -374,9 +374,10 @@ int32_t XeqRunCommon(trigger, action_rec, subject_index, com_trig)
  int32_t      subject_index;
  int32_t      *com_trig;
 {
+  int32_t result;
+
   /* RunCommon() always has 0 parameters. */
   /* Syntax in triggercode: RUNCOMMON 0   */
-
   /* Skip the number of parameters value. */
   NextOpcode(trigger);
 
@@ -397,7 +398,26 @@ int32_t XeqRunCommon(trigger, action_rec, subject_index, com_trig)
     return(QUIT);
   }
 
-  return(Execute(com_trig, action_rec, subject_index, NULL));
+  result = Execute(com_trig, action_rec, subject_index, NULL);
+
+  switch (result) {
+    case AGREE: ;
+    case NO_MATCH:
+      return(OK);
+      break;
+    case DISAGREE:
+      return(ERROR);
+      break;
+    case QUIT:
+      return(QUIT);
+      break;
+    default:
+      PrintError(79, &((resultStruct) {VALUE,result}), "XeqRunCommon()");
+      return(QUIT);
+      break;
+  }
+
+  return(result);
 }
 
 
@@ -1401,13 +1421,13 @@ int32_t XeqGoTo(trigger)
     /* There is a route, move par1.             */
     /* par3 denotes max nr of moves, stop if 0. */
     while (i >= 0 && par3 != 0 && !stop) {
-       /* printf("%d Moving ", i);PrintId(par1, 0);printf(" to ");PrintId(route[i], 0);printf("\n"); */
-      if (!Move(par1, route[i]))
+      /* printf("%d Moving ", i);PrintId(par1);printf(" to ");PrintId(route[level-2]);printf("\n"); */
+      if (!Move(par1, route[level-2-i]))
         return(QUIT);
       if (par1 == PLAYER || Owns(par1, PLAYER, -1))
         /* Update current location. */
-        curr_loc = route[i];
-      if (route[i] == par2)
+        curr_loc = route[level-2-i];
+      if (route[level-2-i] == par2)
         stop = 1;
       i--;
       par3--;

@@ -77,4 +77,8 @@ void NL_PrintArticle(descr, type, use_json)
         break;
     } /* switch */
   }  /* if */
+  /* july 6th 2028: added this because 'use' skipped the space */
+  /* when the object had no noun. Must check if this is the    */
+  /* right solution                                            */
+  else article = 0;
 }

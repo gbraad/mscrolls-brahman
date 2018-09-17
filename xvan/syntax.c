@@ -227,7 +227,7 @@ int32_t NextWordId(line_buf, nr_of_types, types)
 void InitParsedInput(parsed_input)
  parsedInput *parsed_input;
 {
-  int32_t i;
+  int32_t i = 0;
 
   (parsed_input->actor).part1.article               = NO_ID;
   (parsed_input->actor).part1.nr_of_adjectives      = 0;
