@@ -31,7 +31,7 @@
 
 #pragma once
 
-#include "types.h"
+#include <stdint.h>
 
 /* provide alternative versions of rand() and srand() to 
  * link with that are known.
@@ -42,19 +42,19 @@
 
 struct Ranq1
 {
-    mutable uint64 v;
+    mutable uint64_t v;
 
-    Ranq1(uint64 s = 0) : v(4101842887655102017LL)
+    Ranq1(uint64_t s = 0) : v(4101842887655102017LL)
     {
         seed(s);
     }
     
-    void seed(const uint64& s)
+    void seed(const uint64_t& s)
     {
         v ^= s;
     }
 
-    uint64 gen64() const
+    uint64_t gen64() const
     {
         v ^= v >> 21;
         v ^= v << 35;
@@ -62,10 +62,10 @@ struct Ranq1
         return v*2685821657736338717LL;
     }
 
-    uint gen32() const { return (uint)gen64(); }
+    uint32_t gen32() const { return (uint32_t)gen64(); }
     
-    float genFloat() const
+    double genFloat() const
     {
-        return ((float)gen32())/4294967296.0f;
+        return 5.42101086242752217E-20 * gen64();
     }
 };

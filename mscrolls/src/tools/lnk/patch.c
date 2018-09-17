@@ -45,9 +45,11 @@ extern int patch;		/* !=0 if patching enabled */
     (((dest) - (src)) <= 32767 && ((dest) - (src)) >= -32768)
 #define abs(n) ((n)>=0?(n):-(n))
 
-int SUCCEED(int type, int ad)
+int SUCCEED(int type, int ad, const char* how)
 {
-    printf("patched successfully in");
+    printf("patched ");
+    if (how && *how) printf("%s, ", how);
+    printf("successfully in");
     printfiles(type, ad);
     printf("\n");
     return ad;
@@ -67,53 +69,85 @@ int patch_word(char* name, int type, int from, int to)
     if (addtoword(name, type, from, to-from)) return 1; // ok
     if (!patch) return 1;
     
-    if (type != N_TEXT) {
+    if (type != N_TEXT)
+    {
 	printf("reference to data, patch unsuccessful\n");
 	return 0;
     }
 
     /* look for an existing tunnel that is in range */
     for (i=0, tp=tunnels; i<n_tunnels; i++, tp++)
+    {
 	if (!tp->spare &&
-	    tp->destination == to && IN_RANGE(from, tp->location)) {
+	    tp->destination == to && IN_RANGE(from, tp->location)) 
+        {
 	    addtoword(name, type, from, tp->location-from);
-	    SUCCEED(type, tp->location);
+	    return SUCCEED(type, tp->location, "via exiting tunnel");
 	}
+    }
 
     /* find the best empty tunnel which will work */
     /* best is defined to be furthest from the destination */
     maxdist = -1;
     best = 0;
     for (i=0, tp=tunnels; i<n_tunnels; i++, tp++)
+    {
 	if (tp->spare && IN_RANGE(from, tp->location) &&
 	    IN_RANGE(tp->location+2, to))
-	    if (abs(tp->location+2 - to) > maxdist) {
-		maxdist = tp->location+2 - to;
+        {
+            int d;
+            if (from < to)
+                d = to - (tp->location+2);
+            else
+                d = (tp->location+2) - to;
+            
+	    if (d > maxdist)
+            {
+		maxdist = d;
 		best = tp;
 	    }
+        }
+    }
 
-    if (best) {			/* got one ? */
+    if (best)
+    {			/* got one ? */
 	best->spare = 0;
 	best->destination = to;
 	addtoword("a patch", type, from, best->location-from); /* to the tunnel */
 	addtoword(name, type, best->location+2, to-(best->location+2));
-	SUCCEED(type, best->location);
+	return SUCCEED(type, best->location, "via new tunnel");
     }
 
+    printf("attempting multiple tunnel relay\n");
+
     /* attempt a relay through 2 or more tunnels by recursing */
+
+    // find spare tunnel furthest from source
     maxdist = -1;
     best = 0;
     for (i=0, tp=tunnels; i<n_tunnels; i++, tp++)
+    {
 	if (tp->spare && IN_RANGE(from, tp->location))
-	    if (abs(tp->location - from) > maxdist) {
-		maxdist = tp->location - from;
+        {
+            int d;
+            if (from < to)
+                d = tp->location - from;
+            else
+                d = from - tp->location;
+            
+	    if (d > maxdist)
+            {
+		maxdist = d;
 		best = tp;
 	    }
+        }
+    }
 
     if (best)
     {
 	int relay;
 	best->spare = 0;	/* remove from free list */
+        
 	/* attempt a patch from this tunnel to the destination */
 	relay = patch_word(name, type, best->location+2, to);
         if (relay)
@@ -131,7 +165,7 @@ int patch_word(char* name, int type, int from, int to)
 	}
     }
 
-    printf("patch failed\n");
+    printf("patch failed, no spare tunnels!\n");
     return 0;
 }
 

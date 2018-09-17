@@ -469,7 +469,8 @@ public:
     // from ifiMetaResponse
     void metaChanged(const string& js) override { currentMetaJSON(js); }
 
-    // trigger a sound, from ifiSoundResponse
+    // trigger a sound, from ifiSoundResponse 
+    // called also from transcripti
     void soundChanged(const string& js) override { soundJSON(js); }
 
     QString currentMessage() const { return QSTR(_currentMessage); }

@@ -301,10 +301,11 @@ Page
 
                     fillMode: Image.PreserveAspectFit
                     
-                    mipmap: true
-                    antialiasing: true
+                    // these make drawings blurred!
+                    //mipmap: true
+                    //antialiasing: true
+
                     visible: false
-                    cache: false
                     paused: gamearea.rollHeightShown <= 0 || !gamepage.visible
                 }
 

@@ -80,7 +80,6 @@ struct DLLX Control: public APIType
     // if defined by options
     string                      _storyfile;
     string                      _engineName;
-    string                      _recordFilename;
     string                      _musicFile;
     AP<JSON>                    _productInfoJSON;
 
