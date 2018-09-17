@@ -482,7 +482,8 @@ struct IFIHandler
     {
         // build simple json for startup
         assert(_js);
-        
+
+        // will add those defined
         JSONWalker::addKeyValue(*_js, IFI_CONFIGDIR, getProp(IFI_CONFIGDIR));
         JSONWalker::addKeyValue(*_js, IFI_DATADIR, getProp(IFI_DATADIR));
         JSONWalker::addKeyValue(*_js, IFI_STORY, getProp(IFI_STORY));
