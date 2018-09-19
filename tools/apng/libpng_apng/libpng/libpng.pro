@@ -40,6 +40,11 @@ include($$PROJ/app.pri)
 
 ### ////////////////// BASE ///////////////////////////////////////////
 
+unix:!android {
+    #ZLIBDIR = $$PROJ/tools/zlib
+    #LIBS += -L$$ZLIBDIR/$$LIBDIR -lz
+}
+
 INCLUDEPATH += $$ZLIBDIR
 
 
