@@ -131,12 +131,6 @@ Page
         Slider
         {
             Layout.fillWidth: true
-            anchors.verticalCenter: parent.verticalCenter
-
-            // XX hack. should not be needed but slider does not
-            // position center as above.
-            anchors.verticalCenterOffset: 4*Units.dp
-            
             maximumValue: boxSizeNormal*2
             minimumValue: boxSizeNormal/3
             stepSize: (maximumValue - minimumValue)/10
