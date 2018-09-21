@@ -186,7 +186,8 @@ int main(int argc, char** argv)
 
     const char* configdir = ".";
     const char* datadir = "."; // default;
-    const char* story = "story"; // stub default
+    const char* story = 0;
+    bool help = false;
     
     char** args = argv+1;
     for (char**& ap = args; *ap; ++ap)
@@ -197,10 +198,11 @@ int main(int argc, char** argv)
         if ((arg = Opt::nextOptArg(ap, "-story")) != 0) story = arg;
         if ((arg = Opt::nextOptArg(ap, "-d", true)) != 0)
             Logged::_logLevel = atoi(arg);
+        if (Opt::nextOpt(ap, "-h")) help = true;
     }
     Opt::rebuildArgs(argc, argv);
 
-    if (!story)
+    if (help)
     {
         std::cout << "Usage: " << argv[0] << "[-d <level>] [-configdir <path>] [-datadir <path>] -story <storyname>\n";
         return 0;
@@ -211,7 +213,7 @@ int main(int argc, char** argv)
 
     h.setProp(IFI_CONFIGDIR, configdir);
     h.setProp(IFI_DATADIR, datadir);
-    h.setProp(IFI_STORY, story);
+    if (story) h.setProp(IFI_STORY, story);
 
     host.setHandler(&h);
     host.setIFI(ifi);
@@ -225,7 +227,7 @@ int main(int argc, char** argv)
     // duplicate existing argc/argv with making space for more args
     // NB: copy must be deleted later
     argv = Opt::copyArgs(argc, argv, 2);
-    LOG2("IFIConsole, passing start json, ", js.start());
+    LOG3("IFIConsole, passing start json, ", js.start());
     Opt::addArg(argc, argv, "-e", js.start());
 
     // plug the host handler into the client

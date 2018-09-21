@@ -1,0 +1,20 @@
+
+$COMMON_TRIGGERS
+
+  t_take_all
+    if not(owns(o_player, %this)) and
+       cansee(o_player, %this) and 
+       testflag(%this.f_takeable) then
+      move(%this, o_player)
+      printcr("[this]: taken.")
+    else
+      nomatch()
+      
+  t_drop_all
+    if owns(o_player, %this) then
+      clearflag(%this.f_bypass)
+      move(%this, owner(owner(%this)))
+      indent()
+      printcr("[this]: dropped.")
+    else
+      nomatch()

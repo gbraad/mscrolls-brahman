@@ -681,6 +681,7 @@ struct Control::Imp :
     int                 _emitType;
     bool                _typeChanged;
     int                 _recordMetaState; // tracks [hello](world)
+    int                 _blevel;
     int                 _recordLast;
 
     // write console commands also to main text window
@@ -704,6 +705,7 @@ struct Control::Imp :
         _emitType = 0;
         _typeChanged = false;
         _recordMetaState = 0;
+        _blevel = 0;
         _recordLast = 0;
         _echoConsoleToTranscript = false;
 
@@ -726,6 +728,7 @@ struct Control::Imp :
         _typeChanged = false;
         _recordMetaState = 0;
         _recordLast = 0;
+        _blevel = 0;
         
         res = _recordFile.open(_recordFilename.c_str(),
                                FD::fd_write | FD::fd_create | FD::fd_trunc);
@@ -785,35 +788,44 @@ struct Control::Imp :
 
                 // deal with "bla bla [hello](world) bla
                 // emit hello, but not world and all before and after
-                if (!_recordMetaState)
+                switch (_recordMetaState)
                 {
+                case 0:
                     if (c == '[') 
                     {
                         _recordMetaState = 1;
                         emit = false;
                     }
-                }
-                else if (_recordMetaState == 1)
-                {
+                    break;
+                case 1:
                     if (c == ']') 
                     {
                         _recordMetaState = 2;
+                        _blevel = 0;
                         emit = false;
                     }
-                }
-                else // state 2
-                {
+                    break;
+                case 2:
                     emit = false;
-                    if (_recordLast == ']')
+                    if (_recordLast == ']' && c != '(')
                     {
-                        if (c != '(')
-                        {
-                            // drop out [foo]...
-                            _recordMetaState = 0;
-                            emit = true;
-                        }
+                        // drop out [foo]...
+                        _recordMetaState = 0;
+                        emit = true;
                     }
-                    else if (c == ')') _recordMetaState = 0;
+                    else if (c == '(') ++_blevel;
+                    else if (c == ')' && !--_blevel) _recordMetaState = 3;
+                    break;
+                case 3:
+                    emit = false;
+                    if (_recordLast == ')' && c != '{')
+                    {
+                        // drop out [foo](bar)...
+                        _recordMetaState = 0;
+                        emit = true;
+                    }
+                    else if (c == '}') _recordMetaState = 0;
+                    break;
                 }
 
                 if (emit)
@@ -1385,6 +1397,11 @@ struct Control::Imp :
                            _host->_prefs->getInt(PREFS_IMAGEPIXSCALE_ENABLED,
                                                  DEFAULT_IMAGEPIXSCALE_ENABLE));
 
+        // send initial option set up to engine
+        sendOptionToEngine(BRA_OPT_MODERN, 
+                           _host->_prefs->getInt(PREFS_MODERN_ENABLED,
+                                                 DEFAULT_MODERN_ENABLE));
+        
         // retrieve from prefs
         updateEchoConsoleMode();
             
@@ -1393,8 +1410,8 @@ struct Control::Imp :
             // start game
             storypath = makeConfigPath(_host->_storyfile);
 
-            if (_host->_recordFilename.size())
-                startRecording(_host->_recordFilename);
+            if (!_recordFilename.empty())
+                startRecording(_recordFilename);
             
             // default to same if not set
             if (_host->_musicFile.empty())
@@ -1568,12 +1585,6 @@ struct Control::Imp :
                             );
             if (r)
             {
-                
-                // send initial option set up to engine
-                sendOptionToEngine(BRA_OPT_MODERN, 
-                                   _host->_prefs->getInt(PREFS_MODERN_ENABLED,
-                                                     DEFAULT_MODERN_ENABLE));
-            
                 // initial update of scene
                 postEval();
             }
@@ -2029,7 +2040,8 @@ struct Control::Imp :
     {
         bool r = false;
 
-        string fn = makeDataPath(changeSuffix(name, ".sav"));
+        //string fn = makeDataPath(changeSuffix(name, ".sav"));
+        string fn = changeSuffix(name, ".sav");
         LOG3("loadGame, ", fn);
         
         if (_be)
@@ -2154,7 +2166,6 @@ struct Control::Imp :
                 else if ((arg = isOptArg(argv + i, "-w")) != 0)
                 {
                     int w = atoi(arg);
-                    LOG3("UI option width ", w);
                     if (w > 0 && w < 10000) _host->_uiOptionWidth = atoi(arg);
                 }
                 else if ((arg = isOptArg(argv + i, "-h")) != 0)

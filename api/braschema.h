@@ -38,6 +38,7 @@
 #define BRA_SEGMENT_IMAGE       3
 #define BRA_SEGMENT_JSON        4
 #define BRA_SEGMENT_CLEAR       5
+#define BRA_SEGMENT_SOUND       6
 
 // obsolete
 #define BRA_SEGMENT_ACTION      1
@@ -128,6 +129,13 @@
 
 // display within text
 #define BRA_PIC_INLINE          "inline"
+
+// ---- sounds ---------------------------------------------
+
+// description: full path to file name.
+#define BRA_SOUND_NAME            "name"
+
+#define BRA_SOUND_DURATION        "duration"
 
 // -----------------------------------------------------------------------
 // option

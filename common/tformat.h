@@ -222,23 +222,22 @@ struct TextFormat
 
             if (start)
             {
-                {(*this)("<span");
+                (*this)("<span");
 
-                    if (hasclass)
-                    {
-                        (*this)(" class=\"");
-                        _addtEscape(cssclass.c_str());
-                        (*this)("\"");
-                    }
-
-                    if (!style.empty())
-                    {
-                        (*this)(" style=\"");
-                        _addtEscape(style.c_str());
-                        (*this)("\"");
-                    }
-                    (*this)(">");
+                if (hasclass)
+                {
+                    (*this)(" class=\"");
+                    _addtEscape(cssclass.c_str());
+                    (*this)("\"");
                 }
+
+                if (!style.empty())
+                {
+                    (*this)(" style=\"");
+                    _addtEscape(style.c_str());
+                    (*this)("\"");
+                }
+                (*this)(">");
             }
 
             if (!text.empty())
