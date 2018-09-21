@@ -49,6 +49,15 @@ Page
     function selected() {}
 
     property string droplink
+    property string currentImage
+    property bool picValid
+
+    onCurrentImageChanged:
+    {
+        pic.play(currentImage)
+        if (picValid) gamearea.bump();
+        else gamearea.unbump(); 
+    }
 
     function setDroplink(s)
     {
@@ -241,7 +250,6 @@ Page
                 color: QControl.colorContrast(theme.backgroundShade, 0.05)
 
                 property string currentImageJSON: QControl.currentImageJSON
-                property string currentImage
                 property real imgBrightness: 0.0
                 property real imgContrast: 0.0
                 property real imgSaturation: 0.0
@@ -253,9 +261,10 @@ Page
                     //console.log("current image JSON ", currentImageJSON);
                     var js = JSON.parse(currentImageJSON);
                     var pname = js["name"]
+                    var iname = ""
                     if (pname)
                     {
-                        currentImage = QControl.resolveAsset(pname)
+                        iname = QControl.resolveAsset(pname)
                         var v;
                         v = js["brightness"]
                         imgBrightness = v ? v : 0.0
@@ -268,16 +277,11 @@ Page
                         v = js["gamma"]
                         imgGamma = v ? v : 1.0
                     }
-                    else currentImage = ""
+                    
+                    picValid = iname.length > 0
+                    currentImage = iname
                 }
 
-                onCurrentImageChanged:
-                {
-                    pic.play(currentImage)
-                    if (picarea.currentImage.length > 0) gamearea.bump();
-                    else gamearea.unbump(); 
-                }
-                
                 AnimatedImage2
                 {
                     id: pic
@@ -288,9 +292,9 @@ Page
                     property int hadj: Math.max(m1*(1 - aspect), 0)
 
                     property bool scaleMode: QControl.prefs.imagescaleEnabled
-                    
-                    width: picarea.currentImage.length > 0 ? parent.width - m*2 : 0
-                    height: picarea.currentImage.length > 0 ? (scaleMode ? Math.max(gamearea.rollHeightShown - m*2, 0): parent.height) : 0
+
+                    width: picValid ? parent.width - m*2 : 0
+                    height: picValid ? (scaleMode ? Math.max(gamearea.rollHeightShown - m*2, 0): parent.height) : 0
 
                     anchors
                     {
@@ -333,19 +337,19 @@ Page
                     anchors.fill: effect2
                     source: effect2
                     gamma:  QControl.prefs.imageadjEnabled ? picarea.imgGamma : 1.0;
-                }
 
-                DropShadow
-                {
-                    // picture shadow
-                    anchors.fill: pic
-                    verticalOffset: 4*Units.dp
-                    horizontalOffset: 4*Units.dp
-                    radius: 6*Units.dp
-                    samples: 1+radius*2
-                    color: "#80000000"
-                    source: effect3
-                    visible: Theme.isDark == false
+                    visible: picValid
+                    layer.enabled: Theme.isDark == false
+                    layer.effect: DropShadow
+                    {
+                        transparentBorder: true
+                        verticalOffset: 4*Units.dp
+                        horizontalOffset: 4*Units.dp
+                        radius: 6*Units.dp
+                        samples: 1+radius*2
+                        color: "#80000000"
+
+                    }
                 }
             }
         }

@@ -2040,7 +2040,8 @@ struct Control::Imp :
     {
         bool r = false;
 
-        string fn = makeDataPath(changeSuffix(name, ".sav"));
+        //string fn = makeDataPath(changeSuffix(name, ".sav"));
+        string fn = changeSuffix(name, ".sav");
         LOG3("loadGame, ", fn);
         
         if (_be)
