@@ -1,0 +1,81 @@
+w
+n
+n
+e
+n
+get toaster
+throw toaster through window
+look through window
+get key, shard
+unlock door
+n
+n
+get hacksaw
+s
+s
+s
+w
+s
+s
+e
+u
+x step 11
+press button
+d
+cut pipe with hacksaw
+u
+u
+w
+open tap
+e
+d
+d
+cut carpet with glass
+open trapdoor
+d
+get lamp
+light it
+e
+ne
+s
+press green
+press red
+wait
+press blue
+wait 5
+ne
+enter 5489
+open vault
+get key
+s
+w
+w
+z
+give brass key to fred
+w
+get key
+unlock chest
+open it
+get rope
+e
+s
+tie rope to lever
+u
+pull rope
+open clamp
+get ladder
+e
+s
+s
+press right
+n
+n
+e
+e
+slide the ladder in the groove
+turn ladder clockwise
+e
+enter chute
+get hook
+u
+e

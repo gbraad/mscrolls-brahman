@@ -950,9 +950,10 @@ int32_t XeqCount(trigger)
     if (!GetPar(&owner, &par4, &type4, &str, trigger))
       return(QUIT);
   }
-  else
+  else {
     par4  = 1;       /* 0 is default level */
     type4 = NUMBER;
+  }
 
   if (CheckPars(COUNT, type1, type2, type3, type4, NO_TYPE)) {
     /* types are correct, now check whether */
@@ -2187,9 +2188,10 @@ int32_t XeqSynchro(trigger, action_rec, subject_index)
     if (!GetPar(&owner, par+4, type+4, &str, trigger))
       return(QUIT);
   }
-  else
+  else {
     par[4]  = 1;       /* 0 is default level */
     type[4] = NUMBER;
+  }
 
   if (CheckPars(SYNCHRONIZE, type[0], type[1], type[2], type[3], type[4])) {
     /* types are correct, now check whether */

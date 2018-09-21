@@ -576,8 +576,9 @@ int32_t ReplaceItObjects(action_rec)
       action_rec->subject[i] = (it_value == NONE ? NO_ID : it_value);
   }
 
-  if (action_rec->specifier == IT)
+  if (action_rec->specifier == IT) {
     action_rec->specifier = it_value;
+  }
 
     return(OK);
 }
