@@ -216,7 +216,10 @@ SliderStyle {
                 x: padding.left + control.__panel.handleWidth / 2
                 sourceComponent: groove
                 width: (horizontal ? parent.width : parent.height) - padding.left - padding.right - (control.__panel.handleWidth)
-                y:  Math.round(padding.top + (Math.round(horizontal ? parent.height : parent.width - padding.top - padding.bottom) - grooveLoader.item.height - control.__panel.handleHeight) / (style.numericValueLabel ? 1 : 2))
+                // VW change
+                //y:  Math.round(padding.top + (Math.round(horizontal ? parent.height : parent.width - padding.top - padding.bottom) - grooveLoader.item.height - control.__panel.handleHeight) / (style.numericValueLabel ? 1 : 2))
+                y:  Math.round(padding.top + (Math.round(horizontal ? parent.height : parent.width - padding.top - padding.bottom) - grooveLoader.item.height) / (style.numericValueLabel ? 1 : 2))
+
             }
 
             Loader {
