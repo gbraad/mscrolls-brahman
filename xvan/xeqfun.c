@@ -528,7 +528,7 @@ int32_t XeqTry(trigger)
   int32_t      nr_of_pars;
   int32_t      result;
   int32_t      old_muted;
-  int32_t      old_special_ids[5];
+  int32_t      old_special_ids[8];
   int          i = 0;
 
   /* Read nr of pars. */
@@ -569,13 +569,13 @@ int32_t XeqTry(trigger)
     return(QUIT);
   }
 
-  /* 18march2018: in a 'normal' user action record    */  /* @@@ */
+  /* 18march2018: in a 'normal' user action record    */
   /* that was created from user input, there won't be */
   /* wildcards, but in a user action record that was  */
   /* created from the try() function there may be.    */
 
   /* replace wildcards in the action record */
-  ConvSpecId(&(action_rec.actor), &dummy_type);   /* @@@ */
+  ConvSpecId(&(action_rec.actor), &dummy_type);
   ConvSpecId(&(action_rec.action1), &dummy_type);
   ConvSpecId(&(action_rec.direction), &dummy_type);
   for (i=0; i<MAX_SUBJECTS; i++) {
@@ -592,6 +592,9 @@ int32_t XeqTry(trigger)
   old_special_ids[2] = subject;
   old_special_ids[3] = specifier;
   old_special_ids[4] = prepos;
+  old_special_ids[5] = direction;
+  old_special_ids[6] = value;
+  old_special_ids[7] = ordinal;
 
   /* load special ids from action rec parameter */
   action    = action_rec.action1;
@@ -599,6 +602,9 @@ int32_t XeqTry(trigger)
   subject   = action_rec.subject[0];
   specifier = action_rec.specifier;
   prepos    = action_rec.prepositions.preposition[0];
+  direction = action_rec.direction;
+  value     = action_rec.value;
+  ordinal   = action_rec.ordinal;
 
 
   /* now execute the action record */
@@ -613,6 +619,9 @@ int32_t XeqTry(trigger)
   subject   = old_special_ids[2];
   specifier = old_special_ids[3];
   prepos    = old_special_ids[4];
+  direction = old_special_ids[5];
+  value     = old_special_ids[6];
+  ordinal   = old_special_ids[7];
 
   /* possible return values:                   */
   /* QUIT, DISAGREE, CONTINUE, NO_MATCHAGREE   */

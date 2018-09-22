@@ -56,6 +56,9 @@ extern int32_t   actor;                /* letsplay.c */
 extern int32_t   subject;              /* letsplay.c */
 extern int32_t   specifier;            /* letsplay.c */
 extern int32_t   prepos;               /* letsplay.c */  /* @@@ */
+extern int32_t   direction;            /* letsplay.c */
+extern int32_t   value;                /* letsplay.c */
+extern int32_t   ordinal;              /* letsplay.c */
 extern int32_t   indent;               /* letsplay.c */
 extern int32_t   muted;                /* letsplay.c */
 
