@@ -520,36 +520,36 @@ int32_t XeqTry(trigger)
   char         *str;  /* dummy */
   int32_t      par1;
   int32_t      par2;
+  int32_t      par3;
   int32_t      type1      = NO_TYPE;
   int32_t      type2      = NO_TYPE;
   int32_t      type3      = NO_TYPE;
+  int32_t      type4      = NO_TYPE;
   int32_t      dummy_type = NO_ID;
   usrActionRec action_rec;
-  int32_t      nr_of_pars;
   int32_t      result;
   int32_t      old_muted;
   int32_t      old_special_ids[8];
   int          i = 0;
 
-  /* Read nr of pars. */
-  nr_of_pars = NextOpcode(trigger);
+  /* Skip nr of pars, which will always be 4. */
+  NextOpcode(trigger);
 
-  /* Parameter 3 all members of a compiler */
-  /* action record stored in the *trigger  */
-  /* int array                             */
+  /* Parameter 4 are all members of a */
+  /* compiler action record stored in */
+  /* the *trigger int array           */
 
   /* Read first parameter */
   if (!GetPar(&owner, &par1, &type1, &str, trigger))
     return(QUIT);
 
-  if (nr_of_pars == 3) {
-    /* read second parameter */
-    if (!GetPar(&owner, &par2, &type2, &str, trigger))
-      return(QUIT);
-  }
-  else {
-    type2 = NUMBER;
-  }
+  /* read second parameter */ /* mute or not */
+  if (!GetPar(&owner, &par2, &type2, &str, trigger))
+    return(QUIT);
+
+  /* read third parameter */ /* fire timers or not */
+  if (!GetPar(&owner, &par3, &type3, &str, trigger))
+    return(QUIT);
 
   /* read the last parameter */
   /* we do not use GetPar() here, because it  */
@@ -557,9 +557,9 @@ int32_t XeqTry(trigger)
   /* If we get more functions with action rec */
   /* parameters we might change it.           */
 
-  type3 = NextOpcode(trigger); /* must be ACTION_REC */
+  type4 = NextOpcode(trigger); /* must be ACTION_REC */
 
-  if (!CheckPars(TRY, type1, type2, type3, NO_TYPE, NO_TYPE)) {
+  if (!CheckPars(TRY, type1, type2, type3, type4, NO_TYPE)) {
     return(QUIT);
   }
 
@@ -627,6 +627,15 @@ int32_t XeqTry(trigger)
   /* QUIT, DISAGREE, CONTINUE, NO_MATCHAGREE   */
   /* After executing this action record, there */
   /* there may (will) be more trigger code     */
+
+  /* check if we must fire the timers */
+  if (par3 && result != QUIT) {
+    if (CheckDoTimers()) {
+      if (HandleTimers(&action_rec, 0) == QUIT) {
+        result = QUIT;
+      }
+    }
+  }
 
   switch (result) {
     case AGREE: ;

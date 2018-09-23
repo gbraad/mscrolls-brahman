@@ -257,9 +257,9 @@ int32_t CheckPars(fun_code, type1, type2, type3, type4, type5)
       break;
 
     case TRY:
-      /************************************************/
-      /* try(loc/obj, number, action record members). */
-      /************************************************/
+      /********************************************************/
+      /* try(loc/obj, number, number, action record members). */
+      /********************************************************/
 
       if (type1 != LOC_ID && type1 != OBJ_ID) {
         TypeErr(1, TranslateKeyword("TRY"), "location or object");
@@ -271,8 +271,13 @@ int32_t CheckPars(fun_code, type1, type2, type3, type4, type5)
         return(ERROR);
       }
 
-      if (type3 != ACTION_REC) {
-        TypeErr(3, TranslateKeyword("TRY"), "action record");
+      if (type3 != NUMBER) {
+        TypeErr(3, TranslateKeyword("TRY"), TranslateKeyword("number"));
+        return(ERROR);
+      }
+
+      if (type4 != ACTION_REC) {
+        TypeErr(4, TranslateKeyword("TRY"), "action record");
         return(ERROR);
       }
       return(OK);
