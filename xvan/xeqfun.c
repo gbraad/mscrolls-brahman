@@ -2451,10 +2451,12 @@ int32_t XeqTranscript(trigger)
     return(CONTINUE);
   }
   /* write headers to transcript file */
+  fprintf(transcriptfile, "%s", "\n=====================================\n");
   fprintf(transcriptfile, "%s", "XVAN transcript for: ");
   fprintf(transcriptfile, "%s\n", story_info.title);
   fprintf(transcriptfile, "%s", "version: ");
   fprintf(transcriptfile, "%s\n", story_info.version);
+  fprintf(transcriptfile, "%s", "\n=====================================\n");
 
   PrintError (92, NULL, NULL);  /* not an error */
   transcript = 1;

@@ -46,7 +46,7 @@ int32_t NL_XeqYesNo()
   char yes_or_no[INPUT_LINE_LEN];
 
   while (1) {
-    GetAddtlInput(yes_or_no, "j\\n");
+    GetAddtlInput(yes_or_no, "j/n");
     xv_strlwr(yes_or_no);
 
     if ((strcmp(yes_or_no, "ja") == 0) || (strcmp(yes_or_no, "j") == 0))
