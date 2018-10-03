@@ -223,23 +223,37 @@ int32_t CheckPars(fun_code, type1, type2, type3, type4, type5)
       return(OK);
       break;
 
-    case OWNS:
-      /***************************/
-      /* owns(loc/obj, obj, num) */
-      /***************************/
+        case OWNS:
+      /*************************************/
+      /* owns(loc/obj, obj, num [,prepos]) */
+      /*************************************/
       if (type1 != LOC_ID && type1 != OBJ_ID) {
-        TypeErr(1, "OWNS", "location or object");
+        TypeErr(1, "OWNS", "location or object.");
         return(ERROR);
       }
       if (type2 != LOC_ID && type2 != OBJ_ID)  {
         /* we must also allow type location for par2  */
         /* because they may use the 'this' parameter. */
-        TypeErr(2, "OWNS", "location or object");
+        TypeErr(2, "OWNS", "location or object.");
         return(ERROR);
       }
-      if (type3 != NUMBER) {
-        TypeErr(3, "OWNS", "number");
-        return(ERROR);
+      if (type4 != NO_TYPE) {
+        /* there are 4 parameters */
+        if (type3 != NUMBER) {
+          TypeErr(3, "OWNS", "number.");
+          return(ERROR);
+        }
+        if (type4 != WORD_ID) {
+          TypeErr(4, "OWNS", "word (preposition).");
+          return(ERROR);
+        }
+      }
+      else {
+        /* there are 3 parameters */
+        if (!(type3 == NUMBER || type3 == WORD_ID)) {
+          TypeErr(3, "OWNS", "number or word (preposition).");
+          return(ERROR);
+        }
       }
       return(OK);
       break;

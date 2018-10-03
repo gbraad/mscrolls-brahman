@@ -284,15 +284,19 @@ int32_t XeqIsObject(trigger)
 int32_t XeqOwns(trigger)
  int32_t **trigger;
 {
-  int32_t owner; /* dummy */
-  char    *str;  /* dummy. */
-  int32_t par1;
-  int32_t par2;  /* Owns() has either two or three parameters. */
-  int32_t par3;
-  int32_t nr_of_pars;
-  int32_t type1 = NO_TYPE;
-  int32_t type2 = NO_TYPE;
-  int32_t type3 = NO_TYPE;
+  int32_t  owner; /* dummy */
+  char *str;  /* dummy. */
+  int32_t  par1;
+  int32_t  par2;  /* Owns() has either 2, 3 or 4 parameters. */
+  int32_t  par3;
+  int32_t  depth = 1;           /* preposition may be par3 or par3 */
+  int32_t  preposition = NO_ID; /* preposition may be par3 or par3 */
+  int32_t  nr_of_pars;
+  int32_t  type1 = NO_TYPE;
+  int32_t  type2 = NO_TYPE;
+  int32_t  type3 = NO_TYPE;
+  int32_t  type4 = NO_TYPE;
+  int      index = 0;
 
   /* Read number of parameters. */
   nr_of_pars = NextOpcode(trigger);
@@ -308,20 +312,65 @@ int32_t XeqOwns(trigger)
     return(QUIT);
   }
 
-  if (nr_of_pars == 3) {
-    /* Syntax: NUMBER int */
-    if (!GetPar(&owner, &par3, &type3, &str, trigger))
+  if (nr_of_pars == 4) {
+    /* a number and a word id */
+    if (!GetPar(&owner, &depth, &type3, &str, trigger)) {
       return(QUIT);
     }
+    if (!GetPar(&owner, &preposition, &type4, &str, trigger)) {
+      return(QUIT);
+    }
+    /* help checkpars a bit (see also comments in XeqMove() */
+    if (IsWordId(preposition)) {
+      type4 = WORD_ID;
+    }
+  }
   else {
-    par3  = 1;
-    type3 = NUMBER;
+    if (nr_of_pars == 3) {
+      /* third parameter is a number or a word (preposition)  */
+      if (!GetPar(&owner, &par3, &type3, &str, trigger)) {
+        return(QUIT);
+      }
+      /* help checkpars a bit (see also comments in XeqMove() */
+      if (IsWordId(par3)) {
+        preposition = par3;
+        type4       = WORD_ID;
+        depth       = 1;
+        type3       = NUMBER;
+      }
+      else {
+        depth = par3;
+      }
+    }
+    else {
+      /* there are only 2 parameters, so set */
+      /* containment level to 1              */
+      depth = 1;
+      type3 = NUMBER;
+    }
   }
 
   /* We now must test if par1 owns (contains) par2. */
   /* The depth of the containment may be max par3.  */
-  if (CheckPars(OWNS, type1, type2, type3, NO_TYPE, NO_TYPE))
-    return(Owns(par1, par2, par3));
+  if (CheckPars(OWNS, type1, type2, type3, type4, NO_TYPE)) {
+    if (Owns(par1, par2, depth)) {
+      /* par1 owns par2, now check if the prepositions match */
+      /* r_preposotion has id FIRST_COMMON_ATTR_ID.          */
+      /* This is set at compile time.                        */
+      index = (par2-FIRST_OBJECT_ID)*nr_of_cattrs;
+      if (preposition == NO_ID || c_obj_attrs[index].value == preposition) {
+        return(OK);
+      }
+      else {
+        return(ERROR);
+      }
+      return(OK);
+    }
+    else {
+      return(ERROR);
+    }
+    return(OK);
+  }
   else
     return(QUIT);
 }
