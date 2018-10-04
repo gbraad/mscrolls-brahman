@@ -284,15 +284,19 @@ int32_t XeqIsObject(trigger)
 int32_t XeqOwns(trigger)
  int32_t **trigger;
 {
-  int32_t owner; /* dummy */
-  char    *str;  /* dummy. */
-  int32_t par1;
-  int32_t par2;  /* Owns() has either two or three parameters. */
-  int32_t par3;
-  int32_t nr_of_pars;
-  int32_t type1 = NO_TYPE;
-  int32_t type2 = NO_TYPE;
-  int32_t type3 = NO_TYPE;
+  int32_t  owner; /* dummy */
+  char *str;  /* dummy. */
+  int32_t  par1;
+  int32_t  par2;  /* Owns() has either 2, 3 or 4 parameters. */
+  int32_t  par3;
+  int32_t  depth = 1;           /* preposition may be par3 or par3 */
+  int32_t  preposition = NO_ID; /* preposition may be par3 or par3 */
+  int32_t  nr_of_pars;
+  int32_t  type1 = NO_TYPE;
+  int32_t  type2 = NO_TYPE;
+  int32_t  type3 = NO_TYPE;
+  int32_t  type4 = NO_TYPE;
+  int      index = 0;
 
   /* Read number of parameters. */
   nr_of_pars = NextOpcode(trigger);
@@ -308,20 +312,65 @@ int32_t XeqOwns(trigger)
     return(QUIT);
   }
 
-  if (nr_of_pars == 3) {
-    /* Syntax: NUMBER int */
-    if (!GetPar(&owner, &par3, &type3, &str, trigger))
+  if (nr_of_pars == 4) {
+    /* a number and a word id */
+    if (!GetPar(&owner, &depth, &type3, &str, trigger)) {
       return(QUIT);
     }
+    if (!GetPar(&owner, &preposition, &type4, &str, trigger)) {
+      return(QUIT);
+    }
+    /* help checkpars a bit (see also comments in XeqMove() */
+    if (IsWordId(preposition)) {
+      type4 = WORD_ID;
+    }
+  }
   else {
-    par3  = 1;
-    type3 = NUMBER;
+    if (nr_of_pars == 3) {
+      /* third parameter is a number or a word (preposition)  */
+      if (!GetPar(&owner, &par3, &type3, &str, trigger)) {
+        return(QUIT);
+      }
+      /* help checkpars a bit (see also comments in XeqMove() */
+      if (IsWordId(par3)) {
+        preposition = par3;
+        type4       = WORD_ID;
+        depth       = 1;
+        type3       = NUMBER;
+      }
+      else {
+        depth = par3;
+      }
+    }
+    else {
+      /* there are only 2 parameters, so set */
+      /* containment level to 1              */
+      depth = 1;
+      type3 = NUMBER;
+    }
   }
 
   /* We now must test if par1 owns (contains) par2. */
   /* The depth of the containment may be max par3.  */
-  if (CheckPars(OWNS, type1, type2, type3, NO_TYPE, NO_TYPE))
-    return(Owns(par1, par2, par3));
+  if (CheckPars(OWNS, type1, type2, type3, type4, NO_TYPE)) {
+    if (Owns(par1, par2, depth)) {
+      /* par1 owns par2, now check if the prepositions match */
+      /* r_preposotion has id FIRST_COMMON_ATTR_ID.          */
+      /* This is set at compile time.                        */
+      index = (par2-FIRST_OBJECT_ID)*nr_of_cattrs;
+      if (preposition == NO_ID || c_obj_attrs[index].value == preposition) {
+        return(OK);
+      }
+      else {
+        return(ERROR);
+      }
+      return(OK);
+    }
+    else {
+      return(ERROR);
+    }
+    return(OK);
+  }
   else
     return(QUIT);
 }
@@ -520,36 +569,36 @@ int32_t XeqTry(trigger)
   char         *str;  /* dummy */
   int32_t      par1;
   int32_t      par2;
+  int32_t      par3;
   int32_t      type1      = NO_TYPE;
   int32_t      type2      = NO_TYPE;
   int32_t      type3      = NO_TYPE;
+  int32_t      type4      = NO_TYPE;
   int32_t      dummy_type = NO_ID;
   usrActionRec action_rec;
-  int32_t      nr_of_pars;
   int32_t      result;
   int32_t      old_muted;
-  int32_t      old_special_ids[5];
+  int32_t      old_special_ids[8];
   int          i = 0;
 
-  /* Read nr of pars. */
-  nr_of_pars = NextOpcode(trigger);
+  /* Skip nr of pars, which will always be 4. */
+  NextOpcode(trigger);
 
-  /* Parameter 3 all members of a compiler */
-  /* action record stored in the *trigger  */
-  /* int array                             */
+  /* Parameter 4 are all members of a */
+  /* compiler action record stored in */
+  /* the *trigger int array           */
 
   /* Read first parameter */
   if (!GetPar(&owner, &par1, &type1, &str, trigger))
     return(QUIT);
 
-  if (nr_of_pars == 3) {
-    /* read second parameter */
-    if (!GetPar(&owner, &par2, &type2, &str, trigger))
-      return(QUIT);
-  }
-  else {
-    type2 = NUMBER;
-  }
+  /* read second parameter */ /* mute or not */
+  if (!GetPar(&owner, &par2, &type2, &str, trigger))
+    return(QUIT);
+
+  /* read third parameter */ /* fire timers or not */
+  if (!GetPar(&owner, &par3, &type3, &str, trigger))
+    return(QUIT);
 
   /* read the last parameter */
   /* we do not use GetPar() here, because it  */
@@ -557,9 +606,9 @@ int32_t XeqTry(trigger)
   /* If we get more functions with action rec */
   /* parameters we might change it.           */
 
-  type3 = NextOpcode(trigger); /* must be ACTION_REC */
+  type4 = NextOpcode(trigger); /* must be ACTION_REC */
 
-  if (!CheckPars(TRY, type1, type2, type3, NO_TYPE, NO_TYPE)) {
+  if (!CheckPars(TRY, type1, type2, type3, type4, NO_TYPE)) {
     return(QUIT);
   }
 
@@ -569,13 +618,13 @@ int32_t XeqTry(trigger)
     return(QUIT);
   }
 
-  /* 18march2018: in a 'normal' user action record    */  /* @@@ */
+  /* 18march2018: in a 'normal' user action record    */
   /* that was created from user input, there won't be */
   /* wildcards, but in a user action record that was  */
   /* created from the try() function there may be.    */
 
   /* replace wildcards in the action record */
-  ConvSpecId(&(action_rec.actor), &dummy_type);   /* @@@ */
+  ConvSpecId(&(action_rec.actor), &dummy_type);
   ConvSpecId(&(action_rec.action1), &dummy_type);
   ConvSpecId(&(action_rec.direction), &dummy_type);
   for (i=0; i<MAX_SUBJECTS; i++) {
@@ -592,6 +641,9 @@ int32_t XeqTry(trigger)
   old_special_ids[2] = subject;
   old_special_ids[3] = specifier;
   old_special_ids[4] = prepos;
+  old_special_ids[5] = direction;
+  old_special_ids[6] = value;
+  old_special_ids[7] = ordinal;
 
   /* load special ids from action rec parameter */
   action    = action_rec.action1;
@@ -599,6 +651,9 @@ int32_t XeqTry(trigger)
   subject   = action_rec.subject[0];
   specifier = action_rec.specifier;
   prepos    = action_rec.prepositions.preposition[0];
+  direction = action_rec.direction;
+  value     = action_rec.value;
+  ordinal   = action_rec.ordinal;
 
 
   /* now execute the action record */
@@ -613,11 +668,23 @@ int32_t XeqTry(trigger)
   subject   = old_special_ids[2];
   specifier = old_special_ids[3];
   prepos    = old_special_ids[4];
+  direction = old_special_ids[5];
+  value     = old_special_ids[6];
+  ordinal   = old_special_ids[7];
 
   /* possible return values:                   */
   /* QUIT, DISAGREE, CONTINUE, NO_MATCHAGREE   */
   /* After executing this action record, there */
   /* there may (will) be more trigger code     */
+
+  /* check if we must fire the timers */
+  if (par3 && result != QUIT) {
+    if (CheckDoTimers()) {
+      if (HandleTimers(&action_rec, 0) == QUIT) {
+        result = QUIT;
+      }
+    }
+  }
 
   switch (result) {
     case AGREE: ;
@@ -950,9 +1017,10 @@ int32_t XeqCount(trigger)
     if (!GetPar(&owner, &par4, &type4, &str, trigger))
       return(QUIT);
   }
-  else
+  else {
     par4  = 1;       /* 0 is default level */
     type4 = NUMBER;
+  }
 
   if (CheckPars(COUNT, type1, type2, type3, type4, NO_TYPE)) {
     /* types are correct, now check whether */
@@ -2187,9 +2255,10 @@ int32_t XeqSynchro(trigger, action_rec, subject_index)
     if (!GetPar(&owner, par+4, type+4, &str, trigger))
       return(QUIT);
   }
-  else
+  else {
     par[4]  = 1;       /* 0 is default level */
     type[4] = NUMBER;
+  }
 
   if (CheckPars(SYNCHRONIZE, type[0], type[1], type[2], type[3], type[4])) {
     /* types are correct, now check whether */
@@ -2431,10 +2500,12 @@ int32_t XeqTranscript(trigger)
     return(CONTINUE);
   }
   /* write headers to transcript file */
+  fprintf(transcriptfile, "%s", "\n=====================================\n");
   fprintf(transcriptfile, "%s", "XVAN transcript for: ");
   fprintf(transcriptfile, "%s\n", story_info.title);
   fprintf(transcriptfile, "%s", "version: ");
   fprintf(transcriptfile, "%s\n", story_info.version);
+  fprintf(transcriptfile, "%s", "\n=====================================\n");
 
   PrintError (92, NULL, NULL);  /* not an error */
   transcript = 1;

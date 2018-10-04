@@ -56,6 +56,9 @@ extern int32_t   actor;                /* letsplay.c */
 extern int32_t   subject;              /* letsplay.c */
 extern int32_t   specifier;            /* letsplay.c */
 extern int32_t   prepos;               /* letsplay.c */  /* @@@ */
+extern int32_t   direction;            /* letsplay.c */
+extern int32_t   value;                /* letsplay.c */
+extern int32_t   ordinal;              /* letsplay.c */
 extern int32_t   indent;               /* letsplay.c */
 extern int32_t   muted;                /* letsplay.c */
 
@@ -128,6 +131,7 @@ extern int32_t  BuildRoute(int32_t, int32_t*, spanTree*);                       
 extern int32_t  SpanTree(int32_t, int32_t, int32_t, spanTree*);                  /* sysfunc.c  */
 extern int32_t  LetsTry(int32_t, usrActionRec);                                  /* lets-try.c */
 extern char     *GetDescr(int32_t, int32_t);                                     /* execute.c  */
+extern int32_t  CheckDoTimers(void);                                             /* timers.c   */
 extern int32_t  HandleTimers(usrActionRec*, int32_t);                            /* timers.c   */
 extern void     PrintString(char*, int);                                         /* output.c   */
 extern void     PrintWord(int32_t, int);                                         /* output.c   */
