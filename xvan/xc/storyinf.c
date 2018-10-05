@@ -39,7 +39,7 @@ int32_t ReadStoryInfo(storyInfo*, char*, fileList**);
 /* function definitions  */
 /*************************/
 
-int32_t ReadStoryInfo(info, filename, file_list)  /* @@@ */
+int32_t ReadStoryInfo(info, filename, file_list)
  storyInfo *info;
  char      *filename;
  fileList  **file_list;

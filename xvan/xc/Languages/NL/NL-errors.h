@@ -118,9 +118,9 @@ const char *NL_errors[] = {
   "\n(088) De runcommon() functie is niet toegestaan in common trigger code",
   "\n(089) Fout bij het maken van de woordentabel",
   "ongedefinieerd als",
-  "\n(091) De tekst is te lang voor:",   /* @@@ */
-  "\n(092) Gereserveerd",                /* @@@ */
-  "\n(093) Gereserveerd",                /* @@@ */
+  "\n(091) De tekst is te lang voor:",
+  "\n(092) Gereserveerd",
+  "\n(093) Gereserveerd",
   "Verwerkt",
   "\n(095) Er zijn teveel werkwoorden gedefinieerd. Het maximum aantal is:",
   "\n(096) Er zijn teveel woorden gedefinieerd. Het maximum aantal is:",
@@ -171,7 +171,7 @@ const char *NL_errors[] = {
   "\n(141) Onverwachte komma",
   "\n(142) de quote aan het einde van de tekst ontbreekt",
   "\n(143) Onbekende escape code \\",
-  "\n(144) Dubbele definitie van:",  /* @@@ */
+  "\n(144) Dubbele definitie van:",
   "\n(145) Bij deze vlag ontbreekt de eigenaar:",
   "\n(146) Meer dan 1 vervangende definitie van flag:"
   "\n(146) Meer dan 1 vervangende definitie van attribuut:"

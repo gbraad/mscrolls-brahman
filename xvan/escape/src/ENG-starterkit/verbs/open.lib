@@ -51,7 +51,12 @@ $VERB open
      disagree()
    endif
    setflag(o_player.f_first)
+   print("Opening [the] [o_subject] reveals ")
    synchronize(o_subject, o_subject.t_reveal, o_subject.f_any, 1)
+   if equal(o_player.r_nr_to_reveal, 0) and testflag(o_player.f_first) then
+     # all invisible to the player, nobody printed something
+     printcr("[the] [o_subject] is now open.")
+   endif
    agree()  # otherwise returns number of objects from sync
 
  DEFAULT

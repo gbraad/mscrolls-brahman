@@ -1,0 +1,19 @@
+
+$VERB goto
+ SCOPE ALL_LOCS
+ PROLOGUE
+   if not(equal(o_actor, o_player)) then
+     printcr("The 'goto' action only works for the player.")
+     disagree()
+   endif
+   if equal(o_subject, %none) then
+     agree()
+   else
+     if isobject(o_subject) then
+       printcr("The goto command can only be used with locations.")
+       disagree()
+
+ DEFAULT
+   printcr("I only understood you as far as willing to go somewehere.")
+
+ENDVERB

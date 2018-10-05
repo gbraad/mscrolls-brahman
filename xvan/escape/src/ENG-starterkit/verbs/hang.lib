@@ -7,9 +7,14 @@ $VERB hang
      endif
    endif
 
-  if equal(o_subject, %none) then
-    agree()
-  endif
+   if not(equal(o_subject, %none)) then
+     if not(owns(o_actor, o_subject)) then
+       printcr("(taking [the] [o_subject]).")
+       if not(try(l_location, 0, 0, "get [o_subject]")) then
+         disagree()
+       endif
+     endif
+   endif
 
   if equal(o_actor, o_nst) then       # no such thing
     print("No one is holding ")

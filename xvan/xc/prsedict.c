@@ -190,7 +190,6 @@ int32_t AddWord(word, print_word, type, syn_id, word_id, redefine)
   /* referred to by its id.                               */
 
   if ((info = (wordInfo *) malloc(sizeof(wordInfo))) == NULL) {
-    ErrHdr();
     PrintError(1, NULL, "AddWord()");
     return(ERROR);
   }

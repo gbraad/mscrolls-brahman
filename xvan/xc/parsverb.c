@@ -50,7 +50,6 @@ synList *NewSynListStruct(void)
   synList *sl = NULL;
 
   if ((sl = (synList *) malloc(sizeof(synList))) == NULL) {
-    ErrHdr();
     PrintError(1, NULL, "syn_list");
     return(ERROR);
   }
@@ -672,9 +671,10 @@ int32_t ParseVerb(offset, redefined, source, file_list)
             /* checked by Pass1().                       */
             ErrHdr();
             PrintError(51, NULL, word);
-            if (state == 25 || state == 26)
+            if (state == 25 || state == 26) {
               PrintError(53, NULL, NULL);
               return(ERROR);
+            }
         }  /* switch */
         free(word);
         word = GetNextWord(&keyword, NO_ID, 0, source, file_list);

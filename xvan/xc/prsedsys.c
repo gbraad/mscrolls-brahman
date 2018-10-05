@@ -392,7 +392,6 @@ int32_t ParseDSys(descr_text, descr)
 
   /* Malloc() space for descr_text_2 */
   if ((descr_text_2 = (char **) malloc(sizeof(char*))) == NULL) {
-    ErrHdr();
     PrintError(1, NULL, "desc_text_2");
     result.tag = ERROR;
     return(result.tag);

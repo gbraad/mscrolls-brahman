@@ -331,9 +331,9 @@ int32_t CheckPars(fun_string)
       }
       break;
 
-    case OWNS:              /* owns(loc/obj, obj [, number]) */
-      if (nr_of_pars != 2 && nr_of_pars != 3) {
-        NrErr("owns()", "2 or 3");
+    case OWNS:              /* owns(loc/obj, obj [, number] [, preposition]) */
+      if (nr_of_pars != 2 && nr_of_pars != 3 && nr_of_pars != 4) {
+        NrErr("owns()", "2, 3 or 4");
         return(ERROR);
       }
 
@@ -351,8 +351,23 @@ int32_t CheckPars(fun_string)
 
       if (nr_of_pars == 3) {
         par = NextPar(fun_string, &index);
+        if (!(IsType(par, NUMBER) || IsType(par, PREPOSITIONS))) {
+          TypeErr(3, "owns()", "number or preposition");
+          return(ERROR);
+        }
+      }
+
+      if (nr_of_pars == 4) {
+        /* read par 3 */
+        par = NextPar(fun_string, &index);
         if (!IsType(par, NUMBER)) {
           TypeErr(3, "owns()", "number");
+          return(ERROR);
+        }
+        /* read par 4 */
+        par = NextPar(fun_string, &index);
+        if (!IsType(par, PREPOSITIONS)) {
+          TypeErr(3, "owns()", "preposition");
           return(ERROR);
         }
       }
@@ -427,8 +442,8 @@ int32_t CheckPars(fun_string)
       }
       break;
 
-    case TRY:  /* try(string) */
-      if (nr_of_pars == 3) {
+    case TRY:  /* try(loc/obj, int, int, string) */
+      if (nr_of_pars == 4) {
         /* check first par */
         par = NextPar(fun_string, &index);
         if (!(IsType(par, LOC_ID) || IsType(par, OBJ_ID))) {
@@ -441,17 +456,22 @@ int32_t CheckPars(fun_string)
           TypeErr(2, TranslateKeyword("try"), TranslateKeyword("number"));
           return(ERROR);
         }
-
         /* check third par */
         par = NextPar(fun_string, &index);
+        if (!IsType(par, NUMBER)) {
+          TypeErr(3, TranslateKeyword("try"), TranslateKeyword("number"));
+          return(ERROR);
+        }
+        /* check fourth par */
+        par = NextPar(fun_string, &index);
         if (!IsType(par, ACTION_REC)) {
-          TypeErr(3, TranslateKeyword("try"), TranslateKeyword("string"));
+          TypeErr(4, TranslateKeyword("try"), TranslateKeyword("string"));
           /* error msg must say string or the user won't understand */
           return(ERROR);
         }
       } /* if */
       else {
-        NrErr(TranslateKeyword("try"), "3");
+        NrErr(TranslateKeyword("try"), "4");
         return(ERROR);
       }
       break;
@@ -899,7 +919,7 @@ int32_t CheckPars(fun_string)
       }
       break;
 
-    case ADDJSON:  /* addjson("string") */  /* @@@ */
+    case ADDJSON:  /* addjson("string") */
       if (nr_of_pars != 1 && nr_of_pars != 2) {
         NrErr("addjson()", "1 or 2");
         return(ERROR);
@@ -1060,12 +1080,12 @@ int32_t CheckPars(fun_string)
     case CLEARSCREEN:      /* clearscreen() */
       if (fun_name[0] == '\0')
         strncpy(fun_name, "clearscreen()", MAX_WORD_LEN);
-    case CLEARJSON:      /* clearjson() */  /* @@@ */
+    case CLEARJSON:      /* clearjson() */
       if (fun_name[0] == '\0')
         strncpy(fun_name, "clearjson()", MAX_WORD_LEN);
-    case SENDJSON:      /* sendjson() */  /* @@@ */
+    case SENDJSON:      /* sendjson() */
       if (fun_name[0] == '\0')
-    case NOTIMERS:      /* notimers() */  /* @@@ */
+    case NOTIMERS:      /* notimers() */
       if (fun_name[0] == '\0')
         strncpy(fun_name, "notimers()", MAX_WORD_LEN);
       if (nr_of_pars != 0) {

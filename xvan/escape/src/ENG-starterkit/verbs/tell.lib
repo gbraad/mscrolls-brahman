@@ -13,11 +13,6 @@ $VERB tell
      agree()
    endif
 
-   if not(cansee(o_actor, o_subject)) then
-     printcr("There is no [o_subject] here.")
-     disagree()
-   endif
-
  "[o_player], tell [o_subject] about [o_spec]"
    if equal(o_subject, o_actor) then
      printcr("Talking to yourself is a sign of pending mental collapse.")

@@ -15,15 +15,15 @@ $VERB look SYNONYM l
  "look"
    if not(equal(owner(o_player), l_location)) then
      # the player is in some other object
-     print("[o_player.r_preposition] [the] ")
+     print("([o_player.r_preposition] [the] ")
      print(owner(o_player))
-     printcr(".")
+     printcr(").")
    endif
-   clearflag(l_location.f_seenbefore)
-   entrance(l_location)
+   clearflag(owner(o_player).f_seenbefore)
+   entrance(owner(o_player))
 
  "look at [o_subject]"
-   printcr(o_subject.d_exa)
+   if try(l_location, 0, 0, "examine [o_subject]") then endif
 
  "look [prepos] [o_subject]"
    printcr("There is nothing special [prepos] [the] [o_subject].")

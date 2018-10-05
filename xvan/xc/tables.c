@@ -2085,7 +2085,6 @@ int32_t CheckTables()
   lp = loc_table;
   while (strcmp(lp->l_word, TERMINATOR) != 0) {
     if (!(lp->exists)) {
-      ErrHdr();
       printf("%s ", lp->l_word);
       PrintError(90, NULL, "location");
       status = ERROR;
@@ -2097,7 +2096,6 @@ int32_t CheckTables()
   op = obj_table;
   while (strcmp(op->o_word, TERMINATOR) != 0) {
     if (!(op->exists)) {
-      ErrHdr();
       printf("%s: ", op->o_word);
       PrintError(90, NULL, "object");
       status = ERROR;
@@ -2111,7 +2109,6 @@ int32_t CheckTables()
   fp = flag_table;
   while (strcmp(fp->f_word, TERMINATOR) != 0) {
     if (!(fp->common) && !(fp->exists)) {
-      ErrHdr();
       if (IsLocId(fp->owner)) {
         printf("\nLocation ");
         PrintLocationNameForId(fp->owner);
@@ -2133,7 +2130,6 @@ int32_t CheckTables()
   rp = attr_table;
   while (strcmp(rp->r_word, TERMINATOR) != 0) {
     if (!(rp->common) && !(rp->exists)) {
-      ErrHdr();
       if (IsLocId(rp->owner)) {
         printf("\nLocation ");
         PrintLocationNameForId(rp->owner);
@@ -2153,7 +2149,6 @@ int32_t CheckTables()
   tp = trigg_table;
   while (strcmp(tp->t_word, TERMINATOR) != 0) {
     if (!(tp->common) && !(tp->exists)) {
-      ErrHdr();
       if (IsLocId(tp->owner)) {
         printf("\nLocation ");
         PrintLocationNameForId(tp->owner);
@@ -2173,7 +2168,6 @@ int32_t CheckTables()
   mp = tim_table;
   while (strcmp(mp->m_word, TERMINATOR) != 0) {
     if (!(mp->exists)) {
-      ErrHdr();
       PrintError(132, NULL, mp->m_word);
       status = ERROR;
     }
@@ -2184,7 +2178,6 @@ int32_t CheckTables()
   dp = descr_table;
   while (strcmp(dp->d_word, TERMINATOR) != 0) {
     if (!(dp->common) && !(dp->exists)) {
-      ErrHdr();
       if (IsLocId(dp->owner)) {
         printf("\nLocation ");
         PrintLocationNameForId(dp->owner);

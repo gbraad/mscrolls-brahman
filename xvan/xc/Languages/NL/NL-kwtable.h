@@ -32,7 +32,7 @@
 
 kwTable kw_table[] =  {
   {.keyword_eng = "ACTOR_ONLY", .keyword_nl = "ALLEEN_ACTEUR"},
-  {.keyword_eng = "ADDJSON", .keyword_nl = "ADDJSON"},     /* @@@ */
+  {.keyword_eng = "ADDJSON", .keyword_nl = "ADDJSON"},
   {.keyword_eng = "ADJECTIVES", .keyword_nl = "BVNW"},
   {.keyword_eng = "ADVERBS", .keyword_nl = "BIJWOORDEN"},
   {.keyword_eng = "AGREE", .keyword_nl = "KLAAR"},
@@ -47,7 +47,7 @@ kwTable kw_table[] =  {
   {.keyword_eng = "BOLD", .keyword_nl = "VET"},
   {.keyword_eng = "CANSEE", .keyword_nl = "KANZIEN"},
   {.keyword_eng = "CLEARFLAG", .keyword_nl = "MAAKONWAAR"},
-  {.keyword_eng = "CLEARJSON", .keyword_nl = "CLEARJSON"},     /* @@@ */
+  {.keyword_eng = "CLEARJSON", .keyword_nl = "CLEARJSON"},
   {.keyword_eng = "CLEARSCREEN", .keyword_nl = "WISSCHERM"},
   {.keyword_eng = "CLEARSTATUS", .keyword_nl = "WISSTATUSSCHERM"},
   {.keyword_eng = "COMMON_ATTRS", .keyword_nl = "ALG_ATTRIBUTEN"},
@@ -146,7 +146,7 @@ kwTable kw_table[] =  {
   {.keyword_eng = "SAVE", .keyword_nl = "OPSLAAN"},
   {.keyword_eng = "SCOPE", .keyword_nl = "SCOPE"},
   {.keyword_eng = "SCORE", .keyword_nl = "SCORE"},
-  {.keyword_eng = "SENDJSON", .keyword_nl = "SENDJSON"},      /* @@@ */
+  {.keyword_eng = "SENDJSON", .keyword_nl = "SENDJSON"},
   {.keyword_eng = "SETCURSOR", .keyword_nl = "PLAATSCURSOR"},
   {.keyword_eng = "SETFLAG", .keyword_nl = "MAAKWAAR"},
   {.keyword_eng = "SETTIMER", .keyword_nl = "ZETTIMER"},

@@ -118,9 +118,9 @@ const char *ENG_errors[] = {
   "\n(088) runcommon() function may not be used in common trigger code",
   "\n(089) error creating WordTable",
   " undefined",
-  "\n(091) String too long for:",   /* @@@ */
-  "\n(092) Reserved",               /* @@@ */
-  "\n(093) Reserved",               /* @@@ */
+  "\n(091) String too long for:",
+  "\n(092) Reserved",
+  "\n(093) Reserved",
   "Processed",
   "\n(095) Too many verbs defined. Max number of verbs is:",
   "\n(096) Too many words defined. Max number of words is:",
@@ -171,7 +171,7 @@ const char *ENG_errors[] = {
   "\n(141) Unexpected comma",
   "\n(142) Missing end quote",
   "\n(143) Unknown escape sequence \\",
-  "\n(144) Double definition of:",  /* @@@ */
+  "\n(144) Double definition of:",
   "\n(145) Owner missing for flag:",
   "\n(146) Multiple redefinition of flag:",
   "\n(147) Multiple redefinition of attribute:"

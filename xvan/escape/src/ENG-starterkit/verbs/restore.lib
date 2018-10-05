@@ -4,7 +4,10 @@ $VERB restore
   notimers()
 
  "[o_player], restore"
+   printcr("Restoring progress...")
    restore()
+   printcr("Done.")
+
 
    # timers are not called after a restore
 

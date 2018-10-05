@@ -611,6 +611,7 @@ char *ReadParInString(owner, r_s, ch, source, file_list)
             state = 6;
             break;
           default:
+            ErrHdr();
             PrintError(10, NULL, par);
             free(par);
             return(NULL);
@@ -631,6 +632,7 @@ char *ReadParInString(owner, r_s, ch, source, file_list)
             state = 6;
             break;
           default:
+            ErrHdr();
             PrintError(11, NULL, par);
             free(par);
             return(NULL);
@@ -651,6 +653,7 @@ char *ReadParInString(owner, r_s, ch, source, file_list)
             state = 8;
             break;
           default:
+            ErrHdr();
             PrintError(12, NULL, par);
             free(par);
             return(NULL);
@@ -676,6 +679,7 @@ char *ReadParInString(owner, r_s, ch, source, file_list)
             state = 7;
             break;
           default:
+            ErrHdr();
             PrintError(13, NULL, par);
             free(par);
             return(NULL);
@@ -701,6 +705,7 @@ char *ReadParInString(owner, r_s, ch, source, file_list)
             state = 7;
             break;
           default:
+            ErrHdr();
             PrintError(14, NULL, par);
             free(par);
             return(NULL);
@@ -720,6 +725,7 @@ char *ReadParInString(owner, r_s, ch, source, file_list)
             state = 3;
             break;
           default:
+            ErrHdr();
             PrintError(15, NULL, NULL);
             free(par);
             return(NULL);
@@ -738,6 +744,7 @@ char *ReadParInString(owner, r_s, ch, source, file_list)
             state = 4;
             break;
           default:
+            ErrHdr();
             PrintError(16, NULL, NULL);
             free(par);
             return(NULL);
@@ -762,6 +769,7 @@ char *ReadParInString(owner, r_s, ch, source, file_list)
             state = 2;
             break;
           default:
+            ErrHdr();
             PrintError(17, NULL, par);
             free(par);
             return(NULL);
@@ -780,6 +788,7 @@ char *ReadParInString(owner, r_s, ch, source, file_list)
               cont = 0;
               break;
             default:
+              ErrHdr();
               PrintError(18, NULL, NULL);
               free(par);
               return(NULL);
@@ -809,6 +818,7 @@ char *ReadParInString(owner, r_s, ch, source, file_list)
             case 8:
               break;
             default:
+              ErrHdr();
               PrintError(19, NULL, NULL);
               free(par);
               return(NULL);
@@ -1970,21 +1980,18 @@ int32_t StoreFlags()
 
   /* Malloc() space for common location flags. */
   if ((com_loc_flags = (int32_t *) malloc(com_loc_len*sizeof(int32_t))) == NULL) {
-    ErrHdr();
     PrintError(1, NULL, "common location flags");
     return(ERROR);
   }
 
   /* Malloc() space for common object flags. */
   if ((com_obj_flags = (int32_t *) malloc(com_obj_len*sizeof(int32_t))) == NULL) {
-    ErrHdr();
     PrintError(1, NULL, "common object flags");
     return(ERROR);
   }
 
   /* Malloc() space for local flags. */
   if ((local_flags = (int32_t *) malloc(local_len*sizeof(int32_t))) == NULL) {
-    ErrHdr();
     PrintError(1, NULL, "local flags");
     return(ERROR);
   }
@@ -2045,9 +2052,7 @@ int32_t StoreFlags()
   /* First store the common location flags.               */
   /* Tell the interpreter the number of the common flags. */
   if (!StoreInt32(nr_of_cflags)) {
-    ErrHdr();
     PrintError(39, NULL, NULL);
-    printf("StoreFlags(): error writing nr_of_cflags.\n");
     return(ERROR);
   }
 
@@ -2061,7 +2066,6 @@ int32_t StoreFlags()
   /* Now store the common object flag bits.             */
   if (fwrite((void *) com_obj_flags, sizeof(int32_t), com_obj_len,
                                           datafile) != com_obj_len) {
-    ErrHdr();
     PrintError(39, NULL, NULL);
     return(ERROR);
   }
@@ -2069,14 +2073,12 @@ int32_t StoreFlags()
   /* Next store the local flags.                         */
   /* Tell the interpreter the length of the flag string. */
   if (!StoreInt32(local_len)) {
-    ErrHdr();
     PrintError(39, NULL, NULL);
     return(ERROR);
   }
 
   if (fwrite((void *) local_flags, sizeof(int32_t), local_len,
                                          datafile) != local_len) {
-    ErrHdr();
     PrintError(39, NULL, NULL);
     return(ERROR);
   }
@@ -2110,21 +2112,18 @@ int32_t StoreAttributes()
 
   /* Malloc() space for common location attributes. */
   if ((com_loc_attrs = (attrInfo *) malloc(com_loc_len*sizeof(attrInfo))) == NULL) {
-    ErrHdr();
     PrintError(1, NULL, "common location attributes");
     return(ERROR);
   }
 
   /* Malloc() space for common object attributes. */
   if ((com_obj_attrs = (attrInfo *) malloc(com_obj_len*sizeof(attrInfo))) == NULL) {
-    ErrHdr();
     PrintError(1, NULL, "common object attributes");
     return(ERROR);
   }
 
   /* Malloc() space for local attributes. */
   if ((local_attrs = (attrInfo *) malloc(nr_of_lattrs*sizeof(attrInfo))) == NULL) {
-    ErrHdr();
     PrintError(1, NULL, "local attributes");
     return(ERROR);
   }
@@ -2193,23 +2192,19 @@ int32_t StoreAttributes()
   /* First store the common location attributes.               */
   /* Tell the interpreter the number of the common attributes. */
   if (!StoreInt32(nr_of_cattrs)) {
-    ErrHdr();
     PrintError(40, NULL, NULL);
     return(ERROR);
   }
   for (i=0; i<com_loc_len; i++) {
     if (!StoreInt32(com_loc_attrs[i].type)) {
-      ErrHdr();
       PrintError(40, NULL, NULL);
       return(ERROR);
     }
     if (!StoreInt32(com_loc_attrs[i].value)) {
-      ErrHdr();
       PrintError(40, NULL, NULL);
       return(ERROR);
     }
     if (!StoreInt32(com_loc_attrs[i].owner)) {
-      ErrHdr();
       PrintError(40, NULL, NULL);
       return(ERROR);
     }
@@ -2218,17 +2213,14 @@ int32_t StoreAttributes()
   /* Now store the common object attributes. */
   for (i=0; i<com_obj_len; i++) {
     if (!StoreInt32(com_obj_attrs[i].type)) {
-      ErrHdr();
       PrintError(40, NULL, NULL);
       return(ERROR);
     }
     if (!StoreInt32(com_obj_attrs[i].value)) {
-      ErrHdr();
       PrintError(40, NULL, NULL);
       return(ERROR);
     }
     if (!StoreInt32(com_obj_attrs[i].owner)) {
-      ErrHdr();
       PrintError(40, NULL, NULL);
       return(ERROR);
     }
@@ -2237,24 +2229,20 @@ int32_t StoreAttributes()
   /* Next store the local attributes.                     */
   /* Tell the interpreter the number of local attributes. */
   if (!StoreInt32(nr_of_lattrs)) {
-    ErrHdr();
     PrintError(40, NULL, NULL);
     return(ERROR);
   }
 
   for (i=0; i<nr_of_lattrs; i++) {
     if (!StoreInt32(local_attrs[i].type)) {
-      ErrHdr();
       PrintError(40, NULL, NULL);
       return(ERROR);
     }
     if (!StoreInt32(local_attrs[i].value)) {
-      ErrHdr();
       PrintError(40, NULL, NULL);
       return(ERROR);
     }
     if (!StoreInt32(local_attrs[i].owner)) {
-      ErrHdr();
       PrintError(40, NULL, NULL);
       return(ERROR);
     }
@@ -2281,7 +2269,6 @@ int32_t StoreVerbDir()
   /* determine the size of the verbDir.                      */
 
   if (!StoreInt32(size)) {
-    ErrHdr();
     PrintError(41, NULL, NULL);
     return(ERROR);
   }
@@ -2321,7 +2308,6 @@ int32_t StoreLocDir()
 
   /* create space on heap for loc_dir */
   if ((loc_dir = (dirInfo *) malloc(nr_of_locations*sizeof(dirInfo))) == NULL) {
-    ErrHdr();
     PrintError(1, NULL, "location directory");
     return(ERROR);
   }
@@ -2337,7 +2323,6 @@ int32_t StoreLocDir()
 
   /* store the number of locations */
   if (!StoreInt32(nr_of_locations)) {
-    ErrHdr();
     PrintError(42, NULL, NULL);
     free(loc_dir);
     return(ERROR);
@@ -2346,7 +2331,6 @@ int32_t StoreLocDir()
   /* Store the location directory. */
   for (i=0; i<nr_of_locations; i++) {
     if (!StoreInt32(loc_dir[i].nr_of_dsys)) {
-      ErrHdr();
       PrintError(42, NULL, NULL);
       free(loc_dir);
       return(ERROR);
@@ -2362,13 +2346,11 @@ int32_t StoreLocDir()
       return(ERROR); /* error message was printed by StoreContData() */
     }
     if (!StoreInt32(loc_dir[i].held_by)) {
-      ErrHdr();
       PrintError(42, NULL, NULL);
       free(loc_dir);
       return(ERROR);
     }
     if (!StoreInt64(loc_dir[i].offset)) {
-      ErrHdr();
       PrintError(42, NULL, NULL);
       free(loc_dir);
       return(ERROR);
@@ -2398,7 +2380,6 @@ int32_t StoreObjDir()
 
   /* create space on heap for obj_offsets */
   if ((obj_dir = (dirInfo *) malloc(nr_of_objects*sizeof(dirInfo))) == NULL) {
-    ErrHdr();
     PrintError(1, NULL, "object directory");
     return(ERROR);
   }
@@ -2412,7 +2393,6 @@ int32_t StoreObjDir()
 
   /* store the number of objects */
   if (!StoreInt32(nr_of_objects)) {
-    ErrHdr();
     PrintError(43, NULL, NULL);
     free(obj_dir);
     return(ERROR);
@@ -2421,7 +2401,6 @@ int32_t StoreObjDir()
   /* store the object directory */
   for (i=0; i<nr_of_objects; i++) {
     if (!StoreInt32(obj_dir[i].nr_of_dsys)) {
-      ErrHdr();
       PrintError(43, NULL, NULL);
       free(obj_dir);
       return(ERROR);
@@ -2437,13 +2416,11 @@ int32_t StoreObjDir()
       return(ERROR); /* error message was printed by StoreExtendedSysDescr() */
     }
     if (!StoreInt32(obj_dir[i].held_by)) {
-      ErrHdr();
       PrintError(43, NULL, NULL);
       free(obj_dir);
       return(ERROR);
     }
     if (!StoreInt64(obj_dir[i].offset)) {
-      ErrHdr();
       PrintError(43, NULL, NULL);
       free(obj_dir);
       return(ERROR);
@@ -2470,7 +2447,6 @@ int32_t StoreTriggOwners()
 
   /* Malloc() space for trigg_owners */
   if ((trigg_owners = (int32_t *) malloc(nr_of_ltrigs*sizeof(int32_t))) == NULL) {
-    ErrHdr();
     PrintError(1, NULL, "trigg_owners");
     return(ERROR);
   }
@@ -2493,7 +2469,6 @@ int32_t StoreTriggOwners()
   /* There is no need to store the number of common triggers, as */
   /* the interpreter doesn't need to know  this.                 */
   if (!StoreInt32(nr_of_ltrigs)) {
-    ErrHdr();
     PrintError(44, NULL, NULL);
     free(trigg_owners);
     return(ERROR);
@@ -2502,7 +2477,6 @@ int32_t StoreTriggOwners()
   /* Write the trigg_owners to file */
   for (i=0; i<nr_of_ltrigs; i++) {
     if (!StoreInt32(trigg_owners[i])) {
-    ErrHdr();
     PrintError(44, NULL, NULL);
     free(trigg_owners);
     return(ERROR);
@@ -2529,7 +2503,6 @@ int32_t StoreDescrOwners()
 
   /* Malloc() space for descr_owners */
   if ((descr_owners = (int32_t *) malloc(nr_of_ldescrs*sizeof(int32_t))) == NULL) {
-    ErrHdr();
     PrintError(1, NULL, "descr_owners");
     return(ERROR);
   }
@@ -2553,7 +2526,6 @@ int32_t StoreDescrOwners()
   /* There is no need to store the number of common descriptions, */
   /* as the interpreter doesn't need to know this.               */
   if (!StoreInt32(nr_of_ldescrs)) {
-    ErrHdr();
     PrintError(45, NULL, NULL);
     free(descr_owners);
     return(ERROR);
@@ -2562,7 +2534,6 @@ int32_t StoreDescrOwners()
   /* Write the descr_owners to file */
   for (i=0; i<nr_of_ldescrs; i++) {
     if (!StoreInt32(descr_owners[i])) {
-      ErrHdr();
       PrintError(45, NULL, NULL);
       free(descr_owners);
       return(ERROR);
@@ -2750,4 +2721,3 @@ void ProcLAttrVal(attrs, id, type, value, value_owner)  /*10march2017 */
   attrs[index].value = value;
   attrs[index].owner = value_owner; /*10march2017 */
 }
-

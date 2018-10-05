@@ -1,0 +1,22 @@
+
+$VERB poke
+ PROLOGUE
+   if not(testflag(o_actor.f_alive)) then
+     if trigger(o_actor.t_talk_to_dead) then
+       disagree()
+     endif
+   endif
+
+ "poke [o_subject]",
+ "poke in [o_subject]"
+   print("[the] [o_actor] poke")
+   if not(equal(o_actor, o_player)) then
+     print("s")
+   endif
+   printcr(" [the] [o_subject], but nothing happens.")
+
+ DEFAULT
+   printcr("I only understood you as far as wanting to poke something.")
+
+ENDVERB
+

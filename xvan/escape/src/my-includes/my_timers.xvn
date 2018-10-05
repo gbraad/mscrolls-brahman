@@ -1,4 +1,10 @@
 
+# my timers for stairs.xvn
+
+#===========
+# Timer part
+#===========
+
 $TIMERS
 
  m_moves
@@ -13,22 +19,48 @@ $TIMERS
   step       1
   direction  up
   interval   1
-  state      go
+  state      stop
   trigger_at 1 OR_MORE
   execute    o_npc.t_move
+
+m_heat
+  init          3
+  step          1
+  direction  down
+  interval      1
+  state      stop
+  trigger_at    0
+  execute       l_closet.t_leave
+
+m_carpet
+  init         10
+  step          1
+  direction  down
+  interval      1
+  state      stop
+  trigger_at    0
+  execute       o_carpet.t_dry
+
+ m_snake
+   init       1
+   step       1
+   direction  up
+   interval   1
+   state      stop
+   trigger_at 1 or_more
+   execute    o_snake.t_crawl
 
  m_battery
    init       250
    step       1
    direction  down
    interval   1
-   state      go
+   state      stop
    trigger_at 0
    execute    o_lamp.t_empty
 
 # The following timers are used in the dial puzzle.
 # All three dials must be set to 8 at the same time.
-
 
  m_red_dial
    init      0

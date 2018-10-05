@@ -14,17 +14,24 @@ $OBJECT o_it
   f_update_it = 1  # to determine if auto update
 
  ATTRIBUTES
-  r_it = %none
+  r_it       = %none
+  r_last_loc = l_location
 
  TRIGGERS
   t_update_it
-    if testflag(f_update_it) then
-      if not(equal(o_subject, o_it) or equal(o_subject, %none)) then
-        r_it = o_subject
+    if not(equal(r_last_loc, l_location)) then
+      # they went to a new location, cancel. Erase 'it' object
+      # because it will otherwise not be reparsed
+      r_it = %none
+    else
+      if testflag(f_update_it) then
+        if not(equal(o_subject, o_it) or equal(o_subject, %none)) then
+          r_it = o_subject
+        endif
       endif
-      # some object already updated r_it
-      setflag(f_update_it)
     endif
+    r_last_loc = l_location
+    setflag(f_update_it)
     m_update_it = 0
 
 END_OBJ

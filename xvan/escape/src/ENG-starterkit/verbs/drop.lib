@@ -28,6 +28,11 @@ $VERB drop SYNONYM put
   endif
   agree()
 
+ EPILOGUE
+   # check if they dropped the light source out of sight
+   if not(islit(o_player)) then
+     printcr("It is now pitch black.")
+
  "drop"
    if equal(o_actor, o_player) then
      printcr("What do you want to drop?")
@@ -38,19 +43,14 @@ $VERB drop SYNONYM put
 
  "drop [o_subject]"
    DISAMBIGUATION_RULES
-    if owns(o_actor, o_subject) then score(5) endif
+    if owns(o_actor, o_subject) then score(10) endif
+    if testflag(o_subject.f_takeable) then score(5) endif  # make o_nst loose
    END_RULES
 
    if owns(o_actor, o_subject) then
      clearflag(o_subject.f_bypass)
      move(o_subject, owner(owner(o_subject)))
-     print("[the] [o_actor]")
-     if equal(o_actor, o_player) then
-       print(" drop ")
-     else
-       print(" drops ")
-     endif
-     printcr("[the] [o_subject].")
+     printcr("dropped.")
    else
      if testflag(o_subject.f_takeable) then
        printcr("[the] [o_actor] [o_actor.r_is] not holding the [o_subject].")
@@ -59,8 +59,10 @@ $VERB drop SYNONYM put
 
  "drop [o_subject] [prepos] [o_spec]"
    DISAMBIGUATION_RULES
-     if owns(o_actor, o_subject) then score(5) endif
-     if testflag(o_spec.f_container) then score(5) endif
+    if owns(o_actor, o_subject) then score(5) endif
+    if testflag(o_subject.f_takeable) then score(5) endif  # make o_nst loose
+    if not(owns(o_actor, o_spec)) then score(5) endif
+    if testflag(o_spec.f_container) then score(5) endif
    END_RULES
 
    printcr("[the] [o_actor] cannot drop [the] [o_subject] [prepos] [the] [o_spec].")

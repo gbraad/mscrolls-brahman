@@ -36,10 +36,10 @@ $VERB lock
 
    if owns(o_actor, o_subject.r_key) then
      if testflag(o_subject.f_open) then
-       printcr("[[closing [the] [o_subject] first].")
+       printcr("(closing [the] [o_subject] first).")
        clearflag(o_subject.f_open)
      endif
-     printcr("[[with [the] [o_subject.r_key]].")
+     printcr("(with [the] [o_subject.r_key]).")
      setflag(o_subject.f_locked)
      printcr("[the] [o_subject] is now locked.")
    else

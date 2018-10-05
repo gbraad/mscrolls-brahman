@@ -47,7 +47,7 @@ int32_t NL_CheckIfKeyword(word_lwr)
   /* language is changed, the keywords won't be recognized */
 
   /* story info keywords */
-    if (strncmp(word_lwr, "story_info", MAX_WORD_LEN) == 0)   /* @@@ */
+    if (strncmp(word_lwr, "story_info", MAX_WORD_LEN) == 0)
       return(STORY_INFO);
     if (strncmp(word_lwr, "verhaal_info", MAX_WORD_LEN) == 0)
       return(STORY_INFO);
@@ -114,11 +114,11 @@ int32_t NL_CheckIfKeyword(word_lwr)
     if (strncmp(word_lwr, "geen_kompas", MAX_WORD_LEN) == 0)
       return(NO_COMPASS);
     if (strncmp(word_lwr, "autolink", MAX_WORD_LEN) == 0)
-      return(AUTOLINK);                                         /* @@@ */
+      return(AUTOLINK);
     if (strncmp(word_lwr, "primary_color", MAX_WORD_LEN) == 0)
-      return(PRIMARY_COLOR);                                         /* @@@ */
+      return(PRIMARY_COLOR);
     if (strncmp(word_lwr, "hoofdkleur", MAX_WORD_LEN) == 0)
-      return(PRIMARY_COLOR);                                         /* @@@ */
+      return(PRIMARY_COLOR);
     /* end of story info keywords */
 
   if (strncmp(word_lwr, "kanzien", MAX_WORD_LEN) == 0)
@@ -479,13 +479,13 @@ int32_t NL_CheckIfKeyword(word_lwr)
     return(LIBRARY);
       if (strncmp(word_lwr, "isding", MAX_WORD_LEN) == 0)
     return(ISOBJECT);
-  if (strncmp(word_lwr, "addjson", MAX_WORD_LEN) == 0)  /* @@@ */
+  if (strncmp(word_lwr, "addjson", MAX_WORD_LEN) == 0)
     return(ADDJSON);
-  if (strncmp(word_lwr, "clearjson", MAX_WORD_LEN) == 0)  /* @@@ */
+  if (strncmp(word_lwr, "clearjson", MAX_WORD_LEN) == 0)
     return(CLEARJSON);
-  if (strncmp(word_lwr, "sendjson", MAX_WORD_LEN) == 0)  /* @@@ */
+  if (strncmp(word_lwr, "sendjson", MAX_WORD_LEN) == 0)
     return(SENDJSON);
-  if (strncmp(word_lwr, "geentimers", MAX_WORD_LEN) == 0)  /* @@@ */
+  if (strncmp(word_lwr, "geentimers", MAX_WORD_LEN) == 0)
     return(NOTIMERS);
   return(NO_KEYWORD);
 }

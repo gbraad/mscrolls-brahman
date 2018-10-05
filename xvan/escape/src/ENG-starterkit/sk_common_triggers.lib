@@ -14,35 +14,32 @@ t_entrance
   if equal(%this, l_location) then
     printcrbold(%this)
     if not(testflag(%this.f_seenbefore)) or testflag(o_player.f_verbose) then
-      printcr(%this.d_entr_long)
+      print(%this.d_entr_long)
       setflag(f_seenbefore)
     else
-      printcr(%this.d_entr_short)
+      print(%this.d_entr_short)
     endif
     agree()
   endif
 
   # part for objects
-  indent(2)
   if cansee(o_player, %this) then
     if equal(owner(%this), owner(o_player)) then
       # same containment level
       if testflag(%this.f_seenbefore) then
-        printcr(%this.d_entr_short)
+        print(%this.d_entr_short)
       else
-        printcr(%this.d_entr_long)
+        print(%this.d_entr_long)
         setflag(%this.f_seenbefore)
     else
       if not(owns(o_player, %this, 0)) then
-        indent()
-        print("[this.r_preposition] [the] ")
+        print("\n[this.r_preposition] [the] ")
         print(owner(%this))
         printcr(" is [a] [this].")
       endif
     endif
     setflag(%this.f_seenbefore)
   endif
-  indent(-2)
   agree()
 
 
@@ -64,12 +61,11 @@ t_i
 
 
 t_reveal
-  # trigger used by verb 'open'
   o_player.r_nr_to_reveal -= 1
   if cansee(o_player, %this) then
+    setflag(%this.f_seenbefore)
     if testflag(o_player.f_first) then
       clearflag(o_player.f_first)
-      print("Opening [the] [o_subject] reveals ")
       if equal(o_player.r_nr_to_reveal, 0) then
         printcr("[a] [this].")
       else
@@ -84,9 +80,6 @@ t_reveal
       endif
     endif
   endif
-  if equal(o_player.r_nr_to_reveal, 0) and testflag(o_player.f_first) then
-    # all invisible to the player, nobody printed something
-    printcr("[the] [o_subject] is now open.")
 
 
 t_talk_to_dead

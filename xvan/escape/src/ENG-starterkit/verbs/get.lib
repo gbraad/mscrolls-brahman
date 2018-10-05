@@ -38,19 +38,18 @@ $VERB get SYNONYM take SYNONYM grab
 
  "get [o_subject]"
    DISAMBIGUATION_RULES
-    if testflag(o_subject.f_takeable) then score(5) endif
-    if not(owns(o_actor, o_subject)) then score(5) endif
+    if testflag(o_subject.f_takeable) and not(owns(o_actor, o_subject)) then score(5) endif
    END_RULES
-
    if not(testflag(o_subject.f_takeable)) then
      printcr("[the] [o_subject] is not something that can be taken.")
+     disagree()
    else
      if not(owns(o_actor, o_subject)) then
        setflag(o_subject.f_bypass)
        move(o_subject, o_actor)
-       printcr("[o_subject]: taken.")
+       printcr("taken.")
      else
-       printcr("But [the] [o_actor] already has the [o_subject].")
+       printcr("But [the] [o_actor] already [o_actor.r_have] the [o_subject].")
      endif
    endif
 
@@ -65,13 +64,15 @@ $VERB get SYNONYM take SYNONYM grab
 
    if not(testflag(o_subject.f_takeable)) then
      printcr("[the] [o_subject] is not something that can be taken.")
+     disagree()
    else
      if owns(o_spec, o_subject) then
        setflag(o_subject.f_bypass)
        move(o_subject, o_actor)
-       printcr("[o_subject]: taken.")
+       printcr("taken.")
      else
        printcr("[the] [o_actor] cannot get [the] [o_subject] [prepos] [the] [o_spec].")
+       disagree()
      endif
    endif
 

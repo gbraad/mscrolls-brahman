@@ -1,5 +1,5 @@
 
-$VERB break
+$VERB break SYNONYM smash
  PROLOGUE
    if not(testflag(o_actor.f_alive)) then
      if trigger(o_actor.t_talk_to_dead) then
@@ -9,11 +9,8 @@ $VERB break
 
    if not(equal(o_spec, %none)) then
      if not(owns(o_actor, o_spec)) then
-       if testflag(o_spec.f_takeable) then
-         printcr("[[taking [the] [o_spec] first].")
-         move(o_spec, o_actor)
-       else
-         printcr("[the] [o_actor] cannot take [the] [o_spec] to break [the] [o_subject].")
+       printcr("(taking [the] [o_spec]).")
+       if not(try(l_location, 0, 0, "get [o_spec]")) then
          disagree()
        endif
      endif

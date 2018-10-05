@@ -19,7 +19,7 @@ $VERB examine SYNONYM x SYNONYM investigate
    if equal(o_subject, l_location) then
      entrance(l_location)
    else
-     printcr("[o_subject.d_exa]")
+     print("[o_subject.d_exa]")
      setflag(o_subject.f_seenbefore)
      contents(o_subject)
 

@@ -3,11 +3,6 @@ $VERB ask
  SCOPE all_locs
 
  PROLOGUE
-   if not(cansee(o_actor, o_subject)) then
-     printcr("There is no [o_subject] here.")
-     disagree()
-   endif
-
    if not(testflag(o_actor.f_alive)) then
      printcr("Do you realize that you are talking to [a] [o_actor]?.")
      disagree()
@@ -22,7 +17,12 @@ $VERB ask
    DISAMBIGUATION_RULES
      if testflag(o_spec.f_seenbefore) then score(5) endif
    END_RULES
-     
+
+   if not(cansee(o_actor, o_spec)) then
+     printcr("[the] is not here.")
+     disagree()
+   endif
+
    if equal(o_subject, o_actor) then
      printcr("Talking to yourself is a sign of pending mental collapse.")
    else
@@ -40,4 +40,3 @@ $VERB ask
       printcr("(to turn off these help messages, type 'help')")
 
 ENDVERB
-

@@ -1,5 +1,5 @@
 
-$VERB turn
+$VERB turn SYNONYM rotate
  PROLOGUE
    if not(testflag(o_actor.f_alive)) then
      if trigger(o_actor.t_talk_to_dead) then

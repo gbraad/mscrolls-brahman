@@ -28,18 +28,18 @@ $VERB unlock
  "unlock [o_subject]"
    DISAMBIGUATION_RULES
     if testflag(o_subject.f_locked) then score(5) endif
-    END_RULES
+   END_RULES
 
    if owns(o_actor, o_subject.r_key) then
-     printcr("[[with [the] [o_subject.r_key]].")
+     printcr("(with [the] [o_subject.r_key]).")
      clearflag(o_subject.f_locked)
      printcr("[the] [o_subject] is now unlocked.")
    else
      printcr("[the] [o_actor] [o_actor.r_do] not seem to have the right key.")
 
  "unlock [o_subject] with [o_spec]"
-  DISAMBIGUATION_RULES
-   if testflag(o_subject.f_locked) then score(5) endif
+   DISAMBIGUATION_RULES
+    if testflag(o_subject.f_locked) then score(5) endif
    END_RULES
 
    if not(owns(o_actor, o_spec)) then

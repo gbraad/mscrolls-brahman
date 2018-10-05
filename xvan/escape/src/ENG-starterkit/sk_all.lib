@@ -9,51 +9,84 @@ $OBJECT o_all
  CONTAINED in o_player
 
  FLAGS
-  f_hidden = 1
-  f_bypass = 1
-  f_fixed  = 0
+  f_hidden   = 1
+  f_bypass   = 1
+  f_takeable = 1
+  f_openable = 1  # to get through prologues
+  f_lockable = 1
+  f_wearable = 1
+  f_alive    = 1
+  f_fixed    = 0
+  f_any      = 0  # to not participate in synchronize()
 
  TRIGGERS
-  "drop [o_all]"               -> t_drop_all
-  "take [o_all]"               -> t_take_all
-  "take [o_all] from [o_spec]" -> t_take_all_from
-  "[action] [o_all]"           -> t_other
+  "drop [o_all]"                   -> t_sk_drop_all
+  "drop [o_all] [prepos] [o_spec]" -> t_sk_drop_all_prepos
+  "take [o_all]"                   -> t_sk_take_all
+  "take [o_all] [prepos] [o_spec]" -> t_sk_take_all_prepos
 
-  t_drop_all
-    if equal(synchronize(o_actor, t_drop, f_takeable, 1), 0) then
+  t_ifi_items
+    # o_all should not be listed as a contained item
+    agree()
+
+  t_sk_drop_all
+    if equal(synchronize(o_actor, t_sk_drop, f_takeable, 1), 0) then
       printcr("There is nothing to drop.")
 
-  t_take_all
-    if equal(synchronize(owner(o_actor), t_take, f_takeable, 1, 0), 0) then
+  t_sk_drop_all_prepos
+    if equal(synchronize(o_actor, t_sk_drop_prepos, f_takeable, 1), 0) then
+      printcr("There is nothing to drop.")
+
+  t_sk_take_all
+    if equal(synchronize(owner(o_actor), t_sk_take, f_takeable, 1, 0), 0) then
       printcr("There is nothing to take.")
 
-  t_take_all_from
-    if equal(synchronize(o_spec, t_take, f_takeable, 1, 0), 0) then
+  t_sk_take_all_prepos
+    if equal(synchronize(o_spec, t_sk_take_prepos, f_takeable, 1, 0), 0) then
       printcr("There is nothing to take from [the] [o_spec].")
 
-  t_other
-    printcr("All cannot be used with [action]. You must address objects individually.")
+  t_default
+    if equal(o_actor, %this) or equal(o_subject, %this) or equal(o_spec, %this) then
+      printcr("For [action] you must address objects individually.")
+    else
+      nomatch()
 
 END_OBJ
 
 
 $COMMON_TRIGGERS
- t_drop
-   if not(testflag(f_hidden)) then
-     move(%this, owner(o_actor))
-     printcr("[this]: dropped.")
+ t_sk_drop
+   if owns(o_actor, %this) and not(testflag(f_hidden)) then
+     # also o_all which otherwise will cause an endless loop
+     print("[this]: ")
+     if try(l_location, 0, 0, "drop [this]") then endif
    else
      nomatch()
 
- t_drop_all_prepos
-   # called by specifier from 'drop all [prepos] [o_spec]' command
-   if not(testflag(f_hidden)) then
-     printcr("[this]: dropped [prepos] [the] [o_spec]")
-     move(%this, o_spec, %prepos)
+ t_sk_drop_prepos
+   if owns(o_actor, %this) and not(testflag(f_hidden)) then
+     # also o_all which otherwise will cause an endless loop
+     print("[this]: ")
+     if try(l_location, 0, 0, "drop [this] [prepos] [o_spec]") then endif
+   else
+     nomatch()
 
- t_take
-   if cansee(o_actor, %this) and not(owns(o_actor, %this)) then
-     move(%this, o_actor)
-     printcr("[this]: taken.")
+ t_sk_take
+   if not(owns(o_actor, %this, 0)) and 
+      (cansee(o_actor, %this) or testflag(%this.f_bypass)) and
+      testflag(%this.f_seenbefore) then
+     # also excludes o_all which otherwise will cause an endless loop
+     print("[this]: ")
+     if try(l_location, 0, 0, "take [this]") then endif
+   else
+     nomatch()
+
+ t_sk_take_prepos
+   if not(owns(o_actor, %this, 0)) and 
+      (cansee(o_actor, %this) or testflag(%this.f_bypass)) and
+      testflag(%this.f_seenbefore) then
+     # also excludes o_all which otherwise will cause an endless loop
+     print("[this]: ")
+     if try(l_location, 0, 0, "take [this] [prepos] [o_spec]") then endif
    else
      nomatch()

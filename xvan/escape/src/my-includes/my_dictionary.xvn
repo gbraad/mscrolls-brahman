@@ -1,22 +1,35 @@
 
-# XVAN Starter Kit version 1.0
+# my dictionary for stairs.xvn
 
+#===================
+# Directions section
+#===================
+
+$DIRECTIONS
+in, out
 
 #=============
 # Noun section
 #=============
 
 $NOUNS
-
-dial, dials, Fred, guy, keyhole, keypad, lantern, npc, vault, walls, you SYNONYM me
+alcove, bars, buttons, clamp, dial, dials, edges, engraving, flames, fred, grating, 
+groove, guy, hacksaw, halfway, hedges, inscription, keyhole, keypad, lever, nails, notch, 
+notches, photos, python, saw, shard, shed, splinter, splinters, stairs, toaster, trapdoor, 
+upstairs, vault, you SYNONYM me
 
 #==================
 # Adjective section
 #==================
 
 $ADJECTIVES
-brass, chest, colored, dial, east, escape, golden, metal, nondescript, north, red, south, vault, west,
+brass, carved, chest, closet, colored, counter, dial, drain, east, escape, garden, giant, 
+glass, golden, halfway, jessica, kitchen, living, metal, middle, nondescript, north, northern, 
+red, reset, rusty, shed, shiny, south, southern, tiny, tom, trap, vault, water, west, wood, 
 wooden
+
+$PREPOSITIONS
+around, clockwise, counterclockwise, into, of
 
 
 

@@ -5,29 +5,30 @@ $COMMON_FLAGS
 
 $VERB use
  "use [o_subject]"
-   if not(testflag(o_subject.f_examined)) then
-     print("\n> examine [o_subject].\n")
-     if try(l_location, 0, "examine [o_subject]") then
+   if testflag(o_subject.f_examined) and testflag(o_subject.f_takeable) then
+     print("\n> get [o_subject].\n")
+     if try(l_location, 0, 0, "get [o_subject]") then
        # '0' means print output from the command
        # '1' means mute
-       setflag(o_subject.f_examined)
        agree()
      endif
    else
-     print("\n> get [o_subject].\n")
-     if try(l_location, 0, "get [o_subject]") then
+     print("\n> examine [o_subject].\n")
+     if try(l_location, 0, 0, "examine [o_subject]") then
+       setflag(o_subject.f_examined)
        agree()
+     endif
 
  "use [o_subject] with [o_spec]"
    if testflag(o_spec.f_alive) then
      if testflag(o_subject.f_alive) then
        print("\n> ask [o_spec] about [o_subject].\n")
-       if try(l_location, 0, "ask [o_spec] about [o_subject]") then
+       if try(l_location, 0, 0, "ask [o_spec] about [o_subject]") then
          agree()
        endif
      else
        print("\n> give [o_spec] to [o_subject].\n")
-       if try(l_location, 0, "give [o_spec] to [o_subject]") then
+       if try(l_location, 0, 0, "give [o_spec] to [o_subject]") then
          agree()
        endif
      endif
@@ -35,18 +36,18 @@ $VERB use
    endif
    if testflag(o_spec.f_locked) and testflag(o_subject.f_key) then
      print("\n> unlock [o_spec] with [o_subject].\n")
-     if try(l_location, 0, "unlock [o_spec] with [o_subject]") then
+     if try(l_location, 0, 0, "unlock [o_spec] with [o_subject]") then
        agree()
      endif
    else
      if testflag(o_spec.f_container) then
        print("\n> put [o_subject] in [o_spec].\n")
-       if try(l_location, 0, "put [o_subject] in [o_spec]") then
+       if try(l_location, 0, 0, "put [o_subject] in [o_spec]") then
          agree()
        endif
      else
        print("\n> put [o_subject] on [o_spec].\n")
-       if try(o_actor, 0, "put [o_subject] on [o_spec]") then
+       if try(o_actor, 0, 0, "put [o_subject] on [o_spec]") then
          agree()
        endif
      endif
@@ -55,3 +56,7 @@ $VERB use
    agree() # do nothing
 
 ENDVERB
+
+
+
+   

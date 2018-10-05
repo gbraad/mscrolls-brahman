@@ -165,11 +165,11 @@ int32_t main(argc, argv)
   int32_t   err = 0;       /* No errors yet. */
   storyInfo story_info;
 
-  printf("                     ***********************************************\n");
+  printf("                     *************************************************\n");
   printf("                                        XVAN COMPILER\n");
   printf("                                        version 2.3.4\n");
   printf("                       Copyright 2016, 2017, 2018 Marnix van den Bos\n");
-  printf("                     ***********************************************\n\n");
+  printf("                     *************************************************\n\n");
 
 
 

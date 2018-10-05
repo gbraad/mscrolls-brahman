@@ -186,9 +186,11 @@ int32_t FindCTriggerIds(word, keyword, redefine, source, file_list)
             /* set parsed to 1 to force GetTriggerId() */
             /* to make a struct in the trigger table   */
             return(ERROR);
-        } else
+        }
+        else {
           free(*word);
           *word = GetNextWord(keyword, NO_ID, 0, source, file_list);
+        }
         break;
       case LOC_ID:   ;
       case OBJ_ID:   ;

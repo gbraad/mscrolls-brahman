@@ -36,10 +36,10 @@
                                  /* after 20 chars                 */
 #define MAX_WORD_LEN          20 /* words will be truncated after  */
                                  /* 15 chars                       */
-#define MAX_TITLE_LEN        100 /* must be the same as input_line_len */ /* @@@ */
-#define MAX_VERSION_LEN      100 /* must be the same as input_line_len */ /* @@@ */
-#define MAX_FILENAME_LEN     100 /* must be the same as input_line_len */ /* @@@ */
-#define MAX_COMPILER_LEN     100 /* must be the same as input_line_len */ /* @@@ */
+#define MAX_TITLE_LEN        100 /* must be the same as input_line_len */
+#define MAX_VERSION_LEN      100 /* must be the same as input_line_len */
+#define MAX_FILENAME_LEN     100 /* must be the same as input_line_len */
+#define MAX_COMPILER_LEN     100 /* must be the same as input_line_len */
 #define MAX_TRIGG_LEN       1000
 #define INPUT_LINE_LEN       100 /* for interpreter 08mrt2018:     */
                                  /* changed to 100 for IFI-version */
@@ -199,9 +199,9 @@
 #define CLEARSCREEN    108
 #define HITANYKEY      109
 #define SCORE          110
-#define CLEARJSON      111  /* @@@ */
-#define ADDJSON        112  /* @@@ */
-#define SENDJSON       113  /* @@@ */
+#define CLEARJSON      111
+#define ADDJSON        112
+#define SENDJSON       113
 #define NOTIMERS       114
 #define UPPER_BOUND_INT_ACT         116
 
@@ -285,7 +285,7 @@
 #define NO_SIDEBAR      191
 #define NO_TEXTINPUT    192
 #define NO_COMPASS      193
-#define AUTOLINK        194  /* @@@ */
+#define AUTOLINK        194
 #define UPPER_BOUND_COMPILER_KEYWORD 199
 
 
