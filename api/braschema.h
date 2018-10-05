@@ -88,6 +88,7 @@
 #define BRA_PRO_COVERTEXT_COL   "covertext_col"
 #define BRA_PRO_COVER_EFFECT    "cover_effect"
 #define BRA_PRO_COVER_IMAGE     "cover_image"
+#define BRA_PRO_PRIVACY         "privacy"
 
 #define BRA_PRO_THM_PRIME_COL   "prime_color"
 #define BRA_PRO_THM_ACCENT_COL  "acc_color"

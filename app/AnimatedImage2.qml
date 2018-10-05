@@ -44,6 +44,18 @@ Image
     cache: false
     property bool animationEnabled: true
 
+    onWidthChanged: updateImage()
+    onHeightChanged: updateImage()
+
+    function updateImage()
+    {
+        if (suffix(imageName) == ".svg")
+        {
+            // re-render when app size changes
+            sourceSize = QControl.svgRenderSize(width, height)
+        }
+    }
+    
     function suffix(name)
     {
         return name.substring(name.lastIndexOf('.')).toLowerCase();
@@ -61,6 +73,11 @@ Image
                 // only PNG animated
                 step()
                 if (animationEnabled) animt.start()
+            }
+            else if (s == ".svg")
+            {
+                sourceSize = QControl.svgRenderSize(width, height)
+                source = imageName                
             }
             else
             {

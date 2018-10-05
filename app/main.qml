@@ -66,11 +66,14 @@ ApplicationWindow
     property string gameCredits: QControl.gameCreditsHTML()
     property bool enableSaveLoad: QControl.gameEnableSaveLoad()
     property bool enableClassic: QControl.gameEnableClassic()
+    property string privacyPolicy: QControl.gamePrivacyPolicy()
     
     // classic or enabled through IFI meta
     property bool enableRestart: QControl.gameEnableClassic()
 
     property string soundJSON: QControl.soundJSON
+    property int force: QControl.force
+    property string currentSound
     
     function setThemeCols(matname)
     {
@@ -108,6 +111,8 @@ ApplicationWindow
         if (v) author = v
         v = js["organisation"]
         if (v) organisation = v
+        v = js["privacy"]
+        if (v) privacyPolicy = v
         v = js["ui_textinput"]
         if (v) enableTextInput = true
         v = js["ui_sidebar"]

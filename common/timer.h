@@ -56,9 +56,14 @@ struct Timer
 
     Timer() { _init(); }
 
-    void report(std::ostream& os)
+    int elapsedMS() const
     {
-        uint tms = (now()*1000 + 0.5);
+        return (now()*1000 + 0.5);
+    }
+
+    void report(std::ostream& os) const
+    {
+        uint tms = elapsedMS();
         os << "time " << tms << "ms\n";
     }
 
@@ -66,7 +71,7 @@ struct Timer
     
     bool started() const { return _start != 0; }
 
-    double now()
+    double now() const
     {
         LARGE_INTEGER li;
         QueryPerformanceCounter(&li);
@@ -145,12 +150,46 @@ struct TimeReport
     }
 };
 
+struct TimeAlert
+{
+    Timer       _t;
+    const char* _name;
+    int         _minTime;
+    int         _level;
+
+
+    TimeAlert(const char* name, int minTime, int level = 2)
+        : _name(name), _minTime(minTime),  _level(level)
+    {
+        _t.start();
+    }
+
+    bool        willReport() const
+    { 
+        return Logged::_logLevel >= _level && _t.elapsedMS() >= _minTime;
+    }
+
+    ~TimeAlert()
+    {
+        if (willReport())
+        {
+            std::cerr << "TIMER ALERT: " << _name << ' ';
+            _t.report(std::cerr);
+        }
+    }
+};
+
 #else // debug
 
 struct Timer {};
 struct TimeReport 
 {
     TimeReport(const char*, int level = 2) {}
+};
+
+struct TimeAlert 
+{
+    TimeAlert(const char*, int minTime, int level = 2) {}
 };
 
 #endif

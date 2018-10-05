@@ -40,6 +40,8 @@
 #include <QDebug>
 #include <QPluginLoader>
 #include <QColor>
+#include <QResource>
+#include <QSize>
 #include <assert.h>
 
 #ifdef Q_OS_ANDROID
@@ -77,6 +79,7 @@ class QControl : public QObject, public Control
     Q_PROPERTY(QString titleText READ titleText NOTIFY titleTextChanged);
 
     Q_PROPERTY (QString soundJSON READ soundJSON NOTIFY soundJSONChanged)
+    Q_PROPERTY (int force READ force NOTIFY forceChanged);
 
     typedef Control parentT;
 
@@ -104,6 +107,7 @@ public:
     int                         _topBarHeight = 0;
 
     AnimImageProvider*          _animProvider = 0;
+    int                         _force = 0;
 
     static QControl* theControl()
     {
@@ -131,6 +135,14 @@ public:
 #if defined(Q_OS_ANDROID)
         setupAndroidLog();
 #endif
+    }
+
+    int force() const { return _force; }
+    void forceUpdate()
+    {
+        //LOG3("MS, ", "force update");
+        ++_force;
+        forceChanged(); 
     }
 
     // initialise the control object
@@ -281,6 +293,7 @@ public:
     _GAME_STR(Credits, CREDITS);
     _GAME_STR(MarketAndroid, MARKET_ANDROID);
     _GAME_STR(MarketIOS, MARKET_IOS);
+    _GAME_STR(PrivacyPolicy, PRIVACY);
     _GAME_STR_D(CoverTextColor, COVERTEXT_COL, "black");
     _GAME_STR_D(CoverTextFont, COVERTEXT_FNT, "Arial");
     _GAME_STR(CoverEffect, COVER_EFFECT);
@@ -333,7 +346,23 @@ public:
 
     Q_INVOKABLE QString resolveAsset(const QString& path)
     {
-        return QSTR(Control::resolveAsset(STRQ(path)));
+        // first see if this is a QT resource
+        QResource qr(path);
+
+        if (qr.isValid())
+        {
+     
+            QString qpath("qrc:///");
+            qpath += path;
+
+            LOG3("Located as Qt resource ", STRQ(qpath));
+            
+            return qpath;
+        }
+        else
+        {
+            return QSTR(Control::resolveAsset(STRQ(path)));
+        }
     }
 
     Q_INVOKABLE QString formatCoverText(const QString& qfname,
@@ -471,7 +500,11 @@ public:
 
     // trigger a sound, from ifiSoundResponse 
     // called also from transcripti
-    void soundChanged(const string& js) override { soundJSON(js); }
+    void soundChanged(const string& js) override
+    {
+        soundJSON(js);
+        if (js == "{}") forceUpdate();
+    }
 
     QString currentMessage() const { return QSTR(_currentMessage); }
     void currentMessage(const string& text) { currentMessage(text.c_str()); }
@@ -655,6 +688,36 @@ public:
         return Control::compassDirection(dir);
     }
 
+    Q_INVOKABLE QSize svgRenderSize(int w, int h)
+    {
+        // 16:9 aspect
+        int aspw = 16;
+        int asph = 9;
+        
+        // arrange mins
+        if (w < 1024) w = 1024;
+        if (h < 576) h = 576;
+
+        // find min (w1, h1) that covers (w, h) with aspect
+        int w1 = h*aspw/asph;
+        //int h1 = h;
+        if (w1 < w)
+        {
+            w1 = w;
+            //h1 = w*asph/aspw;            
+        }
+
+        // quantize to K pixels, so we dont resize all the time!
+        int k = 256;
+        int q = w1/k;
+        int w2 = q*k;
+        if (w2 < w1) w2 += k;
+        int h2 = w2*asph/aspw;
+
+        //LOG3("svg render size ", w2 << " x " << h2 << ": " << ((float)w2)/h2);
+        return QSize(w2, h2);
+    }
+
 public slots:
 
     void uiInitialised()
@@ -670,6 +733,7 @@ signals:
     void currentMessageChanged();
     void titleTextChanged();
     void soundJSONChanged();
+    void forceChanged();
 
 public:
     

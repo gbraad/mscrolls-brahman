@@ -59,6 +59,7 @@ struct ProductInfoBuilder: public InfoBuilder
     _PS(CoverImage, BRA_PRO_COVER_IMAGE);
     _PS(MarketAndroid, BRA_PRO_MARKET_ANDROID);
     _PS(MarketIOS, BRA_PRO_MARKET_IOS);
+    _PS(PrivacyPolicy, BRA_PRO_PRIVACY);
 
     void productCoverTextWeight(int w) { tagInt(BRA_PRO_COVERTEXT_W, w); }
 

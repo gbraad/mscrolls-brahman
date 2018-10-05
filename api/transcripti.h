@@ -163,6 +163,15 @@ struct Transcript::Imp : public ImpType<Transcript>
                 _host->_control->imageChanged(imagepath);
             }
         }
+        else if (_currentSegmentId == BRA_SEGMENT_SOUND)
+        {
+            string js = trim(_segmentText);
+            _segmentText.clear();
+            if (!js.empty() && js[0] == '{')
+            {
+                _host->_control->soundChanged(js);
+            }
+        }
         else if (_currentSegmentId == BRA_SEGMENT_TITLE)
         {
             //LOG3("title segment '", _segmentText << "'");

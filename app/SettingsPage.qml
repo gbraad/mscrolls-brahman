@@ -360,6 +360,14 @@ Page
 
             ListItem.Subtitled
             {
+                text: "Privacy Policy"
+                subText: "Tap to open browser"
+                visible: app.privacyPolicy.length > 0
+                onClicked: Qt.openUrlExternally(app.privacyPolicy)
+            }
+
+            ListItem.Subtitled
+            {
                 text: "About"
                 subText: 
                 {
