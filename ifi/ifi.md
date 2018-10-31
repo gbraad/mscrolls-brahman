@@ -150,7 +150,6 @@ These are the json tags that may appear in a _request_. See the _Replies_ sectio
 
 The _reply_ json, sent from the back-end to the front-end, can have these terms at the top level. Some of the terms have values that are (optionally) json objects. In these cases, consult the subsequent json object definitions.
 
-
 * `text: "You are in a maze of twisty passages all alike."`  
    Block of text from the game to be formatted and shown in the transcript window. A newline will be added to the end when displayed. The `text` may contain a subset of [Markdown](https://daringfireball.net/projects/markdown/) and HTML.
 
@@ -178,6 +177,9 @@ The _reply_ json, sent from the back-end to the front-end, can have these terms 
     Initiate `savedata` load from the back-end.
 
     See section "Save and Load".
+
+* `restart: true`  
+   Erase all UI-side state.
 
 * `items: [{item}...]`  
    item details for the sidebar (eg inventory).

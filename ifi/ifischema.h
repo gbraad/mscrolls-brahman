@@ -52,6 +52,7 @@
 #define IFI_RANDOMSEED  "randomseed"
 #define IFI_DATA        "data"
 #define IFI_BEGIN       "begin"
+#define IFI_RESTART     "restart"
 
 // reply only
 

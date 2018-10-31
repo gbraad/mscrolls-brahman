@@ -55,7 +55,7 @@
 
 // 1.1.X pre ifi
 // 1.2.X post ifi
-#define VERSION_STRING  "1.2.6"
+#define VERSION_STRING  "1.2.7"
 
 struct ControlImpBase
 {
@@ -1141,6 +1141,12 @@ struct Control::Imp :
             }
             
         }
+        return true;
+    }
+
+    bool ifiRestartResponse() override
+    {
+        _wordStat.reset();        
         return true;
     }
 

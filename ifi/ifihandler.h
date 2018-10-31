@@ -274,9 +274,11 @@ struct IFIHandler
                 LOG3("IFI savedata request ignored :", v);
             }
         }
-        else if (key == IFI_LOADDATA)
+        else if (key == IFI_LOADDATA) r = ifiLoadData(v.toString());
+        else if (key == IFI_RESTART)
         {
-            r = ifiLoadData(v.toString());
+            // ignore argument
+            r = ifiRestartResponse();
         }
 
         if (!r) ifiDefault(key, v);
@@ -293,6 +295,7 @@ struct IFIHandler
     virtual bool ifiTitleTextResponse(const string&) { return false; }
     virtual bool ifiPicture(bool v) { return false; }
     virtual bool ifiPictureResponse(const string&) { return false; }
+    virtual bool ifiRestartResponse() { return false; }
     virtual bool ifiSaveData()
     {
         // request
