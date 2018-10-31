@@ -262,6 +262,8 @@ void QControl::setSimOptions(const char* sim)
         
         { "ipad12vid", 1200, 1600, 1.15, "ipad12_bar", 23, 15},
         { "ipad12lvid", 1600, 1200, 1.15, "ipad12l_bar", 23, 15 },
+
+        { "pixel2xl", 1440, 2880, 3.5, "pixel2_bar", 0, 12 }, // h94
     };
 
     for (int i = 0; i < ASIZE(SimTab); ++i)

@@ -36,8 +36,7 @@ TEMPLATE=lib
 TARGET=ifigame
 QT = 
 
-
-CONFIG += dll
+#CONFIG += dll
 
 
 PROJ = $$PWD/..

@@ -346,16 +346,17 @@ public:
 
     Q_INVOKABLE QString resolveAsset(const QString& path)
     {
+        if (path.isEmpty()) return path;
+
         // first see if this is a QT resource
         QResource qr(path);
 
         if (qr.isValid())
         {
-     
             QString qpath("qrc:///");
             qpath += path;
 
-            LOG3("Located as Qt resource ", STRQ(qpath));
+            LOG4("Located as Qt resource ", STRQ(qpath));
             
             return qpath;
         }
@@ -542,12 +543,8 @@ public:
 
     Q_INVOKABLE QString getMusicFile() const
     {
-        // return non-empty string if exists
-        string mf;
-        if (!_musicFile.empty())
-            mf = string("file:///") + _musicFile; // turn url
-        
-        return QSTR(mf);
+        // NB: no longer make url
+        return QSTR(_musicFile);
     }
 
     Q_INVOKABLE bool saveGame(const QString& filename)
@@ -716,6 +713,17 @@ public:
 
         //LOG3("svg render size ", w2 << " x " << h2 << ": " << ((float)w2)/h2);
         return QSize(w2, h2);
+    }
+
+    Q_INVOKABLE void sentinel(const QString& qmsg)
+    {
+#ifdef Q_OS_ANDROID
+        _setupAndroidLog();
+#endif
+        string msg = STRQ(qmsg);
+        LOG1("QControl log 1 sentinel ", msg);
+        LOG3("QControl log 3 sentinel ", msg);
+        std::cout << "qcontrol cout sentinel " << msg << "\n" << std::flush;
     }
 
 public slots:

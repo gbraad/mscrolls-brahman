@@ -73,7 +73,6 @@ ApplicationWindow
 
     property string soundJSON: QControl.soundJSON
     property int force: QControl.force
-    property string currentSound
     
     function setThemeCols(matname)
     {
@@ -158,6 +157,11 @@ ApplicationWindow
     FontLoad { id: ptri; source: "fonts/PT_Serif-Web-Italic.ttf" }
     FontLoad { id: ptr; source: "fonts/PT_Serif-Web-Regular.ttf" }
 
+    FontLoad { id: mw; source: "fonts/Merriweather-Light.ttf" }
+    FontLoad { id: mwi; source: "fonts/Merriweather-LightItalic.ttf" }
+    //FontLoad { id: mwr; source: "fonts/Merriweather-Regular.ttf" }
+    //FontLoad { id: mwri; source: "fonts/Merriweather-Italic.ttf" }
+
     Component
     {
         id: retroFonts
@@ -207,138 +211,65 @@ ApplicationWindow
         QControl.colorContrast(theme.backgroundColor, 0.2) : theme.backgroundColor
     }
 
-    Audio
+    QSoundPlayer
     {
-        id: mplayer1
-        audioRole: MediaPlayer.MusicRole
-        loops: Audio.Infinite
-
-        //onErrorChanged: console.log("audio, ", errorString)
-        //onPlaybackStateChanged: console.log("audio play ", playbackState)
-        //onStatusChanged: console.log("audio state", status)
+        // this is to play ogg ambience and loops
+        id: soundplayer1
     }
 
-    Audio
+    function playTitleMusic()
     {
-        id: mplayer2
-        audioRole: MediaPlayer.MusicRole
-        loops: Audio.Infinite
-
-        //onErrorChanged: console.log("audio, ", errorString)
-        //onPlaybackStateChanged: console.log(">>>> audio2 play ", playbackState)
-        //onStatusChanged: console.log("audio state", status)
+        if (!QControl.prefs.musicEnabled) return;        
+        var mf = QControl.resolveAsset(QControl.getMusicFile())
+        if (mf.length > 0) playSound(mf, 0);
     }
 
-    NumberAnimation
+    function stopTitleMusic()
     {
-        id: fadein1
-        target: mplayer1
-        property: "volume"
-        to: 1
-        duration: 1000
+        stopSound(0)
+    }            
+
+    function playSound(f, ch)
+    {
+        if (!QControl.prefs.musicEnabled) return;
+
+        //console.log("playSound", f);
+        soundplayer1.loops = -1
+        soundplayer1.fade = 1000
+        soundplayer1.play(ch, f)
     }
 
-    NumberAnimation
+    function stopSound(ch)
     {
-        id: fadeout1
-        target: mplayer1
-        property: "volume"
-        to: 0
-        duration: 500
-        onStopped: mplayer1.stop()
-    }
+        soundplayer1.stop(ch);
+    }          
 
-    NumberAnimation
+    function updateSound()
     {
-        id: fadein2
-        target: mplayer2
-        property: "volume"
-        to: 1
-        duration: 1000
-    }
-
-    NumberAnimation
-    {
-        id: fadeout2
-        target: mplayer2
-        property: "volume"
-        to: 0
-        duration: 500
-        onStopped: mplayer2.stop()
-    }
-
-    function playMusic(mf)
-    {
-         if (mf.length > 0 && QControl.prefs.musicEnabled)
-         {
-             if (mplayer1.playbackState == Audio.PlayingState)
-             {
-                 fadein1.stop()
-                 fadeout1.start()
-
-                 // play on 2
-                 mplayer2.source = mf
-                 mplayer2.volume = 0
-                 mplayer2.play()
-                 fadein2.start()
-             }
-             else
-             {
-                 // play on 1
-
-                 // stop 2 if playing
-                 if (mplayer2.playbackState == Audio.PlayingState)
-                 {
-                     fadein2.stop()
-                     fadeout2.start()
-                 }
-
-                 mplayer1.source = mf
-                 mplayer1.volume = 0
-                 mplayer1.play()
-                 fadein1.start()
-             }
-         }
-    }
-
-    function stopMusic()
-    {
-        if (mplayer1.playbackState == Audio.PlayingState)
+        //console.log("sound JSON ", soundJSON)
+        var js = JSON.parse(soundJSON)
+        var ch = js["channel"]
+        if (ch == undefined) ch = 0
+        var d = js["duration"]
+        if (d !== undefined)
         {
-            fadein1.stop()
-            fadeout1.start()
+            if (d == 0)
+            {
+                stopSound(ch)
+            }
+            else
+            {
+                var v = QControl.resolveAsset(js["name"])
+                if (v.length > 0) playSound(v, ch)
+            }
         }
-
-        if (mplayer2.playbackState == Audio.PlayingState)
-        {
-            fadein2.stop()
-            fadeout2.start()
-        }
+        else stopSound(ch)
     }
 
-    onSoundJSONChanged:
-    {
-       //console.log("sound JSON ", soundJSON)
-       var js = JSON.parse(soundJSON)
-       var d
-       d = js["duration"]
-       if (d !== undefined)
-       {
-           if (d == 0)
-           {
-               stopMusic();
-           }
-           else
-           {
-               var v = QControl.resolveAsset(js["name"])
-               if (v.length > 0)
-               {
-                   console.log("sound", v);
-                   playMusic(v)
-               }
-           }
-       }
-    }
+    onSoundJSONChanged: updateSound();
+
+    // force the update of sound from json.
+    onForceChanged: updateSound();
 
     Loader
     {
@@ -348,6 +279,16 @@ ApplicationWindow
         onLoaded: app.initialPage = item
     }
 
+   // onClosing: {console.log("ApplicationWindow closing"); close.accepted = false; }
+
+    QtObject 
+    {
+        id: fontobj
+        property font afont: Qt.font({
+            family: "Merriweather",
+            weight: Font.Light
+        })
+    }
 
     Component.onCompleted:
     {
@@ -362,20 +303,18 @@ ApplicationWindow
         if (fs)
         {
             // fs is point size
-            QControl.prefs.setGameFontDefault(Qt.font({ family: ptr.name }), fs*Units.dp, false);
+            QControl.prefs.setGameFontDefault(fontobj.afont, fs*Units.dp, false);
         }
         else
         {
             // fs is pixel size
             fs = 16;
             if (Device.isLargeMobile) fs = 20 // tablet+
-            QControl.prefs.setGameFontDefault(Qt.font({ family: ptr.name }), fs*Units.dp, true)
+            QControl.prefs.setGameFontDefault(fontobj.afont, fs*Units.dp, true)
         }
 
         // signal that we've started up
         QControl.uiInitialised()
-
-        playMusic(QControl.getMusicFile())
-
+        playTitleMusic()
     }
 }

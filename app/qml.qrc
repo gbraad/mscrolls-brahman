@@ -24,11 +24,21 @@
         <file>WordBar.qml</file>
         <file>AnimatedImage2.qml</file>
         <file>ThemeSelector.qml</file>
+        <file>ImportMessage.qml</file>
+        <file>ScaleSelector.qml</file>
+        <file>FontLoad.qml</file>
+    </qresource>
+
+    <qresource prefix="/">
         <file>assets/brahman_logo-256.png</file>
         <file>assets/iphone7p_bar.png</file>
         <file>assets/iphone7pl_bar.png</file>
         <file>assets/ipad12_bar.png</file>
         <file>assets/ipad12l_bar.png</file>
+        <file>assets/pixel2_bar.png</file>
+    </qresource>
+
+    <qresource prefix="/">
         <file>fonts/Roboto-Regular.ttf</file>
         <file>fonts/Kanit-Thin.ttf</file>
         <file>fonts/Kanit-Light.ttf</file>
@@ -40,8 +50,7 @@
         <file>fonts/PxPlus_IBM_VGA9.ttf</file>
         <file>fonts/PxPlus_AmstradPC1512.ttf</file>
         <file>fonts/AtariST8x16SystemFont.ttf</file>
-        <file>ImportMessage.qml</file>
-        <file>ScaleSelector.qml</file>
-        <file>FontLoad.qml</file>
+        <file>fonts/Merriweather-Light.ttf</file>
+        <file>fonts/Merriweather-LightItalic.ttf</file>
     </qresource>
 </RCC>

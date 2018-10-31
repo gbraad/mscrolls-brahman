@@ -90,6 +90,13 @@ public:
         if (startsWithIgnoreCase(p, "file:///")) p += 8;
 
         reqName = p;
+
+        if (startsWithIgnoreCase(reqName, "qrc:///"))
+        {
+            // qrc:/// -> :/
+            reqName = string(":") + reqName.substr(5, string::npos);
+        }
+
         uint reqIndex = atoi(buf);
 
         //LOG3("animimageprovider request for ", reqName << " index " << reqIndex)
@@ -151,17 +158,26 @@ again:
 
         if (ok)
         {
+            //LOG3("APNG read frame ", _index);
+
             int w = _reader->_lastImg.width();
             int h = _reader->_lastImg.height();
-                
+
             if (size) *size = QSize(w, h);
             
-            if ((requestedSize.width() > 0 && requestedSize.width() != w) ||
-                (requestedSize.height() > 0 && requestedSize.height() != h))
+            if (requestedSize.isValid())
             {
-                LOG2("requested size different ", _filename);
+                int rw = requestedSize.width();
+                int rh = requestedSize.height();
+
+                if (rw != w || rh != h)
+                {
+                    // need to scale, but makes it worse!
+                    //LOG3("animImageProvider, scaling image ", _filename << "(" << _index << ") " << w << "x" << h << " to " << rw << "x" << rh);
+                    //return _reader->_lastImg.scaled(rw,rh);
+                }
             }
-            
+
             return _reader->_lastImg;
         }
          

@@ -41,7 +41,10 @@ Image
     property string imageName
     property int count: 0
     property bool paused: false
-    cache: false
+
+    // this is meant to cache from image provider, but it doesnt?
+    cache: true
+
     property bool animationEnabled: true
 
     onWidthChanged: updateImage()
@@ -65,6 +68,7 @@ Image
     {
         if (imageName != name) count = 0
         imageName = name;
+        animt.stop()
         if (imageName.length > 0)
         {
             var s = suffix(name)
@@ -87,7 +91,6 @@ Image
         else
         {
             source = ""
-            animt.stop()
         }
     }
 

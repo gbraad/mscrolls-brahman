@@ -55,7 +55,7 @@
 
 // 1.1.X pre ifi
 // 1.2.X post ifi
-#define VERSION_STRING  "1.2.1"
+#define VERSION_STRING  "1.2.6"
 
 struct ControlImpBase
 {
@@ -511,7 +511,7 @@ struct ImpEngine
 
         if (!data || !amt) return false;
 
-        LOG3("control, ", "updateWordsRequest")
+        LOG4("control, ", "updateWordsRequest")
 
         GrowString gs;
         _wordStat->buildWordsJSON(gs);
@@ -1419,7 +1419,7 @@ struct Control::Imp :
 
             if (_be)
             {
-            // do we have any story.json
+                // do we have any story.json
                 string sJSONPath = makeConfigPath(changeSuffix(_host->_storyfile, ".json"));
 
                 FD jfile;
@@ -1457,50 +1457,14 @@ struct Control::Imp :
             }
         }
 
-        static const char* audioSuffixTab[] =
-        {
-            // order of audio files to load, the first one found
-            // plays. so windows should have mp3 and Linux ogg.
-            //
-            // add -music pawn.ogg to start script if have
-            // both .mp3 and .ogg in configDir
-            
-            //".m4a",
-            ".mp3", 
-            ".ogg",
-            ".wav"
-        };
-
         if (!_host->_musicFile.empty())
         {
-            // change to complete path
-            _host->_musicFile = makeConfigPath(_host->_musicFile);
-             
-            bool found = false;
-            
-            // when suffix not provided try defaults
-            if (suffixOf(_host->_musicFile).empty())
-            {
-                for (int i = 0; !found && i < ASIZE(audioSuffixTab); ++i)
-                {
-                    _host->_musicFile = changeSuffix(_host->_musicFile,
-                                                     audioSuffixTab[i]);
-                    LOG3("looking for music, ", _host->_musicFile);
-            
-                    found = FD::exists(_host->_musicFile.c_str());
-                }
-            }
-            else
-            {
-                found = FD::exists(_host->_musicFile.c_str());
-            }
-
-            // string non-empty when file present
-            if (!found)
-            {
-                LOG1("WARNING, music file ", _host->_musicFile << " not found");
-                _host->_musicFile.clear();
-            }
+            // can be a resource
+            _host->_musicFile = changeSuffix(_host->_musicFile, ".ogg");
+        }
+        else
+        {
+            LOG1("WARNING, no music file", "");
         }
 
         _temit = TEmit(this, _host->_transcript->_imp,

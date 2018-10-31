@@ -391,7 +391,10 @@ Same meanings as `item`.
 * `name: "filepath"`
 
 * `duration: int`  
-   play for `int` milliseconds. A value of 0 means; stop playing any existing sounds. A value of `-n` means play for `n` loops.
+   play `int` times. A value of 0 means; stop playing any existing sounds. A value of `-1` means play continuous loop.
+
+* `channel: int`
+   _Optional_. Specify audio channel, default to 0.
 
 ## Save and Load
 

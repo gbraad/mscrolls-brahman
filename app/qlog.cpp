@@ -75,16 +75,21 @@ private:
     char buffer[bufsize];
 };
 
+void _setupAndroidLog()
+{
+    static androidbuf abuf;
+    std::cout.rdbuf(&abuf);
+    std::cout << "android log installed\n" << std::flush;
+}
+
 void setupAndroidLog()
 {
     static bool done;
-    static androidbuf abuf;
     
     if (!done)
     {
+        _setupAndroidLog();
         done = true;
-        std::cout.rdbuf(&abuf);
-        std::cout << "android log installed\n" << std::flush;
     }
 }
 

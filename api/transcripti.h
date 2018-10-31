@@ -165,6 +165,8 @@ struct Transcript::Imp : public ImpType<Transcript>
         }
         else if (_currentSegmentId == BRA_SEGMENT_SOUND)
         {
+            //LOG4("sound segment '", _segmentText << "'");
+                            
             string js = trim(_segmentText);
             _segmentText.clear();
             if (!js.empty() && js[0] == '{')

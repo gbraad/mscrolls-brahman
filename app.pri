@@ -37,6 +37,8 @@ gcc:QMAKE_CFLAGS_WARN_ON = -Wall -Wno-unknown-pragmas -Wno-switch
 
 QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.8
 
+LIBPNG = $$PROJ/tools/apng/libpng_apng/libpng
+LIBZ = $$PROJ/tools/zlib
 RJSONDIR = $$PROJ/rapidjson
 IFIDIR = $$PROJ/ifi
 KLIFDIR = $$PROJ/klif
@@ -51,7 +53,7 @@ win32 {
 
 CONFIG(debug, debug|release) {
    CONFIG += console
-   DEFINES += LOGGING
+   DEFINES += LOGGING TIMERS
    BUILDT=debug
 }
 

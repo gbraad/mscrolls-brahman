@@ -106,7 +106,7 @@ Page
                 onClicked: 
                 {
                     enabled = false; // prevent a second click!
-                    app.stopMusic()
+                    app.stopTitleMusic()
                     pageStack.replace(Qt.resolvedUrl("MainPage.qml"))
                     QControl.coverPageClosed()
                 }

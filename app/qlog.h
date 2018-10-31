@@ -41,6 +41,7 @@
 #include <stdio.h>
 
 #if defined(Q_OS_ANDROID)
+extern void _setupAndroidLog();
 extern void setupAndroidLog();
 #endif
 

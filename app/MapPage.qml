@@ -130,6 +130,7 @@ Page
 
         Slider
         {
+            id: zoomslider
             Layout.fillWidth: true
             maximumValue: boxSizeNormal*2
             minimumValue: boxSizeNormal/3

@@ -86,6 +86,8 @@ struct ApngReader
         
         delete[] _frame.rows;
         delete [] _data;
+        
+        delete _frame.p2;
     }
 
     bool valid() const
@@ -114,6 +116,7 @@ struct ApngReader
     }
 
     QImage      _lastImg;
+    QImage      _prevImg;
     string      _filename;
     uchar*      _data;
     uchar*      _dpos;
@@ -144,22 +147,24 @@ struct ApngReader
 
     struct Frame
     {
-        quint32 x;
-        quint32 y;
-        quint32 width;
-        quint32 height;
-        quint32 channels;
+        quint32 x = 0;
+        quint32 y = 0;
+        quint32 width = 0;
+        quint32 height = 0;
+        quint32 channels = 0;
 
         quint16 delay_num = 0;
         quint16 delay_den = 1;
-        quint8 dop;
-        quint8 bop;
+        quint8 dop = PNG_DISPOSE_OP_NONE;
+        quint8 bop = PNG_BLEND_OP_SOURCE;
 
-        quint32 rowbytes;
-        unsigned char * p;
-        png_bytepp rows;
-        
-        Frame();
+        quint32 rowbytes = 0;
+        unsigned char* p = 0;
+        png_bytepp rows = 0;
+
+        // for animation
+        unsigned char* p2 = 0;
+
     } _frame;
 
     unsigned int _framesRead = 0;

@@ -62,6 +62,7 @@
 #include "game.h"
 #include "brahmanapp.h"
 #include "opt.h"
+#include "soundplayer.h"
 
 #ifdef USE_ITCH
 #include "updateritch.h"
@@ -147,6 +148,7 @@ int main(int argc, char *_argv[])
     QREGISTER_CONSOLE;
     QREGISTER_MAPBOX;
     QREGISTER_SHAPE;
+    QREGISTER_SOUNDPLAYER;
 
     // load IF engine as plugin
     if (!qc->loadEngine())

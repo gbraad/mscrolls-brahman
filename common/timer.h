@@ -97,7 +97,7 @@ struct Timer
 
     bool started() const { return _start.tv_sec != 0 || _start.tv_nsec != 0; }
 
-    double now()
+    double now() const
     {
 	struct timespec ts, last;
         clock_gettime(CLOCK_REALTIME, &last);

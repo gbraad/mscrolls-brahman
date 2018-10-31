@@ -239,6 +239,8 @@ Page
                 }
             }
 
+            rollcontentheight: picValid ? picarea.height : 0
+
             rollcontent: Rectangle
             {
                 id: picarea

@@ -37,6 +37,8 @@ QT += qml gui quick quickcontrols2 network multimedia
 PROJ = $$PWD/..
 include($$PROJ/app.pri)
 
+DEFINES += STB_VORBIS_NO_PULLDATA_API STB_VORBIS_MAX_CHANNELS=2
+
 ### ////////////////// BASE ///////////////////////////////////////////
 
 ios {
@@ -110,9 +112,6 @@ ios {
     LIBS += -L$$LIBZ/$$LIBDIR -lz
     LIBS += -L$$PROJ/ifi/$$LIBDIR -lifigame
 
-    ifi.files = $$PROJ/ifi/$$LIBDIR/libifigame.1.dylib
-    ifi.path = Frameworks
-    QMAKE_BUNDLE_DATA += ifi
 
     QMAKE_RPATHDIR = @executable_path/Frameworks
     #maglib.files += $$PROJ/magnetic/$$LIBDIR/libmagnetic.dylib
@@ -130,7 +129,9 @@ ios {
 SOURCES += main.cpp qlog.cpp qcontrol.cpp \
     iosappdelegate.mm \
     brahmanapp.cpp \
-    apngreader.cpp
+    apngreader.cpp \
+    playsourceogg.cpp \
+    vorbis.cpp \
     iosshare.mm
     
 RESOURCES += qml.qrc
@@ -164,7 +165,10 @@ HEADERS += \
     iosshare.h \
     apngreader.h \
     qimgprov.h \
-    qsbmodel.h
+    qsbmodel.h \
+    playsource.h \
+    soundplayer.h \
+    vorbis.h
 
 DISTFILES += \
     android/AndroidManifest.xml \

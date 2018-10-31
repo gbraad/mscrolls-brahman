@@ -80,7 +80,7 @@
 #define DEFAULT_GAME_CONTRAST_COLOR ""
 
 #define PREFS_CONSOLEECHO_ENABLED "consoleecho_enabled"
-#define DEFAULT_CONSOLEECHO_ENABLE 0
+#define DEFAULT_CONSOLEECHO_ENABLE 1
 
 #ifdef _WIN32
 #define DLLX   __declspec( dllexport )

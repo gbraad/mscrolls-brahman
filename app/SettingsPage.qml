@@ -409,8 +409,8 @@ Page
         height: dialogHeight
         backgroundColor: app.theme.dialogColor
 
-        onOpened: app.playMusic()
-        onClosed: app.stopMusic()
+        onOpened: app.playTitleMusic()
+        onClosed: app.stopTitleMusic()
 
         Column
         {

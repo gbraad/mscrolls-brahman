@@ -47,6 +47,8 @@ Item
     property alias rollcontent: rollarea.data
     property alias thumbcontent: rollthumb.data
     property alias thumbColor: rollthumb.color
+    
+    property int rollcontentheight: 0
 
     property int yPos: height - thumbHeight
 
@@ -72,7 +74,7 @@ Item
                 // anyhow, if this is the case, we wait a short time then try again
                 delayer.running = true
             }
-            else if (flick.contentY == roll.height - thumbHeight) bump_anim.start();
+            else if (rollHeightShown < 2*thumbHeight) bump_anim.start();
         }
     }
 
@@ -89,8 +91,8 @@ Item
 
         contentWidth: item.width
         contentHeight: item.height
-        bottomMargin: moving || ok ? item.yPos : 0
-        contentY: item.yPos
+        bottomMargin: (moving || ok) ? yPos : 0
+        contentY: yPos
         z:1
 
         property bool ok
@@ -98,7 +100,7 @@ Item
         flickableDirection: Flickable.VerticalFlick
         boundsBehavior: Flickable.StopAtBounds
 
-        topMargin: rollarea.childrenRect.height ? Math.min(rollarea.childrenRect.height - item.yPos, 0) : 0
+        topMargin: rollcontentheight ? Math.min(rollcontentheight - yPos, 0) : thumbHeight - yPos;
 
         onMovingChanged: ok = false
 
@@ -113,7 +115,7 @@ Item
                 // placement for the roller content
                 id: rollarea
                 width: parent.width
-                height: item.yPos
+                height: yPos
             }
 
             Rectangle
@@ -121,7 +123,7 @@ Item
                 id: rollthumb
                 width: parent.width
                 height: thumbHeight
-                y: item.yPos
+                y: yPos
                 color: "red"
 
                 Component.onCompleted: 
@@ -133,7 +135,7 @@ Item
                 id: back_anim
                 target: flick
                 property: "contentY"
-                to: item.yPos
+                to: yPos
                 easing.type: Easing.OutBounce
                 easing.amplitude: 0.5
                 duration: 500
@@ -159,7 +161,7 @@ Item
                 {
                     target: flick
                     property: "contentY"
-                    to: item.yPos - bump_anim.bumpval
+                    to: yPos - bump_anim.bumpval
                     duration: 500
                 }
 
@@ -168,7 +170,7 @@ Item
                     // delay
                     target: flick
                     property: "contentY"
-                    to: item.yPos - bump_anim.bumpval
+                    to: yPos - bump_anim.bumpval
                     duration: 500
                 }
 
@@ -176,7 +178,7 @@ Item
                 {
                     target: flick
                     property: "contentY"
-                    to: item.yPos
+                    to: yPos
                     duration: 500
                 }
             }
@@ -189,7 +191,7 @@ Item
                 onClicked:
                 {
                     flick.ok = false
-                    if (flick.contentY == item.yPos) open_anim.start();
+                    if (flick.contentY == yPos) open_anim.start();
                     else back_anim.start();
                 }
             }
@@ -211,7 +213,7 @@ Item
         // game text goes here
         id: contentarea
         width: parent.width
-        height: item.yPos
+        height: yPos
         y: thumbHeight
     }
 }

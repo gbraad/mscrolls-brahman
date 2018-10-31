@@ -5,6 +5,5 @@ import com.voidware.brahman 1.0
 
 FontLoader
 {
-    onStatusChanged: if (status == FontLoader.Ready) 
-    console.log("loaded font", name)
+    //onStatusChanged: if (status == FontLoader.Ready) console.log("loaded font", name)
 }

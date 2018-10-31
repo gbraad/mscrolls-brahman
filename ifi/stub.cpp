@@ -32,8 +32,12 @@
 
 
 #include "ifi.h"
+#include "logged.h"
 
 IFI* IFI::create()
 {
+    Logged initLog;
+
+    LOG3("IFI Stub, ", "create");
     return 0;
 }
