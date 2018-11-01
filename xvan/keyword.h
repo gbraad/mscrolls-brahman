@@ -41,8 +41,8 @@
 #define MAX_FILENAME_LEN     100 /* must be the same as input_line_len */
 #define MAX_COMPILER_LEN     100 /* must be the same as input_line_len */
 #define MAX_TRIGG_LEN       1000
-#define INPUT_LINE_LEN      4980 /* for interpreter 31mrt2018:     */
-                                 /* changed to 975 for IFI-version */
+#define INPUT_LINE_LEN       100 /* for interpreter 08mrt2018:     */
+                                 /* changed to 100 for IFI-version */
 #define OUTPUT_LINE_LEN       79 /* for interpreter                */
                                  /* 79 in case a line ends with a  */
                                  /* special character.             */
@@ -203,6 +203,7 @@
 #define ADDJSON        112
 #define SENDJSON       113
 #define NOTIMERS       114
+#define RESTART        115
 #define UPPER_BOUND_INT_ACT         116
 
 #define LOWER_BOUND_SPECIAL_CHAR    117
@@ -229,7 +230,7 @@
 #define COMMON_TRIGGERS   136
 #define REDEFINE_TRIGGERS 137
 #define REDEFINE_FLAGS    138
-#define REDEFINE_ATTRIBUTES 139
+#define REDEFINE_ATTRS 139
 #define STORY_INFO        140
 #define MAX_VALID_COMPILER_KEYWORD 140  /* 4sep2017 for detecting errors */
 #define EXITS           141
