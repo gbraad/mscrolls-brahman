@@ -34,6 +34,8 @@
 /*************************/
 
 void CleanUp(void);
+void FreeAllLocations(void);  /* @@@@ */
+void FreeAllObjects(void);    /* @@@@ */
 void FreeLocation(locationInfo*);
 void FreeObject(objectInfo*);
 void FreeVerb(verbInfo*);

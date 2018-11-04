@@ -95,6 +95,8 @@ extern int32_t  GetAttributeInfo(int32_t, int32_t, attrInfo**, int32_t*);       
 extern int32_t  GetActionRecPar(usrActionRec*, int32_t**);                       /* sysfunc.c    */
 extern int32_t  CheckPars(int32_t, int32_t, int32_t, int32_t, int32_t, int32_t); /* checkpar.c   */
 
+extern int32_t  Restart(void);  /* restart.c */   /* @@@@ */
+
 extern int32_t  XeqEqual(int32_t**);                                             /* arithmtc.c   */
 extern int32_t  XeqLtGt(int32_t, int32_t**);                                     /* arithmtc.c   */
 extern int32_t  XeqBasicOperator(int32_t, int32_t**);                            /* arithmtc.c   */
