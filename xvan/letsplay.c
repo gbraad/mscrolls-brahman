@@ -69,7 +69,7 @@ int32_t muted         = 0;        /* Tells whether to print the output         *
 /* Function declarations */
 /*************************/
 
-
+void    ResetGlobals(void);                 /* oct 18 18 */  /* @@@@ */
 int32_t LetsPlay(void);
 
 /************************/

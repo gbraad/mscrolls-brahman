@@ -92,6 +92,7 @@ int32_t XeqPrtStat(int32_t**);
 int32_t XeqSetCursor(int32_t**);
 int32_t XeqClearWindow(int32_t**, int);
 int32_t XeqQuit(int32_t**);
+int32_t XeqRestart(int32_t**);          /* oct 18 18 */  /* @@@@ */
 int32_t XeqScore(int32_t**);
 int32_t XeqSendJson(int32_t**);
 int32_t XeqSetAttribute(int32_t**);
@@ -1970,6 +1971,24 @@ int32_t XeqQuit(trigger)
 }
 
 
+int32_t XeqRestart(trigger)    /* @@@@ */
+ int32_t **trigger; /* Caller expects rest of trigger to be returned. */
+{
+  /* Restart() always has 0 parameters. */
+  /* Syntax in triggercode: RESTART 0   */
+
+  /* Skip the number of parameters value. */
+  NextOpcode(trigger);
+
+  if (!Restart()) {
+     return(QUIT);
+  }
+  else {
+    return(CONTINUE);
+  }
+}
+
+
 int32_t XeqScore(trigger)
  int32_t **trigger;
 {
@@ -2672,6 +2691,9 @@ int32_t XeqIntAct(opcode, trigger, action_rec, subject_index)
 
     case REM:
       return(XeqBasicOperator(opcode, trigger));
+
+    case RESTART:                   /* oct 18 18 */  /* @@@@ */
+      return(XeqRestart(trigger));
 
     case SCORE:
       return(XeqScore(trigger));
