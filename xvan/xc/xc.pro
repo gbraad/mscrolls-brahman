@@ -38,7 +38,9 @@ CONFIG += console
 CONFIG -= app_bundle
 
 PROJ = $$PWD/../..
-include($$PROJ/app.pri)       
+include($$PROJ/app.pri)
+
+DEFINES -= TIMERS
 
 ### //////////////////  ///////////////////////////////////////////
 

@@ -203,6 +203,7 @@
 #define ADDJSON        112
 #define SENDJSON       113
 #define NOTIMERS       114
+#define RESTART        115
 #define UPPER_BOUND_INT_ACT         116
 
 #define LOWER_BOUND_SPECIAL_CHAR    117

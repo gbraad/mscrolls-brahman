@@ -1085,9 +1085,13 @@ int32_t CheckPars(fun_string)
         strncpy(fun_name, "clearjson()", MAX_WORD_LEN);
     case SENDJSON:      /* sendjson() */
       if (fun_name[0] == '\0')
+        strncpy(fun_name, "sendjson()", MAX_WORD_LEN);
     case NOTIMERS:      /* notimers() */
       if (fun_name[0] == '\0')
         strncpy(fun_name, "notimers()", MAX_WORD_LEN);
+    case RESTART:      /* restart() */
+      if (fun_name[0] == '\0')
+        strncpy(fun_name, "restart()", MAX_WORD_LEN);
       if (nr_of_pars != 0) {
         NrErr(fun_name, "0");
         return(ERROR);

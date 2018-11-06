@@ -249,6 +249,8 @@ int32_t NL_CheckIfKeyword(word_lwr)
     return(DEST);
   if (strncmp(word_lwr, "hussel", MAX_WORD_LEN) == 0)
     return(SHUFFLE);
+  if (strncmp(word_lwr, "herstart", MAX_WORD_LEN) == 0)
+    return(RESTART);
   if (strncmp(word_lwr, "(", MAX_WORD_LEN) == 0)
     return(LEFT_PAR);
   if (strncmp(word_lwr, ")", MAX_WORD_LEN) == 0)
