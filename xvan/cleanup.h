@@ -48,8 +48,7 @@ extern int32_t      *trigg_owners;   /* fileio.c */
 extern int32_t      *descr_owners;   /* fileio.c */
 extern int32_t      *stack;          /* init.c   */
 
-/* extern char         *outputline; */     /* init.c   */  /* @@@@@ */
-extern char         *outputbuffer;   /* init.c   */  /* @@@@@ */
+extern char         *outputline;     /* init.c   */
 
 extern char         *ResetString(char*); /* output.c */  /* @@@@@ */
 
