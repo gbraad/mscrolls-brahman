@@ -252,6 +252,8 @@ int32_t ENG_CheckIfKeyword(word_lwr)
     return(DEST);
   if (strncmp(word_lwr, "shuffle", MAX_WORD_LEN) == 0)
     return(SHUFFLE);
+  if (strncmp(word_lwr, "restart", MAX_WORD_LEN) == 0)
+    return(RESTART);
   if (strncmp(word_lwr, "(", MAX_WORD_LEN) == 0)
     return(LEFT_PAR);
   if (strncmp(word_lwr, ")", MAX_WORD_LEN) == 0)

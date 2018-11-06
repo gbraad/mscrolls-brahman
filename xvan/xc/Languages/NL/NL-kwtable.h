@@ -140,6 +140,7 @@ kwTable kw_table[] =  {
   {.keyword_eng = "REDEFINE_TRIGGERS", .keyword_nl = "VERVANG_TRIGGERS"},
   {.keyword_eng = "REDEFINE_VERB", .keyword_nl = "VERVANG_ACTIE"},
   {.keyword_eng = "REM", .keyword_nl = "REM"},
+  {.keyword_eng = "RESTART", .keyword_nl = "HERSTART"},
   {.keyword_eng = "RESTORE", .keyword_nl = "LADEN"},
   {.keyword_eng = "RUNCOMMON", .keyword_nl = "DOE_ALGEMEEN"},
   {.keyword_eng = "RUNVERB", .keyword_nl = "DOE_WERKWOORD"},
