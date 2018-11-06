@@ -24,9 +24,9 @@
 #if !defined(__cleanup)
 #define __cleanup
 
-extern int32_t nr_of_locs;           /* fileio.c */
-extern int32_t nr_of_objs;           /* fileio.c */
-extern int32_t nr_of_verbs;          /* fileio.h */
+extern int32_t nr_of_locs;               /* fileio.c */
+extern int32_t nr_of_objs;               /* fileio.c */
+extern int32_t nr_of_verbs;              /* fileio.h */
 
 extern locationInfo **locations;     /* fileio.c */
 extern objectInfo   **objects;       /* fileio.c */
@@ -48,7 +48,10 @@ extern int32_t      *trigg_owners;   /* fileio.c */
 extern int32_t      *descr_owners;   /* fileio.c */
 extern int32_t      *stack;          /* init.c   */
 
-extern char         *outputline;     /* init.c   */
+/* extern char         *outputline; */     /* init.c   */  /* @@@@@ */
+extern char         *outputbuffer;   /* init.c   */  /* @@@@@ */
+
+extern char         *ResetString(char*); /* output.c */  /* @@@@@ */
 
 
 #endif

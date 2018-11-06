@@ -68,7 +68,6 @@ void FreeCommonTriggers(void)
   }
 }
 
-
 void FreeDescrs(start_descr)
  descrInfo *start_descr;
 {
@@ -80,7 +79,6 @@ void FreeDescrs(start_descr)
   }
 }
 
-
 void FreeCompActionRecs(start_actionrec)
  compActionRec *start_actionrec;
 {
@@ -91,7 +89,6 @@ void FreeCompActionRecs(start_actionrec)
     free(start_actionrec);
   }
 }
-
 
 void FreeTriggers(start_trigger)
  triggerInfo *start_trigger;
@@ -105,7 +102,6 @@ void FreeTriggers(start_trigger)
     free(start_trigger);
   }
 }
-
 
 void FreeVerb(verb)
  verbInfo *verb;
@@ -139,6 +135,31 @@ void FreeObject(obj)
   free(obj);
 }
 
+void FreeAllLocations()
+{
+  int i = 0;
+
+  for (i=0; i<nr_of_locs; i++) {
+    /* it may be swapped out of memory */
+    if (locations[i] != NULL)
+      FreeLocation(locations[i]);
+  }
+  free(locations);
+}
+
+
+void FreeAllObjects()
+{
+  int i = 0;
+
+  for (i=0; i<nr_of_objs; i++) {
+    /* it may be swapped out of memory */
+    if (objects[i] != NULL)
+      FreeObject(objects[i]);
+  }
+  free(objects);
+}
+
 
 void FreeLocation(loc)
  locationInfo *loc;
@@ -156,28 +177,14 @@ void FreeLocation(loc)
   free(loc);
 }
 
-
 void CleanUp()
 {
   int32_t i=0;
 
   /* complicated Free()'s */
 
-  /* free all locations */
-  for (i=0; i<nr_of_locs; i++) {
-    /* it may be swapped out of memory */
-    if (locations[i] != NULL)
-      FreeLocation(locations[i]);
-  }
-  free(locations);
-
-  /* free all objects */
-  for (i=0; i<nr_of_objs; i++) {
-    /* it may be swapped out of memory */
-    if (objects[i] != NULL)
-      FreeObject(objects[i]);
-  }
-  free(objects);
+  FreeAllLocations();
+  FreeAllObjects();
 
   /* free all verbs */
   for (i=0; i<nr_of_verbs; i++) {
@@ -204,6 +211,8 @@ void CleanUp()
   free(local_attrs);
   free(trigg_owners);
   free(descr_owners);
-  free(outputline);
+  /* free(outputline); */
+  outputbuffer = ResetString(outputbuffer);  /* @@@@@ */
   free(stack);
 }
+
