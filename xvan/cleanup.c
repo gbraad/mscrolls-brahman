@@ -211,8 +211,7 @@ void CleanUp()
   free(local_attrs);
   free(trigg_owners);
   free(descr_owners);
-  /* free(outputline); */
-  outputbuffer = ResetString(outputbuffer);  /* @@@@@ */
+  free(outputline);
   free(stack);
 }
 

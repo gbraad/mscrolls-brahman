@@ -54,7 +54,6 @@ extern int32_t indent;
 extern int32_t capital;
 extern int32_t article;
 extern int32_t muted;
-extern int32_t char_count;
 
 extern int32_t disambig_score;
 

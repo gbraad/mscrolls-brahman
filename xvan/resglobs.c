@@ -67,7 +67,6 @@ void ResetGlobals()
   capital       = 1;
   article       = 0;
   muted         = 0;
-  char_count    = 0;
 
   fire_timers   = OK;
 
