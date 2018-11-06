@@ -31,24 +31,16 @@ app/Brahman.xcodeproj/qt_makeqmake.mak
 app/Brahman.xcodeproj/qt_preprocess.mak
 app/Brahman.xcodeproj/project.xcworkspace/xcshareddata/WorkspaceSettings.xcsettings
 app/Brahman.xcodeproj/xcshareddata/xcschemes/Brahman.xcscheme
-app/android/assets/pawn.gfx
-app/android/assets/pawn.mag
-app/android/assets/pawn.mp3
-app/android/assets/pawn.msg
 magnetic/firstblock.asm
 magnetic/secondblock.asm
 magnetic/thirdblock.asm
 magnetic/wk_c64_test.asm
 magnetic.pro.user.564ad26
 brahman.pro.user.564ad26
-ThePawn.AppImage
 app.pro.user.564ad26
 api.pro.user.564ad26
-The_Pawn-x86_64.AppImage
 api.pro.user.643565c
 app.pro.user.643565c
-The_Pawn-x86_64.AppImage.Ubuntu
-ThePawn-x86_64.AppImage
 brahman.pro.user.643565c
 app.pro.user.7b4b72c
 QMP3Player.pro.user.7b4b72c
@@ -63,14 +55,7 @@ app/AI_Build/AppRun
 app/AI_Build/libbrahmanapi.so.1
 app/AI_Build/libbrahmanapi.so.1.0
 app/AI_Build/libbrahmanapi.so.1.0.0
-app/AI_Build/pawn.gfx
-app/AI_Build/pawn.mag
-app/AI_Build/pawn.msg
-app/AI_Build/pawn.ogg
-app/AI_Build/pawn.png
 app/AI_Build/qt.conf
-app/AI_Build/ThePawn
-app/AI_Build/ThePawn.desktop
 app/AI_Build/lib/libasyncns.so.0
 app/AI_Build/lib/libattr.so.1
 app/AI_Build/lib/libbrahmanapi.so.1
@@ -842,12 +827,9 @@ app/AI_Build/qml/QtTest/testlogger.js
 appimagetool.AppImage
 api.pro.user.ac25aad
 buildfix.sh
-ThePawn-CentOS7.AppImage
 brahman.pro.user.ac25aad
 magnetic.pro.user.ac25aad
-ThePawn-Ubuntu.AppImage
 app.pro.user.ac25aad
-ThePawn-Debian8.AppImage
 api/api.pro.user.02a5e76
 api/api.pro.user.176cddd
 api/api.pro.user.21b9707
@@ -861,13 +843,6 @@ brahman/brahman.pro.user.21b9707
 magnetic/magnetic.pro.user.02a5e76
 magnetic/magnetic.pro.user.176cddd
 magnetic/magnetic.pro.user.21b9707
-app/ThePawn-EMU.AppImage
-app/ThePawn-Fedora25.AppImage
-app/ThePawn-SuseLeap422.AppImage
-app/ThePawn-U1404.AppImage
-ThePawn-Centos7i.AppImage
-ThePawn_beta.AppImage
-ThePawn_beta_ok.AppImage
 app/linux-ai/AppRun.c_broken.c
 app/linux-ai/gilist.txt
 app/linux-ai/liblist.txt
@@ -897,66 +872,6 @@ magnetic/ios/magnetic.xcodeproj/project.xcworkspace/xcuserdata/stefan.xcuserdata
 magnetic/ios/magnetic.xcodeproj/project.xcworkspace/xcuserdata/stefan.xcuserdatad/WorkspaceSettings.xcsettings
 magnetic/ios/magnetic.xcodeproj/xcshareddata/xcschemes/magnetic.xcscheme
 magnetic/ios/magnetic.xcodeproj/xcuserdata/stefan.xcuserdatad/xcschemes/xcschememanagement.plist
-ThePawn-linux-0.6.5.AppImage
-ThePawn-linux-0.6.7.AppImage
-app/Debug-iphonesimulator/ThePawn.app/Default-568h@2x.png
-app/Debug-iphonesimulator/ThePawn.app/Info.plist
-app/Debug-iphonesimulator/ThePawn.app/LaunchScreen.nib
-app/Debug-iphonesimulator/ThePawn.app/PkgInfo
-app/Debug-iphonesimulator/ThePawn.app/ThePawn
-app/Release-iphonesimulator/ThePawn.app/Default-568h@2x.png
-app/Release-iphonesimulator/ThePawn.app/Info.plist
-app/Release-iphonesimulator/ThePawn.app/LaunchScreen.nib
-app/Release-iphonesimulator/ThePawn.app/pawn.gfx
-app/Release-iphonesimulator/ThePawn.app/pawn.mag
-app/Release-iphonesimulator/ThePawn.app/pawn.msg
-app/Release-iphonesimulator/ThePawn.app/pawn.ogg
-app/Release-iphonesimulator/ThePawn.app/PkgInfo
-app/Release-iphonesimulator/ThePawn.app/ThePawn
-app/Release-iphonesimulator/ThePawn.app/assets/pawn.gfx
-app/Release-iphonesimulator/ThePawn.app/assets/pawn.mag
-app/Release-iphonesimulator/ThePawn.app/assets/pawn.msg
-app/Release-iphonesimulator/ThePawn.app/assets/pawn.ogg
-app/ThePawn.xcodeproj/Default-568h@2x.png
-app/ThePawn.xcodeproj/LaunchScreen.xib
-app/ThePawn.xcodeproj/project.pbxproj
-app/ThePawn.xcodeproj/qt_makeqmake.mak
-app/ThePawn.xcodeproj/qt_preprocess.mak
-app/ThePawn.xcodeproj/project.xcworkspace/xcshareddata/WorkspaceSettings.xcsettings
-app/ThePawn.xcodeproj/project.xcworkspace/xcuserdata/stefan.xcuserdatad/UserInterfaceState.xcuserstate
-app/ThePawn.xcodeproj/project.xcworkspace/xcuserdata/stefan.xcuserdatad/WorkspaceSettings.xcsettings
-app/ThePawn.xcodeproj/xcshareddata/xcschemes/ThePawn.xcscheme
-app/ThePawn.xcodeproj/xcuserdata/stefan.xcuserdatad/xcschemes/xcschememanagement.plist
-app/Debug-iphonesimulator/ThePawn.app/assets/pawn.gfx
-app/Debug-iphonesimulator/ThePawn.app/assets/pawn.mag
-app/Debug-iphonesimulator/ThePawn.app/assets/pawn.mp3
-app/Debug-iphonesimulator/ThePawn.app/assets/pawn.msg
-app/ThePawn.xcodeproj/xcuserdata/stefan.xcuserdatad/xcdebugger/Breakpoints_v2.xcbkptlist
-app/Release-iphonesimulator/ThePawn.app/iPad App Icon iOS 5,6.png
-app/Release-iphonesimulator/ThePawn.app/iPad App Icon iOS 5,6@2x.png
-app/Release-iphonesimulator/ThePawn.app/iPad App Icon iOS 7,9.png
-app/Release-iphonesimulator/ThePawn.app/iPad App Icon iOS 7,9@2x.png
-app/Release-iphonesimulator/ThePawn.app/iPad Pro Icon iOS 9@2x.png
-app/Release-iphonesimulator/ThePawn.app/iPad Settings.png
-app/Release-iphonesimulator/ThePawn.app/iPad Settings@2x.png
-app/Release-iphonesimulator/ThePawn.app/iPad Spotlight iOS 5,6.png
-app/Release-iphonesimulator/ThePawn.app/iPad Spotlight iOS 5,6@2x.png
-app/Release-iphonesimulator/ThePawn.app/iPad Spotlight iOS 7,9.png
-app/Release-iphonesimulator/ThePawn.app/iPad Spotlight iOS 7,9@2x.png
-app/Release-iphonesimulator/ThePawn.app/iPhone App Icon iOS 5,6.png
-app/Release-iphonesimulator/ThePawn.app/iPhone App Icon iOS 5,6@2x.png
-app/Release-iphonesimulator/ThePawn.app/iPhone App Icon iOS 7,9@2x.png
-app/Release-iphonesimulator/ThePawn.app/iPhone App Icon iOS 7,9@3x.png
-app/Release-iphonesimulator/ThePawn.app/iPhone Spotlight iOS 5,6 Settings.png
-app/Release-iphonesimulator/ThePawn.app/iPhone Spotlight iOS 5,6 Settings@2x.png
-app/Release-iphonesimulator/ThePawn.app/iPhone Spotlight iOS 5,6 Settings@3x.png
-app/Release-iphonesimulator/ThePawn.app/iPhone Spotlight iOS 7,9.png
-app/Release-iphonesimulator/ThePawn.app/iPhone Spotlight iOS 7,9@2x.png
-app/Release-iphonesimulator/ThePawn.app/iPhone Spotlight iOS 7,9@3x.png
-app/Release-iphonesimulator/ThePawn.app/iTunesArtwork.png
-app/Release-iphonesimulator/ThePawn.app/iTunesArtwork@2x.png
-app/Release-iphonesimulator/ThePawn.app/assets/pawn.mp3
-ThePawn-linux-0.6.10.AppImage
 butler
 prog
 sim
@@ -967,35 +882,18 @@ magnetic/autosave.dat
 magnetic/game.asm
 magnetic/magnetic.pro.user.643565c
 magnetic/pa23pc.mag
-magnetic/Pawn.rec
 magnetic/testest
 magnetic/wtest_neu.asm
-magnetic/media/ThePawn.dmgCanvas/Disk Image
-magnetic/media/ThePawn.dmgCanvas/QuickLook/Preview.jpg
 mscrolls/go.bat
 mscrolls/go.sh
-mscrolls/tools/ira/pawncode3.asm
 mscrolls/tools/MSDis/.gitignore
 magnetic
 mscrolls
 ifbrahman
 choice
 xvanglk
-ThePawn-linux-1.0.0.2.AppImage
-app/pawn-linux-1.0.1.2.AppImage
-app/thepawn.pro.user.564ad26
 app/Scott-linux-1.0.1.2.AppImage
 app/scott.pro.user.564ad26
-app/ThePawn-linux-1.0.1.2.AppImage
-thepawn.pro.user.ac25aad
-ThePawn-linux-1.0.1.2rc.AppImage
-ThePawn-linux-1.0.2.2.AppImage
-ThePawn-linux-1.0.3.3.AppImage
-ThePawn-linux-1.0.3.4.AppImage
-ThePawn-linux-1.0.4.4.AppImage
-ThePawn-linux-1.0.5.4.AppImage
-ThePawn-linux-1.0.5.5.AppImage
-ThePawn-linux-*.AppImage
 tools/apng/qapng/mkspecs/modules/qt_plugin_libqapng_debug.pri
 tools/apng/qapng/mkspecs/modules/qt_plugin_qapng.pri
 tools/apng/qapng/mkspecs/modules-inst/qt_plugin_libqapng_debug.pri
@@ -1008,17 +906,13 @@ tools/apng/qapng/plugins/imageformats/libqapng_debug.dylib.dSYM/Contents/Info.pl
 tools/apng/qapng/plugins/imageformats/libqapng_debug.dylib.dSYM/Contents/Resources/DWARF/libqapng_debug.dylib
 Qt5Gui_ApngImagePlugin.cmake
 mbtest.sh
-app/theguild.pro.user.564ad26
-app/theguild.pro.user.ac25aad
 tools/apng/libpng_apng/libpng/libpng.pro.user.564ad26
 tools/apng/libpng_apng/libpng/libpng.pro.user.ac25aad
 tools/zlib/libz.pro.user.564ad26
 tools/zlib/libz.pro.user.ac25aad
-TheGuild-linux-*.AppImage
 tools/libz/ios-dev/Makefile
 tools/libz/ios-dev/release/libz.a
 api/api.pro.linux
-app/theguild.pro.linux
 tools/apng/libpng_apng/libpng/libpng.pro.linux
 tools/zlib/libz.pro.linux
 ifi/release/libifigame.1.0.0.dylib
@@ -1032,49 +926,6 @@ ifi/ios-dev/release/release/libifigame.1.0.dylib
 ifi/ios-dev/release/release/libifigame.1.dylib
 ifi/ios-dev/release/release/libifigame.dylib
 app/build-ios/game.h
-app/build-ios/theguild_plugin_import.cpp
-app/build-ios/theguild_qml_plugin_import.cpp
-app/build-ios/Release-iphoneos/TheGuild.app/AppIcon20x20@2x.png
-app/build-ios/Release-iphoneos/TheGuild.app/AppIcon20x20@2x~ipad.png
-app/build-ios/Release-iphoneos/TheGuild.app/AppIcon20x20@3x.png
-app/build-ios/Release-iphoneos/TheGuild.app/AppIcon20x20~ipad.png
-app/build-ios/Release-iphoneos/TheGuild.app/AppIcon29x29@2x.png
-app/build-ios/Release-iphoneos/TheGuild.app/AppIcon29x29@2x~ipad.png
-app/build-ios/Release-iphoneos/TheGuild.app/AppIcon29x29@3x.png
-app/build-ios/Release-iphoneos/TheGuild.app/AppIcon29x29~ipad.png
-app/build-ios/Release-iphoneos/TheGuild.app/AppIcon40x40@2x.png
-app/build-ios/Release-iphoneos/TheGuild.app/AppIcon40x40@2x~ipad.png
-app/build-ios/Release-iphoneos/TheGuild.app/AppIcon40x40@3x.png
-app/build-ios/Release-iphoneos/TheGuild.app/AppIcon40x40~ipad.png
-app/build-ios/Release-iphoneos/TheGuild.app/AppIcon60x60@2x.png
-app/build-ios/Release-iphoneos/TheGuild.app/AppIcon60x60@3x.png
-app/build-ios/Release-iphoneos/TheGuild.app/AppIcon76x76@2x~ipad.png
-app/build-ios/Release-iphoneos/TheGuild.app/AppIcon76x76~ipad.png
-app/build-ios/Release-iphoneos/TheGuild.app/AppIcon83.5x83.5@2x~ipad.png
-app/build-ios/Release-iphoneos/TheGuild.app/Assets.car
-app/build-ios/Release-iphoneos/TheGuild.app/Default-568h@2x.png
-app/build-ios/Release-iphoneos/TheGuild.app/embedded.mobileprovision
-app/build-ios/Release-iphoneos/TheGuild.app/Info.plist
-app/build-ios/Release-iphoneos/TheGuild.app/LaunchScreen.nib
-app/build-ios/Release-iphoneos/TheGuild.app/PkgInfo
-app/build-ios/Release-iphoneos/TheGuild.app/TheGuild
-app/build-ios/Release-iphoneos/TheGuild.app/_CodeSignature/CodeResources
-app/build-ios/Release-iphoneos/TheGuild.app/assets/guild.gfx
-app/build-ios/Release-iphoneos/TheGuild.app/assets/guild.json
-app/build-ios/Release-iphoneos/TheGuild.app/assets/guild.mp3
-app/build-ios/Release-iphoneos/TheGuild.app/assets/guild.prog
-app/build-ios/Release-iphoneos/TheGuild.app/assets/guild.text
-app/build-ios/Release-iphoneos/TheGuild.app/Frameworks/libifigame.1.dylib
-app/build-ios/Release-iphoneos/TheGuild.app/LaunchScreen.storyboardc/01J-lp-oVM-view-Ze5-6b-2t3.nib
-app/build-ios/Release-iphoneos/TheGuild.app/LaunchScreen.storyboardc/Info.plist
-app/build-ios/Release-iphoneos/TheGuild.app/LaunchScreen.storyboardc/UIViewController-01J-lp-oVM.nib
-app/build-ios/TheGuild.xcodeproj/Default-568h@2x.png
-app/build-ios/TheGuild.xcodeproj/LaunchScreen.xib
-app/build-ios/TheGuild.xcodeproj/project.pbxproj
-app/build-ios/TheGuild.xcodeproj/qt_makeqmake.mak
-app/build-ios/TheGuild.xcodeproj/qt_preprocess.mak
-app/build-ios/TheGuild.xcodeproj/project.xcworkspace/xcshareddata/WorkspaceSettings.xcsettings
-app/build-ios/TheGuild.xcodeproj/xcshareddata/xcschemes/TheGuild.xcscheme
 ifi/build-ios/Makefile
 ifi/build-ios/release/libifigame.1.0.0.dylib
 ifi/build-ios/release/libifigame.1.0.dylib
@@ -1082,54 +933,4 @@ ifi/build-ios/release/libifigame.1.dylib
 ifi/build-ios/release/libifigame.dylib
 tools/libz/build-ios/Makefile
 tools/libz/build-ios/release/libz.a
-app/build-ios/Release-iphoneos/TheGuild.app.dSYM/Contents/Info.plist
-app/build-ios/Release-iphoneos/TheGuild.app.dSYM/Contents/Resources/DWARF/TheGuild
-app/build-ios/TheGuild.xcodeproj/project.xcworkspace/xcuserdata/stefan.xcuserdatad/UserInterfaceState.xcuserstate
-app/build-ios/TheGuild.xcodeproj/project.xcworkspace/xcuserdata/stefan.xcuserdatad/WorkspaceSettings.xcsettings
-build-theguild-Desktop_Qt_5_9_4_clang_64bit2-Debug/asset_catalog_compiler.Info.plist
 ifi/Makefile
-app/build-ios/jinxter_plugin_import.cpp
-app/build-ios/jinxter_qml_plugin_import.cpp
-app/build-ios/Jinxter.xcodeproj/Default-568h@2x.png
-app/build-ios/Jinxter.xcodeproj/LaunchScreen.xib
-app/build-ios/Jinxter.xcodeproj/project.pbxproj
-app/build-ios/Jinxter.xcodeproj/qt_makeqmake.mak
-app/build-ios/Jinxter.xcodeproj/qt_preprocess.mak
-app/build-ios/Jinxter.xcodeproj/project.xcworkspace/xcshareddata/WorkspaceSettings.xcsettings
-app/build-ios/Jinxter.xcodeproj/xcshareddata/xcschemes/Jinxter.xcscheme
-app/build-ios/Release-iphoneos/Jinxter.app/AppIcon20x20@2x.png
-app/build-ios/Release-iphoneos/Jinxter.app/AppIcon20x20@2x~ipad.png
-app/build-ios/Release-iphoneos/Jinxter.app/AppIcon20x20@3x.png
-app/build-ios/Release-iphoneos/Jinxter.app/AppIcon20x20~ipad.png
-app/build-ios/Release-iphoneos/Jinxter.app/AppIcon29x29@2x.png
-app/build-ios/Release-iphoneos/Jinxter.app/AppIcon29x29@2x~ipad.png
-app/build-ios/Release-iphoneos/Jinxter.app/AppIcon29x29@3x.png
-app/build-ios/Release-iphoneos/Jinxter.app/AppIcon29x29~ipad.png
-app/build-ios/Release-iphoneos/Jinxter.app/AppIcon40x40@2x.png
-app/build-ios/Release-iphoneos/Jinxter.app/AppIcon40x40@2x~ipad.png
-app/build-ios/Release-iphoneos/Jinxter.app/AppIcon40x40@3x.png
-app/build-ios/Release-iphoneos/Jinxter.app/AppIcon40x40~ipad.png
-app/build-ios/Release-iphoneos/Jinxter.app/AppIcon60x60@2x.png
-app/build-ios/Release-iphoneos/Jinxter.app/AppIcon60x60@3x.png
-app/build-ios/Release-iphoneos/Jinxter.app/AppIcon76x76@2x~ipad.png
-app/build-ios/Release-iphoneos/Jinxter.app/AppIcon76x76~ipad.png
-app/build-ios/Release-iphoneos/Jinxter.app/AppIcon83.5x83.5@2x~ipad.png
-app/build-ios/Release-iphoneos/Jinxter.app/Assets.car
-app/build-ios/Release-iphoneos/Jinxter.app/Default-568h@2x.png
-app/build-ios/Release-iphoneos/Jinxter.app/embedded.mobileprovision
-app/build-ios/Release-iphoneos/Jinxter.app/Info.plist
-app/build-ios/Release-iphoneos/Jinxter.app/Jinxter
-app/build-ios/Release-iphoneos/Jinxter.app/LaunchScreen.nib
-app/build-ios/Release-iphoneos/Jinxter.app/PkgInfo
-app/build-ios/Release-iphoneos/Jinxter.app.dSYM/Contents/Info.plist
-app/build-ios/Release-iphoneos/Jinxter.app.dSYM/Contents/Resources/DWARF/Jinxter
-app/build-ios/Release-iphoneos/Jinxter.app/_CodeSignature/CodeResources
-app/build-ios/Release-iphoneos/Jinxter.app/assets/jinxter.gfx
-app/build-ios/Release-iphoneos/Jinxter.app/assets/jinxter.json
-app/build-ios/Release-iphoneos/Jinxter.app/assets/jinxter.mp3
-app/build-ios/Release-iphoneos/Jinxter.app/assets/jinxter.prog
-app/build-ios/Release-iphoneos/Jinxter.app/assets/jinxter.text
-app/build-ios/Release-iphoneos/Jinxter.app/Frameworks/libifigame.1.dylib
-app/build-ios/Release-iphoneos/Jinxter.app/LaunchScreen.storyboardc/01J-lp-oVM-view-Ze5-6b-2t3.nib
-app/build-ios/Release-iphoneos/Jinxter.app/LaunchScreen.storyboardc/Info.plist
-app/build-ios/Release-iphoneos/Jinxter.app/LaunchScreen.storyboardc/UIViewController-01J-lp-oVM.nib
