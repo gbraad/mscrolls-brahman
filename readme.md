@@ -144,7 +144,7 @@ You can copy the binaries and resources together so that the game can be launche
 * create a subdirectory called `assets`
 * copy all images, icons etc into the `assets` subdirectory
 
-**Example for Escape**
+### Example for Escape
 
 (from `escape/xvan` directory)
 
@@ -160,6 +160,30 @@ cp -r icons dist/assets
 ```
 
 Be sure to put the `images` and `icons` directories _inside_ the `assets` directory in the same arrangement as they are relative to `-configdir` as ran before.
+
+### Changing the Icon
+
+If you wish your deployed binary to have its own internal icon, you have to change `app/klif.pro` to specify it.
+
+For Windows, set `RC_ICONS` to an `.ico` file and for OSX make an `.icns` file
+
+eg.
+
+```
+win32 {
+   RC_ICONS = pathto/yourlogo.ico
+}
+```
+
+For OSX change `ICON`
+
+eg.
+
+```
+macx:  {
+   ICON = pathto/yourlogo.icns
+}
+```
 
 
 ## Build Instructions for Debug
