@@ -135,6 +135,33 @@ appname=klif
 $APP/${appname}.app/Contents/MacOS/${appname} -configdir . -story escape.dat
 ```
 
+## Deployment
+
+You can copy the binaries and resources together so that the game can be launched by clicking on the binary as follows;
+
+* rename the binary to the game name
+* copy all DLLs locally to the game binary
+* create a subdirectory called `assets`
+* copy all images, icons etc into the `assets` subdirectory
+
+**Example for Escape**
+
+(from `escape/xvan` directory)
+
+```
+mkdir dist
+cp ../release/ifigame.dll dist
+cp ../../app/release/*.dll dist
+cp ../../app/release/klif.exe dist/escape.exe
+mkdir dist\assets
+cp escape.dat dist/assets
+cp -r images dist/assets
+cp -r icons dist/assets
+```
+
+Be sure to put the `images` and `icons` directories _inside_ the `assets` directory in the same arrangement as they are relative to `-configdir` as ran before.
+
+
 ## Build Instructions for Debug
 
 ### Windows
