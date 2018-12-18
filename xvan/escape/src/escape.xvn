@@ -8,9 +8,9 @@
 #=====================
 
 TITLE         "Escape!"
-VERSION       "1.6"
+VERSION       "1.10"
 AUTHOR        "Marnix van den Bos"
-CREDITS       "Mathbrush (testing initial verion)"
+CREDITS       "Mathbrush, Andrew Schultz."
 ORGANIZATION  "XVAN"
 COVERTEXT     "A sample XVAN story"
 BACKIMAGE     "images\\\\coverimage.jpg"  # need '\\' in json string
@@ -44,7 +44,8 @@ $LOCATION l_hallway_south
                  up. To the west is a passage to the living room and a passage /
                  to the east is blocked by a [o_grating].\n"
 
-   d_entr_short "A passage to the east is blocked by a [o_grating].\n"
+   d_entr_short "Exits are west and north//up. A passage to the east is blocked /
+                 by a [o_grating].\n"
 
    d_blocked    "That way is blocked by the [o_grating]."
 
@@ -110,7 +111,8 @@ $LOCATION l_living_south
                  living room continues to the north.\n"
                 "There is an exit to the hallway to the east.\n"
 
-   d_entr_short "The hallway is to the east.\n"
+   d_entr_short "The hallway is to the east and the living room continues to /
+                 the north.\n"
 
  EXITS
    e -> l_hallway_south
@@ -128,7 +130,11 @@ $LOCATION l_living_south
    t_north
      # must be able to refer to the closet door
      o_closet_door.r_direction = east
-     o_closet_door.r_access    = o_closet_door.d_closet
+     if testflag(l_closet.f_seenbefore) then
+       o_closet_door.r_access    = o_closet_door.d_closet_the
+     else
+       o_closet_door.r_access    = o_closet_door.d_closet_a
+     endif
      move(o_closet_door, l_living_middle)
      nomatch()
 
@@ -261,12 +267,15 @@ END_LOC
 #-------------------------------------------------------------------------------
 $LOCATION l_garden
  DESCRIPTIONS
+   d_picture       "images\\\\Dialroom.Png"
+
    d_sys        "the garden", "the hedges", "the hedge"
 
    d_entr_long  "You are in the garden at the back of the house. East and west /
                  are hedges. To the north is a garden shed.\n"
 
-   d_entr_short "To the north is a shed.\n"
+   d_entr_short "To the north is a shed and a door to the south leads back /
+                 into the kitchen.\n"
 
    d_hedges     "The hedges are very thick. You cannot go through them (actually "
                 "they are a boundary of the game world)."
@@ -303,8 +312,10 @@ $LOCATION l_shed
 
    d_entr_long  "You are now in the garden shed. The shed hasn't been cleaned /
                  for a long time. Maybe never. On the walls you see the nails /
-                 that were used to hang the garden utensils to. Almost all of /
+                 that were used to hang the garden utensils on. Almost all of /
                  them are gone now.\n"
+
+   d_entr_short "The exit is to the south\n."
 
  EXITS
    s -> l_garden
@@ -331,8 +342,8 @@ $LOCATION l_halfway
    d_entr_short "The stairs continue up to the north and down to the south.\n"
 
    d_up_closed  "When you walk farther up the stairs one of the steps makes /
-                 a hollow sound. You try to pinpoint it but get no further /
-                 than that it is somewhere in the upper half of the stairs.\n"
+                 a hollow sound. You try to pinpoint it but can only narrow /
+                 the source to the upper half of the stairs.\n"
 
    d_up_open    "You carefully step over step 11, so you don't fall down /
                  into the closet.\n"
@@ -389,8 +400,8 @@ $LOCATION l_upstairs
    d_entr_short  "The [o_stairs] lead down and there is an exit to the west.\n"
 
    d_down_closed "When you walk down, one of the steps makes a hollow sound. /
-                  You try to pinpoint it but get no further than that it is /
-                  at the top half of the stairs.\n"
+                  You try to pinpoint it but can only narrow the source to the /
+                  upper half of the stairs.\n"
 
    d_down_open  "You carefully step over step 11, so you don't fall down /
                  into the closet.\n"
@@ -398,7 +409,7 @@ $LOCATION l_upstairs
  EXITS
    s -> l_halfway
    d -> l_halfway
-   w -> l_bedroom
+   w -> l_bathroom
 
  ATTRIBUTES
   r_ifi_gx       = 1
@@ -429,17 +440,19 @@ END_LOC
 #-------------------------------------------------------------------------------
 
 #-------------------------------------------------------------------------------
-$LOCATION l_bedroom
+$LOCATION l_bathroom
  DESCRIPTIONS
-   d_sys        "the bedroom"
+   d_picture    "images\\\\Sink.Png"
 
-   d_entr_long  "This location used to be a bedroom a long time ago. But /
-                 now, there is nothing there. All furniture has been /
-                 removed. Mounted to the wall is a [o_sink]. Above the sink /
-                 is a water tap.\n"
+   d_sys        "the bathroom"
 
-   d_entr_short "Mounted to the west wall are a water tap and a sink. The /
-                 exit is to the east.\n"
+   d_entr_long  "This location used to be a bathroom a long time ago. But /
+                 now, most of the fixtures have been removed. All that remains /
+                 is a [o_sink], mounted to the wall. Above the sink is a water /
+                 tap.\n"
+
+   d_entr_short "Mounted to the wall are a water tap and a sink. The exit is /
+                 to the east.\n"
 
  EXITS
    e -> l_upstairs
@@ -448,6 +461,7 @@ $LOCATION l_bedroom
   r_ifi_gx       = 0
   r_ifi_gy       = 3
   r_ifi_maplevel = 3
+  r_ifi_picture  = d_picture
 
  TRIGGERS
    "ifi_map" -> t_ifi_place
@@ -536,27 +550,34 @@ $LOCATION l_chest_room
    d_picture_closed "images\\\\Chestroom closed.Png"
    d_picture_open   "images\\\\Chestroom open.Png"
 
-   d_sys         "the chest room"
+   d_sys          "the chest room"
 
-   d_entr_long   "Lit by the [o_lamp], you see that you are in a small dark /
-                  room. An exit is to the east and there is a closed /
-                  [o_trapdoor] in the [o_generic_ceiling].\n"
+   d_entr_long    "Thanks to the [o_lamp]'s light, you see that you are in a /
+                   small dark room. An exit is to the east and there is a /
+                   closed [o_trapdoor] in the [o_generic_ceiling].\n"
 
-   d_entr_short  "An exit leads east.\n"
+   d_entr_short   "An exit leads east.\n"
 
-   d_burning     "You walk down the stairs. Down below you see the red glow /
-                  of a fire. As you walk down further, it gets hotter and /
-                  hotter. You realize you will be fried if you continue and /
-                  you hurry back to the [l_closet].\n"
+   d_burning      "You walk down the stairs. Down below, you see the red glow /
+                   of a fire. As you walk down further, it gets hotter and /
+                   hotter. You realize you will be fried if you continue and /
+                   you hurry back to the [l_closet].\n"
 
-   d_not_burning "There is still a lot of smoke, but through the clearing /
-                  haze you can make out an old chest and an exit to the /
-                  east.\n\n"
-                 "On the chest is [a] [o_lamp].\n\n"
-                 "Above you, the trap door slams shut. It is now pitch black."
+   d_not_burning  "There is still a lot of smoke, but through the clearing /
+                   haze you can make out an old chest and an exit to the /
+                   east.\n\n"
+                  "On the chest is [a] [o_lamp].\n\n"
+                  "Above you, the trap door slams shut. It is now pitch black."
 
-   d_no_go       "When you want to exit the room you feel there is a force /
-                  holding you back. The [o_brass_key] vibrates slightly."
+   d_no_go        "When you want to exit the room, you feel there is a force /
+                   holding you back. The [o_brass_key] vibrates slightly."
+
+   d_exa_trapdoor "This side of the trapdoor is completely smooth. There's /
+                   now way to open it from this side."
+
+   d_no_tie       "There's nothing to tie the rope to."
+
+   d_no_push      "It's locked and will remain so."
 
  EXITS
    u -> l_closet
@@ -572,9 +593,13 @@ $LOCATION l_chest_room
    r_ifi_picture  = d_picture_closed
 
  TRIGGERS
-   "go east"                     -> t_go
-   "examine [o_generic_ceiling]" -> t_exa_ceiling
-   "ifi_map"                     -> t_ifi_place
+   "go east"                      -> t_go
+   "examine [o_generic_ceiling]"  -> t_exa_ceiling
+   "examine [o_trapdoor]"         -> t_exa
+   "tie [o_rope] to [o_trapdoor]" -> t_tie
+   "push [o_trapdoor]"            -> t_push
+   "pull [o_trapdoor]"            -> t_push
+   "ifi_map"                      -> t_ifi_place
 
    t_entrance
      if equal(%dir, d) then
@@ -619,6 +644,18 @@ $LOCATION l_chest_room
      printcr("There is a closed trap door in the ceiling.")
      disagree()        # important, otherwise ceiling object will also reply.
 
+   t_exa
+     printcr(d_exa_trapdoor)
+     disagree()
+
+   t_tie
+     printcr(d_no_tie)
+     disagree()
+
+   t_push
+     printcr(d_no_push)
+     disagree()
+
 END_LOC
 #-------------------------------------------------------------------------------
 
@@ -639,21 +676,21 @@ $LOCATION l_dial_room
 
    d_entr_short    "Exits are west, southwest and northeast.\n"
 
-   d_solved_dials1 "You hear a squeeking noise. Looking at the [o_dials], you /
+   d_solved_dials1 "You hear a squeaking noise. Looking at the [o_dials], you /
                     see that all three hands point to the number 8. At the /
                     same time, the door in the south wall moves back a few /
-                    inches and turns 180 degrees revealing a metal ladder on its /
-                    other side. Then the door retracts further. What remains /
-                    is a small alcove to the south with a ladder leading up /
-                    and a carved wooden lever in the west wall."
+                    inches and turns 180 degrees, revealing a metal ladder on /
+                    its other side. Then the door retracts further, moving the /
+                    ladder out of sight. What remains is a small alcove to the /
+                    south."
 
-   d_solved_dials2 "You hear a squeeking noise. It looks like it's coming from [the] /
+   d_solved_dials2 "You hear a squeaking noise. It looks like it's coming from [the] /
                     [l_dial_room]. Maybe you better check it out..."
 
  EXITS
    w  -> l_chest_room
    sw -> l_passageway
-   ne -> l_vault_room
+   ne -> l_secure_room
 
  FLAGS
    f_solved_dials   = 0
@@ -755,23 +792,23 @@ END_LOC
 #-------------------------------------------------------------------------------
 
 #-------------------------------------------------------------------------------
-$LOCATION l_vault_room
+$LOCATION l_secure_room
 
  DESCRIPTIONS
    d_picture_closed "images\\\\Vaultroom closed.Png"
    d_picture_open   "images\\\\Vaultroom open.Png"
 
-   d_sys            "the vault room"
+   d_sys            "the secure room"
 
    d_entr_long      "This is a room with an exit leading south.\n"
 
-   d_entr_short     "To the south is an exit.\n"
+   d_entr_short     "The way out is to the south.\n"
 
  EXITS
    s -> l_dial_room
 
  FLAGS
-   f_lit            = 1   # otherwise Fred cannot see the vault when he is alone
+   f_lit            = 1   # otherwise Fred cannot see the safe when he is alone
    f_player_visited = 0   # player has not been here yet
 
  ATTRIBUTES
@@ -794,7 +831,10 @@ $LOCATION l_alcove
  DESCRIPTIONS
    d_sys        "the alcove"
 
-   d_entr_long  "You are in the alcove, a pretty narrow space.\n"
+   d_entr_long  "You are in the alcove, a pretty narrow space. The way back /
+                 to the dial room is to the north.\n"
+
+   d_entr_short "an exit is to the north.\n"
 
    d_look       "You see light coming in."
 
@@ -808,8 +848,8 @@ $LOCATION l_alcove
    r_ifi_maplevel = 0
 
  TRIGGERS
-   "look up" -> t_look
-   "ifi_map" -> t_ifi_place
+   "look up"       -> t_look
+   "ifi_map"       -> t_ifi_place
 
    t_entrance
      l_json.r_maptext = o_player.d_maptext_basement
@@ -833,23 +873,25 @@ END_LOC
 #-------------------------------------------------------------------------------
 $LOCATION l_east_of_grating
  DESCRIPTIONS
-   d_sys        "East of grating"
+   d_sys         "East of grating"
 
-   d_entr_long  "You are in a corridor on the other side of the grating. /
-                 The corridor continues to the east. A passage to the west /
-                 is blocked by a [o_grating].\n"
+   d_entr_long   "You are on the other side of the grating, which blocks your /
+                  way west. A corridor leads east.\n"
 
-   d_entr_short "A passage to the west is blocked by a [o_grating].\n"
+   d_entr_short  "A passage to the west is blocked by a [o_grating].\n"
 
-   d_entr_add1  "\nYou can go back down to the alcove."
+   d_entr_add1   "\nYou can go back down to the alcove."
 
-   d_close      "You firmly pull the [o_rope]. You feel the lever switching /
-                 into the up position. The alcove's south wall swings up /
-                 and latches. Fortunately, the rope slipped off the lever /
-                 just before the wall closed.\n\nYou hear a faint click /
-                 from within the clamp."
+   d_pull_ladder "You firmly pull the rope, but the ladder does not give /
+                  in. You hear the lever clicking, though."
 
-   d_blocked    "That way is blocked by the [o_grating]."
+   d_close       "You firmly pull the [o_rope]. You feel the lever switching /
+                  into the up position. The alcove's south wall swings up /
+                  and latches. Fortunately, the rope slipped off the lever /
+                  just before the wall closed.\n\nYou hear a faint click /
+                  from within the clamp."
+
+   d_blocked     "That way is blocked by the [o_grating]."
                   
  EXITS
    d -> l_alcove
@@ -884,18 +926,27 @@ $LOCATION l_east_of_grating
        printcr(o_ladder.d_entr_grating)
 
    t_pull
-    if equal(o_rope.r_tied_to, o_lever) then
-      printcr(d_close)
-      blockexit(%this, down)
-      move(o_ladder, %this)
-      move(o_clamp, %this)
-      move(o_rope, o_player)  # in case the rope was on the floor
-      clearflag(o_clamp.f_locked)
-      o_rope.r_tied_to = %none
-      setflag(f_solved_ladder)
-      move(o_npc, l_circular_room)
-      o_npc.r_loc_next = l_east_of_grating
-      disagree()  # to prevent rope from replying
+     if equal(o_rope.r_tied_to, o_ladder) then
+       if not(testflag(o_clamp.f_open)) then
+         printcr(d_pull_ladder)
+         disagree()  # to prevent rope from replying
+       else
+         nomatch()  # let verb handle oit
+       endif
+     else
+     if equal(o_rope.r_tied_to, o_lever) then
+       printcr(d_close)
+       blockexit(%this, down)
+       move(o_ladder, %this)
+       move(o_clamp, %this)
+       move(o_rope, o_player)  # in case the rope was on the floor
+       clearflag(o_clamp.f_locked)
+       o_rope.r_tied_to = %none
+       setflag(f_solved_ladder)
+       move(o_npc, l_circular_room)
+       o_npc.r_loc_next = l_east_of_grating
+       disagree()  # to prevent rope from replying
+     endif
 
 END_LOC
 #-------------------------------------------------------------------------------
@@ -966,14 +1017,18 @@ $LOCATION l_dark_place_1
    d_entr_first "The moment you step into the dark place, a grating slides /
                  down from the ceiling, closing the exit to the north.\n"
 
-   d_entr_1     "You are in a dark place. It is dimly lit and there is an /
+   d_entr_1     "You are in a dark place. It is dimly lit, with an /
                  exit to the north."
 
-   d_entr_2     "The only thing you can make out are 2 buttons way in the /
+   d_entr_2     "The only thing you can make out are two buttons way in the /
                  back on the south wall."
 
-   d_lamp       "\nStrange enough, turning on the [o_lamp] doesn't make a /
+   d_lamp       "\nStrangely enough, turning on the [o_lamp] doesn't make a /
                  difference."
+
+   d_wrong      "It's a solid wall now. You can still finish the game, only /
+                 not with a perfect score. Accept that you lost the 30 /
+                 points or start over again."
 
  EXITS
    n -> l_escape_hallway
@@ -1014,7 +1069,7 @@ $LOCATION l_dark_place_1
 
    t_south
      if testflag(l_dark_place_1.f_solved) then
-       printcr("It's a solid wall, now.")
+       printcr(d_wrong)
 
    t_light
      if trigger(o_lamp.t_light) then
@@ -1081,7 +1136,8 @@ $LOCATION l_circular_room
                  a 15 ft deep [o_pit].\nAn exit leads to the east.\n"
                 "\nIn the middle of the room is a [o_disk].\n"
 
-   d_entr_short "A circular shaped room with a wooden circle in the middle.\n"
+   d_entr_short "A circular shaped room surrounding a pit with a wooden circle /
+                in the center.\n"
 
  EXITS
    w -> l_escape_hallway2
@@ -1155,6 +1211,7 @@ $LOCATION l_escape_room
 
  TRIGGERS
    "south"            -> t_south
+   "down"             -> t_south
    "enter [o_chute]"  -> t_south
    "up"               -> t_up
    "look up"          -> t_look_up
@@ -1211,7 +1268,7 @@ $LOCATION l_exit
                 "Closer by, you see the garden, surrounded by hedges."
 
    d_entr_2     "Next to the garden shed you see a large snake, warming /
-                 itself in the sunshine. It raises its head and you would /
+                 itself in the sunshine. It raises its head and you could /
                  have sworn it winked at you..."
 
    d_west       "You notice an exit down to the west that you didn't see /
@@ -1221,20 +1278,20 @@ $LOCATION l_exit
                  [l_escape_room]."
 
    d_give_watch "Looking down the hole, you see Fred looking back at you. /
-                 Congratulations, you made it out of here. As a reward, I /
-                 will give you this fine watch. Fred takes the watch off /
-                 his wrist and ties it to the other end of the rope. This /
-                 is for you. It was nice meeting you, I hope you enjoyed this /
+                 \"Congratulations, you made it out of here. As a reward, I /
+                 will give you this fine watch.\" Fred takes the watch off /
+                 his wrist and ties it to the other end of the rope. \"This /
+                 is for you. It was nice meeting you! I hope you enjoyed this /
                  little sample XVAN game. I'll go now and wait for the next /
-                 adventurer.\n\n"
+                 adventurer.\"\n\n"
                 "Fred leaves the room and you hear him mumble \"...frame his /
                  picture and hang it on the wall...\"."
 
-   d_rope       "Looking down the hole, you see that Fred is gone. the /
+   d_rope       "Looking down the hole, you see that Fred is gone. The /
                  [o_watch] is tied to the end of the rope."
 
-   d_no_pull    "The rope seems to be stuck. It is like someone in the /
-                 [l_escape_room] is blocking it it."
+   d_no_pull    "The rope seems to be stuck. It's as if someone in the /
+                 [l_escape_room] is blocking it."
 
    d_pull       "Slowly, so the watch won't fall off, you pull up the rope. /
                  You untie the watch and put it on your wrist. When you move /
@@ -1242,13 +1299,13 @@ $LOCATION l_exit
                  is a beautiful watch.\n\n"
 
    d_exit       "You can't help but feel a bit sorry for Fred. He has to /
-                 stay in this small sample story. But - you tell yourself - /
-                 he seems to like it here and you ask yourself whether he /
+                 stay in this small sample story. But, you tell yourself, /
+                 he seems to like it here, and you ask yourself whether he /
                  would be able to survive in the real world outside his /
                  24 test locations...\n\n"
 
                 "You see a ladder to the west that you didn't notice before /
-                 and climb down to end up in front of the house."
+                 and climb down to the front of the house."
 
                 "\n\n\n==== You have escaped! ====\n\n\n"
                 "Your score is [o_player.r_score] out of /
@@ -1271,6 +1328,8 @@ $LOCATION l_exit
    "x [o_escape_hole]"       -> t_look_down
    "look in [o_escape_hole]" -> t_look_down
    "pull [o_rope]"           -> t_pull
+   "get [o_rope]"            -> t_pull
+   "untie [o_rope]"          -> t_pull
    "go down"                 -> t_down
    "go west"                 -> t_west
    "ifi_map"                 -> t_ifi_place
@@ -1294,7 +1353,7 @@ $LOCATION l_exit
      agree()
 
    t_down
-     printcr("You've just escaped from there. There's no need going back...")
+     printcr("You've just escaped from there. There's no need to go back...")
 
    t_west
      printcr("That would make this sample story too large...")
@@ -1339,51 +1398,48 @@ $OBJECT o_player
  DESCRIPTIONS
    d_sys  "You", "me", "head"
 
-   d_exa  "The avarage adventurer\n"
+   d_exa  "The average adventurer.\n"
 
-   d_init "Suddenly you are here. You have no recollection of anything. Your /
+   d_init1 "Suddenly you are here. You have no recollection of anything. Your /
            mind is empty, like it just started.\n\n"
           "It looks like you are in a house, but then again, it looks like /
            you're not. It is like you're in all rooms at the same time. You /
-           see a kitchen and a bedroom, but somehow you can also see through /
-           it. The house merges with the outside world. It is like your /
+           see a kitchen and a bathroom, but somehow you can also see through /
+           them. The house merges with the outside world. It is like your /
            surroundings are not yet finished.\n\n"
           "You faintly see a garden, hedges and meadows. Looking down, you /
            can also make out blue, red and green objects in the near /
            distance and a shiny object that looks like gold.\n\n"
           "Very weird...\n\n"
           "Someone walks into the room. A big nondescript guy. He is carrying /
-           a tablet. When he sees you he looks surprised and a bit confused.\n\n"
-          "'What's going on? Who put you in here already? The world isn't even /
+           a tablet. When he sees you, he looks surprised and a bit confused.\n"
+
+   d_init2 "\"What's going on? Who put you in here already? The world isn't even /
            finished, yet. They all know that the player object should only be /
            enabled during the final test cases and regression tests. We're /
-           not that far yet!'\n\n"
-          "He looks at you and smiles. 'I'm sorry buddy. This shouldn't have /
-           happened. I am going to fix this right away.'\n\n"
-          "After a few swipes on the tablet screen he starts typing. You hear /
-           him mumbling something about 'commenting out' and "
-          "'recompiling'.\n\n"
-          "And then everything goes black again....\n\n"
-
-   d_init1 "\n.======================== I N T R O D U C I N G  X V A N =====================.\n\n"
-           "This is a short sample story for XVAN 2.3.4.\n"
-           "It has 24 locations and 68 objects, including the player and one npc named Fred.\n"
-           "The story contains several puzzles and you need to interact with /
-            Fred to solve some of them. Your goal is: escape!\n\n"
-           ".=============================================================================.\n\n"
+           not that far yet!\"\n\n"
+          "He looks at you and smiles. \"I'm sorry, buddy. This shouldn't have /
+           happened. I am going to fix this right away.\"\n\n"
+          "After a few swipes on the tablet screen, he starts typing. You hear /
+           him mumbling something about \"commenting out\" and "
+          "\"recompiling\".\n\n"
+          "And then everything goes black again....\n"
 
    d_score_25 "\n\nYour score just went up by 25 points!"
 
    d_score_50 "\n\nYour score just went up by 50 points!"
 
    d_cut  "Technically speaking, committing suicide would count as an /
-           escape. But it is not the intention of this game."
+           escape. But that is not the intent of this game."
 
    d_no_route "There is no known route from [the] [l_location] to [the] /
                [o_subject]."
 
    d_help "The source file for this game is part of the distribution. If you are /
            really stuck, cheat by checking the source code."
+
+   d_ask  "\"I've seen many adventurers, trying to escape from here. Don't /
+           disappoint me...\""
 
    d_maptext_basement "Basement"
    d_maptext_house    "House"
@@ -1394,10 +1450,13 @@ $OBJECT o_player
 
  FLAGS
    f_lit         = 1
+   f_seenbefore  = 1
    f_alive       = 1
+   f_quenched    = 0
    f_may_save    = 1
    f_verbose     = 0
    f_first       = 1
+   f_fixed       = 0
    f_any         = 0  # exclude from t_reveal
    f_verb_help   = 0
 
@@ -1416,11 +1475,16 @@ $OBJECT o_player
    "[dir]"                        -> t_move
    "go to [dir]"                  -> t_move
    "goto [o_subject]"             -> t_goto
+   "ask [o_npc] about [o_player]" -> t_ask
    "cut [o_player] with [o_spec]" -> t_cut
    "help"                         -> t_help
    "zwoosh"                       -> t_zwoosh  # used for testing
 
    t_zwoosh
+     printcrbold("Dit is bold")
+     printcritalic("Dit is italic")
+     bold(on) printcr("bold") bold(off)
+     underline(on) printcr("underline") underline(off)
      agree()
 
    t_entrance
@@ -1443,12 +1507,14 @@ $OBJECT o_player
      if try(l_json, 0, 0, "ifi_map") then endif
 
      background(blue)       # blue background with white text
-     printcr(d_init)        # print opening message
-
-     print("Hit a key...")
+     printcr(d_init1)        # print opening message
+     printcr("  Hit a key...\n")
      hitanykey()
-     clearscreen()
-     printcr(d_init1)
+
+     printcr(d_init2)
+
+     printcr("  Hit a key...\n")
+     hitanykey()
 
      # restore f_seenbefore for south hallway (was set to 1 for ifi-xvan
      clearflag(l_hallway_south.f_seenbefore)
@@ -1538,6 +1604,9 @@ $OBJECT o_player
        if try(l_location, 0, 1, "go d") then agree() else disagree() endif
      endif
 
+   t_ask
+     printcr(d_ask)
+
 END_OBJ
 #-------------------------------------------------------------------------------
 
@@ -1559,28 +1628,29 @@ $OBJECT o_npc
                       here. It's my home. In case you /
                       want to look me up in the source file and see what I can /
                       do, my object id is o_npc.\n\n"
-                     "Your goal is to escape from this story. In order to /
+                     "\"Your goal is to escape from this story. In order to /
                       pull that off, you will need my help. You may ask me /
                       about things and I might give a clue. I can also perform /
                       actions for you.\n\n"
-                     "Ow, before I forget...\" Fred raises his tablet and /
+                     "\"Oh, before I forget...\" Fred raises his tablet and /
                       takes a picture of you.\n\n"
-                     "\"Hope to see you soon, buddy\". Fred pulls a key from /
+                     "\"Hope to see you soon, buddy.\" Fred pulls a key from /
                       his pocket and unlocks and opens the closet door. He looks /
                       at you and smiles:\n\n\"Happy adventuring!\"\n\n/
                       Fred steps into the closet. You hear the sound of the /
-                      door being locked.\n\n"
+                      door being locked and after some time there's a sound of /
+                      squeaking hinges, followed by a slam.\n\n"
                      "You are alone again."
 
    d_met_again       "\n[o_npc] is here. He looks happy to see you. \"Hey /
                       buddy, so glad you made it this far\". He pulls out his /
-                      tablet and starts typing. \"I'll award you with 50 /
-                      points for you achievements. But you're not there yet. /
-                      There's more to do before you can get out of here\", /
+                      tablet and starts typing. \"I'll award you 50 /
+                      points for your achievements. But you're not there yet. /
+                      There's more to do before you can get out of here,\" /
                       he says.\n"
                      "\"I'll be walking around here between locations. If you /
-                      want me to stay, say 'fred, wait'. To let me go again, /
-                      just say 'Fred, go'. Otherwise, I'll stay forever and /
+                      want me to stay, say 'Fred, wait'. To let me go again, /
+                      just say 'Fred, go'. Otherwise, I'll stay forever, and /
                       you may need me in another room\".\n\n"
                      "\"Happy adventuring!\"."
 
@@ -1592,36 +1662,36 @@ $OBJECT o_npc
    d_throw_hook      "With an impressive swing, Fred throws the [o_hook] /
                       through the hole."
 
-   d_no_throw        "Fred looks at you. I thought you would have figured it /
+   d_no_throw        "Fred looks at you. \"I thought you would have figured it /
                       out by now. Throwing the hook at this moment is not a /
-                      good idea. Nice rope, by the way."
+                      good idea. Nice rope, by the way.\""
 
-   d_rope_attach     "As the [o_rope] is tied to the hook, the rope is /
+   d_rope_attach     "Since the [o_rope] is tied to the hook, it's also /
                       pulled through the hole by the weight of the hook. /
                       Apparently, the [o_hook] got stuck behind something /
                       outside the room."
 
    d_dangling        "The [o_rope] is dangling from the ceiling."
 
-   d_sees_vault1     "\nYou hear a voice in one of the other rooms saying /
-                      \"Hey, there's the good old vault. I almost forgot it /
+   d_sees_safe1     "\nYou hear a voice in one of the other rooms saying /
+                      \"Hey, there's the good old safe. I almost forgot it /
                       was there. Hope I can remember the code. It was /
-                      something like 5489. Yes! I never forget numbers\"."
+                      something like 5489. Yes! I never forget numbers.\""
 
-   d_sees_vault2     "[o_npc] sees [the] [o_vault] and says hey, there's the /
-                      good old vault. I almost forgot it was there. Maybef I /
+   d_sees_safe2     "[o_npc] sees [the] [o_safe] and says \"Hey, there's the /
+                      good old safe. I almost forgot it was there. Maybe I /
                       can remember the code. It was something like 5489. I'll /
-                      try that. Yes! I never forget numbers."
+                      try that. Yes! I never forget numbers.\""
 
-   d_takes_watch1    "The voice continues. Oh my, that's a beautifull watch /
-                      in there!"
+   d_takes_watch1    "The voice continues. \"Oh my, that's a beautiful watch /
+                      in there!\""
 
-   d_takes_watch2    "Opening the vault reveals [a] [o_watch] and [a] /
+   d_takes_watch2    "Opening the safe reveals [a] [o_watch] and [a] /
                       [o_brass_key]. Before you can do anything, [o_npc] /
-                      snatches the watch out of the vault, puts it around /
-                      his wrist and slams the vault door shut. Just before /
-                      the vault closed, you caught a glimpse of something /
-                      reddish brown. "
+                      snatches the watch out of the safe, puts it around /
+                      his wrist and slams the safe door shut. Just before /
+                      the safe closed, you caught a glimpse of something /
+                      reddish brown."
 
    d_key             "\nFred looks at you carefully. \"Ah, I see you've got [the] /
                       [o_brass_key]! /
@@ -1635,15 +1705,15 @@ $OBJECT o_npc
                       You'll never be able to enter the chest room when you /
                       carry the key. But maybe I can remove the check\". /
                       Fred's typing on the screen. \"Hmmm, this should work.\n\n"
-                     "Darn! They made the file read only. They must have /
+                     "\"Darn! They made the file read only. They must have /
                       found out I helped the guy that was here last week. /
                       This is not going to work. "
-                     "Oh, wait! It's only the player code that checks for /
+                     "\"Oh, wait! It's only the player code that checks for /
                       the brass key when entering the chest room. My npc code /
                       doesn't. So... Well, you do the math, buddy...\""
 
-   d_give_key        "Fred looks at you and smiles from ear to ear. Cool! You /
-                      figured it out. I'll meet you in [the] [l_chest_room]. /
+   d_give_key        "Fred looks at you and smiles from ear to ear. \"Cool! You /
+                      figured it out. I'll meet you in [the] [l_chest_room].\" /
                       Fred takes the key and wanders off..."
 
    d_fred_curious    "\nFred says \"let's open the [o_chest] so we can see /
@@ -1654,10 +1724,13 @@ $OBJECT o_npc
 
    d_refuse_rope     "Fred is about to accept the gift, but seeing that the /
                       [o_rope] is tied to [the] [o_rope.r_tied_to], Fred /
-                      refuses your offer: \"it's not going to work that /
-                      way\"."
+                      refuses your offer: \"It's not going to work that /
+                      way.\""
 
    d_confused        "[o_npc] looks at you, confused. \"I already have the"
+
+   d_specific        "You have to be more specific about where you want to /
+                      throw the hook."
 
    d_icon            "icons\\\\Fred.Png"
 
@@ -1689,7 +1762,9 @@ FLAGS
    "[o_npc], wait"                                    -> t_wait
    "[o_npc], go"                                      -> t_go
    "[o_npc], tie [o_rope] to [o_hook]"                -> t_tie
-   "[o_npc], throw [o_hook]"                          -> t_throw
+   "[o_npc], tie [o_hook] to [o_rope]"                -> t_tie
+   "[o_npc], throw [o_hook]"                          -> t_more_specific
+   "[o_npc], throw [o_hook] at [o_generic_ceiling]"   -> t_throw
    "[o_npc], throw [o_hook] [prepos] [o_escape_hole]" -> t_throw
    "[o_npc], [action] [o_subject]"                    -> t_do_self
    "[o_npc], [action] [o_subject] [prepos] [o_spec]"  -> t_do_self
@@ -1760,8 +1835,8 @@ FLAGS
    t_move
      # Trigger for moving around Fred.
      # Initially Fred travels between the dial room and the passageway.
-     # After the player has been in the vault room and left it, Fred
-     # will travel between the dial room and the vault room.
+     # After the player has been in the secure room and left it, Fred
+     # will travel between the dial room and the secure room.
      # After solving the ladder puzzle, Fred will travel between the 
      # east of grating room and the circular room.
      # When the escape room is accessible (after solving the groove puzzle), Fred
@@ -1806,19 +1881,19 @@ FLAGS
          endif
               
        else         
-         if equal(r_loc_next, l_vault_room) then
-           # This is the vault room <-> dial room scenario
+         if equal(r_loc_next, l_secure_room) then
+           # This is the secure room <-> dial room scenario
            r_loc_next = l_dial_room
 
-           # We're in the vault room, Fred takes the watch if he hasn't done so already
-           # Check if Fred can see the vault and doesn't have the watch yet
-           if cansee(o_npc, o_vault) and not(owns(o_npc, o_watch)) then
+           # We're in the secure room, Fred takes the watch if he hasn't done so already
+           # Check if Fred can see the safe and doesn't have the watch yet
+           if cansee(o_npc, o_safe) and not(owns(o_npc, o_watch)) then
              setflag(o_watch.f_seenbefore)
-             if cansee(o_player, o_vault) then
-               printcr(d_sees_vault2)
+             if cansee(o_player, o_safe) then
+               printcr(d_sees_safe2)
                printcr(d_takes_watch2)
              else
-               printcr(d_sees_vault1)
+               printcr(d_sees_safe1)
                printcr(d_takes_watch1)
              endif
              move(o_watch, o_npc, on)
@@ -1839,11 +1914,11 @@ FLAGS
                endif
              else
                if equal(r_loc_next, l_dial_room) then
-                 # either dial room <-> passageway or dial room <-> vault room scenario
-                 if testflag(l_vault_room.f_player_visited) then
-                   # Fred may open the vault and take the watch
-                   # This is the dial room <-> vault room scenario
-                   r_loc_next = l_vault_room
+                 # either dial room <-> passageway or dial room <-> secure room scenario
+                 if testflag(l_secure_room.f_player_visited) then
+                   # Fred may open the safe and take the watch
+                   # This is the dial room <-> secure room scenario
+                   r_loc_next = l_secure_room
                  else
                    # this is the dial room <-> passageway scenario
                    r_loc_next = l_passageway
@@ -1872,16 +1947,16 @@ FLAGS
 
    t_wait # tells fred to stop moving around
      if testflag(f_endgame) then
-       printcr("I'm not going anywhere.")
+       printcr("\"I'm not going anywhere.\"")
      else
-       printcr("Huh? Ok, I'll wait, then.")
+       printcr("\"Huh? Ok, I'll wait, then.\"")
        stoptimer(m_npc)
    
    t_go # tells Fred to start moving again
      if testflag(f_endgame) then
-       printcr("I think I'll stay. You need me now.")
+       printcr("\"I think I'll stay. You need me now.\"")
      else
-       printcr("Ok, see you around. Bye!")
+       printcr("\"Ok, see you around. Bye!\"")
        settimer(m_npc, 0) # in case it stopped at value 1
        starttimer(m_npc)
 
@@ -1899,9 +1974,9 @@ FLAGS
          o_rope.r_tied_to = o_hook
          printcr("The rope is now tied to the hook.")
        else
-         printcr("I don't have the [o_rope].")
+         printcr("\"I don't have the [o_rope].\"")
      else
-       printcr("I don't have the [o_hook].")
+       printcr("\"I don't have the [o_hook].\"")
 
    t_give_rope
      if owns(o_npc, o_rope) then
@@ -1943,10 +2018,10 @@ FLAGS
          # in case Fred was told to wait, cancel the wait
          starttimer(m_npc)
        else
-         printcr("[o_npc] looks at you suspiciously. What's up? Just go and open [the] [o_chest].")
+         printcr("\"[o_npc] looks at you suspiciously. What's up? Just go and open [the] [o_chest].\"")
        endif
      else
-       printcr("We already did that.")
+       printcr("\"We already did that.\"")
      agree()
 
    t_lift
@@ -1957,15 +2032,18 @@ FLAGS
 
    t_give_watch
      if owns(o_npc, o_watch) then
-       printcr("Not yet...")
+       printcr("\"Not yet...\"")
      else
-       printcr("What watch?")
+       printcr("\"What watch?\"")
      endif
-     
+
+   t_more_specific
+     printcr(d_specific)
+ 
    t_throw
      if equal(o_rope.r_tied_to, o_hook) then
        if not(owns(o_npc, o_hook)) then
-         printcr("[o_npc] takes the[o_hook] first]")
+         printcr("[o_npc] takes the [o_hook] first]")
        endif
        printcr(d_throw_hook)
        move(o_hook, l_storage) # remove the hook from the story
@@ -2007,10 +2085,12 @@ $OBJECT o_npc_endgame
    f_alive = 1
 
  TRIGGERS
-   "listen to [o_npc_endgame]" -> t_listen
-   "listen"                    -> t_listen
-   "look at [o_npc_endgame]"   -> l_exit.t_look_down
-   "where is [o_npc_endgame]"  -> t_where
+   "listen to [o_npc_endgame]"          -> t_listen
+   "listen"                             -> t_listen
+   "ask [o_npc_endgame] about [o_spec]" -> t_listen
+   "x [o_npc_endgame]"                  -> l_exit.t_look_down
+   "look at [o_npc_endgame]"            -> l_exit.t_look_down
+   "where is [o_npc_endgame]"           -> t_where
 
    t_entrance
      agree()
@@ -2023,7 +2103,7 @@ $OBJECT o_npc_endgame
 
    t_where
      if not(testflag(l_exit.f_fred_gone)) then
-       printcr("He's down here in the escape room.")
+       printcr("He's down here in the escape room. Look down.")
      else
        printcr("He's gone.")
 
@@ -2035,8 +2115,8 @@ $OBJECT o_grating
  DESCRIPTIONS
    d_sys        "the metal grating", "the metal bars", "the metal bar"
 
-   d_exa        "The grating is made of a number of steel bars, of /
-                 approximately 4 inch thickness. You tick on the bars and /
+   d_exa        "The grating is made of a number of steel bars, each /
+                 approximately 4 inches thick. You tap on the bars and /
                  they are all massive. You conclude that this grating is /
                  here to stay.\n"
 
@@ -2103,14 +2183,14 @@ $OBJECT o_row_photos
  DESCRIPTIONS
    d_sys        "the row of photos", "the photos"
 
-   d_entr_long  "\nMounted to the west wall, is a [o_row_photos].\n"
+   d_entr_long  "\nMounted to the west wall is a [o_row_photos].\n"
 
-   d_entr_short "\nMounted to the west wall, is a [o_row_photos].\n"
+   d_entr_short "\nMounted to the west wall is a [o_row_photos].\n"
 
    d_exa        "Each photo is a portrait of a person, framed and fixed to /
                  the wall (the photo, not the person).\n"
 
-   d_good_look  "From your current position you only have a good look on photos"
+   d_good_look  "From your current position you only have a good view of the photos"
 
  CONTAINED in l_living_south
 
@@ -2162,24 +2242,24 @@ $OBJECT o_photo
    d_specific "You have to be more specific about which photo you want to /
                [action]."
 
-   d_exa_1    "\nYou can refer to a particular photo with 'photo <number>.'"
+   d_exa_1    "\nYou can refer to a particular photo with \"photo <number>.\""
 
-   d_photo_1  "A photo of a man. Inscribed in the frame is the text 'Adventurer /
-               Rick. He did not make it'."
+   d_photo_1  "A photo of a man. Inscribed in the frame is the text \"Adventurer /
+               Rick. He did not make it.\""
 
-   d_photo_2  "A photo of a man. Inscribed in the frame is the text 'Adventurer /
-               Mike. He made it with a full score'."
+   d_photo_2  "A photo of a man. Inscribed in the frame is the text \"Adventurer /
+               Mike. He made it with a full score.\""
 
-   d_photo_3  "A photo of a woman. Inscribed in the frame is the text 'Adventurer /
-               Shirley. She made it with a full score'."
+   d_photo_3  "A photo of a woman. Inscribed in the frame is the text \"Adventurer /
+               Shirley. She made it with a full score.\""
 
-   d_photo_4  "A photo of a man. Inscribed in the frame is the text 'Adventurer /
-               Tom. He did not make it'."
+   d_photo_4  "A photo of a man. Inscribed in the frame is the text \"Adventurer /
+               Tom. He did not make it\"."
 
-   d_photo_5  "A photo of a woman. Inscribed in the frame is the text 'Adventurer /
-               Jessica. She made it'."
+   d_photo_5  "A photo of a woman. Inscribed in the frame is the text \"Adventurer /
+               Jessica. She made it.\""
 
-   d_photo_6  "This is an empty frame, there's no photo in it."
+   d_photo_6  "This is an empty frame. There's no photo in it."
 
  CONTAINED in l_living_south
 
@@ -2290,9 +2370,9 @@ $OBJECT o_kitchen_door
  DESCRIPTIONS
    d_sys       "the door", "the kitchen door"
 
-   d_exa       "The door is made of wood; it gives access to the garden"
+   d_exa       "The door is made of wood; it gives access to the garden."
 
-   d_exa1      "The door is made of wood; it leads back into the kitchen"
+   d_exa1      "The door is made of wood; it leads back into the kitchen."
 
    d_entr      "\nTo the north is a door that leads to the garden."
 
@@ -2348,7 +2428,7 @@ $OBJECT o_kitchen_door
    t_open
      # test for already open is done by verb prologue
      if not(testflag(f_locked)) then
-       printcr("Ok, the kitchen door is now open")
+       printcr("Ok, the kitchen door is now open.")
        setflag(f_open)
        newexit(l_kitchen, north, l_garden)
      else
@@ -2377,7 +2457,7 @@ $OBJECT o_kitchen_window
    d_exa           "The window is made of glass, which somehow doesn't /
                     surprise you.\n"
 
-   d_smash_no      "You smash the window with your fist, but with no /
+   d_smash_no      "You bang on the window with your fist, but with no /
                     success. You need something heavy to break the /
                     window."
 
@@ -2397,6 +2477,12 @@ $OBJECT o_kitchen_window
    d_climb         "You don't fit through the window. It's way too small (or /
                     you are too big)."
 
+   d_scattered     "It's scattered all over the floor."
+
+   d_get           "The [o_kitchen_window] is firmly mounted in the /
+                    [o_kitchen_door]. You won't be able to get it out in /
+                    one piece."
+
  CONTAINED in o_kitchen_door
 
  FLAGS
@@ -2404,7 +2490,9 @@ $OBJECT o_kitchen_window
 
  TRIGGERS
    "x [o_kitchen_window]"                          -> t_exa
+   "get [o_kitchen_window]"                        -> t_get
    "look through [o_kitchen_window]"               -> t_look_through
+   "look in [o_kitchen_window]"                    -> t_look_through
    "put [o_player] in [o_kitchen_window]"          -> t_look_through
    "put [o_player] through [o_kitchen_window]"     -> t_look_through
    "break [o_kitchen_window]"                      -> t_break_no
@@ -2422,9 +2510,16 @@ $OBJECT o_kitchen_window
 
    t_exa
      if testflag(f_broken) then
-       printcr("The window is scattered all over the floor.")
+       printcr(d_scattered)
      else
        nomatch()
+
+   t_get
+     if testflag(f_broken) then
+       print("[d_scattered] You might hurt yourself.")
+       disagree()
+     else
+       printcr(d_get)
 
    t_look_through
      if testflag(f_broken) then
@@ -2443,12 +2538,12 @@ $OBJECT o_kitchen_window
      if not(testflag(o_spec.f_heavy)) then
        printcr(", but it bounces back. It obviously isn't /
                 heavy enough.")
-       move(o_spec, l_kitchen)
+       move(o_spec, l_kitchen, in)
      else
-       printcr(" and it goes straight through. The window /
+       printcr(", and it goes straight through. The window /
                 is shattered all over the floor. One of the /
                 glass fragments is a bit larger than the rest.")
-       move(o_spec, l_garden)
+       move(o_spec, l_garden, in)
        setflag(f_broken)
        move(%this, l_kitchen)
        move(o_fragment, l_kitchen)
@@ -2456,17 +2551,17 @@ $OBJECT o_kitchen_window
 
    t_throw
      # may only work for 'at' and 'through'
-     if equal(%prepos, at) OR equal(%prepos, through) then
+     if equal(%prepos, at) or equal(%prepos, through) then
        print("You throw [the] [o_subject] at the window")
        if not(testflag(o_subject.f_heavy)) then
          printcr(", but it bounces back. It obviously isn't /
                   heavy enough.")
-         move(o_subject, l_kitchen)
+         move(o_subject, l_kitchen, in)
        else
-         printcr(" and it goes straight through. The window /
+         printcr(", and it goes straight through. The window /
                   is shattered all over the floor. One of the /
                   glass fragments is a bit larger than the rest.")
-         move(o_subject, l_garden)
+         move(o_subject, l_garden, in)
          setflag(f_broken)
          move(%this, l_kitchen)
          move(o_fragment, l_kitchen)
@@ -2486,7 +2581,7 @@ $OBJECT o_keyhole_door
  DESCRIPTIONS
    d_sys  "the keyhole"
 
-   d_peek "You peek through the keyhole but you cannot see a thing. /
+   d_peek "You peek through the keyhole but cannot see a thing. /
            something on the other side of the keyhole blocks your view."
 
    d_look "You see the garden. At the far east end, there is a /
@@ -2615,9 +2710,9 @@ $OBJECT o_sticky_note
 
    d_ask        "Fred looks at you wearily. \"Oh, not the world dev team /
                  again. We call them the world mess team here. They always /
-                 leave stuff laying around. The other day they forgot to /
+                 leave stuff lying around. The other day they forgot to /
                  comment out the player character during early world tests. /
-                 Luckily I found out and could fix it just in time\"."
+                 Luckily I found out and was able to fix it just in time\"."
 
    d_read      "  # note to self from world dev team\n"
                "  # check with Fred:\n"
@@ -2668,7 +2763,7 @@ $OBJECT o_stairs
    d_refer      "\nYou can refer to a particular step with 'step <number>'."
 
    d_cant_see   "It's hard to get a good view from here. If you were /
-                 halfway up the stairs you would have a better view."
+                 halfway up the stairs, you would have a better view."
 
    d_exa_hollow "It looks just like a 15 step staircase with one step that /
                  sounds hollow when stepped on."
@@ -2851,7 +2946,9 @@ $OBJECT o_closet_door
 
    d_exa        "[the] [o_closet_door] seems to be locked.\n"
 
-   d_closet     "a closet under the stairs"
+   d_closet_a   "a closet under the stairs"
+
+   d_closet_the "the closet under the stairs"
 
    d_living     "the living room"
 
@@ -2869,13 +2966,14 @@ $OBJECT o_closet_door
 
  ATTRIBUTES
    r_direction = east
-   r_access    = d_closet
+   r_access    = d_closet_a
 
  TRIGGERS
+   "open [o_closet_door]"                      -> t_unlock
    "unlock [o_closet_door]"                    -> t_unlock
    "unlock [o_closet_door] with [o_rusty_key]" -> t_rusty
    "unlock [o_closet_door] with [o_spec]"      -> t_unlock_key
-   "enter [o_closet_door]"                     -> t_enter
+   "enter [o_closet_door]"                     -> t_unlock
 
    t_rusty
      print("The rusty key does not fit. Come to think of it... ")
@@ -2896,7 +2994,7 @@ END_OBJ
 #-------------------------------------------------------------------------------
 $OBJECT o_carpet
  DESCRIPTIONS
-   d_sys        "the old carpet"
+   d_sys        "the old carpet", "the old rug"
 
    d_entr_long  "\nOn the floor is an [o_carpet].\n"
 
@@ -2907,10 +3005,10 @@ $OBJECT o_carpet
                  turns out that its sides are glued to the floor.\n"
 
    d_cut        "You use the [o_fragment] to cut along the glued /
-                 sides of the carpet. You grab the the middle part /
-                 of the carpet that now is no longer attached to /
+                 sides of the carpet. You grab the middle part /
+                 of the carpet that is now no longer attached to /
                  the floor and lift it. Removing the carpet /
-                 reveals a trapdoor in the floor!."
+                 reveals a trapdoor in the floor!"
 
    d_no_move    "The carpet won't move. On closer examination /
                  you find that its edges are glued to the floor."
@@ -3087,7 +3185,7 @@ END_OBJ
 #-------------------------------------------------------------------------------
 
 #-------------------------------------------------------------------------------
-$OBJECT o_drain_pipe_bedroom
+$OBJECT o_drain_pipe_bathroom
  DESCRIPTIONS
    d_sys        "the drain pipe", "the drain"
 
@@ -3098,16 +3196,24 @@ $OBJECT o_drain_pipe_bedroom
    d_exa        "The drain pipe emerges from the sink and disappears in /
                  the floor. It is recessed in the wall.\n"
 
-   d_no_cut     "The [o_drain_pipe_bedroom] is recessed in the wall. You /
+   d_no_get     "Better not. It will get pretty messy, a [o_sink] without a /
+                 [o_drain_pipe_bathroom]. Anyway, it is firmly attached to /
+                 the wall."
+
+   d_no_cut     "The [o_drain_pipe_bathroom] is recessed in the wall. You /
                  cannot cut it with the [o_hacksaw]."
 
- CONTAINED in l_bedroom
+ CONTAINED in l_bathroom
 
  FLAGS
    f_cuttable = 1
 
  TRIGGERS
-   "cut [o_drain_pipe_bedroom] with [o_hacksaw]" -> t_cut
+   "get [o_drain_pipe_bathroom]"                  -> t_get
+   "cut [o_drain_pipe_bathroom] with [o_hacksaw]" -> t_cut
+
+   t_get
+     printcr(d_no_get)
 
    t_cut
      printcr(d_no_cut)
@@ -3128,6 +3234,9 @@ $OBJECT o_drain_pipe_closet
                       disappears in the floor. It is mounted on the wall, /
                       not recessed, so it's well reachable."
 
+   d_no_get          "It's firmly attached to the wall. There's no way /
+                      to get it loose from the wall."
+
    d_cut             " About halfway up the wall, the pipe has been cut."
 
    d_cut_again       "You try to cut the pipe (again), but the hacksaw has /
@@ -3144,7 +3253,7 @@ $OBJECT o_drain_pipe_closet
    d_look_in         "You look in the drain pipe, but there's nothing in /
                       there."
 
-   d_look_wet        "Better not. Water is pouring out and you don't want to /
+   d_look_wet        "Better not. Water is pouring out, and you don't want to /
                       get wet."
 
    d_no_look         "The pipe is one piece from floor to ceiling. You can't /
@@ -3158,9 +3267,12 @@ $OBJECT o_drain_pipe_closet
    f_cut      = 0  # not yet cut.
 
  TRIGGERS
-   "examine [o_drain_pipe_closet]"              -> t_exa
-   "cut [o_drain_pipe_closet] with [o_hacksaw]" -> t_cut
-   "look in [o_drain_pipe_closet]"              -> t_look
+   "examine [o_drain_pipe_closet]"                -> t_exa
+   "get [o_drain_pipe_closet]"                    -> t_get
+   "break [o_drain_pipe_closet]"                  -> t_break
+   "cut [o_drain_pipe_closet] with [o_hacksaw]"   -> t_cut
+   "break [o_drain_pipe_closet] with [o_hacksaw]" -> t_cut
+   "look in [o_drain_pipe_closet]"                -> t_look
 
    t_entrance
      print(d_entr)
@@ -3192,6 +3304,12 @@ $OBJECT o_drain_pipe_closet
            endif
          endif
      endif
+
+   t_get
+     printcr(d_no_get)
+
+  t_break
+    printcr("Not with your bare hands, you won't.")
      
    t_cut
      if not(testflag(f_cut)) then
@@ -3237,7 +3355,7 @@ $OBJECT o_flames
  DESCRIPTIONS
    d_sys        "the flames", "the fire"
 
-   d_exa        "Because of the heat you cannot get close enough for /
+   d_exa        "Because of the heat, you cannot get close enough for /
                  a good examination.\n"
 
    d_flames     "\nA tremendous heat is coming through the open trapdoor. /
@@ -3245,12 +3363,12 @@ $OBJECT o_flames
                  the cellar."
 
    d_extinguish "As soon as the water touches the flames, you hear a loud hissing /
-                 sound, followed by the appearance of lots of steam. After a /
+                 sound, and then a huge steam cloud billows up. After a /
                  while, the hissing gets less until it completely stops. The fire /
                  has died.\nIt seems safe to go down into the cellar now."
 
    d_burn       "You throw [the] [o_subject] into [the] [o_flames]. The heat "
-                "completely desintegrates it and it is gone forever."
+                "completely disintegrates it and it is gone forever."
 
    d_needed     "A little voice in the back of your mind says that it is not /
                  a good idea to throw [the] [o_subject] into the flames. You /
@@ -3293,14 +3411,14 @@ $OBJECT o_hacksaw
 
    d_exa        "This is just an ordinary hacksaw. It can be used /
                  to saw metal objects. The saw looks a bit worn, /
-                 but it probably will last for one more saw job."
+                 but it probably will last for one more job."
 
    d_no_saw     "The saw is pretty worn. It will probably last for /
-                 one more saw job and cutting [the] [o_subject] seems /
-                 not a good choice."
+                 one more job, and cutting [the] [o_subject] seems /
+                 like a poor choice."
 
    d_worn       "The saw is completely worn out. Whatever you are going to /
-                 do with it, it won't be a saw job."
+                 do with it, it won't be cutting."
 
  CONTAINED in l_shed
 
@@ -3331,6 +3449,8 @@ $OBJECT o_hacksaw
          printcr(d_worn)
        else
          printcr(d_no_saw)
+       endif
+       disagree()
 
 END_OBJ
 #-------------------------------------------------------------------------------
@@ -3343,6 +3463,9 @@ $OBJECT o_nails
    d_exa         "Just a row of nails, nothing special."
 
    CONTAINED in l_shed
+
+   ATTRIBUTES
+     r_is = are
 
    TRIGGERS
      "get [o_nails]" -> t_get
@@ -3359,28 +3482,38 @@ END_OBJ
 #-------------------------------------------------------------------------------
 $OBJECT o_tap
  DESCRIPTIONS
-   d_sys        "the water tap"
+   d_sys        "the water tap", "the faucet"
 
    d_exa        "It's a water tap for cold water. "
 
-   d_open       "As you turn the tap to open it, water starts /
-                 pouring into the sink."
+   d_open       "As you turn the tap to open it, water starts pouring into /
+                 the sink."
 
-   d_extinguish "After a little while, you faintly here a hissing /
-                 sound, coming from somewhere below."
+   d_extinguish "After a little while, you faintly hear a hissing sound, /
+                 coming from somewhere below."
 
- CONTAINED in l_bedroom
+ CONTAINED in l_bathroom
 
  FLAGS
    f_openable = 1  # for open prologue
+   f_swap     = 1  # when they use faucet, refer to it as faucet.
 
  TRIGGERS
-   "examine [o_tap]"  -> t_exa
-   "open [o_tap]"     -> t_open
-   "close [o_tap]"    -> t_close
-   "turn [o_tap]"     -> t_turn
-   "turn on [o_tap]"  -> t_open
-   "turn off [o_tap]" -> t_close
+   "examine [o_tap]"   -> t_exa
+   "open [o_tap]"      -> t_open
+   "open [o_sink]"     -> t_open
+   "close [o_tap]"     -> t_close
+   "close [o_sink]"    -> t_close
+   "turn [o_tap]"      -> t_turn
+   "turn [o_sink]"     -> t_turn
+   "turn on [o_tap]"   -> t_open
+   "turn on [o_sink]"  -> t_open
+   "turn off [o_tap]"  -> t_close
+   "turn off [o_sink]" -> t_close
+   "turn [o_tap] on"   -> t_open
+   "turn [o_sink] on"  -> t_open
+   "turn [o_tap] off"  -> t_close
+   "turn [o_sink] off" -> t_close
    
    t_entrance
      # tap is handled by sink, because we want 
@@ -3401,7 +3534,7 @@ $OBJECT o_tap
        printcr("The water is already running.")
      else
        setflag(f_open)
-       clearflag(o_water_bedroom.f_hidden)
+       clearflag(o_water_bathroom.f_hidden)
        if testflag(o_drain_pipe_closet.f_cut) then
          if owns(l_closet, o_carpet) then
            setflag(o_carpet.f_soaked)
@@ -3427,7 +3560,7 @@ $OBJECT o_tap
        printcr("It's already closed.")
      else
        clearflag(f_open)
-       setflag(o_water_bedroom.f_hidden)
+       setflag(o_water_bathroom.f_hidden)
        setflag(o_water_closet.f_hidden)
        # water in hallway north remains
        printcr("The waterflow stops when you close the tap.")
@@ -3454,7 +3587,7 @@ $OBJECT o_sink
    d_exa        "The sink is connected to a drain pipe, which disappears /
                  into the floor.\n"
 
- CONTAINED in l_bedroom
+ CONTAINED in l_bathroom
 
  TRIGGERS
    "drop [o_subject] in [o_sink]" -> t_drop
@@ -3489,7 +3622,7 @@ END_OBJ
 #-------------------------------------------------------------------------------
 
 #-------------------------------------------------------------------------------
-$OBJECT o_water_bedroom
+$OBJECT o_water_bathroom
  DESCRIPTIONS
    d_sys        "the water"
 
@@ -3499,21 +3632,31 @@ $OBJECT o_water_bedroom
 
    d_exa        "Just plain ordinary water.\n"
 
- CONTAINED in l_bedroom
+ CONTAINED in l_bathroom
 
  FLAGS
    f_hidden   = 1
    f_takeable = 1
 
  TRIGGERS
-   "get [o_water_bedroom]"     -> t_take
-   "drink [o_water_bedroom]"   -> t_drink
+   "get [o_water_bathroom]"     -> t_take
+   "drink [o_water_bathroom]"   -> t_drink
 
    t_take
      printcr("You have nothing with you that can hold the water.")
 
    t_drink
-     printcr("That's refreshing! You didn't realize you were thirsty.")
+     if not(testflag(o_player.f_quenched)) then
+       printcr("That's refreshing! You didn't realize you were thirsty.")
+       setflag(o_player.f_quenched)
+       starttimer(m_quenched)
+     else
+       printcr("You just drank and are not thirsty right now.")
+
+   t_may_drink
+     stoptimer(m_quenched)
+     m_quenched = 5
+     clearflag(o_player.f_quenched)
 
 END_OBJ
 #-------------------------------------------------------------------------------
@@ -3525,9 +3668,8 @@ $OBJECT o_water_closet
 
    d_exa      "Just plain ordinary water.\n"
 
-   d_no_drink "It's better not to drink from the floor. if /
-               you are thirsty, better go to the tap in /
-               the bedroom for some fresh water."
+   d_no_drink "It's better not to drink from the floor. if you are thirsty, /
+               better to go to the tap in the bathroom upstairs for some fresh water."
 
  CONTAINED in l_closet
 
@@ -3564,9 +3706,9 @@ $OBJECT o_water_living
 
    d_exa        "Just plain ordinary water.\n"
 
-   d_no_drink   "It's better not to drink from the floor. if /
-                 you are thirsty, better go to the tap in /
-                 the bedroom for some fresh water."
+   d_no_drink   "It's better not to drink from the floor. if you are /
+                 thirsty, better go to the tap in the bathroom upstairs for /
+                 some fresh water."
 
  CONTAINED in l_living_middle
 
@@ -3612,6 +3754,7 @@ $OBJECT o_dials
     "[action] [o_dials]"               -> t_individual
 
    t_entrance
+     setflag(f_seenbefore)
      agree()      # do not use default t_entrance code
  
    t_exit         # do not use default t_exit code
@@ -3631,6 +3774,61 @@ $OBJECT o_dials
    t_individual
      if not(equal(%action, examine)) then
        printcr("In order to [action] [the] [o_dials], you must address them individually.")
+     disagree()
+
+END_OBJ
+#-------------------------------------------------------------------------------
+
+#-------------------------------------------------------------------------------
+$OBJECT o_engravings
+ DESCRIPTIONS
+   d_sys "the engravings"
+
+   d_ask "Maybe it's a clue about the corresponding dial, if any."
+
+ CONTAINED in l_dial_room
+
+ FLAGS
+   f_hidden   = 1 # must be invisible
+   f_bypass   = 1 # must also work when not visible
+
+ ATTRIBUTES
+   r_is = are
+
+  TRIGGERS
+    "examine [o_engravings]"             -> t_read
+    "read [o_engravings]"                -> t_read
+    "ask [o_npc] about [o_engravings]"   -> t_ask
+    "ask [o_npc] about [o_red_button]"   -> t_ask
+    "ask [o_npc] about [o_green_button]" -> t_ask
+    "ask [o_npc] about [o_blue_button]"  -> t_ask
+    "ask [o_npc] about [o_black_button]" -> t_ask
+    "[action] [o_engravings]"            -> t_individual
+
+   t_entrance
+     setflag(f_seenbefore)
+     agree()      # do not use default t_entrance code
+ 
+   t_exit         # do not use default t_exit code
+     agree()
+
+   t_read
+     printbold("\n[o_red_button]: ")
+     printcr(o_red_button.d_exa)
+     printbold("\n[o_green_button]: ")
+     printcr(o_green_button.d_exa)
+     printbold("\n[o_blue_button]: ")
+     printcr(o_blue_button.d_exa)
+     printbold("\n[o_black_button]: ")
+     printcr(o_black_button.d_exa)
+
+    t_ask
+      printcr(d_ask)
+    
+   t_individual
+     if not(equal(%action, examine)) then
+       printcr("In order to [action] [the] [o_engravings], you must address /
+                them individually.")
      disagree()
 
 END_OBJ
@@ -3818,15 +4016,15 @@ $OBJECT o_chest
 
    d_exa         "The chest looks very old and worn."
 
-   d_ask         "I'm not allowed to disclose information about the /
+   d_ask         "\"I'm not allowed to disclose information about the /
                   [o_chest] as it's a crucial item in your quest. Hmmm, /
-                  maybe I just did disclose information that I'm not entitled /
-                  to do..."
+                  maybe I just did disclose information I'm not entitled /
+                  to...\""
 
    d_locked      "You try to open [the] [o_chest] but find that it is locked."
 
-   d_take        "You try to take [the] [o_chest] but it is mounted to the /
-                  floor. It would have been too heavy to carry around anyway,"
+   d_take        "You try to take [the] [o_chest], but it is mounted to the /
+                  floor. It would have been too heavy to carry around anyway."
 
    d_on_schedule "\nFred looks in the chest and sees the [o_rope]. He pulls /
                   out his tablet and checks something. You hear him mumble. /
@@ -4024,23 +4222,23 @@ $OBJECT o_brass_key
 
    d_exa        "It's just [a] [o_brass_key].\n"
 
-   d_ask1       "I know that key. It's important."
+   d_ask1       "\"I know that key. It's important.\""
 
-   d_ask2       "You gave it to me, remember?"
+   d_ask2       "\"You gave it to me, remember?\""
 
    d_ask3       "It's no longer important now that you opened the [o_chest]."
 
-   d_cannot_go  "The moment you want to enter the room you feel there is /
+   d_cannot_go  "The moment you're about to enter the room you feel there is /
                  some force holding you back. [the] [o_brass_key] vibrates /
                  slightly."
 
-   d_throw      "You throw [the] [o_brass_key] to the [dir], but as it's /
-                 about to leave the room it bounces back on what seems an /
-                 invisible shield and lands on the floor."
+   d_throw      "You throw [the] [o_brass_key] to the [dir], but right at /
+                 the border of the next room, it bounces against what seems /
+                 like an invisible shield and lands on the floor."
 
    d_icon       "icons\\\\Brass key.Png"
 
- CONTAINED in o_vault
+ CONTAINED in o_safe
 
  FLAGS
    f_takeable = 1
@@ -4121,8 +4319,8 @@ $OBJECT o_rope
    d_take_as_well "You take [the] [r_tied_to] as well, as it is tied /
                    to the [o_rope]."
 
-   d_no_time      "[the] [o_npc] looks at you. We don't have time for /
-                   this. We need to get you out of here!"
+   d_no_time      "[the] [o_npc] looks at you. \"We don't have time for /
+                   this. We need to get you out of here!\""
 
    d_tie          "Ok [the] [o_rope] is now tied to [o_spec]."
 
@@ -4136,15 +4334,24 @@ $OBJECT o_rope
    d_no_climb     "Why? It's not attached to anything you might want to /
                    climb to."
 
+   d_no_cut_1     "Cutting the rope is something that cannot be undone, so /
+                   you decide - given the fact that there's no urgent /
+                   reason to cut the rope - to leave it as it is."
+
+   d_no_cut_2     "We already decided cutting the rope was not a good /
+                   idea, remember?"                  
+
    d_icon         "icons\\\\Rope.Png"
 
  CONTAINED in o_chest
 
  FLAGS
-   f_takeable = 1
-   f_needed   = 1
-   f_fixed    = 0
-   f_dangling = 0
+   f_takeable      = 1
+   f_cuttable      = 1
+   f_needed        = 1
+   f_fixed         = 0
+   f_dangling      = 0
+   f_tried_cutting = 0
 
 ATTRIBUTES
    r_tied_to  = %none
@@ -4155,13 +4362,16 @@ ATTRIBUTES
    "look"                         -> t_look
    "inventory"                    -> t_i
    "examine [o_rope]"             -> t_exa
-   "ask [o_npc] about [o_rope]"   -> t_ask
    "take [o_rope]"                -> t_take
+   "drop [o_subject]"             -> t_drop
+   "ask [o_npc] about [o_rope]"   -> t_ask
    "pull [o_rope]"                -> t_pull
    "climb [o_rope]"               -> t_climb
-   "tie [o_rope] to [o_spec]"     -> t_tie
+   "tie [o_rope] to [o_spec]"     -> t_tie_spec
+   "tie [o_subject] to [o_rope]"  -> t_tie_subject
    "untie [o_rope]"               -> t_untie
    "untie [o_rope] from [o_spec]" -> t_untie_from
+   "cut [o_rope] with [o_spec]"   -> t_cut
 
    t_entrance
      if owns(o_player, %this) or owns(o_npc, %this) then
@@ -4183,10 +4393,14 @@ ATTRIBUTES
          nomatch() # use default t_entrance
 
    t_exit
+     if not(owns(o_player, o_rope)) then
+       agree()
+     endif
      # check if the rope is not attached to something immobile
      # location alcove will handle this by itself
      if equal(o_rope.r_tied_to, %none) or 
-        (equal(l_location, l_alcove) and equal(%dir, up)) then
+        (equal(l_location, l_alcove) and equal(%dir, up)) or 
+        (equal(l_location, l_east_of_grating) and equal(%dir, d)) then
        agree()
      endif
      r_dummy = o_rope.r_tied_to        # o_rope.r_tied_to.f_fixed does not work
@@ -4201,6 +4415,44 @@ ATTRIBUTES
        printcr("[the] [o_rope] is tied to [the] [o_rope.r_tied_to].")
      else
        nomatch()
+
+   t_take
+     if equal(l_location, l_exit) then
+       printcr("It's stuck.")
+       disagree()
+     endif
+     if owns(o_npc, %this) then
+       printcr(d_no_time)
+     else
+       if testflag(f_dangling) then
+         printcr(d_take)
+       else
+         nomatch()
+
+   t_drop
+     if equal(o_subject, o_rope) then
+       # check if something is tied to the rope
+       if not(equal(r_tied_to, %none)) then
+         if owns(o_player, r_tied_to) then
+           move(o_subject, owner(o_player))
+           move(r_tied_to, owner(o_player))
+           printcr("As the rope is tied to [the] [r_tied_to], you drop /
+                    [the] [r_tied_to] as well.")
+         else
+           # player does not own the object the rope is tied to
+           nomatch()
+         endif
+       endif
+     else
+       # check if the rope is tied to the object to be dropped
+       if equal(r_tied_to, o_subject) then
+         if runverb() then
+           printcr("As the rope is tied to the [o_subject], you drop /
+                    the rope as well.")
+           move(o_rope, owner(o_player))
+         endif
+       else
+         nomatch()
 
    t_ask
      if testflag(f_dangling) then
@@ -4227,36 +4479,24 @@ ATTRIBUTES
      endif
      agree()
 
-   t_take
-     if equal(l_location, l_exit) then
-       printcr("It's stuck.")
-       disagree()
-     endif
-     if owns(o_npc, %this) then
-       printcr(d_no_time)
-     else
-       if testflag(f_dangling) then
-         printcr(d_take)
-       else
-         if equal(r_tied_to, %none) then
-           nomatch()
-         else
-           if testflag(r_tied_to.f_takeable) then
-             printcr(d_take_as_well)
-             move(o_rope, o_player)
-             move(r_tied_to, o_player)
-
    t_pull
+     if equal(r_tied_to, o_ladder) then
+       if trigger(o_ladder.t_pull) then
+         agree()
+       else
+         disagree()
+       endif
+     endif
+     if equal(r_tied_to, o_lever) then
+       nomatch()
+     endif
      if testflag(f_dangling) then
        printcr(d_pull)
      else
        if owns(o_npc, o_rope) then
          printcr(d_no_time)
        else
-         printcr("You pull [the] [o_rope]. But why?")
-       endif
-     endif
-     agree()
+         printcr("Nothing happens.") 
 
    t_climb
      if testflag(f_dangling) then
@@ -4266,31 +4506,71 @@ ATTRIBUTES
      else
        printcr(d_no_climb)
 
-   t_tie
-     if equal(o_spec, o_lever) or equal(o_spec, o_hook) then
+   t_cut
+     if testflag(f_tried_cutting) then
+       printcr(d_no_cut_2)
+     else
+       setflag(f_tried_cutting)
+       printcr(d_no_cut_1)
+     endif
+     disagree()
+
+   t_tie_spec
+     if equal(o_spec, o_lever) or equal(o_spec, o_ladder) then
        # will be handled by the objects themselves
        nomatch()
      endif
-     if testflag(o_spec.f_tieable) then
-       if not(equal(r_tied_to, o_spec)) then
-         r_tied_to = o_spec
-         printcr("Ok, the [o_rope] is now tied to the [o_spec].")
-       else
-         printcr("But the [o_rope] is already tied to the [o_spec].")
-         disagree()
-       endif
-     else
-       # let verb handle this one, therefore return nomatch()
+     if not(testflag(o_spec.f_tieable)) then
        nomatch()
      endif
+     if equal(r_tied_to, o_spec) then
+       printcr("But the [o_rope] is already tied to [the] [o_spec].")
+       disagree()
+     endif
+     if not(owns(o_player, o_rope)) then
+       printcr("(taking the rope first).\n")
+       if not(try(l_location, 0, 0, "take [o_rope]")) then
+         disagree()
+       endif
+     endif
+     if testflag(o_spec.f_takeable) then
+       if not(owns(o_player, o_spec)) then
+         printcr("(taking [the] [o_spec] first).\n")
+         if not(try(l_location, 0, 0, "take [o_spec]")) then
+           disagree()
+         endif
+       endif
+     endif
+     if not(equal(r_tied_to, %none)) then
+       printcr("You must untie the rope from [the] [r_tied_to] first.")
+         disagree()
+       else
+         o_rope.r_tied_to = o_spec
+         printcr("Ok, the rope is now tied to [the] [o_spec].")
+
+   t_tie_subject
+     # switch subject and specifier
+     if try(l_location, 0, 0, "tie [o_rope] to [o_subject]") then
+       agree()
+     else
+       disagree()
 
    t_untie
-     if equal(o_rope.r_tied_to, %none) then
-       printcr("But the [o_rope] isn't tied to anything.")
+     if equal(o_rope.r_tied_to, o_ladder) then
+       # ladder will handle this
+       nomatch()
+     else
+       if equal(o_rope.r_tied_to, %none) then
+         printcr("The [o_rope] isn't tied to anything.")
+       else
+         printcr("You untie the [o_rope] from [the] [o_rope.r_tied_to].")
+         o_rope.r_tied_to = %none
 
    t_untie_from
      if not(equal(o_rope.r_tied_to, o_spec)) then
        printcr("But the [o_rope] is not tied to [the] [o_spec].")
+     else
+       if trigger(t_untie) then endif
 
    t_no_tied_to
      r_tied_to = %none
@@ -4310,18 +4590,18 @@ $OBJECT o_hook
    d_exa         "This is a metal hook, about two feet long. The long side /
                   ends in an open eye.\n"
 
-   d_take        "You take the [o_rope] as well, since it's tied to the /
+   d_take_drop   "You [action] the [o_rope] as well, since it's tied to the /
                   [o_hook]."
 
    d_fred_enters "Just as you are about to throw [the] [o_hook], all of a /
                   sudden [the] [o_npc] rushes into the room and shouts /
                   at you..... "
 
-   d_throw_1     "Don't throw that [o_hook]! If it gets lost you'll never /
-                  escape!"
+   d_throw_1     "\"Don't throw that [o_hook]! If it gets lost you'll never /
+                  escape!\""
 
-   d_throw_2     "[the] [o_npc] holds your arm... I wouldn't do that if /
-                  I were you. You really need that hook to get out of here."
+   d_throw_2     "[the] [o_npc] holds your arm... \"I wouldn't do that if /
+                  I were you. You really need that hook to get out of here.\""
 
    d_throw_3     "You throw the [o_hook] but the [o_escape_hole] is way out /
                   of your reach. The hook doesn't even get halfway and /
@@ -4343,38 +4623,26 @@ $OBJECT o_hook
 
  TRIGGERS
    "i"                                       -> t_i
-   "take [o_hook]"                           -> t_take
-   "tie [o_rope] to [o_hook]"                -> t_tie
+   "take [o_hook]"                           -> t_take_drop
+   "drop [o_hook]"                           -> t_take_drop
    "throw [o_hook]"                          -> t_more_specific
-   "throw [o_hook] [prepos] [o_escape_hole]" ->t_throw
+   "throw [o_hook] [prepos] [o_escape_hole]" -> t_throw
 
-   t_take
+   t_take_drop
      if owns(o_npc, %this) then
        printcr(o_rope.d_no_time)
      else
        if cansee(o_player, o_rope) and equal(o_rope.r_tied_to, o_hook) then
-         printcr(d_take)
-         move(o_rope, o_player)
-         move(o_hook, o_player)
+         printcr(d_take_drop)
+         if equal(%action, take) then
+           move(o_rope, o_player)
+           move(o_hook, o_player)
+         else
+           move(o_rope, owner(o_player))
+           move(o_hook, owner(o_player))
+         endif
        else
          nomatch()
-
-   t_tie
-     if not(owns(o_player, o_rope)) then
-       printcr("(picking up the rope first).")
-       if not(try(l_location, 0, 0, "take [o_rope]")) then
-         disagree()
-       endif
-     endif
-     if not(owns(o_player, o_hook)) then
-       printcr("(picking up the hook first).")
-       if not(try(l_location, 0, 0, "take [o_hook]")) then
-         disagree()
-       endif
-     endif
-     o_rope.r_tied_to = o_hook
-     printcr("Ok, the [o_rope] is now tied to the [o_hook].")
-
 
    t_more_specific
      if equal(l_location, l_escape_room) then
@@ -4407,7 +4675,7 @@ END_OBJ
 #-------------------------------------------------------------------------------
 $OBJECT o_ladder
  DESCRIPTIONS
-   d_sys          "the metal ladder"
+   d_sys          "the wooden ladder"
 
    d_entr_long    "\nThere is a [o_ladder] here.\n"
 
@@ -4417,32 +4685,40 @@ $OBJECT o_ladder
 
    d_entr_grating "\nClamped to the floor is a [o_ladder]."
 
-   d_exa          "The ladder is about 10 ft long. The sides are 3 inch /
-                   wide. There are scratches on the sides of the ladder /
-                   where the wood is splintered."
+   d_exa          "The ladder is about 10 ft long and made of wood. The /
+                   sides are 3 inch wide. There are scratches on the sides /
+                   of the ladder where the wood is splintered."
 
    d_locked       "The [o_ladder] is firmly attached to the "
 
    d_climb        "You climb the ladder and go up to the...\n"
 
    d_pit          "You reach into the pit, but the distance to the /
-                   [o_ladder] is too great."
+                   [o_ladder] is too far."
+
+   d_pull_pit     "You manage to lift the ladder a little bit but it's not /
+                   enough to pull it out of the pit." 
 
  CONTAINED in l_alcove
 
  FLAGS
    f_takeable = 1
-   f_fixed    = 0
+   f_fixed    = 1
+   f_tieable  = 1
    f_floor    = 1   # for when it falls into the pit
    f_needed   = 1
 
  TRIGGERS
-   "i"                    -> t_i
-   "examine [o_ladder]"   -> t_exa
-   "get [o_ladder]"       -> t_take
-   "climb [o_ladder]"     -> t_climb
-   "climb [o_south_wall]" -> t_climb
-   "go up"                -> t_climb
+   "inventory"                      -> t_i
+   "examine [o_ladder]"             -> t_exa
+   "get [o_ladder]"                 -> t_take
+   "climb [o_ladder]"               -> t_climb
+   "climb [o_south_wall]"           -> t_climb
+   "tie [o_rope] to [o_ladder]"     -> t_tie
+   "tie [o_ladder] to [o_rope]"     -> t_tie
+   "untie [o_rope]"                 -> t_untie
+   "untie [o_rope] from [o_ladder]" -> t_untie
+   "go up"                          -> t_climb
 
    t_entrance
      if equal(owner(o_ladder), l_alcove) then
@@ -4492,6 +4768,54 @@ $OBJECT o_ladder
      else
        nomatch()
 
+   t_tie
+     if equal(o_rope.r_tied_to, o_ladder) then
+       printcr("The rope is already tied to the ladder.")
+       disagree()
+     endif
+     if owns(o_pit, o_ladder) and owns(l_location, o_player) then
+       printcr(d_pit)
+       disagree()
+     endif
+     if not(equal(o_rope.r_tied_to, %none)) then
+       printcr("(untying the rope from [the] [o_rope.r_tied_to] first).")
+     endif
+     printcr("The rope is now tied to the ladder.")
+     o_rope.r_tied_to = o_ladder
+
+   t_untie
+     if equal(o_subject, %none) then
+       if not(equal(o_rope.r_tied_to, o_ladder)) then
+         # they entered "untie rope" and it's not tied to the ladder
+         nomatch()
+       endif
+     endif
+     if not(equal(o_rope.r_tied_to, o_ladder)) then
+       printcr("But the rope is not tied to the ladder.")
+     else
+       if owns(o_pit, o_ladder) and owns(l_location, o_player) then
+         printcr(d_pit)
+         disagree()
+       else
+         printcr("You untie the rope from the ladder.")
+         o_rope.r_tied_to = %none
+         disagree()
+
+   t_pull  # will be called by the rope when the rope is attached to the ladder
+     if owns(l_alcove, o_ladder) or (owns(l_east_of_grating, o_ladder) and 
+                                not(testflag(o_clamp.f_open))) then
+       print("Nothing happens. ")
+       if trigger(t_clamped) then endif
+     else
+       if owns(o_pit, o_ladder) and owns(l_circular_room, o_player) then
+         printcr(d_pull_pit)
+       else
+         if not(owns(o_player, o_ladder)) then
+           printcr("You pull the ladder towards you and take it.")
+           move(o_ladder, o_player)
+         else
+           printcr("Nothing happens.")
+
 END_OBJ
 #-------------------------------------------------------------------------------
 
@@ -4527,7 +4851,7 @@ $OBJECT o_clamp
        printcr("closed and locked.")
      else
        if testflag(f_open) then
-         printcr("open")
+         printcr("open.")
        else
          printcr("closed.")
 
@@ -4559,14 +4883,13 @@ $OBJECT o_lever
    d_tie        "The [o_rope] fits nicely into the recession at the top of /
                  the [o_lever]. It won't slide off that easy now."
 
-   d_close      "You push the lever up. The alcove's south wall swings up /
-                 and covers the opening in the ceiling, moving the ladder /
-                 and the clamp out of sight. You hear a click above you, /
-                 probably from the clamp."
+   d_close      "The alcove's south wall swings up and covers the opening /
+                 in the ceiling, moving the ladder and the clamp out of /
+                 sight. You hear a click above you, probably from the clamp."
 
-   d_open       "You push the lever down. Again, you hear a click above you /
-                 and the ceiling swings down and covers the [o_south_wall] /
-                 again, bringing the ladder and clamp back in sight."
+   d_open       "Again, you hear a click above you and the ceiling swings /
+                 down and covers the [o_south_wall] again, bringing the /
+                 ladder and clamp back in sight."
 
  CONTAINED in l_alcove
 
@@ -4583,12 +4906,19 @@ $OBJECT o_lever
    "push [o_lever] [dir]"          -> t_switch_dir
    "switch [o_lever]"              -> t_switch
    "switch [o_lever] [dir]"        -> t_switch_dir
+   "pull [o_rope]"                 -> t_switch
    "tie [o_rope] to [o_lever]"     -> t_tie
+   "tie [o_lever] to [o_rope]"     -> t_tie
    "put [o_rope] around [o_lever]" ->t_tie
 
    t_switch
      if equal(r_position, up) then
        r_position = down
+       if equal(o_subject, o_rope) then
+         print("Pulling the rope flips the lever. " )
+       else
+         print("You push the lever down. ")
+       endif
        printcr(d_open)
        move(o_ladder, l_alcove)
        move(o_clamp, l_alcove)
@@ -4596,6 +4926,11 @@ $OBJECT o_lever
        setflag(l_alcove.f_lit)
      else
        r_position = up
+       if equal(o_subject, o_rope) then
+         print("Pulling the rope flips the lever. " )
+       else
+         print("You push the lever up. ")
+       endif
        printcr(d_close)
        move(o_ladder, l_east_of_grating)
        move(o_clamp, l_east_of_grating)
@@ -4613,6 +4948,7 @@ $OBJECT o_lever
    t_tie
      o_rope.r_tied_to = o_lever
      printcr(d_tie)
+     disagree()  # prevent rope from replying
 
 END_OBJ
 #-------------------------------------------------------------------------------
@@ -4622,7 +4958,7 @@ $OBJECT o_tj_buttons
  DESCRIPTIONS
    d_sys       "the buttons"
 
-   d_exa       "You cannot see the buttons clear enough from you current /
+   d_exa       "You cannot see the buttons clearly enough from you current /
                 position. You must move closer to the south for a better view."
 
    d_no_press  "You cannot press both buttons at the same time."
@@ -4654,7 +4990,7 @@ $OBJECT o_tom_button
            "the left engraving"
 
    d_exa   "The button has a diameter of about 2 inches. In the button is an /
-            engraving that says: \"Tom was here\".\n"
+            engraving that says: \"Tom was here.\"\n"
 
    d_dead  "(that was the wrong choice...).\n\n"
            "The moment you press the button, you feel the floor /
@@ -4668,8 +5004,8 @@ $OBJECT o_tom_button
             really should have checked out those photos better, buddy\". /
             He pulls out his tablet and starts typing. \"I'll put you /
             back on your feet, but it'll cost you 30 points. Try to be /
-            more careful now, will you?\"\n\n"
-            "Happy adventuring!\n"  
+            more careful now, will you?\n\n"
+            "\"Happy adventuring!\"\n"  
 
  CONTAINED in l_dark_place_1
 
@@ -4715,7 +5051,7 @@ $OBJECT o_jessica_button
            "the right engraving"
 
    d_exa   "The button has a diameter of about 2 inches. In the button is an /
-            engraving that says: \"Jessica was here\".\n"
+            engraving that says: \"Jessica was here.\"\n"
 
    d_ok   "Very good! From the row of photos in the living room you /
            remembered that Jessica made it and Tom didn't.\n\n"
@@ -4755,25 +5091,24 @@ END_OBJ
 #-------------------------------------------------------------------------------
 
 #-------------------------------------------------------------------------------
-$OBJECT o_vault
+$OBJECT o_safe
  DESCRIPTIONS
-   d_sys        "the metal vault"
+   d_sys        "the metal safe"
 
-   d_entr       "There is a [o_vault] here, which is "
+   d_entr       "There is a [o_safe] here, which is "
 
-   d_exa        "It's about three feet high, two feet wide and one foot /
-                 deep. The vault looks pretty new and you can see it's very /
-                 heavy.\n"
-                "\nOn the [o_vault] is a [o_keypad]."
+   d_exa        "A metal safe, six cubic feet maybe. The safe looks pretty /
+                 new and very heavy.\n"
+                "\nOn the [o_safe] is a [o_keypad]."
 
    d_guess      "You are either a very lucky guesser or cheating. For the /
                  latter, don't expect to find a watch now.\n"
 
-   d_vault_closed "icons\\\\Vault closed.Png"
-   d_vault_open   "icons\\\\Vault open.Png"
+   d_safe_closed "icons\\\\Vault closed.Png"
+   d_safe_open   "icons\\\\Vault open.Png"
 
  CONTAINED in
-   l_vault_room
+   l_secure_room
 
  FLAGS
    f_openable  = 1
@@ -4784,18 +5119,18 @@ $OBJECT o_vault
    f_container = 1
 
  ATTRIBUTES
-   r_ifi_icon = d_vault_closed
+   r_ifi_icon = d_safe_closed
 
  TRIGGERS
-   "examine [o_vault]"                  -> t_exa
-   "look in the [o_vault]"              -> t_exa
-   "put [o_subject] [prepos] [o_vault]" -> t_put
-   "unlock [o_vault]"                   -> t_unlock
-   "close [o_vault]"                    -> t_close
-   "open [o_vault]"                     -> t_open
+   "examine [o_safe]"                  -> t_exa
+   "look in the [o_safe]"              -> t_exa
+   "put [o_subject] [prepos] [o_safe]" -> t_put
+   "unlock [o_safe]"                   -> t_unlock
+   "close [o_safe]"                    -> t_close
+   "open [o_safe]"                     -> t_open
    
    t_entrance
-     if not(owns(l_location, o_vault) and cansee(o_actor, o_vault)) then
+     if not(owns(l_location, o_safe) and cansee(o_actor, o_safe)) then
        agree()
      endif
      setflag(f_seenbefore)
@@ -4809,12 +5144,12 @@ $OBJECT o_vault
   
    t_exa
      printcr(d_exa)
-     print("\n[the] [o_vault] is")
+     print("\n[the] [o_safe] is")
      if testflag(f_open) then
        printcr(" open.")
        indent(2)
        indent()
-       contents(o_vault)
+       contents(o_safe)
        indent(-2)
      else
        printcr(" closed.")
@@ -4826,28 +5161,28 @@ $OBJECT o_vault
      # trigger from o_subject.
      
      if not(testflag(f_open)) then
-       printcr("[the] [o_vault] is closed.")
+       printcr("[the] [o_safe] is closed.")
      else     
-       move(o_subject, o_vault)
-       printcr("You put the [o_subject] [prepos] [the] [o_vault].")
+       move(o_subject, o_safe)
+       printcr("You put the [o_subject] [prepos] [the] [o_safe].")
        o_subject.r_preposition = %prepos
        clearflag(o_subject.f_bypass)
      agree() # for lamp
 
    t_unlock
      if testflag(f_seenbefore) then
-       printcr("Maybe examine [the] [o_vault] first?")
+       printcr("Maybe examine [the] [o_safe] first?")
      else
        printcr("Just enter the correct number on [the] [o_keypad].")
 
    t_close
-     printcr("You close the vault door and hear a click.")
+     printcr("You close the safe door and hear a click.")
      setflag(f_opaque)
      clearflag(f_open)
      setflag(f_locked)
      o_keypad.r_set_to = 0
-     r_ifi_icon = d_vault_closed
-     l_vault_room.r_ifi_picture = l_vault_room.d_picture_closed
+     r_ifi_icon = d_safe_closed
+     l_secure_room.r_ifi_picture = l_secure_room.d_picture_closed
 
    t_open
      # we let this handle by the verb default code, but need to do
@@ -4855,8 +5190,8 @@ $OBJECT o_vault
      if runverb() then endif
      if testflag(f_open) then
        # cannot test for runverb() because may return disagree()
-       r_ifi_icon = d_vault_open
-       l_vault_room.r_ifi_picture = l_vault_room.d_picture_open
+       r_ifi_icon = d_safe_open
+       l_secure_room.r_ifi_picture = l_secure_room.d_picture_open
      endif
 
 END_OBJ
@@ -4874,10 +5209,10 @@ $OBJECT o_keypad
                  on keypad\" or \"set keypad to <number>\".\n"
 
    d_guess      "You are either a very lucky guesser or cheating. For the /
-                 latter, don't expect to find a watch when you oppen the /
-                 vault now.\n"
+                 latter, don't expect to find a watch when you open the /
+                 safe now.\n"
 
- CONTAINED on o_vault
+ CONTAINED on o_safe
 
  FLAGS
    f_bypass = 1
@@ -4888,26 +5223,28 @@ $OBJECT o_keypad
 
  TRIGGERS
    "set [o_keypad] to [value]"   -> t_set
+   "set [o_safe] to [value]"     -> t_set
    "enter [value]"               -> t_set
    "enter [value] on [o_keypad]" -> t_set
+   "enter [value] on [o_safe]"   -> t_set
    "push [value]"                -> t_set
-   "close [o_vault]"             -> t_reset
+   "close [o_safe]"              -> t_reset
 
    t_entrance
      agree()
 
    t_set
      if testflag(f_open) then
-       printcr("[the] [o_vault] door must be closed first.")
+       printcr("[the] [o_safe] door must be closed first.")
        agree() #exit the trigger here
      endif
      r_set_to = %value
      if equal(%value, 5489) then
-       printcr("you hear a click from inside the vault.")
-       clearflag(o_vault.f_locked)
-       o_it.r_it = o_vault
+       printcr("you hear a click from inside the safe.")
+       clearflag(o_safe.f_locked)
+       o_it.r_it = o_safe
        clearflag(o_it.f_update_it)
-       # check if the player is cheating with the vault code
+       # check if the player is cheating with the safe code
        if (not(owns(o_npc, o_watch))) then
          # yes, he's cheating, because Fred doesnt have the watch yet.
          printcr(d_guess)
@@ -4934,15 +5271,15 @@ $OBJECT o_watch
 
    d_exa  "[o_npc] is wearing [the] [o_watch]. He won't let you near it.\n"
 
-   d_ask1 "Fred looks at you suspiciously. You are running ahead a bit. /
-           You're not supposed to know about the watch yet..."
+   d_ask1 "Fred looks at you suspiciously. \"You are running ahead a bit. /
+           You're not supposed to know about the watch yet...\""
 
-   d_ask2 "Pretty nice watch, huh? With each new adventurer there's /
-           another surprise in the vault. Too bad I never get to keep it."
+   d_ask2 "\"Pretty nice watch, huh? With each new adventurer there's /
+           another surprise in the safe. Too bad I never get to keep it.\""
 
    d_icon "icons\\\\Watch.Png"
 
- CONTAINED in o_vault
+ CONTAINED in o_safe
 
  FLAGS
    f_takeable = 1
@@ -4989,7 +5326,7 @@ $OBJECT o_lamp
 
    d_lit      "[the] [o_lamp] is lit. It has power for [m_battery] more /
                moves. Because this is a sample story you may recharge the /
-               lamp with the 'charge' command."
+               lamp with the \"charge\" command."
 
    d_empty    "The lamp just went off (use charge to reset it.)"
 
@@ -5003,7 +5340,6 @@ $OBJECT o_lamp
    f__needed  = 1
    f_swap     = 1
    f_takeable = 1
-   f_tieable  = 1
    f_bypass   = 1     # must be able to turn it on in the dark
    f_moveable = 1
 
@@ -5132,21 +5468,27 @@ $OBJECT o_red_dial
  DESCRIPTIONS
    d_sys "the red dial"
 
-   d_exa "A red circular plate. It looks like a clock dial with one hand, /
-          with the numbers 0 through 9 printed at equal distances around /
-          the edge. The number 8 is highlighted. There is [a] [o_red_hand] /
-          on the dial, pointing towards the number [m_red_dial].\n"
+   d_exa "A red circular plate, fixed to the wall. It looks like a clock dial /
+          with one hand, with the numbers 0 through 9 printed at equal /
+          distances around the edge. The number 8 is highlighted. There is a/
+          [o_red_hand] on the dial, pointing towards the number [m_red_dial].\n"
 
  CONTAINED in l_dial_room
 
  TRIGGERS
-   "press [o_black_button]" -> t_reset
+   "turn [o_red_dial] to [value]" -> t_turn
+   "set  [o_red_dial] to [value]" -> t_turn
+   "move [o_red_dial] to [value]" -> t_turn
+   "press [o_black_button]"       -> t_reset
 
    t_entrance
      # t_entrance for l_dial_room also mentions the three dials
      setflag(f_seenbefore)
      agree()
 
+   t_turn
+     printcr("The [o_red_dial] is firmly fixed to the wall.")
+     
    t_reset
      if testflag(l_dial_room.f_solved_dials) then
        nomatch()  # let verb handle this
@@ -5162,11 +5504,14 @@ END_OBJ
 #-------------------------------------------------------------------------------
 $OBJECT o_red_button
  DESCRIPTIONS
-   d_sys "the red button", "the red engraving"
+   d_sys     "the red button", "the red engraving"
 
-   d_exa "the red button has a diameter of about 2 inches, it is positioned /
-          under the [o_red_dial]. "
-         "In the button is an engraving that says: delta = 1.\n"
+   d_exa     "the red button has a diameter of about 2 inches. It is /
+              positioned under the [o_red_dial]. "
+             "In the button is an engraving that says: delta = 1.\n"
+
+   d_no_stop "Nothing happens. The hand keeps moving. Apparently, the button /
+              can only be used to start the hand moving."
 
  CONTAINED in l_dial_room
 
@@ -5191,8 +5536,8 @@ $OBJECT o_red_button
        nomatch()
      else
        if testflag(f_pressed) then
-         # They may not stop the hand once it's noving
-         printcr("Nothing happens. The hand keeps moving.")
+         # They may not stop the hand once it's moving
+         printcr(d_no_stop)
        else
          setflag(f_pressed)
          starttimer(m_red_dial)
@@ -5218,16 +5563,24 @@ $OBJECT o_red_hand
 
    d_exa "the red hand points to the number [m_red_dial].\n"
 
+   d_blocked "The [o_red_hand] is blocked by some sort of mechanism. It's /
+              obviously not meant to be moved manually."
+
  CONTAINED on o_red_dial
 
- ATTRIBUTES
-
  TRIGGERS
-   "press [o_black_button]" -> t_reset
+   "turn [o_red_hand] to [value]" -> t_turn
+   "set  [o_red_hand] to [value]" -> t_turn
+   "move [o_red_hand] to [value]" -> t_turn
+   "press [o_black_button]"      -> t_reset
 
    t_entrance
      setflag(f_seenbefore)
      agree()
+
+   t_turn
+     printcr(d_blocked)
+     disagree()
 
    t_print_value
      m_red_dial = m_red_dial rem 10
@@ -5253,20 +5606,27 @@ $OBJECT o_green_dial
  DESCRIPTIONS
    d_sys "the green dial"
 
-   d_exa "A green circular plate. It looks like a clock dial with one hand, /
-          with the numbers 0 throug 9 printed at equal distances around /
-          the edge. The number 8 is highlighted. There is a [o_green_hand] on /
-          the dial, pointing towards the number [m_green_dial].\n"
+   d_exa "A green circular plate, fixed to the wall. It looks like a clock /
+          dial with one hand, with the numbers 0 through 9 printed at equal /
+          distances around the edge. The number 8 is highlighted. There is /
+          a [o_green_hand] on the dial, pointing towards the number /
+          [m_green_dial].\n"
 
  CONTAINED in l_dial_room
 
  TRIGGERS
-   "press [o_black_button]" -> t_reset
+   "turn [o_green_dial] to [value]" -> t_turn
+   "set  [o_green_dial] to [value]" -> t_turn
+   "move [o_green_dial] to [value]" -> t_turn
+   "press [o_black_button]"         -> t_reset
 
    t_entrance
      # t_entrance for l_dial_room also mentions the three dials
      setflag(f_seenbefore)
      agree()
+
+   t_turn
+     printcr("The [o_green_dial] is firmly fixed to the wall.")
 
    t_reset
      if testflag(l_dial_room.f_solved_dials) then
@@ -5283,11 +5643,14 @@ END_OBJ
 #-------------------------------------------------------------------------------
 $OBJECT o_green_button
  DESCRIPTIONS
-   d_sys "the green button", "the green engraving"
+   d_sys     "the green button", "the green engraving"
 
-   d_exa "the green button has a diameter of about 2 inches, it is /
-          positioned under the [o_green_dial]. "
-         "In the button is an engraving that says: delta = 2.\n"
+   d_exa     "the green button has a diameter of about 2 inches. It is /
+              positioned under the [o_green_dial]. "
+             "In the button is an engraving that says: delta = 2.\n"
+
+   d_no_stop "Nothing happens. The hand keeps moving. Apparently, the button /
+              can only be used to start the hand moving."
 
  CONTAINED in l_dial_room
 
@@ -5313,7 +5676,7 @@ $OBJECT o_green_button
         else
        if testflag(f_pressed) then
          # They may not stop the hand once it's noving
-         printcr("Nothing happens. The hand keeps moving.")
+         printcr("d_no_stop")
        else
          setflag(f_pressed)
          starttimer(m_green_dial)
@@ -5336,18 +5699,28 @@ END_OBJ
 #-------------------------------------------------------------------------------
 $OBJECT o_green_hand
  DESCRIPTIONS  
-   d_sys "the green hand"
+   d_sys     "the green hand"
 
-   d_exa "the green hand points to the number [m_green_dial].\n"
+   d_exa     "the green hand points to the number [m_green_dial].\n"
+
+   d_blocked "The [o_green_hand] is blocked by some sort of mechanism. It's /
+              obviously not meant to be moved manually."
 
  CONTAINED on o_green_dial
 
  TRIGGERS
-   "press [o_black_button]" -> t_reset
+   "turn [o_green_hand] to [value]" -> t_turn
+   "set  [o_green_hand] to [value]" -> t_turn
+   "move [o_green_hand] to [value]" -> t_turn
+   "press [o_black_button]"       -> t_reset
 
    t_entrance
      setflag(f_seenbefore)
      agree()
+
+   t_turn
+     printcr(d_blocked)
+     disagree()
 
    t_print_value
      m_green_dial = m_green_dial rem 10
@@ -5355,6 +5728,7 @@ $OBJECT o_green_hand
        printcr("\nThe green hand is pointing towards the [m_green_dial].")
      endif
      m_green_hand = 0
+
 
    t_reset
      if testflag(l_dial_room.f_solved_dials) then
@@ -5373,20 +5747,27 @@ $OBJECT o_blue_dial
  DESCRIPTIONS
    d_sys "the blue dial"
 
-   d_exa "A blue circular plate. It looks like a clock dial with one hand, /
-          with the numbers 0 throug 9 printed at equal distances around /
-          the edge. The number 8 is highlighted. There is a [o_blue_hand] on /
-          the dial, pointing towards the number [m_blue_dial].\n"
+   d_exa "A blue circular plate, fixed to the wall. It looks like a clock /
+          dial with one hand, with the numbers 0 through 9 printed at equal /
+          distances around the edge. The number 8 is highlighted. There is a /
+          [o_blue_hand] on the dial, pointing towards the number /
+          [m_blue_dial].\n"
 
  CONTAINED in l_dial_room
 
  TRIGGERS
-   "press [o_black_button]" -> t_reset
+   "turn [o_blue_dial] to [value]" -> t_turn
+   "set  [o_blue_dial] to [value]" -> t_turn
+   "move [o_blue_dial] to [value]" -> t_turn
+   "press [o_black_button]"        -> t_reset
 
    t_entrance
      # t_entrance for l_dial_room also mentions the three dials
      setflag(f_seenbefore)
      agree()
+
+   t_turn
+     printcr("The [o_blue_dial] is firmly fixed to the wall.")
 
    t_reset
      if testflag(l_dial_room.f_solved_dials) then
@@ -5403,11 +5784,14 @@ END_OBJ
 #-------------------------------------------------------------------------------
 $OBJECT o_blue_button
  DESCRIPTIONS
-   d_sys "the blue button", "the blue engraving"
+   d_sys     "the blue button", "the blue engraving"
 
-   d_exa "the blue button has a diameter of about 2 inches, it is positioned /
-          under the [o_blue_dial]. "
-         "In the button is an engraving that says: delta = 3.\n"
+   d_exa     "the blue button has a diameter of about 2 inches. It is positioned /
+              under the [o_blue_dial]. "
+             "In the button is an engraving that says: delta = 3.\n"
+
+   d_no_stop "Nothing happens. The hand keeps moving. Apparently, the button /
+              can only be used to start the hand moving."
 
  CONTAINED in l_dial_room
 
@@ -5431,7 +5815,7 @@ $OBJECT o_blue_button
      else
        if testflag(f_pressed) then
          # They may not stop the hand once it's noving
-         printcr("Nothing happens. The hand keeps moving.")
+         printcr("d_no_stop")
        else
          setflag(f_pressed)
          starttimer(m_blue_dial)
@@ -5453,18 +5837,28 @@ END_OBJ
 #-------------------------------------------------------------------------------
 $OBJECT o_blue_hand
  DESCRIPTIONS
-   d_sys "the blue hand"
+   d_sys     "the blue hand"
 
-   d_exa "the blue hand points to the number [m_blue_dial].\n"
+   d_exa     "the blue hand points to the number [m_blue_dial].\n"
+
+   d_blocked "The [o_blue_hand] is blocked by some sort of mechanism. It's /
+              obviously not meant to be moved manually."
 
  CONTAINED on o_blue_dial
 
  TRIGGERS
-   "press [o_black_button]" -> t_reset
+   "turn [o_blue_hand] to [value]" -> t_turn
+   "set  [o_blue_hand] to [value]" -> t_turn
+   "move [o_blue_hand] to [value]" -> t_turn
+   "press [o_black_button]"        -> t_reset
 
    t_entrance
      setflag(f_seenbefore)
      agree()
+
+   t_turn
+     printcr(d_blocked)
+     disagree()
 
    t_print_value
      m_blue_dial = m_blue_dial rem 10
@@ -5490,7 +5884,7 @@ $OBJECT o_black_button
  DESCRIPTIONS
    d_sys        "the black button", "the black engraving", "the reset button"
 
-   d_exa        "the o_black_button is engraved with the word RESET.\n"
+   d_exa        "the [o_black_button] is engraved with the word RESET.\n"
 
  CONTAINED in l_dial_room
 
@@ -5544,7 +5938,7 @@ $OBJECT o_pit
 
    d_enter      "You climb down the [o_ladder] into the pit.\n"
 
-   d_no_enter   "But how? It's 15 feet deep and there's no ladder or /
+   d_no_enter   "But how? It's 15 feet deep, and there's no ladder or /
                  other way to get down without hurting yourself."
 
    d_on_floor   "Technically, there is a [o_ladder] in the [o_pit], /
@@ -5564,11 +5958,11 @@ $OBJECT o_pit
 
    d_no_rope    "Well, the [o_rope] probably wasn't secured in the chest for /
                  nothing and you haven't actually used it. Maybe throwing it /
-                 into the pit is not you best idea of today."
+                 into the pit is not your best idea today."
 
    d_snake_gone "Realizing that you are in the [o_pit] now, you look around /
-                 terrified for the snake, but see that it is no longer in /
-                 the pit. Apparently it found a way to escape.\n"
+                 for the snake, terrified, but see that it is no longer /
+                 here. Apparently it found a way to escape.\n"
 
  CONTAINED in l_circular_room
 
@@ -5685,6 +6079,10 @@ $OBJECT o_pit
      if not(equal(%action, drop) or equal(%action, throw) or equal(%action, put)) then
        nomatch()
      endif
+     if owns(o_pit, o_subject) then
+       printcr("[the] [o_subject] is already in the [o_pit].")
+       disagree()
+     endif
      if equal(o_subject, o_ladder) then
        printcr(d_no_ladder)
        agree()
@@ -5694,6 +6092,7 @@ $OBJECT o_pit
        printcr(d_no_rope)
        agree()
      endif
+
      if owns(o_pit, o_player) then
        printcr("As you are in the o_pit yourself, you just drop [the] [o_subject].")
      else
@@ -5733,10 +6132,10 @@ $OBJECT o_chute
  DESCRIPTIONS
    d_sys          "the chute"
 
-   d_exa_pit      "The chute is about 3 feet wide. it goes up very steep."
+   d_exa_pit      "The chute is about 3 feet wide. It goes up very steeply."
 
    d_exa_esc      "The chute is about 3 feet wide. It goes down very /
-                   steep, like a slide."
+                   steeply, like a slide."
 
    d_enter_chute  "You climb up a few feet and then slide back into the /
                    pit. The chute is too steep and smooth to climb."
@@ -5780,7 +6179,7 @@ $OBJECT o_snake
  DESCRIPTIONS
    d_sys        "the giant snake", "the giant python"
 
-   d_exa        "The snake is huge! It's a python with a length of 8 feet. /
+   d_exa        "The snake is huge! It's a python, 8 feet long. /
                  It seems well fed. However, it looks like it doesn't want to /
                  be disturbed. Better leave it alone."
 
@@ -5891,11 +6290,11 @@ $OBJECT o_disk
                     be rotated.\n\n"
                    "In the middle of the disk is a [o_groove].\n"
 
-   d_ask1           "The [o_disk] can be rotated. If you could somehow /
-                     reach to it."
+   d_ask1           "\"The [o_disk] can be rotated. If you could somehow /
+                     reach it.\""
 
-   d_ask2           "It is no longer important, now that you got rid of /
-                     that snake."
+   d_ask2           "\"It is no longer important, now that you got rid of /
+                     that snake.\""
 
    d_more_specific "You have to be more specific about which way to turn: /
                     clockwise or counterclockwise."
@@ -5906,12 +6305,12 @@ $OBJECT o_disk
 
    d_ctr_clockwise "That would mean you would fall into the [o_pit]."
 
-   d_clockwise     "As soon as you start pushing the ladder it starts /
+   d_clockwise     "As soon as you start pushing the ladder. it starts /
                     to rotate towards the snake. The snake hisses at you, /
                     but the ladder in between prevents it from reaching you.\n"
                    "You push harder when the ladder reaches the snake. With /
                     tremendous effort you push the snake towards the edge of /
-                    the [o_pit]. The snake winds itself around the ladder /
+                    the [o_pit]. The snake winds itself around the ladder, /
                     and both ladder and snake tumble into the [o_pit]!\n"
                    
    d_turn_prepos   "Use clockwise or counterclockwise to indicate in which /
@@ -5926,11 +6325,14 @@ $OBJECT o_disk
    "ask [o_npc] about [o_disk]"   -> t_ask
    "ask [o_npc] about [o_groove]" -> t_ask
    "turn [o_disk]"                -> t_turn
+   "turn [o_groove]"              -> t_turn
    "turn [o_ladder]"              -> t_turn
    "turn [o_disk] [dir]"          -> t_turn_err
+   "turn [o_groove] [dir]"        -> t_turn_err
    "turn [o_ladder] [dir]"        -> t_turn_err
    "turn [o_disk] [prepos]"       -> t_turn_prepos
-   "turn [o_ladder] [prepos]"      -> t_turn_prepos
+   "turn [o_groove] [prepos]"     -> t_turn_prepos
+   "turn [o_ladder] [prepos]"     -> t_turn_prepos
 
    t_ask
      if owns(l_circular_room, o_snake) then
@@ -5981,6 +6383,9 @@ $OBJECT o_disk
            printcr(d_clockwise)
            move(o_ladder, o_pit)
            move(o_snake, o_pit)
+           if equal(o_rope.r_tied_to, o_ladder) then
+             move(o_rope, o_pit)
+           endif
            starttimer(m_snake)
            printcr(o_player.d_score_50)
            o_player.r_score += 50
@@ -6005,7 +6410,10 @@ $OBJECT o_groove
 
    d_slide      "Carefully, so you don't disturb the [o_snake], you align the /
                  [o_ladder] with the [o_groove] and slide it in until it is /
-                 level on both sides. It now kind of splits the room in two." 
+                 level on both sides. It now almost splits the room in two."
+
+   d_throw      "[the] [o_spec] has no protrusions that the rope might get /
+                 stuck to."
 
  CONTAINED in l_circular_room
 
@@ -6014,14 +6422,30 @@ $OBJECT o_groove
 
  TRIGGERS
    "put [o_ladder] in [o_groove]"   -> t_put
+   "put [o_ladder] on [o_groove]"   -> t_put
    "slide [o_ladder] in [o_groove]" -> t_put
    "put [o_ladder] in [o_disk]"     -> t_put
    "put [o_ladder] on [o_disk]"     -> t_put
    "slide [o_ladder] in [o_disk]"   -> t_put
+   "throw [o_rope] at [o_groove]"   -> t_throw
+   "throw [o_rope] at [o_disk]"     -> t_throw
 
    t_put
-     printcr(d_slide)
-     move(o_ladder, o_groove, in)
+     if owns(o_groove, o_ladder) then
+       printcr("It already is.")
+     else
+       if not(owns(o_actor, o_ladder)) then
+         printcr("(Taking the ladder first).\n")
+         if not(try(l_location, 0, 0, "get [o_ladder]")) then
+           disagree()
+         endif
+       endif
+       printcr(d_slide)
+       move(o_ladder, o_groove, in)
+
+   t_throw
+     printcr(d_throw)
+     disagree()
 
 END_OBJ
 #-------------------------------------------------------------------------------
@@ -6056,13 +6480,13 @@ END_OBJ
 #-------------------------------------------------------------------------------
 $OBJECT o_escape_hole
  DESCRIPTIONS
-   d_sys        "the hole"
+   d_sys        "the hole", "the hole in the ceiling"
 
    d_exa        "[the] [o_escape_hole] seems large enough to climb through. /
                  if only you could reach it...\n"
 
    d_ask        "Fred looks up at the ceiling. It's a large hole. I think /
-                 you will fit through it. If.... you can reach it."
+                 you will fit through it. If ... you can reach it."
 
  CONTAINED in l_escape_room
 
@@ -6090,7 +6514,7 @@ $OBJECT o_endgame_scenery
 
    d_exa1   "the [o_endgame_scenery] is too far away to get a good look."
 
-   d_exa2   "the [o_endgame_scenery] looks like the first time you saw it."
+   d_exa2   "the [o_endgame_scenery] looks the same as the first time you saw it."
 
    d_exa3   "Looks great in the sunshine! You really have a beautiful /
              view from up here."
@@ -6221,7 +6645,7 @@ $OBJECT o_generic_ceiling
 
    t_exa
      if owns(l_escape_room, %this, 0) then
-       printcr(o_escape_hole.d_entr_short)
+       printcr("There's [o_escape_hole] in the ceiling.")
      else
        r_examine = rnd(1,3)
        if equal(r_examine, 1) then
@@ -6258,7 +6682,7 @@ $OBJECT o_generic_floor
 
    d_exa_2 "It looks just like you expected."
 
-   d_exa_3 "The floor, allright."
+   d_exa_3 "The floor, all right."
 
  CONTAINED in o_player
 

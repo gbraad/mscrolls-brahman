@@ -8,8 +8,6 @@ $VERB use
    if testflag(o_subject.f_examined) and testflag(o_subject.f_takeable) then
      print("\n> get [o_subject].\n")
      if try(l_location, 0, 0, "get [o_subject]") then
-       # '0' means print output from the command
-       # '1' means mute
        agree()
      endif
    else

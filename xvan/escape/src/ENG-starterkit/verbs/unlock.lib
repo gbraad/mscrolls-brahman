@@ -40,6 +40,7 @@ $VERB unlock
  "unlock [o_subject] with [o_spec]"
    DISAMBIGUATION_RULES
     if testflag(o_subject.f_locked) then score(5) endif
+    if testflag(o_spec.f_takeable) then score(5) endif
    END_RULES
 
    if not(owns(o_actor, o_spec)) then

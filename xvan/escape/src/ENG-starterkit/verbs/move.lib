@@ -9,7 +9,7 @@ $VERB move
 
    if not(equal(o_subject, %none)) then
      if testflag(o_subject.f_fixed) then
-       printcr("[the] [o_subject] is fixed in place.")
+       printcr("[the] [o_subject] [o_subject.r_is] fixed in place.")
        disagree()
 
  "move"

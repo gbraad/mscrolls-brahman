@@ -4,6 +4,7 @@ $VERB quit SYNONYM q
  "[o_player], quit"
    print("Do you really want to quit? ")
    if yesno() then
+     background(black)
      quit()
 
  DEFAULT

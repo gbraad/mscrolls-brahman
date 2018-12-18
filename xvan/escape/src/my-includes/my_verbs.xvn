@@ -1,7 +1,21 @@
 
 # my verbs for stairs.xvn
 
+$VERB debug DEFAULT debug() ENDVERB
+
 $verb zwoosh endverb
+
+#--------------------------------------------------------------------
+$VERB info
+ DEFAULT
+   print("\n  This is a sample story for XVAN 2.3.4.\n\n"
+         "  It has 24 locations and 68 objects, including the player /
+         and one NPC named\n"
+         "  Fred. The story contains several puzzles, and you need /
+          to interact with\n"
+         "  Fred to solve some of them. Your goal is: escape!\n")
+ENDVERB
+#--------------------------------------------------------------------
 
 #--------------------------------------------------------------------
 $VERB burn
@@ -74,7 +88,7 @@ PROLOGUE
     agree()
   else
     if not(testflag(o_subject.f_cuttable) or testflag(o_subject.f_alive)) then
-      printcr("[the] [o_subject] is not something that can be cut.")
+      printcr("[the] [o_subject] [o_subject.r_is] not something that can be cut.")
       disagree()
     endif
   endif
@@ -224,7 +238,7 @@ $VERB set
     getspec()
 
  DEFAULT
-   printcr("You can't set [the] [o_subject] to [the] [o_spec]!")
+   printcr("I only understood you as far as wanting to set something.")
 ENDVERB
 #--------------------------------------------------------------------
 

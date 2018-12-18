@@ -15,13 +15,9 @@ $VERB ask
 
  "ask [o_subject] about [o_spec]"
    DISAMBIGUATION_RULES
+     if equal(o_subject, o_nst) then score(-10) endif
      if testflag(o_spec.f_seenbefore) then score(5) endif
    END_RULES
-
-   if not(cansee(o_actor, o_spec)) then
-     printcr("[the] is not here.")
-     disagree()
-   endif
 
    if equal(o_subject, o_actor) then
      printcr("Talking to yourself is a sign of pending mental collapse.")

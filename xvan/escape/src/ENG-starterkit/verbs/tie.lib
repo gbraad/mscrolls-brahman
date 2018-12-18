@@ -24,7 +24,7 @@ $VERB tie
    getsubject()
 
  "tie [o_subject] to [o_spec]"
-   printcr("[o_actor] can't tie [the] [o_subject] to [the] [o_spec]")
+   printcr("[o_actor] can't tie [the] [o_subject] to [the] [o_spec].")
 
  DEFAULT
    printcr("I only understood you as far as wanting to tie something.")

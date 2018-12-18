@@ -1,4 +1,9 @@
 
+#===============================================
+# this file is used with the IFI-version of XVAN
+#===============================================
+
+
 $LOCATION l_json  # needed as a home for the flag
  DESCRIPTIONS
    d_map_backimage "images\\\\mapback.jpg"

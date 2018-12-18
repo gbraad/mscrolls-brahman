@@ -19,7 +19,7 @@ $VERB is
        printcr("[the] [o_subject] is a living creature. Could have gone /
                 anywhere since your last encounter.")
      else
-       print("[the] [o_subject] is [o_subject.r_preposition] [the]")
+       print("[the] [o_subject] [o_subject.r_is] [o_subject.r_preposition] [the]")
        print(owner(o_subject))
        printcr(".")
    else

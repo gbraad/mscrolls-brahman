@@ -5,7 +5,7 @@ $VERB score
 
  "[o_player], score"
    printcr("Your current score is [o_player.r_score] out of a /
-            total of [o_player.r_max_score] points")
+            total of [o_player.r_max_score] points.")
 
  DEFAULT
    printcr("To get your current score, just type 'score'.")

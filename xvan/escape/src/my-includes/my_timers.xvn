@@ -32,6 +32,15 @@ m_heat
   trigger_at    0
   execute       l_closet.t_leave
 
+m_quenched
+  init          5
+  step          1
+  direction  down
+  interval      1
+  state      stop
+  trigger_at    0
+  execute       o_water_bathroom.t_may_drink
+
 m_carpet
   init         10
   step          1

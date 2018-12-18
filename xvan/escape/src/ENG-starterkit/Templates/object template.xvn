@@ -42,7 +42,7 @@ $OBJECT <o_name>
  TRIGGERS
    # when referring to an object or location in the text string,
    # use the identifier and not the textual description.
-   # right: "open the [o_chest]"        -> t_open
+   # right: "open [o_chest]"            -> t_open
    # wrong: "open the old wooden chest" -> t_open
 
    "text string1" -> t_trigger1

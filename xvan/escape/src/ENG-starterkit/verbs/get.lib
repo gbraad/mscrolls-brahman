@@ -41,7 +41,7 @@ $VERB get SYNONYM take SYNONYM grab
     if testflag(o_subject.f_takeable) and not(owns(o_actor, o_subject)) then score(5) endif
    END_RULES
    if not(testflag(o_subject.f_takeable)) then
-     printcr("[the] [o_subject] is not something that can be taken.")
+     printcr("[the] [o_subject] [o_subject.r_is] not something that can be taken.")
      disagree()
    else
      if not(owns(o_actor, o_subject)) then
@@ -63,7 +63,7 @@ $VERB get SYNONYM take SYNONYM grab
    END_RULES
 
    if not(testflag(o_subject.f_takeable)) then
-     printcr("[the] [o_subject] is not something that can be taken.")
+     printcr("[the] [o_subject] [o_subject.r_is] not something that can be taken.")
      disagree()
    else
      if owns(o_spec, o_subject) then
