@@ -30,13 +30,11 @@
 #include "typedefs.h"
 #include "resglobs.h"
 
-
 /*************************/
 /* Function declarations */
 /*************************/
 
-void    ResetGlobals(void);                 /* oct 18 18 */  /* @@@@ */
-
+void    ResetGlobals(void);  /* oct 18 18 */
 
 /************************/
 /* Function definitions */
@@ -84,4 +82,3 @@ void ResetGlobals()
   sp                   = 0;
 
 }
-

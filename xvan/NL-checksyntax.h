@@ -24,7 +24,6 @@
 #if !defined(__NL_checksyntax)
 #define __NL_checksyntax
 
-
 /*************************/
 /* External declarations */
 /*************************/

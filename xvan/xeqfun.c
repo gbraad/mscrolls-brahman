@@ -42,7 +42,6 @@
 #include "IFI.h"
 #include "xeqfun.h"
 
-
 /*************************/
 /* Function declarations */
 /*************************/
@@ -92,7 +91,7 @@ int32_t XeqPrtStat(int32_t**);
 int32_t XeqSetCursor(int32_t**);
 int32_t XeqClearWindow(int32_t**, int);
 int32_t XeqQuit(int32_t**);
-int32_t XeqRestart(int32_t**);          /* oct 18 18 */  /* @@@@ */
+int32_t XeqRestart(int32_t**);          /* oct 18 18 */
 int32_t XeqScore(int32_t**);
 int32_t XeqSendJson(int32_t**);
 int32_t XeqSetAttribute(int32_t**);
@@ -109,7 +108,6 @@ int32_t XeqRestore(int32_t**);			/* dec 21 07 */
 int32_t XeqTestmode(int32_t**);
 int32_t XeqTranscript(int32_t**);
 int32_t XeqIntAct(int32_t, int32_t**, usrActionRec*, int32_t);
-
 
 /****************************/
 /* Testfunction definitions */
@@ -290,8 +288,8 @@ int32_t XeqOwns(trigger)
   int32_t  par1;
   int32_t  par2;  /* Owns() has either 2, 3 or 4 parameters. */
   int32_t  par3;
-  int32_t  depth = 1;           /* preposition may be par3 or par3 */
-  int32_t  preposition = NO_ID; /* preposition may be par3 or par3 */
+  int32_t  depth = 1;           /* preposition may be par3 or par4 */
+  int32_t  preposition = NO_ID; /* preposition may be par3 or par4 */
   int32_t  nr_of_pars;
   int32_t  type1 = NO_TYPE;
   int32_t  type2 = NO_TYPE;
@@ -656,7 +654,6 @@ int32_t XeqTry(trigger)
   value     = action_rec.value;
   ordinal   = action_rec.ordinal;
 
-
   /* now execute the action record */
   old_muted = muted;
   muted     = par2;
@@ -710,58 +707,42 @@ int32_t XeqTestFun(opcode, trigger, action_rec, subject_index, com_trig)
  int32_t      *com_trig;
 {
   switch (opcode) {
-    /* Testfunctions are listed in alfabetical order. */
+    /* Testfunctions are listed in alphabetical order. */
     case CANSEE:
       return(XeqCanSee(trigger));
-
     case EQUAL:
       return(XeqEqual(trigger));
-
     case LESS_THAN:
       return(XeqLtGt(LESS_THAN, trigger));
-
     case GREATER_THAN:
       return(XeqLtGt(GREATER_THAN, trigger));
-
     case EXIT:
       return(XeqExit(trigger, action_rec, subject_index));
-
     case ISLIT:
       return(XeqIsLit(trigger));
-
     case ISOBJECT:
       return(XeqIsObject(trigger));
-
     case OWNS:
       return(XeqOwns(trigger));
-
     case RUNVERB:
       return(XeqRunVerb(trigger, action_rec, subject_index));
-
     case RUNCOMMON:
       return(XeqRunCommon(trigger, action_rec, subject_index, com_trig));
-
     case TESTFLAG:
       return(XeqTstFlag(trigger));
-
     case TRIGGER:
       return(XeqExecute(trigger, action_rec, subject_index));
-
     case VALID_DIRECTION:
       return(XeqValDir(trigger));
-
     case YES_NO:
       return(XeqYesNo(trigger));
-
     case TRY:
       return(XeqTry(trigger));
-
     default:
       PrintError(81, &((resultStruct) {VALUE,opcode}), NULL);
       return(ERROR);
    } /* switch */
 }
-
 
 /*******************************/
 /* Internal action definitions */
@@ -1971,7 +1952,7 @@ int32_t XeqQuit(trigger)
 }
 
 
-int32_t XeqRestart(trigger)    /* @@@@ */
+int32_t XeqRestart(trigger)
  int32_t **trigger; /* Caller expects rest of trigger to be returned. */
 {
   /* Restart() always has 0 parameters. */
@@ -2238,6 +2219,7 @@ int32_t XeqStopTimer(trigger)
   else
     return(QUIT);
 }
+
 
 int32_t XeqSynchro(trigger, action_rec, subject_index)
  int32_t      **trigger;
@@ -2543,197 +2525,130 @@ int32_t XeqIntAct(opcode, trigger, action_rec, subject_index)
     /* Internal actions are listed in alfabetical order. */
     case AGREE:
       return(XeqAgree(trigger));
-
     case ADD:
       return(XeqBasicOperator(opcode, trigger));
-
     case ADDJSON:
       return(XeqAddJson(trigger));
-
     case ASTERIX:
       return(XeqBasicOperator(opcode, trigger));
-
     case BACKGROUND:
       return(XeqBackground(trigger));
-
     case BLOCK_EXIT:
       return(XeqBlockExit(trigger));
-
     case BOLD:
       return(XeqBold(trigger));
-
     case CLEARFLAG:
       return(XeqFlagVal(trigger, 0));
-
     case CLEARJSON:
       return(XeqClearJson(trigger));
-
     case DEBUG:
       return(XeqDebug(trigger));
-
     case DEST:
       return(XeqDest(trigger));
-
     case DISAGREE:
       return(XeqDisagree(trigger));
-
     case DISTANCE:
       return(XeqDistance(trigger, DISTANCE));
-
     case NOMATCH:
       /* Do not use keyword NO_MATCH here. */
-
       /* (not an internal action).         */
       return(XeqNoMatch(trigger));
-
     case CONTENTS:
       return(XeqContents(trigger, action_rec, subject_index));
-
     case ENTRANCE:
       return(XeqEntrance(trigger, action_rec, subject_index));
-
     case FIRSTDIR:
       return(XeqDistance(trigger, FIRSTDIR));
-
     case COUNT:
       return(XeqCount(trigger));
-
     case GET_SUBJECT:
       return(XeqGetSubject(trigger));
-
     case GET_SPECIFIER:
       return(XeqGetSpec(trigger));
-
     case GET_ANSWER:
       return(XeqGetAnswer(trigger));
-
     case GO_TO:
       return(XeqGoTo(trigger));
-
-    case INDENT:
+   case INDENT:
       return(XeqIndent(trigger));
-
     case ITALIC:
       return(XeqItalic(trigger));
-
     case MOVE:
       return(XeqMove(trigger));
-
     case NEW_EXIT:
       return(XeqNewExit(trigger));
-
     case NOTIMERS:
       return(XeqNoTimers(trigger));
-
     case OWNER:
       return(XeqOwner(trigger));
-
     case PRINT:
       return(XeqPrt(trigger));
-
     case PRINTBOLD:
-      /* we cannot print Boldface in the console */
-      return(XeqPrt(trigger));
-
+     return(XeqPrt(trigger));
     case PRINTITALIC:
-      /* we cannot print Italic in the console */
       return(XeqPrt(trigger));
-
     case PRINTCR:
       return(XeqPrtcr(trigger));
-
     case PRINTCRBOLD:
-      /* we cannot print Boldface in the console */
       return(XeqPrtcr(trigger));
-
     case PRINTCRITALIC:
-      /* we cannot print Italic in the console */
       return(XeqPrtcr(trigger));
-
     case PRINTSTATUS:        /* For Glk XVAN only */
       return(XeqPrtStat(trigger));
-
     case PRINTCRSTATUS:      /* For Glk XVAN only */
       return(XeqPrtStat(trigger));
-
     case SENDJSON:
       return(XeqSendJson(trigger));
-
     case SETCURSOR:          /* For Glk XVAN only */
       return(XeqSetCursor(trigger));
-
     case CLEARSTATUS:        /* For Glk XVAN only */
       return(XeqClearWindow(trigger, 0));
-
     case CLEARSCREEN:
       return(XeqClearWindow(trigger, 1));
-
     case HITANYKEY:
       return(XeqHitAnyKey(trigger));
-
     case QUIT:
       return(XeqQuit(trigger));
-
     case RAND:
       return(XeqRnd(trigger));
-
     case SETTIMER:
       return(XeqSetTimer(trigger));
-
     case SETFLAG:
       return(XeqFlagVal(trigger, 1));
-
     case SETATTRIBUTE:
       return(XeqSetAttribute(trigger));
-
     case QUOT:
       return(XeqBasicOperator(opcode, trigger));
-
     case REM:
       return(XeqBasicOperator(opcode, trigger));
-
-    case RESTART:                   /* oct 18 18 */  /* @@@@ */
+    case RESTART:                   /* oct 18 18 */
       return(XeqRestart(trigger));
-
     case SCORE:
       return(XeqScore(trigger));
-
     case SHUFFLE:
       return(XeqShuffle(trigger));
-
     case STARTTIMER:
       return(XeqStartTimer(trigger));
-
     case STOPTIMER:
       return(XeqStopTimer(trigger));
-
     case SUB:
       return(XeqBasicOperator(opcode, trigger));
-
     case SYNCHRONIZE:
       return(XeqSynchro(trigger, action_rec, subject_index));
-
     case TESTMODE:
       return(XeqTestmode(trigger));
-
     case TEXT:
       return(XeqText(trigger));
-
     case TRANSCRIPT:
       return(XeqTranscript(trigger));
-
     case UNDERLINE:
       return(XeqUnderline(trigger));
-
     case WAIT:
       return(XeqWait(trigger, action_rec, subject_index));
-
 	case SAVE:						/* dec 21 07 */
 	  return(XeqSave(trigger));
-
 	case RESTORE:					/* dec 21 07 */
 	  return(XeqRestore(trigger));
-
     default:
       PrintError(94, &((resultStruct) {VALUE,opcode}), NULL);
       return(ERROR);

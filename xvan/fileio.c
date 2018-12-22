@@ -29,7 +29,6 @@
 #include "typedefs.h"
 #include "fileio.h"
 
-
 /***********/
 /* Globals */
 /***********/
@@ -68,7 +67,6 @@ locationInfo **locations;               /* Location pointer array.  */
 objectInfo   **objects;                 /* Object pointer array.    */
 timerInfo    *timers          = NULL;   /* Timer array.             */
 
-
 /*************************/
 /* function declarations */
 /*************************/
@@ -99,7 +97,6 @@ int32_t  ReadSysDescr(sysDescr*);
 int32_t  ReadContData(contData*);
 int32_t  InMem(int32_t);
 int32_t  Load(int32_t);
-
 
 /***********************/
 /* file input routines */
@@ -792,6 +789,7 @@ int32_t ReadVerbDir(offset)
 
   return(OK);
 }
+
 
 int32_t ReadVoc(offset)
  int64_t offset;

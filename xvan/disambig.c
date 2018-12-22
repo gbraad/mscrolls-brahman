@@ -36,7 +36,6 @@
 
 int32_t disambig_score = 0;
 
-
 /*************************/
 /* Function declarations */
 /*************************/
@@ -51,7 +50,6 @@ void            RebuildSpecifierHits(parserActionRec*, match*, int32_t);
 int32_t         *FindParserRules(parserActionRec*);
 int32_t         XeqParserRules(parserActionRec*,int32_t*, int32_t*);
 int32_t         ApplyParserRules(parsedInput*, match*, match*, match*);
-
 
 /************************/
 /* Function definitions */
@@ -356,6 +354,7 @@ int32_t MatchParserRec(verb, parser)
   /* OK, it's a match. */
   return(OK);
 }
+
 
 int32_t AlreadyHas(hits, item)
  match   *hits;

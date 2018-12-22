@@ -24,12 +24,16 @@
 #if !defined(__input)
 #define __input
 
-extern FILE *transcriptfile;                            /* init.c     */
+/**************************/
+/* External declarations */
+/*************************/
 
-extern short testmode;                                  /* letsplay.c */
-extern short transcript;                                /* letsplay.c */
-extern char  *outputline;                               /* output.c   */
-extern FILE  *testfile;                                 /* init.c     */
+extern FILE *transcriptfile;                             /* init.c     */
+
+extern short testmode;                                   /* letsplay.c */
+extern short transcript;                                 /* letsplay.c */
+extern char  *outputline;                                /* output.c   */
+extern FILE  *testfile;                                  /* init.c     */
 
 extern void  Output(char*, int);                         /* init.c      */
 extern void  PrintError(int16_t, resultStruct*, char*);  /* errors.c    */

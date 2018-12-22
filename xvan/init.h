@@ -24,22 +24,20 @@
 #if !defined(__init)
 #define __init
 
+/************/
+/* Ddefines */
+/************/
+
 #define STACK_SIZE  50        /* max 50 ints on stack.     */
                               /* Also defined in sysfunc.h */
 #define DATAFILE "out.dat"    /* storyfile                 */
 
-
-/*************/
-/* externals */
-/*************/
+/**************************/
+/* External declarations */
+/*************************/
 
 extern short   transcript;                                 /* letsplay.c */
 extern char    *outputline;                                /* init.c     */
-
-
-/********************************/
-/* Extern function declarations */
-/********************************/
 
 extern void    PrintError(int16_t, resultStruct*, char*);  /* errors.c    */
 extern void    *Output(char*, int);                        /* output.c    */
@@ -58,6 +56,5 @@ extern void    PrintString(char*, int);                    /* output.c    */
 /* IFI stuff */
 extern int32_t ValidateJson(char*);
 extern int32_t CheckIFI(char*);
-
 
 #endif

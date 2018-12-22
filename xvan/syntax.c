@@ -31,7 +31,6 @@
 #include "typedefs.h"
 #include "syntax.h"
 
-
 /*************************/
 /* Function declarations */
 /*************************/
@@ -48,6 +47,9 @@ int32_t  CheckSyntax(char*, int32_t, int32_t, int32_t*, int32_t, int32_t, int32_
 resultStruct MakeSysDescr(char*, char**, int32_t, int32_t, int32_t*, int32_t, int32_t, sysDescr*);
 int32_t      ParseDSys(char*, extendedSysDescr*);
 
+/************************/
+/* Function definitions */
+/************************/
 
 char *xv_strlwr(char* str)
 {
@@ -79,7 +81,6 @@ int32_t    ScanWordTable(word, wt_rec, lower, upper)
   /* word is max MAX_WORD_LEN chars, no need to check again */
   strncpy(look_for, word, MAX_WORD_LEN);
   xv_strlwr(look_for);
-
 
   /* Check for numberstring. */
   if (StringToNum(look_for, &value)) {
@@ -245,13 +246,13 @@ void InitParsedInput(parsed_input)
   parsed_input->direction                           = NO_ID;
 
   for (i=0; i<MAX_SUBJECTS; i++) {
-  (parsed_input->subject[i]).part1.article          = NO_ID;
-  (parsed_input->subject[i]).part1.nr_of_adjectives = 0;
-  (parsed_input->subject[i]).part1.noun             = NO_ID;
-  (parsed_input->subject[i]).connect_prepos         = NO_ID;
-  (parsed_input->subject[i]).part2.article          = NO_ID;
-  (parsed_input->subject[i]).part2.nr_of_adjectives = 0;
-  (parsed_input->subject[i]).part2.noun             = NO_ID;
+    (parsed_input->subject[i]).part1.article          = NO_ID;
+    (parsed_input->subject[i]).part1.nr_of_adjectives = 0;
+    (parsed_input->subject[i]).part1.noun             = NO_ID;
+    (parsed_input->subject[i]).connect_prepos         = NO_ID;
+    (parsed_input->subject[i]).part2.article          = NO_ID;
+    (parsed_input->subject[i]).part2.nr_of_adjectives = 0;
+    (parsed_input->subject[i]).part2.noun             = NO_ID;
   }
 
   (parsed_input->specifier).part1.article           = NO_ID;

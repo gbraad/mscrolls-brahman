@@ -24,6 +24,10 @@
 #if !defined(__play)
 #define __play
 
+/*************************/
+/* External declarations */
+/*************************/
+
 extern int32_t   nr_of_locs;                                   /* fileio.c   */
 extern int32_t   nr_of_objs;                                   /* fileio.c   */
 extern dirInfo   *obj_dir;                                     /* fileio.c   */

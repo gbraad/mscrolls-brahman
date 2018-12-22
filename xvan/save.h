@@ -24,9 +24,9 @@
 #if !defined(__save)
 #define __save
 
-/*************/
-/* externals */
-/*************/
+/*************************/
+/* External declarations */
+/*************************/
 
 extern int32_t      nr_of_locs;
 extern int32_t      nr_of_objs;

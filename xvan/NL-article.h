@@ -20,8 +20,12 @@
 /*                                                                      */
 /************************************************************************/
 
-#if !defined(__NL_kwtable)
-#define __NL_kwtable
+#if !defined(__NL_article)
+#define __NL_article
+
+/*************************/
+/* External declarations */
+/*************************/
 
 extern int32_t   article;
 extern int32_t   nr_of_words;

@@ -29,7 +29,6 @@
 #include "typedefs.h"
 #include "save.h"
 
-
 /*************************/
 /* function declarations */
 /*************************/
@@ -58,6 +57,9 @@ char *SaveTimer(timerInfo*, char*, int*, int8_t*);
 char *SaveAllTimers(char*, int*, int8_t*);
 char *Base64Save(char*);
 
+/************************/
+/* function definitions */
+/************************/
 
 char *StoreInt8(n, json_save, trailer_len, trailer)
  int8_t n;
@@ -182,12 +184,6 @@ char *StoreString(str, json_save, trailer_len, trailer)
   int32_t len = 0;
 
   len = strlen(str);
-
-  /* save the length of the string */
-/*  if ( (json_save = StoreInt16(len, json_save, trailer_len, trailer)) == NULL) { */
-    /* error msg will be printed by the calling function */
-/*    return(NULL); */
-/*  } */
 
   /* save the length of the string */
   if ( (json_save = StoreInt32(len, json_save, trailer_len, trailer)) == NULL) {

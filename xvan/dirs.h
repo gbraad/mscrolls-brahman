@@ -24,6 +24,10 @@
 #if !defined(__dirs)
 #define __dirs
 
+/*************************/
+/* External declarations */
+/*************************/
+
 extern wordTable *word_table;              /* fileio.c */
 extern verbDir   *verb_dir;                /* fileio.c */
 extern dirInfo   *loc_dir;                 /* fileio.c */

@@ -1,6 +1,6 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018 Marnix van den Bos.                   */
+/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
 /*                                                                      */
 /* <marnix.home@gmail.com>                                              */
 /*                                                                      */
@@ -138,7 +138,6 @@ int32_t ByteToBase64(source, result, trailer_len, trailer)
 
   /* depending on the number of trailer bits the following    */
   /* masks are used (x = relevant bit)                       */
-
 
   /****************************************************** ****/
   /* mask for int8_t (1 byte) without prior remainder        */

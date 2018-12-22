@@ -31,11 +31,9 @@
 
 extern const char *ifi_getRequest(void);
 
-
 /*************************/
 /* Function declarations */
 /*************************/
-
 
 int32_t ENG_XeqYesNo(void);
 

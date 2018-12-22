@@ -24,14 +24,17 @@
 #if !defined(__lets_try)
 #define __lets_try
 
+/*************************/
+/* External declarations */
+/*************************/
 
-extern int32_t   nr_of_locs;  /* fileio.c */
-extern int32_t   nr_of_objs;  /* fileio.c */
-extern dirInfo   *obj_dir;    /* fileio.c */
-extern verbDir   *verb_dir;   /* fileio.c */
+extern int32_t   nr_of_locs;                                   /* fileio.c */
+extern int32_t   nr_of_objs;                                   /* fileio.c */
+extern dirInfo   *obj_dir;                                     /* fileio.c */
+extern verbDir   *verb_dir;                                    /* fileio.c */
 
-extern int32_t subject;       /* Current subject(s).          */
-extern int32_t capital;       /* Start printing with a capital character.  */
+extern int32_t subject;
+extern int32_t capital;
 
 
 extern int32_t CheckDoTimers(void);                            /* timers.c  */

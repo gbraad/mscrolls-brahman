@@ -30,14 +30,12 @@
 #include "typedefs.h"
 #include "readloc.h"
 
-
 /*************************/
 /* function declarations */
 /*************************/
 
 void         InitLoc(locationInfo*);
 locationInfo *ReadLocation(int64_t);
-
 
 /************************/
 /* Function definitions */

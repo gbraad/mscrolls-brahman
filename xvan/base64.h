@@ -24,6 +24,10 @@
 #if !defined(__base64)
 #define __base64
 
+/*************************/
+/* External declarations */
+/*************************/
+
 extern void  PrintError(int16_t, resultStruct*, char*); /* errors.c */
 extern char *AddToString(char*, char*);
 extern char *ResetString(char*);

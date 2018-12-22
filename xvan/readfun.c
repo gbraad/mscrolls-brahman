@@ -30,14 +30,12 @@
 #include "typedefs.h"
 #include "readfun.h"
 
-
 /*************************/
 /* function declarations */
 /*************************/
 
 int32_t CheckedStore(int32_t*, int32_t, int32_t*, int32_t);
 int32_t ReadFun(int32_t*, int32_t*, int32_t);
-
 
 /************************/
 /* function definitions */

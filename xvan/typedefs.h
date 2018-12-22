@@ -24,7 +24,7 @@
 #if !defined(__typedefs)
 #define __typedefs
 
-typedef struct {                                /* @@@ */
+typedef struct {
           char    title[MAX_TITLE_LEN];
           char    author[INPUT_LINE_LEN];
           char    organization[INPUT_LINE_LEN];
@@ -39,7 +39,7 @@ typedef struct {                                /* @@@ */
           int16_t ui_sidebar;
           int16_t ui_textinput;
           int16_t ui_compass;
-          int16_t autolink;   /* @@@ */
+          int16_t autolink;
           char    compiler_version[MAX_COMPILER_LEN];
           int16_t xvan_language;
           int16_t story_language;

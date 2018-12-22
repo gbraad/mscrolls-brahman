@@ -24,13 +24,16 @@
 #if !defined(__letsplay)
 #define __letsplay
 
+/*************************/
+/* External declarations */
+/*************************/
 
-extern int32_t   nr_of_locs;  /* fileio.c */
-extern int32_t   nr_of_objs;  /* fileio.c */
-extern dirInfo   *obj_dir;    /* fileio.c */
-extern storyInfo story_info;  /* init.c   */
+extern int32_t   nr_of_locs;                                   /* fileio.c */
+extern int32_t   nr_of_objs;                                   /* fileio.c */
+extern dirInfo   *obj_dir;                                     /* fileio.c */
+extern storyInfo story_info;                                   /* init.c   */
 
-extern char    *outputline;   /* init.c   */
+extern char    *outputline;                                    /* init.c   */
 
 extern void    Output(char*, int);                             /* output.c   */
 extern void    PrintError(int16_t, resultStruct*, char*);      /* errors.c   */

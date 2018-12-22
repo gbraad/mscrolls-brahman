@@ -24,11 +24,14 @@
 #if !defined(__xeqfun)
 #define __xeqfun
 
+/***********/
+/* Defines */
+/***********/
+
 #define DEBUGFILE      "debug.txt"
 #define TESTFILE       "testinput.txt"
 #define TRANSCRIPTFILE "transcript.txt"
 #define SAVEFILE       "save.dat"
-
 
 /*************************/
 /* External declarations */
@@ -55,7 +58,7 @@ extern int32_t   action;               /* letsplay.c */
 extern int32_t   actor;                /* letsplay.c */
 extern int32_t   subject;              /* letsplay.c */
 extern int32_t   specifier;            /* letsplay.c */
-extern int32_t   prepos;               /* letsplay.c */  /* @@@ */
+extern int32_t   prepos;               /* letsplay.c */
 extern int32_t   direction;            /* letsplay.c */
 extern int32_t   value;                /* letsplay.c */
 extern int32_t   ordinal;              /* letsplay.c */
@@ -67,13 +70,9 @@ extern char      *json_msg_from_story; /* init.c     */
 
 extern int32_t   disambig_score;       /* disambig.c */
 
-/* next line commented out at 8 dec 03 */
-/* extern int32_t     nr_of_locations;*/
-
-/* next line inserted at 8 dec 03 */
-extern int32_t  nr_of_locs;             /* fileio.c   */
-extern int32_t  nr_of_directions;       /* fileio.c   */
-extern int32_t  first_direction_id;     /* fileio.c   */
+extern int32_t  nr_of_locs;            /* fileio.c   */
+extern int32_t  nr_of_directions;      /* fileio.c   */
+extern int32_t  first_direction_id;    /* fileio.c   */
 extern int32_t  nr_of_cattrs;
 extern attrInfo *c_loc_attrs;
 extern attrInfo *c_obj_attrs;
@@ -95,7 +94,7 @@ extern int32_t  GetAttributeInfo(int32_t, int32_t, attrInfo**, int32_t*);       
 extern int32_t  GetActionRecPar(usrActionRec*, int32_t**);                       /* sysfunc.c    */
 extern int32_t  CheckPars(int32_t, int32_t, int32_t, int32_t, int32_t, int32_t); /* checkpar.c   */
 
-extern int32_t  Restart(void);  /* restart.c */   /* @@@@ */
+extern int32_t  Restart(void);                                                   /* restart.c    */
 
 extern int32_t  XeqEqual(int32_t**);                                             /* arithmtc.c   */
 extern int32_t  XeqLtGt(int32_t, int32_t**);                                     /* arithmtc.c   */
@@ -115,32 +114,32 @@ extern void     ProcCFlagVal(int32_t, int32_t, int32_t);
 extern void     ProcLFlagVal(int32_t, int32_t);
 extern int32_t  TestCFlag(int32_t, int32_t);
 extern int32_t  TestLFlag(int32_t);
-extern int32_t  Exit(int32_t, usrActionRec*, int32_t);                           /* sysfunc.c  */
-extern int32_t  Entrance(int32_t, usrActionRec*, int32_t);                       /* sysfunc.c  */
-extern int32_t  Contents(int32_t, usrActionRec*, int32_t);                       /* sysfunc.c  */
-extern int32_t  IsLit(int32_t);                                                  /* sysfunc.c  */
-extern int32_t  CountObjects(int32_t, int32_t, int32_t, int32_t);                /* sysfunc.c  */
+extern int32_t  Exit(int32_t, usrActionRec*, int32_t);                           /* sysfunc.c    */
+extern int32_t  Entrance(int32_t, usrActionRec*, int32_t);                       /* sysfunc.c    */
+extern int32_t  Contents(int32_t, usrActionRec*, int32_t);                       /* sysfunc.c    */
+extern int32_t  IsLit(int32_t);                                                  /* sysfunc.c    */
+extern int32_t  CountObjects(int32_t, int32_t, int32_t, int32_t);                /* sysfunc.c    */
 extern int32_t  Synchronize(int32_t, int32_t, int32_t, int32_t, int32_t,
-                            usrActionRec*, int32_t);                             /* sysfunc.c  */
-extern int32_t  XeqTrigger(int32_t, int32_t, usrActionRec*, int32_t);            /* execute.c  */
-extern int32_t  CanSee(int32_t, int32_t);                                        /* sysfunc.c  */
-extern int32_t  Move(int32_t, int32_t);                                          /* sysfunc.c  */
-extern int32_t  Owns(int32_t, int32_t, int32_t);                                 /* spantree.c */
-extern int32_t  InitSpanTree(spanTree**, int32_t**);                             /* sysfunc.c  */
-extern int32_t  Shuffle(int32_t);                                                /* sysfunc.c  */
-extern int32_t  ExpandTree(int32_t, spanTree*);                                  /* spantree.c */
-extern int32_t  BuildRoute(int32_t, int32_t*, spanTree*);                        /* spantree.c */
-extern int32_t  SpanTree(int32_t, int32_t, int32_t, spanTree*);                  /* sysfunc.c  */
-extern int32_t  LetsTry(int32_t, usrActionRec);                                  /* lets-try.c */
-extern char     *GetDescr(int32_t, int32_t);                                     /* execute.c  */
-extern int32_t  CheckDoTimers(void);                                             /* timers.c   */
-extern int32_t  HandleTimers(usrActionRec*, int32_t);                            /* timers.c   */
-extern void     PrintString(char*, int);                                         /* output.c   */
-extern void     PrintWord(int32_t, int);                                         /* output.c   */
-extern void     PrintNumber(int32_t, int);                                       /* output.c   */
-extern int32_t  XeqVerbDefault(usrActionRec*, int32_t);                          /* execute.c  */
-extern int32_t  IsWordId(int32_t);                                               /* execute.c  */
-extern int32_t  Execute(int32_t*, usrActionRec*, int32_t, int32_t*);             /* execute.c  */
+                            usrActionRec*, int32_t);                             /* sysfunc.c    */
+extern int32_t  XeqTrigger(int32_t, int32_t, usrActionRec*, int32_t);            /* execute.c    */
+extern int32_t  CanSee(int32_t, int32_t);                                        /* sysfunc.c    */
+extern int32_t  Move(int32_t, int32_t);                                          /* sysfunc.c    */
+extern int32_t  Owns(int32_t, int32_t, int32_t);                                 /* spantree.c   */
+extern int32_t  InitSpanTree(spanTree**, int32_t**);                             /* sysfunc.c    */
+extern int32_t  Shuffle(int32_t);                                                /* sysfunc.c    */
+extern int32_t  ExpandTree(int32_t, spanTree*);                                  /* spantree.c   */
+extern int32_t  BuildRoute(int32_t, int32_t*, spanTree*);                        /* spantree.c   */
+extern int32_t  SpanTree(int32_t, int32_t, int32_t, spanTree*);                  /* sysfunc.c    */
+extern int32_t  LetsTry(int32_t, usrActionRec);                                  /* lets-try.c   */
+extern char     *GetDescr(int32_t, int32_t);                                     /* execute.c    */
+extern int32_t  CheckDoTimers(void);                                             /* timers.c     */
+extern int32_t  HandleTimers(usrActionRec*, int32_t);                            /* timers.c     */
+extern void     PrintString(char*, int);                                         /* output.c     */
+extern void     PrintWord(int32_t, int);                                         /* output.c     */
+extern void     PrintNumber(int32_t, int);                                       /* output.c     */
+extern int32_t  XeqVerbDefault(usrActionRec*, int32_t);                          /* execute.c    */
+extern int32_t  IsWordId(int32_t);                                               /* execute.c    */
+extern int32_t  Execute(int32_t*, usrActionRec*, int32_t, int32_t*);             /* execute.c    */
 extern int32_t  IsLocId(int32_t);
 extern int32_t  IsObjId(int32_t);
 extern int32_t  IsCDescrId(int32_t);
@@ -152,12 +151,11 @@ extern int32_t  IsTestFun(int32_t);
 extern int32_t  IsIntAct(int32_t);
 extern int32_t  IsCAttrId(int32_t);
 extern int32_t  IsLAttrId(int32_t);
-extern void     PrintId(int32_t, int);                                           /* output.c */
-extern int32_t  LookUpId(char*);                                                 /* syntax.c */
-extern void     PrintId(int32_t, int);                                           /* output.c */
+extern void     PrintId(int32_t, int);                                           /* output.c     */
+extern int32_t  LookUpId(char*);                                                 /* syntax.c     */
+extern void     PrintId(int32_t, int);                                           /* output.c     */
 
 extern char *Base64Save(char*);
-
 
 /* Debug functions */
 extern int32_t  PrintSpecialIds(void);     /* debug.c */

@@ -24,12 +24,12 @@
 #if !defined(__timers)
 #define __timers
 
-/*************/
-/* Externals */
-/*************/
+/*************************/
+/* External declarations */
+/*************************/
 
-extern int32_t   nr_of_timers;    /* fileio.c   */
-extern timerInfo *timers;         /* fileio.c   */
+extern int32_t   nr_of_timers;                                         /* fileio.c  */
+extern timerInfo *timers;                                              /* fileio.c  */
 
 extern void     PrintError(int16_t, resultStruct*, char*);             /* errors.c  */
 extern char     *TranslateKeyword(char*);                              /* errors.c  */

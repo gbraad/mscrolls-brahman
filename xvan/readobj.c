@@ -30,14 +30,12 @@
 #include "typedefs.h"
 #include "readobj.h"
 
-
 /*************************/
 /* function declarations */
 /*************************/
 
 void       InitObj(objectInfo*);
 objectInfo *ReadObject(int64_t);
-
 
 /************************/
 /* Function definitions */

@@ -23,7 +23,6 @@
 #if !defined(__NL_errors)
 #define __NL_errors
 
-
 const char *NL_errors[] = {
   "runtime error (000): XeqLtGt(): onbekende operator:",
   "runtime error (001): XeqDiv() attribuut of timer verwacht",

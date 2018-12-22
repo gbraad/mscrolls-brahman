@@ -29,7 +29,6 @@
 #include "typedefs.h"
 #include "restore.h"
 
-
 /*************************/
 /* function declarations */
 /*************************/
@@ -58,6 +57,9 @@ int32_t ReadTimer(timerInfo*, char*, int*, int*, int8_t*);
 int32_t RestoreTimers(char*, int*, int*, int8_t*);
 int32_t Base64Restore(char*);
 
+/************************/
+/* function definitions */
+/************************/
 
 int32_t ReadInt8(n, base64_string, byte_index, leader_len, leader)
  int8_t *n;
@@ -705,6 +707,7 @@ int32_t RestoreTimers(base64_string, byte_index, leader_len, leader)
 
   return(OK);
 }
+
 
 int32_t Base64Restore(base64_restore)
  char *base64_restore;

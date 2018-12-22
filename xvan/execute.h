@@ -68,7 +68,6 @@ extern void         SkipIntAct(int32_t**);                                      
 extern void         PrintId(int32_t, int);                                            /* output.c   */
 extern int32_t      GetAttributeInfo(int32_t, int32_t, attrInfo**, int32_t*);         /* sysfunc.h  */
 
-
 /***********************************/
 /* System function implementations */
 /***********************************/

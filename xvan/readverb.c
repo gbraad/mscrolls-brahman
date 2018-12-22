@@ -29,14 +29,12 @@
 #include "typedefs.h"
 #include "readverb.h"
 
-
 /*************************/
 /* Function declarations */
 /*************************/
 
 verbInfo *NewVerbInfo(void);
 verbInfo *RdVerb(int64_t);
-
 
 /************************/
 /* Function definitions */

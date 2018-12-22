@@ -258,7 +258,6 @@ void PrintCommonAttributes(void)
     Output(outputline, 0);
   }
   sprintf(outputline, "\n");
-
   sprintf(outputline, "\n\n************************************************************\n");
   Output(outputline, 0);
   sprintf(outputline, "*** Common Object Attributes (type, value, value owner) ***\n"); /* 10march2017 */

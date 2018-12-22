@@ -29,13 +29,11 @@
 #include "typedefs.h"
 #include "NL-xeqfun.h"
 
-
 /*************************/
 /* Function declarations */
 /*************************/
 
 int32_t NL_XeqYesNo(void);
-
 
 /****************************/
 /* Testfunction definitions */

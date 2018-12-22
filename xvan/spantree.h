@@ -24,9 +24,9 @@
 #if !defined(__spantree)
 #define __spantree
 
-/*************/
-/* Externals */
-/*************/
+/*************************/
+/* External declarations */
+/*************************/
 
 extern locationInfo **locations;                               /* fileio.c */
 extern objectInfo   **objects;                                 /* fileio.c */

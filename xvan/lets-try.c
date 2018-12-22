@@ -36,13 +36,11 @@
 #include "lets-try.h"
 #include "defs.h"
 
-
 /*************************/
 /* Function declarations */
 /*************************/
 
 int32_t LetsTry(int32_t, usrActionRec);
-
 
 /************************/
 /* Function definitions */

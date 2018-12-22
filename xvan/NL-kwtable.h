@@ -29,7 +29,6 @@
 /* for displaying in error messages.                                    */
 /* The keyword table must be sorted A->Z because we use a binary search */
 
-
 kwTable kw_table[] =  {
   {.keyword_eng = "ACTOR_ONLY", .keyword_nl = "ALLEEN_ACTEUR"},
   {.keyword_eng = "ADJECTIVES", .keyword_nl = "BVNW"},

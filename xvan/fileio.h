@@ -24,21 +24,20 @@
 #if !defined(__fileio)
 #define __fileio
 
+/***********/
+/* defines */
+/***********/
+
 #define MAX_VERBS_IN_MEM    10
 #define MAX_LOCS_IN_MEM     10
 #define MAX_OBJS_IN_MEM     10
 
-
-/*************/
-/* externals */
-/*************/
+/*************************/
+/* External declarations */
+/*************************/
 
 extern FILE    *datafile;
 extern dirData dirs;
-
-/********************************/
-/* Extern function declarations */
-/********************************/
 
 extern uint16_t     xv_htons(uint16_t);                         /* endian.c   */
 extern uint16_t     xv_ntohs(uint16_t);                         /* endian.c   */
@@ -73,6 +72,5 @@ extern int32_t      subject;                                     /* letsplay.c *
 extern int32_t      specifier;                                   /* letsplay.c */
 extern int32_t      value;                                       /* letsplay.c */
 /* End of special Ids for save() and restore() functiona */
+
 #endif
-
-

@@ -39,7 +39,6 @@
 
 void NL_PrintArticle(sysDescr*, int32_t, int);
 
-
 /************************/
 /* Function definitions */
 /************************/
@@ -80,5 +79,6 @@ void NL_PrintArticle(descr, type, use_json)
   /* july 6th 2028: added this because 'use' skipped the space */
   /* when the object had no noun. Must check if this is the    */
   /* right solution                                            */
-  else article = 0;
+  else
+    article = 0;
 }

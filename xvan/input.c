@@ -34,7 +34,6 @@
 
 #include "ifiglue.h"
 
-
 /*************************/
 /* Function declarations */
 /*************************/
@@ -42,6 +41,9 @@
 void  GetAddtlInput(char*, char*);
 int32_t ProcessInput(char*);
 
+/************************/
+/* Function definitions */
+/************************/
 
 void GetAddtlInput(addtl_input, prompt)
  char *addtl_input;  /* must have size INPUT_LINE_LEN */

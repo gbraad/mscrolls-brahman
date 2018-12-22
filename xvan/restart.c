@@ -31,13 +31,11 @@
 #include "typedefs.h"
 #include "restart.h"
 
-
 /*************************/
 /* function declarations */
 /*************************/
 
 int32_t Restart(void);
-
 
 /************************/
 /* Function definitions */

@@ -30,7 +30,6 @@
 #include "typedefs.h"
 #include "readtrig.h"
 
-
 /*************************/
 /* function declarations */
 /*************************/
@@ -43,6 +42,9 @@ int32_t       ProcCode(int32_t*, int32_t, int32_t);
 int32_t       *RdTrCode(int32_t*);
 triggerInfo   *ReadTrigger(int32_t*);
 
+/************************/
+/* function definitions */
+/************************/
 
 descrInfo *ReadDescr(code)
  int32_t  *code;  /* Contains the description id. */

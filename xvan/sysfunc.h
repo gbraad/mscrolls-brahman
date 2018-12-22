@@ -21,15 +21,18 @@
 /************************************************************************/
 
 
-#if !defined(__func)
-#define __func
+#if !defined(__sysfunc)
+#define __sysfunc
+
+/***********/
+/* Defines */
+/***********/
 
 #define STACK_SIZE   50   /* Also defined in init.h */
 
-
-/*************/
-/* Externals */
-/*************/
+/*************************/
+/* External declarations */
+/*************************/
 
 extern dirInfo *loc_dir;            /* fileio.c */
 extern dirInfo *obj_dir;            /* fileio.c */
@@ -37,11 +40,11 @@ extern dirInfo *obj_dir;            /* fileio.c */
 extern locationInfo **locations;    /* fileio.c */
 extern objectInfo   **objects;      /* fileio.c */
 
-extern int32_t   *com_loc_flags;      /* fileio.c */
-extern int32_t   *com_obj_flags;      /* fileio.c */
-extern int32_t   *local_flags;        /* fileio.c */
+extern int32_t   *com_loc_flags;    /* fileio.c */
+extern int32_t   *com_obj_flags;    /* fileio.c */
+extern int32_t   *local_flags;      /* fileio.c */
 
-extern int32_t   nr_of_cflags;        /* fileio.c */
+extern int32_t   nr_of_cflags;      /* fileio.c */
 
 extern attrInfo  *c_loc_attrs;
 extern attrInfo  *c_obj_attrs;
@@ -52,33 +55,28 @@ extern int32_t   nr_of_cattrs;
 extern int32_t   *stack;
 extern int32_t   sp;
 
-extern int32_t   *exit_data;              /* fileio.c   */
+extern int32_t   *exit_data;        /* fileio.c   */
 
 extern wordTable *word_table;       /* fileio.c */
 
-/* next line commented out at 8 dec 03 */
-/* extern int32_t nr_of_locations;*/         /* fileio.c   */
+extern int32_t nr_of_locs;          /* fileio.c   */
+extern int32_t nr_of_objs;          /* fileio.c   */
 
-/* next line inserted at 8 dec 03 */
-extern int32_t nr_of_locs;              /* fileio.c   */
-extern int32_t nr_of_objs;              /* fileio.c   */
+extern int32_t nr_of_words;         /* fileio.c */
 
-extern int32_t nr_of_words;             /* fileio.c */
+extern int32_t nr_of_directions;    /* fileio.c   */
+extern int32_t first_direction_id;  /* fileio.c   */
 
-extern int32_t nr_of_directions;        /* fileio.c   */
-extern int32_t first_direction_id;      /* fileio.c   */
-
-extern int32_t active_entity;           /* letsplay.c */
-extern int32_t curr_loc;                /* letsplay.c */
-extern int32_t direction;               /* letsplay.c */
-extern int32_t prepos;                  /* letsplay.c */
-extern int32_t action;                  /* letsplay.c */
-extern int32_t actor;                   /* letsplay.c */
-extern int32_t subject;                 /* letsplay.c */
-extern int32_t specifier;               /* letsplay.c */
-extern int32_t value;                   /* letsplay.c */
-extern int32_t ordinal;                 /* letsplay.c */
-
+extern int32_t active_entity;       /* letsplay.c */
+extern int32_t curr_loc;            /* letsplay.c */
+extern int32_t direction;           /* letsplay.c */
+extern int32_t prepos;              /* letsplay.c */
+extern int32_t action;              /* letsplay.c */
+extern int32_t actor;               /* letsplay.c */
+extern int32_t subject;             /* letsplay.c */
+extern int32_t specifier;           /* letsplay.c */
+extern int32_t value;               /* letsplay.c */
+extern int32_t ordinal;             /* letsplay.c */
 
 extern void    PrintError(int16_t, resultStruct*, char*);                        /* errors.c  */
 extern int32_t NextOpcode(int32_t**);

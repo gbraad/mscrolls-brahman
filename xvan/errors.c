@@ -35,7 +35,6 @@
 #include "ENG-errors.h"
 #include "NL-errors.h"
 
-
 /*************************/
 /* Function declarations */
 /*************************/
@@ -45,7 +44,6 @@ void  NrErr(char*, char*);
 void  TypeErr(int32_t, char*, char*);
 char  *TranslateKeyword(char*);
 char  *ScanKeywordTable(char*, int32_t, int32_t);
-
 
 /************************/
 /* Function definitions */
@@ -88,6 +86,7 @@ void PrintError(err_num, par1, par2)
   }
   Output(".\n", 0);
 }
+
 
 void NrErr(fun_name, nr_of_pars)
  char *fun_name;

@@ -81,14 +81,15 @@ typedef struct {
 #define IFI_RPLY_TEXT       212
 #define IFI_RPLY_VALUES     213
 
+/*************************/
+/* External declarations */
+/*************************/
 
 extern ifiStats  ifi_stats;                                 /* init.c */
 extern storyInfo story_info;                                /* init.c */
 
 extern int32_t   nr_of_locs;
 extern int32_t   nr_of_objs;
-
-
 
 extern int32_t   GetNextKVpair(char*, int*, kvPair*);
 extern char      *AddToString(char*, char*);

@@ -30,7 +30,6 @@
 
 /* DO NOT INCLUDE keyword.h */
 
-
 /*************************/
 /* Function declarations */
 /*************************/
@@ -46,7 +45,6 @@ char *NewJsonArray(char*);
 char *CloseArray(char*);
 char *CloseObject(char*);
 char *AddKV(char*, char*, jsonValue*);
-
 
 /************************/
 /* Function definitions */
@@ -98,7 +96,6 @@ char *ExpandString(source, amount)
     source[0] = '\0';
   }
   else {
-
     /* don't know why the F#$K realloc() crashes the debugger        */
     /* got the infamous "cannot find the bounds of current function" */
 
@@ -128,7 +125,6 @@ char *ResetString(string)
     return(NULL);
   }
 }
-
 
 /*******************/
 /* Build functions */

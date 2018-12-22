@@ -35,7 +35,6 @@
 
 int32_t endian = 0;
 
-
 /*************************/
 /* Function declarations */
 /*************************/
@@ -50,7 +49,6 @@ uint64_t xv_htonll(uint64_t);
 /************************/
 /* Function definitions */
 /************************/
-
 
 uint16_t xv_ntohs(val)
  uint16_t val;
@@ -70,7 +68,7 @@ uint16_t xv_ntohs(val)
 uint16_t xv_htons(val)
  uint16_t val;
 {
-  uint8_t  v[8]; /* SHOULD THIS BE A 2 ??? */
+  uint8_t  v[8];
   uint16_t *result = (uint16_t *)v;
   int      i;
 

@@ -38,7 +38,6 @@
 #include "ifiglue.h"
 #include "ifischema.h"
 
-
 /***********/
 /* Globals */
 /***********/
@@ -56,7 +55,6 @@ int32_t   sp = 0;     /* stackpointer                   */
 char      *outputline;
 char      *json_msg_from_story;
 
-
 /*************************/
 /* function declarations */
 /*************************/
@@ -66,7 +64,6 @@ int32_t ExitProgram(void);
 void    FileNameFromJson(char*, char*);
 void    GetFileName(int, char**, char*, int*);
 int32_t main(int, char**);
-
 
 /************************/
 /* Function definitions */
@@ -180,7 +177,7 @@ void FilenameFromJSON(json_string, filename)
                 strcat(story, ".dat");
             }
         }
-        
+
         kv.key              = ResetString(kv.key);
         kv.value.textstring = ResetString(kv.value.textstring);
         break;
@@ -282,7 +279,6 @@ void GetFileName(nr_args, args, filename, json)
   free(initialJSON);
 }
 
-
 /************************/
 /*         main()       */
 /************************/
@@ -333,7 +329,6 @@ int32_t main(argc, argv)
   story_info.autolink       = 0;
   story_info.xvan_language  = ENG;
   story_info.story_language = ENG;
-
 
   /* malloc space for stack            */
   if ((stack = (int32_t *) malloc(STACK_SIZE*sizeof(int32_t))) == NULL) {

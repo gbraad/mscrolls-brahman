@@ -1,6 +1,6 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018 Marnix van den Bos.                   */
+/* Copyright (c) 2016, 2017, 2018 , 2019 Marnix van den Bos.            */
 /*                                                                      */
 /* <marnix.home@gmail.com>                                              */
 /*                                                                      */
@@ -42,7 +42,6 @@
 /*************************/
 
 int32_t CheckPars(int32_t, int32_t, int32_t, int32_t, int32_t, int32_t);
-
 
 /*************************/
 /* Function definitions  */

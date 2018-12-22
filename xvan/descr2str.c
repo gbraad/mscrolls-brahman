@@ -29,7 +29,6 @@
 #include "typedefs.h"
 #include "descr2str.h"
 
-
 /*************************/
 /* function declarations */
 /*************************/
@@ -40,7 +39,6 @@ char *GetArticle(sysDescr*);
 char *GetSysDescr(sysDescr*, int);
 char *GetExtendedSysDescr(extendedSysDescr*, int);
 char *GetId(int32_t, int);
-
 
 /************************/
 /* function definitions */

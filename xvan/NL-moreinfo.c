@@ -30,14 +30,12 @@
 #include "typedefs.h"
 #include "NL-moreinfo.h"
 
-
 /*************************/
 /* Function declarations */
 /*************************/
 
 void NL_MoreInfo(extendedSysDescr*, match*, char*);
 void NL_PrintNotFound(extendedSysDescr*);
-
 
 /************************/
 /* Function definitions */

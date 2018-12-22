@@ -36,14 +36,12 @@
 #include "play.h"
 #include "defs.h"
 
-
 /*************************/
 /* Function declarations */
 /*************************/
 
 void    PrintNotFound(extendedSysDescr*);
 int32_t Play(char*);
-
 
 /************************/
 /* Function definitions */

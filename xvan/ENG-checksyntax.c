@@ -31,7 +31,6 @@
 #include "typedefs.h"
 #include "ENG-checksyntax.h"
 
-
 /*************************/
 /* Function declarations */
 /*************************/
@@ -288,8 +287,8 @@ int32_t ENG_CheckSyntax(line_buf, id, nr_of_types, types, type_index,
           state = 11;
           break;
         case 4: ;
-        case 7:
-        case 34:  /* added on dec 23 2015 to allow <numbers> after a noun */
+        case 7: ;
+        case 34: ; /* added on dec 23 2015 to allow <numbers> after a noun */
         case 50:
           state = 6;
           break;
@@ -403,7 +402,7 @@ int32_t ENG_CheckSyntax(line_buf, id, nr_of_types, types, type_index,
         case 22: ;    /* 19 nov 2017 for 'turn machine on' */
         case 34: ;    /* added on dec 23 2015 to allow <numbers> after a noun */
         case 36: ;    /* added on dec 23 2015 to allow <numbers> after a noun */
-        case 47:
+        case 47: ;
         case 50:
           state = 8;
           break;
@@ -459,12 +458,12 @@ int32_t ENG_CheckSyntax(line_buf, id, nr_of_types, types, type_index,
           state = 10;
           break;
         case 14: ;
-        case 36:      /* added on dec 23 2015 to allow <numbers> after a noun */
+        case 36: ;    /* added on dec 23 2015 to allow <numbers> after a noun */
         case 47:
           state = 15;
           break;      /* break seemed to be missing, added on dec 23rd 2015   */
         case 17: ;
-        case 37:      /* added on dec 23 2015 to allow <numbers> after a noun */
+        case 37: ;    /* added on dec 23 2015 to allow <numbers> after a noun */
         case 41:
           state = 18;
           break;
@@ -494,11 +493,11 @@ int32_t ENG_CheckSyntax(line_buf, id, nr_of_types, types, type_index,
           state = 10;
           break;
         case 14: ;
-        case 36:      /* added on dec 23 2015 to allow <numbers> after a noun */
+        case 36: ;    /* added on dec 23 2015 to allow <numbers> after a noun */
         case 47:
           state = 15;
           break;
-        case 34:      /* added on dec 23 2015 to allow <numbers> after a noun */
+        case 34: ;    /* added on dec 23 2015 to allow <numbers> after a noun */
         case 50:
           state = 5;
           break;
@@ -833,8 +832,8 @@ int32_t ENG_CheckSyntax(line_buf, id, nr_of_types, types, type_index,
                                      actor.part1.nr_of_adjectives++] = id;
             break;
           case 42: ;
-          case 43:
-          case 48:       /* subject part 2 adjective */
+          case 43: ;
+          case 48: ;     /* subject part 2 adjective */
           case 49:
             if (parsed_input->subject[subject_index].part2.nr_of_adjectives < MAX_PARSE_ADJ)
               parsed_input->subject[subject_index].part2.
@@ -880,6 +879,3 @@ int32_t ENG_CheckSyntax(line_buf, id, nr_of_types, types, type_index,
   } /* switch */
   /* no return here */
 }
-
-
-

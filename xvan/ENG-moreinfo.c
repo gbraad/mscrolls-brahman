@@ -31,14 +31,12 @@
 #include "trnslate.h"
 #include "ENG-moreinfo.h"
 
-
 /*************************/
 /* Function declarations */
 /*************************/
 
 void ENG_MoreInfo(extendedSysDescr*, match*, char*);
 void ENG_PrintNotFound(extendedSysDescr*);
-
 
 /************************/
 /* Function definitions */

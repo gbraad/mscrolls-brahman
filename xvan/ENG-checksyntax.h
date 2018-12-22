@@ -24,7 +24,6 @@
 #if !defined(__ENG_checksyntax)
 #define __ENG_checksyntax
 
-
 /*************************/
 /* External declarations */
 /*************************/

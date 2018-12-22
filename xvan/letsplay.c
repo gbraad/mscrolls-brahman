@@ -33,7 +33,6 @@
 #include "IFI.h"       /* IFI_REQ_META */
 #include "defs.h"
 
-
 /***********/
 /* Globals */
 /***********/
@@ -64,12 +63,11 @@ int32_t capital       = 1;        /* Start printing with a capital character.  *
 int32_t article       = 0;        /* Tells whether to print an article.        */
 int32_t muted         = 0;        /* Tells whether to print the output         */
 
-
 /*************************/
 /* Function declarations */
 /*************************/
 
-void    ResetGlobals(void);                 /* oct 18 18 */  /* @@@@ */
+void    ResetGlobals(void);       /* oct 18 18 */
 int32_t LetsPlay(void);
 
 /************************/

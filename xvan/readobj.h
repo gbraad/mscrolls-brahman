@@ -24,9 +24,9 @@
 #if !defined(__readobj)
 #define __readobj
 
-/*************/
-/* Externals */
-/*************/
+/*************************/
+/* External declarations */
+/*************************/
 
 extern FILE          *datafile;
 

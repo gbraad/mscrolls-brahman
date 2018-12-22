@@ -30,7 +30,6 @@
 
 /* DO NOT INCLUDE keyword.h */
 
-
 /*************************/
 /* Function declarations */
 /*************************/
@@ -57,7 +56,6 @@ char    *ReadJsonString(char*, int*);
 void    ReadJsonNumber(char*, int*, int32_t*, float*, int*);
 void    ReadJsonValue(char*, jsonValue*, int*);
 int32_t GetNextKVpair(char*, int*, kvPair*);
-
 
 /************************/
 /* Function definitions */
@@ -228,7 +226,7 @@ int32_t ValidateJsonString(string, index)
       case 'f': ;
       case 'n': ;
       case 'r': ;
-      case 't': ;
+      case 't':
         switch (state) {
           case 1: ;
           case 2: ;

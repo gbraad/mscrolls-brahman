@@ -30,7 +30,6 @@
 #include "typedefs.h"
 #include "execute.h"
 
-
 /*************************/
 /* Function declarations */
 /*************************/
@@ -66,7 +65,6 @@ int32_t  IsTestFun(int32_t);
 int32_t  IsIntAct(int32_t);
 int32_t  IsCAttrId(int32_t);
 int32_t  IsLAttrId(int32_t);
-
 
 /************************/
 /* Function definitions */
@@ -979,6 +977,7 @@ int32_t XeqTrigger(owner, id, action_rec, subject_index)
   return(result);
 }
 
+
 int32_t IsWordId(id)
  int32_t id;
 {
@@ -987,6 +986,7 @@ int32_t IsWordId(id)
 
   return(ERROR);
 }
+
 
 int32_t IsVerbId(id)
  int32_t id;

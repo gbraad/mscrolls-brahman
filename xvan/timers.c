@@ -27,13 +27,11 @@
 #include "typedefs.h"
 #include "timers.h"
 
-
 /***********/
 /* Globals */
 /***********/
 
 short fire_timers = OK;
-
 
 /*************************/
 /* Function declarations */
@@ -41,7 +39,6 @@ short fire_timers = OK;
 
 int32_t CheckDoTimers();
 int32_t HandleTimers(usrActionRec*, int32_t);
-
 
 /************************/
 /* Function definitions */

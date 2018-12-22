@@ -24,9 +24,9 @@
 #if !defined(__readloc)
 #define __readloc
 
-/*************/
-/* Externals */
-/*************/
+/*************************/
+/* External declarations */
+/*************************/
 
 extern FILE          *datafile;
 

@@ -41,7 +41,6 @@
 /* to abort the program.                           */
 /***************************************************/
 
-
 /*************************/
 /* Function declarations */
 /*************************/
@@ -51,7 +50,6 @@ int32_t CheckIFI(char*);
 int32_t XeqIFIrequest(int32_t, jsonValue*);
 int32_t ProcessJson(char*, char*);
 void    SendIFIerror(char*, char*);
-
 
 /************************/
 /* Function definitions */
@@ -185,7 +183,8 @@ int32_t CheckIFI(request)
     return(IFI_REQ_ITEMS);
   if (strcmp(request, "loaddata") == 0)
     return(IFI_REQ_LOADDATA);
-  //if (strcmp(request, "location") == 0) return(IFI_REQ_LOCATION);
+/*  if (strcmp(request, "location") == 0) */
+/*    return(IFI_REQ_LOCATION); */
   if (strcmp(request, "map") == 0)
     return(IFI_REQ_MAP);
   if (strcmp(request, "meta") == 0)
@@ -284,7 +283,7 @@ int32_t XeqIFIrequest(request, value)
         Play(interpreter_input);
       }
       break;
-#endif      
+#endif
     case IFI_REQ_MAP:
       /* if true we must send map updates */
       ifi_stats.map = (value->type == JSON_VAL_TRUE ? 1 : 0);

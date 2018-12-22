@@ -30,7 +30,6 @@
 #include "typedefs.h"
 #include "trnslate.h"
 
-
 /*************************/
 /* Function declarations */
 /*************************/
@@ -54,7 +53,6 @@ int32_t      SearchHits(extendedSysDescr*, int32_t, int32_t*, match*, char*);
 int32_t      Find(extendedSysDescr*, int32_t, char*, match*);
 void         PrintNotFound(extendedSysDescr*);
 resultStruct Translate(parsedInput*, int32_t, usrActionRec*, char*);
-
 
 /************************/
 /* Function definitions */

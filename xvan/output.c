@@ -40,7 +40,6 @@
 
 #define CR (char) 10
 
-
 /*************************/
 /* Function declarations */
 /*************************/
@@ -128,8 +127,8 @@ void PrintString(str, use_json)
  char *str;
  int  use_json;
 {
-  /* Syntax: <string> or                            */
-  /*         [string]<-1><parameter>[string]        */
+  /* Syntax: <string> or                     */
+  /*         [string]<-1><parameter>[string] */
 
   int32_t i    = 0;
   int32_t id1  = NO_ID;               /* Needed in case str contains an id. */
@@ -523,7 +522,7 @@ int32_t IsSpecialChar(ch)
   if ( (((int32_t) ch>=97) && ((int32_t) ch<=122)) ||   /* a..z */
        (((int32_t) ch>=65) && ((int32_t) ch<=90))  ||   /* A..Z */
        (((int32_t) ch>=48) && ((int32_t) ch<=57))  ||   /* 0..9 */
-       (ch == '_') )                          /* for identifiers */
+       (ch == '_') )                                    /* for identifiers */
     return(0);
   else
     return(1);

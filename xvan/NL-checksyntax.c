@@ -31,13 +31,11 @@
 #include "typedefs.h"
 #include "NL-checksyntax.h"
 
-
 /*************************/
 /* Function declarations */
 /*************************/
 
 int32_t  NL_CheckSyntax(char*, int32_t, int32_t, int32_t*, int32_t, int32_t, int32_t, parsedInput*);
-
 
 /************************/
 /* Function definitions */
@@ -499,17 +497,17 @@ int32_t NL_CheckSyntax(line_buf, id, nr_of_types, types, type_index,
           break;
         case 9: ;
         case 35: ;    /* added on dec 23 2015 to allow <numbers> after a noun */
-        case 53:
+        case 53: ;
         case 56:
           state = 10;
           break;
         case 14: ;
-        case 36:      /* added on dec 23 2015 to allow <numbers> after a noun */
+        case 36: ;    /* added on dec 23 2015 to allow <numbers> after a noun */
         case 47:
           state = 15;
           break; /* break seemed to be missing, added on dec 23rd 2015 */
         case 17: ;
-        case 37:      /* added on dec 23 2015 to allow <numbers> after a noun */
+        case 37: ;    /* added on dec 23 2015 to allow <numbers> after a noun */
         case 41:
           state = 18;
           break;
@@ -536,16 +534,16 @@ int32_t NL_CheckSyntax(line_buf, id, nr_of_types, types, type_index,
           break;
         case 9: ;
         case 35: ;    /* added on dec 23 2015 to allow <numbers> after a noun */
-        case 53:
+        case 53: ;
         case 56:
           state = 10;
           break;
         case 14: ;
-        case 36:      /* added on dec 23 2015 to allow <numbers> after a noun */
+        case 36: ;    /* added on dec 23 2015 to allow <numbers> after a noun */
         case 47:
           state = 15;
           break;
-        case 34:      /* added on dec 23 2015 to allow <numbers> after a noun */
+        case 34: ;    /* added on dec 23 2015 to allow <numbers> after a noun */
         case 50:
           state = 5;
           break;
@@ -605,16 +603,16 @@ int32_t NL_CheckSyntax(line_buf, id, nr_of_types, types, type_index,
         case 1:
           state = 29;
           break;
-        case 2:
-        case 3:
+        case 2: ;
+        case 3: ;
         case 5:
           state = 23;
           break;
-        case 8:
+        case 8: ;
         case 10:
           state = 25;
           break;
-        case 13:
+        case 13: ;
         case 15:
           state = 27;
           break;
@@ -884,8 +882,8 @@ int32_t NL_CheckSyntax(line_buf, id, nr_of_types, types, type_index,
                                      actor.part1.nr_of_adjectives++] = id;
             break;
           case 42: ;
-          case 43:
-          case 48:       /* subject part 2 adjective */
+          case 43: ;
+          case 48: ;     /* subject part 2 adjective */
           case 49:
             if (parsed_input->subject[subject_index].part2.nr_of_adjectives < MAX_PARSE_ADJ)
               parsed_input->subject[subject_index].part2.

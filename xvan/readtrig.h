@@ -24,9 +24,9 @@
 #if !defined(__readtrig)
 #define __readtrig
 
-/*************/
-/* Externals */
-/*************/
+/*************************/
+/* External declarations */
+/*************************/
 
 extern FILE    *datafile;
 

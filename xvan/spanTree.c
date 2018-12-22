@@ -29,7 +29,6 @@
 #include "typedefs.h"
 #include "spantree.h"
 
-
 /*************************/
 /* Function declarations */
 /*************************/
@@ -37,7 +36,6 @@
 int32_t InitSpanTree(spanTree**, int32_t**);
 int32_t ExpandTree(int32_t, spanTree*);
 int32_t BuildRoute(int32_t, int32_t*, spanTree*);
-
 
 /************************/
 /* Function definitions */

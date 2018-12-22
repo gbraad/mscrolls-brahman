@@ -34,8 +34,8 @@
 /*************************/
 
 void CleanUp(void);
-void FreeAllLocations(void);  /* @@@@ */
-void FreeAllObjects(void);    /* @@@@ */
+void FreeAllLocations(void);
+void FreeAllObjects(void);
 void FreeLocation(locationInfo*);
 void FreeObject(objectInfo*);
 void FreeVerb(verbInfo*);
@@ -44,7 +44,6 @@ void FreeDescrs(descrInfo*);
 void FreeCompActionRecs(compActionRec*);
 void FreeTriggers(triggerInfo*);
 void FreeCommonTriggers(void);
-
 
 /************************/
 /* Function definitions */
@@ -68,6 +67,7 @@ void FreeCommonTriggers(void)
   }
 }
 
+
 void FreeDescrs(start_descr)
  descrInfo *start_descr;
 {
@@ -79,6 +79,7 @@ void FreeDescrs(start_descr)
   }
 }
 
+
 void FreeCompActionRecs(start_actionrec)
  compActionRec *start_actionrec;
 {
@@ -89,6 +90,7 @@ void FreeCompActionRecs(start_actionrec)
     free(start_actionrec);
   }
 }
+
 
 void FreeTriggers(start_trigger)
  triggerInfo *start_trigger;
@@ -102,6 +104,7 @@ void FreeTriggers(start_trigger)
     free(start_trigger);
   }
 }
+
 
 void FreeVerb(verb)
  verbInfo *verb;
@@ -119,6 +122,7 @@ void FreeVerb(verb)
   free(verb);
 }
 
+
 void FreeObject(obj)
  objectInfo *obj;
 {
@@ -134,6 +138,7 @@ void FreeObject(obj)
   /* free object itself */
   free(obj);
 }
+
 
 void FreeAllLocations()
 {
@@ -214,4 +219,3 @@ void CleanUp()
   free(outputline);
   free(stack);
 }
-

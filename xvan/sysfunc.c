@@ -35,7 +35,6 @@
 #include "sysfunc.h"
 #include "defs.h"
 
-
 /*************************/
 /* Function declarations */
 /*************************/
@@ -80,7 +79,6 @@ int32_t Pop(void);
 void    And(void);
 void    Or(void);
 void    Not(void);
-
 
 /************************/
 /* Function definitions */
@@ -1172,15 +1170,11 @@ int32_t Shuffle(id)
     }
     while (disp == i);
     displacements[i] = disp;
-    /*printf("%d ", displacements[i]);*/
   }
-  /*printf("\n");*/
 
   /* now shuffle the contained objects */
   /* algorithm: object[i] is switched with object[displacement[i]] */
   objs = contained_objs->object_ids;
-
-  /*for (i=0; i<len; i++) printf("%d ", objs[i]); printf("\n");*/
 
   for (i=0; i<len; i++) {
     temp                   = objs[displacements[i]];

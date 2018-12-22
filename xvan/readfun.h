@@ -24,10 +24,9 @@
 #if !defined(__readfun)
 #define __readfun
 
-
-/*************/
-/* externals */
-/*************/
+/*************************/
+/* External declarations */
+/*************************/
 
 extern FILE    *datafile;
 
