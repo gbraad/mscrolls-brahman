@@ -1,0 +1,72 @@
+**************************************************************
+*
+*	10/27/87
+*	@(#)pr_want.elt	1.3
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"scenequ.i"
+
+
+    IFND	wantNOQUOTES
+
+	XDEF	PR.WANT,PR17,PR15,PR11
+
+	XREF	INSULTSUB,NEG_
+	
+PR.WANT
+	
+	BTST    #3,D2            ;THINK AS WEL
+	BEQ.S	10$
+	MSGGO	COP15            ;WISHFUL THINKING HUH!
+10$ 
+	MOVEQ   #3,D1
+	RND_D1
+
+	BeSure	M.REALWT
+
+	ADD.W   #M.REALWT,D1
+	DOGO	P.MSG
+PR11
+	MSGGO	COP12
+  
+*--------------------------------
+  
+  
+PR15
+	BTST    #4,D2
+	BNE     INSULTSUB
+	MOVEQ   #2,D1
+	RND_D1
+	TEST_W  NEG_(A4)
+	BNE.S   PR16
+
+	BeSure	M.COP15
+
+	ADD.W   #M.COP15,D1
+	BRA.S   PR17   
+PR16
+
+	BeSure	M.COP17
+
+	ADD.W   #M.COP17,D1
+PR17
+	DOGO	P.MSG
+	       
+	XDEF	PR.HMANY
+	       
+PR.HMANY
+	       
+	DO	P.SAY
+	MSG     IDNK
+	DOGO	PR20
+
+    ENDC	;wantNOQUOTES
+
+
+	END

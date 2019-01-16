@@ -1,0 +1,38 @@
+**************************************************************
+*
+*	%G%
+*	%W%
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"scenequ.i"
+
+    IFND	wantNOQUOTES
+
+	XDEF	P.KYWRD
+	XREF	KYWRD,INSULT,P.TAB
+  
+P.KYWRD
+	
+	MOVE.W  KYWRD(A4),D1
+      
+      IFND	wantBIGPROG
+	LEA     INSULT(A4),A1
+      ENDC
+
+      IFD	wantBIGPROG
+	LEA     INSULT,A1
+      ENDC
+
+	DOGO	P.TAB
+
+    ENDC	;!wantNOQUOTES
+
+*------------------------------------------
+
+	END

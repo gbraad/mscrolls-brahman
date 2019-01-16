@@ -1,0 +1,50 @@
+**************************************************************
+*
+*	10/27/87
+*	@(#)punch.elt	1.2
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"verbequ.i"
+
+*--------------------------------
+
+	XREF	CONJ,DBS
+
+	IfVerb	PUNCH
+
+	include	"nounequ1.i"
+
+	XDEF	V.PUNCH,PU50
+	XREF	V.BREAK
+	
+V.PUNCH
+	
+	TEST_W  CONJ(A4)
+	BMI.S   PU50               ;WITHOUT
+	MOVEQ   #0,D1         
+	DO	CHK4PT	           ;WITH WHAT?
+	CMP.W   #NFIST,D5          ;!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	BEQ.S   PU50               ;OK
+	CMP.W   #NHAND,D5          ;!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	BNE     DBS
+PU50
+	CLR.W   CONJ(A4)
+	MOVE.W  #NFIST,D5          ;!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	EXG     D0,D5
+	EXG     A0,A5
+	GETINFO
+	EXG     D0,D5
+	EXG     A0,A5
+	BRA     V.BREAK
+
+	ENDC
+	
+*--------------------------------
+
+	END

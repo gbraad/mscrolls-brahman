@@ -1,0 +1,311 @@
+**************************************************************
+*
+*	6/7/89
+*	@(#)vlist3.elt	2.18
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"verbequ.i"
+	include	"scenequ.i"
+
+*--------------------------------
+*
+*  VLIST.GO - VERBS WHICH MAY BE
+*             FOLLOWED BY A 
+*             DIRECION N,S,E,W..
+*
+*--------------------------------
+
+	XDEF	VLIST.GO,VLST.GO2,VLEN.GO,VLEN.GO2
+ 
+VLIST.GO
+ 
+	       DC.B    -1       ;JUST DIR GIVEN
+ 
+VLST.GO2
+ 
+* VLST.GO2 - AS USED BY VALID
+
+	SVERB	GO
+	SVERB	LEAVE
+	SVERB	WALK
+	SVERB	ENTER
+	SVERB	RUN
+	SVERB	EXIT
+	SVERB	CLIMB
+	SVERB	JUMP 
+	SVERB	HIDE
+
+	SVERB	PADDLE
+	SVERB	RIDE
+	SVERB	CRAWL
+	
+VLEN.GO       EQU     *-VLIST.GO-1
+VLEN.GO2      EQU     *-VLST.GO2-1
+
+	XDEF	L.WHSAT
+
+L.WHSAT
+	SVERB	SAY
+	SVERB	SHOUT
+	
+    IFND	wantCALLisPHONE
+	SVERB	CALL
+    ENDC	;!wantCALLisPHONE
+	
+	SVERB	ASK
+	SVERB	TELL
+	SVERB	LOOK
+	SVERB	EXAMINE
+	SVERB	LISTEN
+	SVERB	THROW
+	SVERB	SUSS
+	SVERB	SIT
+
+	DC.B	-1
+*
+* List of verbs where the INDIRECT object must a) be reachable and
+* b) not owned by an npc.
+*
+	
+	XDEF	VLIST.NOREACHD5
+
+VLIST.NOREACHD5
+
+	SVERB	PUT
+	SVERB	STICK
+	SVERB	FIX
+	SVERB	TIE
+	SVERB	DROP
+	SVERB	EMPTY
+	SVERB	FILL
+	SVERB	POUR
+	SVERB	INSERT
+	SVERB	LOCK
+	SVERB	UNLOCK
+	SVERB	OPEN
+	SVERB	CLOSE
+	SVERB	FIT
+	SVERB	DIP
+	SVERB	SACRIFICE
+
+    IFD	wantGIVEinNOREACHD5List
+	SVERB	GIVE
+    ENDC	;wantGIVEinNOREACHD5List
+
+	DC.B	-1
+
+*--------------------------------
+*
+* VLST.INV -  VERBS WHICH REFER
+*             TO ALL ON INVENT
+*             RATHER THAN ALL IN
+*             ROOM WHEN USED WITH
+*             ALL.
+*
+*--------------------------------
+
+	XDEF	VLST.INV
+
+VLST.INV
+
+	SVERB	DROP
+	SVERB	LEAVE
+	SVERB	INSERT
+	SVERB	FIT
+	SVERB	FILL
+	SVERB	TIE
+	SVERB	FIX
+	SVERB	GIVE
+	SVERB	SHOW
+	SVERB	FEED
+	SVERB	DRINK
+	SVERB	EAT
+	SVERB	OPEN
+	SVERB	CLOSE
+	SVERB	LOCK
+	SVERB	UNLOCK
+	SVERB	PUT
+	SVERB	THROW
+	SVERB	ROLL
+	SVERB	SHAKE
+	SVERB	THROW
+
+	DC.B	-1		;terminator
+  
+	ALIGN
+  
+*--------------------------------
+*
+* SINGV.TAB - LIST OF VERBS WHICH
+*             ARE ALLOWED WITH
+*             NO NOUNS, EG, I
+*             L, STATUS ETC..
+*
+*--------------------------------
+
+	XDEF	SINGV.TB,VLN.SING
+
+SINGV.TB
+ 
+	SVERB	INVENTORY
+	SVERB	STATUS
+	SVERB	DEBUG
+	SVERB	EXIT
+	SVERB	JUMP
+	SVERB	EXITS
+	SVERB	WAIT
+	SVERB	SIT
+	SVERB	GET
+	SVERB	STAND
+	SVERB	RIDE
+	SVERB	DISMOUNT
+	SVERB	HELP
+	SVERB	LAUGH
+	SVERB	LISTEN
+	SVERB	KICK
+	SVERB	PUNCH
+	SVERB	VOTE
+	SVERB	KNOCK
+	SVERB	PRAY
+	SVERB	SLEEP
+	SVERB	DIG
+	SVERB	SWIM
+	SVERB	HIDE
+	SVERB	REVEAL
+ 
+; Added for Green Magic.
+
+	SVERB	DIAL
+	SVERB	STAY
+	SVERB	FOLLOW
+	SVERB	DOODAH			;yuk this is a spell...
+	SVERB	THINGY			;so is this
+	SVERB	DANCE
+	SVERB	LIE
+	SVERB	SLIDE
+
+; In GM, smell is allowed as a singv.
+
+	IFD	wantSMELLisSINGV
+	SVERB	SMELL
+	ENDC
+
+* for fish, so you can turn over
+
+	IFD	wantTURNisSINGV
+	SVERB	TURN
+	ENDC
+
+* so (when a fish) you can just drink
+
+	IFD	wantDRINKisSINGV
+	SVERB	DRINK
+	ENDC
+
+    IFD		wantPISSisSINGV
+	SVERB	PISS
+    ENDC	;wantPISSisSINGV
+
+	SVERB	CONFESS
+	DC.B	-1			;-1 term also, for VerbInList
+
+
+VLN.SING      EQU       *-SINGV.TB-1 ;NO. OF VERBS (-1)
+
+*--------------------------------
+*
+*	singv exeptions
+*	eg. get
+*	can say  get {on/off/in} but not just 'get'
+*
+	XDEF	SING.EX
+
+SING.EX
+
+	SVERB	GET
+
+	DC.B	0		;zero terminated
+				;NB: does not apply to LOOK
+
+*------------------------------------------
+
+    IFD	wantSP.MANIPULATE
+
+	XDEF	Vlist_Manipulate
+
+Vlist_Manipulate
+
+	SVERB	GET
+	SVERB	LIFT
+	SVERB	MOVE
+	SVERB	SHIFT
+	SVERB	PICK
+	SVERB	PUT
+	SVERB	SHAKE
+	SVERB	STEAL
+	SVERB	TAKE
+	SVERB	THROW
+	SVERB	TURN
+	SVERB	TWIST
+	SVERB	WEAR
+	SVERB	WAVE
+	SVERB	WEIGH
+	SVERB	HOLD
+	SVERB	FILL
+	SVERB	SLIDE
+	SVERB	REMOVE
+	SVERB	POUR
+	SVERB	EMPTY
+	SVERB	DIP
+	SVERB	CARRY
+	SVERB	GRAB
+	SVERB	CATCH
+	SVERB	INSERT
+	SVERB	SCRAPE
+	SVERB	PLACE
+	SVERB	POSITION
+
+	DC.B	-1
+	ALIGN
+
+    ENDC	;wantSP.MANIPULATE
+
+*------------------------------------------
+
+    IFD	wantNoReachD5Seated
+	XDEF	Vlist.NoReachD5Seated
+
+Vlist.NoReachD5Seated
+
+	SVERB	THROW
+	SVERB	CAST
+	SVERB	POINT
+	SVERB	SHINE
+	SVERB	ILLUMINATE
+	DC.B	-1
+	ALIGN
+
+    ENDC	;wantNoReachD5Seated
+
+*------------------------------------------
+
+    IFD		wantONEAsDigit
+	XDEF	Vlist_ONEAsDigit
+
+Vlist_ONEAsDigit
+	
+	SVERB	SET
+	SVERB	DIAL
+	DC.B	-1
+	ALIGN
+	
+    ENDC	;wantONEAsDigit
+
+*------------------------------------------ 
+	END

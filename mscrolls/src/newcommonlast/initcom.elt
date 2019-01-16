@@ -1,0 +1,96 @@
+**************************************************************
+*
+*   %G%
+*   %W%
+*
+**************************************************************
+
+
+    SECTION "ADV",CODE
+    
+    include "equates.i"
+    include "macros.i"
+    include "scenequ.i"
+
+    XREF    WORD_,OLDVERB,VERB,VERB2,CONJBUF,NOUN,EXNUM,ADDBUF
+    XREF    SECTION_,ADJPNTR,ADDPNTR,CONJPNTR,ADDNOUN,CONJ
+    XREF    NOUNBUF,NOUNBUF2,NOUNBUF3,ADJBUF,GETNUM,DEPTH
+    XREF    BRKWCH,WHOOPS,ADVERB,PEND,NEG_,DBSFLG,IGNORQ,ZAPWHFIX
+    XREF    WDEPTH,PADV,PVERB
+
+    IFD wantNUMBERS
+    XREF    NUMBERFLAG
+    XREF    NUMBERBUF,NumberExists
+    ENDC
+
+
+*--------------------------------
+* INITCOMMAND,
+* RESETS VARIBLES FOR NEW COMMAND
+*--------------------------------
+ 
+    XDEF    INITCOM
+ 
+INITCOM
+ 
+    MOVEQ   #-1,D1
+    CLR.W   WORD_(A4)
+    MOVE.W  VERB(A4),OLDVERB(A4)
+    MOVE.W  D1,VERB(A4)
+    MOVE.W  D1,VERB2(A4)    ;incase VERB = use
+    MOVE.L  D1,CONJBUF(A4)
+    CLR.W   NOUN(A4)
+    CLR.W   EXNUM(A4)
+    CLR.W   ADDBUF(A4)
+    CLR.B   SECTION_(A4)
+    LEA     ADJBUF(A4),A0
+    MOVE.L  A0,ADJPNTR(A4)
+    LEA     ADDBUF(A4),A0  
+    MOVE.L  A0,ADDPNTR(A4)
+    LEA     CONJBUF(A4),A0  
+    MOVE.L  A0,CONJPNTR(A4)
+    MOVE.L  D1,ADDNOUN(A4)
+    MOVE.L  D1,CONJ(A4)
+    CLR.L   NOUNBUF(A4)
+    CLR.L   NOUNBUF2(A4)
+    CLR.L   NOUNBUF3(A4)
+    CLR.W   ADJBUF(A4)
+    CLR.W   GETNUM(A4)          ;GET COUNTER
+    CLR.W   DEPTH(A4)           ;ZERO RECUSTION DEPTH
+    CLR.W   BRKWCH(A4)
+    CLR.W   WHOOPS(A4)
+    MOVE.W  D1,ADVERB(A4)
+    CLR.W   PEND(A4)
+    CLR.W   NEG_(A4)
+    CLR.W   DBSFLG(A4)
+    MOVE.L  D1,IGNORQ(A4)       ;CLR BOTH
+    CALL    ZAPWHFIX
+    CLR.W   WDEPTH(A4)      ;for which nesting
+    MOVE.W  D1,PADV(A4)     ;clear pending adverb
+    MOVE.W  D1,PVERB(A4)        ;clear pending verb
+    IFD wantNUMBERS
+    CLR.W   NUMBERFLAG(A4)      ;flag for numerics in command
+    CLR.L   NUMBERBUF(A4)
+    CLR.B   NumberExists(A4)    ;new sentence.
+    ENDC
+
+    IFEQ  THE_PAWN
+    XREF    NearNPC,FoundTO
+    MOVE.W  D1,NearNPC(A4)      ;fod semi-local NPC
+    SF  FoundTO(A4)     ;kill flag for 'use x TO verb y'
+                    ;as used in GW07/VerbOrNoun (same code)
+    ENDC
+
+    IFD     wantPOSSESSIVE_PRONOUNS
+    XREF    HERFLAG
+    CLR.B   HERFLAG(A4)         ;ask checks it.
+    ENDC    ;wantPOSSESSIVE_PRONOUNS
+
+    IFND    wantNONPCPAUSE
+    XREF    UNPAUSE
+    CALL     UNPAUSE 
+    ENDC    ;!wantNONPCPAUSE
+    RET
+      
+
+    END

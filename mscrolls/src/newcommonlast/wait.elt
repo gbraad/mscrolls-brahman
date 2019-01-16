@@ -1,0 +1,231 @@
+**************************************************************
+*
+*	2/6/89
+*	@(#)wait.elt	2.11
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"verbequ.i"
+	include "scenequ.i"
+
+*--------------------------------
+
+	IfVerb	WAIT
+
+	XDEF	V.WAIT
+   
+V.WAIT
+
+      IFND	wantNUMBERS
+      IFD	wantAutomaticWait
+
+	XREF	ADVERB,P.IDFY,CLOCK,P.LOC,SPECIALS_Before,SPECIALS,Waiting
+
+
+	CMP.W	#UNTIL,ADVERB(A4)	;until?
+
+	XREF	SP.AutomaticWait
+
+	BEQ	P.IDFY			;otherwise pretend not to understand
+	CALL	SP.AutomaticWait	;decide to superwait? ->waiting
+	BNE	99$			;go for it.
+	
+	
+	XREF	DIED,GameFinished
+
+	MSG	TPASS
+10$
+	ADDQ.W	#1,CLOCK(A4)
+	DO	R.NOUN
+	CALL	P.LOC
+	CALL	SPECIALS_Before
+	CALL	SPECIALS
+	TEST_W	Waiting(A4)
+	BEQ.S	90$			;end
+	TEST_B	DIED(A4)			;are you dead?
+	BNE.S	90$
+	TEST_B	GameFinished(A4)		;or terminated.
+	BNE.S	90$
+	SUBQ.W	#1,Waiting(A4)
+	BGT.S	10$
+	MSG	LINE
+	MSGGO	TIREWAITING		;you tire of waiting.
+90$
+	MSGGO	LINE
+
+      ENDC	;wantAutomaticWait
+      ENDC	;!wantNUMBERS
+
+      IFD	wantNUMBERS
+
+	XREF	CLOCK,ADVERB,SPECIALS,SPECIALS_Before,Waiting
+	XREF	R.NOUN,P.LOC,P.TN,DBS,SP.WAITUNTIL
+	XREF	P.IDFY
+
+	
+	CMP.W	#UNTIL,ADVERB(A4)	;until?
+    IFND	wantAutomaticWait
+	BEQ.S	WaitUntil		;normal state of affairs
+    ENDC	;!wantAutomaticWait
+
+    IFD		wantAutomaticWait
+	XREF	SP.AutomaticWait
+	BEQ	P.IDFY			;otherwise pretend not to understand
+	CALL	SP.AutomaticWait	;decide to superwait? ->waiting
+	BEQ.S	WaitUntil.Loop		;go for it.
+
+    ENDC	;wantAutomaticWait
+
+	CMP.W	#FOR,ADVERB(A4)		;wait for?
+	BEQ.S	10$
+    IFD	wantSP.WAIT
+	XREF	SP.WAIT
+	CALL	SP.WAIT
+    ENDC	;wantSP.WAIT
+	MSGGO	TPASS
+10$
+	TEST_W	D0			;any?
+	BMI	P.IDFY			;no
+	
+    IFD		wantSP.WaitFor
+	XREF	SP.WaitFor
+	CALL	SP.WaitFor
+    ENDC	;wantSP.WaitFor
+
+	DO	P.TN
+	MSGGO	NEVERARRIVE		;<'might never arrive!^'>
+
+    IFND	wantAutomaticWait
+WaitUntil
+
+    IFD		wantNOTIME
+	BRA	P.IDFY
+    ENDC	;wantNOTIME
+
+    IFND	wantNOTIME
+	XREF	GetTime
+	CALL	GetTime			;grab a time+convert to KerovnianST
+					;returns D2
+	CALL	SP.WAITUNTIL		;any specials?
+	SUB.W	CLOCK(A4),D2		;suss that it was in the past
+
+    IFD	want12HourClock
+	BPL.S	01$
+	ADD.W	#12*60,D2		;is in the afternoon.
+	BMI	DBS
+01$
+	CMP.W	#24*60,D2		;too large?
+	BHS	DBS
+    ENDC	;want12HourClock
+
+    IFND	want12HourClock
+	BMI	DBS
+    ENDC	;!want12HourClock
+
+    IFD	MaxWaitDuration
+	XREF	IGNORAJ
+
+    IFD		wantPatientlyWait	
+	CMP.W	#3,IGNORAJ(A4)			;please?
+	BEQ.S	02$				;then ok.
+	CMP.W	#5,IGNORAJ(A4)			;patiently
+	BEQ.S	02$
+    ENDC	;wantPatientlyWait
+	
+	CMP.W	#MaxWaitDuration,D2		;too long?
+	BLT.S	02$
+	MSGGO	TOOLONG				;too long to wait
+02$
+    ENDC	;MaxWaitDuration
+
+	SUBQ.W	#1,D2			;adjust
+	MOVE.W	D2,Waiting(A4)
+
+* loop through specials for a while - this is an iffy method
+
+    ENDC	;!wantNOTIME
+    ENDC	!wantAutomaticWait
+
+
+AreWeGoingToHaveWaitUntil.Loop	SET	FALSE
+    IFD	wantAutomaticWait
+AreWeGoingToHaveWaitUntil.Loop	SET	TRUE
+    ENDC	;wantAutomaticWait
+    IFND	wantNOTIME
+AreWeGoingToHaveWaitUntil.Loop	SET	TRUE
+    ENDC	;!wantNOTIME
+
+	IFNE	AreWeGoingToHaveWaitUntil.Loop
+	
+	XDEF	WaitUntil.Loop
+
+WaitUntil.Loop
+	
+	XREF	DIED,GameFinished
+
+	MSG	TPASS
+10$
+	ADDQ.W	#1,CLOCK(A4)
+	DO	R.NOUN
+	CALL	P.LOC
+	CALL	SPECIALS_Before
+	CALL	SPECIALS
+	TEST_W	Waiting(A4)
+	BEQ.S	90$			;end
+	TEST_B	DIED(A4)			;are you dead?
+	BNE.S	90$
+	TEST_B	GameFinished(A4)		;or terminated.
+	BNE.S	90$
+	SUBQ.W	#1,Waiting(A4)
+	BGT.S	10$
+	MSG	LINE
+	MSGGO	TIREWAITING		;you tire of waiting.
+90$
+    IFD		wantTIMERSAFTER
+	CALL_S	Fix_Timers		;else completely wild.
+    ENDC	;wantTIMERSAFTER
+	MSGGO	LINE
+
+    ENDC	;AreWeGoingToHaveWaitUntil.Loop
+
+
+*------------------------------------------
+
+    IFD	wantTIMERSAFTER
+
+	XREF	TIMERS_AFTER,NumTimersAfter
+
+Fix_Timers
+	
+	PUSH_L	D0/A1	
+	LEA	TIMERS_AFTER(A4),A1
+	MOVE.W	#NumTimersAfter-1,D0
+10$
+	TEST_B	(A1)+				;is this timer active?
+	BEQ.S	20$				;no, next
+	ADDQ.B	#1,-1(A1)			;else inc it.
+20$
+	DBRA	D0,10$				;continue.
+	PULL_L	D0/A1
+	RET
+		
+    ENDC	;wantTIMERSAFTER
+
+*------------------------------------------
+
+
+      ENDC	;wantNUMBERS
+
+99$
+	MSGGO	TPASS
+
+	ENDC
+
+
+
+	END

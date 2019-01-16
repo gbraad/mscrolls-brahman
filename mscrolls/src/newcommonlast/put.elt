@@ -1,0 +1,371 @@
+**************************************************************
+*
+*	12/13/89
+*	@(#)put.elt	2.8
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"verbequ.i"
+	include	"scenequ.i"
+
+
+	XREF	YCANT,P.MHAVSTOP
+
+	IfVerb	PUT
+
+	XDEF	V.PUT
+	XREF	CONJ,DBS,NESTLOOP,WHOOPS,YCANTW,SP.PUT
+	XREF	ISATTRIBUTE,ROOM
+ 
+V.PUT
+
+12$
+	MOVE.W  CONJ(A4),D1
+	BMI.S   15$
+	CMP.B   #INTO,D1		;INTO
+	BEQ.S   10$	
+	CMP.B   #IN,D1			;IN
+	BEQ.S   10$			;OK
+
+      IFD	wantPUT_THROUGH
+
+	CMP.B	#THROUGH,D1
+	BEQ.S	10$
+
+      ENDC
+
+	CMP.B   #ON,D1			;ON
+	BEQ	V.PUTON
+	CMP.B   #ONTO,D1		;ONTO
+	BEQ	V.PUTON
+	CMP.B	#UNDER,D1
+	BEQ	V.PUTUNDER
+	ST	WHOOPS(A4)
+	MSGGO	IDFY
+15$
+	MOVEQ   #4,D1			;INTO WHAT?
+	DO	CHK4PT			;WILL ALWAYS ERROR!   
+10$
+	TEST_W  D5			;SECOND NOUN?
+	BEQ.S   15$			;WHOOPS!
+
+	IFEQ	THE_PAWN
+	XREF	SP.PutBefore
+* This special gets called before anything gets printed
+* to cope with put x in beam 
+* and dr anything in pool!
+	CALL	SP.PutBefore
+	ENDC
+
+	EXG	D0,D5			;D5=#, D0=ADD
+	EXG	A0,A5			;TOO
+	MOVE.B  10(A0),D2		;DAT
+	AND.B   #7,D2			;CONTAINER?
+	BNE.S   20$			;YES
+	ST	WHOOPS(A4)		;TELL PROCESS TO GIVE UP
+	TST_BROKEN				;BROKEN?
+	BNE	YCANTW			;CAN DO THAT WI IT
+	DO	P.BTN
+	DO	ISAREN
+	MSGGO	NCONT
+20$
+	MOVE.B  (A0),D1			;GET STATUS
+	AND.B   #$60,D1			;LOCKED OR CLOSED?
+	BEQ.S   25$
+	ST	WHOOPS(A4)		;TELL PROCESS TO GIVE UP
+	DO	P.BTN			;SORRY, CONTAINER IS LOCKED/CLOSED
+	DO	ISARE
+	MSG	CLOSED			;BYE
+	DOGO	BSFULLSTOP
+ 
+25$
+	BTST	#5,6(A5)		;is dobj already in something?
+	BEQ.S   35$			;no
+	CMP.W   8(A5),D0		;CONTAINED HERE
+	BNE.S   35$
+	EXG	D0,D5
+	MSG	BUT
+	DO	P.TN
+	DO	ISARE
+	MSG	AINSID
+	
+	EXG	D5,D0
+	DOGO	P.TNSTOP
+30$
+	EXG	D0,D5			;D0=#
+	DO	P.TN
+	MSG	WNTF
+	DOGO	BSFULLSTOP
+35$
+	EXG	D0,D5
+	MOVE.B  6(A5),D1		;get dobj locator
+	AND.B   #$1E,D1			;if hidden,worn,intrinsic,insep
+	BNE.S   38$			;can't manipulate it
+	BTST	#4,3(A5)		;check movability
+	BEQ.S   38$
+	DO	FIXCHK			;IS OBJECT TIED?
+	BEQ.S   40$			;NO, GOTO 40$
+38$
+	DOGO	YCANTNOW		;U CAN'T DO THAT TO THE ..
+40$
+	EXG	D0,D5
+	CALL	NESTLOOP		;check that d5 in not alread in d0
+	BNE	DBS			;it may be prefered to say, "not possible"
+	CMP.W   8(A0),D5		;is the target related to source?
+	BNE.S   41$
+	TST_INSEPARABLE			;is it part of it?
+	BNE	DBS			;yes, dissallow (put jeans in pocket)
+41$
+
+	IFEQ	THE_PAWN		;in all other games u cannot get pseudos
+	BTST	#0,5(A5)		;is it a pseudo?
+	BNE.S	38$			;if so, nocandu
+	ENDC	;!THE_PAWN
+
+	MOVE.B  2(A5),D3		;SIZE&W
+	LSR.B   #4,D3			;SIZE
+	BEQ	DBS			;IF VOID
+
+    IFD	attribute_IMPERMEABLE
+	XREF	Denotation_IMPERMEABLE
+
+	MOVE.B	1(A5),D1		;pc of dobj
+	LSR.B	#4,D1			;get hardness
+	CMP.B	#1,D1			;is it a liquid?
+	BNE.S	44$			;no, then it is ok
+	LEA	Denotation_IMPERMEABLE(A4),A1
+	DO	ISATTRIBUTE		;is our container impermeable?
+	BEQ.S	44$			;yes, ok 
+	DO	P.TN
+	DO	ISARE
+	MSG	TSOFT			;the <container> is not suitable
+	DOGO	FULLSTOP
+44$
+    ENDC	;attribute_IMPERMEABLE
+
+    IFD	attribute_SMALLCONTENTS
+	XREF	Denotation_SMALLCONTENTS
+	LEA	Denotation_SMALLCONTENTS(A4),A1
+	DO	ISATTRIBUTE		;d0= container.
+	BNE.S	4101$			;no, continue
+	CMP.B	#1,D3			;max size at once=1
+	BHI	30$			;wont fit otherwise
+4101$
+    ENDC	;attribute_SMALLCONTENTS
+
+	SUB.B   D3,D2			;SPACE LEFT
+	BMI	30$			;WON'T FIT
+	BEQ     30$			;WON'T FIT
+
+	EXG	D0,D5
+	EXG	A0,A5			;swap back to call sp.put
+	CALL	SP.PUT			;sensible place!
+
+    IFD	Support_NakedFlames
+	CALL	NakedFlame		;is it alight?
+	BNE.S	43$			;no
+	MOVE.B	11(A5),D1		;data4
+	AND.B	#%11<<3,D1		;combustability
+	BEQ.S	43$
+	MSG	NOTWHILST
+	DO	ISARE
+	MSGGO	LIT
+43$
+    ENDC	;Support_NakedFlames
+
+	IFNE	THE_PAWN
+	BCLR	#0,5(A0)		;if it is a pseudo => no longer
+	ENDC	;THE_PAWN		;This is for the SNOW in THE PAWN
+
+
+	EXG	D0,D5			;fetch container ->d0
+    IFD	attribute_INFINITE_CONTAINER
+	XREF	Denotation_INFINITE_CONTAINER
+	LEA	Denotation_INFINITE_CONTAINER(A4),A1
+	DO	ISATTRIBUTE		;is container infinite?
+	BEQ.S	42$
+    ENDC	;attribute_infinite_container
+
+	MOVE.B  10(A5),D3		;CAP
+	AND.B   #$F8,D3			;REMOVE CAP
+	OR.B	D2,D3			;WITH NEW CAP
+	MOVE.B  D3,10(A5)		;UPDATE
+42$
+	EXG	D0,D5
+	DO	FIXCONT			;FIX VOLUME OF CONTAINER REMOVED FR
+
+    IFND	wantOmnipresentContents
+	BTST	#0,5(A5)		;container is a pseudo?
+	BEQ.S	45$
+	MOVE.B	ROOM+1(A4),7(A0)	;set the secondary locator.
+    ENDC	;!wantOmnipresentContents
+
+45$
+	MOVE.W  D5,8(A0)		;POINT TO CONTAINER  
+	AND.B	#$C,6(A0)		;zap all but room & out
+	BSET	#5,6(A0)		;SET contained BIT
+	DO	P.TN
+	GETINFO
+	DO	ISARE
+	MSG	NINSID
+*	CALL	SP.PUT			;silly place to call it
+	EXG	D0,D5
+	EXG	A0,A5
+	DO	P.TNSTOP
+
+	IFEQ	THE_PAWN
+
+	XREF	SP.PUT2
+*	EXG	D0,D5			;MUST be the wrong way round!
+*	EXG	A0,A5
+	CALL	SP.PUT2			;'loud' specials
+
+	ENDC
+
+	RET
+ 
+*--------------------------------
+
+	XDEF	V.PUTON
+	XREF	SP.PUTON,ROOM
+	
+V.PUTON
+	
+    IFEQ	THE_PAWN
+	CALL	SP.PUTON
+    ENDC
+	
+	TEST_W	D5
+	BGT.S	05$
+	MOVEQ	#ON,D1
+	DO	CHK4PT
+05$
+	BTST	#3,5(A5)	;CAN PUT x ON y?
+	BNE	10$
+	MOVE.L  A5,A0
+	MOVE.W  D5,D0
+	DOGO	YCANT
+10$
+	DO	CARRIED		;MUST HAVE
+	BNE	P.MHAVSTOP
+
+      IFD	wantPUTONDoesWornCheck
+
+	TST_WORNBYPLAYER
+	BEQ.S	11$
+
+      IFD	wantSP.UNWEA_BEFORE
+
+	XREF	SP.UNWEA_BEFORE
+	CALL	SP.UNWEA_BEFORE
+
+      ENDC	;wantSP.UNWEA_BEFORE
+
+	XREF	SP.UNWEA
+	CALL	SP.UNWEA
+11$
+      ENDC	;wantPUTONDoesWornCheck
+
+	TST_INSEPARABLE		;inseperable?
+	BNE.S   15$		;OK, stop 'em putting the band on things!
+	TST_MOVEABLE		;moveable?
+	BEQ	YCANT		;sorry
+	DO	FIXCHK		;IS TIED?
+	BEQ.S   20$		;NO, OK
+15$
+
+    IFD	Version2_FIX
+	MOVE.W	12(A0),D1
+	AND.W	#$3FFF,D1		;lose top bits
+	CMP.W	D1,D5			;put on the object it is tied to?
+	BEQ.S	20$			;if so, ok.
+    ENDC	Version2_FIX
+
+	DOGO	YCANTNOW	;YOU CAN'T 
+20$
+	LIQUID	D1		;is it a liquid (use d1 as scratch)
+	BNE.S   21$		;NOPE, OK
+	DO	P.TN
+	DO	SETOUT
+	BSET	#5,3(A5)	;TARGET BECOMES WET.
+	MSGGO	SEPAWY
+21$
+
+      IFD	wantSP.PUTON2
+	XREF	SP.PUTON2
+	CALL	SP.PUTON2
+      ENDC	;wantSP.PUTON2
+
+	DO	FIXCONT		;in case it's in something
+	MOVE.W  #$0100,6(A0)	;ZAP, IN
+	MOVE.W  D5,8(A0)
+	BTST	#0,5(A5)	;onto a pseudo?
+	BEQ.S	22$		;no.
+	MOVE.B	ROOM+1(A4),7(A0)	;the secondary locator!!
+22$
+	DO	P.TN
+	DO	ISARE
+	MSG	NOW
+	MSG	ON
+	MOVE.W  D5,D0
+	DOGO	P.TNSTOP
+
+
+
+*----------------------------------
+
+	XREF	P.SUBV
+
+V.PUTUNDER
+
+    IFD	wantSP.PUTUNDER
+	XREF	SP.PUTUNDER
+	CALL	SP.PUTUNDER
+    ENDC	;wantSP.PUTUNDER
+
+	DO	P.SUBV
+
+      IFND	wantCorrectFullStops
+	MSGGO	UNABLE
+      ENDC	;!wantCorrectFullStops
+
+      IFD	wantCorrectFullStops
+	MSG	UNABLE
+	DOGO	BSFULLSTOP
+      ENDC	;wantCorrectFullStops
+
+
+
+	ENDC
+
+*------------------------------------------
+
+    IFD	Support_NakedFlames
+
+	XDEF	NakedFlame
+
+NakedFlame
+
+* EQ <=> it is.
+
+	MOVE.L	A0,-(A7)
+	GETINFO
+	TST_LIT			;must be lit
+	BEQ.S	80$		;nope.
+	TST_LIGHTABLE		;and lightable
+80$
+	EOR	#4,CCR		;invert
+	MOVE.L	(A7)+,A0	;resore incase needed.
+	RET
+
+    ENDC	;Support_NakedFlames
+
+*------------------------------------------
+	
+
+	END

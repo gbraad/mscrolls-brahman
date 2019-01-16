@@ -1,0 +1,36 @@
+**************************************************************
+*
+*	4/10/89
+*	@(#)utexit.elt	2.2
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"scenequ.i"
+
+	XDEF	UTEXIT,DBEXIT,DBDASH
+	XREF	SC70
+
+UTEXIT
+DBEXIT
+
+      IFNE	GENERIC
+	XREF	MakeUndoDiff
+	CALL	MakeUndoDiff		;so you can undo VERBOSE etc
+      ENDC
+
+	MOVE.L  (A7)+,D0            ;POP ONCE..
+	BRA     SC70                ;AND GO.W/O CLOCKING
+    
+DBDASH
+	
+	PRINT   <' - '>
+	RET
+
+
+
+	END

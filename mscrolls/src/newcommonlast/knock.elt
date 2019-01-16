@@ -1,0 +1,55 @@
+******************************************************
+*
+*	@(#)knock.elt	2.3
+*	6/21/88
+*
+******************************************************
+
+		SECTION		"ADV",CODE
+
+*--------------------------------
+*
+* SRC.ADV.KNOCK
+*
+*--------------------------------
+
+	include "equates.i"
+
+	include "macros.i"
+
+	include	"verbequ.i"
+
+
+
+      XREF     CONJ,W.SQLCH,W.THUD,V.BREAK,DBS
+
+	
+	IfVerb	KNOCK
+
+	XDEF	V.KNOCK
+	XREF	SP.KNOCK
+ 
+V.KNOCK
+ 
+	TEST_W  CONJ(A4)
+	BPL     V.BREAK
+	TEST_W  D0                 ;ANY?
+	BMI.S   10$
+	MOVE.B  1(A0),D1           ;GET PHYS CHAR
+	LSR.B   #4,D1              ;HARDNESS
+	BEQ	DBS		   ;VOID ITEMS CAN'T BE TAPPED
+	CMP.B   #5,D1              ;SOFT?
+	BLT.S	20$
+	CMP.B   #12,D1
+	BEQ     DBS
+10$
+	CALL    SP.KNOCK
+	MSGGO	THUD
+20$
+	MSGGO	SQLCH
+
+
+	ENDC
+
+      END
+

@@ -1,0 +1,86 @@
+**************************************************************
+*
+*	3/6/89
+*	@(#)listen.elt	2.2
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"verbequ.i"
+	include	"scenequ.i"
+
+	IfVerb	LISTEN
+
+	XDEF	V.LISTEN
+	XREF	SP.LISTE,ADVERB
+
+V.LISTEN
+
+      IFD	wantLISTENtoROOM
+
+	XREF	R.NOUN
+
+	TEST_W	D0
+	BPL.S	03$
+	DO	R.NOUN
+	GETINFO
+	MOVE.W	#AT,ADVERB(A4)
+03$
+
+      ENDC
+
+	CALL	SP.LISTE
+
+      IFEQ	THE_PAWN
+
+	XREF	TBL.LISTEN,MessageFromTable
+
+	LEA     TBL.LISTEN(A4),A1	;LIST OF LISTENABLE (!?) ITEMS
+
+      IFD	wantFindListenable
+	
+	TEST_W	D0			;listen to/at something?
+	BPL.S	04$
+01$
+	MOVE.W	(A1)+,D0
+	BEQ.S	10$			;end of table=>you can't hear owt
+	MOVE.W	(A1)+,D1		;message
+	DO	VALID.NP
+	BNE.S	01$			;not valid so get next one
+	DOGO	P.SCN			;you hear this
+04$
+      ENDC	;wantFindListenable
+
+	DO	MessageFromTable
+	BEQ.S	05$			;If we output nothing, then EQ
+	RET
+05$ 
+
+      ENDC
+
+	CMP.W   #TO,ADVERB(A4)		;Listen to object?
+	BEQ.S   20$                 	
+	CMP.W   #AT,ADVERB(A4)		;Listen at xyzzy?
+	BEQ.S   10$
+	MSGGO	IDFY
+10$
+	DO	P.SUB
+	MSGGO	CNTHEA
+20$
+	TST_NPC				;
+	BEQ.S   10$
+	DO	P.TN
+	DO	ISARE
+	MSG	SILNT
+	MSGGO	ATMOMT
+
+
+	ENDC
+
+
+
+	END

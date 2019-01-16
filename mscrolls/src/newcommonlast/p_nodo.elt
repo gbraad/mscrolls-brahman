@@ -1,0 +1,32 @@
+**************************************************************
+*
+*	10/27/87
+*	@(#)p_nodo.elt	1.2
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+
+*--------------------------------
+
+	XDEF	P.NODO
+	
+P.NODO
+	
+*MSG WHEN CANT DO SOMETHING
+	
+	MOVEQ   #6,D1
+	RND_D1
+
+	BeSure	M.NODO1
+	
+	ADD.W   #M.NODO1,D1
+	DOGO	P.MSG
+
+
+
+	END

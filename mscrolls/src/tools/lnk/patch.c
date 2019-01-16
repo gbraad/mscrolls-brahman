@@ -39,7 +39,7 @@
 struct tunnel tunnels[MAXOBJFILES];
 int n_tunnels = 0;
 
-extern int patch;		/* !=0 if patching enabled */
+extern int patch;       /* !=0 if patching enabled */
 
 #define IN_RANGE(src, dest) \
     (((dest) - (src)) <= 32767 && ((dest) - (src)) >= -32768)
@@ -71,19 +71,19 @@ int patch_word(char* name, int type, int from, int to)
     
     if (type != N_TEXT)
     {
-	printf("reference to data, patch unsuccessful\n");
-	return 0;
+        printf("reference to data, patch unsuccessful\n");
+        return 0;
     }
 
     /* look for an existing tunnel that is in range */
     for (i=0, tp=tunnels; i<n_tunnels; i++, tp++)
     {
-	if (!tp->spare &&
-	    tp->destination == to && IN_RANGE(from, tp->location)) 
+        if (!tp->spare &&
+            tp->destination == to && IN_RANGE(from, tp->location)) 
         {
-	    addtoword(name, type, from, tp->location-from);
-	    return SUCCEED(type, tp->location, "via exiting tunnel");
-	}
+            addtoword(name, type, from, tp->location-from);
+            return SUCCEED(type, tp->location, "via existing tunnel");
+        }
     }
 
     /* find the best empty tunnel which will work */
@@ -92,8 +92,8 @@ int patch_word(char* name, int type, int from, int to)
     best = 0;
     for (i=0, tp=tunnels; i<n_tunnels; i++, tp++)
     {
-	if (tp->spare && IN_RANGE(from, tp->location) &&
-	    IN_RANGE(tp->location+2, to))
+        if (tp->spare && IN_RANGE(from, tp->location) &&
+            IN_RANGE(tp->location+2, to))
         {
             int d;
             if (from < to)
@@ -101,21 +101,22 @@ int patch_word(char* name, int type, int from, int to)
             else
                 d = (tp->location+2) - to;
             
-	    if (d > maxdist)
+            if (d > maxdist)
             {
-		maxdist = d;
-		best = tp;
-	    }
+                maxdist = d;
+                best = tp;
+            }
         }
     }
 
     if (best)
-    {			/* got one ? */
-	best->spare = 0;
-	best->destination = to;
-	addtoword("a patch", type, from, best->location-from); /* to the tunnel */
-	addtoword(name, type, best->location+2, to-(best->location+2));
-	return SUCCEED(type, best->location, "via new tunnel");
+    {
+        /* got one ? */
+        best->spare = 0;
+        best->destination = to;
+        addtoword("a patch", type, from, best->location-from); /* to the tunnel */
+        addtoword(name, type, best->location+2, to-(best->location+2));
+        return SUCCEED(type, best->location, "via new tunnel");
     }
 
     printf("attempting multiple tunnel relay\n");
@@ -127,7 +128,7 @@ int patch_word(char* name, int type, int from, int to)
     best = 0;
     for (i=0, tp=tunnels; i<n_tunnels; i++, tp++)
     {
-	if (tp->spare && IN_RANGE(from, tp->location))
+        if (tp->spare && IN_RANGE(from, tp->location))
         {
             int d;
             if (from < to)
@@ -135,34 +136,36 @@ int patch_word(char* name, int type, int from, int to)
             else
                 d = from - tp->location;
             
-	    if (d > maxdist)
+            if (d > maxdist)
             {
-		maxdist = d;
-		best = tp;
-	    }
+                maxdist = d;
+                best = tp;
+            }
         }
     }
 
     if (best)
     {
-	int relay;
-	best->spare = 0;	/* remove from free list */
+        int relay;
+        best->spare = 0;    /* remove from free list */
         
-	/* attempt a patch from this tunnel to the destination */
-	relay = patch_word(name, type, best->location+2, to);
+        /* attempt a patch from this tunnel to the destination */
+        relay = patch_word(name, type, best->location+2, to);
         if (relay)
         {
-	    /* the patch was successful, so return success */
-	    /* note: SUCCEED will already have printed the success
-	       message at a lower level */
-	    /* fill in the branch to the first link */
-	    addtoword("a patch", type, from, best->location - from);
-	    return 1;
-	} else {
-	    best->spare = 1;	/* patch failed, so tunnel still free */
-	    printf("patch failed\n");
-	    return 0;		/* return failure */
-	}
+            /* the patch was successful, so return success */
+            /* note: SUCCEED will already have printed the success
+               message at a lower level */
+            /* fill in the branch to the first link */
+            addtoword("a patch", type, from, best->location - from);
+            return 1;
+        }
+        else
+        {
+            best->spare = 1;    /* patch failed, so tunnel still free */
+            printf("patch failed\n");
+            return 0;       /* return failure */
+        }
     }
 
     printf("patch failed, no spare tunnels!\n");

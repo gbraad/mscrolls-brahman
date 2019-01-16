@@ -1,0 +1,30 @@
+**************************************************************
+*
+*	10/27/87
+*	@(#)p_alcarry.elt	1.2
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+
+	XDEF	P.ALCARRY
+
+*--------------------------------
+	
+P.ALCARRY
+	
+	MSG	LINE
+	MSG	BUT
+	DO	P.SUBV
+	MSG	ALCAR
+	DOGO	P.TNSTOP
+	
+*--------------------------------
+
+
+
+	END

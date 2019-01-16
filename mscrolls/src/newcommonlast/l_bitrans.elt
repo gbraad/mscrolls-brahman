@@ -1,0 +1,44 @@
+**************************************************************
+*
+*	%G%
+*	%W%
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"verbequ.i"
+
+	XDEF	L.BITRANS
+
+*--------------------------------
+	
+L.BITRANS
+	
+*LIST OF BITRANSITIVE VERBS
+	
+*EFFECTIVELY NO 'AND' IS REQUIRED
+*BETWEEEN NOUNS, IF THE VERB IS OF
+*THIS TYPE.
+	
+		SVERB	OFFER
+		SVERB	FEED
+		SVERB	PAY
+		SVERB	GIVE
+		SVERB	SHOW
+
+		SVERB	POST
+		SVERB	MAIL
+		SVERB	SEND
+
+* also throw, pass ?
+
+
+		DC.B    0
+
+
+
+	END

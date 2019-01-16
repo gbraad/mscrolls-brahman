@@ -1,0 +1,436 @@
+******************************************************
+*
+*	@(#)look.elt	2.6
+*	2/23/89
+*
+******************************************************
+
+		SECTION		"ADV",CODE
+
+
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"verbequ.i"
+	include	"scenequ.i"
+
+
+	XREF	ADVERB,SEATED,V.FIND,W.NOT,W.FHERE,P.BTN,ISARE,W.CLOSED
+	XREF	P.TN,W.CNTS,GET_CONT,P.LIST,P.DESC,W.DEADDN,FMSG
+	XREF	CHAROUT,LINE,GETRELN,GETNPC,P.PRN,W.WEARNG,GETDATA,PRTTXT
+	XREF	P.PV,W.GLOW,W.LIT,W.AND,W.SEEMS,SPACE
+	XREF	W.FXTO,ONLYREL,ISANYREL,W.THERE,W.ON,P.OBJPRN,W.FXTIT,SCAN
+	XREF	FULLSTOP,GETNOUNS,L.DATA,P.SCN,P.Description
+	XREF	BSFULLSTOP,P.TNSTOP,P.LISTSTOP
+	XREF	VERB,M.LOOKHAPPY
+
+
+* VERB ROUTINE: LOOK,EXAMINE
+
+	IfVerb	LOOK
+
+	XDEF	LOOK
+ 
+LOOK
+	
+	IFEQ	THE_PAWN
+	XREF	SP.LOOK
+	CALL	SP.LOOK
+	ENDC
+
+    IFD	wantAdjacentRooms
+    
+	XREF	LookNextRoomTable
+	MOVE.W	#-1,VERB(A4)			;fod verb
+	DO	VALID.NP			;is dobj still valid?
+	CLR.W	VERB(A4)			;set back to look
+	TEST_B	D7
+	BEQ.S	10$				;is still ok, fine
+
+	LEA	LookNextRoomTable(A4),A1
+05$
+	MOVE.L	(A1)+,D1
+	BEQ.S	07$				;end of list, use cop-out
+	CMP.W	D0,D1				;right room (noun# really)
+	BNE.S	05$				;nope, try next
+	SWAP	D1				;msg# was in hi word
+	DOGO	P.SCN				;print it
+07$
+      IFD	wantPrintNextRoom
+	XREF	STOPRON
+	MOVE.W	D0,STOPRON(A4)
+      ENDC
+	MSGGO	PDR2				;you'l have to go there
+
+    ENDC	;wantAdjacentRooms
+
+10$
+	MOVE.W  ADVERB(A4),D1
+	CMP.W   #IN,D1				;IN
+	BEQ.S   20$
+	CMP.W	#INTO,D1
+	BEQ.S	20$
+	CMP.W   #WITHIN,D1			;WITHIN (!!)
+	BEQ.S   20$
+	CMP.W	#BEHIND,D1			;same for behind
+	BEQ.S	11$
+	CMP.W   #UNDER,D1			;UNDER
+	BNE.S   40$
+11$
+	TEST_W  SEATED(A4)
+	BEQ	V.FIND				;OK
+	MSG	NOT
+	MSGGO	FHERE
+	
+20$
+	MOVE.B  10(A0),D1			;CONTAINER?
+	AND.B   #7,D1
+	BEQ.S   40$
+	MOVEQ   #$60,D2				;MASK FOR CLOSED/LOCKED
+	AND.B   (A0),D2				;IS IT?
+	BEQ.S   30$				;NO
+
+	IFEQ	THE_PAWN
+
+	TST_LOCALCONTENTS				;
+	BNE.S	30$
+
+	ENDC
+
+	DO	P.BTN				;BUT THE ..
+	DO	ISARE
+	MSG	CLOSED
+	DOGO	BSFULLSTOP
+30$
+	IFD	wantSUCCESS
+	XREF	SUCCESS
+	MOVE.W	#RETCODE_SUCCESS,SUCCESS(A4)
+	ENDC
+	DO	P.TN
+	MSG	CNTS
+	DO	GET_CONT
+	MOVE.L  A1,A0
+	DO	P.LISTSTOP
+	MSGGO	LINE
+40$
+	TST_NPC				    ;NPC?
+	BEQ.S   55$				;NO
+	TST_DEAD				;Is it dead?
+	BEQ.S	55$				;Nope alive and well.
+	DO	GETNPC
+
+	IFEQ	THE_PAWN
+	BTST	#2,2(A3)			;animal?
+	BNE.S	55$				;yes, give normal desc
+	ENDC
+
+	DO	P.TN	
+	DO	ISARE
+	MSGGO	DEADDN				;AS DEAD AS A DOORNAIL
+55$
+    IFD	wantMULTIPLES
+	XREF	MULTICODE,LASTMULTICODE
+	XREF	PLURALDESC
+	CLR.B	PLURALDESC(A4)			;clear flag
+	MOVE.B	MULTICODE(A4),D1		;code of this item.
+	BEQ.S	56$				;no code, thus normal
+	CMP.B	LASTMULTICODE(A4),D1		;has it changed?
+	BEQ.S	57$
+	ST	PLURALDESC(A4)			;instruct p.desc to think plural
+56$
+	MOVE.B	D1,LASTMULTICODE(A4)		;set up for next time.
+	CALL	P.Description			;First check which description.
+57$
+    ENDC	;wantMULTIPLES
+
+    IFND	wantMULTIPLES
+	CALL	P.Description			;First check which description.
+    ENDC	;!wantMULTIPLES
+
+	IFD	wantSUCCESS
+	MOVE.W	#RETCODE_SUCCESS,SUCCESS(A4)
+	ENDC
+
+	IFD	wantSP.LOOK_After
+	XREF	SP.LOOK_After
+	CALL	SP.LOOK_After
+	ENDC	;look_after
+	
+	IFEQ	THE_PAWN
+
+	BTST	#2,4(A0)			;short look?
+	BEQ.S	60$				;nope
+	RET					;NE => yes, forget rest of look
+	
+	ENDC
+60$
+
+	XDEF	RestOfLook
+RestOfLook
+	MSG	LINE
+	MOVE.L  A0,A2
+	MOVE.W  D0,D2
+	DO	GETRELN				;CREATE BUFF=A1
+	TST_NPC				;CHARACTER?
+	BEQ.S   STAT				;NOT SO
+	DO	GETNPC				;FIND DATA
+
+* GETNPC:
+* FINDS DATA ON D0 INTO A3
+
+
+	BTST	#1,2(A3)			;SUPPRESS?
+	BNE.S   STAT				;YES
+	DO	P.PRN				;THE NOUN#
+	DO	ISARE
+	MSG	WEARNG
+	CLR.L   D3				;BIT MASK
+	MOVE.L  A1,-(A7)			;PUSH
+L70
+	MOVE.W  (A1)+,D0			;GET NOUN
+	BEQ.S   90$				;DONE
+	GETINFO
+	BTST	#0,11(A0)			;WORN?
+	BEQ.S   80$				;NO, AGAIN
+	MOVE.B  D3,D4				;SAVE MASK
+	OR.B	10(A0),D3			;WITH BITS
+	AND.B   #$F8,D3				;TOP 4 ONLY
+	CMP.B   D4,D3				;DIFFERENT
+	BNE.S   L70				;YES, OK
+80$ 
+	BSET	#7,-2(A1)			;DUMMY
+	BRA.S   L70				;DO REST
+90$
+	MOVE.L  (A7)+,A0			;PULL
+	DO	P.LISTSTOP
+	MSG	LINE
+	MOVE.L  D2,D0				;RESET NOUN#
+	MOVE.L  A0,A1				;A1=START
+	MOVE.L  A2,A0				;RESTORE
+STAT
+ 
+* NOW PRINT STATUS INFORMATION
+  
+	MOVE.B  #6,D2				;HIGHEST BIT
+	LEA	L.DATA(A4),A3			;ADDR
+	CLR.W   D4
+	TST_LIT				;LIT?
+	BEQ.S   11$				;NOPE
+
+* this is really yuk!!!!!!
+
+	PEA	11$(PC)
+	DO	P.PV
+	MOVEQ   #1,D4
+	TST_LIGHTABLE				;LIGHTABLE= LIT
+	BEQ.S	10$
+	MSGGO	LIT
+10$
+	PRINT	<'GLOWING '>
+	RET
+
+11$
+
+	BTST	D2,(A0)				;BIT?
+	BEQ.S   12$				;NO
+	TEST_B  (A3)+
+	BEQ.S   13$
+	SUBQ.L  #1,A3
+	TEST_W  D4				;ANY?
+	BEQ.S   15$
+	MSG	AND
+15$
+	DO	P.PV				;IT IS
+	ADDQ.W  #1,D4
+14$
+	MOVE.B  (A3)+,D1			;GET CHAR
+	BEQ.S   13$				;DONE
+	CALL	LOOK.COUT
+	BRA.S   14$
+12$
+	MOVE.B  (A3)+,D1 
+	BNE.S   12$				;UNTIL END
+13$
+	SUBQ.B  #1,D2				;DEC COUNTER
+	BNE.S   11$				;NEXT FLG
+	TEST_W  D4
+	BEQ.S   19$
+	DO	BSFULLSTOP
+	MSG	LINE
+19$
+	TST_NPC				;NPC
+	BEQ.S   20$
+	TST_DEAD				;
+	BNE.S   20$
+	DO	GETNPC
+	MOVE.B  2(A3),D1
+	LSR.B   #4,D1
+	BEQ.S   20$
+	DO	P.PRN
+	MSG	SEEMS
+	MSG	SPACE
+	EXT.W	D1			;make sure a word
+	ADD.W	#M.LOOKHAPPY-1,D1	;+ base -1
+	DO	P.MSG			;& print it
+	DO	FULLSTOP
+	MSG	LINE
+20$
+
+* NOW DO FIXTURES
+
+	MOVE.W  12(A0),D1			;FIXTURE
+	AND.W   #$3FFF,D1
+	BEQ.S   LCONT				;NOT FIXED
+	PUSH	D1
+	DO	P.PV
+	MSG	FXTO
+	POP	D1
+	EXG	D1,D0
+	DO	P.TNSTOP
+	EXG	D1,D0
+	MSG	LINE
+LCONT
+
+* NOW DO CONTAINERS
+
+	MOVE.W  D0,D6
+	MOVE.B  10(A0),D1			;GET DATA
+	AND.B   #7,D1				;LOW 3
+	BEQ.S   40$				;NOT A CONTAINER
+	TST_LOCALCONTENTS				;DEHASSLE CONTAINER
+	BNE.S   31$				;DO 
+*
+* if the container is not closed (like fountain - may not be open)
+* list it's contents
+*
+	TST_CLOSED				;Closed??
+	BNE.S   40$				;NE => yes
+31$
+	MOVE.L  A1,A3				;SAVE
+35$
+	TEST_W  (A3)				;DT?
+	BEQ.S   34$
+	BCLR	#7,(A3)				;OK
+	ADDQ.L  #2,A3
+	BRA.S   35$
+34$
+	CLR.B   D4
+	MOVE.L  A1,-(A7)			;SAVE START
+32$
+	MOVE.W  (A1)+,D0			;GET NOUN
+	BEQ.S   33$				;DONE
+	GETINFO					;TO A0
+	TST_CONTAINED				;CONTAINED?
+	BEQ.S   37$				;NO, OK
+	ADDQ.B  #1,D4
+	BRA.S   32$
+37$
+	BSET	#7,-2(A1)			;DUMMY
+	BRA.S   32$
+33$
+	MOVE.L  (A7)+,A1			;START
+	TEST_B  D4
+	BEQ.S   36$
+	MOVE.L  A2,A0 
+	DO	P.PRN
+	MOVE.W	D6,D0				;noun# back for '@'
+	MSG	CNTS
+	MOVE.L  A1,A0
+	DO	P.LISTSTOP			;LIST CONTAINED ITEMS
+	MSG	LINE
+36$
+	MOVE.L  A0,A1				;A1=START
+	MOVE.L  A2,A0				;RESTORE ADDR
+	MOVE.W  D6,D0				;BACK
+
+*NOW SCAN FOR ITEMS FIXED TO IT
+  
+40$	
+	TST_NPC				;
+	BNE.S   43$				;NOT4NPC
+	TST_ISAROOM				;ROOM?
+	BNE.S   43$				;SKIP
+
+	PUSH_L  D0/A0				;SAVE THESE
+
+	MOVE.W  D0,D2				;TARGET
+	MOVE.W  D6,-(A7)			;SAVE NOUN
+	DO	GETRELN				;RELATED TO D0
+	MOVE.W  (A7)+,D6			;BACK
+	CALL	ONLYREL
+	CALL	ISANYREL			;IN THIS SENSE?
+	BEQ.S   42$				;NO, 2 BAD
+
+	MSG	THERE
+	GETINFO					;ON RET D0
+	DO	ISARE
+	MOVE.L  A1,A0				;START OF LIST
+	DO	P.LIST				;LIST OUT THEM
+	MSG	ON
+	PULL_L  D0/A0				;BAK
+	DO	P.OBJPRN			;IT
+	DO	BSFULLSTOP
+	BRA.S   43$
+42$ 
+	PULL_L  D0/A0
+	
+43$
+	MOVE.W  D0,D2				;TARGET
+	MOVEQ   #1,D5				;WRD
+	MOVEQ   #12,D1				;BYTE#
+	DO	GETNOUNS			;TAB=A1
+	MOVE.L  A1,A0				;ADDR TO A0
+
+    IFD	Version2_FIX
+	PUSH_L	A0-A1
+44$
+	MOVE.W	(A1)+,D0
+	BEQ.S	45$
+	GETINFO
+	CMP.W	#$0100,6(A0)			;related?
+	BNE.S	44$				;no, next.
+	CMP.W	8(A0),D2			;to the target
+	BNE.S	44$				;no.
+	BSET	#7,-2(A1)			;we've already said so.
+	BRA.S	44$
+45$
+	PULL_L	A0-A1
+	DO	COUNTLIST
+    ENDC	;Version2_FIX
+
+    IFND	Version2_FIX
+	TEST_W  (A0)				;NONE?
+    ENDC	;!Version2_FIX
+
+	BEQ	41$				;YES
+	PUSH_L  D0/A0	
+	MSG	THERE
+46$
+	MOVE.W  (A0)+,D0
+	BMI.S	46$			;not this one.
+	GETINFO
+	DO	ISARE
+	PULL_L  D0/A0  
+	DO	P.LIST
+	MSG	FXTO				;fixed to
+	GETINFO
+	DO	P.OBJPRN			;it
+	DO	BSFULLSTOP			;fullstop.
+	MSG	LINE
+41$
+	CMP.W   #UNDER,ADVERB(A4)		;UNDER?
+	BEQ	SCAN
+99$
+	RET
+ 
+ 
+LOOK.COUT
+ 
+	OR.B	#$20,D1				;FUDGE TO L CASE
+	DOGO	CHAROUT
+
+	ENDC
+ 
+*--------------------------------
+
+	END

@@ -1,0 +1,100 @@
+******************************************************
+*
+*	@(#)printbits.elt	1.2
+*	10/27/87
+*
+******************************************************
+
+		SECTION		"ADV",CODE
+
+*--------------------------------
+*
+*   SRC.ADV.PRINTBITS
+*
+*--------------------------------
+
+
+	XREF     CHAROUT,CHAR.SUB,POS
+
+	XDEF     LINE,UTIL.BS,UTIL.SP,UTIL.DEL
+
+	include	"equates.i"
+
+	include	"macros.i"
+
+ 
+*--------------------------------
+*
+* UTIL.DEL  DELETES CHAR TO LEFT
+*           OF CURRENT CURS POS
+*           (MOVES CURSOR LEFT)
+*
+*--------------------------------
+ 
+ 
+UTIL.DEL    
+ 
+	MOVE.L  D1,-(A7)           ;ELSE STOMPED
+	CALL_S  UTIL.BS            ;MOVE CURSOR LEFT
+	MOVEQ   #$20,D1            ;SPACE
+	DO	CHAR.SUB           ;PRINT - IGNORING LEFT JUSTIFY
+	ADDQ.W  #1,POS(A4)         ;UPDATE SCREEN POSITION
+	MOVE.L  (A7)+,D1
+ 
+* FALLS THROUGH TO UTIL.BS
+ 
+*--------------------------------
+*
+* UTIL.BS   JUST MOVES CURSOR
+*           LEFT ONE CHAR
+*
+*--------------------------------
+ 
+UTIL.BS
+ 
+	MOVE.L  D1,-(A7)
+	MOVEQ   #8,D1
+	DO	CHAR.SUB
+	SUBQ.W  #1,POS(A4)
+	MOVE.L  (A7)+,D1
+	RET
+ 
+*--------------------------------
+*
+* LINE - DOES A LINE FEED
+*    
+* N.B. LF DOES *NOT* CLEAR TO
+*      RIGHT OF CURSOR
+*
+*--------------------------------
+ 
+LINE
+   
+	MOVE.L  D1,-(A7)
+	MOVEQ   #$0A,D1            ;LF
+	DO	CHAROUT	           ;HAS TO COPE WITH LEFT JUST ETC
+	MOVE.L  (A7)+,D1
+	RET
+   
+*--------------------------------
+*
+* UTIL.SP - FORCES A SPACE!
+*
+* USES CHAR.SUB TO AVOID NASTY
+* RULE APPLICATION IN CHAROUT
+* (DECOM'S FAULT)
+*
+*--------------------------------
+ 
+UTIL.SP
+ 
+	MOVE.L  D1,-(A7)
+	MOVEQ   #$20,D1
+	ADDQ.W  #1,POS(A4)         ;KEEP LEFT JUST HAPPY
+	DO	CHAR.SUB           ;DO THE SPACE (FORCED)
+	MOVE.L  (A7)+,D1
+	RET
+
+*-------------------------------
+
+	END

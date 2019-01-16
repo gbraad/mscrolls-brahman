@@ -1,0 +1,50 @@
+**************************************************************
+*
+*	10/27/87
+*	@(#)p_init.elt	1.2
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+
+*--------------------------------
+
+	XDEF	P.INIT
+	XREF	INIT.TAB,VERB
+  
+P.INIT
+  
+ 
+      IFNE    YCHEAT
+
+	XREF	CHEAT
+
+	TEST_W  CHEAT(A4)
+	BNE.S   90$
+
+      ENDC
+ 
+	MOVE.W  #-1,VERB(A4)       ;BLOODY ROOMS!!!
+	LEA     INIT.TAB(PC),A1
+20$
+	MOVE.W  (A1)+,D1           ;MSG #
+	MOVE.W  (A1)+,D0
+	BEQ.S   90$
+	GETINFO        
+	DO	VALID.NP	          ;SETS D5 ITSELF
+	TEST_W  D7
+	BNE.S   20$
+	BSET    #1,5(A0)
+	BNE.S   20$
+	DO	P.SCN
+	BRA.S   20$
+90$
+	RET
+
+
+
+	END

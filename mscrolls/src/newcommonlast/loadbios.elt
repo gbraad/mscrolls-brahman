@@ -1,0 +1,51 @@
+**************************************************************
+*
+*	10/27/87
+*	@(#)loadbios.elt	1.2
+*
+**************************************************************
+
+
+
+*****************************************************************
+*
+*	@(#)loadbios.asm	1.7
+*	5/16/87
+*
+*****************************************************************
+
+	SECTION	"ADV",code
+
+*	loadbios.asm
+
+	include	"equates.i"
+
+	XDEF	BIOSA4,BIOSA5,BIOSA6
+	XREF	BIOS
+
+*
+* So as there is a hope in hell of linking this program...
+*
+* BIOSA4/5/6 - load A4/5/6 with the address of BIOS
+* 
+* USE THESE don't do LEA BIOS(PC).... cos it won't fit!!!!!
+*
+
+BIOSA4
+	LEA	BIOS(PC),A4
+	RET
+
+BIOSA5
+	LEA	BIOS(PC),A5
+	RET
+
+BIOSA6
+	LEA	BIOS(PC),A6
+	RET
+
+
+	END
+
+
+
+	END

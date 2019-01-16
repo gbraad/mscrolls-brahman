@@ -1,0 +1,62 @@
+**************************************************************
+*
+*	%G%
+*	%W%
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"scenequ.i"
+	include	"verbequ.i"
+
+*--------------------------------
+
+	IfVerb	DISMOUNT
+
+	XDEF	V.DISMOU
+	XREF	SEATED,V.STAND
+	
+V.DISMOU
+
+      IFD	wantSP.DISMOUNT
+	XREF	SP.DISMOUNT
+	CALL	SP.DISMOUNT
+      ENDC
+	
+	TEST_W	D0			;was it specified?
+	BMI.S	15$			;nope, can't be a room then
+
+      IFD	wantGETOFFROOMisLEAVE
+	XREF	LEAVE
+	TEST_W	SEATED(A4)		;EQ => like get off (bus)
+	BNE.S	07$			;NE => like get off (horse/chair/etc)
+	TST_ISAROOM				;a room?
+	BNE	LEAVE			;Yes, so bye bye
+07$
+      ENDC	;wantGETOFFROOMisLEAVE
+
+	MOVE.W  SEATED(A4),D1
+	BEQ.S   20$               ;NOT SEATED
+	CMP.W   D0,D1             ;SITTING?
+	BNE.S   10$               ;NO GOOD     
+20$
+	MOVEQ   #-1,D0
+15$
+	BRA     V.STAND           ;OK
+10$
+	MSG	YOUMEAN
+	MOVE.W  SEATED(A4),D0  
+	DO	P.TNSTOP
+	MSG     LINE
+	BRA.S   20$               ;OK
+
+	ENDC	;v.dismount
+
+
+*------------------------------------------
+	END

@@ -1,0 +1,35 @@
+***********************************************************
+*
+*	@(#)sieve.elt	1.4
+*	10/27/87
+*
+************************************************************
+
+		SECTION	"ADV",CODE
+
+		include	"equates.i"
+		include	"macros.i"
+		include	"scenequ.i"
+		include	"verbequ.i"
+
+		IfVerb	SIEVE
+
+		XDEF	V.SIEVE
+		XREF	SP.SIEVE,P.SUBV,P.MHAV
+V.SIEVE
+
+	CALL	SP.SIEVE
+	CLR.W	D1		;with
+	DO	CHK4PT		;which what?
+	EXG	D0,D5
+	DO	CARRIED		;must have
+	BNE	P.MHAV
+	EXG	D0,D5
+
+	DO	P.SUBV
+	MSGGO	UNABLE
+
+
+	ENDC	;V.SIEVE
+
+	END

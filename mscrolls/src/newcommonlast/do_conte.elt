@@ -1,0 +1,71 @@
+**************************************************************
+*
+*	%G%
+*	%W%
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+
+	XDEF	DO.CONTE
+	XREF	WSYN2,WRDPNT,OLDBUF,GNG2
+
+DO.CONTE
+ 
+	DO	GETWRD
+	CMP.W   #SECT.SPEC,D6
+	BNE     WSYN2
+	CMP.W   #$B,D5                  ;'OF'
+	BNE     WSYN2
+	MOVE.L  A6,WRDPNT(A4)           ;UPDATE
+	DO	GETADJPH
+	CMP.B   #1,D7
+	BHI     98$
+	BEQ     99$
+	CMP.W   #SECT.NOUN,D6
+	BEQ.S   07$
+	CMP.W   #SECT.SPEC,D6
+	BNE.S   03$
+	CMP.W   #3,D5                    ;IT?
+	BEQ.S   05$
+03$
+	DOGO	P.IDFY
+05$
+	MOVE.W  OLDBUF(A4),D5
+	SUBQ.W  #1,D5
+07$
+	MOVE.W  D5,D0   
+	ADDQ.W  #1,D0
+	GETINFO        
+	DO	GET_CONT
+	BCS.S   20$
+	TEST_W  (A1)               ;NONE
+	BNE.S   10$
+	MSG	NO.TNG
+	MSG	IN
+	DO	P.TNSTOP
+	BRA.S   98$
+10$
+	MOVE.W  (A1)+,D5
+	BEQ.S   99$
+	BMI.S   10$
+	DO	INCNOUN2
+	BRA.S   10$
+20$
+	DO	P.BTN
+	GETINFO        
+	DO	ISAREN
+	MSG	NCONT
+98$
+	MOVEQ   #2,D7
+	RET
+99$
+	MOVEQ   #1,D3              ;'AND' FLAG
+	BRA     GNG2
+ 
+
+	END

@@ -1,0 +1,214 @@
+**************************************************************
+*
+*	%G%
+*	%W%
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"scenequ.i"
+
+
+	IFND	Version2_DO.FIX
+
+	XDEF	DO.FIX,SETA1
+	XREF	EXBUFF
+
+*------------------------------------------
+*
+* DO.FIX - loops around through a fixtures buffer calling 
+*	a verb routine (such as get/drop/put) on each noun
+*	Old Version for the Guild & Pawn
+   
+DO.FIX
+
+	MOVE.W  D5,-(A7)
+	MOVEQ   #0,D5			;WAS 1 NOW 0 SO AS NOT TO PRINT
+	DO	FIXSYS
+	CALL_S  SETA1
+	MOVE.W  (A7)+,D5
+10$
+	MOVE.W  (A1)+,D0
+	BEQ.S   20$
+	GETINFO
+	TST_MOVEABLE				;MOVEABLE?
+	BNE.S   10$			;YES, NEXT..
+	BSET	#7,-2(A1)		;NOT ON!
+	DO	CARRIED			;THE DREADED BAND???
+	BNE.S   10$			;NOPE, NEXT..
+	MSGGO	NEASY			;TUT TUT GOOD TRY..
+20$
+	CALL_S  SETA1			;GET EXBUFF
+30$
+	MOVE.W  (A1)+,D0		;GET NOUN #
+	BMI.S   30$			;NON MOVEABLE?
+	BEQ.S   SETA1			;FINISGHED?
+	GETINFO				;NOPE GET NOUN DATA
+	MOVE.L  A1,-(A7)		;SAVE EXBUFF POINTER
+	JSR	(A6)			;CALL VERBROUTINE
+	MOVE.L  (A7)+,A1		;RECOVER EXBUFF POINTER
+	BRA.S   30$			;NEXT...
+SETA1
+	LEA	EXBUFF(A4),A1
+	RET
+
+*------------------------------------------
+
+	ENDC	;!Version2_DO.FIX
+
+	IFD	Version2_DO.FIX
+
+	XDEF	DO.FIX
+	XREF	WHOOPS,P.MHAVSTOP,P.LIST3,SETPL
+
+* The player has attempted to manipulate an item which is a component
+* of a connected system of particles.
+*
+* One assummption with such systems is that the location of each
+* component is the same. However This may not be the case, either
+* due to a BUG or a weird special.
+*
+* DO.FIX will dissalow anysuch manipulation of components if any such
+* component is in some way permanent.
+   
+* Parametrs passed in registers D6
+*
+*
+* D6 & 1 =>	Insist elements of system are CARRIED
+* D6 & 2 =>	print the elements of the system in a list
+*		ie.
+*		The X, Y and Z
+*		so that the routine can look smarter.
+
+DO.FIX
+
+	MOVE.W	D5,-(A7)
+	MOVEQ   #0,D5			;WAS 1 NOW 0 SO AS NOT TO PRINT
+	DO	FIXSYS			;->a3
+	MOVE.L	A3,A1			;into a1
+	MOVE.W	(A7)+,D5
+10$
+	MOVE.W  (A1)+,D0		;get one
+	BEQ.S   20$			;done
+	
+    IFND	wantDropNonPermanents
+	CALL	IsPermanent		;will it move?
+	BEQ	NOTPERM
+	BTST	#0,D6			;do we insist items are carried?
+	BEQ.S	10$			;no
+	DO	CARRIED			;is D0 carried?
+	BNE	P.MHAVSTOP		;you must have it
+    ENDC	;!wantDropNonPermanents
+	
+    IFD		wantDropNonPermanents
+	BTST	#0,D6			;insist carried?
+	BEQ.S	10$			;no, then ok.
+	DO	CARRIED			;is it carried then??
+	BNE	P.MHAVSTOP		;no- tough.
+    ENDC	;wantDropNonPermanents
+	
+	BRA.S	10$			;next
+20$
+	MOVE.L	A3,A1			;start of buffer again
+	CLR.W	D4			;counter
+	BTST	#1,D6			;shall we print the items in a list?
+	BEQ.S	30$			;nah.
+	MOVE.L	A0,-(A7)
+	MOVE.L	A1,A0			;point to item list
+	DO	P.LIST3			;print them
+	CALL	SETPL
+	MOVE.L	(A7)+,A0		;restore data
+30$
+	MOVE.W  (A1)+,D0		;GET NOUN #
+	BMI.S   30$			;NON MOVEABLE?
+	BEQ.S   90$			;FINISGHED?
+	GETINFO				;NOPE GET NOUN DATA
+	PUSH_L	D4/D6/A1
+	JSR	(A6)			;CALL VERBROUTINE
+	PULL_L	D4/D6/A1
+	TEST_W	WHOOPS(A4)		;do we want to quit?
+	BNE.S	90$
+	ADDQ.W	#1,D4			;inc counter
+	BRA.S   30$			;NEXT...
+90$
+	RET
+
+*------------------------------------------
+
+	XDEF	IsPermanent
+
+IsPermanent
+
+* EQ <=> perm.
+
+
+	PUSH_L	D0/D1/A0
+	GETINFO
+	TST_ISAROOM			;item is a room?
+	BNE.S	90$			;exit as perm.
+20$
+	TST_ISAROOM			;is a room
+	BNE.S	90$			;yes, then allowed
+
+    IFND	wantNonPermanentAnimals
+	TST_NPC				;an npc?
+	BNE.S	80$			;don't allow npc's
+    ENDC	;!wantNonPermanentAnimals
+
+    IFD	wantNonPermanentAnimals
+	TST_NPC				;an npc?
+	BEQ.S	010$			;no
+	MOVE.L	A3,-(A7)		;stash
+	DO	GETNPC			;-> A3
+	BTST	#2,2(A3)		;an animal?
+	MOVE.L	(A7)+,A3		;restore (flags inatct)
+	BRA.S	90$			;exit wi flags
+010$
+    ENDC	;wantNonPermanentAnimals
+
+	TST_MOVEABLE			;moveable?
+	BEQ.S	90$			;not so => perm.
+	TST_PSEUDO			;pseudo?
+	BNE.S	80$			;yes => dont let'em move these
+	MOVE.B	6(A0),D1		;fetch relation
+	BEQ.S	80$			;if simple allow it
+	AND.B	#%10001100,D1		;out/intrin/worn
+	BNE.S	80$			;then not allowed.
+	BTST	#4,6(A0)		;insep?
+	BEQ.S	80$			;not insep => ok. (not perm).
+	MOVE.W	8(A0),D0		;get next one up.
+	GETINFO
+	BRA.S	20$			;try next one up
+80$
+	EOR	#4,CCR			;invert flag
+90$
+	PULL_L	D0/D1/A0
+	RET
+
+*------------------------------------------
+
+	XDEF	NOTPERM
+
+NOTPERM
+
+* prints you are unable to do that because the NOUN won't move
+
+	DO	P.SUBV
+	MSG	UNABLE
+	MSG	BECAUS
+	DO	P.TN
+	MSG	WNTMVE
+	DOGO	BSFULLSTOP
+
+
+*------------------------------------------
+
+
+	ENDC	;Version2_DO.FIX
+
+
+	END

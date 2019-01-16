@@ -1,0 +1,37 @@
+**************************************************************
+*
+*	%W%
+*	%G%
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+
+*--------------------------------
+*
+*  LOOK TABLES - ASCII !!
+*
+*--------------------------------
+
+	XDEF	L.DATA
+   
+ 
+L.DATA
+
+	ASCWORD	<'LOCKED '>
+	ASCWORD	<'CLOSED '>
+	ASCWORD	<'OPEN '>
+	DC.B   $00           ;NULL
+	ASCWORD	<'DAMAGED '>
+	ASCWORD	<'DEAD '>
+	DC.B   $00           ;NULL
+
+	ALIGN
+
+*------------------------------------------
+
+	END

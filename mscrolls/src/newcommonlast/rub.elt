@@ -1,0 +1,76 @@
+**************************************************************
+*
+*	10/27/87
+*	@(#)rub.elt	1.2
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"verbequ.i"
+
+*--------------------------------
+
+	IfVerb	RUB
+
+	XDEF	V.RUB
+	XREF	CONJ,GRABorRUB
+   
+V.RUB
+ 
+	TST_NPC				;npc?
+	BNE	GRABorRUB
+
+      IFNE	THE_PAWN	
+
+	MSG	BUT
+	MSGGO	NHAP
+
+      ENDC
+
+      IFEQ	THE_PAWN
+
+	XREF	SP.RUB,SP.RUB2
+
+* new all singing all dancing rub code
+
+	CALL	SP.RUB			;simple special
+	MOVE.W	CONJ(A4),D1		;get with/into/on etc
+	BEQ.S	30$			;rub x with y?
+	CMP.W	#ON,D1			;rub y on x
+	BEQ.S	20$
+	CMP.W	#INTO,D1		;rub y into x
+	BEQ.S	20$
+	MOVEQ	#0,D1			;with
+	TST_MOVEABLE				;moveable
+	BEQ.S	10$			;if moveable do 'On what?'
+	MOVEQ	#ON,D1			;else do 'with what?'
+10$
+	DO	CHK4PT			; will not return!!!!!!!!!!!
+
+* swap arguments for 'rub y on x' to 'rub x with y'
+
+20$
+	EXG	A0,A5
+	EXG	D0,D5
+
+* call special
+
+30$
+	CALL	SP.RUB2
+	DO	P.TN		;failed - 'the x is not effected by the y'
+	DO	ISAREN
+	MSG	EFFECTEDBY	;<' effected by '>
+	EXG	D0,D5
+	DOGO	P.TNSTOP
+
+      ENDC
+
+      ENDC
+
+
+
+	END

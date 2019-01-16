@@ -1,0 +1,45 @@
+
+************************************************************
+*
+*	@(#)memberofset.elt	1.1
+*	1/22/88
+*
+************************************************************
+
+
+	SECTION		"ADV",CODE
+	include		"equates.i"
+	include		"macros.i"
+
+
+
+	XDEF	MEMBEROFSET
+
+MEMBEROFSET
+
+* lookup an item in a given set
+* Entry		d0= item
+*		A1 = pointer to data
+
+
+* Exit		EQ=> yes
+*		NE=> no
+
+	PUSH_L	D1/A1
+20$
+	MOVE.W	(A1)+,D1		;fetch an item
+	BEQ.S	80$			;end, not there
+	AND.W	#$3fff,D1		;loose top 2 bits
+	CMP.W	D1,D0			;a hit?
+	BEQ.S	90$			;yes, quit
+	BRA.S	20$
+80$
+	SETNE
+90$
+	PULL_L	D1/A1
+	RET
+	
+
+*----------------------------------------
+
+	END

@@ -1,0 +1,32 @@
+**************************************************************
+*
+*	10/27/87
+*	@(#)sleep.elt	1.2
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"verbequ.i"
+
+*
+* V.SLEEP
+*
+	IfVerb	SLEEP
+
+	XDEF	V.SLEEP
+	XREF	SP.SLEEP
+
+V.SLEEP
+
+	CALL	SP.SLEEP
+	MSGGO	ZZZZZZ			;Zzzzz...
+
+	ENDC
+
+
+
+	END

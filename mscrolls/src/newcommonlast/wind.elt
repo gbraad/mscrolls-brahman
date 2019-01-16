@@ -1,0 +1,36 @@
+**************************************************************
+*
+*	10/27/87
+*	@(#)wind.elt	1.2
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"verbequ.i"
+
+*
+* V.WIND
+*
+	IfVerb	WIND
+
+	XDEF	V.WIND
+	XREF	SP.WIND
+
+V.WIND
+
+	CALL	SP.WIND
+
+	DO	P.SUB		;You...
+	MSG	YCNDTT		;Can't do that to the ...
+	DOGO	P.TNSTOP	;xyzzy!
+
+	ENDC
+
+
+
+
+	END

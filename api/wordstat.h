@@ -392,11 +392,11 @@ struct WordStat
             { "strum", 1 },
             { "tip", 1 },
             { "unscrew", 1 },
+            { "cast", 1 },
 #if 0    
             // pawn
             { "mix", 1 },
             { "hide", 1 },
-            { "cast", 1 },
             { "smoke", 1 },
             { "mend", 1 },
             { "lean", 1 },

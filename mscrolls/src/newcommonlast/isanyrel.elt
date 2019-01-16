@@ -1,0 +1,56 @@
+**************************************************************
+*
+*	10/27/87
+*	@(#)isanyrel.elt	1.3
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"verbequ.i"
+
+	XDEF	ISANYREL,ISANYREL.SUB
+	
+ISANYREL
+	
+*ARE ANY NOUNS RELATED SEPARABLY?
+	
+*ENTRY:
+*A1=NOUNS LIST
+	
+*EXIT:
+*EQ =NONE  
+*NE = AT LEAST ONE
+*D0=ITEM FOUND
+	
+	PUSH	D1
+	MOVE.W	#1,D1		;set to related only
+	CALL	ISANYREL.SUB
+	POP	D1
+	TEST_W	D0		;set flags
+	RET
+
+*--------------------------------------------
+	
+ISANYREL.SUB
+
+* D1
+
+	PUSH_L  A0-A1
+10$
+	MOVE.W  (A1)+,D0
+	BEQ.S   90$
+	BMI.S   10$				;NOT REALLY?
+	GETINFO					;TO A0
+	CMP.B   6(A0),D1			;correct relation?
+	BNE.S   10$
+90$
+	PULL_L  A0-A1
+	RET
+
+
+
+	END

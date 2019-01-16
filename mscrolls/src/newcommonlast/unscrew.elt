@@ -1,0 +1,40 @@
+***********************************************************
+*
+*	@(#)unscrew.elt	1.1
+*	3/7/88
+*
+************************************************************
+
+		SECTION	"ADV",CODE
+
+		include	"equates.i"
+		include	"macros.i"
+		include	"verbequ.i"
+		include	"scenequ.i"
+
+	    IfVerb	UNSCREW
+		XDEF	V.UNSCREW
+		XREF	SP.UNSCREW,YCANT,P.MHAV,PCOK
+
+V.UNSCREW
+
+	MOVEQ	#WITH,D1		;with
+	DO	CHK4PT			;with what?
+	CALL	PCOK			;sensible?
+	BNE.S	90$			;no, exit.
+	EXG	D0,D5			;switch
+	DO	CARRIED			;insist you have the d5
+	BNE	P.MHAV			;moan otherwise.
+	EXG	D0,D5			;switch back.
+	CALL	SP.UNSCREW		;call routine.
+	BRA	YCANT			;else nocando
+90$
+	RET
+
+*------------------------------------------
+
+    ENDC	;V.UNSCREW
+
+	END
+
+

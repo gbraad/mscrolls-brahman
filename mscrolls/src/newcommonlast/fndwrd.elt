@@ -1,0 +1,56 @@
+**************************************************************
+*
+*	10/27/87
+*	@(#)fndwrd.elt	1.2
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+
+*--------------------------------
+*
+* FINDWORD
+*
+* FINDS NEXT LETTER IN INBUFF
+*
+* ON EXIT:
+* D7=1 = END OF INPUT LINE
+*
+*--------------------------------
+ 
+	XDEF	FNDWRD,LB3
+	XREF	INBUFF
+ 
+FNDWRD
+ 
+	CLR.L   D7
+	LEA     INBUFF(A4),A2
+	CMP.L   A2,A6
+	BEQ.S   20$
+	CMP.B   #$20,(A6)
+	BEQ.S   20$
+10$
+	MOVE.B  (A6)+,D0
+	BEQ     30$
+	CMP.B   #$20,D0
+	BNE.S   10$                  ;UNTIL END
+20$
+	MOVE.B  (A6),D0
+	BEQ.S   30$                  ;TEXTEND
+	CMP.B   #$20,D0              ;SPACE
+	BNE.S   40$
+	ADDQ.L  #1,A6
+	BRA.S   20$
+30$
+	MOVEQ  #1,D7
+40$
+  
+LB3  
+  
+	RET
+ 
+
+	END

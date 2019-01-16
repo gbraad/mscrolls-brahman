@@ -1,0 +1,66 @@
+**************************************************************
+*
+*	3/6/89
+*	@(#)pickone.elt	2.2
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include "scenequ.i"
+
+*--------------------------------
+	
+	XDEF	PICKONE
+	XREF	MATCHBUF
+	
+PICKONE
+	
+* TRIES TO PICK A LOCAL NOUN FROM
+* MATCHBUF
+* ELSE PICKS  LAST (unless wantPickFirstOne defined)
+* USES A0/D0/D7
+	
+* EXIT:
+* D5,D6 SET ON CHOSEN NOUN
+	
+      IFD	wantPickFirstOne
+	CLR.W	D5
+      ENDC	;wantPickFirstOne
+
+	LEA     MATCHBUF(A4),A0
+10$
+	MOVE.L  (A0)+,D0           ;NEXT
+	BMI.S   90$                ;EXIT WI D6/D5 AS B4
+	SWAP    D0
+	CMP.W   #SECT.NOUN,D0      ;NOUN
+	BNE.S   10$                ;FORGET IT
+	SWAP    D0                 ;BAK
+	DO	VALID.WO           ;BUT IS IT LOCAL??
+	
+      IFD	wantPickFirstOne
+	TEST_W	D5
+	BNE.S	20$
+      ENDC	;wantPickFirstOne
+
+	MOVE.W  D0,D5
+	MOVEQ   #SECT.NOUN,D6
+20$
+	TEST_W  D7
+	BNE.S   10$                ;NO, NEXT
+	
+      IFD	wantPickFirstOne
+	MOVE.W  D0,D5
+	MOVEQ   #SECT.NOUN,D6
+      ENDC	;wantPickFirstOne
+
+90$                      
+	RET
+
+
+
+
+	END

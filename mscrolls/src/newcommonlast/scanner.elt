@@ -1,0 +1,174 @@
+**************************************************************
+*
+*	10/27/87
+*	@(#)scanner.elt	1.5
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include "scenequ.i"
+	include	"verbequ.i"
+
+	IFNE	ELIZA
+
+	
+*--------------------------------
+*
+*   THE SCANNER
+*--------------------------------
+   
+*PRIORITY:
+*  QUESTION
+*  'THINK'
+*  'WANT'
+*  N.V.N.
+*  NOT
+   
+	
+*--------------------------------
+	 
+*BIT FLAGS IN IUFLAG:
+	
+* 0=YOU, 1=I,  2=WANT,LIKE...
+* 3=THINK, KNOW..
+* 4=INSULT
+* 5=IS/ARE PRES.
+
+	XDEF	SCANNER,BLD.NVN
+
+	XREF	SCAN.REP,TYPE,ERR4,NEG_,SCANVERB,KYWRD,ISARETYP
+	XREF	SCAN.SUB,SCAN.OBJ,IUFLAG
+    
+SCANNER
+
+	CALL_S  SCANSUB
+	BRA     SCAN.REP
+
+SCANSUB
+  
+	DO	NOERR                 ;FREZE ERROR
+	CLR.L   SCAN.SUB(A4)
+	CLR.L   SCAN.OBJ(A4)
+	CLR.L   IUFLAG(A4)
+	CLR.W   ISARETYP(A4)
+	LEA     IUFLAG(A4),A1
+
+BLD.NVN
+
+	ST      ERR4(A4)        	;NO WHICHES?
+*	SUBQ.L  #1,A6			;taken care of in back.wrd b4 call
+	MOVE.L  A6,A5
+	CLR.W   D7
+30$
+	CMP.W   #1,D7
+	BEQ     92$
+	PUSH_L  A1/A5
+	DO	GETADJPH
+	PULL_L  A1/A5
+	CMP.B   #2,D7
+	BEQ.S   30$
+	CALL    SC.SHORT
+	CMP.W   #SECT.NOUN,D6
+	BNE.S   31$                    ;NONE
+	ADDQ.W  #1,D5                  ;ADJ
+	TEST_W  SCAN.SUB(A4)
+	BNE.S   60$
+	
+	MOVE.W  D5,SCAN.SUB(A4)
+	BRA     30$
+60$
+	TEST_W  SCAN.OBJ(A4)
+	BNE.S   30$
+	MOVE.W  D5,SCAN.OBJ(A4)
+	BRA     30$
+31$
+	CMP.B   #1,TYPE(A4)            ;END QUOTE
+	BEQ     92$
+	CMP.B   #10,D6                 ;TO BE
+	BNE.S   23$
+	BSET    #5,(A1)
+	MOVE.W  D5,ISARETYP(A4)
+	BRA.S   20$
+23$
+	CMP.W   #2,D6                ;SPECIAL
+	BNE.S   24$
+	CMP.W   #$11,D5              ;ABOUT,MUCH,MANY
+	BLS.S   24$
+	MOVE.W  D5,ISARETYP(A4)
+	BRA.S   30$
+24$
+	CMP.B   #13,D6                ;WANT,LIKE WISH
+	BNE.S   21$
+	BSET    #2,(A1)
+21$
+	CMP.B   #14,D6                 ;THINK, KNOW..
+	BNE.S   22$
+	BSET    #3,(A1)
+22$
+	CMP.B   #16,D6
+	BNE.S   20$                    ;INSULT
+	BSET    #4,(A1)
+	MOVE.W  D5,KYWRD(A4)
+	BRA     30$
+20$
+	CMP.W   #SECT.VERB,D6           ;VERB?
+	BNE.S   50$
+	CMP.W   #VNINVENTORY,D5         ;I
+	BNE.S   90$
+	BSET    #$1,(A1)
+	BRA     30$
+90$
+	TEST_W  SCANVERB(A4)
+	BNE.S   50$
+	MOVE.W  D5,SCANVERB(A4)
+	BRA     30$  
+70$
+50$
+	CMP.B   #12,D6                 ;YOU
+	BNE.S   80$
+	BSET    #0,(A1)
+80$
+	CMP.B   #$F,D6
+	BNE.S   81$
+	NOT.W   NEG_(A4)
+	BRA     30$
+	
+81$
+	CMP.B   #SECT.QUEST,D6
+	BNE     30$                    ;BACK
+	MOVEQ   #3,D7                  ;FLAG AS SPECIAL CASE
+	MOVE.L  (A7)+,D0               ;DUMP RET
+92$
+	CLR.W   ERR4(A4)
+	RET
+	
+*--------------------------------
+	
+SC.SHORT
+	
+	CMP.B   #2,TYPE(A4)        ;APOSTROPHE TERMINATOR
+	BNE.S   90$
+	MOVE.B  TYPE+1(A4),D0      ;GET NEXT CHR
+	CMP.B   #'T'+32,D0         ;NOT?
+	BNE.S   10$                ;NO
+	NOT.W   NEG_(A4)           ;NEGATE
+	BRA.S   90$                ;DONE
+10$
+	CMP.B   #'R'+32,D0         ;RE?
+	BEQ.S   20$  ;OK
+	CMP.B   #'M'+32,D0
+	BNE.S   90$                ;SORRY
+20$
+	BSET    #5,(A1)            ;TO BE EXITS
+90$
+	RET
+
+
+
+
+	ENDC	;eliza
+	END

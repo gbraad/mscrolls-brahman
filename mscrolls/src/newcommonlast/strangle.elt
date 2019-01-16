@@ -1,0 +1,50 @@
+**************************************************************
+*
+*	3/9/89
+*	@(#)strangle.elt	2.2
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include "nounequ1.i"
+	include	"verbequ.i"
+	include "scenequ.i"
+
+	IfVerb	STRANGLE
+
+	XDEF	V.STRANG
+	XREF	CONJ,FIGHT
+
+V.STRANG
+ 
+	TEST_W  CONJ(A4)
+	BMI.S   60$
+	BEQ.S	10$
+	MSGGO	IDFY           ;0=WITH= OK
+10$
+	CMP.W   #NHAND,D5        ;!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	BEQ.S   60$
+	EXG     D0,D5
+	EXG     A0,A5
+
+      IFND	wantCorrectFullStops
+	DOGO	YCANTW
+      ENDC	;!wantCorrectFullStops
+
+      IFD	wantCorrectFullStops
+	DO	YCANTW
+	DOGO	BSFULLSTOP
+      ENDC	;wantCorrectFullStops
+
+60$
+	BRA     FIGHT
+
+	ENDC
+
+
+
+	END

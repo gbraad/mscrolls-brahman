@@ -1,0 +1,70 @@
+**************************************************************
+*
+*	%G%
+*	%W%
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"scenequ.i"
+
+*--------------------------------
+*
+* GETPRON
+*
+* TAKES CURRENT NOUN(S)
+* TO USE AS PRONOUNS NEXT TIME
+*
+*--------------------------------
+
+	XDEF	GETPRON
+	XREF	OLDBUF,NOUNBUF,PRONHIM,PRONHER
+ 
+GETPRON
+ 
+	PUSH_L  D0/A0-A1/A3
+ 
+	LEA     OLDBUF(A4),A0
+	LEA     NOUNBUF(A4),A1
+	
+    IFD		wantPronounITKept
+	TEST_W	2(A1)				;only one item in buffer?
+	BNE.S	10$				;no, then update as normal.
+	MOVE.W	(A1),D0				;get the single item.
+	DO	SETPRON				;update singleton.
+	BRA.S	90$				;exit as finished.
+    ENDC	;wantPronounITKept
+	
+10$
+	MOVE.W  (A1)+,(A0)+			;'THEM' LIST
+	BNE.S   10$
+ 
+	LEA     OLDBUF(A4),A1
+20$
+	MOVE.W  (A1)+,D0
+	BEQ.S   90$
+	GETINFO
+	TST_NPC				;NPC?
+	BEQ.S   20$                ;NO = NOT 'HIM' OR 'HER'
+	DO	GETNPC
+	BTST    #0,2(A3)           ;1=MALE, 0=FEMALE
+	BEQ.S   30$
+	MOVE.W  D0,PRONHIM(A4)
+	BRA.S   20$
+30$
+	MOVE.W  D0,PRONHER(A4)
+	BRA.S   20$
+ 
+90$
+	PULL_L  D0/A0-A1/A3
+	RET
+ 
+*------------------------------------------  
+
+
+
+	END

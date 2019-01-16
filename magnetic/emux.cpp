@@ -48,6 +48,14 @@ Symbols syms;
 void IItem::parse(IItems& items, const string& phrase)
 {
     std::vector<string> words;
+
+    // first try a full resolve for names with spaces and underscores
+    phraseResolve(items,phrase);
+    if (items.size() == 1)
+    {
+        LOG3("Exact resolve found for ", phrase);
+        return;
+    }
     
     split(words, trim(phrase));
     
@@ -67,6 +75,19 @@ void IItem::parse(IItems& items, const string& phrase)
     }
 }
 
+void IItem::phraseResolve(IItems& items, const string& phrase)
+{
+    // find an "underscore" phrase in dictionary
+    if (phrase.find(' ') != string::npos || phrase.find('_') != string::npos)
+    {
+        // replace any spaces with underscore for dictionary match
+        string p = replaceAll(toLower(phrase), ' ', '_');
+        
+        // find complete phrase
+        findItems(p, items);
+    }
+}
+
 bool IItem::parse(const string& phrase)
 {
     // find best match for phrase.
@@ -76,6 +97,7 @@ bool IItem::parse(const string& phrase)
     IItems items;
     
     // parse root word resolving by any given adjectives
+    // also checks for exact resolve if phrase has spaces or underscore
     parse(items, phrase);
     
     int n = items.size();
@@ -106,6 +128,61 @@ bool IItem::parse(const string& phrase)
     }
     
     return n >= 1;
+}
+
+IItem IItem::locationTop(bool ignoreout) const
+{
+    IItem top;
+    if (*this)
+    {
+        uint head = loc_head();
+        uint parent = loc_data();
+
+        // out
+        if (!ignoreout && (head & 0x80)) return top;
+
+        // pseudos have no top (even though they do have rooms)
+        if (pseudo()) return top;
+        
+        if (!head)
+        {
+            if (!parent)
+            {
+                // carried, use the player's location
+                top = currentRoom();
+            }
+            else
+            {
+                // parent is a room#
+                top = getRoom(parent);
+            }
+        }
+        else 
+        {
+            if (head & 0x40)
+            {
+                // is room, just return itself
+                top = *this;
+            }
+            else
+            {
+                // intrinsic or worn by player
+                // or related to player
+                if ((head & 0x0c) || !parent)
+                {
+                    // then where the player is
+                    top = currentRoom();
+                }
+                else
+                {
+                    IItem p(find_item(parent));
+                    if (p)
+                        top = p.locationTop();
+                }
+            }
+        }
+    }
+    return top;
 }
 
 bool IItem::_spine(IItem x, IItem y, bool xray)
@@ -141,7 +218,7 @@ bool IItem::_spine(IItem x, IItem y, bool xray)
             }
             else
             {
-                LOG2("spine, no pseudat! ", x);
+                //LOG2("spine, no pseudat! ", x);
             }
             return false;
         }
@@ -231,11 +308,12 @@ void IItem::initDiction()
         Item* ii = items + i;
 
         // some dictionary "words" have spaces (or underscore)
-        // like "jerry lee lewis". disregard the initial words
+        // like "jerry lee lewis".
+        // keep last segment of underscored word
+
         const char* w = (const char*)ii->word.name;
         const char* w1 = strrchr(w, ' ');
-        if (!w1) w1 = strrchr(w, '_');
-        if (w1) w = w1 + 1; // word after last space or underscore
+        if (w1) w = w1 + 1; // word after last space
         _nouns.add(Diction::WordOwn(w, ii->id));
     }
 
@@ -327,27 +405,28 @@ void init_items()
 
 void init_syms(FILE* fp)
 {
-    bool v = syms.load_syms(fp);
-    if (v)
+    int c = syms.load_syms(fp);
+    if (c)
     {
-        printf("loaded %d symbols\n", (int)syms.size());
+        LOG4("MS, loaded symbols ", (int)syms.size());
     }
     else
     {
-        printf("WARNING: prog symbols not present\n");
+        LOG2("MS, WARNING: prog symbols not present", "");
     }
 }
 
 int get_sym_value(const char* s)
 {
     int addr = syms.get_value(s);
-    if (!addr) printf("WARNING: unable to locate symbol '%s'\n", s);
+    if (!addr) 
+    {
+        LOG3("MS WARNING: unable to locate symbol, ", s);
+    }
     return addr;
 }
     
 }; // "C"
-
-#ifdef STANDALONE
 
 using namespace std;
 
@@ -399,10 +478,21 @@ static void show_exits_and_entrances(IItem room, bool exits, bool entrance)
     }
 }
 
+#if defined(LOGGING) && !defined(NDEBUG) && !defined(DEBUG)
+#define DEBUG
+#endif
+
 int handle_test_commands(const char* cmd)
 {
-    int res;
+    int res = 0;
 
+    if ((res = !strncmp("seed", cmd, 4) != 0))
+    {
+        ms_seed(atoi(cmd+5));
+        return 1;
+    }
+    
+#ifdef DEBUG
     if ((res = !strcmp(cmd, "inv")) != 0)   // #inv
     {
         cout << IItem::getInventoryString() << endl;
@@ -464,11 +554,6 @@ int handle_test_commands(const char* cmd)
         int target = atoi(cmd+5);
         cout << GameMap::theMap.find_path(get_current_room(),target);
     }
-    else if ((res = !strncmp("seed", cmd, 4) != 0))
-    {
-        ms_seed(atoi(cmd+5));
-        cout << "Seed defined" << "\n";
-    }
     else if ((res = !strcmp("gettables", cmd) != 0))
     {
         IItem::IItems items;
@@ -495,10 +580,10 @@ int handle_test_commands(const char* cmd)
         else
             dasm_fillgaps(d->getUTArray(),d->getUTNum(),0);
     }
-#endif
+#endif 
+#endif // debug    
 
     return res;
 }
 
-#endif // STANDALONE
 

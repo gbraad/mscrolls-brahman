@@ -1,0 +1,77 @@
+******************************************************
+*
+*	@(#)direct.elt	1.5
+*	10/27/87
+*
+******************************************************
+
+		SECTION		"ADV",CODE
+
+
+	include	"equates.i"
+	include	"verbequ.i"
+	include	"macros.i"
+
+      XDEF     DIRECT
+
+      XREF     GETDATA,TALKME,W.JCHKG,W.WISLI,DECODE,W.TALKME
+      XREF     VERB,DIRNPC,ADVERB,INBUFF
+      XREF	DEC.N,VALID.NP,NOTRAIL
+      XREF	PADV,PVERB,YNHANDLR,DOYESNO
+
+   
+DIRECT
+ 
+	CMP.B   #SECT.NOUN,D6      ;ADDRESSING SOMEONE
+	BNE.S   01$                ;NOT TO SOMETHING
+	ADDQ.W  #1,D5              ;ADJUST
+	MOVE.W  D5,D0
+	GETINFO        
+	TST_NPC				;NPC?
+	BNE     DIRNPC             ;ADDRESSING SOMEONE
+01$
+	CMP.B   #SECT.YESNO,D6     ;YES OR NO DIRECT?
+	BNE.S   10$
+	TEST_W  TALKME(A4)
+
+	IFEQ	THE_PAWN
+
+	BNE.S	16$		   ;NOT DONE YET
+	TEST_L	YNHANDLR(A4)
+	BNE	DOYESNO		   ;suss out yes/no bits
+*
+* this may cause major stack traumas!!!!!!!!!!!
+*
+
+	ENDC
+
+	BEQ.S	10$			;do first pass talking bits
+
+
+16$
+	TEST_W  D5                 ;YES?
+	BNE.S   20$                ;NO
+	MSG     JCHKG              ;JUST CHECKING
+	BRA.S   99$                ;EXIT
+20$
+	CMP.B   #1,D5              ;NO
+	BNE.S   10$
+	MSG	WISLI              ;WELL IT SOUNDED LIKE IT
+99$                              
+	CLR.W   TALKME(A4)
+	DOGO	DECODE
+10$
+	TEST_W	PVERB(A4)		;pending verb?
+	BMI.S	11$			;no.
+	MOVE.W	PVERB(A4),VERB(A4)
+	MOVE.W	PADV(A4),ADVERB(A4)	;replace old values.
+	LEA	INBUFF(A4),A6		;start again
+	BRA	DEC.N
+11$
+	MSG	TALKME
+	ST      TALKME(A4)
+	DOGO	DECODE
+
+*--------------------------------
+	
+	END

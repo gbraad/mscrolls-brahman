@@ -1,0 +1,159 @@
+**************************************************************
+*
+*	%G%
+*	%W%
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+*
+* here is stuff to avoid hassle from text-only IBM (MS-DOS) versions
+* and to let them load the title picture (if they are bored!)
+*
+
+
+    IFNE	IBM
+
+	XREF	GET_TITLE,P.IDFY,LOAD_PIC2
+	XREF	INBUFF
+	XDEF	IBMMORE,IBMTITLE,IBMTEXT,IBMPICTURE,IBMFASTER,IBMSLOWER
+
+IBMMORE
+
+	LEA	INBUFF(A4),A6
+	DO	GETWRD			;find word# of MORE
+	
+	MOVE.W	D5,-(A7)		;cos we know picture,text follow MORE
+	DO	GETWRD			;in wtable
+	SUB.W	(A7)+,D5		;so 1=>picture 2=>text
+	CMP.W	#2,D5			;EQ=> more text
+*
+* this got hacked (23/10/88 - Ken) so that 'more xyzzy' will be like
+* 'more picture' this saves checking for picture the noun (fish!)
+*
+	BEQ.S	10$
+	MOVEQ	#4,D2
+	BRA.S	IBM_DOIT
+10$
+	MOVEQ	#2,D2
+	BRA.S	IBM_DOIT
+90$
+	CALL_S	CheckTextOnly
+	DO	P.IDFY
+	DOGO	UTEXIT
+
+
+IBMPICTURE
+
+	MOVEQ	#3,D2
+	BRA.S	IBM_DOIT
+
+IBMTEXT
+
+	MOVEQ	#1,D2
+	BRA.S	IBM_DOIT
+
+IBMFASTER
+
+	MOVEQ	#5,D2
+	BRA.S	IBM_DOIT
+
+IBMSLOWER
+
+	MOVEQ	#6,D2
+
+IBM_DOIT
+
+	CALL_S	CheckTextOnly
+	CALL	LOAD_PIC2
+	DOGO	UTEXIT
+
+
+IBMTITLE
+	
+	CALL_S	CheckTextOnly
+	CALL	GET_TITLE
+	DOGO	UTEXIT
+
+	ENDC		;ibm
+
+	IFNE	Graphics
+    
+	IFNE	IBM!APPLE2
+
+CheckTextOnly
+
+	XREF	IsTextOnly
+
+	TEST_B	IsTextOnly(A4)
+	BNE.S	10$			;EQ => looks like an EGA version
+	RET
+10$
+	MSG	TEXTONLY
+*	PRINT	<'This is a text-only version. Please refer to the packaging '>
+*	PRINT	<'for details of hardware requirements and installation '>
+*	PRINT	<'procedures for graphics versions.^'>
+	ADDQ.W	#4,A7			;POPSP
+	DOGO	UTEXIT
+
+    ENDC		;apple2/ibm
+
+
+	IFNE	C128!C64
+	XREF	GRAPH64
+	XDEF	UTGRAPHICS
+
+UTGRAPHICS
+
+	CALL	GRAPH64
+	DOGO	UTEXIT
+
+	ENDC
+
+	IFEQ	C128!C64
+
+	XDEF	UTGRAPHICS
+	XREF	UTEXIT,GRAPHICS,Switch,PICTURES
+
+UTGRAPHICS
+
+      IFNE	IBM!APPLE2		;already in an IFNE Graphics
+
+	CALL	CheckTextOnly
+
+      ENDC
+
+	PEA     UTEXIT(PC)
+	MSG	GRAPHICS		;'Graphics '
+	LEA     GRAPHICS(A4),A0         ;Toggle flag (default = on)
+	CALL    Switch
+	TEST_B  (A0)
+
+	BEQ.S   10$			; Now -1 => graphics on
+	MSG	ON_STOP			;      0 => graphics off
+	MOVEQ	#1,D1			;so loadpic loads!! (non 68k)
+	BRA     PICTURES                ;just turned graphics on, check if right
+
+10$
+      IFEQ	M68000			;ie not amiga/st/mac
+
+	XREF	LOAD_PIC
+
+	MOVEQ	#0,D1			;turn piccy off
+	CALL	LOAD_PIC
+
+      ENDC
+
+	MSGGO	OFF
+
+
+	ENDC
+
+
+	ENDC	;Graphics
+
+	END

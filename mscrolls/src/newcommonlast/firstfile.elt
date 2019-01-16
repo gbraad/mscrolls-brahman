@@ -1,0 +1,132 @@
+**************************************************************
+*
+* firstfile.elt -  adv start
+*
+*	@(#)firstfile.elt	2.6
+*	5/2/89
+*
+**************************************************************
+
+* based on v2.7 16th May 87 (Ken 10th June 87)
+
+
+	SECTION	"ADV",code
+
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"scenequ.i"
+
+	IFEQ	M68000			; needed for non 68k
+
+	XREF	INIT
+	XDEF	BIOS,BEGLNK,COUT,READFILE,WRITEFIL
+
+BIOS
+BEGLNK
+
+
+	IFNE	GENERIC
+
+	XREF	SessionStart,SessionEnd,StackStart,StackEnd
+
+	BRA.S	10$
+
+	DC.L	SessionStart
+	DC.L	SessionEnd
+
+;      IFEQ	VAX
+
+	DC.L	StackStart
+	DC.L	StackEnd
+
+;      ENDC
+
+      IFNE	0			;VAX
+
+	DC.L	$1f400-STACKLEN		;a hack...
+	DC.L	$1f400
+
+      ENDC
+10$
+
+	ENDC	;GENERIC
+
+
+
+	LEA	BIOS(PC),A4
+	BRA	INIT
+
+COUT
+	DC.W	$F000
+	RET
+
+READFILE
+	DC.W	$A0F5
+	RET
+
+WRITEFIL
+	DC.W	$A0F4
+	RET
+
+	IFNE	0
+
+GETCHAR2
+	DC.W	$A000
+	CMP.B	#13,D1
+	BNE.S	10$
+	MOVEQ	#10,D1
+10$
+	RET
+	ENDC
+
+
+      ENDC				;of !M68000
+
+      IFNE	M68000
+
+
+	XDEF	BIOS
+	XREF	ENTRY_POINT
+
+BIOS_OFFSET	EQU	$FFFF9000	;-b xyzzy to linker
+
+BIOS	EQU	*-BIOS_OFFSET
+
+      IFEQ	MAC512			;cos start of mac version is
+					;jump table
+
+	IFEQ	GENERIC
+
+	XREF	NEWGAME,DECOMPIC
+
+
+	LEA	NEWGAME,A0
+	LEA	DECOMPIC,A1
+	LEA	BIOS,A2
+
+	ENDC	;!generic
+
+      IFNE	GENERIC
+
+	XREF	SessionStart,SessionEnd,StackStart,StackEnd
+	
+	BRA.S	10$
+
+	DC.L	SessionStart-BIOS_OFFSET
+	DC.L	SessionEnd-BIOS_OFFSET
+
+	DC.L	StackStart-BIOS_OFFSET
+	DC.L	StackEnd-BIOS_OFFSET
+
+10$
+      ENDC	;GENERIC
+
+	BRA	ENTRY_POINT
+
+
+      ENDC				;!mac512
+
+      ENDC				;of M68000	
+
+	END

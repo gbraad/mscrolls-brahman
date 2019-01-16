@@ -1,0 +1,47 @@
+***********************************************************
+*
+*	%W%
+*	%G%
+*
+************************************************************
+
+		SECTION	"ADV",CODE
+
+		include	"equates.i"
+		include	"macros.i"
+		include	"nounequ2.i"
+		include	"scenequ.i"
+
+
+	    IFD	wanted_CLONES
+	
+		XDEF	GetRealNoun
+		XREF	CLONEDATA
+
+GetRealNoun
+
+* Return the the real identity of a clone.
+* Entry;
+*		D0 = clone noun#
+*
+* Exit;
+*		D0 = real noun#
+
+
+	CMP.W	#NMAXNOUN,D0			;is it a clone?
+	BLS.S	90$				;no, just quit
+	MOVE.L	A1,-(A7)
+	LEA	CLONEDATA(A4),A1
+	SUB.W	#NMAXNOUN+1,D0			;distance from last.
+	ADD.W	D0,D0				;*2
+	MOVE.W	0(A1,D0.W),D0			;fetch identity.
+	MOVE.L	(A7)+,A1			;restore.
+90$
+	RET
+
+
+    ENDC	;wanted_CLONES
+
+*------------------------------------------
+
+	END

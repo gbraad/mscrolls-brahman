@@ -1,0 +1,63 @@
+**************************************************************
+*
+*	%W%
+*	%G%
+*
+**************************************************************
+
+	SECTION		"ADV",CODE
+
+	include		"equates.i"
+	include		"macros.i"
+	include		"scenequ.i"
+
+
+	XDEF	SORTMATCHBUF,SORTBUF
+
+	XREF	MATCHBUF
+
+SORTMATCHBUF
+
+	MOVE.L	A0,-(A7)		;save
+	LEA	MATCHBUF(A4),A0		;start at beginning
+	CALL	SORTBUF			;sort them
+	MOVE.L	(A7)+,A0		;restore
+	RET
+
+SORTBUF
+
+* Sort buffer at A0
+
+	PUSH_L	D0/D1/A0/A1/A2
+10$
+	MOVE.L	(A0),D0			;get section.
+	CMP.L	#-1,D0			;end?
+	BEQ.S	50$			;yes	
+	SWAP	D0			;get section low
+	MOVE.L	A0,A1			;for inner loop
+	MOVE.L	A1,A2			;save position of best
+	ADDQ.L	#4,A1			;next extry
+20$
+	MOVE.W	(A1),D1			;get entry section
+	CMP.W	#-1,D1			;end of list?
+	BEQ.S	30$			;yes
+	CMP.W	D0,D1			;less than best so far?
+	BHS.S	25$			;no, dont keep
+	MOVE.L	A1,A2			;save position of best
+	MOVE.L	(A1)+,D0		;this is better
+	SWAP	D0			;section low
+	BRA.S	20$			;next
+25$
+	ADDQ.L	#4,A1			;next entry
+	BRA.S	20$			;continue
+30$
+	SWAP	D0			;back to longword
+	MOVE.L	(A0),(A2)		;move old contents into main buffer
+	MOVE.L	D0,(A0)+		;insert into buffer
+	BRA.S	10$			;next main loop
+50$
+	PULL_L	D0/D1/A0/A1/A2
+	RET
+
+
+	END

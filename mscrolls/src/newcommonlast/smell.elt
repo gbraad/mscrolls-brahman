@@ -1,0 +1,81 @@
+**************************************************************
+*
+*	%G%
+*	%W%
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"verbequ.i"
+	include	"scenequ.i"
+
+	IfVerb	SMELL
+
+	XDEF	V.SMELL
+	XREF	EDTS.OK,EDTS.FNDED,V.TASTE2
+
+V.SMELL
+
+      IFD	wantSP.SMELL
+	XREF	SP.SMELL
+	CALL	SP.SMELL
+      ENDC	;wantSP.SMELL
+
+      IFD	wantSMELLfromTABLE
+	XREF	TBL.SMELL,MessageFromTable
+
+	LEA	TBL.SMELL(A4),A1
+	DO	MessageFromTable	;Do any message
+	BNE.S	80$
+      ENDC	;wantSMELLfromTABLE
+
+	CALL    EDTS.OK
+	
+    IFND	wantNonSillySmellCopout
+	DO	P.TN
+	MSG	SML   
+	CALL    EDTS.FNDED
+	BNE     V.TASTE2
+	MSG	LKE
+	DO	P.QN
+	DO	BSFULLSTOP
+    ENDC	;!wantNonSillySmellCopout
+    
+    IFD		wantNonSillySmellCopout
+	TST_ISAROOM			;is it the room?
+	BNE.S	05$			;speciall copout.
+	CALL	EDTS.FNDED		;get edibility.
+	BEQ.S	10$			;none => copout.
+	DO	P.TN
+	MSG	SML
+	BRA	V.TASTE2		;use normal msg if non-copout.
+05$
+	MSG	SMELLHERE		;nothing here.
+	BRA.S	11$
+10$
+	DO	P.TN
+	MSG	NOSMELL			;smells of nothing special.
+11$
+    ENDC	;wantNonSillySmellCopout
+
+
+80$
+
+    IFD	wantSUCCESS
+	XREF	SUCCESS
+	MOVE.W	#RETCODE_SUCCESS,SUCCESS(A4)
+    ENDC
+
+90$
+	RET
+
+	ENDC
+
+*------------------------------------------ 
+
+
+	END

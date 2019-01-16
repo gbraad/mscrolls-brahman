@@ -1,0 +1,67 @@
+**************************************************************
+*
+*	10/27/87
+*	@(#)killpseudo.elt	1.2
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+
+	XDEF	KILLPSEUDO,KILLNPC,KILLNOTNPC
+ 
+ 
+KILLPSEUDO
+ 
+	MOVEQ   #1,D1
+	BRA.S   DOKILL
+ 
+KILLNPC
+ 
+	MOVEQ   #2,D1
+	BRA.S   DOKILL
+ 
+KILLNOTNPC
+ 
+	MOVEQ   #3,D1
+	MOVEQ   #-1,D6        ;MANY?
+  
+DOKILL
+ 
+	MOVE.L  A1,-(A7)
+10$
+	MOVE.W  (A1)+,D0
+	AND.W   #$7FFF,D0
+	BEQ.S   90$
+	GETINFO        
+	CMP.B   #1,D1         ;KILLPSEUDO
+	BNE.S   20$
+	TST_PSEUDO				;PSEUDO?
+	BEQ.S   10$
+15$
+	OR.W    #$8000,-2(A1)
+	BRA.S   10$
+20$
+	CMP.B   #2,D1         ;KILL NPC
+	BNE.S   30$
+	TST_NPC				;
+	BEQ.S   10$
+	BRA.S   15$
+30$
+	TST_NPC				;KILL NOT NPC
+	BEQ.S   15$
+	TEST_W  6(A0)         ;KILL NPC IF NOT EXPLICITLY IN
+	BNE.S   15$           ;ROOM
+	AND.W   #$7FFF,-2(A1)
+	ADDQ.B  #1,D6
+	BRA.S   10$
+90$
+	MOVE.L  (A7)+,A1
+	RET
+
+
+
+	END

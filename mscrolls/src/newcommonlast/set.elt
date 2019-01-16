@@ -1,0 +1,35 @@
+**************************************************************
+*
+*	10/27/87
+*	@(#)set.elt	1.2
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"verbequ.i"
+
+*
+* V.SET
+*
+	IfVerb	SET
+
+	XDEF	V.SET
+	XREF	SP.SET
+
+V.SET
+
+	CALL	SP.SET
+
+	DO	P.SUB
+	MSG	YCNDTT
+	DOGO	P.TNSTOP
+
+	ENDC
+
+
+
+	END

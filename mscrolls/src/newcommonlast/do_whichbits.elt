@@ -1,0 +1,116 @@
+****************************************************************
+*
+*	@(#)do_whichbits.elt	2.4
+*	7/19/89
+*
+****************************************************************
+
+		SECTION		"ADV",CODE
+
+
+		include	"equates.i"
+		include	"macros.i"
+		include	"scenequ.i"
+
+	IFD	wantWHICHBITS
+* Whichbits are extra responses from a WHICH ONE message
+* such as
+* 	ALL
+*	BOTH
+*	NEITHER,NONE
+*	ANY
+*
+* 
+
+	XDEF	DO.WHICHBITS,WBITS.SUB
+	XREF	COUNTLIST,DNOUNBUF,INCNOUN2
+
+DO.WHICHBITS
+
+	MOVE.L	D4,-(A7)
+	CMP.B	#SECT.WBITS,D6		;this section?
+	BNE.S	50$			;no, move towards exit
+	TEST_W	D5			;='both'?
+	BNE.S	10$			;no.
+	MOVEQ	#2,D4			;set as pick two
+	CALL	WBITS.SUB		;and do it.
+	BRA.S	90$
+10$
+	CMP.W	#3,D5			;='ANY'
+	BNE.S	20$			;no.
+	MOVEQ	#1,D4
+	CALL	WBITS.SUB		;get just one
+	BRA.S	90$
+20$
+					;otherwise 1or2=>none
+	MSG	OKDONT			;ok, don't.
+	SETNE
+	BRA.S	95$			;and exit
+50$
+	CMP.B	#SECT.SPEC,D6		;specials (for all)
+	BNE.S	60$			;no, just exit
+	CMP.W	#$1,D5			;code for 'all'
+	BNE.S	90$			;no,exit
+	MOVE.L	A1,-(A7)
+	LEA	DNOUNBUF(A4),A1		;get ptr to list
+	DO	COUNTLIST		;how many? -> d4
+	MOVE.L	(A7)+,A1
+	CALL	WBITS.SUB		;and do it
+
+
+      IFD	wantWHICHBITS_MULTS
+
+	BRA.S	90$
+
+	XREF	MULT.WRD,MATCHBUF
+
+      ENDC
+60$
+      IFD	wantWHICHBITS_MULTS
+
+	CMP.B	#SECT.MULT,D6
+	BNE.S	90$
+	CALL	MULT.WRD
+	MOVE.W	MATCHBUF(A4),D6		;pretend we have a noun
+	MOVE.W	MATCHBUF+2(A4),D5
+
+      ENDC
+90$
+	SETEQ				;set as ok
+95$
+	PULL_L	D4			;and back
+	RET
+
+*------------------------------------------------------------
+
+WBITS.SUB
+
+* Extract D4 nouns from DNOUNBUF as result
+* Entry:
+*		D4= no. of items to grab
+*
+* Since we are under getwrd try to sneakily fod rest into nounbuf
+
+	CMP.W	#1,D4			;just the one?
+	BNE.S	10$			;no.
+	MOVE.W	DNOUNBUF(A4),D5		;grab the 1st entry.
+	BRA.S	90$			;and exit
+10$
+	SUBQ.W	#2,D4			;n-1 to go
+	PUSH_L	D3/A0/A3
+	LEA	DNOUNBUF(A4),A0		;buffer
+20$
+	MOVE.W	(A0)+,D5		;fetch one
+	DO	INCNOUN2		;sneakily fod it in
+	DBRA	D4,20$			;d4 of them
+	MOVE.W	(A0),D5			;and the last
+	PULL_L	D3/A0/A3
+90$
+	SUBQ.W	#1,D5			;adjust
+	MOVE.W	#SECT.NOUN,D6		;say it is a noun
+	RET
+	
+	
+	ENDC	;wantWHICHBITS
+		
+	END

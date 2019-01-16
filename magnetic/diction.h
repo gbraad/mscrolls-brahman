@@ -36,6 +36,7 @@
 #include <iostream>
 #include <string>
 #include "cutils.h"
+#include "strutils.h"
 #include "logged.h"
 
 struct Diction
@@ -61,9 +62,40 @@ struct Diction
             return c < 0 || (!c && _id < w._id); 
         }
         
-        bool same(const Word& w) const
+        bool same(const Word& w) const { return equalsIgnoreCase(_w, w._w); }
+
+        bool matchesPhrase(const char* s1) const
         {
-            return !u_stricmp(_w, w._w);
+            const char* pat;
+            for(pat = _w; *pat; ++s1, ++pat)
+            {
+                char c = u_tolower(*pat);
+                if (c == '_') c = ' ';
+                if (u_tolower(*s1) != c) return false;
+            }
+            return !*pat;
+        }
+
+        bool isPhrase() const
+        {
+            // phrases have underscores
+            return _w && u_strchr(_w, '_') != 0;
+        }
+
+        int phraseLength() const
+        {
+            // number of words in phrase, or 1 if a single word
+            int n = 0;
+            for (const char* p = _w; *p; ++p) if (*p == '_') ++n;
+            return n + 1;
+        }
+
+        string firstWord() const
+        {
+            // if we're a phrase return the first word, else just our word
+            const char* p = _w;
+            while (*p && *p != '_') ++p;
+            return string(_w, p - _w);
         }
 
         friend std::ostream& operator<<(std::ostream& os, const Word& w)
@@ -74,10 +106,11 @@ struct Diction
     struct WordOwn: public Word
     {
         // a word where we own the string 
-        
         ~WordOwn() { delete _w; }
         
         WordOwn(const char* w, int id) : Word(u_strdup(w), id) {}
+        WordOwn(const char* w, int id, int size)
+            : Word(u_strndup(w, size), id) {}
         WordOwn(const WordOwn& w) : Word(w)
         {
             ((Word&)w)._w = 0; // consume 
@@ -96,10 +129,10 @@ struct Diction
         return v;
     }
 
-    int findMatches(const string& word, Words& words) const
+    void findMatches(const string& word, Words& words) const
     { return findMatches(word.c_str(), words); }
 
-    int findMatches(const char* word, Words& words) const
+    void findMatches(const char* word, Words& words) const
     {
         Word t(word, 0);
         WordOwns::const_iterator it = _words.lower_bound((const WordOwn&)t);
@@ -110,16 +143,45 @@ struct Diction
             words.push_back(wi);
             ++it;
         }
-        return words.size();
+    }
+
+    void findPhraseMatches(const char* phrase, Words& words) const
+    {
+        // `phrase` points to the starts of a phrase with words after it
+        // eg "lump of coal is here".
+        // locate phrase words like "lump of coal"
+        // NB: do not find single words like "lump"
+        // ONLY PHRASE WORDS MATCH
+
+        const char* e = strchr(phrase, ' ');
+        if (e)
+        {
+            // isolate the first word and locate it
+            WordOwn t(phrase, 0, e - phrase);
+            WordOwns::const_iterator it = _words.lower_bound(t);
+
+            // if we locate the first word of a phrase, the rest must follow
+            while (it != _words.cend())
+            {
+                const WordOwn& wi = *it;
+
+                // as soon as the initial word changes, we're done
+                if (!equalsIgnoreCase(t._w, wi.firstWord())) break;
+
+                if (wi.isPhrase() && wi.matchesPhrase(phrase))
+                {
+                    words.push_back(wi);
+                    //LOG3("######## findPhraseMatch ", wi._w);
+                }
+                ++it;
+            }
+        }
     }
 
     friend std::ostream& operator<<(std::ostream& os, const Diction& d)
     {
         for (WordOwns::const_iterator it = d._words.cbegin(); 
-             it != d._words.cend(); ++it)
-        {
-            os << *it << " ";
-        }
+             it != d._words.cend(); ++it) os << *it << " ";
         return os;
     }
     

@@ -1,0 +1,225 @@
+**************************************************************
+*
+*	%G%
+*	%W%
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+*	include "msgequates.i"
+	include	"macros.i"
+	include	"scenequ.i"
+
+
+    IFND	wantNOQUOTES
+
+*--------------------------------
+
+	XDEF	PR.QUESTION
+	XREF	NPC.LBF1,STOPRON,NPCQUEST,M.LOOKHAPPY
+	XREF	NPCABOUT,PR.HOWAB,PR.HMANY,PR.HMUCH,INTERROR,PERSON
+	XREF	CHARTSET,PR.SPEC,GETCMSG,GOTOASK,PR.BACK
+	XREF	CONVNPC,NPC.TOBE,NPCMODEL,PR.HOWQ,PR.HOWCOP,TYPE
+
+
+PR.QUESTION
+
+* PROCESS WHERE,WHO,WHAT,WHEN,WHY,WHICH
+	
+	MOVE.W  NPC.LBF1(A4),STOPRON(A4)
+	
+	MOVE.W  NPCQUEST(A4),D0
+	BMI.S   01$
+	
+	
+	CMP.W   #5,D0                    ;HOW???
+	BNE.S   20$
+	MOVE.B  NPCABOUT(A4),D1          ;FLAGS
+	BEQ     PR.HOW
+	CMP.B   #1,D1                    ;ABOUT?
+	BEQ     PR.HOWAB
+	BTST    #2,D1                    ;MANY?
+	BNE     PR.HMANY
+	BTST    #1,D1                    ;MUCH?
+	BNE     PR.HMUCH
+	BRA     INTERROR                 ;HUH?
+20$
+	TEST_W  PERSON(A4)
+	BNE.S   01$                     ;SKIP
+	
+	CALL    CHARTSET                ;SPECIAL?
+	TEST_W  D7
+	BEQ.S   10$                     ;YEP, MSG# IN D0
+01$
+	MOVE.W  PERSON(A4),D2
+	CALL    PR.SPEC
+	CALL    GETCMSG
+	TEST_W  D0                      ;NULL MESSAGE?
+	BEQ     GOTOASK                 ;MUST BE ASK ABOUT..
+10$
+	DO	P.SAY
+
+	BeSure	M.NOIDEA
+
+	CMP.W   #M.NOIDEA,D0
+	BNE.S   11$
+	CALL    PR.DOWHERE
+11$
+	MOVE.W  D0,D1                   ;INTO D1
+	BCLR    #15,D1
+	DO	P.MSG	                  ;PRINT MESSAGE
+	TEST_W  D0
+	BPL     PR20                    ;Exit
+	MOVE.W  (A0)+,D0
+	BRA.S   11$
+
+*--------------------------------
+	
+PR.DOWHERE
+	
+	MOVE.W  D0,-(A7)
+	MOVE.W  NPC.LBF1(A4),D0
+	BEQ.S   90$                    ;FAIL IF NONE FOUND
+	MOVE.L  D5,-(A7)
+	DO	VALID.NP	               ;LOC?
+	MOVE.L  (A7)+,D5
+	TEST_W  D7
+	BNE.S   90$                    ;NO FAIL
+	DO	P.PRN
+	DO	ISARE
+	MSG     HYF                  ;HERE YOU FOOL
+	MOVE.W  (A7)+,D0
+	MOVE.L  (A7)+,D0               ;DUMP
+	DOGO	PR20
+90$
+	MOVE.W  (A7)+,D0
+	RET
+
+*--------------------------------
+   
+PR.HOW
+	DO	P.SAY
+	PEA     PR20(PC)
+	MOVE.W  NPC.LBF1(A4),D3
+	MOVE.W  PERSON(A4),D1
+	MOVE.W  CONVNPC+4(A4),D5
+	MOVE.W  NPC.TOBE(A4),D2
+	TEST_W  NPCMODEL(A4)
+	BPL     PR.HOWQ
+	TEST_W  D2
+	BMI     PR.HOWCOP             ;NO-TOBE
+	TEST_W  D2                    ;AM?
+	BNE.S   11$                   ;NOT AM
+	TEST_W  D1                    ;I?
+	BEQ.S	10$
+	MSGGO	EH
+10$
+	TEST_W  D3
+	BNE.S   12$                   ;MISTAKE
+	MOVEQ   #2,D1                 ;INDEX
+	RND_D1	               ;RANDOM
+
+	BeSure	M.FORYOU
+
+	ADD.W   #M.FORYOU,D1
+	DOGO	P.MSG
+12$
+	MSGGO	YURMIS
+11$ 
+	CMP.W   #1,D2                 ;ARE?
+	BNE.S   13$                   ;'IS'
+	CMP.B   #1,D1                 ;YOU?
+	BNE     PR.HOWCOP             ;COPOUT
+	TEST_W  D3
+	BEQ.S   14$                   ;HOW ARE YOU?
+	CMP.W   D5,D3
+	BNE     PR.HOWCOP
+	MSGGO	ALWAYS
+14$
+	MOVE.W  D5,D0
+	DO	GETNPC
+	MOVE.B  2(A3),D1
+	LSR.B   #4,D1
+	BEQ.S   15$                  ;NORMAL
+	MSG     IAM                ;I AM
+	EXT.W	D1
+	ADD.W	#M.LOOKHAPPY-1,D1
+	DO	P.MSG
+	DOGO	FULLSTOP
+15$
+	MOVEQ   #2,D1
+	RND_D1
+
+	BeSure	M.IMFINE
+
+	ADD.W   #M.IMFINE,D1
+	DOGO	P.MSG
+13$
+	CMP.W   #2,D2                ;'IS'
+	BNE     PR.HOWCOP
+	MOVEQ   #2,D1
+	RND_D1
+
+	BeSure	M.IDBELYU
+
+	ADD.W   #M.IDBELYU,D1
+	DOGO	P.MSG
+
+*--------------------------------
+
+    ENDC	;wantNOQUOTES
+	
+	XDEF	PR20
+	
+    IFND	Version2_PR20
+	
+	XREF	QuoteFlag,PR.BACK,TYPE,ERR1
+
+PR20
+
+	BCLR	#0,QuoteFlag(A4)
+	BEQ.S	10$
+	MSG	QUOTE
+10$
+	
+	ST      ERR1(A4)
+	DO	GETWRD
+	CLR.W   ERR1(A4)
+	CMP.W   #1,TYPE(A4)
+	BEQ     PR.BACK
+	TEST_B  D7
+	BEQ.S   PR20
+	MOVE.L  (A7)+,D0
+	DOGO	SCREEN
+	
+    ENDC	;!Version2_PR20
+
+* I can't figure out why this piece of code skips the rest of the
+* command line manually. This was problematic in FISH, and anyway,
+* it's a waste of space.
+* My guess is that it was originally intended to somhow skip over
+* the contents of some quoted speech in an attempt to parse
+* a multi-command.
+* Is conditional for the reason that it is not wise to unconditionally
+* delete code you do not understand.
+	
+    IFD		Version2_PR20
+	XREF	QuoteFlag
+
+PR20
+
+	BCLR	#0,QuoteFlag(A4)
+	BEQ.S	10$
+	MSG	QUOTE
+10$
+	POPSP
+	DOGO	SCREEN
+	
+    ENDC	;Version2_PR20
+
+
+*------------------------------------------ 
+	END

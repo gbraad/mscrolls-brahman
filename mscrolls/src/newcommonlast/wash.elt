@@ -1,0 +1,39 @@
+***********************************************************
+*
+*	@(#)wash.elt	2.2
+*	3/10/89
+*
+************************************************************
+
+		SECTION	"ADV",CODE
+
+		include	"equates.i"
+		include	"macros.i"
+		include	"verbequ.i"
+		include	"scenequ.i"
+
+
+		IfVerb	WASH
+
+		XDEF	V.WASH
+		XREF	SP.WASH
+
+V.WASH
+
+	CALL	SP.WASH
+	DO	P.SUBV
+
+      IFND	wantCorrectFullStops
+	MSGGO	UNABLE
+      ENDC	;!wantCorrectFullStops
+
+      IFD	wantCorrectFullStops
+	MSG	UNABLE
+	DOGO	BSFULLSTOP
+      ENDC	;wantCorrectFullStops
+
+
+
+
+	ENDC	;V.WASH
+	END

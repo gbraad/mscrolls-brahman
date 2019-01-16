@@ -1,0 +1,398 @@
+************************************************************
+*
+*	%W%
+*	%G%
+*
+************************************************************
+
+
+	SECTION		"ADV",CODE
+	include		"equates.i"
+	include		"macros.i"
+	include		"vclassequ.i"
+	include		"nounequ1.i"
+	include		"scenequ.i"
+	include		"nounequ2.i"
+
+    IFD	wantSITUATION
+
+	XDEF	GETNPCSLOCAL,GETVERBCLASS,WHOELSELOCAL
+	XDEF	NPCREACTIONS,NPCREACTIONS.EXIT
+	XDEF	FODBADGUYS
+
+
+	XREF	NPC.LIST,DNOUNBUF,VERB,VCLASS.TBL
+	XREF	P.LIST2,P.LISTIS
+	XREF	P.SAY2,P.NOUN,TOPNPC,CARRIED,GETNPCOWNER
+	XREF	LINE,NPC.OK,P.LIST,PLURAL
+	XREF	SETS.TBL,COUNTLIST,SETPL
+
+*----------------------------------------
+
+GETNPCSLOCAL
+
+* returns a buffer of npc's local.
+* EXIT:
+*		a1 => buffer
+
+	PUSH_L	D0/A0/A2
+	LEA	NPC.LIST(A4),A1		;list of npc's NOUN numbers
+	LEA	DNOUNBUF(A4),A2		;target buffer
+10$
+	MOVE.W	(A1)+,D0		;get an npc
+	BEQ.S	50$			;done.
+	GETINFO
+	DO	NPC.OK			;must be conscious/alive etc.
+	BNE.S	10$			;no, too bad
+	DO	VALID.NP		;ah, but is he/she around?
+	BNE.S	10$			;no, too bad
+	MOVE.W	D0,(A2)+		;yes, copy into buffer
+	BRA.S	10$			;anymore?
+50$
+	CLR.W	(A2)			;z-terminate
+	LEA	DNOUNBUF(A4),A1		;point to start
+	PULL_L	D0/A0/A2
+	RET
+
+*----------------------------------------
+
+WHOELSELOCAL
+
+	
+* returns a buffer of npc's local except the npc in d0
+
+	MOVE.L	D1,-(A7)		;save register
+	DO	GETNPCSLOCAL		;buffer to a1
+	MOVE.L	A1,-(A7)		;save it
+10$
+	MOVE.W	(A1)+,D1		;get an npc
+	BEQ.S	20$			;done
+	CMP.W	D1,D0			;same as this one?
+	BNE.S	10$			;next
+	SUBQ.L	#2,A1			;adjust to previous
+	BSET	#7,(A1)			;hibit => void
+	ADDQ.L	#2,A1			;de-adjust
+	BRA.S	10$			;anymore?
+20$
+	MOVE.L	(A7)+,A1		;start of list
+	MOVE.L	(A7)+,D1		;restore
+	RET
+
+*----------------------------------------
+
+GETVERBCLASS
+
+*
+*	finds the verb class code for the current 'verb'
+*	according to vclass.tbl
+*
+* Entry: 	none
+*
+* Exit:		d2 = verb class code
+*		(d2=0) => not in a class or verb does not exist
+*		EQ <=> (d2=0)
+		
+	
+	PUSH_L	D0/D1/D3/A0
+	MOVEQ	#0,D2			;to store vclass number
+	MOVE.W	VERB(A4),D0		;verb#
+	BMI.S	90$			;no verb, just exit
+	LEA	VCLASS.TBL(PC),A0	;start of class table
+10$
+	MOVE.B	(A0)+,D1		;fetch class number from table
+	BEQ.S	30$			;end of class list, exit
+20$
+	MOVE.B	(A0)+,D3		;fetch verb# from table
+	BEQ.S	10$			;found end, go for next section.
+	CMP.B	D3,D0			;this verb?
+	BNE.S	20$			;no, carry on thru' table
+	OR.B	D1,D2			;or' in code. for a match
+25$
+	TEST_B	(A0)+			;now, just skip to end of table
+	BNE.S	25$
+	BRA.S	10$			;try next class section
+30$
+90$
+	PULL_L	D0/D1/D3/A0
+	TEST_B	D2			;set flags on d2 for exit
+	RET				;value in d2
+	
+
+*----------------------------------------
+
+NPCREACTIONS
+
+*	handles pre-verb processing
+* Entry:  as if it were a verb
+
+	PUSH_L	D0/D1/D5/A0/A5
+	PEA	NPCREACTIONS.EXIT(PC)
+	CALL	GETVERBCLASS		;class# to d2
+	BEQ.S	90$			;nosuch section, exit
+	LEA	NPCreactions.TBL(PC),A0	;start of jump table (odd)
+10$
+	MOVE.W	(A0)+,D1		;get code mask
+	BEQ.S	30$			;end of table
+	AND.B	D2,D1			;verb in this class?
+	BEQ.S	20$			;nope, next
+	MOVE.W	(A0),D1			;get jump offset
+	LEA	NPCreactions.TBL(PC),A0	;start of table again
+	JMP	0(A0,D1.W)		;go there.
+20$
+	ADDQ.L	#2,A0			;skip offset
+	BRA.S	10$			;try next table entry
+30$
+90$
+	RET				;return to npcreaction.exit
+					;which knows the stack
+
+*----------------------------------------
+
+
+
+	XDEF	NPCreactions.TBL
+NPCreactions.TBL
+
+	DC.W	Vclass_aggressive
+	DC.W	NPCREACT_AGGRESSIVE-NPCreactions.TBL
+	DC.W	Vclass_destructive
+	DC.W	NPCREACT_DESTRUCTIVE-NPCreactions.TBL
+	DC.W	Vclass_acquisition
+	DC.W	NPCREACT_ACQUISITION-NPCreactions.TBL
+	DC.W	Vclass_consume
+	DC.W	NPCREACT_CONSUME-NPCreactions.TBL
+	DC.W	Vclass_moveitem
+	DC.W	NPCREACT_MOVEITEM-NPCreactions.TBL
+nn	DC.W	0
+
+
+
+*----------------------------------------
+
+NPCREACTIONS.EXIT
+	PULL_L	D0/D1/D5/A0/A5		;origninal variables back
+	RET	
+
+*----------------------------------------
+
+NPCREACT_AGGRESSIVE
+
+	GETINFO				;d0 is noun
+	TST_NPC				;is it an npc?
+	BEQ	NPCREACT_DESTRUCTIVE	;only sense of it
+	CALL	WHOELSELOCAL		;anyone else about? -> a1
+	CALL	FODBADGUYS		;from list a1
+	DO	COUNTLIST		;how many -> d4
+	BEQ.S	90$			;none, exit
+	CALL	LINE
+	MOVE.W	#-1,D5			;flag for 'the' in lists
+	MOVE.L	A1,A0			;a0->list for p.list
+	DO	P.LISTIS		;list npc's isare
+	PRINT	<'disgusted by your behaviour.^'>
+90$
+	RET
+
+*----------------------------------------
+NPCREACT_DESTRUCTIVE
+
+	DO	GETNPCSLOCAL		;to a1
+	CALL	FODBADGUYS
+	DO	COUNTLIST		;do d4
+	BEQ	90$			;no-one, just exit
+	MOVE.W	D0,D2			;save dobj
+	DO	CARRIED			;on your person?
+	BEQ	50$			;yes.
+    IFD	wanted_OWNERSHIP
+	CALL	GETNPCOWNER		;to d1
+	BEQ.S	05$			;none, try topnpc
+	CMP.W	#NPLAYER,D1		;are you the owner?
+	BEQ	50$			;yes, strange response
+	MOVE.W	D1,D0			;copy
+	DO	VALID.NP		;is d0 around?
+	BEQ.S	10$			;yes, complains
+    ENDC	;wanted_ownership
+    IFND	wanted_OWNERSHIP
+	BRA.S	05$			;skip
+    ENDC
+04$
+	CALL	LINE
+	MOVE.W	#-1,D5			;flag for 'the' in lists
+	MOVE.L	A1,A0			;a0->list for p.list
+	DO	P.LISTIS		;list npc's isare
+	MSG	SHOCKED			;shocked by your behaviour.
+	BRA	80$			;quit
+05$
+	CALL	TOPNPC			;into d4
+	MOVE.W	D4,D0
+	GETINFO				;on carrier (if exists)
+	TST_NPC				;carried by someone?
+	BEQ.S	20$			;no
+	DO	VALID.NP
+	BNE.S	04$			;but they aren't here
+10$
+	CALL	LINE
+	DO	P.SAY2			;the d0 says "...
+	MSG	WHATUDOING		;what are you doing.
+	MOVE.W	D2,D0
+	DO	P.NOUN
+	BRA	80$			;quit
+20$
+	CALL	LINE
+	MOVE.W	#-1,D5			;flag for 'the' in lists
+	MOVE.L	A1,A0			;a0->list for p.list
+	DO	P.LISTIS		;list npc's isare
+	MSG	UNCOUTH			;uncouth behaviour.
+	BRA.S	80$			;quit
+50$
+	CALL	LINE
+	MOVE.W	#-1,D5			;flag for 'the' in lists
+	MOVE.L	A1,A0			;a0->list for p.list
+	DO	P.LISTIS		;list npc's isare
+	MSG	PERPLEXED		;perplexed by your strange behav.
+80$
+	;put npcdata mods here
+90$
+	RET
+
+*----------------------------------------
+NPCREACT_ACQUISITION
+
+	CALL	NPCREACT.SUB		;ret value in d7
+	BEQ.S	90$
+	CMP.B	#2,d7			;owned by someone elsewhere
+	BEQ.S	90$			;yes, quit
+;	BNE.S	10$
+;	CALL	LINE
+;	MOVE.W	#-1,D5			;flag for 'the' in lists
+;	MOVE.L	A1,A0			;a0->list for p.list
+;	DO	P.LIST
+;	CALL	SETPL			;set plural on a1
+;	MSG	DUBIOUS
+;	BRA.S	80$			;exit
+10$
+	CMP.B	#3,D7			;owned by local in d2
+	BNE.S	20$			;no
+	EXG	D2,D0
+	DO	P.SAY2			;the d0 says "...
+	MSG	HEYMY
+	MOVE.W	D2,D0
+	DO	P.NOUN
+	DO	BSFULLSTOP
+	DO	P.ENDQUOTE
+	
+20$
+80$
+	; data mods go here
+
+90$
+	RET
+	
+*----------------------------------------
+NPCREACT_CONSUME
+NPCREACT_MOVEITEM
+
+	RET
+
+*----------------------------------------
+
+FODBADGUYS
+
+* remove all 'bad guys' from list -> a1
+
+	XREF	BadGuysTable
+
+	PUSH_L	D0/A1-A3
+	LEA	BadGuysTable(A4),A2
+	MOVE.L	A1,A3
+10$
+	MOVE.W	(A2)+,D0			;get one.
+	BEQ.S	90$				;done.
+	MOVE.L	A3,A1				;start of list.
+20$
+	TEST_W	(A1)				;end?
+	BEQ.S	10$				;yes, next bad guy.
+	CMP.W	(A1)+,D0			;this one?
+	BNE.S	20$				;try next.
+	BSET	#7,-2(A1)			;else zap him.
+	BRA.S	10$				;asume only in table once.
+90$
+	PULL_L	D0/A1-A3
+	RET
+	
+*------------------------------------------
+
+NPCREACT.SUB
+
+* Generalised ownership tests for reactions
+* Exit codes in D7
+* 	0 => void
+*	1 => object not specifically owned
+*	2 => object owned bu someone elsewhere
+*	3 => object owned by npc in d2
+*	4 => object owned by player
+
+	DO	GETNPCSLOCAL		;to a1
+	DO	COUNTLIST		;do d4
+	BNE.S	01$
+	MOVEQ	#0,D7
+	BRA	90$			;no-one, just exit
+01$
+	MOVE.W	D0,D2			;save dobj
+    IFD	wanted_OWNERSHIP
+	CALL	GETNPCOWNER		;to d1
+	BEQ.S	05$			;none, try topnpc
+	CMP.W	#NPLAYER,D1		;are you the owner?
+	BEQ	50$			;yes, strange response
+	MOVE.W	D1,D0			;copy
+	DO	VALID.NP		;is d0 around?
+	BEQ.S	10$			;yes, complains
+    ENDC	;wanted_ownership
+    IFND	wanted_OWNERSHIP
+	BRA.S	05$			;skip
+    ENDC
+04$
+	EXG	D0,D2			;d0=noun, d2=npc
+	MOVEQ	#2,D7			;flag
+	BRA	80$			;quit
+
+05$
+	DO	CARRIED			;on your person?
+	BEQ	50$			;yes.
+	CALL	TOPNPC			;into d4
+	MOVE.W	D4,D0
+	GETINFO				;on carrier (if exists)
+	TST_NPC				;carried by someone?
+	BEQ.S	20$			;no
+	DO	VALID.NP
+	BNE.S	04$			;but they aren't here
+10$
+	EXG	D0,D2			;d0= noun, d2= npc
+	MOVEQ	#3,D7
+	BRA.S	80$			;quit
+20$
+	MOVE.W	D2,D0			;dobj
+	MOVEQ	#1,D7
+	BRA.S	80$			;quit
+50$
+	MOVEQ	#4,D7
+80$
+	;put npcdata mods here
+90$
+	TEST_W	D7
+	RET
+
+*----------------------------------------
+
+NPCREACT.PEOPLE
+
+	CALL	LINE
+	MOVE.W	#-1,D5			;flag for 'the' in lists
+	MOVE.L	A1,A0			;a0->list for p.list
+	DO	P.LISTIS		;list npc's isare
+	RET
+
+*----------------------------------------
+
+    ENDC	;wantSITUATION
+
+	END

@@ -1,0 +1,32 @@
+
+************************************************************
+*
+*	%W%
+*	%G%
+*
+************************************************************
+
+
+	SECTION		"ADV",CODE
+	include		"equates.i"
+	include		"macros.i"
+	include		"nounequ1.i"
+	include		"scenequ.i"
+	include		"nounequ2.i"
+
+	XDEF	IsItemValid
+
+IsItemValid
+
+	PUSH_L	D0/D7/A0
+	MOVE.L	$0c(A7),A0		;fetch return address = data adr.
+	ADDQ.L	#2,$0c(A7)		;skip past data on return.
+	MOVE.W	(A0),D0			;get noun#
+	DO	VALID.NP		;is it around?
+	PULL_L	D0/D7/A0		;restore regs.
+	RET
+
+*------------------------------------------
+
+	END
+

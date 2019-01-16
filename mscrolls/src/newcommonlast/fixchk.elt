@@ -1,0 +1,60 @@
+**************************************************************
+*
+*	10/27/87
+*	@(#)fixchk.elt	1.2
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+
+*--------------------------------
+*
+*  FIXCHK - SUSSES WHETHER ITEM
+*           IS FIXED TO ANYTHING
+*
+*  PASSED   D0/A0 - NOUN NO. ETC
+*
+*  RETURNS  ZERO FLAG
+*
+*  BNE  (NOT SET, Z=0)  FIXED
+*  BEQ  (SET, Z=1) NOT FIXED
+*
+* D1 a noun tied to noun which is D0
+* A1 a pointer to a buffer of such nouns (zero terminated)
+*
+*--------------------------------
+
+	XDEF	FIXCHK
+	XREF	DNOUNBUF
+ 
+   
+FIXCHK
+ 
+	PUSH_L  D2/D5/A0            ;SAVE SCRATCH
+	GETINFO                     ;MAKE *SURE*
+	MOVE.W  12(A0),D1           ;FIX DATA
+	AND.W   #$3FFF,D1           ;IS THIS TIED (DIRRECTLY)ND
+	BNE.S   10$                 ;YES, THEN 10$
+	MOVE.W  D0,D2               ;LOOK FOR NOUN NO.
+	MOVEQ   #12,D1              ;AT BYTE 12
+	MOVEQ   #1,D5               ;&13
+	DO	GETNOUNS            ;GO LOOK
+	MOVE.W  (A1),D1             ;TEST F TIED (BUFFER)
+	BRA.S	90$
+10$
+	LEA	DNOUNBUF(A4),A1		;fake up a GETNOUNS return
+	CLR.W	2(A1)
+	MOVE.W	D1,(A1)
+90$
+	PULL_L  D2/D5/A0
+	RET                         ;BACK TO CALLER
+  
+*--------------------------------
+
+
+
+	END

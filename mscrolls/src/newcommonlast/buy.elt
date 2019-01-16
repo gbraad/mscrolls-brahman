@@ -1,0 +1,177 @@
+**************************************************************
+*
+*   7/20/88
+*   @(#)buy.elt 2.6
+*
+**************************************************************
+
+
+    SECTION "ADV",CODE
+
+
+    include "equates.i"
+    include "macros.i"
+    include "verbequ.i"
+    include "scenequ.i"
+
+
+    IfVerb  BUY
+
+    XDEF    V.BUY
+    XREF    CHK6PART,P.MHAVSTOP,IFLIQUID,PRTTXT,WHOOPS,F_TRADE,ONINV
+    XREF    P.FLOO
+
+V.BUY
+ 
+    MOVEQ   #-1,D7             ;FORCE CHK4PART
+    MOVEQ   #FROM,D1           ;WITH A FROM B   
+    CALL    CHK6PART           ;SUSS ADNOUN ETC
+    EXG     D0,D5
+    EXG     A0,A5
+    DO  CARRIED            ;MUST HAVE IT
+
+    IFD wantBUYWithoutMultipleMHAV
+    BEQ.S   05$
+    ST  WHOOPS(A4)     ;NO MORE NOUNS
+    BRA P.MHAVSTOP         ;TOO BAD
+05$
+    ENDC;   wantBUYWithoutMultipleMHAV
+
+    IFND    wantBUYWithoutMultipleMHAV
+    BNE P.MHAVSTOP
+    ENDC;   !wantBUYWithoutMultipleMHAV
+
+    EXG     D0,D5
+    EXG     A0,A5
+
+    IFEQ  THE_PAWN
+    XREF    SP.BUY_Before
+    CALL    SP.BUY_Before       ;if anything done, won't come back
+    ENDC  ;!THE_PAWN
+
+    IFND    wantSparseBuy
+    CALL    IFLIQUID
+    TST_NPC             ;ALIVE
+    BNE P.FLOO          ;funny look
+    
+    IFNE  THE_PAWN
+    MOVE.B  4(A0),D1           ;GET VALUE BYTE
+    AND.W   #$F,D1             ;BIT3 = MONEY, BITS 0-2 R VALUE
+    ENDC
+
+    IFEQ  THE_PAWN
+    XREF    GetValue
+    DO  GetValue    ;values object in D0, returns D1/Z flag
+
+    ENDC ;!wantSparseBuy
+
+    BNE.S   10$
+    DO  P.TN                  ;ZERO VALUE = NOT FOR SALE
+    DO  ISAREN
+    MSGGO   FSALE
+10$
+    DO  CARRIED            ;CANNOT BUY IF U ALREADY HAVE IT!
+    BNE.S   20$
+    DO  P.TN
+    DO  ISARE
+    MSGGO   AYOURS
+    
+20$
+
+    IFNE  THE_PAWN
+    MOVE.B  4(A5),D1
+    AND.W   #$0F,D1            ;LOSE JUNK BITS
+    BCLR    #3,D1              ;USING MONEY?
+    ENDC
+
+    IFEQ  THE_PAWN
+    EXG D0,D5
+    CALL    GetValue
+    EXG D0,D5
+    BTST    #3,4(A5)        ;test money bit
+    ENDC
+
+    BNE.S   30$
+    DO  P.SUB
+    ST      WHOOPS(A4)         ;TELL PROCESS TO GIV UP
+    MSGGO   NTENDE           ;NOPE - USELESS!
+30$
+
+    IFNE  THE_PAWN
+    MOVE.B  4(A0),D2
+    AND.W   #$0F,D2
+    BCLR    #3,D2
+    ENDC
+
+    IFEQ  THE_PAWN
+    EXG D1,D2           ;cause result will be in D1
+    DO  GetValue
+    EXG D1,D2
+    TST_MONEY               ;
+    ENDC
+
+    BEQ.S   4909$
+    MSGGO   STRANG
+4909$
+    SUB.W   D2,D1              ;WORTH DOING?
+    SMI     WHOOPS(A4)
+    BPL.S   50$
+    MSGGO   NDEAL            ;NOPE!
+50$
+
+    IFNE  THE_PAWN
+    OR.B    #8,D1              ;SET TO BEW VALUABLE
+    AND.B   #$F0,4(A5)
+    OR.B    D1,4(A5)
+    AND.W   #3,D1              ;ANY REMAINING VALUE?
+    ENDC
+
+    IFEQ  THE_PAWN
+    XREF    SetValue
+    CALL    SetValue       ;set the value of obj D5 to D1.B
+                                ;returns EQ => no value
+    ENDC
+
+    IFND  wantNoChange
+    BNE.S   60$  
+    ENDC
+
+    EXG     D0,D5           ;COS SETOUT WANTS D0!
+    DO  SETOUT              ;USED ALL VALUE OFCOIN = KNOBBLE IT
+    EXG     D0,D5
+60$
+      
+    IFEQ  THE_PAWN
+    XREF    SP.BUY
+    CALL    SP.BUY      ;returns EQ => avoid 'you have now...'
+    BEQ.S   90$     ;oninv
+    ENDC
+
+    CALL    PRTTXT
+    DC.W    $8100
+    MSG NOW
+    MSG GOT
+    DO  P.TN
+    MSG LINE
+    ST      F_TRADE(A4)        ;SO SETMODE CAN SUSS IF TRADED IN ROOM
+90$
+    IFD wantSUCCESS
+    XREF    SUCCESS
+    MOVE.W  #RETCODE_SUCCESS,SUCCESS(A4)
+    ENDC
+    BRA     ONINV
+
+    ENDC
+
+    ENDC    ;!wantSparseBuy
+    
+    IFD     wantSparseBuy
+    XREF    YCANTWSTOP
+    MOVE.W  D5,D0
+    CALL    YCANTWSTOP
+    RET                 ;incase it returns
+    ENDC    ;wantSparseBuy
+
+*------------------------------------------ 
+
+    END

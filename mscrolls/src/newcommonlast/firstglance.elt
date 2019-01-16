@@ -1,0 +1,65 @@
+**************************************************************
+*
+*	1/11/88
+*	@(#)firstglance.elt	2.2
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+
+***************************************************************************
+*
+*  FirstGlance
+* 
+* This bit of code will append a description onto a look the first time that
+* the object is looked at.  If the Initial State bit is EQ and the noun 
+* number is in the table then it will print the description and fod the bit
+* 
+* When it arrives here A0 points at the noun data
+*                      D0 contains the noun number
+*
+* A2/D1 are used
+*
+***************************************************************************
+
+      IFEQ	THE_PAWN
+
+	XREF	FirstGlanceTable
+	XDEF	FirstGlance
+
+	include	"nounbits.i"
+
+FirstGlance
+
+	LEA	FirstGlanceTable(A4),A2		
+
+* This Table is:
+* SCN  # (.W)
+* NOUN # (.W)
+* ZERO terminated
+
+10$
+	MOVE.L	(A2)+,D1
+	BEQ.S	99$
+	CMP.W	D0,D1			;does noun number correspond?
+	BNE.S	10$
+	SWAP	D1			;Put Scenario number in low word
+	BCLR	#15,D1			;if hi bit of msg# then ALWAYS use
+	BNE.S	80$
+	BSET	#INIT_BIT,SPARE_BYTE(A0)	;Fod it once only!
+	BNE.S	10$				;NE => been done once
+80$
+	DO	P.SCN
+	BRA.S	10$			;loop back so more than one message
+					;can happen
+99$
+	RET
+
+      ENDC
+	
+
+	END

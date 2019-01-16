@@ -1,0 +1,52 @@
+**************************************************************
+*
+*	10/27/87
+*	@(#)fill.elt	1.2
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"verbequ.i"
+
+*--------------------------------
+
+	IfVerb	FILL
+
+	XDEF	V.FILL
+	XREF	CONJ,EMPTY,V.PUT
+	
+V.FILL
+	
+*FILL X WITH Y = PUT Y IN X
+*FILL X FROM Y = EMPTY Y INTO X
+	
+	TEST_W	D5			;is there an I.O. ?
+	BLT.S	40$			;no - ask CHK4PT about it
+
+	CMP.W   #FROM,CONJ(A4)     ;FROM?
+	BEQ.S   50$                ;CASE 2
+40$
+	MOVEQ	#WITH,D1
+	DO	CHK4PT
+	CALL_S  FillSub
+	BRA     V.PUT
+50$
+	CALL_S  FillSub
+	BRA     EMPTY
+	
+FillSub
+
+	EXG     D0,D5
+	EXG     A0,A5
+	MOVE.W  #INTO,CONJ(A4)         ;SET TO INTO
+	RET
+
+	ENDC
+
+
+
+	END

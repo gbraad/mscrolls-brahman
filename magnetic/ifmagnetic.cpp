@@ -30,6 +30,7 @@
  *
  */
 
+#include <sstream>
 #include "ifmagnetic.h"
 #include "strutils.h"
 #include "qdefs.h"
@@ -42,8 +43,7 @@
 #include "imgpng.h"
 #include "rect.h"
 
-
-#define VERSION_STRING  "8"
+#define VERSION_STRING  "9"
 
 static IFMagnetic* theMS;
 
@@ -158,6 +158,9 @@ void IFMagnetic::gameRestarting()
 {
     gameStarting();
 
+    // reinstate classic/modern
+    _puzzles.setRemaster(_modernMode);
+
     // need game to be operational to apply fixes
     _puzzles.applyGameFixes();
 }
@@ -181,6 +184,9 @@ void IFMagnetic::runMsTask()
                                 std::placeholders::_2);
 
     _messages.start(story);
+
+    // set REMASTER here, *after* symbols loaded but *before* initial game code
+    _puzzles.setRemaster(_modernMode);
 
     --_ms_gfx;
     _running = true;
@@ -251,6 +257,21 @@ static void builderEmitter(char c, void* ctx)
 {
     GrowString* buf = (GrowString*)ctx;
     buf->add(c);
+}
+
+void IFMagnetic::_buildSoundJSON(GrowString& buf, 
+                                 const string& filepath,
+                                 const SoundRequest* sr)
+{
+    // use builder helper, give it our emitter
+    InfoBuilder build(builderEmitter, &buf);
+
+    build.begin();
+    build.tagString(BRA_SOUND_NAME, filepath);
+    build.tagInt(BRA_SOUND_DURATION, sr->_duration);
+    build.end();
+    
+    buf.add(0);  // terminate string
 }
 
 void IFMagnetic::_buildPictureJSON(GrowString& buf, 
@@ -388,9 +409,25 @@ static bool makeMSImage(ImgData& img, int w, int h, ushort* pal,
 }
 
 static bool makeMSImageScaled(ImgData& img, int w, int h, ushort* pal,
-                              uchar* data, uchar* mask, int scaleFactor)
+                              uchar* data, uchar* mask, int scaleFactor,
+                              float* pcp)
 {
     bool r = makeMSImage(img, w, h, pal, data, mask);
+
+    if (pcp)
+    {
+        // optional cropping
+        int ctop = pcp[5];
+        int cright = pcp[6];
+        int cbottom = pcp[7];
+        int cleft = pcp[8];
+
+        if (ctop || cright || cbottom || cleft)
+        {
+            img.crop(ctop, cright, cbottom, cleft);
+        }
+    }
+    
     if (r && scaleFactor > 1)
     {
         // apply XBR scale
@@ -423,7 +460,8 @@ std::string IFMagnetic::_decodePicture(const PicRequest* pr,
         LOG4("MS ", "Have animation? " << (int)isAnim);
 
         ImgData bgimg;
-        if (makeMSImageScaled(bgimg, w, h, pal, p, 0, _useXBR4 ? 4 : 1))
+        if (makeMSImageScaled(bgimg, w, h, pal, p, 0, (_useXBR4 ? 4 : 1),
+                              pr->_profile))
         {
             LOG3("MS showpic, saving ", imagepath);
                                 
@@ -457,7 +495,7 @@ std::string IFMagnetic::_decodePicture(const PicRequest* pr,
                             int scale = _useXBR4 ? 4 : 1;
                             if (makeMSImageScaled(img, width, height,
                                                   pal, picdata, pmask,
-                                                  scale))
+                                                  scale,0))
                             {
                                 ++cc;
 
@@ -532,19 +570,85 @@ void IFMagnetic::showImage(const string& filepath, const PicRequest* pr)
         GrowString buf;
         _buildPictureJSON(buf, filepath, pr);
 
+        // should not be one, but just incase
+        _dropImage();
+        
         // takes out the string and gives it to us
         _imageJSONBuf = buf.donate();
     }
 }
 
-void IFMagnetic::_showpic(const PicRequest* pr)
+void IFMagnetic::_showNewVersionPic(PicRequest* pr)
 {
-    LOG3("MS showpic #", pr->_picn << " mode " << pr->_mode);
+    if (!pr->_picAddr) return; // bail
+    
+    const char* p = (const char*)getcode() + pr->_picAddr;
+    
+    LOG3("MS show new pic name: ", p);
+
+    // will be resolved by QControl::resolveAsset, which will look first
+    /// in Qt resources, then in configdir/
+    string file = "images/" + toLower(p);
+
+    // dont apply any profile to new version pictures
+    pr->_profile = 0;
+
+    LOG3("show new version pic '", file << "'");
+    showImage(file, pr);
+}
+
+void IFMagnetic::_playSoundJSON(GrowString& buf)
+{
+    LOG3("MS, playsoundJSON ", buf.start());
+    
+    // in case old still here
+    _dropSound();
+
+    // takes out the string and gives it to us
+    _soundJSONBuf = buf.donate();
+}
+
+void IFMagnetic::_playSound(SoundRequest* sr)
+{
+    GrowString buf;
+        
+    if (sr->_soundFile)
+    {
+        LOG3("MS, playsound ", sr->_soundFile << " in " << sr->_room);
+
+        // will be resolved by QControl::resolveAsset, which will look first
+        /// in Qt resources, then in configdir/
+        string file = "sounds/" + toLower(sr->_soundFile);
+
+        // build sound json
+        _buildSoundJSON(buf, file, sr);
+    }
+    else
+    {
+        //LOG3("MS, ", "stopsound");
+        // empty json means stop playing sound
+        buf.append("{}");
+        buf.add(0);
+    }
+
+    _playSoundJSON(buf);
+
+}
+
+void IFMagnetic::_showpic(PicRequest* pr)
+{
+    LOG3("MS showpic #", pr->_picn << " mode " << pr->_mode << " ver " << pr->_picVer);
 
     if (pr->_mode == 0)
     {
         LOG3("MS hidepic ", pr->_picn);
         clearImage();
+        return;
+    }
+
+    if (pr->_picVer > 0)
+    {
+        _showNewVersionPic(pr);
         return;
     }
     
@@ -553,9 +657,8 @@ void IFMagnetic::_showpic(const PicRequest* pr)
     // prefix
     strcpy(imagename, "ms_");
     
-    if (pr->_ver > 1)
+    if (pr->_picAddr)
     {
-        assert(pr->_picAddr);
         const char* p = (const char*)getcode() + pr->_picAddr;
         LOG3("MS show pic name: ", p << " mode " << pr->_mode);
 
@@ -610,9 +713,11 @@ void IFMagnetic::_showpic(const PicRequest* pr)
     {
         // decode it
         savedFilename = _decodePicture(pr, imagename);
+        found = !savedFilename.empty();
     }
 
-    showImage(savedFilename, pr);
+    if (found)
+        showImage(savedFilename, pr);
 }
 
 std::string IFMagnetic::prettyCommand(const char* cmd)
@@ -787,7 +892,7 @@ bool IFMagnetic::_substWordID(string& word)
             IItem ii(find_item(id));
             if (ii)
             {
-                word = ii.adjWord();
+                word = ii.adjWordIf();
                 LOG4("subst ID ", id << " -> " << word);
                 r = true;
             }
@@ -811,6 +916,47 @@ bool IFMagnetic::undo(int delta)
     bool v = autoLoad(delta, true);
     LOG3("Undo: ", _undos);
     return v;
+}
+
+bool IFMagnetic::_handleTestCommands(const char* cmd)
+{
+    bool handled = false;
+    
+    bool enabled = false;
+    if (*cmd == '#') enabled = true;
+        
+    // accept $ as prefix so that it can be in script files where # is comment
+    // keep in release, so we can test!
+    if (*cmd == '$') enabled = true;
+    
+    if (enabled)
+    {
+        // this goes into release builds now so we can have secret
+        // commands to make screenshots etc.
+        
+        extern int handle_test_commands(const char* cmd);
+
+        // capture cout and send to UI
+        std::stringstream buffer;
+        std::streambuf* old = std::cout.rdbuf(buffer.rdbuf());
+
+        if ((handled = !strcmp(cmd+1, "showmap")) != 0)
+        {
+            _allMapCheat = true;
+            std::cout << "Map Shown\n";
+        }
+        else if ((handled = (cmd[1] == '(')) != 0)
+        {
+            _puzzles.evalKL(cmd + 1, true);
+        }
+
+        if (!handled) handle_test_commands(cmd + 1);
+        std::cout.rdbuf(old);
+        LOG3("test command ", cmd << ": " << buffer.str());
+        handled = true;
+
+    }
+    return handled;
 }
 
 bool IFMagnetic::_evalCommandSpecial(const char* cmd, CommandResultI* cres)
@@ -849,7 +995,16 @@ bool IFMagnetic::_evalCommandSpecial(const char* cmd, CommandResultI* cres)
         
         return true;
     }
+    else if (!u_stricmp(cmd, "resetgame"))
+    {
+        restartGame();
 
+        return true;
+    }
+
+    // deal with special debug commands
+    if (_handleTestCommands(cmd)) return true;
+    
     bool res = false;
 
     // as soon as a non-undo/redo is issued, we accept the undo state
@@ -875,16 +1030,32 @@ bool IFMagnetic::_evalCommandSpecial(const char* cmd, CommandResultI* cres)
 
         if (n > 0)
         {
-            const string* adj = 0;
-            if (n > 2) adj = &words[n-2];
+            IItem::IItems items;
+
+            // without "do"
+            string phrase = unsplit(words, ' ', 1, n);
+
+            // check for phrase match
+            IItem::phraseResolve(items, phrase);
             
-            // first look for a puzzle bound to the root word (if enabled)
-            res = puzzleForX(adj, words[n-1], act);
+            if (items.size() == 1)
+                res = puzzleForX(0, 0, phrase, act);
+            else
+            //if (!res)
+            {
+                const string* adj = 0;
+                const string* adj2 = 0;
+                if (n > 3) adj2 = &words[n-3];
+                if (n > 2) adj = &words[n-2];
+
+                // then look for a puzzle bound to the root word (if enabled)
+                res = puzzleForX(adj2, adj, words[n-1], act);
+            }
 
             if (!res)
             {
-                // otherwise useX (NB: drop "do")
-                res = evalUseX(unsplit(words, ' ', 1, n), false);
+                // otherwise useX
+                res = evalUseX(phrase, false);
             }
         }
     }
@@ -935,7 +1106,6 @@ bool IFMagnetic::_evalCommandSpecial(const char* cmd, CommandResultI* cres)
                     if (*s == '#' || p == s) continue;
                     
                     string cmd(s, p - s);
-                    //LOG3("cmd: ", cmd);
 
                     //echo
                     res = evalCommand(cmd.c_str(), 0, true);
@@ -959,22 +1129,34 @@ bool IFMagnetic::_evalCommandSpecial(const char* cmd, CommandResultI* cres)
     return res;
 }
 
-bool IFMagnetic::puzzleForX(const string* adj, const string& x, int act)
+bool IFMagnetic::puzzleForX(const string *adj2, const string* adj, const string& x, int act)
 {
     // look for a puzzle for x
     // if adj and no puzzle for x, look for a puzzle for "adj x".
+    // and if adj2 and no puzzle for adj x, look for "adj2 adj x"
     
     bool res = false;
+    Puzzle* p = 0;
 
     if (!_puzzles._enabled) return false; // switched off
-    
-    Puzzle* p = _puzzles.find(x.c_str());
 
+    // prefer adj+adj+word
+    if (adj2 && adj)
+    {
+        string ax = *adj2 + ' ' + *adj + ' ' + x;
+        p = _puzzles.find(ax.c_str());
+    }
+    // prefer adjective+word
     if (!p && adj)
     {
-        // try adjective as well
         string ax = *adj + ' ' + x;
-        p = _puzzles.find(ax.c_str());        
+        p = _puzzles.find(ax.c_str());
+    }
+    
+    if (!p)
+    {
+        // try plain x
+        p = _puzzles.find(x.c_str());
     }
 
     if (p)
@@ -1043,7 +1225,7 @@ bool IFMagnetic::evalUseX(const string& x, bool frommenu)
 
             seq.add("look");
             
-            if (xi.gettable() && !xi.carried())
+            if ((xi.gettable() && !xi.carried())||(xi.carried() && !xi.simplyCarried()))
             {
                 if (_puzzles.allowSuggestGet(xi)) seq.add("get");
             }
@@ -1197,7 +1379,10 @@ void IFMagnetic::_buildMapJSON(GrowString& buf)
     MapPosSet knownMapPos;
     Point2 minpos;
 
-    bool allMapCheat = false;
+#if !defined(NDEBUG)
+    // level 2 and above, see whole map
+    if (Logged::_logLevel >= 2) _allMapCheat = true;
+#endif
     
     for (size_t i = 0; i < gm.size(); ++i)
     {
@@ -1206,13 +1391,8 @@ void IFMagnetic::_buildMapJSON(GrowString& buf)
 
         IItem ri = IItem::getRoom(mpi.room);
 
-#ifdef LOGGING
-            // logging level >= 2, add room# to name 
-            if (Logged::_logLevel >= 2) allMapCheat = true;
-#endif
-
         // collect only rooms we know about
-        if (ri && (ri.visibleOnMap() || allMapCheat))
+        if (ri && (ri.visibleOnMap() || _allMapCheat))
         {
             // collect the min grid locations
             if (knownMapPos.size()) minpos = minpos.min(mpi.pos);
@@ -1230,10 +1410,22 @@ void IFMagnetic::_buildMapJSON(GrowString& buf)
         mpi.pos -= minpos;
 
         IItem ri = IItem::getRoom(mpi.room);
+        string name = ri.toString();
+
+#if !defined(NDEBUG)
+        // level 3 and above, show room numbers
+        if (Logged::_logLevel >= 3)
+        {
+            char buf[32];
+            sprintf(buf, " (%d)", mpi.room);
+            //sprintf(buf, " (%x)", mpi.room);
+            name += buf;
+        }
+#endif        
 
         build.beginPlace();
         build.placeID(mpi.room);
-        build.placeName(ri.toString());
+        build.placeName(name);
         build.placeX(mpi.pos.x);
         build.placeY(mpi.pos.y);
 
@@ -1252,7 +1444,7 @@ void IFMagnetic::_buildMapJSON(GrowString& buf)
         // rooms may be visible on the map even though they aren't explored.
         // ie, they have never been visible.
         // rooms that are visible but not explored do not show map links
-        if (ri.isExplored() || allMapCheat)
+        if (ri.isExplored() || _allMapCheat)
         {
             // exits
             int exits[ITEM_MAX_EXITS];
@@ -1264,7 +1456,7 @@ void IFMagnetic::_buildMapJSON(GrowString& buf)
                 for (int i = 0; i < ne; ++i)
                 {
                     IItem rj = IItem::getRoom(exits[i]);
-                    if (rj.isExplored() || allMapCheat)
+                    if (rj.isExplored() || _allMapCheat)
                         build.exit(exits[i]);
                 }
                 build.endExits();
@@ -1283,7 +1475,7 @@ bool IFMagnetic::updateMapInfo(MapInfo& mi)
 {
     IItem croom = IItem::currentRoom();
 
-    mi._currentLocation = croom.roomNumber();
+    mi._currentLocation = std::to_string(croom.roomNumber());
     mi._currentExits = 0;
 
     // `currentExits` is a bit mask of exits 
@@ -1347,10 +1539,10 @@ void IFMagnetic::_buildRosterJSON(GrowString& buf)
 
 bool IFMagnetic::updateRosterInfo(RosterInfo& ri)
 {
-    //LOG3("MS ", "updateRosterInfo");
-     
     GrowString buf;
     _buildRosterJSON(buf);
+
+    // LOG3("MS, updateRosterInfo ", buf.start());
     
     ri._changed = ri._json != buf.start();
     if (ri._changed) ri._json = buf.start();
@@ -1885,7 +2077,18 @@ bool IFMagnetic::setOptions(const VarSet& vs)
         else if (it->first == BRA_OPT_MODERN)
         {
             bool v = it->second.toInt() != 0;
+            
             _puzzles.enabled(v);
+
+            // set here *before* game starts, later used in `start`
+            _modernMode = v;
+
+            if (_running)
+            {
+                // if running set right away, so changes mid-game work
+                _puzzles.setRemaster(_modernMode);
+            }
+
         }
         else if (it->first == BRA_OPT_RANDOMSEED)
         {
@@ -1973,7 +2176,6 @@ bool IFMagnetic::restartGame()
     return true;
 }
 
-
 // ----------------------------------------
     
 void ms_flush()
@@ -1996,7 +2198,7 @@ void ms_statuschar(type8 c)
     theMS->_putStatusChar(c);
 }
 
-void ms_showpic(type32 c, type32 picAddr, type8 mode, type8 ver, float* profile)
+void ms_showpic(type32 c, type32 picAddr, type8 mode, type8 ver, float* profile, int picVer)
 {
     IFMagnetic::PicRequest pr;
     pr._picn = c;
@@ -2004,7 +2206,16 @@ void ms_showpic(type32 c, type32 picAddr, type8 mode, type8 ver, float* profile)
     pr._mode = mode;
     pr._ver = ver;
     pr._profile = profile;
+    pr._picVer = picVer;
     theMS->_showpic(&pr);
+}
+
+void ms_playsound(int room, const char* name)
+{
+    IFMagnetic::SoundRequest sr;
+    sr._room = room;
+    sr._soundFile = name;
+    theMS->_playSound(&sr);
 }
 
 void ms_playmusic(type8 * midi_data, type32 length, type16 tempo)
@@ -2041,5 +2252,20 @@ void ms_undo_signal()
     // from game trap A0E2
     LOG3("MS, ", "undo signal");
     theMS->undo(0);  // restore game delta 0 (ie latest)
+}
+
+void ms_event_hook(int quiet)
+{
+    // called after location description printed and nothing is happening
+    theMS->_handleEvent(quiet);
+}
+
+void ifiSend(const char* js)
+{
+    // hook for IFI-style responses within KLMAG
+    GrowString buf;
+    buf.append(js);
+    buf.add(0);
+    theMS->_playSoundJSON(buf);
 }
 

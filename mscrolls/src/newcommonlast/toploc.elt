@@ -1,0 +1,58 @@
+**************************************************************
+*
+*	%G%
+*	%W%
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+
+****************************************************************************
+*
+*  TOPLOC you pass it d0 as object
+*  returns D0 as room number of the top location
+*  won't work on pseudos and d0=0 means inventory
+*
+****************************************************************************
+
+	XDEF	TOPLOC
+ 
+TOPLOC 
+ 
+	GETINFO	
+	MOVE.B  6(A0),D1
+	AND.W   #$3F,D1                  ;ALLOW ROOMS
+	BEQ.S   10$
+	MOVE.B	7(A0),D1		;I know top byte of D1.W is zero
+	BNE.S	30$
+	MOVE.W  8(A0),D0
+	BRA.S   TOPLOC
+30$
+	MOVE.W	D1,D0
+	BRA.S	20$
+10$
+	MOVE.W  8(A0),D0
+20$
+	RET
+
+*------------------------------------------
+
+	XDEF	TOPLOC2
+
+TOPLOC2
+
+* The same as toploc, but preserves D1/A0
+
+	PUSH_L	D1/A0
+	CALL_S	TOPLOC
+	PULL_L	D1/A0
+	RET
+
+*------------------------------------------
+
+
+	END

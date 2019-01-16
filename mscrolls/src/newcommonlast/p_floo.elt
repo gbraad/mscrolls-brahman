@@ -1,0 +1,41 @@
+**************************************************************
+*
+*	3/12/89
+*	@(#)p_floo.elt	2.3
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include "scenequ.i"
+
+*--------------------------------
+
+	XDEF	P.FLOO
+	
+P.FLOO
+	
+	DO	NPC.OK			;is the npc alive etc.
+	BEQ.S	10$			;yes
+	MSG	YOUDBETTERNOT		;you'd better not do that_
+	MSGGO	ATMOMT			;at the moment.
+10$
+
+      IFD	wantSP.FLOOK
+	XREF	SP.FLOOK
+	CALL	SP.FLOOK
+      ENDC	;wantSP.FLOOK
+
+	DO	P.TN
+	MSG	GIVE  
+	DO	P.SUB
+	MSGGO	FLOOK
+
+*-------------------------------
+
+
+
+	END

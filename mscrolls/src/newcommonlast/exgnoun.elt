@@ -1,0 +1,22 @@
+******************************************************
+*
+*	@(#)exgnoun.elt	1.2
+*	10/27/87
+*
+******************************************************
+
+		SECTION		"ADV",CODE
+
+
+	include	"equates.i"
+	include "macros.i"
+
+      XDEF     EXGNOUN
+
+
+EXGNOUN
+	EXG     D0,D5
+	EXG     A0,A5
+	RET
+
+	END

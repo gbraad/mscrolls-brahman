@@ -1,0 +1,76 @@
+**************************************************************
+*
+*	10/27/87
+*	@(#)scan_rep.elt	1.3
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"scenequ.i"
+
+	IFNE	ELIZA
+
+*--------------------------------
+   
+	XDEF	SCAN.REP
+	XREF	CONVNPC,NPCQUEST,PR.COPOUT,NOTNICE,SCAN.SUB,INSULTSUB
+	XREF	SUBJECTIVE,OBJECTIVE,IUFLAG
+
+
+
+SCAN.REP
+   
+* ASSUME,
+* D5,A5 = NPC TALKED TO
+   
+	MOVE.L  CONVNPC(A4),A5
+	MOVE.W  CONVNPC+4(A4),D5
+	TEST_W  NPCQUEST(A4)
+	BMI.S   02$
+	DO	P.SAY
+	MSGGO	TRICKQ
+02$
+	MOVE.B  IUFLAG(A4),D2
+	BTST    #1,D2              ;I
+	BNE     SUBJECTIVE
+	BTST    #0,D2              ;YOU
+	BNE     OBJECTIVE
+   
+* GENERAL STATEMENT
+   
+	DO	P.SAY
+	CMP.W   SCAN.SUB(A4),D5    ;TALKING ABOUT OTHER PERSON
+	BNE.S   11$
+	BTST    #4,D2
+	BNE     INSULTSUB
+	MSGGO	NCONCE
+11$
+	MOVE.W  SCAN.SUB(A4),D0
+	BEQ.S   15$                ;NOONE
+	GETINFO
+	TST_NPC				;
+	BEQ     PR.COPOUT
+	DO	VALID              ;ABOUT SOMEONE IN ROOM
+	BNE.S   12$                ;NO
+	MSG     SAYTO
+	MOVE.W  D5,D0
+	MOVE.L  A5,A0
+	DOGO	P.OBJPRN
+12$
+	BTST    #4,D2
+	BNE     NOTNICE
+	MSGGO	IMPOLI
+15$
+	BTST    #4,D2              ;INSULT?
+	BEQ     PR.COPOUT          ;NO
+
+	MSGGO	PARDON
+
+
+    ENDC	;ELIZA
+
+	END

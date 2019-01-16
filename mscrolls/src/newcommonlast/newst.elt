@@ -1,0 +1,33 @@
+**************************************************************
+*
+*	10/27/87
+*	@(#)newst.elt	1.2
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+
+*--------------------------------
+
+	XDEF	NEWST
+	XREF	BRKWCH,DECODE,INBUFF,NOTOUT
+	
+NEWST
+	
+*START ANOTHER COMMAND WO 
+*PROPERLY FINISHING OLD ONE
+      
+	TEST_W  BRKWCH(A4)         ;did we get a verb in response to a 'which..'
+	BEQ     DECODE             ;EQ => nope, so carry on as per normal
+	LEA     INBUFF(A4),A6      ;POINT TO START
+	BRA     NOTOUT             ;PROCESS NEXT SENTANCE
+   
+*--------------------------------
+
+
+
+	END

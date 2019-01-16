@@ -1,0 +1,261 @@
+**************************************************************
+*
+*	4/5/89
+*	@(#)rootnum.elt	2.3
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"scenequ.i"
+	include	"linemacros.i"
+
+
+*--------------------------------
+*
+* Rootnum - finds no of nouns with the same 'root' (like key)
+* that are local
+*
+* takes D0 = noun#
+*
+
+
+    IFND	Version2_ROOTNUM
+
+	XDEF	ROOTNUM
+	XREF	LOOPBUF,LIST.N,L.DIREC,MATCHBUF
+
+   
+ROOTNUM
+   
+* CALCS NUMBER OF ROOT-WORD
+* MATCHES IN LOCALITY
+   
+	PUSH_L  D0-D3/D5-D7/A0-A6
+      
+      IFND	wantBIGPROG
+
+	LEA     LIST.N(A4),A6
+
+      ENDC
+
+      IFD	wantBIGPROG
+
+	LEA     LIST.N,A6
+
+      ENDC
+
+
+      IFEQ	FastBits
+
+	SUBQ.W  #1,D0
+10$
+	MOVE.B  (A6)+,D1           ;CHAR
+	BPL.S   10$
+	SUBQ.W  #1,D0              ;COUNTER
+	BNE.S   10$                ;END?
+
+      ENDC
+
+      IFNE	FastBits
+
+	SUBQ.W  #1,D0
+	BEQ.S	10$
+
+	MOVE.L	A6,A1
+	MOVE.L	D0,D2
+	DC.W	$A0FB		;call WORDSCAN
+	MOVE.L	A1,A6
+10$
+
+      ENDC
+
+
+20$
+	LEA     LOOPBUF(A4),A3
+	MOVE.L  A3,A2
+21$
+      IFND	wantBIGPROG
+
+	MOVE.B  (A6)+,(A2)+		;copy word from wtable 
+	BPL.S   21$
+      
+      ENDC
+
+      IFD	wantBIGPROG
+	
+	MOVE.L	A6,A1		;source string (in wordtable)
+	MOVE.L	A2,A0		;destination
+
+	CopyWTabWord		;Does MOVE.B (A1)+,(A0)+ until MI
+
+	MOVE.L	A1,A6		;pointers now point at char AFTER MI one
+	MOVE.L	A0,A2
+
+      ENDC
+
+	MOVE.B  #' ',(A2)		;put a ' ' at the end of it
+	BCLR    #7,-(A2)		;FOD the hi bit term.
+	MOVE.L  A3,A6			;and fake input for SEARCH (2)
+
+    IFND	wantSLOW_ROOTNUM
+
+      IFND	wantBIGPROG
+
+	LEA     LIST.N(A4),A3
+ 
+	MOVE.B  L.DIREC(A4),-(A7)	;SAVE FIRST BYTE AFTER NOUNS
+	MOVE.B  L.DIREC(A4),-(A7)	;SAVE FIRST BYTE AFTER NOUNS
+ 
+	MOVE.B  #$81,L.DIREC(A4)	;PUT WORDTABLE TERMINATER IN
+
+      ENDC
+ 
+      IFD	wantBIGPROG
+
+	LEA     LIST.N,A3
+ 
+	LEA	L.DIREC,A1	;SAVE FIRST BYTE AFTER NOUNS
+	GetWTabByte
+	MOVE.W	D1,-(A7)
+
+	MOVEQ	#$81,D1
+	PutWTabByte		;PUT WORDTABLE TERMINATER IN
+ 
+      ENDC
+ 
+	MOVE.W  D4,-(A7)		;SAVE
+	CLR.W   D6
+	DO	SEARCH2			;INTO MATCHBUF
+	MOVE.W  (A7)+,D4
+
+
+      IFND	wantBIGPROG
+
+	MOVE.B  (A7)+,L.DIREC(A4)	;NOTE THAT THIS ADDS 2 TO A7  !!
+	MOVE.B  (A7)+,L.DIREC(A4)	;NOTE THAT THIS ADDS 2 TO A7  !!
+      
+      ENDC
+     
+      IFD	wantBIGPROG
+
+ 	LEA	L.DIREC,A1
+	MOVE.W	(A7)+,D1		;get back real byte at L.DIRECT
+	PutWTabByte
+
+      ENDC
+
+    ENDC	;wantSLOW_ROOTNUM
+
+      IFD		wantSLOW_ROOTNUM
+
+	MOVE.W  D4,-(A7)		;SAVE
+	CLR.W   D6
+	DO	SEARCH			;NOT search2 'cos starts at BEGING of
+	MOVE.W  (A7)+,D4		;word table
+
+      ENDC	;wantSLOW_ROOTNUM
+
+     
+	MOVE.W  #$FFFF,(A2)		;DT OF BUF
+	LEA     MATCHBUF(A4),A2
+
+	DO	ISDOFRE			;EQ => always local
+	SEQ	D2
+30$
+	MOVE.W  (A2)+,D1		;SECTION
+	BMI.S   50$			;END OF MATCHES
+	MOVE.W  (A2)+,D0		;#
+	ADDQ.W  #1,D0			;convert to noun#
+
+      IFND	wantSLOW_ROOTNUM
+
+	TEST_W  D1			;SECTIN #0? (ie NOUN)
+
+      ENDC
+
+      IFD	wantSLOW_ROOTNUM
+
+	CMP.W	#SECT.NOUN,D1
+
+      ENDC
+
+	BNE.S   30$			;SKIP
+	TEST_B	D2			;was DO free? (NE => yes)
+	BNE.S	40$			;in that case don't do a valid
+	DO	VALID.NP
+	TEST_B  D7
+	BNE.S   30$			;FAIL?
+40$
+	ADDQ.B  #1,D4			;COUNTER
+	BRA.S   30$
+50$
+	PULL_L  D0-D3/D5-D7/A0-A6
+	RET
+
+    ENDC	;!Version2_ROOTNUM
+
+*------------------------------------------
+
+    IFD	Version2_ROOTNUM
+
+	XDEF	ROOTNUM
+	XREF	SETS.TBL
+
+ROOTNUM
+
+	PUSH_L	D0-D3/A1-A2
+	MOVEQ	#0,D3			;not in a set (yet)
+	MOVE.W	D0,D2			;d2 is the target
+	LEA	SETS.TBL(A4),A1
+10$
+	MOVE.W	(A1),D1			;get first set element
+	BEQ.S	90$			;all sets done.
+	BMI.S	30$			;not relevent, skip this set
+	BTST	#14,D1			;is a class, not a set
+	BNE.S	30$			;yes, lose this as wel.
+	MOVE.L	A1,A2			;save start of set for reference.
+20$
+	MOVE.W	(A1)+,D1		;get one
+	BEQ.S	10$			;end of set, try next
+	CMP.W	D1,D2			;is it our noun?
+	BNE.S	20$			;no, continue
+	MOVEQ	#1,D3			;it's in at least one set
+	MOVE.L	A2,A1			;start of this set
+25$
+	MOVE.W	(A1)+,D0
+	BEQ.S	10$			;this set is over, look for anymore?
+	CMP.W	D0,D2			;don't count itself
+	BEQ.S	25$
+	DO	VALID.NP		;is it around?
+	BNE.S	25$			;no, look for rest
+	ADDQ.W	#1,D4			;inc counter
+	BRA.S	25$			;try next
+30$
+	TEST_W	(A1)+			;end of this set?
+	BNE.S	30$			;no
+	BRA.S	10$			;next set.
+90$
+	MOVE.W	D2,D0			;get original target
+	DO	VALID.NP		;is it local itself?
+	BNE.S	91$
+	ADD.W	D3,D4			;add in self occurrence if local
+91$
+	TEST_W	D4			;found any?
+	BNE.S	99$			;yes, ok fine
+	DO	VALID.NP		;is it local itself?
+	BEQ.S	99$			;no, tough
+	MOVEQ	#1,D4			;well there is the one.
+99$
+	PULL_L	D0-D3/A1-A2
+	RET
+
+    ENDC	;Version2_ROOTNUM
+
+*------------------------------------------
+	
+
+	END

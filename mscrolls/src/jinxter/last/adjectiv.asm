@@ -1,0 +1,1680 @@
+***************************************************************************
+*
+*
+*	fred23jr output from file '../jinxter'*
+*
+***************************************************************************
+
+		SECTION		"ADV",CODE
+
+*--------------------------------
+*
+* SRC.ADV.ADJECTIVES1
+*
+*--------------------------------
+  
+	include "equates.i"
+	include	"macros.i"
+	include	"adjequ.i"
+
+      XDEF        ADJ.TBL
+
+ADJ      MACRO    * adjname,adjname....
+
+         IFC      '','\1'
+         DC.B     0
+         MEXIT
+         ENDC
+         DC.B     ADJ_\1
+         ADJ      \2,\3,\4,\5,\6
+
+         ENDM
+
+
+
+
+ADJ.TBL
+
+
+
+
+* onbus
+	XDEF	ADJ.ONBUS
+ADJ.ONBUS
+	ADJ	
+* bus_sign
+	XDEF	ADJ.BUS_SIGN
+ADJ.BUS_SIGN
+	ADJ	
+* button
+	XDEF	ADJ.BUTTON
+ADJ.BUTTON
+	ADJ	
+* autodoors
+	XDEF	ADJ.AUTODOORS
+ADJ.AUTODOORS
+	ADJ	automatic,bus
+* crowd
+	XDEF	ADJ.CROWD
+ADJ.CROWD
+	ADJ	
+* bus_driver
+	XDEF	ADJ.BUS_DRIVER
+ADJ.BUS_DRIVER
+	ADJ	bus
+* frontgarden1
+	XDEF	ADJ.FRONTGARDEN1
+ADJ.FRONTGARDEN1
+	ADJ	front
+* lawn
+	XDEF	ADJ.LAWN
+ADJ.LAWN
+	ADJ	green,perfect,lush
+* flowerurn
+	XDEF	ADJ.FLOWERURN
+ADJ.FLOWERURN
+	ADJ	flower
+* roses
+	XDEF	ADJ.ROSES
+ADJ.ROSES
+	ADJ	small
+* gardengate
+	XDEF	ADJ.GARDENGATE
+ADJ.GARDENGATE
+	ADJ	garden
+* deckchair
+	XDEF	ADJ.DECKCHAIR
+ADJ.DECKCHAIR
+	ADJ	striped,orange,yellow,deck
+* bag1
+	XDEF	ADJ.BAG1
+ADJ.BAG1
+	ADJ	cello
+* jeans
+	XDEF	ADJ.JEANS
+ADJ.JEANS
+	ADJ	pair_of,white
+* sweatshirt
+	XDEF	ADJ.SWEATSHIRT
+ADJ.SWEATSHIRT
+	ADJ	white
+* fist
+	XDEF	ADJ.FIST
+ADJ.FIST
+	ADJ	
+* hand
+	XDEF	ADJ.HAND
+ADJ.HAND
+	ADJ	
+* player
+	XDEF	ADJ.PLAYER
+ADJ.PLAYER
+	ADJ	
+* floor
+	XDEF	ADJ.FLOOR
+ADJ.FLOOR
+	ADJ	
+* kitchen1
+	XDEF	ADJ.KITCHEN1
+ADJ.KITCHEN1
+	ADJ	
+* table
+	XDEF	ADJ.TABLE
+ADJ.TABLE
+	ADJ	
+* tin_opener
+	XDEF	ADJ.TIN_OPENER
+ADJ.TIN_OPENER
+	ADJ	tin,can
+* fridge
+	XDEF	ADJ.FRIDGE
+ADJ.FRIDGE
+	ADJ	
+* ramblingshed
+	XDEF	ADJ.RAMBLINGSHED
+ADJ.RAMBLINGSHED
+	ADJ	rambling
+* sandwich
+	XDEF	ADJ.SANDWICH
+ADJ.SANDWICH
+	ADJ	cheese
+* hearth
+	XDEF	ADJ.HEARTH
+ADJ.HEARTH
+	ADJ	vast,Gothic
+* cmakers_sign
+	XDEF	ADJ.CMAKERS_SIGN
+ADJ.CMAKERS_SIGN
+	ADJ	
+* bedroom1
+	XDEF	ADJ.BEDROOM1
+ADJ.BEDROOM1
+	ADJ	
+* bed
+	XDEF	ADJ.BED
+ADJ.BED
+	ADJ	wooden,plain
+* cmakers_window
+	XDEF	ADJ.CMAKERS_WINDOW
+ADJ.CMAKERS_WINDOW
+	ADJ	small,paned,shop
+* wardrobe
+	XDEF	ADJ.WARDROBE
+ADJ.WARDROBE
+	ADJ	plain
+* ash
+	XDEF	ADJ.ASH
+ADJ.ASH
+	ADJ	black
+* keyring
+	XDEF	ADJ.KEYRING
+ADJ.KEYRING
+	ADJ	metal,key
+* key1
+	XDEF	ADJ.KEY1
+ADJ.KEY1
+	ADJ	plastic,yellow
+* key2
+	XDEF	ADJ.KEY2
+ADJ.KEY2
+	ADJ	iron,metal
+* key3
+	XDEF	ADJ.KEY3
+ADJ.KEY3
+	ADJ	rusty,metal,old
+* bathroom1
+	XDEF	ADJ.BATHROOM1
+ADJ.BATHROOM1
+	ADJ	
+* bathtub
+	XDEF	ADJ.BATHTUB
+ADJ.BATHTUB
+	ADJ	old,cracked,freestanding
+* basin
+	XDEF	ADJ.BASIN
+ADJ.BASIN
+	ADJ	wash
+* lavatory
+	XDEF	ADJ.LAVATORY
+ADJ.LAVATORY
+	ADJ	old,porcelain
+* dragon
+	XDEF	ADJ.DRAGON
+ADJ.DRAGON
+	ADJ	plastic
+* book1
+	XDEF	ADJ.BOOK1
+ADJ.BOOK1
+	ADJ	history
+* library1
+	XDEF	ADJ.LIBRARY1
+ADJ.LIBRARY1
+	ADJ	
+* green_door
+	XDEF	ADJ.GREEN_DOOR
+ADJ.GREEN_DOOR
+	ADJ	back,green
+* bookshelves
+	XDEF	ADJ.BOOKSHELVES
+ADJ.BOOKSHELVES
+	ADJ	book
+* desk
+	XDEF	ADJ.DESK
+ADJ.DESK
+	ADJ	old,vast
+* countryside
+	XDEF	ADJ.COUNTRYSIDE
+ADJ.COUNTRYSIDE
+	ADJ	country,rolling
+* telephone
+	XDEF	ADJ.TELEPHONE
+ADJ.TELEPHONE
+	ADJ	red
+* magazines
+	XDEF	ADJ.MAGAZINES
+ADJ.MAGAZINES
+	ADJ	
+* conservatory
+	XDEF	ADJ.CONSERVATORY
+ADJ.CONSERVATORY
+	ADJ	glass
+* wickerchairs
+	XDEF	ADJ.WICKERCHAIRS
+ADJ.WICKERCHAIRS
+	ADJ	wicker
+* wickertable
+	XDEF	ADJ.WICKERTABLE
+ADJ.WICKERTABLE
+	ADJ	wicker
+* milkbottle
+	XDEF	ADJ.MILKBOTTLE
+ADJ.MILKBOTTLE
+	ADJ	milk
+* tablecloth
+	XDEF	ADJ.TABLECLOTH
+ADJ.TABLECLOTH
+	ADJ	red,dull,frayed
+* pseudocmakers
+	XDEF	ADJ.PSEUDOCMAKERS
+ADJ.PSEUDOCMAKERS
+	ADJ	
+* backgarden1
+	XDEF	ADJ.BACKGARDEN1
+ADJ.BACKGARDEN1
+	ADJ	back
+* oil_lamp
+	XDEF	ADJ.OIL_LAMP
+ADJ.OIL_LAMP
+	ADJ	oil
+* shears
+	XDEF	ADJ.SHEARS
+ADJ.SHEARS
+	ADJ	
+* gloves
+	XDEF	ADJ.GLOVES
+ADJ.GLOVES
+	ADJ	gardening
+* countrylane2
+	XDEF	ADJ.COUNTRYLANE2
+ADJ.COUNTRYLANE2
+	ADJ	holly,country
+* mailbox
+	XDEF	ADJ.MAILBOX
+ADJ.MAILBOX
+	ADJ	yellow,plastic,mail
+* postal_note
+	XDEF	ADJ.POSTAL_NOTE
+ADJ.POSTAL_NOTE
+	ADJ	postal
+* dead_mouse
+	XDEF	ADJ.DEAD_MOUSE
+ADJ.DEAD_MOUSE
+	ADJ	dead
+* countrylane1
+	XDEF	ADJ.COUNTRYLANE1
+ADJ.COUNTRYLANE1
+	ADJ	Neverending,country,narrow
+* ladder
+	XDEF	ADJ.LADDER
+ADJ.LADDER
+	ADJ	
+* charm1
+	XDEF	ADJ.CHARM1
+ADJ.CHARM1
+	ADJ	dragon,jade
+* charm2
+	XDEF	ADJ.CHARM2
+ADJ.CHARM2
+	ADJ	unicorn,ivory
+* charm3
+	XDEF	ADJ.CHARM3
+ADJ.CHARM3
+	ADJ	walrus,lapis
+* stool
+	XDEF	ADJ.STOOL
+ADJ.STOOL
+	ADJ	metal,tall
+* pubhearth
+	XDEF	ADJ.PUBHEARTH
+ADJ.PUBHEARTH
+	ADJ	capacious
+* charm4
+	XDEF	ADJ.CHARM4
+ADJ.CHARM4
+	ADJ	pelican,jet,tiny
+* charm5
+	XDEF	ADJ.CHARM5
+ADJ.CHARM5
+	ADJ	amethyst
+* hallway1
+	XDEF	ADJ.HALLWAY1
+ADJ.HALLWAY1
+	ADJ	
+* view
+	XDEF	ADJ.VIEW
+ADJ.VIEW
+	ADJ	sheer,profound
+* field1
+	XDEF	ADJ.FIELD1
+ADJ.FIELD1
+	ADJ	grassy
+* bull
+	XDEF	ADJ.BULL
+ADJ.BULL
+	ADJ	angry
+* bull2
+	XDEF	ADJ.BULL2
+ADJ.BULL2
+	ADJ	defeated
+* curtain2
+	XDEF	ADJ.CURTAIN2
+ADJ.CURTAIN2
+	ADJ	red
+* wood1
+	XDEF	ADJ.WOOD1
+ADJ.WOOD1
+	ADJ	Dead_Fly
+* trees
+	XDEF	ADJ.TREES
+ADJ.TREES
+	ADJ	conifer,mighty,ancient,willow,oak
+* flies
+	XDEF	ADJ.FLIES
+ADJ.FLIES
+	ADJ	dead,crunchy
+* field2
+	XDEF	ADJ.FIELD2
+ADJ.FIELD2
+	ADJ	mustard
+* fence
+	XDEF	ADJ.FENCE
+ADJ.FENCE
+	ADJ	barbed
+* orchard
+	XDEF	ADJ.ORCHARD
+ADJ.ORCHARD
+	ADJ	
+* int_freeze
+	XDEF	ADJ.INT_FREEZE
+ADJ.INT_FREEZE
+	ADJ	oojimy
+* clockmakers
+	XDEF	ADJ.CLOCKMAKERS
+ADJ.CLOCKMAKERS
+	ADJ	clockmakers,old
+* stream1
+	XDEF	ADJ.STREAM1
+ADJ.STREAM1
+	ADJ	cool
+* bridge1
+	XDEF	ADJ.BRIDGE1
+ADJ.BRIDGE1
+	ADJ	
+* bridge
+	XDEF	ADJ.BRIDGE
+ADJ.BRIDGE
+	ADJ	
+* frontgarden2
+	XDEF	ADJ.FRONTGARDEN2
+ADJ.FRONTGARDEN2
+	ADJ	front
+* path
+	XDEF	ADJ.PATH
+ADJ.PATH
+	ADJ	gravel
+* kitchen_door
+	XDEF	ADJ.KITCHEN_DOOR
+ADJ.KITCHEN_DOOR
+	ADJ	kitchen
+* parcel
+	XDEF	ADJ.PARCEL
+ADJ.PARCEL
+	ADJ	small
+* kitchen2
+	XDEF	ADJ.KITCHEN2
+ADJ.KITCHEN2
+	ADJ	messy
+* sock
+	XDEF	ADJ.SOCK
+ADJ.SOCK
+	ADJ	woolly,red
+* jar
+	XDEF	ADJ.JAR
+ADJ.JAR
+	ADJ	plastic,old,oil
+* oil
+	XDEF	ADJ.OIL
+ADJ.OIL
+	ADJ	
+* crystalball
+	XDEF	ADJ.CRYSTALBALL
+ADJ.CRYSTALBALL
+	ADJ	crystal
+* diningroom1
+	XDEF	ADJ.DININGROOM1
+ADJ.DININGROOM1
+	ADJ	dining
+* diningtable
+	XDEF	ADJ.DININGTABLE
+ADJ.DININGTABLE
+	ADJ	vast
+* rungs
+	XDEF	ADJ.RUNGS
+ADJ.RUNGS
+	ADJ	
+* candle
+	XDEF	ADJ.CANDLE
+ADJ.CANDLE
+	ADJ	wax
+* painting
+	XDEF	ADJ.PAINTING
+ADJ.PAINTING
+	ADJ	
+* study1
+	XDEF	ADJ.STUDY1
+ADJ.STUDY1
+	ADJ	
+* benches
+	XDEF	ADJ.BENCHES
+ADJ.BENCHES
+	ADJ	
+* encyclopaedias
+	XDEF	ADJ.ENCYCLOPAEDIAS
+ADJ.ENCYCLOPAEDIAS
+	ADJ	
+* wooden_door
+	XDEF	ADJ.WOODEN_DOOR
+ADJ.WOODEN_DOOR
+	ADJ	heavy
+* study_table
+	XDEF	ADJ.STUDY_TABLE
+ADJ.STUDY_TABLE
+	ADJ	crufty
+* ice
+	XDEF	ADJ.ICE
+ADJ.ICE
+	ADJ	water
+* keyholes
+	XDEF	ADJ.KEYHOLES
+ADJ.KEYHOLES
+	ADJ	
+* trapdoor1
+	XDEF	ADJ.TRAPDOOR1
+ADJ.TRAPDOOR1
+	ADJ	tiny,trap
+* cellar2
+	XDEF	ADJ.CELLAR2
+ADJ.CELLAR2
+	ADJ	cheese
+* cheese
+	XDEF	ADJ.CHEESE
+ADJ.CHEESE
+	ADJ	lump_of,foul
+* wooden_box
+	XDEF	ADJ.WOODEN_BOX
+ADJ.WOODEN_BOX
+	ADJ	match,wooden
+* match
+	XDEF	ADJ.MATCH
+ADJ.MATCH
+	ADJ	
+* paddle
+	XDEF	ADJ.PADDLE
+ADJ.PADDLE
+	ADJ	
+* backgarden2
+	XDEF	ADJ.BACKGARDEN2
+ADJ.BACKGARDEN2
+	ADJ	herb
+* holly_bush
+	XDEF	ADJ.HOLLY_BUSH
+ADJ.HOLLY_BUSH
+	ADJ	holly,green,colossal
+* naturestuff
+	XDEF	ADJ.NATURESTUFF
+ADJ.NATURESTUFF
+	ADJ	crimson,herb,little,red,large
+* hollybush
+	XDEF	ADJ.HOLLYBUSH
+ADJ.HOLLYBUSH
+	ADJ	
+* magpie
+	XDEF	ADJ.MAGPIE
+ADJ.MAGPIE
+	ADJ	nerdulent
+* spectacles
+	XDEF	ADJ.SPECTACLES
+ADJ.SPECTACLES
+	ADJ	pair_of,old
+* boathouse
+	XDEF	ADJ.BOATHOUSE
+ADJ.BOATHOUSE
+	ADJ	
+* fishingboat
+	XDEF	ADJ.FISHINGBOAT
+ADJ.FISHINGBOAT
+	ADJ	fishing,old
+* witch_hand
+	XDEF	ADJ.WITCH_HAND
+ADJ.WITCH_HAND
+	ADJ	greenish
+* slidingdoor
+	XDEF	ADJ.SLIDINGDOOR
+ADJ.SLIDINGDOOR
+	ADJ	sliding
+* runners
+	XDEF	ADJ.RUNNERS
+ADJ.RUNNERS
+	ADJ	
+* canoe_mooring
+	XDEF	ADJ.CANOE_MOORING
+ADJ.CANOE_MOORING
+	ADJ	canoe,little
+* canoe
+	XDEF	ADJ.CANOE
+ADJ.CANOE
+	ADJ	
+* lake1
+	XDEF	ADJ.LAKE1
+ADJ.LAKE1
+	ADJ	
+* clockmaker
+	XDEF	ADJ.CLOCKMAKER
+ADJ.CLOCKMAKER
+	ADJ	
+* pagoda
+	XDEF	ADJ.PAGODA
+ADJ.PAGODA
+	ADJ	ornamental
+* steps1
+	XDEF	ADJ.STEPS1
+ADJ.STEPS1
+	ADJ	marble,carrara,darkened
+* pubfire
+	XDEF	ADJ.PUBFIRE
+ADJ.PUBFIRE
+	ADJ	roaring
+* dirtmound
+	XDEF	ADJ.DIRTMOUND
+ADJ.DIRTMOUND
+	ADJ	large
+* corridor1
+	XDEF	ADJ.CORRIDOR1
+ADJ.CORRIDOR1
+	ADJ	long
+* office
+	XDEF	ADJ.OFFICE
+ADJ.OFFICE
+	ADJ	
+* red_door
+	XDEF	ADJ.RED_DOOR
+ADJ.RED_DOOR
+	ADJ	red,painted
+* bottom_well
+	XDEF	ADJ.BOTTOM_WELL
+ADJ.BOTTOM_WELL
+	ADJ	ornamental
+* pubcrowd
+	XDEF	ADJ.PUBCROWD
+ADJ.PUBCROWD
+	ADJ	
+* plastic_desk
+	XDEF	ADJ.PLASTIC_DESK
+ADJ.PLASTIC_DESK
+	ADJ	leather
+* pouch
+	XDEF	ADJ.POUCH
+ADJ.POUCH
+	ADJ	
+* Aquitanian_ferg
+	XDEF	ADJ.AQUITANIAN_FERG
+ADJ.AQUITANIAN_FERG
+	ADJ	one_ferg,one,ferg
+* icewater
+	XDEF	ADJ.ICEWATER
+ADJ.ICEWATER
+	ADJ	
+* swivel_chair
+	XDEF	ADJ.SWIVEL_CHAIR
+ADJ.SWIVEL_CHAIR
+	ADJ	swivel,leather
+* divers_room
+	XDEF	ADJ.DIVERS_ROOM
+ADJ.DIVERS_ROOM
+	ADJ	divers,small
+* panel1
+	XDEF	ADJ.PANEL1
+ADJ.PANEL1
+	ADJ	control
+* flush_button
+	XDEF	ADJ.FLUSH_BUTTON
+ADJ.FLUSH_BUTTON
+	ADJ	left,flush
+* flood_button
+	XDEF	ADJ.FLOOD_BUTTON
+ADJ.FLOOD_BUTTON
+	ADJ	right,flood
+* diving_suit
+	XDEF	ADJ.DIVING_SUIT
+ADJ.DIVING_SUIT
+	ADJ	wet,black,rubber,diving
+* flippers
+	XDEF	ADJ.FLIPPERS
+ADJ.FLIPPERS
+	ADJ	black,rubber,diving
+* mask
+	XDEF	ADJ.MASK
+ADJ.MASK
+	ADJ	black,rubber,diving
+* aqualung
+	XDEF	ADJ.AQUALUNG
+ADJ.AQUALUNG
+	ADJ	diving
+* airlock
+	XDEF	ADJ.AIRLOCK
+ADJ.AIRLOCK
+	ADJ	
+* underwater
+	XDEF	ADJ.UNDERWATER
+ADJ.UNDERWATER
+	ADJ	
+* library2
+	XDEF	ADJ.LIBRARY2
+ADJ.LIBRARY2
+	ADJ	green
+* water2
+	XDEF	ADJ.WATER2
+ADJ.WATER2
+	ADJ	
+* wood2
+	XDEF	ADJ.WOOD2
+ADJ.WOOD2
+	ADJ	conifer
+* fairground
+	XDEF	ADJ.FAIRGROUND
+ADJ.FAIRGROUND
+	ADJ	village
+* carousel
+	XDEF	ADJ.CAROUSEL
+ADJ.CAROUSEL
+	ADJ	
+* jukebox
+	XDEF	ADJ.JUKEBOX
+ADJ.JUKEBOX
+	ADJ	
+* slot
+	XDEF	ADJ.SLOT
+ADJ.SLOT
+	ADJ	
+* unicorn
+	XDEF	ADJ.UNICORN
+ADJ.UNICORN
+	ADJ	snow,white
+* Kerulgian_dragon
+	XDEF	ADJ.KERULGIAN_DRAGON
+ADJ.KERULGIAN_DRAGON
+	ADJ	dangerous,dancing
+* pelican
+	XDEF	ADJ.PELICAN
+ADJ.PELICAN
+	ADJ	proudly,prancing
+* state_carriage
+	XDEF	ADJ.STATE_CARRIAGE
+ADJ.STATE_CARRIAGE
+	ADJ	pair_of,weary
+* fire_engine
+	XDEF	ADJ.FIRE_ENGINE
+ADJ.FIRE_ENGINE
+	ADJ	furiously,flashing,fire
+* bakery
+	XDEF	ADJ.BAKERY
+ADJ.BAKERY
+	ADJ	
+* baker
+	XDEF	ADJ.BAKER
+ADJ.BAKER
+	ADJ	enormous,bulging
+* bakery_oven
+	XDEF	ADJ.BAKERY_OVEN
+ADJ.BAKERY_OVEN
+	ADJ	bakery
+* oven
+	XDEF	ADJ.OVEN
+ADJ.OVEN
+	ADJ	huge
+* oven_panel
+	XDEF	ADJ.OVEN_PANEL
+ADJ.OVEN_PANEL
+	ADJ	oven
+* oven_button
+	XDEF	ADJ.OVEN_BUTTON
+ADJ.OVEN_BUTTON
+	ADJ	large,green
+* trestle
+	XDEF	ADJ.TRESTLE
+ADJ.TRESTLE
+	ADJ	trestle
+* canoworms
+	XDEF	ADJ.CANOWORMS
+ADJ.CANOWORMS
+	ADJ	
+* ingredients
+	XDEF	ADJ.INGREDIENTS
+ADJ.INGREDIENTS
+	ADJ	bread
+* pudding
+	XDEF	ADJ.PUDDING
+ADJ.PUDDING
+	ADJ	loaf_of
+* cake_tin
+	XDEF	ADJ.CAKE_TIN
+ADJ.CAKE_TIN
+	ADJ	baking
+* nicecloud
+	XDEF	ADJ.NICECLOUD
+ADJ.NICECLOUD
+	ADJ	friendly
+* bakerysteps
+	XDEF	ADJ.BAKERYSTEPS
+ADJ.BAKERYSTEPS
+	ADJ	wooden
+* clock
+	XDEF	ADJ.CLOCK
+ADJ.CLOCK
+	ADJ	
+* girder
+	XDEF	ADJ.GIRDER
+ADJ.GIRDER
+	ADJ	steel
+* girder_room
+	XDEF	ADJ.GIRDER_ROOM
+ADJ.GIRDER_ROOM
+	ADJ	
+* plastictub
+	XDEF	ADJ.PLASTICTUB
+ADJ.PLASTICTUB
+	ADJ	fly
+* on_platform
+	XDEF	ADJ.ON_PLATFORM
+ADJ.ON_PLATFORM
+	ADJ	
+* beam
+	XDEF	ADJ.BEAM
+ADJ.BEAM
+	ADJ	wooden,slender
+* gong
+	XDEF	ADJ.GONG
+ADJ.GONG
+	ADJ	
+* models
+	XDEF	ADJ.MODELS
+ADJ.MODELS
+	ADJ	wax
+* rain_weatherman
+	XDEF	ADJ.RAIN_WEATHERMAN
+ADJ.RAIN_WEATHERMAN
+	ADJ	rain
+* umbrella
+	XDEF	ADJ.UMBRELLA
+ADJ.UMBRELLA
+	ADJ	black
+* sun_weatherman
+	XDEF	ADJ.SUN_WEATHERMAN
+ADJ.SUN_WEATHERMAN
+	ADJ	sun
+* end_of_beam
+	XDEF	ADJ.END_OF_BEAM
+ADJ.END_OF_BEAM
+	ADJ	
+* distant_rainman
+	XDEF	ADJ.DISTANT_RAINMAN
+ADJ.DISTANT_RAINMAN
+	ADJ	rain
+* distant_sunman
+	XDEF	ADJ.DISTANT_SUNMAN
+ADJ.DISTANT_SUNMAN
+	ADJ	sun
+* pub
+	XDEF	ADJ.PUB
+ADJ.PUB
+	ADJ	village
+* bar
+	XDEF	ADJ.BAR
+ADJ.BAR
+	ADJ	
+* bookshelves2
+	XDEF	ADJ.BOOKSHELVES2
+ADJ.BOOKSHELVES2
+	ADJ	book
+* publican
+	XDEF	ADJ.PUBLICAN
+ADJ.PUBLICAN
+	ADJ	
+* solution
+	XDEF	ADJ.SOLUTION
+ADJ.SOLUTION
+	ADJ	iridescent,oil,water
+* drink
+	XDEF	ADJ.DRINK
+ADJ.DRINK
+	ADJ	beer
+* beer
+	XDEF	ADJ.BEER
+ADJ.BEER
+	ADJ	pint_of,old,moose
+* saddle
+	XDEF	ADJ.SADDLE
+ADJ.SADDLE
+	ADJ	red,leather
+* puddle
+	XDEF	ADJ.PUDDLE
+ADJ.PUDDLE
+	ADJ	muddy
+* handpump
+	XDEF	ADJ.HANDPUMP
+ADJ.HANDPUMP
+	ADJ	pint_of
+* library4
+	XDEF	ADJ.LIBRARY4
+ADJ.LIBRARY4
+	ADJ	
+* beergarden
+	XDEF	ADJ.BEERGARDEN
+ADJ.BEERGARDEN
+	ADJ	beer
+* bakerynotice
+	XDEF	ADJ.BAKERYNOTICE
+ADJ.BAKERYNOTICE
+	ADJ	
+* flour_sack
+	XDEF	ADJ.FLOUR_SACK
+ADJ.FLOUR_SACK
+	ADJ	flour
+* outside_station
+	XDEF	ADJ.OUTSIDE_STATION
+ADJ.OUTSIDE_STATION
+	ADJ	
+* train_station
+	XDEF	ADJ.TRAIN_STATION
+ADJ.TRAIN_STATION
+	ADJ	train
+* bench
+	XDEF	ADJ.BENCH
+ADJ.BENCH
+	ADJ	red
+* ticket_office
+	XDEF	ADJ.TICKET_OFFICE
+ADJ.TICKET_OFFICE
+	ADJ	ticket,wooden
+* locomotive
+	XDEF	ADJ.LOCOMOTIVE
+ADJ.LOCOMOTIVE
+	ADJ	red
+* train_ticket
+	XDEF	ADJ.TRAIN_TICKET
+ADJ.TRAIN_TICKET
+	ADJ	train
+* platform1
+	XDEF	ADJ.PLATFORM1
+ADJ.PLATFORM1
+	ADJ	station
+* tapdance_shoes
+	XDEF	ADJ.TAPDANCE_SHOES
+ADJ.TAPDANCE_SHOES
+	ADJ	tap_dancing,tap,dancing
+* top_mountain
+	XDEF	ADJ.TOP_MOUNTAIN
+ADJ.TOP_MOUNTAIN
+	ADJ	top
+* castle
+	XDEF	ADJ.CASTLE
+ADJ.CASTLE
+	ADJ	marble
+* sack
+	XDEF	ADJ.SACK
+ADJ.SACK
+	ADJ	small
+* lake2
+	XDEF	ADJ.LAKE2
+ADJ.LAKE2
+	ADJ	
+* walled_garden
+	XDEF	ADJ.WALLED_GARDEN
+ADJ.WALLED_GARDEN
+	ADJ	walled,castle
+* weeds
+	XDEF	ADJ.WEEDS
+ADJ.WEEDS
+	ADJ	
+* precipice
+	XDEF	ADJ.PRECIPICE
+ADJ.PRECIPICE
+	ADJ	
+* dungeon
+	XDEF	ADJ.DUNGEON
+ADJ.DUNGEON
+	ADJ	dank,castle
+* manacles
+	XDEF	ADJ.MANACLES
+ADJ.MANACLES
+	ADJ	iron,heavy,rusty
+* witch_chamber
+	XDEF	ADJ.WITCH_CHAMBER
+ADJ.WITCH_CHAMBER
+	ADJ	Sanctum
+* windows2
+	XDEF	ADJ.WINDOWS2
+ADJ.WINDOWS2
+	ADJ	Gothic,arched,little
+* witch_door1
+	XDEF	ADJ.WITCH_DOOR1
+ADJ.WITCH_DOOR1
+	ADJ	left,Gothic,identical
+* bed2
+	XDEF	ADJ.BED2
+ADJ.BED2
+	ADJ	small,oddly_shaped
+* trestle_table
+	XDEF	ADJ.TRESTLE_TABLE
+ADJ.TRESTLE_TABLE
+	ADJ	circular
+* witch_door
+	XDEF	ADJ.WITCH_DOOR
+ADJ.WITCH_DOOR
+	ADJ	right,Gothic,identical
+* cmakers_door
+	XDEF	ADJ.CMAKERS_DOOR
+ADJ.CMAKERS_DOOR
+	ADJ	clockmakers,wooden
+* outside
+	XDEF	ADJ.OUTSIDE
+ADJ.OUTSIDE
+	ADJ	
+* wrain
+	XDEF	ADJ.WRAIN
+ADJ.WRAIN
+	ADJ	
+* wcloud
+	XDEF	ADJ.WCLOUD
+ADJ.WCLOUD
+	ADJ	storm
+* wlightning
+	XDEF	ADJ.WLIGHTNING
+ADJ.WLIGHTNING
+	ADJ	
+* wwind0
+	XDEF	ADJ.WWIND0
+ADJ.WWIND0
+	ADJ	
+* chimney
+	XDEF	ADJ.CHIMNEY
+ADJ.CHIMNEY
+	ADJ	
+* castle_parapets
+	XDEF	ADJ.CASTLE_PARAPETS
+ADJ.CASTLE_PARAPETS
+	ADJ	castle
+* glass_fragments
+	XDEF	ADJ.GLASS_FRAGMENTS
+ADJ.GLASS_FRAGMENTS
+	ADJ	glass
+* garden_statues
+	XDEF	ADJ.GARDEN_STATUES
+ADJ.GARDEN_STATUES
+	ADJ	peculiar
+* archway
+	XDEF	ADJ.ARCHWAY
+ADJ.ARCHWAY
+	ADJ	castle,vast,Gothic
+* quadrangle
+	XDEF	ADJ.QUADRANGLE
+ADJ.QUADRANGLE
+	ADJ	Promenade
+* door
+	XDEF	ADJ.DOOR
+ADJ.DOOR
+	ADJ	heavy,tremendous,wooden
+* banquet_hall
+	XDEF	ADJ.BANQUET_HALL
+ADJ.BANQUET_HALL
+	ADJ	great
+* banquet_table1
+	XDEF	ADJ.BANQUET_TABLE1
+ADJ.BANQUET_TABLE1
+	ADJ	refectory,great
+* chairs
+	XDEF	ADJ.CHAIRS
+ADJ.CHAIRS
+	ADJ	dining
+* fireplace1
+	XDEF	ADJ.FIREPLACE1
+ADJ.FIREPLACE1
+	ADJ	marble
+* painting1
+	XDEF	ADJ.PAINTING1
+ADJ.PAINTING1
+	ADJ	
+* door1
+	XDEF	ADJ.DOOR1
+ADJ.DOOR1
+	ADJ	little,Gothic
+* tower_entrance
+	XDEF	ADJ.TOWER_ENTRANCE
+ADJ.TOWER_ENTRANCE
+	ADJ	tower
+* spiral_staircase
+	XDEF	ADJ.SPIRAL_STAIRCASE
+ADJ.SPIRAL_STAIRCASE
+	ADJ	spiral,sinuous,twisting
+* hallway
+	XDEF	ADJ.HALLWAY
+ADJ.HALLWAY
+	ADJ	
+* antechamber
+	XDEF	ADJ.ANTECHAMBER
+ADJ.ANTECHAMBER
+	ADJ	
+* bracelet
+	XDEF	ADJ.BRACELET
+ADJ.BRACELET
+	ADJ	gold
+* balcony
+	XDEF	ADJ.BALCONY
+ADJ.BALCONY
+	ADJ	
+* infinite1
+	XDEF	ADJ.INFINITE1
+ADJ.INFINITE1
+	ADJ	
+* infinite2
+	XDEF	ADJ.INFINITE2
+ADJ.INFINITE2
+	ADJ	
+* nuke_device
+	XDEF	ADJ.NUKE_DEVICE
+ADJ.NUKE_DEVICE
+	ADJ	thermo_nuclear,atomic,thermo,nuclear
+* vat
+	XDEF	ADJ.VAT
+ADJ.VAT
+	ADJ	large,oaken,oak,cheese
+* your_house
+	XDEF	ADJ.YOUR_HOUSE
+ADJ.YOUR_HOUSE
+	ADJ	
+* receiver
+	XDEF	ADJ.RECEIVER
+ADJ.RECEIVER
+	ADJ	
+* front_door
+	XDEF	ADJ.FRONT_DOOR
+ADJ.FRONT_DOOR
+	ADJ	front,oak,heavy
+* document
+	XDEF	ADJ.DOCUMENT
+ADJ.DOCUMENT
+	ADJ	
+* guardian
+	XDEF	ADJ.GUARDIAN
+ADJ.GUARDIAN
+	ADJ	
+* ticket
+	XDEF	ADJ.TICKET
+ADJ.TICKET
+	ADJ	bus
+* inspector
+	XDEF	ADJ.INSPECTOR
+ADJ.INSPECTOR
+	ADJ	ticket
+* bstop
+	XDEF	ADJ.BSTOP
+ADJ.BSTOP
+	ADJ	bus
+* bus
+	XDEF	ADJ.BUS
+ADJ.BUS
+	ADJ	
+* xams_house
+	XDEF	ADJ.XAMS_HOUSE
+ADJ.XAMS_HOUSE
+	ADJ	xams
+* mailbox1
+	XDEF	ADJ.MAILBOX1
+ADJ.MAILBOX1
+	ADJ	mail
+* telephone1
+	XDEF	ADJ.TELEPHONE1
+ADJ.TELEPHONE1
+	ADJ	green
+* receiver1
+	XDEF	ADJ.RECEIVER1
+ADJ.RECEIVER1
+	ADJ	
+* blob
+	XDEF	ADJ.BLOB
+ADJ.BLOB
+	ADJ	plastic,yellow
+* key4
+	XDEF	ADJ.KEY4
+ADJ.KEY4
+	ADJ	plastic,yellow
+* smoke
+	XDEF	ADJ.SMOKE
+ADJ.SMOKE
+	ADJ	tobacco
+* latticed_windows
+	XDEF	ADJ.LATTICED_WINDOWS
+ADJ.LATTICED_WINDOWS
+	ADJ	latticed
+* wall
+	XDEF	ADJ.WALL
+ADJ.WALL
+	ADJ	stone,painted
+* head
+	XDEF	ADJ.HEAD
+ADJ.HEAD
+	ADJ	
+* connecting_passage
+	XDEF	ADJ.CONNECTING_PASSAGE
+ADJ.CONNECTING_PASSAGE
+	ADJ	narrow
+* airlock_door
+	XDEF	ADJ.AIRLOCK_DOOR
+ADJ.AIRLOCK_DOOR
+	ADJ	airlock,colossal,steel
+* wheel
+	XDEF	ADJ.WHEEL
+ADJ.WHEEL
+	ADJ	large
+* inf_underwater
+	XDEF	ADJ.INF_UNDERWATER
+ADJ.INF_UNDERWATER
+	ADJ	
+* over_hatch
+	XDEF	ADJ.OVER_HATCH
+ADJ.OVER_HATCH
+	ADJ	
+* onlake
+	XDEF	ADJ.ONLAKE
+ADJ.ONLAKE
+	ADJ	
+* hatch
+	XDEF	ADJ.HATCH
+ADJ.HATCH
+	ADJ	airlock,metal,plain
+* letter
+	XDEF	ADJ.LETTER
+ADJ.LETTER
+	ADJ	handwritten
+* topof_library2
+	XDEF	ADJ.TOPOF_LIBRARY2
+ADJ.TOPOF_LIBRARY2
+	ADJ	
+* postoffice
+	XDEF	ADJ.POSTOFFICE
+ADJ.POSTOFFICE
+	ADJ	
+* podoor
+	XDEF	ADJ.PODOOR
+ADJ.PODOOR
+	ADJ	post,office
+* counter
+	XDEF	ADJ.COUNTER
+ADJ.COUNTER
+	ADJ	
+* scales
+	XDEF	ADJ.SCALES
+ADJ.SCALES
+	ADJ	pair_of,large
+* bell
+	XDEF	ADJ.BELL
+ADJ.BELL
+	ADJ	small
+* postmistress
+	XDEF	ADJ.POSTMISTRESS
+ADJ.POSTMISTRESS
+	ADJ	post
+* safe
+	XDEF	ADJ.SAFE
+ADJ.SAFE
+	ADJ	steel,metal
+* plum
+	XDEF	ADJ.PLUM
+ADJ.PLUM
+	ADJ	plum
+* pubdoor
+	XDEF	ADJ.PUBDOOR
+ADJ.PUBDOOR
+	ADJ	pub
+* flour
+	XDEF	ADJ.FLOUR
+ADJ.FLOUR
+	ADJ	
+* seat
+	XDEF	ADJ.SEAT
+ADJ.SEAT
+	ADJ	bus
+* bakery_larder
+	XDEF	ADJ.BAKERY_LARDER
+ADJ.BAKERY_LARDER
+	ADJ	bakery
+* job
+	XDEF	ADJ.JOB
+ADJ.JOB
+	ADJ	
+* pudding2
+	XDEF	ADJ.PUDDING2
+ADJ.PUDDING2
+	ADJ	burnt,loaf_of
+* bathroomdoor
+	XDEF	ADJ.BATHROOMDOOR
+ADJ.BATHROOMDOOR
+	ADJ	bathroom
+* kitchendoor
+	XDEF	ADJ.KITCHENDOOR
+ADJ.KITCHENDOOR
+	ADJ	kitchen
+* leatherdoor
+	XDEF	ADJ.LEATHERDOOR
+ADJ.LEATHERDOOR
+	ADJ	padded,red
+* xam
+	XDEF	ADJ.XAM
+ADJ.XAM
+	ADJ	
+* match2
+	XDEF	ADJ.MATCH2
+ADJ.MATCH2
+	ADJ	
+* match3
+	XDEF	ADJ.MATCH3
+ADJ.MATCH3
+	ADJ	
+* match4
+	XDEF	ADJ.MATCH4
+ADJ.MATCH4
+	ADJ	
+* notice
+	XDEF	ADJ.NOTICE
+ADJ.NOTICE
+	ADJ	
+* barsign
+	XDEF	ADJ.BARSIGN
+ADJ.BARSIGN
+	ADJ	
+* int_flyzz
+	XDEF	ADJ.INT_FLYZZ
+ADJ.INT_FLYZZ
+	ADJ	doofer
+* int_aqua
+	XDEF	ADJ.INT_AQUA
+ADJ.INT_AQUA
+	ADJ	doodah
+* int_sol
+	XDEF	ADJ.INT_SOL
+ADJ.INT_SOL
+	ADJ	thingy
+* int_dracmazza
+	XDEF	ADJ.INT_DRACMAZZA
+ADJ.INT_DRACMAZZA
+	ADJ	watchercallit
+* chandelier
+	XDEF	ADJ.CHANDELIER
+ADJ.CHANDELIER
+	ADJ	Gothic,brass
+* top_chandelier
+	XDEF	ADJ.TOP_CHANDELIER
+ADJ.TOP_CHANDELIER
+	ADJ	Gothic,brass
+* underwater2
+	XDEF	ADJ.UNDERWATER2
+ADJ.UNDERWATER2
+	ADJ	
+* over_wreck
+	XDEF	ADJ.OVER_WRECK
+ADJ.OVER_WRECK
+	ADJ	
+* shipwreck
+	XDEF	ADJ.SHIPWRECK
+ADJ.SHIPWRECK
+	ADJ	
+* top_hat
+	XDEF	ADJ.TOP_HAT
+ADJ.TOP_HAT
+	ADJ	top
+* falling
+	XDEF	ADJ.FALLING
+ADJ.FALLING
+	ADJ	
+* glass_dome
+	XDEF	ADJ.GLASS_DOME
+ADJ.GLASS_DOME
+	ADJ	iridescent,immovable,glass
+* block
+	XDEF	ADJ.BLOCK
+ADJ.BLOCK
+	ADJ	plastic
+* platform2
+	XDEF	ADJ.PLATFORM2
+ADJ.PLATFORM2
+	ADJ	station
+* platform3
+	XDEF	ADJ.PLATFORM3
+ADJ.PLATFORM3
+	ADJ	station
+* railway_track
+	XDEF	ADJ.RAILWAY_TRACK
+ADJ.RAILWAY_TRACK
+	ADJ	
+* post_depot
+	XDEF	ADJ.POST_DEPOT
+ADJ.POST_DEPOT
+	ADJ	post
+* dungeon_rope
+	XDEF	ADJ.DUNGEON_ROPE
+ADJ.DUNGEON_ROPE
+	ADJ	dungeon,old
+* telegraph_door
+	XDEF	ADJ.TELEGRAPH_DOOR
+ADJ.TELEGRAPH_DOOR
+	ADJ	
+* station_master
+	XDEF	ADJ.STATION_MASTER
+ADJ.STATION_MASTER
+	ADJ	station
+* harmonica
+	XDEF	ADJ.HARMONICA
+ADJ.HARMONICA
+	ADJ	
+* silver_coin
+	XDEF	ADJ.SILVER_COIN
+ADJ.SILVER_COIN
+	ADJ	foreign
+* dance
+	XDEF	ADJ.DANCE
+ADJ.DANCE
+	ADJ	
+* water
+	XDEF	ADJ.WATER
+ADJ.WATER
+	ADJ	lagoon
+* on_train
+	XDEF	ADJ.ON_TRAIN
+ADJ.ON_TRAIN
+	ADJ	
+* tlhandle
+	XDEF	ADJ.TLHANDLE
+ADJ.TLHANDLE
+	ADJ	top_left,top,left
+* trhandle
+	XDEF	ADJ.TRHANDLE
+ADJ.TRHANDLE
+	ADJ	top_right,top,right
+* blhandle
+	XDEF	ADJ.BLHANDLE
+ADJ.BLHANDLE
+	ADJ	bottom_left,bottom,left
+* brhandle
+	XDEF	ADJ.BRHANDLE
+ADJ.BRHANDLE
+	ADJ	bottom_right,bottom,right
+* twoferg
+	XDEF	ADJ.TWOFERG
+ADJ.TWOFERG
+	ADJ	two_ferg,two,ferg
+* carriage_window1
+	XDEF	ADJ.CARRIAGE_WINDOW1
+ADJ.CARRIAGE_WINDOW1
+	ADJ	carriage
+* carriage_window2
+	XDEF	ADJ.CARRIAGE_WINDOW2
+ADJ.CARRIAGE_WINDOW2
+	ADJ	carriage
+* theatre
+	XDEF	ADJ.THEATRE
+ADJ.THEATRE
+	ADJ	
+* optable
+	XDEF	ADJ.OPTABLE
+ADJ.OPTABLE
+	ADJ	operating,cold
+* straps
+	XDEF	ADJ.STRAPS
+ADJ.STRAPS
+	ADJ	restraining
+* machine
+	XDEF	ADJ.MACHINE
+ADJ.MACHINE
+	ADJ	
+* nurse
+	XDEF	ADJ.NURSE
+ADJ.NURSE
+	ADJ	
+* surgicalmask
+	XDEF	ADJ.SURGICALMASK
+ADJ.SURGICALMASK
+	ADJ	surgical
+* garment
+	XDEF	ADJ.GARMENT
+ADJ.GARMENT
+	ADJ	surgical
+* guards_van
+	XDEF	ADJ.GUARDS_VAN
+ADJ.GUARDS_VAN
+	ADJ	In_The_Guard__s
+* hanging_on_train
+	XDEF	ADJ.HANGING_ON_TRAIN
+ADJ.HANGING_ON_TRAIN
+	ADJ	Clinging,
+* train_roof
+	XDEF	ADJ.TRAIN_ROOF
+ADJ.TRAIN_ROOF
+	ADJ	
+* platform_bridge
+	XDEF	ADJ.PLATFORM_BRIDGE
+ADJ.PLATFORM_BRIDGE
+	ADJ	On_The_Platform
+* other_platform
+	XDEF	ADJ.OTHER_PLATFORM
+ADJ.OTHER_PLATFORM
+	ADJ	Opposite
+* train_passengers
+	XDEF	ADJ.TRAIN_PASSENGERS
+ADJ.TRAIN_PASSENGERS
+	ADJ	
+* guard
+	XDEF	ADJ.GUARD
+ADJ.GUARD
+	ADJ	train,ticket
+* overcoat
+	XDEF	ADJ.OVERCOAT
+ADJ.OVERCOAT
+	ADJ	herringbone
+* scalpel
+	XDEF	ADJ.SCALPEL
+ADJ.SCALPEL
+	ADJ	
+* swab
+	XDEF	ADJ.SWAB
+ADJ.SWAB
+	ADJ	
+* waswossname
+	XDEF	ADJ.WASWOSSNAME
+ADJ.WASWOSSNAME
+	ADJ	
+* roof
+	XDEF	ADJ.ROOF
+ADJ.ROOF
+	ADJ	train
+* busk_sign
+	XDEF	ADJ.BUSK_SIGN
+ADJ.BUSK_SIGN
+	ADJ	
+* voices
+	XDEF	ADJ.VOICES
+ADJ.VOICES
+	ADJ	
+* wooden_shutter
+	XDEF	ADJ.WOODEN_SHUTTER
+ADJ.WOODEN_SHUTTER
+	ADJ	wooden
+* unicorn2
+	XDEF	ADJ.UNICORN2
+ADJ.UNICORN2
+	ADJ	snow,white
+* sieve
+	XDEF	ADJ.SIEVE
+ADJ.SIEVE
+	ADJ	
+* parachute
+	XDEF	ADJ.PARACHUTE
+ADJ.PARACHUTE
+	ADJ	
+* worms
+	XDEF	ADJ.WORMS
+ADJ.WORMS
+	ADJ	
+* tower
+	XDEF	ADJ.TOWER
+ADJ.TOWER
+	ADJ	grandiose
+* passage
+	XDEF	ADJ.PASSAGE
+ADJ.PASSAGE
+	ADJ	narrow
+* gaol
+	XDEF	ADJ.GAOL
+ADJ.GAOL
+	ADJ	
+* gaoler
+	XDEF	ADJ.GAOLER
+ADJ.GAOLER
+	ADJ	
+* solid_door
+	XDEF	ADJ.SOLID_DOOR
+ADJ.SOLID_DOOR
+	ADJ	splintery,solid
+* inner_hatch
+	XDEF	ADJ.INNER_HATCH
+ADJ.INNER_HATCH
+	ADJ	inner,old,food,wooden
+* outer_hatch
+	XDEF	ADJ.OUTER_HATCH
+ADJ.OUTER_HATCH
+	ADJ	outer,wooden,food
+* castle_kitchen
+	XDEF	ADJ.CASTLE_KITCHEN
+ADJ.CASTLE_KITCHEN
+	ADJ	grim
+* in_hatch
+	XDEF	ADJ.IN_HATCH
+ADJ.IN_HATCH
+	ADJ	Dumb
+* jewel_room
+	XDEF	ADJ.JEWEL_ROOM
+ADJ.JEWEL_ROOM
+	ADJ	jewel
+* witch
+	XDEF	ADJ.WITCH
+ADJ.WITCH
+	ADJ	green
+* crisp
+	XDEF	ADJ.CRISP
+ADJ.CRISP
+	ADJ	burnt,black
+* hole
+	XDEF	ADJ.HOLE
+ADJ.HOLE
+	ADJ	gaping
+* postman
+	XDEF	ADJ.POSTMAN
+ADJ.POSTMAN
+	ADJ	
+* pseudoclock
+	XDEF	ADJ.PSEUDOCLOCK
+ADJ.PSEUDOCLOCK
+	ADJ	weather
+* busstopbits
+	XDEF	ADJ.BUSSTOPBITS
+ADJ.BUSSTOPBITS
+	ADJ	long,metal,concrete
+* debris
+	XDEF	ADJ.DEBRIS
+ADJ.DEBRIS
+	ADJ	
+* spare_tank
+	XDEF	ADJ.SPARE_TANK
+ADJ.SPARE_TANK
+	ADJ	spare,air
+* inoven
+	XDEF	ADJ.INOVEN
+ADJ.INOVEN
+	ADJ	
+* ovendoor
+	XDEF	ADJ.OVENDOOR
+ADJ.OVENDOOR
+	ADJ	oven
+* mouse_trap
+	XDEF	ADJ.MOUSE_TRAP
+ADJ.MOUSE_TRAP
+	ADJ	mouse,better
+* canoe_hole
+	XDEF	ADJ.CANOE_HOLE
+ADJ.CANOE_HOLE
+	ADJ	
+* bung
+	XDEF	ADJ.BUNG
+ADJ.BUNG
+	ADJ	small
+* busking
+	XDEF	ADJ.BUSKING
+ADJ.BUSKING
+	ADJ	
+* conservatory_windows
+	XDEF	ADJ.CONSERVATORY_WINDOWS
+ADJ.CONSERVATORY_WINDOWS
+	ADJ	
+* milk
+	XDEF	ADJ.MILK
+ADJ.MILK
+	ADJ	
+* staircase3
+	XDEF	ADJ.STAIRCASE3
+ADJ.STAIRCASE3
+	ADJ	greasy
+* kitchen_fan
+	XDEF	ADJ.KITCHEN_FAN
+ADJ.KITCHEN_FAN
+	ADJ	industrial,suspended
+* caryatids
+	XDEF	ADJ.CARYATIDS
+ADJ.CARYATIDS
+	ADJ	serpentine
+* lectern
+	XDEF	ADJ.LECTERN
+ADJ.LECTERN
+	ADJ	great
+* carvings
+	XDEF	ADJ.CARVINGS
+ADJ.CARVINGS
+	ADJ	peculiar,mythical
+* cmaker_fire
+	XDEF	ADJ.CMAKER_FIRE
+ADJ.CMAKER_FIRE
+	ADJ	
+* mixedoil
+	XDEF	ADJ.MIXEDOIL
+ADJ.MIXEDOIL
+	ADJ	
+* pseudopo
+	XDEF	ADJ.PSEUDOPO
+ADJ.PSEUDOPO
+	ADJ	post,country
+* random_object
+	XDEF	ADJ.RANDOM_OBJECT
+ADJ.RANDOM_OBJECT
+	ADJ	
+* waterfall
+	XDEF	ADJ.WATERFALL
+ADJ.WATERFALL
+	ADJ	
+* fakecmakers
+	XDEF	ADJ.FAKECMAKERS
+ADJ.FAKECMAKERS
+	ADJ	clockmakers,old
+* dummy1
+	XDEF	ADJ.DUMMY1
+ADJ.DUMMY1
+	ADJ	
+
+
+	include "cdadj.i"
+	include	"cloneadj.i"
+
+	DC.B       -1
+
+ 	ALIGN
+
+	END
+
+

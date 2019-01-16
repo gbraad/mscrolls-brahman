@@ -1,0 +1,108 @@
+**************************************************************
+*
+*	%G%
+*	%W%
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"scen.i"
+
+	XDEF	BD.MEDIUM.LD
+	XREF	LJPOS,LAST.CH2,CHANNEL,WIDTH,PRTTXT
+
+BD.MEDIUM.LD
+
+    IFNE    ST520&YCHEAT
+
+	DC.W    $4AFC
+
+    ENDC
+
+* if we get here then the state of global variables is VERY undefined
+* (cos we just loaded a crap game (perhaps even code/piccy/text...))
+*
+* So we have to clean up a bit even before we can tell the punter what does...
+
+	CLR.W   LJPOS(A4)             ;How many chars were in left just buffer
+	CLR.B   LAST.CH2(A4)          ;Previous char
+	CLR.B   CHANNEL(A4)           ;Avoid forced caps
+	
+      IFNE    Graphics
+
+	XREF	CWID_FLG
+	
+	CLR.B   CWID_FLG(A4)          ;make 'normal' height/width
+
+      ENDC
+
+	MOVE.W  #WIDTH.DEF,WIDTH(A4)  ;and more than one word per line...
+
+	IFEQ	GENERIC
+
+	PRINT   <'^Fatal error during load^^'>
+
+	ENDC	;!GENERIC
+
+	IFNE	GENERIC
+
+	XREF	SetFatalErr
+
+	CALL	SetFatalErr
+
+	ENDC
+
+
+      IFNE      AMIGA512
+
+	XREF	NewCLIST
+
+	JSR	NewCLIST(A4)          ;our screen please!
+
+      ENDC
+
+	FIXED_SCN	Removedisk
+
+	IFNE	GENERIC
+
+	XREF	GENERICQUIT
+
+	BRA	GENERICQUIT
+
+	ENDC	;GENERIC
+
+    IFNE	MAC512
+
+	XREF	MACQUIT
+
+	MOVE.L	#100000,D0
+05$	
+	SUBQ.L	#1,D0
+	BNE.S	05$
+
+	BRA	MACQUIT
+
+    ENDC
+	
+
+10$
+	BRA.S	10$
+
+ 
+NT.FOUND.LD
+ 
+	PRINT	<'^Not found^'>
+
+      IFNE      AMIGA512
+
+	JSR	NewCLIST(A4)            ;our screen please!
+
+      ENDC
+
+	RET
+  
+	END

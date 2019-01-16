@@ -1,0 +1,61 @@
+**************************************************************
+*
+*	10/27/87
+*	@(#)sussinv.elt	1.2
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+
+
+      IFNE	THE_PAWN!YCHEAT
+ 
+*--------------------------------
+*
+*  Sussinv - print a list of all the items related to a room,
+*            ie. not normally listed but which lurk in the background
+*
+*--------------------------------
+
+	XDEF	SUSSINV
+	XREF	DNOUNBUF
+	  
+ 
+SUSSINV
+ 
+	DO	R.NOUN             ;GET ROOM#
+	MOVE.W  D0,D2              ;TARG
+	DO	GETRELN	           ;REL TO ROOM.
+ 
+	MOVEQ   #'(',D1
+	DO	CHAROUT
+10$
+	MOVE.W  (A1)+,D0
+	BMI.S   10$
+	BEQ.S   20$
+	GETINFO        
+	TST_PSEUDO				;PSEUDO?
+	BNE.S   15$                ;FAIL
+	MOVE.B  6(A0),D1
+	AND.B   #$3B,D1
+	BNE.S   10$
+15$
+	OR.W    #$8000,-2(A1)
+	BRA.S   10$
+20$
+	LEA     DNOUNBUF(PC),A0
+	DO	P.LIST
+	DO	UTIL.BS
+	MOVEQ   #')',D1
+	DO	CHAROUT
+	MSGGO   LINE
+ 
+      ENDC
+
+
+
+	END

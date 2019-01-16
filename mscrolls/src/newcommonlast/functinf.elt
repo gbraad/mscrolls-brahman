@@ -1,0 +1,30 @@
+******************************************************
+*
+*	@(#)functinf.elt	1.2
+*	10/27/87
+*
+******************************************************
+
+		SECTION		"ADV",CODE
+
+*************************************
+*
+*    FUNCTINF   This is where
+*               function keys
+*               live
+*
+*************************************
+
+	include "equates.i"
+
+
+         XDEF     FUNCBASE,SLADDR.E
+
+
+FUNCBASE     DS.B    (FunctionKeys)*256
+
+             DC.W    0               ;incase
+SLADDR.E
+
+
+         END

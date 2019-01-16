@@ -1,0 +1,257 @@
+**************************************************************
+*
+*	11/19/87
+*	@(#)debug2.elt	2.1
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"verbequ.i"
+	include	"scenequ.i"
+
+    IFNE     YCHEAT
+
+	XDEF	DBVIDEO
+	XREF	TST.DBUG,GETHEX
+
+DBVIDEO
+
+   IFNE     QL128
+
+	CALL    TST.DBUG
+	MOVEQ   #0,D1
+	BCHG    #0,20$          ;!! URK !!!!
+	BNE.S   10$
+	MOVEQ   #-$80,D1
+10$
+	MOVE.B  D1,$18063       ;QL video bit
+
+   ENDC
+
+	DOGO	DBEXIT
+
+   IFNE  QL128
+
+20$
+
+	DS.B     2
+
+   ENDC
+	
+	XDEF	DBSUSN,DBSUSCR,DBSUSR
+	XREF	VERB,ROOM
+
+DBSUSN 
+	CALL    TST.DBUG
+	GETINFO                    ;SUSS NOUN #
+	MOVE.W  #VNSUSS,D2
+	MOVE.W  D2,VERB(A4)
+	DO	GETVECT
+	JSR     (A1)
+	DOGO	DBEXIT
+
+DBSUSCR 
+ 
+	MOVE.W  ROOM(A4),D0        ;SUSS CURRENT ROOM
+DBSUSR
+	MOVE.W  D0,D2              ;SUSS ROOM #
+	DO	R.NOUN2
+	BRA     DBSUSN
+
+*
+* verify network - (Really exits but by saying 'what rooms come here?')
+*
+
+	XDEF	DBVNET
+	XREF	NETWORK,NET_END,CHEAT,P.EXITS
+
+DBVNET
+
+	MOVE.W	ROOM(A4),D7		;room we're in NOW
+
+	LEA	NETWORK(A4),A0
+	LEA	NET_END(A4),A1
+	MOVEQ	#1,D0			;rooms start at 1
+10$
+	MOVEQ	#Sizeof_NET-1,D1	;no of exits/room (DBRA'ed)
+20$
+	CMP.B	(A0)+,D7
+	BEQ.S	30$
+	DBRA	D1,20$
+25$
+	ADDQ.W	#1,D0			;keep track of room#
+	CMP.L	A0,A1			;finished?
+	BNE.S	10$
+
+	MOVE.W	CHEAT(A4),-(A7)
+	ST	CHEAT(A4)
+	CALL	P.EXITS			;list exits from room
+	MOVE.W	(A7)+,CHEAT(A4)	
+
+	DOGO	DBEXIT			;yes, bye
+30$
+	PUSH_L	D0-D1/D7/A0-A1		;overkill
+	MOVE.W	D0,D6
+	CALL	PRTHEX
+	MSG	SPACE
+	MOVE.W	D0,D2
+	DO	R.NOUN2
+	DO	P.TN
+	MSG	LINE
+	PULL_L	D0-D1/D7/A0-A1
+40$
+	SUBQ.W	#1,D1
+	BMI.S	25$
+50$
+	TEST_B	(A0)+
+	DBRA	D1,50$
+	BRA.S	25$
+
+	XDEF	DBSYN
+	XREF	POSWRD,MATCHBUF,PHEXBYTE,PHEXWORD
+
+DBSYN
+	CALL    TST.DBUG
+	MOVE.L  POSWRD(A4),A6
+	DO	SEARCH
+	MOVE.W  #-1,(A2)
+	LEA     MATCHBUF(PC),A2
+10$
+	MOVE.W  (A2)+,D6
+	BMI.S   20$
+	PRINT   <'^SECT #'>
+	CALL    PHEXBYTE
+	MOVE.W  (A2)+,D6
+	BMI.S   20$
+	PRINT   <'   WORD #'>
+	CALL    PHEXWORD
+	PRINT	<' :  '>
+
+	MOVE.W	-2(A2),D6		;word#
+	LSL.W	#5,D6
+	OR.W	-4(A2),D6		;section#
+
+
+	XREF	SYN_L_Len,SYN_L,SynText,P.TAB
+
+	MOVE.W	#SYN_L_Len,D0
+	LEA	SYN_L(A4),A0
+
+    IFND	wantBIGPROG
+	LEA	SynText(A4),A1
+    ENDC
+
+    IFD	wantBIGPROG
+	LEA	SynText,A1
+    ENDC
+
+	MOVEQ	#0,D1
+11$
+	CMP.W	(A0)+,D6
+	BNE.S	12$
+	PUSH_L	A1/D1
+	DO	P.TAB
+	PRINT	<"-">
+	PULL_L	A1/D1
+12$
+	ADDQ.W	#1,D1
+	DBRA	D0,11$
+
+	BRA.S   10$
+20$
+	DOGO	DBEXIT
+
+
+	XDEF	DBWORD
+
+DBWORD
+	CALL    TST.DBUG
+	MOVE.L  POSWRD(A4),A6
+	DO	SEARCH
+	MOVE.W  #-1,(A2)
+	LEA     MATCHBUF(PC),A2
+10$
+	MSG	LINE
+	MOVE.W  (A2)+,D6
+	BMI.S   20$
+	PRINT   <'SECT #'>
+	CALL    PHEXBYTE
+	MOVE.W  (A2)+,D6
+	BMI.S   20$
+	PRINT   <'   WORD #'>
+	CALL    PHEXWORD
+	BRA.S   10$
+20$
+
+      IFEQ	THE_PAWN
+
+	XREF	Section24
+
+	MOVE.L  POSWRD(A4),A6
+
+      IFND	wantBIGPROG
+	LEA	Section24(A4),A3
+      ENDC
+
+      IFD	wantBIGPROG
+	LEA	Section24,A3
+      ENDC
+
+	MOVE.W	#SECT.SCEN,D6
+	DO	SEARCH2
+	MOVE.W  #-1,(A2)
+	LEA     MATCHBUF(PC),A2
+30$
+	MSG	LINE
+	MOVE.W  (A2)+,D6
+	BMI.S   90$
+	PRINT   <'SECT #'>
+	CALL    PHEXBYTE
+	MOVE.W  (A2)+,D6
+	BMI.S   90$
+	PRINT   <'   WORD #'>
+	CALL    PHEXWORD
+	BRA.S   30$
+
+      ENDC
+90$
+	DOGO	DBEXIT
+
+	XDEF	DBMEM
+	XREF	PRTHEX
+
+DBMEM
+	CALL    TST.DBUG
+	ADD.L   A4,D0
+	MOVE.L  D0,D6
+	CALL    PRTHEX
+	PRINT   <': '>
+	MOVE.L  D0,A0
+	MOVE.L  (A0),D6
+	CALL    PRTHEX
+	DOGO	DBEXIT
+
+	XDEF	DBSET
+
+DBSET
+	CALL    TST.DBUG
+	MOVE.L  D0,-(A7)
+	DO	FNDWRD
+	CALL    GETHEX
+	MOVE.L  (A7)+,A0
+	IFD	AnitaHack
+	xref	VICIOUSMOD
+	LEA	VICIOUSMOD+2,A0
+	ENDC
+	MOVE.W  D6,0(A4,A0.L)
+	DOGO	DBEXIT
+
+    ENDC
+
+
+
+	END

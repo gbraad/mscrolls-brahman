@@ -1,0 +1,125 @@
+***********************************************************
+*
+*	@(#)lie.elt	2.14
+*	3/10/89
+*
+************************************************************
+
+		SECTION	"ADV",CODE
+
+		include	"equates.i"
+		include	"macros.i"
+		include	"scenequ.i"
+		include	"verbequ.i"
+
+		IfVerb	LIE
+	    
+		XDEF	V.LIE
+
+		XREF	ADVERB,P.SUB,P.IDFY
+		XREF	CHKNPC,P.SUBV,SP.LIE_DOWN
+V.LIE
+
+	MOVE.W	ADVERB(A4),D1		;get modifier
+	BMI.S	10$			;lie <dir> x
+	TEST_W	D0
+	BMI	P.IDFY			;must have a noun
+	CMP.W	#TO,D1			;lie to someone
+	BNE.S	20$
+	MOVE.W	D0,D5
+	MOVE.W	A0,A5
+	DO	CHKNPC			;make sure that it is ok
+	DO	P.SUB
+	PRINT	<'tell '>
+	DO	P.TN
+	MSG	REALWOPPER		;a real wopper.
+	BRA.S	90$			;exit
+20$
+	CMP.W	#ON,D1			;lie on x
+	BEQ	LIE.DOWN
+	BRA	P.IDFY
+10$
+	BCLR	#15,D1			;de-mask
+	CMP.W	#DIR_D,D1		;lie down
+	BEQ.S	LIE.DOWN
+	BRA	P.IDFY
+90$
+	RET
+
+LIE.DOWN
+
+	XREF	GETATTRIBUTE,SEATED,SEATED_RELATOR
+	XREF	YCANTNOW
+
+
+    IFD	attribute_LIEONABLE		;any liables?
+	XREF	Denotation_LIEONABLE
+	
+	LEA	Denotation_LIEONABLE(A4),A1	;lieable things
+	TEST_W	D0				;any object specified?
+	BMI.S	05$				;no, then generate one.
+	DO	ISATTRIBUTE			;is it lieable?
+	BNE.S	20$				;nocando.
+05$
+	DO	GETATTRIBUTE			;-> d0
+	BEQ.S	20$				;nonesuch
+10$
+    IFD	wantSEATED_LIEON
+	XREF	SEATED_LIEON
+	TEST_B	SEATED_LIEON(A4)	;are you lieing down already?
+	BEQ.S	15$			;no.
+	MOVE.W	SEATED(A4),D1		;are you sitting on somethig?
+	BEQ.S	15$			;not seated.
+	CMP.W	D0,D1			;the same object
+	BNE	YCANTNOW		;not at the moment.
+	DO	P.SUBV
+	MSG	ARDY			;you are already.
+	DOGO	BSFULLSTOP		;'.'
+15$
+
+    IFD	attribute_SINGLESEAT
+	XREF	SeatOccupied
+	CALL	SeatOccupied		;someone there?
+	BNE.S	16$
+	MSGGO	CANTSIT			;nocandu @
+16$
+    ENDC	;attribute_SINGLESEAT
+
+	ST	SEATED_LIEON(A4)	;else ok.
+	
+    ENDC	;wantSEATED_LIEON
+
+
+	CALL	SP.LIE_DOWN
+	MOVE.W	D0,SEATED(A4)		;make sure you sit on it too?
+    ENDC	;attribute_LIEONABLE
+	
+    IFND	attribute_LIEONABLE
+	CALL	SP.LIE_DOWN
+	TEST_W	D0				;have we an object.
+	BMI.S	20$				;no, fail.
+    	TST_SITTABLE				;let them if item is sittable
+	BEQ.S	20$
+	MOVE.W	D0,SEATED(A4)			;else on the item.
+    ENDC	;!attribute_LIEONABLE
+	
+	DO	P.SUB				;you
+	PRINT	<'lie down on '>
+	DOGO	P.TNSTOP			;the object
+	
+20$
+	DO	P.SUBV
+
+      IFND	wantCorrectFullStops
+	MSGGO	UNABLE
+      ENDC	;!wantCorrectFullStops
+
+      IFD	wantCorrectFullStops
+	MSG	UNABLE
+	DOGO	BSFULLSTOP
+      ENDC	;wantCorrectFullStops
+
+*------------------------------------------
+	ENDC	;V.LIE
+
+	END

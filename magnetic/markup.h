@@ -44,7 +44,7 @@ struct Markup
 
     static bool wordChar(char c)
     {
-        return u_isalnum(c);
+        return u_isalnum(c) || u_ishyphen(c);
     }
 
     void skipMarkup()
@@ -217,6 +217,8 @@ struct Markup
 
         string lastword;
         const char* lastp = 0;
+        string seclastword;
+        const char* seclastp = 0;
         
         for (;;)
         {
@@ -229,7 +231,9 @@ struct Markup
             string word(p, _pos - p);
             IItems items;
 
+            // look for direction words like "east", "northwards" etc.
             int d = markupDirection(word, croom);
+            int nw = 0;
 
             if (d >= 0)
             {
@@ -237,8 +241,16 @@ struct Markup
             }
             else
             {
-                // find all items that match this root word (if any)
-                IItem::findItems(word, items);
+                // resolve partials:
+                // p = "lump of coal is here ..."
+                // try to locate prefix "lump of coal"
+                nw = IItem::findPhraseItems(p,items);
+
+                if (!nw)
+                {
+                    // find all items that match this root word (if any)
+                    IItem::findItems(word, items);
+                }
 
                 // remove any rooms because we only markup items
                 IItem::resolveWithoutRooms(items);
@@ -250,10 +262,12 @@ struct Markup
             size_t n = items.size();
             if (n > 0)
             {
-                bool useadj = false;
+                int useadj = 0;
                 
                 if (n > 1 && lastp)
                 {
+                    assert(nw == 0); // not phrase
+                    
                     // we have multiple items based on the root word
                     // if last word is an adjective, resolve with that
                     IItem::resolveAdjective(items,
@@ -262,7 +276,19 @@ struct Markup
                     if (items.size() != n)
                     {
                         // adjective reduced
-                        useadj = true;
+                        useadj = 1;
+                    }
+                    n = items.size();
+                    // ... but not enough, try second adjective
+                    if (n > 1 && seclastp)
+                    {
+                        IItem::resolveAdjective(items,
+                                                IItem::findAdjective(seclastword));
+                        if (items.size() != n)
+                        {
+                            // adjective reduced again
+                            useadj = 2;
+                        }
                     }
                 }
 
@@ -270,16 +296,36 @@ struct Markup
                 if (items.size() == 1)
                 {
                     IItem item = items[0];
-                    if (useadj)
+                    if (useadj == 2)
+                    {
+                        marks.emplace_back(Mark(seclastp - s0, _pos - s0, item));
+                    }
+                    else if (useadj == 1)
                     {
                         marks.emplace_back(Mark(lastp - s0, _pos - s0, item));
                     }
                     else
                     {
+                        if (nw)
+                        {
+                            // advance over rest of phrase match
+                            while (--nw)
+                            {
+                                skipToWord();
+                                assert(*_pos);
+                                skipWord();
+                            }
+                        }
+                        
                         // located a game item
                         marks.emplace_back(Mark(p - s0, _pos - s0, item));
                     }
                 }
+            }
+            if (lastp)
+            {
+                seclastp = lastp;
+                seclastword = lastword;
             }
             lastword = word;
             lastp = p;
@@ -318,11 +364,13 @@ struct Markup
                 string rep;
                 if (mi._dir < 0)
                 {
-                    rep = "[" + sw + "](do " + mi._item.adjWord() + ")";
+                    rep = "[" + sw + "](do " + mi._item.adjWordIf() + ")";
                 }
                 else
                 {
-                    rep = "[" + sw + "](go " + IItem::dirName(mi._dir) + ")";
+                    // changed to allow paddling in Jinxter via click, needs testing
+                    //rep = "[" + sw + "](go " + IItem::dirName(mi._dir) + ")";
+                    rep = "[" + sw + "](" + IItem::dirName(mi._dir) + ")";
                 }
                 LOG4("markup found ", sw << " -> " << rep);
                 

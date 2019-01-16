@@ -1,0 +1,72 @@
+**************************************************************
+*
+*	10/27/87
+*	@(#)fndweapon.elt	1.4
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"scenequ.i"
+
+
+	IFD	wantATTACKBITS
+
+	XDEF	FNDWEAPO
+	
+*  D3=BEST DEFENCE
+*  D2=DEFENCE STRENGTH
+  
+FNDWEAPO
+ 
+	PUSH_L  D0-D1/D5/A0/A1
+	MOVE.W  D0,D2
+	DO	GETRELN			;fetch all nearby objects
+	CLR.W   D2
+	CLR.W   D3
+20$
+	MOVE.W  (A1)+,D0		;get one
+	BEQ.S   10$			;end of list?
+	GETINFO
+	TST_ISAROOM				;rooms don't count
+	BNE.S   20$
+	BTST	#7,3(A0)		;a vsharp objects is preferable
+	BEQ.S   30$			;not vsharp
+	MOVE.B  2(A0),D1		;get size & weight
+	LSR.B   #4,D1			;get SIZE
+	OR.B	#$80,D1			;SET HI as weighting
+	BRA.S   40$			;CONT
+30$
+	MOVE.B  1(A0),D1		;H & S
+	LSR.B   #4,D1
+	CMP.B   #10,D1			;BRITTLE
+	BEQ.S   20$			;yes, can't use that!
+	CMP.B   #12,D1			;FLEX
+	BEQ.S   20$			;neither if it is flexible
+	CMP.B   #3,D1
+	BLS.S   20$			;no soft cushions cardinal
+	MOVE.B  1(A0),D1		;fetch H&S again
+	AND.B   #$0F,D1			;strength this time!
+40$
+	CMP.B   D2,D1			;not better.
+	BLS.S   20$
+	MOVE.W  D0,D3			;SAVE ITEM as best
+	MOVE.B  D1,D2			;and its strength
+	BRA.S   20$			;ok, try another
+10$
+	CMP.B   #3,D2			;strength too low
+	BHI.S   11$
+	MOVE.B  #4,D2			;hands are 4 use them!
+	CLR.W   D3			;nullify item
+11$
+	PULL_L  D0-D1/D5/A0/A1
+	RET
+
+	ENDC	;attackbits
+ 
+
+
+	END

@@ -1,0 +1,151 @@
+**************************************************************
+*
+*	%G%
+*	%W%
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+
+	include	"nounequ2.i"
+
+*--------------------------------
+
+
+	XDEF	GETRELN2
+	XDEF	GETRELN
+
+
+GETRELN2
+	PUSH_L	D1/D5-D6
+	ST	D6
+	MOVEQ   #1,D5
+	MOVEQ   #8,D1
+	CALL_S	GETNOUN2
+	PULL_L	D1/D5-D6
+	RET
+	
+GETRELN
+	
+	MOVEQ   #1,D5
+	MOVEQ   #8,D1
+
+ 
+*--------------------------------
+* 
+* GETNOUNS - GETS ALL THE NOUNS
+*            WHICH HAVE D2.B AS
+*            THE DATA IN BYTE
+*            D1.B OF THEIR DATA
+* GETNOUN2-  Get all nouns (ie including those that are
+*	     not local )
+*
+*--------------------------------
+ 
+
+	XDEF	GETNOUNS
+	
+GETNOUNS
+
+	MOVE.W	D6,-(A7)		;used in fix, for one thing!
+	CLR.W   D6
+	CALL_S	GETNOUN2
+	MOVE.W	(A7)+,D6		;must save regs these days.
+	RET
+
+      IFEQ	FastBits
+
+	XDEF	GETNOUN2
+	XREF	D.NOUNS,DNOUNBUF
+ 
+
+GETNOUN2
+
+	AND.L   #$FF,D1                 ;BYTE ONLY
+	AND.L   #$7FFF,D0
+	PUSH_L  D0-D5/D7/A0/A2-A6 	;SAVE
+	LEA     D.NOUNS(A4),A0
+	ADD.L   D1,A0
+	MOVE.W  #1,D3
+	LEA     DNOUNBUF(A4),A1
+10$ 
+	TEST_B  D5                      ;IF WORD OR BYTE
+	BNE.S   30$
+	CMP.B   (A0),D2
+11$
+	BNE.S   20$
+	TEST_B  D6
+	BNE.S   12$
+	EXG     D0,D3
+	DO	VALID
+	EXG     D0,D3
+	TEST_B  D7
+	BNE.S   20$
+12$
+	MOVE.W  D3,(A1)+
+20$
+	ADD.L   #14,A0
+	ADDQ.W  #1,D3  
+	CMP.W   #NMAXNOUN,D3
+	BLT.S   10$    
+	CLR.W   (A1)
+	MOVE.L  A0,A1
+	PULL_L  D0-D5/D7/A0/A2-A6    ;BACK
+	LEA     DNOUNBUF(A4),A1
+	RET
+30$
+	MOVE.W  (A0),D4
+	AND.W   #$3FFF,D4
+	CMP.W   D4,D2
+	BRA.S   11$
+
+
+    ENDC	;FastBits
+    
+    IFNE	FastBits
+
+	XDEF	GETNOUN2
+	XREF	D.NOUNS,DNOUNBUF
+ 
+GETNOUN2
+
+	AND.L   #$FF,D1
+	AND.L   #$7FFF,D0
+	PUSH_L  D0-D5/D7/A0/A2-A6 ;SAVE
+	LEA     D.NOUNS(A4),A0
+	ADD.L   D1,A0
+	MOVEQ   #0,D3
+	MOVE.W  #NMAXNOUN,D4
+	LEA     DNOUNBUF(A4),A1
+10$
+
+	DC.W    $A0FA          ; Scan to next match
+	BCC.S   17$            ; Branch if no match
+	TEST_B  D6
+	BNE.S   12$
+	EXG     D0,D3
+	DO	VALID
+	EXG     D0,D3
+	TEST_B  D7
+	BNE.S   10$
+12$
+	MOVE.W  D3,(A1)+
+	BRA.S   10$
+	
+17$
+	CLR.W   (A1)
+
+	PULL_L  D0-D5/D7/A0/A2-A6    ;BACK
+	LEA     DNOUNBUF(A4),A1
+	RET
+
+      ENDC
+
+
+
+
+	END

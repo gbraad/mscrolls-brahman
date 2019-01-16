@@ -1,0 +1,113 @@
+**************************************************************
+*
+*	10/27/87
+*	@(#)touch.elt	1.4
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"verbequ.i"
+	include	"scenequ.i"
+
+	IfVerb	TOUCH
+ 
+	XDEF	V.TOUCH,BIZARE
+	XREF	SP.TOUCH,ADVERB,NPC.OK,DBS
+
+V.TOUCH
+
+      IFEQ	THE_PAWN
+
+      XREF	SP.FEEL
+
+	CALL	SP.FEEL			
+
+      ENDC
+ 
+	TST_ISAROOM				;ROOM?
+	BNE     BIZARE
+	TST_DEAD				;DEAD?
+	BEQ.S	10$
+	MSGGO	NNA              ;NECROPHILIACS..  
+10$
+	CMP.W   #-1,ADVERB(A4)
+	BPL.S   20$
+	TST_NPC				;
+	BEQ     BIZARE
+	 
+ 
+	CMP.W   #$8008,ADVERB(A4)
+	BNE     BIZARE
+	CALL    SP.TOUCH
+	MSGGO	OYSB
+ 
+20$
+	 
+	TST_NPC				;NPC?
+	BEQ.S   25$                ;NOPE
+	DO	NPC.OK	            ;CONSIOUS?
+	BEQ.S   25$
+	DO	P.PRN
+	DO	ISARE
+	MSG	SOFT
+    IFD	wantSUCCESS
+	XREF	SUCCESS
+	MOVE.W	#RETCODE_SUCCESS,SUCCESS(A4)
+    ENDC
+	DOGO	BSFULLSTOP
+25$
+    IFD	wantSUCCESS
+	MOVE.W	#RETCODE_SUCCESS,SUCCESS(A4)
+    ENDC
+	CLR.L   D1
+	MOVE.B  3(A0),D1
+	MOVE.B  D1,D2
+	AND.B   #$0F,D1            ;TEXTURE IN D1
+	BEQ     DBS
+	LSR.B   #6,D2              ;SHARPNESS
+	DO	P.TN
+	DO	ISARE
+	TST_WET				;WET ? 
+	BEQ.S   30$  
+	MOVE.B  D1,D6
+	MSG	WET
+	MSG	AND
+	CLR.L   D1
+	MOVE.B  D6,D1
+30$
+	TEST_B  D2
+	BEQ.S   50$
+	CMP.B   #3,D2
+	BNE.S   40$
+	MSG	VSHP
+	DOGO	BSFULLSTOP
+40$    
+	MSG	SHP
+	DOGO	BSFULLSTOP
+ 
+50$
+	TEST_B  D1
+	BEQ.S   60$
+
+	BeSure	M.TEXTURE
+
+	ADD.W   #M.TEXTURE,D1
+	DO	P.MSG
+	DOGO	BSFULLSTOP
+60$
+	RET
+
+	ENDC
+*---------------------------------------
+
+BIZARE
+
+	MSGGO	BZ
+
+
+
+	END

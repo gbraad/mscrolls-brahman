@@ -1,0 +1,63 @@
+**************************************************************
+*
+*	12/18/87
+*	@(#)lean.elt	2.2
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"verbequ.i"
+	include	"scenequ.i"
+
+      IfVerb	LEAN
+
+	XDEF	V.LEAN
+	XREF	SP.LEAN,CONJ,ADVERB,DBS
+
+      IFD	wantSP.LEAN_After
+	XREF	SP.LEAN_After
+      ENDC
+   
+V.LEAN
+ 
+	TEST_W	6(A0)			;only lean simple loc & carried
+	BNE.S	60$			;else not a chance
+	DO	FIXCHK			;fixed?
+	BNE.S	60$			;if so then no-go
+
+	TEST_W  CONJ(A4)
+	BPL.S   50$
+	CMP.W   #AGAINST,ADVERB(A4)     ;AGAINST 
+	BEQ.S   05$
+	CMP.W   #ON,ADVERB(A4)		;ON
+	BEQ.S	05$
+	MSGGO	IDFY
+05$
+	CALL    SP.LEAN
+	BRA.S	60$
+50$
+	MOVE.W  #$11,D1
+	CMP.W   #$3,CONJ(A4)
+	BEQ.S   51$
+	MOVE.W  D1,CONJ(A4)
+51$
+	DO	CHK4PT
+	BTST	#6,4(A5)		;lean x on npc?
+	BNE	DBS			;dbs!
+
+      IFD	wantSP.LEAN_After
+	CALL	SP.LEAN_After
+      ENDC
+
+60$
+	DOGO	YCANT			;else cannot
+
+	ENDC
+
+
+
+	END

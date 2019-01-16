@@ -1,0 +1,43 @@
+
+************************************************************
+*
+*   @(#)getmulticode.elt    1.1
+*   1/22/88
+*
+************************************************************
+
+
+    SECTION     "ADV",CODE
+    include     "equates.i"
+    include     "macros.i"
+    include     "nounequ1.i"
+    include     "scenequ.i"
+    include     "nounequ2.i"
+
+    IFD wantMULTIPLES
+    XDEF    GetMultiCode
+    XREF    MULTIPLE_LIST
+GetMultiCode
+
+* returns the multiple code for d0 
+* exit
+*   code in d1
+
+    PUSH_L  A1
+    LEA MULTIPLE_LIST(A4),A1
+10$
+    MOVE.L  (A1)+,D1
+    BEQ.S   90$         ;end, exit wi 0
+    CMP.W   D0,D1       ;this one?
+    BNE.S   10$         ;no, try next
+    SWAP    D1
+90$
+    TEST_W  D1          ;and set flags on result
+    PULL_L  A1
+    RET
+    ENDC    ;wantMULTIPLES
+
+
+*------------------------------------------
+
+    END

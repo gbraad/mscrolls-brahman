@@ -1,0 +1,301 @@
+**************************************************************
+*
+*	3/22/89
+*	@(#)nodos2.elt	2.6
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+
+*--------------------------------
+*
+*  SRC.ADV.SAVE/LOADGAME
+*
+*--------------------------------
+ 
+
+    IFEQ	DosPresent
+
+	XREF	CRYPT
+
+	XREF	SLGAMENO,DRIVE,FILENO,SLADDR,DEST
+	XREF	SLADDR,SLADDR.E,FILESIZE,CALC.DATA
+ 
+BD.MEDIUM.SV
+ 
+	CALL    CRYPT                 ;RECOVER GAME DATA
+	MSGGO	OBSAVE 			;<'^OUCH! - UNABLE TO SAVE^'>
+ 
+	XDEF	SAVEGAME
+
+SAVEGAME
+
+   IFNE   QL128
+
+	XREF	LEFTM,LEFTM.SV,DISPTYPE,DISP.SV
+ 
+	MOVE.W  LEFTM(A4),LEFTM.SV(A4)         ;PRESERVE LEFT MARGIN ETC ON
+	MOVE.B  DISPTYPE(A4),DISP.SV(A4)       ;SAVE GAME
+    
+   ENDC
+
+	LEA     SAVE_EXIT(PC),A0
+	CALL    SLOT.RUSURE           ;GET GAME #, DO U SURE?
+	 
+	MOVE.B  SLGAMENO+5(A4),D1	;get drive no.
+	AND.W   #$0F,D1
+	MOVE.W  D1,DRIVE(A4)
+ 
+	MOVE.W  D0,FILENO(A4)         ;FILE NO TO GET
+	LEA     SLADDR(A4),A0         ;START OF DATA AREA
+	MOVE.L  A0,DEST(A4)
+ 
+	MOVE.L  #SLADDR.E,D0		;calc save game size
+	SUB.L   #SLADDR,D0
+
+    IFNE     QL128
+
+	LSR.L   #8,D0			;div by 512
+	LSR.L   #1,D0
+
+    ENDC
+
+	MOVE.W  D0,FILESIZE(A4)
+	
+    IFEQ    QL128
+
+	XREF	INBUFF
+
+	MOVE.B  SLGAMENO(A4),INBUFF(A4)	     ;game no. (ascii 1-8)
+	MOVE.B  SLGAMENO+5(A4),INBUFF+1(A4)  ;drive no. (ascii 1/2)
+	CLR.B   INBUFF+2(A4)		     ;zero at end for luck
+
+    ENDC
+
+	MOVE.L  A4,-(A7)              ;OUCH IF STOMPED!!
+
+	CALL    CALC.DATA             ;CALCULATE SOME CHK SUMS
+	CALL    CRYPT                 ;ENCRYPT GAME
+
+    IFNE    QL128
+
+	XREF	WRITEIT
+
+	CALL    WRITEIT               ;SAVE GAME
+
+    ENDC
+
+    IFEQ    QL128
+
+	LEA	INBUFF(A4),A0		;point at 'filename'
+	LEA     SLADDR(A4),A1		;point at area to save/load
+	MOVE.W  FILESIZE(PC),D1         ;no. of bytes to do
+
+	XREF	WRITEFIL
+
+	CALL    WRITEFIL
+
+    ENDC
+
+ 
+	MOVE.L  (A7)+,A4
+  
+	CMP.W   #-1,D7
+	BEQ     BD.MEDIUM.SV
+ 
+	CALL    CRYPT                 ;DECRYPT GAME & EXIT
+
+	XDEF	SAVE_EXIT
+
+SAVE_EXIT
+
+	RET
+
+	XDEF	LOADGAME
+ 
+LOADGAME
+
+	LEA	LOAD_EXIT(PC),A0
+
+	XDEF	GETGAME
+	 
+GETGAME
+
+	CALL    SLOT.RUSURE           ;GET GAME #, DO U SURE?
+	MOVE.B  SLGAMENO+5(A4),D1	;get drive no.
+	AND.W   #$0F,D1
+	MOVE.W  D1,DRIVE(A4)
+ 
+	MOVE.W  D0,FILENO(A4)         ;FILE NO TO GET
+	LEA     SLADDR(A4),A0         ;START OF DATA AREA
+	MOVE.L  A0,DEST(A4)
+ 
+	MOVE.L  #SLADDR.E,D0		;calc save game size
+	SUB.L   #SLADDR,D0
+
+    IFNE    QL128
+	
+	LSR.L   #8,D0			;div by 512
+	LSR.L   #1,D0
+
+    ENDC
+
+	MOVE.W  D0,FILESIZE(A4)
+	
+	MOVE.L  A4,-(A7)              ;MIGHT BE *VERY* PAINFUL
+ 
+    IFNE   QL128
+
+	CALL    READIT
+	
+    ENDC
+
+    IFEQ    QL128
+
+	XREF	READFILE
+
+	MOVE.B  SLGAMENO(A4),INBUFF(A4)	     ;game no. (ascii 1-8)
+	MOVE.B  SLGAMENO+5(A4),INBUFF+1(A4)  ;drive no. (ascii 1/2)
+	CLR.B   INBUFF+2(A4)		     ;zero at end for luck
+
+	LEA	INBUFF(A4),A0		;point at 'filename'
+	LEA     SLADDR(A4),A1		;point at area to save/load
+	MOVE.W  FILESIZE(PC),D1         ;no. of bytes to do
+
+	CALL    READFILE
+
+    ENDC
+
+
+	MOVE.L  (A7)+,A4
+	
+    IFNE	QL128       
+
+	CMP.W   #-1,D7                ;IO ERROR
+	BEQ     BD.MEDIUM.LD          ;YES
+	
+	CMP.W   #-2,D7                ;NOT FOUND?
+	BEQ     NT.FOUND.LD
+
+    ENDC
+
+    IFEQ	QL128
+
+	TEST_B	D7
+	BEQ.S	10$
+	MSG	OBLOAD			;<'Ouch - bad load'>
+	BRA.S	LOAD_EXIT
+10$
+
+    ENDC
+
+	XREF	CHK.DATA
+  
+	
+	CALL    CRYPT                 ;DECRYPT
+	CALL    CHK.DATA              ;SEE IF IT'S A VALID GAME
+ 
+    IFNE	BookProtection
+
+	XREF	PROTECT2
+
+	CALL	PROTECT2
+
+    ENDC
+
+
+* RETURN = YES OK
+
+    IFNE  QL128
+
+ 
+	MOVE.W  LEFTM.SV(A4),LEFTM(A4)
+	MOVE.B  DISP.SV(A4),DISPTYPE(A4)       ;RECOVER SCREEN INFO
+ 
+	MOVE.W  WIDTH(A4),D1          ;YET MORE..
+	ADDQ.W  #2,D1
+	MOVE.W  D1,SWIDTH(A4)
+	ADDQ.W  #1,D1
+	MOVE.W  D1,VWIDTH(A4)
+
+	XREF	STWINDOW
+ 
+	CALL    STWINDOW              ;SINCE WE JUST ZAPPED WIDTH
+*                                    ;BETTER CLEAR UP SCREEN
+ 
+      ENDC
+
+LOAD_EXIT
+ 
+	RET
+
+* P.DEFAULT	prints default msg for people who press RETURN
+
+	XDEF	P.DEFAULT
+
+P.DEFAULT
+
+	PRINT	<'^(Defaulting to '>
+	MOVE.W	D1,-(A7)
+	MOVE.B	(A2),D1
+	DO	CHAROUT
+	MOVE.W	(A7)+,D1
+	PRINT	<')^'>
+	RET
+
+	XDEF	SLOT.RUSURE
+	XREF	GETCHAR
+ 
+SLOT.RUSURE
+ 
+*      CALL    W.PDR2                ;PUT UDV IN D2, WHICH GAME?
+
+	IFNE	APPLE2
+ 
+05$
+	LEA     SLGAMENO+5(A4),A2     ;point at default drive no.
+	PRINT   <'^Drive no. (1/2) ?'>
+	CALL    GETCHAR
+	CMP.B   #10,D1                ;CR = USE DEFAULT
+	BEQ.S   07$
+	CMP.B   #$31,D1               ;one is minimum
+	BLT.S   05$                   ;NO GOOD = TRY AGAIN
+	CMP.B   #$32,D1               ;two IS MAX
+	BGT.S   05$
+	MOVE.B  D1,(A2)
+	BRA.S	10$
+07$
+	CALL	P.DEFAULT		;print '(Defaulting to .)'
+
+	ENDC
+10$
+	PRINT   <'^Game no. (1-8) ?'>
+	LEA     SLGAMENO(A4),A2       ;POINT AT GAME #
+	CALL    GETCHAR               ;DO CURSOR WI DEFAULT NO., GET D1
+	CMP.B   #10,D1                ;CR = USE DEFAULT
+	BEQ.S   15$
+	CMP.B   #$31,D1               ;one is minimum
+	BLT.S   10$                   ;NO GOOD = TRY AGAIN
+	CMP.B   #$38,D1               ;eight IS MAX
+	BGT.S   10$
+	MOVE.B  D1,(A2)               ;SAVE FOR DEFAULT LATER
+	BRA.S	20$
+15$
+	CALL	P.DEFAULT
+20$
+	MOVE.B  (A2),D1               ;GET THE CHAR WE WILL USE
+	MOVE.B  D1,D0                 ;COS D1 WILL GET STOMPED SOON
+	AND.B   #$0F,D0               ;LOSE MISC ASCII BITS
+	MSG	LINE                  ;LF
+	DOGO	RUSURE
+	
+    ENDC
+
+
+
+
+	END

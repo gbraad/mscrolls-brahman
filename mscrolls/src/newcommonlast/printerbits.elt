@@ -1,0 +1,64 @@
+**************************************************************
+*
+*	10/27/87
+*	@(#)printerbits.elt	1.2
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+
+
+   IFNE     SpoolLen
+
+	XDEF	UTPRINTER
+	XREF	UTEXIT,PRINTER,Switch,WRITE_ON
+
+UTPRINTER
+
+	PEA     UTEXIT(PC)
+	LEA     PRINTER(A4),A0            ;Toggle flag (default = on)
+	CALL	Switch
+
+      IFEQ	M68000		;for Apples and the like
+
+	MOVE.B  PRINTER(A4),D0
+
+	DC.W    $A0EF		;printer trap (takes D0.B)
+
+	AND.B   D0,D7		;D0 EQ=> we just fodded printer so error n/a
+	BEQ.S   10$
+	
+	SF      PRINTER(A4)
+	MSGGO	NOPRINTER		;<'Unable to find printer^'>
+
+      ENDC
+
+10$
+	MSG	PRINTER			;<'Printer '>
+
+      IFNE     AMIGA512
+
+   XREF  PrtBAD
+
+
+	TEST_B  PrtBAD(A4)
+	BEQ.S   20$
+	SF      PRINTER(A4)
+	MSGGO	OPEN_FAILED		;<'open failed.'>
+
+      ENDC
+
+20$
+	TEST_B  PRINTER(A4)
+	BNE     WRITE_ON                    ;Now -1 => printer on
+	MSGGO	OFF                       ;     0 => printer off
+
+   ENDC
+
+
+
+	END

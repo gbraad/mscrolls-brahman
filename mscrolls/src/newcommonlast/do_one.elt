@@ -1,0 +1,95 @@
+**************************************************************
+*
+*	%G%
+*	%W%
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"scenequ.i"
+
+*--------------------------------
+
+	XDEF	DO.ONE
+	XREF	MATCHBUF,FROMWCH,DNOUNBUF,TEMPBUF,OLDBUF,RESADJ
+	
+DO.ONE
+	
+
+* have found a 'one' in input command.
+* establish its value (maybe a number).
+* Exit;
+
+* EQ <=> was a number, quit.
+	
+    IFD		wantONEAsDigit
+    	XREF	Vlist_ONEAsDigit,VerbInList
+	
+	LEA	Vlist_ONEAsDigit(A4),A1		;point to buffer
+	DO	VerbInList			;is it one of these?
+	BEQ.S	90$				;yes, then no-go.(fail)
+    ENDC	;wantONEAsDigit
+
+	LEA     MATCHBUF(A4),A0
+	TEST_W  FROMWCH(A4)              ;FROM WHICH ONE??
+	BEQ.S   01$                      ;NO
+	LEA     DNOUNBUF(A4),A1
+	CLR.W   FROMWCH(A4)              ;NOT NEXT TIME
+	BRA.S   02$
+01$
+	LEA     TEMPBUF(A4),A1
+02$
+	TEST_W  (A1)
+	BNE.S   05$
+	LEA     OLDBUF(A4),A1
+05$
+	CALL_S  80$
+	CALL    RESADJ                  ;RESOLVE
+    IFD		wantONEAsDigit
+	CALL_S	COUNT
+	SETNE
+	BRA.S	90$				;happened & exit.
+    ENDC	;wantONEAsDigit
+	
+    IFND	wantONEAsDigit
+	BRA.S   COUNT                   ;AND SET D4
+    ENDC	;!wantONEAsDigit
+
+80$
+	MOVE.W  #SECT.NOUN,(A0)+
+	MOVE.W  (A1)+,(A0)
+	BEQ.S   81$
+	SUBQ.W  #1,(A0)+
+	BRA.S   80$
+81$
+	SUBQ.L  #2,A0
+	MOVE.W  #-1,(A0)			;sets NE
+90$
+	RET
+
+*--------------------------------
+
+	XDEF	COUNT
+	XREF	SECTION_,WORD_
+	
+COUNT
+	LEA     MATCHBUF(A4),A0 
+	MOVE.W  (A0),SECTION_(A4)
+	MOVE.W  2(A0),WORD_(A4)     ;SET UP
+	CLR.W   D4
+10$
+	TEST_L  (A0)+
+	BMI.S   90$
+	ADDQ.W  #1,D4
+	BRA.S   10$
+90$
+    
+	RET
+
+*------------------------------------------ 
+
+	END

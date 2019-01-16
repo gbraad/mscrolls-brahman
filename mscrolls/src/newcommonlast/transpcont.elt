@@ -1,0 +1,138 @@
+**************************************************************
+*
+*	4/28/89
+*	@(#)transpcont.elt	2.7
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include "scenequ.i"
+
+*************************************************
+*
+* TranspCont - returns NE is obj (D0) is in a CLOSED
+*              transp. container and the verb can't
+*              get into it.
+*
+* Uses TRANS_VLIST and things
+
+	XDEF	TranspCont
+	XREF	TRANS_VLIST,VERB
+
+TranspCont
+
+	PUSH_L	D0-D1/A0-A1
+
+	LEA	TRANS_VLIST(A4),A1	;list of allowed verbs
+10$
+	MOVE.B	(A1)+,D1
+	CMP.B	#-1,D1			;-1 term cos look is in list!
+	BEQ.S	20$			;not in list so must see if ok
+	CMP.B	VERB+1(A4),D1		;is the verb in our list?
+	BNE.S	10$			;not yet, try another
+	BRA	90$			;exit ok
+20$
+	GETINFO
+	TST_PSEUDO				;pseudos can't be contained
+	BNE.S	80$
+	MOVE.B	6(A0),D1
+	AND.B	#$23,D1			;is it contained/hidden/related?
+	BEQ.S	90$			;nope, not a pointed noun
+	TST_CONTAINED				;contained?
+	BNE.S	30$			;NE => yes, better consider if its
+					;closed & transp.
+	MOVE.W	8(A0),D0
+	BEQ.S	90$			;just in case!
+	GETINFO
+	BRA.S	20$
+30$
+	MOVE.W	8(A0),D0
+	BEQ.S	90$			;just in case!
+	GETINFO
+	TST_CLOSED				;closed?
+	BNE.S	40$
+	TST_LOCKED				;locked?
+	BEQ.S	20$			;neither locked nor closed, loop up
+
+40$
+ 
+      IFND	wantAutoOpenTranspCont
+ 
+	TST_LOCALCONTENTS				;transp container?
+
+      ENDC	;!wantAutoOpenTranspCont
+ 
+      IFD	wantAutoOpenTranspCont
+ 
+	XREF	OpenFirst,SATOBJLOC,WHENSAT,SEATED,NoCanReach,CanReach
+
+	PUSH_L	D2-D3/D5
+
+	;let's see if we can reach the container
+
+	CALL	NoCanReach		;returns EQ if D0 may be got at from
+	BNE.S	41$			;NE => may not reach it 
+					;(CanReach over-rides)
+* are we sitting ?
+
+	TEST_W  SEATED(A4)
+	BEQ.S   43$                 ;NO, CARRY ON..
+
+* does this verb work when sitting?
+
+	CALL    WHENSAT             
+	BEQ.S	43$			;yes
+	CALL	SATOBJLOC		;binding
+	BNE.S	42$
+
+41$
+
+      IFNE    YCHEAT
+
+	XREF	CHEAT
+
+	TEST_W  CHEAT(A4)
+	BNE.S   43$
+
+      ENDC
+
+	CALL	CanReach		;returns EQ if D0 may be got at from
+	BEQ.S	43$			;where we are sitting
+
+*if we get here we can't reach (and open) the container so lets find out if
+*it's transparent
+
+42$
+	TST_LOCALCONTENTS
+	BRA.S	44$
+
+43$
+	TST_LOCKED			;is it locked?
+	BNE.S	42$			;yes, lets see if it's transparent
+	CLR.L	D5			;not with anything(for open specials)
+ 
+	CALL	OpenFirst
+44$
+	PULL_L	D2-D3/D5	
+ 
+      ENDC	;wantAutoOpenTranspCont
+ 
+	BNE.S	90$			;yes - bad exit!
+	BRA	20$			;no, keep going - may be some later
+	
+80$
+	SETEQ
+90$
+	PULL_L	D0-D1/A0-A1
+	RET
+
+
+
+
+
+
+	END

@@ -87,6 +87,7 @@ FocusScope
 
             placeholderText: "type here"
             focus: true
+            EnterKey.type: Qt.EnterKeyReturn
 
             fontSize: height*6/10
             showBorder: false
@@ -96,11 +97,13 @@ FocusScope
 
             Keys.onTabPressed: text = wordsModel.addBestSuggestion(text)
 
-            onAccepted:
-            {
-                var t = text
-                text = "";
-                if (!qconsole.evalCommand(t)) quitDialog.show();
+            Keys.priority: Keys.BeforeItem
+
+            Keys.onReturnPressed: {
+                    event.accepted = true;
+                    var t = text
+                    text = "";
+                    if (!qconsole.evalCommand(t)) quitDialog.show();
             }
         }
   

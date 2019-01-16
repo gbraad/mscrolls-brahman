@@ -1,0 +1,110 @@
+**************************************************************
+*
+*	2/21/89
+*	@(#)whensat.elt	2.2
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include "scenequ.i"
+
+	XDEF	WHENSAT
+	XREF	VERB,VLST.GO2,RIDING,L.WHSAT,SUBJECT,SEATED
+	XREF	GenSeatMask
+ 
+WHENSAT
+	
+*CHECKS FOR CERTAIN VERBS ONLY WHEN SEATED
+*USES D1
+*EXIT:
+*EQ = OK
+*NE = CAN'T REACH IT FROM HERE.
+	
+	TEST_L  SUBJECT(A4)		;U?
+	BEQ.S   01$			;OK
+	CLR.W   D7			;NO ERROR 
+	RET
+	
+01$
+	PUSH_L  D0/D2/D5/A0-A1/A5
+	GETINFO		
+	LEA	SEATED(A4),A1
+	CMP.W   (A1),D0			;SAME NOUN?
+	BEQ.S   99$			;OK
+	MOVE.W  (A1),D1			;SEATED NOUN
+	MOVE.L  A0,A5
+	MOVE.W  D0,D5
+	TST_PSEUDO				;pseudo?
+	BNE.S	25$			;yes, just check verb
+03$
+	MOVE.B  6(A0),D2 
+	AND.B   #$33,D2			;MASK FOR CONTINUE
+	BEQ.S   20$			;NO, CHK VERB INCASE
+	PUSH_L	D1
+	DO	GenSeatMask		;->d1
+	CMP.B   6(A0),D1		;correct relator?
+	PULL_L	D1			;restore
+	BNE.S   02$			;NO, TRY NEXT?
+	CMP.W   8(A0),D1		;TO THIS ITEM?
+	BEQ.S   99$			;YES, OK
+02$
+	MOVE.W  8(A0),D0
+	GETINFO		
+	BRA.S   03$
+	
+20$
+	MOVE.L  A5,A0
+	MOVE.W  D5,D0			;NOVE BAK
+	DO	TOPLOC
+	CMP.W   SUBJECT(A4),D0		;ON INVENT?
+	BEQ.S   99$			;OK
+25$
+	CLR.W   D0
+	LEA	L.WHSAT(A4),A0
+	TEST_W  RIDING(A4)		;IF RIDING?
+	BEQ.S   10$
+	LEA	VLST.GO2(A4),A0
+10$
+	MOVE.B  (A0)+,D0
+	CMP.B   #-1,D0
+	BEQ.S   90$			;END
+	CMP.W   VERB(A4),D0		;IN LIST?
+	BNE.S   10$			;NO, NEXT
+99$
+	PULL_L  D0/D2/D5/A0-A1/A5
+	RET				;ITS OK
+90$
+	SETNE
+	BRA.S   99$			;EXIT
+
+ 
+*--------------------------------
+
+	XDEF	SATOBJLOC
+	XREF	SEATED_RELATOR
+
+SATOBJLOC
+
+* Evaluate whether the object on the object you are related to
+* with seated_relator is/are local
+* Exit
+*	EQ<=> objects local
+
+      IFD	wantLocalWhenStandingOn
+	TEST_W	SEATED_RELATOR(A4)	;standing on object?
+	BEQ.S	90$
+      ENDC	;wantLocalWhenStandingOn
+
+	CMP.W	#ON,SEATED_RELATOR(A4)	;on is ok
+	BEQ.S	90$			;yes exit
+	CMP.W	#IN,SEATED_RELATOR(A4)	;so is in
+90$
+	RET
+
+
+
+	END

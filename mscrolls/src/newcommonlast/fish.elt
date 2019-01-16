@@ -1,0 +1,85 @@
+**************************************************************
+*
+*	10/27/87
+*	@(#)fish.elt	1.2
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"verbequ.i"
+
+*
+* V.FISH
+*
+* this will call SP.FISH with all sorts of random information
+*
+* if u 'fish for x with y in z'
+* 
+* D2 = x, D3 = y, D4 = z when we get to SP.FISH
+* if any are missed out then the relevant reg will be zero
+*
+
+	IfVerb	FISH
+
+	XDEF	V.FISH
+	XREF	SP.FISH,WHOOPS,ADVERB,CONJ,NOUNBUF3,P.IDFY
+
+V.FISH
+
+	ST	WHOOPS(A4)		;can't use multiple D.O. (John)
+
+	MOVEQ	#0,D2			; for [d2]
+	MOVEQ	#0,D3			; with [d3]
+	MOVEQ	#0,D4			; in [d4]
+	MOVEQ	#0,D7			;flag that at least one found
+
+	MOVE.W	ADVERB(A4),D1
+	CALL_S	FishSet
+
+	MOVE.W	CONJ(A4),D1
+	MOVE.W	D5,D0
+	CALL_S	FishSet
+
+	MOVE.W	CONJ+2(A4),D1
+	MOVE.W	NOUNBUF3(A4),D0
+	CALL_S	FishSet
+
+	TEST_B	D7			;good enough parse?
+	BEQ	P.IDFY
+	CALL	SP.FISH
+	MSGGO	FISHING		;<'Fishing here is a complete waste of time.'>
+
+
+* given: fish [for x] [with y] [in z]
+*
+* put D2 = x, D3 = y, D4 = z
+
+FishSet
+
+	CMP.W	#FOR,D1
+	BNE.S	10$
+	MOVE.W	D0,D2
+	ST	D7			;flag some parts of speech ok
+10$
+	CMP.W	#WITH,D1
+	BNE.S	20$
+	MOVE.W	D0,D3
+	ST	D7			;flag some parts of speech ok
+20$
+	CMP.W	#IN,D1
+	BNE.S	90$
+	MOVE.W	D0,D4
+	ST	D7			;flag some parts of speech ok
+90$
+	RET
+
+	ENDC			;of verb def
+
+
+
+	END

@@ -1,0 +1,45 @@
+**************************************************************
+*
+*	10/27/87
+*	@(#)textsize.elt	1.2
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+
+
+	IFNE	AMIGA512!ST520
+
+	XDEF	UTSWHEIGHT
+	XREF	UTEXIT,WIDTH,CWID_FLG
+
+UTSWHEIGHT
+
+	PEA     UTEXIT(PC)
+	
+10$
+      IFNE     Mono_Possible
+
+	XREF	COL_FLG,SWHEIGHT
+
+	TEST_B  COL_FLG(A4)
+	BEQ     SWHEIGHT
+
+      ENDC
+
+	MOVE.W  #WIDTH.OPT,WIDTH(A4)
+	NOT.B   CWID_FLG(A4)
+	BNE.S   90$
+	MOVE.W  #WIDTH.DEF,WIDTH(A4)
+90$
+	MSGGO	TEXTSIZE		;<'Text size changed. ^'>
+
+	ENDC
+
+
+
+	END

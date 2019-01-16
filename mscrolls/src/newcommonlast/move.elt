@@ -1,0 +1,83 @@
+**************************************************************
+*
+*	3/17/89
+*	@(#)move.elt	2.2
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"verbequ.i"
+	include	"scenequ.i"
+
+      IfVerb	MOVE
+ 
+	XDEF	V.MOVE,MVE.PNT
+	XREF	SP.MOVE.,YCANT,DO.FIX,SCAN,DBS,GET_,PRTTXT
+	XREF	STEADFAST
+
+V.MOVE
+ 
+	CALL    SP.MOVE.
+	TEST_W  8(A0)              ;ON INVENT ?
+	BNE.S   05$
+	TST_PSEUDO				;PSEUDO ?
+	BNE.S   05$
+ 
+	MSG	BUT              ;BUT YOU HAVE
+	CALL    PRTTXT   
+	DC.W    $8100              ;YOU HAVE/HE HAS
+	MSG	GOT
+	DOGO	P.TNSTOP
+	
+05$
+	MOVE.B  1(A0),D1
+	AND.B   #$F0,D1            ;HARDNESS
+	CMP.B   #$10,D1            ;LIQUID ?
+	BLS     YCANT
+	MOVE.B  2(A0),D1
+	AND.B   #$0F,D1
+	BEQ     DBS
+	CMP.B   #$0F,D1
+	BEQ     GET_  
+	DO	FIXCHK
+	BEQ.S   MVE.PNT
+	LEA     MVE.PNT(PC),A6
+	MOVEQ	#0,D6
+	BRA     DO.FIX
+
+MVE.PNT
+
+      IFD	wantSP.MVE_PNT
+	XREF	SP.MVE_PNT
+	CALL	SP.MVE_PNT	;to catch tie systems
+      ENDC	;wantSP.MVE_PNT
+
+	TST_MOVEABLE				;SH&TEX  MOVEABLE?
+	BEQ	STEADFAST
+	DO	P.SUB
+	MSG	YSI             ;'SUCCEED IN'   
+	MSG	MVG
+	DO	P.TN
+	DO	UTIL.BS
+	MSG	COMMA		;print a comma
+	CALL    SCAN
+	TEST_B  D7
+	BEQ.S   20$
+	RET
+20$
+	MSG	BUT
+    IFD	wantSUCCESS
+	XREF	SUCCESS
+	MOVE.W	#RETCODE_SUCCESS,SUCCESS(A4)	;but it did work.
+    ENDC
+	MSGGO	NHAP
+
+	ENDC
+
+
+
+	END

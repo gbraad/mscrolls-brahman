@@ -1,0 +1,39 @@
+**************************************************************
+*
+*	10/27/87
+*	@(#)roll.elt	1.3
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include "verbequ.i"
+
+*
+*  Roll  ( as in dice
+*
+	IfVerb	ROLL
+
+	XDEF	V.ROLL
+	XREF	SP.ROLL,P.MHAV
+
+V.ROLL
+
+	DO	CARRIED
+	BNE.S	10$
+	CALL	SP.ROLL
+	DOGO	DBS		; ... part two
+
+10$
+	DO	P.MHAV		; You must have the xyzzy.
+	DOGO	BSFULLSTOP
+
+	ENDC
+
+
+
+
+	END

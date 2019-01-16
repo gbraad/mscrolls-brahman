@@ -1,0 +1,48 @@
+**************************************************************
+*
+*	10/27/87
+*	@(#)twopv.elt	1.3
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+
+*--------------------------------
+
+	XDEF	TWOPV
+	XREF	TWOPV_L,VERB,ADVERB,ADDNOUN,CONJ
+	        
+TWOPV
+	
+*TRANSLATE 2PART VERBS INTO SINGLE
+*VERB MEANING
+	
+	LEA     TWOPV_L(A4),A1
+10$
+	MOVE.L  (A1)+,D1
+	BEQ.S   90$                ;FAIL
+	CMP.B   VERB+1(A4),D1
+	BNE.S   10$                ;NO, TRY NEXT
+	SWAP    D1                 ;MOVE CONJ LOW
+	CMP.W   ADVERB(A4),D1
+	BEQ.S   20$
+	TEST_W  ADDNOUN(A4)        ;SECOND NP?
+	BNE.S   10$                ;YES, CONJ IS FOR REAL THEN
+	CMP.W   CONJ(A4),D1
+	BNE.S   10$                ;NO
+	MOVE.W  #-1,CONJ(A4)       ;CLEAR CONJ IF 'VERB NOUN CONJ' MATCH
+20$
+	ROL.L   #8,D1              ;MOVE NEW VERB LOW
+	MOVE.B  D1,VERB+1(A4)
+	MOVE.W  #-1,ADVERB(A4)     ;CLEAR ADV
+90$
+	RET
+	
+
+
+
+	END

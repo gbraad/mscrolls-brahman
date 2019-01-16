@@ -1,0 +1,335 @@
+**************************************************************
+*
+*	%G%
+*	%W%
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"scen.i"
+	include	"scenequ.i"
+
+	XDEF	UTQUIT,DO.QUIT,UTRESTART,UTRESTART2
+	XREF	INIT,INITG.E,SLADDR,NEWGAME,SLGAMENO,GETCHAR,BIOSA6
+	XREF	UTEXIT
+
+      IFEQ     M68000
+
+UTQUIT
+	LEA	UTEXIT(PC),A0
+
+DO.QUIT
+
+      IFD	wantSP.DO.QUIT
+
+	XREF	SP.DO.QUIT
+	CALL	SP.DO.QUIT
+
+      ENDC	;wantSP.Do.QUIT
+
+	MSG     QUIT                  ;'DO U WANT TO QUIT OR RESTART
+	LEA     SLGAMENO+2(A4),A2     ;POINT AT 'R' - RESTART DEFAULT
+	CALL    GETCHAR               ;DO CURSOR ETC
+	AND.B   #$5F,D1               ;SORT CASE
+
+
+*	CMP.B   #'L',D1
+*	BEQ     UTRESTORE2
+
+	CMP.B   #'Q',D1               ;IF NOT QUIT THEN RESTART
+	BNE.S   UTRESTART2            ;OK THEN
+
+	MOVE.L  A0,-(A7)              ;Where to return to if not sure
+	DO	RUSURE
+     
+	DC.W	$A0ED			;non 68k quit call (fod memory etc)
+
+UTRESTART
+	
+	LEA	UTEXIT(PC),A0
+
+UTRESTART2
+
+      IFNE	PCW8256&THE_PAWN
+
+* only use SAVE to hide restart game on M: on the pawn (no M: avail later)
+
+	XREF	INIT.Restart
+	XREF	UTSAVE,UTRESTORE
+
+	ST	RestartFlag(A4)
+
+	CALL	UTRESTORE
+
+	SF	RestartFlag(A4)
+
+	ADDQ.L  #4,A7                   ;ADJUST SP
+	BRA     INIT.Restart            ;RESTART GAME
+
+      ENDC
+
+	DO	RUSURE
+
+      IFNE	SPECTRUM
+
+	XREF	SLADDR,POSWRD,SLADDR.E
+
+	LEA      SLADDR(A4),A1        ;Start of buffer
+
+	MOVE.L   #SLADDR.E+511,D1     ;End of buffer
+	SUB.L    #SLADDR,D1           ;Calculate length
+	MOVE.L   POSWRD(A4),A0        ;Pointer to name
+
+      ENDC
+
+      IFNE	BookProtection
+
+	XREF	PROT_FLG		
+
+	MOVE.B	PROT_FLG(A4),D7		;to avoid forgetting
+    
+      ENDC
+
+	DC.W    $A0EE			;non 68k restart call
+
+      IFNE	SPECTRUM
+
+	BeSure	CHK.DATA
+	BeSure	CRYPT
+	
+	XREF	INIT
+
+	CALL	CRYPT                ;Decode game
+	CALL	CHK.DATA             ;Check if its been messed around
+
+	ADD.L	#4,A7			;pop
+	BRA	INIT
+
+      ENDC
+
+      IFNE	BookProtection
+
+      MOVE.B	D7,PROT_FLG(A4)
+
+      ENDC
+
+	BRA	INIT
+
+      ENDC
+
+
+
+      IFNE     M68000		;AMIGA512!MAC512!ST520
+
+
+ 
+UTQUIT
+ 
+	LEA     UTEXIT(PC),A0         ;SAVE RET ADDR in case not sure
+ 
+DO.QUIT
+
+      IFD	wantSP.DO.QUIT
+
+	XREF	SP.DO.QUIT
+	CALL	SP.DO.QUIT
+
+      ENDC	;wantSP.Do.QUIT
+
+	MSG     QUIT                  ;'DO U WANT TO QUIT OR RESTART
+	LEA     SLGAMENO+2(A4),A2     ;POINT AT 'R' - RESTART DEFAULT
+	CALL    GETCHAR               ;DO CURSOR ETC
+	CMP.B   #10,D1                ;if its a CR don't print it
+	BEQ.S   10$
+	DO	CHAR.SUB
+	AND.B   #$5F,D1               ;SORT CASE
+10$
+*	CMP.B   #'L',D1
+*	BEQ     UTRESTORE2
+
+	CMP.B   #'Q',D1               ;IF NOT QUIT THEN RESTART
+	BNE.S   UTRESTART2            ;OK THEN
+
+	MOVE.L  A0,-(A7)              ;Where to return to if not sure
+	DO	RUSURE
+
+	IFD	Amiga_Demo_PCW
+
+	BRA	UTRESTART2
+
+	ENDC
+
+
+	IFNE	 GENERIC
+
+	XREF	GENERICQUIT
+
+	BRA		GENERICQUIT
+
+	ENDC	 ;GENERIC
+
+	 IFNE    MAC512
+
+	XREF     MACQUIT
+	
+	BRA      MACQUIT
+
+	 ENDC
+
+	FIXED_SCN	Removedisk
+20$
+	BRA.S    20$
+
+
+
+
+UTRESTART
+
+	LEA     UTEXIT(PC),A0        ;Return address in case of mistake
+
+UTRESTART2
+
+	DO	RUSURE                  ;goes (A0) if unsure
+
+
+	XDEF	UTRESTART3
+
+UTRESTART3
+
+	LEA     SLADDR(A4),A0
+	LEA     NEWGAME,A1              ;Range errors!
+	ADD.L   A4,A1
+	LEA     INITG.E(A4),A2
+10$
+	MOVE.B  (A1)+,(A0)+
+	CMP.L   A0,A2
+	BNE.S   10$
+
+	ADDQ.L  #4,A7                   ;ADJUST SP
+	BRA     INIT                    ;RESTART GAME
+
+
+      ENDC
+
+
+
+
+   IFNE    0		;	ST520
+
+
+ 
+UTQUIT
+ 
+	LEA     UTEXIT(PC),A0         ;SAVE RET ADDR in case not sure
+ 
+DO.QUIT
+
+      IFD	wantSP.DO.QUIT
+
+	XREF	SP.DO.QUIT
+	CALL	SP.DO.QUIT
+
+      ENDC	;wantSP.Do.QUIT
+
+ 
+	MSG     QUIT                  ;'DO U WANT TO QUIT OR RESTART
+	LEA     SLGAMENO+2(A4),A2     ;POINT AT 'R' - RESTART DEFAULT
+	CALL    GETCHAR               ;DO CURSOR ETC
+	CMP.B   #10,D1                ;if its a CR don't print it
+	BEQ.S   10$
+	DO	CHAR.SUB
+	AND.B   #$5F,D1               ;SORT CASE
+10$
+*	CMP.B   #'L',D1
+*	BEQ     UTRESTORE2
+
+	CMP.B   #'Q',D1               ;IF NOT QUIT THEN RESTART
+	BNE.S   UTRESTART2            ;OK THEN
+
+	MOVE.L  A0,-(A7)              ;Where to return to if not sure
+	DO	RUSURE
+
+	CALL	BIOSA6
+	CALL	MS_END            ;END OF MOUSE
+	CLR.L   -(SP)
+	MOVE.W  #$20,-(SP)            ;supervisor mode
+	TRAP    #1
+	ADD.W   #6,SP
+	BCLR    #3,CONTERM            ;fix control key to normal (for ED.PRG)
+	MOVE.L  D0,-(SP)
+	CALL    GRA_EXIT
+	MOVE.W  #$20,-(SP)
+	TRAP    #1
+	ADD.W   #6,SP
+
+	CLR.W   -(A7)
+	TRAP    #1
+
+* (FUDGE FOR TIME BEING)
+
+   IFNE     0
+
+RESET_
+
+	LEA    MSGPNTR+40000,A0             ;TOP OF PROG
+	ADD.L  A4,A0
+	LEA    UTRESTART(PC),A1
+10$
+	CLR.W  -(A0)
+	CMP.L  A0,A1
+	BNE.S  10$
+	LEA    (A4),A0
+	LEA    RESET_(PC),A1
+20$
+	CLR.W  (A0)+
+	CMP.L  A0,A1
+	BNE.S  20$
+
+	LEA    30$(PC),A0
+	MOVE.B #$41,1(A0)
+	MOVE.B #$4E,(A0)+
+30$
+	ADDQ.W   #1,A0                ;dummy instruction
+   ENDC
+
+*     TRAP    #1
+
+
+UTRESTART
+
+	LEA     UTEXIT(PC),A0          ;Return address in case of mistake
+
+UTRESTART2
+
+	DO	RUSURE                  ;goes (A0) if unsure
+
+	LEA     SLADDR(A4),A0
+	LEA     NEWGAME,A1              ;Range errors!
+	ADD.L   A4,A1
+	LEA     INITG.E(A4),A2
+10$
+	MOVE.B  (A1)+,(A0)+
+	CMP.L   A0,A2
+	BNE.S   10$
+
+	ADDQ.L  #4,A7                   ;ADJUST SP
+	BRA     INIT                    ;RESTART GAME
+
+      ENDC                             ;END OF ST520 BLOCK
+
+
+	XDEF	WRITE_ON
+
+WRITE_ON                               ;Ken did this frig.....
+
+	MSGGO	ON_STOP
+
+
+
+
+
+	END

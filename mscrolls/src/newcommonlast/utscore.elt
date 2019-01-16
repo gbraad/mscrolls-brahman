@@ -1,0 +1,57 @@
+**************************************************************
+*
+*	10/27/87
+*	@(#)utscore.elt	1.3
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"scen.i"
+
+	XDEF	UTSCORE
+	XREF	SCORE_,PRTNUM
+
+UTSCORE
+	 IFNE	THE_PAWN
+	
+ 
+	FIXED_SCN	Score1		;'YOUR SCORE_ IS..'
+	MOVE.W  SCORE_(A4),D6
+
+      IFNE    M68000
+	MULU    #5,D6
+      ENDC
+
+      IFEQ    M68000
+	MOVE.W  D6,-(SP)
+	ASL.W   #2,D6
+	ADD.W   (SP)+,D6
+      ENDC
+
+	CMP.W   #350,D6               ;SCORE_ TOO MUCH?
+	BLS.S   10$                   ;NOPE - OK
+	MOVE.W  #349,D6               ;YES - MAKE IT MAX -1!
+10$
+	CALL    PRTNUM                ;PRINT SCORE
+	FIXED_SCN	Score2		;'FROM A POSSIBLE 350.'
+	DOGO	UTEXIT
+	 ENDC
+
+	 IFEQ	THE_PAWN 
+
+	XREF	ScoreCode
+
+	CALL	ScoreCode
+	DOGO	UTEXIT
+
+	 ENDC
+
+
+
+
+
+	END

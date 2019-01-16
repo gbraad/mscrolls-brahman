@@ -1,0 +1,199 @@
+**************************************************************
+*
+*	%G%
+*	%W%
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"scenequ.i"
+	include	"linemacros.i"
+
+
+*--------------------------------
+
+	XDEF	P.CONJ
+	XREF	CONJST,CHANNEL
+   
+P.CONJ
+ 
+	MOVE.L  A1,-(A7)
+	MOVE.W	D1,-(A7)		;save the code
+
+      IFND	wantBIGPROG
+
+	LEA     CONJST(A4),A1
+      
+      ENDC
+
+      IFD	wantBIGPROG
+
+	LEA     CONJST,A1
+      
+      ENDC
+
+	CALL_S  P.TAB
+	MOVE.W	(A7)+,D1
+	MOVE.L  (A7)+,A1
+	RET
+  
+*--------------------------------
+*
+* P.TAB - print a word from the word table
+*
+* takes: A1 points as start of section
+*	 D1 word# to print
+*
+* On exit D1 is the last character in the word (hi-bit set)
+*
+* NB puts a space on the end of the word
+*
+	XDEF	P.TAB
+	XREF	CHAROUT,SPACE
+   
+P.TAB
+ 
+	MOVE.L  D0,-(A7)           ;SAVE
+	TEST_W  D1   
+	BEQ.S   20$                ;DONE ALREADY
+
+      IFEQ	FastBits
+
+10$
+	MOVE.B  (A1)+,D0           ;GET 
+	BPL.S   10$                ;UNTIL END   
+	SUBQ.W  #1,D1              ;DC     
+	BNE.S   10$                ;UNTIL CORRECT
+
+      ENDC
+
+      IFNE	FastBits
+
+	EXG	D1,D2		;WORDSCAN wants D2 and A1
+	WordScan
+	EXG	D1,D2
+
+      ENDC
+
+20$
+
+      IFND	wantBIGPROG
+	MOVE.B  (A1)+,D1
+	BMI.S   30$
+	CALL	CHAROUT		;call for speed
+	BRA.S   20$
+30$
+	CALL	CHAROUT		;call for speed
+      ENDC
+
+      IFD	wantBIGPROG
+	MOVE.B	CHANNEL(A4),D1
+	PrtWTabWord		;prints string at A1 (in data section)
+
+	SUBQ.L	#1,A1
+	GetWTabByte		;cos D1 is a return param
+
+      ENDC
+
+	CALL	SPACE
+	MOVE.L  (A7)+,D0           ;BACK
+	RET
+
+*******************************************************
+*
+* P.VERB - print a verb 
+*
+*
+* takes D1 is the verb# (starts at 0 = look)
+*
+	XDEF	P.VERB
+	XREF	WTAB_VERBS
+
+P.VERB
+
+	PUSH_L	D1/A1
+      
+      IFND	wantBIGPROG
+
+	LEA	WTAB_VERBS(A4),A1
+      
+      ENDC
+
+      IFD	wantBIGPROG
+
+	LEA	WTAB_VERBS,A1
+      
+      ENDC
+
+	CALL_S	P.TAB
+	PULL_L	D1/A1
+	RET
+
+*******************************************************
+*
+* P.DIR	-	Print a direction.
+*
+*
+* takes D1 is the direction#
+*
+	XDEF	P.DIR
+	XREF	L.DIREC
+
+P.DIR
+
+	PUSH_L	D1/A1
+      
+    IFND	wantBIGPROG
+	LEA	L.DIREC(A4),A1
+    ENDC	;!wantBIGPROG
+
+    IFD		wantBIGPROG
+	LEA	L.DIREC,A1
+    ENDC	;wantBIGPROG
+
+	CALL_S	P.TAB
+	PULL_L	D1/A1
+	RET
+
+*******************************************************
+*
+* P.PARTICLE - print a particle  (things stored in ADVERB!)
+*
+*
+* takes D1 is the particle no.
+* 
+* Hi bit set => up/down - ie DIRECTION section
+*
+
+	XDEF	P.PARTICLE
+	XREF	L.DIREC
+
+P.PARTICLE
+
+	TEST_W	D1		;MI => up/down
+	BPL	P.CONJ		;else just a normal 'conj' prep.
+
+	PUSH_L	D1/A1
+
+	
+      IFND	wantBIGPROG
+	LEA	L.DIREC(A4),A1
+      ENDC
+
+      IFD	wantBIGPROG
+	LEA	L.DIREC,A1
+      ENDC
+
+
+	AND.W	#$7FFF,D1	;fod hi bit
+	CALL_S	P.TAB
+	PULL_L	D1/A1
+	RET
+
+
+
+	END

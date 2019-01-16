@@ -1,0 +1,30 @@
+**************************************************************
+*
+*	10/27/87
+*	@(#)isaren.elt	1.2
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+
+
+*--------------------------------
+*
+* ISAREN - prints is/are not
+*
+* assumes PLURAL is set up 
+*
+
+	XDEF	ISAREN
+  
+ISAREN
+ 
+	DO	ISARE
+	MSGGO	NOT
+
+
+	END

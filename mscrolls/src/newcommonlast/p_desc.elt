@@ -1,0 +1,289 @@
+**************************************************************
+*
+*	%G%
+*	%W%
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"scenequ.i"
+	include "nounequ1.i"
+	include	"nounequ2.i"
+
+
+
+*********************************************************************
+*
+*  P.Description - This routine checks that the noun in D0 prints
+*  	           the noun description by looking it up in the 
+*		   table (OtherDescTable) if it is there it prints
+*	           the corresponding scenario msg.  Else it calls
+*                  the routine P.DESC
+*		   The table contains info as:
+*	           #Scn #Noun Zero Terminated.
+*
+* IF wantODTisNOUN is selected then a HI scen msg# is treated as a NOUN#
+*
+*********************************************************************
+
+      IFEQ	THE_PAWN
+
+	XREF	OtherDescTable
+	XDEF	OtherDescription
+
+OtherDescription
+
+	PUSH_L	A1/D1/D0	
+	LEA	OtherDescTable(A4),A1	;The table containing Noun Numbers.
+10$
+	MOVE.L	(A1)+,D1		
+	BEQ.S	90$			;Zero Terminated
+
+    IFD	wantMULTIPLES
+	XREF	PLURALDESC
+	TEST_B	PLURALDESC(A4)		;if we need the plural, look harder
+	BEQ.S	11$			;no
+	BCLR	#15,D1			;check wo hi bit for a hit.
+11$
+    ENDC	;wantMULTIPLES
+
+	CMP.W	D0,D1			;a hit?
+	BNE.S	10$			;no, ok
+
+* Okay guys we have one now print the scen message of it.
+
+	SWAP	D1			;get Scen number in low word
+
+      IFD	wantODTisNOUN
+	TEST_W	D1			;MI=> is another noun's desc
+	BPL.S	20$
+	MOVE.W	D1,D0
+	AND.W	#$7FFF,D0
+	CALL_S	P.Description
+	BRA.S	30$
+      ENDC
+
+20$
+	DO	P.SCN
+30$
+      IFD	wantSP.OtherDesc
+	XREF	SP.OtherDesc
+	CALL	SP.OtherDesc
+      ENDC
+
+	SETNE
+	
+90$
+	PULL_L	D1/A1/D0
+	RET
+
+      ENDC
+
+	XDEF	P.Description
+
+P.Description
+
+      IFEQ	THE_PAWN	;The Pawn does not know about different descs
+	CALL_S	OtherDescription
+	BEQ.S	10$			;kill rest
+	RET
+10$
+      ENDC	
+
+
+***********************************************************************
+***********************************************************************
+* 
+*  WARNING - Do not seperate these routines.  
+*
+***********************************************************************
+***********************************************************************
+
+*--------------------------------
+*
+* P.DESC - PRINTS THE DESC. OF
+* THE NOUN IN D0. IF A ROOM IT 
+* PUTS A <CR AFTER THE NOUN NAME
+*
+*--------------------------------
+
+	XDEF	P.DESC
+	XREF	FMSG,FirstGlance,STOPRON,CAPITAL
+ 
+P.DESC
+ 
+	PUSH_L  D0/D1/A0/A1
+	GETINFO        
+	TST_ISAROOM				;ROOM?
+	BNE.S	10$
+
+    IFEQ	THE_PAWN
+	BTST	#1,4(A0)		;suppress 'the' xyzzy?
+	BNE.S	10$			;NE => yes
+    ENDC
+
+	DO	P.TN
+10$
+	MOVE.W	D0,STOPRON(A4)
+
+      IFD	wanted_CLONES
+
+	XREF	CLONEDATA
+	
+	CMP.W	#MAXCLONEDESC,D0
+	BLT.S	101$
+	SUB.W	#NMAXNOUN+1,D0
+	LSL.W	#1,D0
+	LEA	CLONEDATA(A4),A0	;a GETINFO will be able to restore A0
+	MOVE.W	0(A0,D0.W),D0
+	AND.W	#$3FF,D0		;kill type bits
+	GETINFO				;reload A0
+101$
+      ENDC
+
+	CALL    FMSG
+
+    IFEQ	THE_PAWN
+
+	XREF	UntilDisturbed
+
+	CALL	FirstGlance
+	CALL	UntilDisturbed
+
+      IFD	wantADDITIONALDESCRIPTIONS
+	CALL	AdditionalDescription
+      ENDC	;wantADDITIONALDESCRIPTIONS
+
+      IFD	wantSP.P.Description
+	XREF	SP.P.Description
+	CALL	SP.P.Description
+      ENDC	;wantSP.P.Description
+
+   
+      IFD	attribute_NOFULLSTOP
+	XREF	Denotation_NOFULLSTOP,ISATTRIBUTE
+	LEA	Denotation_NOFULLSTOP(A4),A1
+	DO	ISATTRIBUTE
+	BEQ.S	20$		;if so, dont bother about '.'
+      ENDC	;attribute_NOFULLSTOP
+
+	DO	FULLSTOP		;else put one on
+	MSG	SPACE
+20$
+
+      IFD	wantLONGLOOK
+	CALL_S	P.LongLook
+      ENDC	;wantLONGLOOK
+
+
+    ENDC	;!THE_PAWN
+
+    IFNE	THE_PAWN
+	DO	FULLSTOP		;if PAWN, then tag '.' here
+    ENDC	;THE_PAWN
+
+	PULL_L  D0/D1/A0/A1
+	RET
+
+*------------------------------------------
+
+	IFD	wantLONGLOOK
+	XDEF	P.LongLook
+
+	XREF	LongLookTable,P.PRN
+
+* Print the long look for noun in d0
+* In the format of the table the msg is correct with the syntax
+* X is/are msg#
+* providing that msg is hi-bit set. Otherwise the syntax is unknown
+* So the msg only is printed
+* If BIT14 is set on the scenmsg#, the modifying text if NOT produced.
+
+
+P.LongLook
+
+	PUSH_L	D1/D5/A0-A1
+	LEA	LongLookTable(A4),A1
+10$
+	MOVE.L	(A1)+,D1
+	BEQ.S	90$			;all over. (exit fail)
+	BCLR	#15,D1			;incase of any hi-bit
+	CMP.W	D1,D0			;is this our noun?
+	BNE.S	10$			;no try another
+	SWAP	D1			;fetch msg low.
+	BCLR	#14,D1			;noprint bit set?
+	BNE.S	10$			;yes, forget this and keep looking.
+	GETINFO
+	DO	P.PRN			;it
+	BCLR	#15,D1			;hi bit flag msg# ?
+	BNE.S	20$			;was hi-bit, msg only
+	DO	ISARE			;is
+20$
+	DO	P.SCN			;msg
+	DO	FULLSTOP		;on end
+90$
+	PULL_L	D1/D5/A0-A1
+	RET
+
+	ENDC	;wantLONGLOOK
+
+*------------------------------------------
+
+    IFD	wantADDITIONALDESCRIPTIONS
+
+	XDEF	AdditionalDescription
+
+AdditionalDescription
+
+	XREF	AdditionalDescription.TBL
+
+* Additional descriptions are those that require to be appended to the
+* main room (or item) description for specials etc.
+*
+* Entries are made in the table:	AdditionalDescription.TBL
+*
+* Format of table
+*
+*	DC.W	noun#		; noun being described.
+*	DC.W	msg#,noun2#	;print msg# if (noun2#) local
+*	...
+*	DC.W	0
+
+* IF noun2# == 0 then msg# is always appended.
+* This is so that specials can change the message printing criterion
+
+	PUSH_L	D0-D2/A1
+	LEA	AdditionalDescription.TBL(A4),A1
+	MOVE.W	D0,D2			;save target noun
+10$
+	MOVE.W	(A1)+,D1		;get entry.
+	BEQ.S	90$			;end of table, done
+	CMP.W	D1,D2			;this noun?
+	BNE.S	20$			;no, try next
+	MOVE.L	(A1)+,D0		;fetch data on main noun
+	BEQ.S	30$			;0=> yes, print it
+	DO	VALID.NP		;is d0.W local?
+	BNE.S	10$			;no
+30$
+	SWAP	D0			;get msg#
+	MOVE.W	D0,D1
+	DO	P.SCN			;print message on end
+	BRA.S	90$			;and exit
+20$
+	ADDQ.L	#4,A1			;skip other data
+	BRA.S	10$			;continue
+90$
+	PULL_L	D0-D2/A1
+	RET
+
+*------------------------------------------
+  
+	ENDC	;wantADDITIONALDESCRIPTIONS
+
+
+	END

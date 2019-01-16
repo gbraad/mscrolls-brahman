@@ -1,0 +1,80 @@
+**************************************************************
+*
+*	10/27/87
+*	@(#)wake.elt	1.3
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"verbequ.i"
+	include	"scenequ.i"
+
+	IfVerb	WAKE
+
+	XDEF	V.WAKE
+	XREF	DBS
+ 
+V.WAKE
+ 
+	TST_NPC				;
+	BEQ     DBS
+	DO	GETNPC
+	MOVE.B  2(A3),D1
+	LSR.B   #4,D1               ;STATE
+	CMP.B   #4,D1               ;ASLEEP
+	BEQ.S   10$
+	CMP.B   #5,D1              ;ALSO IF UNCONSCIOUS
+	BEQ.S   20$
+	DO	P.BTN
+	DO	ISAREN
+
+      IFND	wantCorrectFullStops
+	MSGGO	ASLEEP
+      ENDC	;!wantCorrectFullStops
+
+      IFD	wantCorrectFullStops
+	MSG	ASLEEP
+	BRA.S	90$
+      ENDC	;wantCorrectFullStops
+
+10$
+
+    IFD	wantSP.WAKE
+	XREF	SP.WAKE
+	CALL	SP.WAKE
+    ENDC	;wantSP.WAKE
+
+	DO	P.PRN
+	AND.B   #$0F,2(A3)   
+
+      IFND	wantCorrectFullStops
+	MSGGO	WAKES  
+      ENDC	;!wantCorrectFullStops
+
+      IFD	wantCorrectFullStops
+	MSG	WAKES  
+	BRA.S	90$
+      ENDC	;wantCorrectFullStops
+	
+20$
+	DO	P.SUBV
+
+      IFND	wantCorrectFullStops
+	MSGGO	UNABLE         
+      ENDC	;!wantCorrectFullStops
+
+      IFD	wantCorrectFullStops
+	MSG	UNABLE         
+90$
+	DOGO	BSFULLSTOP
+      ENDC	;wantCorrectFullStops
+
+	ENDC
+
+
+
+	END

@@ -1,0 +1,75 @@
+**************************************************************
+*
+*	10/27/87
+*	@(#)insultsub.elt	1.4
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"nounequ2.i"
+	include	"scenequ.i"
+
+*--------------------------------
+	
+    IFND	wantNOQUOTES
+
+	XDEF	CAN.YOU
+
+CAN.YOU
+	       
+	
+	MSG     ICDOAN
+	DOGO	PR20
+ 
+	
+	XDEF	RNDNOUN
+
+RNDNOUN
+	XREF	RNDGEN
+
+	CALL    RNDGEN             ;THIS LOOKS
+	AND.W   #$7F,D0            ; *VERY* DODGY!
+	CMP.W   #NOUNNUM,D0        ;HMMMM
+	BHI.S   RNDNOUN            ;HMMMM!!!
+	RET
+  
+*--------------------------------
+
+
+
+	XDEF	INSULTSUB
+	XREF	RNDGEN,P.KYWRD,NEG_
+   
+INSULTSUB
+	
+	
+	TEST_W  NEG_(A4)
+	BEQ.S	10$
+	MSGGO	THOUGH
+10$
+	MOVEQ   #3,D1
+	RND_D1
+	CMP.B   #2,D1
+	BEQ.S   20$
+	MOVE.W  D1,D2
+	CALL    P.KYWRD
+	MOVE.W  D2,D1
+
+	BeSure	M.COP7
+
+	ADD.W   #M.COP7,D1
+ 
+	DOGO	P.MSG
+20$
+	DO	P.SUB
+	BRA     P.KYWRD
+
+
+    ENDC	;wantNOQUOTES
+
+
+	END

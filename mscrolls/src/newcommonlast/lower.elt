@@ -1,0 +1,30 @@
+**************************************************************
+*
+*	10/27/87
+*	@(#)lower.elt	1.2
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"verbequ.i"
+
+	IfVerb	LOWER
+
+	XDEF	V.LOWER
+	XREF	SP.LOWER,V.MOVE,DROP
+ 
+V.LOWER
+ 
+	DO	CARRIED
+	BEQ     DROP
+	CALL    SP.LOWER
+	BRA     V.MOVE
+	
+	ENDC
+
+
+	END

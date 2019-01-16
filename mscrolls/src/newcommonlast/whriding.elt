@@ -1,0 +1,87 @@
+**************************************************************
+*
+*	10/27/87
+*	@(#)whriding.elt	1.2
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+
+	XDEF	WHRIDING
+	XREF	RIDING,SEATED,STOPRON,SUBJECT
+
+WHRIDING
+	
+	CLR.W   D7			;NO ERROR YET.
+	
+      IFNE    YCHEAT
+	XREF	CHEAT
+	TEST_W  CHEAT(A4)
+	BNE     99$   
+      ENDC
+ 
+	TEST_W  RIDING(A4)		;RIDING AT ALL?
+	BEQ     99$			;NO, EXIT OK.
+	MOVE.W  SEATED(A4),STOPRON(A4)
+	MOVE.W  D1,D2
+	DO	R.NOUN2
+	GETINFO				;ROOM NOUN IN D0.A0
+	MOVE.B  2(A0),D1		;SIZE & WIGHT
+	LSR.B   #4,D1			;GET SIZE
+	BEQ     90$			;NULL, OK
+	CMP.B   #1,D1			;MUST DROP ALL
+	BEQ.S   11$			;SAME AS 2 FOR THE TIME BEING..
+10$
+	CMP.B   #2,D1			;TOO SMALL TO FIT (HORSE) IN.
+	BNE.S   20$
+11$
+	TEST_W  SUBJECT(A4)
+	BNE.S   15$
+	DO	P.SUB
+	MSG     NOTAKE
+	BRA     80$			;FAIL.
+15$
+	MOVE.W  SEATED(A4),D0
+	DO	P.TN
+	MSG     WNTF			;WONT FIT
+	BRA.S   80$
+20$
+	CMP.B   #3,D1			;NOT RIDING.
+	BNE.S   30$
+	TEST_W  SUBJECT(A4)
+	BNE.S   15$
+	DO	P.SUB
+	MSG     NORIDE
+	BRA.S   80$			;FAIL.
+30$
+	CMP.B   #$A,D1			;TOO LOW.
+	BNE.S   40$
+	MSG     WHAK
+35$
+	CLR.W   RIDING(A4)
+	CLR.W   SEATED(A4)
+	BRA     80$
+40$
+	CMP.B   #$B,D1			;STUMBLES.
+	BNE.S   50$
+	MSG     FALOFF
+	BRA.S   35$
+50$
+	CMP.B   #$C,D1			;FAR TOO SMALL.
+	BNE.S   60$
+	MSG     MTMAGI
+	BRA.S   80$
+60$
+90$
+	MOVE.W  D2,D1 
+99$
+	RET
+80$
+	MOVEQ   #1,D7
+	BRA.S   90$			;EXIT
+
+	END

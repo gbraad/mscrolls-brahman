@@ -1,0 +1,114 @@
+**************************************************************
+*
+*	@(#)pr_hmuch.elt	2.3
+*	5/25/88
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"scenequ.i"
+
+
+	IFND	wantNOQUOTES
+
+	XDEF	PR.HMUCH
+	XREF	CONJ,CONVNPC,NPC.LBF1,LASTA0,TOPNPC
+	
+PR.HMUCH
+	
+	CLR.W   CONJ(A4)		;CLEAR TO FIX ALL PROCESSING
+	DO	P.SAY
+	MOVE.W  CONVNPC+4(A4),D5
+	LEA	NPC.LBF1(A4),A1
+	TEST_W  (A1)
+	BEQ	80$			;NONE SPEC.
+10$
+	MOVE.W  (A1)+,D0		;GET ONE
+	BEQ	90$			;DONE
+	GETINFO				;TO A0
+	TST_NPC				;NPC?
+	BNE	50$			;VALUE NPC?
+	DO	VALID.NP		;if not local will deny knowledge
+	CALL	TOPNPC			;find owner of object in D0 returns noun# in
+	CMP.W   D4,D5			;D4 - is this the owner -no=> worthless
+
+    IFND	wanted_OWNERSHIP
+	BNE.S	20$
+    ENDC	;!wanted_OWNERSHIP
+
+    IFD		wanted_OWNERSHIP
+	XREF	OWNERLOCAL
+	BEQ.S	15$
+	CALL	OWNERLOCAL
+	BNE.S	20$			;no.
+    ENDC	;wanted_OWNERSHIP
+15$
+	DO	P.TN
+	DO	ISARE
+	
+	IFNE	THE_PAWN
+	MOVE.B  4(A0),D1		;GET VALUE
+	AND.B   #$7,D1			;LOW 3 BITS
+	ENDC
+
+	IFEQ	THE_PAWN
+	XREF	GetValue
+	DO	GetValue
+	ENDC
+
+	BEQ.S	17$			;zero value - not for sale
+	MSG	WORTH
+	DO	P.XFERGS
+	BRA.S   60$			;NEXT
+17$
+	MSG	NOT
+	MSG	FSALE
+	MSG	LINE
+	BRA.S	60$
+20$
+	TEST_W  D7
+	BNE.S   40$			;NO
+	TST_MONEY			;ONLY OF MONEY.
+	BNE.S   15$			;DOIT
+	
+	DO	P.TN
+	DO	ISARE
+	MSG	PROBAB
+	MSG	WLESS
+	BRA.S   60$			;NEXT
+40$
+	MSG	IDNK			;not local => i dont know of any xyzzy
+	MSG	OFANY
+	DO	P.NOUN
+	BRA.S   60$
+	
+50$
+	CMP.W   D0,D5			;ASKING HIMSELF?
+	BNE.S   51$  ;NO
+	MSG	ME
+	DO	DBS
+	BRA.S   60$
+51$
+	DO	P.TN			;print 'the NPC'
+	DO	ISARE			;is/are
+	MSG	PLESS			;priceless
+   
+60$
+	TEST_W  2(A0)			;NEXT?
+	BEQ	10$			;NO, OK
+	MSG	LINE
+	BRA	10$			;ANOTHER
+80$
+	MSG	IDNK
+90$
+	DOGO	PR20			;EXIT
+
+	ENDC	;wantNOQUOTES
+
+*------------------------------------------
+
+	END

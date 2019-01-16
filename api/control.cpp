@@ -55,7 +55,7 @@
 
 // 1.1.X pre ifi
 // 1.2.X post ifi
-#define VERSION_STRING  "1.2.7"
+#define VERSION_STRING  "1.2.10"
 
 struct ControlImpBase
 {

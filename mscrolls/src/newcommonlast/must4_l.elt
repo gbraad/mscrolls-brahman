@@ -1,0 +1,65 @@
+**************************************************************
+*
+*	%G%
+*	%W%
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"verbequ.i"
+
+	XDEF	MUST4_L
+
+*--------------------------------
+	
+MUST4_L
+
+	SVERB   LOOK
+	SVERB   EXAMINE
+	SVERB   GET
+	SVERB   TAKE
+	SVERB   CARRY
+	SVERB   CAST
+	SVERB   PLANT
+	SVERB   MIX
+	SVERB   ASK
+	SVERB   SAY
+	SVERB	OPEN
+	SVERB	CLOSE
+	SVERB	READ
+	SVERB	COUNT
+	SVERB	PLAY
+	SVERB	DROP
+	SVERB	MOVE
+	SVERB	SHIFT
+	SVERB	LIFT
+	SVERB	PUSH
+	SVERB	PULL
+	SVERB	SMELL
+	SVERB	TASTE
+	SVERB	EAT
+	SVERB	DRINK
+	SVERB	KICK
+	SVERB	BREAK
+	SVERB	SMASH
+	SVERB	REMOVE
+	SVERB	LIGHT
+	SVERB	TURN
+	SVERB	FEEL
+	SVERB	TOUCH
+	SVERB	WEAR
+	SVERB	HIDE
+	SVERB	STEAL
+	SVERB	BITE
+	SVERB	BLOW
+	SVERB	PRESS
+
+	DC.B    -1
+
+
+
+	END

@@ -1,0 +1,42 @@
+
+************************************************************
+*
+*	@(#)countlist.elt	1.1
+*	1/22/88
+*
+************************************************************
+
+
+	SECTION		"ADV",CODE
+	include		"equates.i"
+	include		"macros.i"
+	include		"scenequ.i"
+
+
+*------------------------------------------
+
+	XDEF	COUNTLIST
+
+COUNTLIST
+
+* Counts a zlist of words ignoring hi-bit flags
+* Entry:	A1 = adr of list
+* Exit		d4 = no. in list
+*		(flags on d4)
+
+	MOVE.L	A1,-(A7)		;save start 
+	MOVEQ	#0,D4			;clear counter
+10$
+	TEST_W	(A1)+			;consider one elt.
+	BEQ.S	90$			;done
+	BMI.S	10$			;<0 continue
+	ADDQ.W	#1,D4			;inc. counter
+	BRA.S	10$
+90$
+	MOVE.L	(A7)+,A1		;restore list ptr
+	TEST_W	D4
+	RET
+
+*------------------------------------------
+
+	END

@@ -1,0 +1,43 @@
+**************************************************************
+*
+*	10/27/87
+*	@(#)leave.elt	1.5
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"verbequ.i"
+
+	IfVerb	LEAVE
+
+	XDEF	LEAVE
+	XREF	GO.LEAVE,V.EXIT,DROP,SEATED,V.STAND
+ 
+LEAVE
+
+	IFEQ	THE_PAWN
+	XREF	SP.LEAVE
+	CALL	SP.LEAVE
+	ENDC
+ 
+	CMP.W	SEATED(A4),D0		;leave (seated)?
+	BNE.S	10$			;no
+	MOVE.W	#-1,D0			;as -1 for stand.
+	BRA	V.STAND			;yes, stand up.
+10$
+	TST_ISAROOM				;ROOM?
+	BNE	V.EXIT
+	CALL	GO.LEAVE		;DO A GO NOUN IF POSSIBLE
+*					;TO ALLOW LEAVE SHED
+	BRA	DROP
+
+	ENDC
+
+
+
+
+	END

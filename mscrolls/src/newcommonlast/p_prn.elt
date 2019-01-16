@@ -1,0 +1,150 @@
+**************************************************************
+*
+*	%G%
+*	%W%
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"scenequ.i"
+
+*--------------------------------
+	
+	XDEF	P.PRN,P.OBJPRN
+	XREF	NOTRAIL
+ 
+P.PRN
+
+    IFD		Version2_P.PRN
+* print subjective pronoun in d0
+	
+	PUSH_L	D5/A0
+	CLR.W	D5
+	GETINFO
+	CALL_S	PRNSUB
+	TEST_B	NOTRAIL(A4)			;suppress trail space?
+	BEQ.S	10$				;no, ok.
+	DO	UTIL.BS
+10$
+	PULL_L	D5/A0
+	RET
+    ENDC	;Version2_P.PRN
+	
+    IFND	Version2_P.PRN
+	CLR.W	D5
+	BRA.S	PRNSUB
+    ENDC	;!Version2_P.PRN
+ 
+ 
+P.OBJPRN
+ 
+	PUSH_L	D5/A0
+	MOVEQ   #6,D5			;DISP
+	GETINFO
+	CALL	PRNSUB
+	
+    IFD		Version2_P.PRN
+	TEST_B	NOTRAIL(A4)
+	BEQ.S	10$
+	DO	UTIL.BS
+10$
+    ENDC	;Version2_P.PRN
+	
+	PULL_L	D5/A0
+	RET
+ 
+*--------------------------------
+ 
+PRNSUB
+ 
+	PUSH_L  A0/A3
+	TST_PLURAL			;PL
+	BNE.S   70$			;YES
+	TST_NPC				;ALIVE?
+	BNE.S   50$			;YES
+	MSG	IT
+	BRA.S   90$
+50$
+	DO	GETNPC			;TO A3
+	BTST	#0,2(A3)		;MALE OR FEMALE
+	BNE.S   60$			;MALE
+	TEST_B	D5
+	BNE.S	55$
+	MSG	SHE
+	BRA.S   90$
+55$
+	MSG	HER
+	BRA.S   90$
+60$
+	TEST_B	D5			;flag NE => object prons
+	BNE.S	65$
+	MSG	HE
+	BRA.S   90$
+65$
+	MSG	HIM
+	BRA.S   90$
+70$
+	TEST_B	D5
+	BNE.S	75$
+	MSG	THEY
+	BRA.S   90$
+75$
+	MSG	THEM
+90$
+	PULL_L   A0/A3
+	RET
+
+
+*------------------------------------------
+
+    IFD	wantPPRN
+
+	XDEF	P.PPRN
+	XREF	NOTRAIL
+	
+P.PPRN
+
+* Print possessive pronoun.
+
+* Entry;
+*	D1 = npc
+
+
+	PUSH_L	D0/A0/A3
+	MOVE.W	D1,D0
+	GETINFO
+	TST_PLURAL			;plural npc?
+	BEQ.S	10$			;no.
+	MSG	THEIR
+	BRA.S	90$			;quit.
+10$
+	DO	GETNPC			;->a3
+	BTST	#2,2(A3)		;animal?
+	BEQ.S	20$			;no.
+	MSG	ITS
+	BRA.S	90$			;quit
+20$
+	BTST	#0,2(A3)		;male or female?
+	BEQ.S	30$			;female.
+	MSG	HIS
+	BRA.S	90$
+30$
+	MSG	HER
+90$
+	TEST_B	NOTRAIL(A4)
+	BEQ.S	91$
+	DO	UTIL.BS
+91$
+	PULL_L	D0/A0/A3
+	RET
+
+    ENDC	;wantPPRN
+
+*------------------------------------------
+
+
+	END

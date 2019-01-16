@@ -1,0 +1,36 @@
+**************************************************************
+*
+*	10/27/87
+*	@(#)kill.elt	1.2
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"verbequ.i"
+
+	include	"nounequ1.i"
+
+*--------------------------------
+
+	IfVerb	KILL
+	
+	XDEF	V.KILL
+	XREF	FIGHT,OK
+
+V.KILL
+	
+	CMP.W   #NPLAYER,D0     	;KILL ME/MYSELF?
+	BNE     FIGHT			;NO
+	CALL    OK
+	DOGO	DEAD
+
+
+	ENDC
+
+
+
+	END

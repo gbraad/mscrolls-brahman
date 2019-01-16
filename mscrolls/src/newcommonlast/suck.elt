@@ -1,0 +1,41 @@
+**************************************************************
+*
+*	4/28/89
+*	@(#)suck.elt	2.2
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"verbequ.i"
+	include	"scenequ.i"
+
+	IfVerb	SUCK
+
+	XDEF	V.SUCK
+	XREF	SP.SUCK,VERB,DBS
+
+V.SUCK
+	CALL	SP.SUCK
+	TST_NPC				;an NPC?
+	BEQ.S	10$
+	MSGGO	AHEM
+10$
+	MOVE.B	2(A0),D1		;size&weight
+	LSR.B	#4,D1			;we want size
+	BEQ	DBS
+	CMP.B	#2,D1
+	BLE	DBS
+	DO	P.TN
+	DO	ISARE
+	MSG	2BIG
+	MSG	TO
+	MOVE.W	VERB(A4),D1
+	DO	P.VERB
+	DOGO	BSFULLSTOP
+
+
+	ENDC

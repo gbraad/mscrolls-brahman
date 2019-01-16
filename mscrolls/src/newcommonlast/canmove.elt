@@ -1,0 +1,57 @@
+
+***********************************************************
+*
+*	%W%
+*	%G%
+*
+************************************************************
+
+		SECTION	"ADV",CODE
+
+		include	"equates.i"
+		include	"macros.i"
+		include	"scenequ.i"
+
+
+	XDEF	CanMove
+	XREF	CALCWHT
+
+CanMove
+
+* EQ <=> yes
+
+* is the item, D0, removeable in terms of its weight
+
+	PUSH_L	D3/A0
+	GETINFO
+	MOVE.B	2(A0),D3	;size & weight
+	AND.B	#$0f,D3		;just the weight
+	CMP.B	#$f,D3		;not liftable?
+	BEQ.S	70$
+	DO	CALCWHT		;->d3
+	CMP.W	#MAXWGHT,D3	;could carry it?
+	BLS.S	80$		;yes
+70$
+	SETNE
+	BRA.S	90$		;quit
+80$
+	SETEQ
+90$
+	PULL_L	D3/A0
+	RET
+
+*------------------------------------------
+	XDEF	CantMove
+
+CantMove
+
+* prints The X is too heavy 
+
+	DO	P.TN
+	DO	ISARE
+	MSGGO	ADVGRE			;too heavy to budge
+
+*------------------------------------------
+
+
+	END

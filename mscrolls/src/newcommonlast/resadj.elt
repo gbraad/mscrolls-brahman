@@ -1,0 +1,76 @@
+**************************************************************
+*
+*	10/27/87
+*	@(#)resadj.elt	1.2
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+
+
+*
+* RESolve ADJectives -	removes nouns in match buf which suffer adjective
+*			clashes	
+*
+	XDEF	RESADJ
+	XREF	MATCHBUF,ADJ.TBL,P.NOTANY,CLEANUP,ADJBUF
+
+RESADJ
+ 
+	LEA     MATCHBUF(A4),A0
+10$
+	MOVE.L  (A0)+,D0          ;GET A NOUN
+	BMI.S   90$               ;DONE, EXIT
+	LEA     ADJ.TBL(A4),A1
+	AND.W   #$7FFF,D0         ;loose bit we may have set above
+
+	IFEQ	FastBits
+
+	SUBQ.W  #1,D0             ;ADJUST FOR DBRA
+	BMI.S   20$               ;SKIP IF 1ST ONE
+15$
+	TEST_B  (A1)+             ;END OF LIST?
+	BNE.S   15$               ;NO
+	DBRA    D0,15$            ;UNTIL CORRECT
+
+	ENDC
+
+	IFNE	FastBits
+
+	BEQ.S	20$
+
+	DC.W	$A0F1		;Find Nth zero;
+
+	ENDC
+20$
+	LEA     ADJBUF(A4),A2
+30$
+	MOVE.L  A1,A3             ;SAVE START
+	MOVE.W  (A2)+,D0          ;GET ADJ
+	BEQ.S   10$               ;DONE, A MATCH, NEXT
+	ADDQ.B  #3,D0
+32$
+	MOVE.B  (A3)+,D1          ;GET ADJ IN TABLE
+	BNE.S   31$               ;NOT END
+	BSET    #7,-2(A0)         ;FLAG NOUN AS FAIL
+	BRA.S   10$               ;TRY NEXT
+31$
+	CMP.B   D0,D1             ;ADJ MATCH?
+	BNE.S   32$               ;TRY REST OF LIST
+	BRA.S   30$               ;OK, NEXT ADJ IN BUFFER
+90$
+	CALL    CLEANUP           ;DELETE FLAGGED NOUNS
+	TEST_L  MATCHBUF(A4)      ;ANY?
+	BPL.S   99$               ;YES
+	CALL    P.NOTANY          ;THERE ISNT ANY
+99$
+	RET
+
+
+
+
+	END

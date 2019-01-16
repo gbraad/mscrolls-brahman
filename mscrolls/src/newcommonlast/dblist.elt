@@ -1,0 +1,170 @@
+**************************************************************
+*
+*	%G%
+*	%W%
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"scenequ.i"
+
+
+DBEntry	MACRO	* address
+	XREF	\1
+	DC.W	\1
+	ENDM
+  
+
+	XDEF	DBLIST
+
+DBLIST
+	DBEntry	UTNORMAL
+	DBEntry	UTVERBOSE
+	DBEntry	UTBRIEF
+	DBEntry	UTVERSION
+	DBEntry	UTSAVE
+	DBEntry	UTQUIT
+	DBEntry	UTSCORE
+	DBEntry	UTRESTORE
+	DBEntry	UTRESTORE
+	DBEntry	UTRESTART
+	DBEntry	UTSERIAL
+	DBEntry	UTID
+ 
+    IFNE     YCHEAT
+  
+	DBEntry	DBWHATIS
+	DBEntry	DBSG
+	DBEntry	DBWHEREIS
+	DBEntry	DBZAP
+	DBEntry	DBGOTO
+	DBEntry	DBTELE
+	DBEntry	DBNOUN
+	DBEntry	DBMSG
+	DBEntry	DBSCN
+   
+    ENDC
+  
+	DBEntry	DBPN
+	DBEntry	DBPN          ;INSTEAD OF 'REAL' SYNONYM
+  
+    IFNE     YCHEAT
+	XDEF	Adj_word_num
+
+Adj_word_num EQU (*-DBLIST)/2
+
+	DBEntry	DBADJ
+    ENDC
+	
+    IFNE	QL128
+	DBEntry	DBLEFT
+	DBEntry	DBRIGHT
+    ENDC
+	
+    IFNE     YCHEAT
+	DBEntry	DBVIDEO
+	DBEntry	DBSUSN
+	DBEntry	DBSUSR
+	DBEntry	DBSUSCR
+    ENDC
+    
+    IFNE	QL128
+	DBEntry	DBCONTRAST
+    ENDC
+
+    IFNE     YCHEAT
+	DBEntry	DBWORD
+	DBEntry	DBMEM
+	DBEntry	DBSET
+    ENDC
+
+      IFNE      AMIGA512&YCHEAT&0
+	DBEntry	DBBPON
+	DBEntry	DBBPOFF
+	DBEntry	DBMISC
+      ENDC
+
+    IFNE     Graphics
+	DBEntry	UTGRAPHICS
+    
+      IFNE    YCHEAT
+	DBEntry	DBPICTURE
+      ENDC
+
+      IFNE	AMIGA512!ST520
+	DBEntry	UTSWHEIGHT
+      ENDC
+
+      IFNE    Mono_Possible
+	DBEntry	UTMAKESTIP
+	DBEntry	UTMAKEDITH
+	DBEntry	UTMAKEFREE
+      ENDC
+
+    ENDC
+
+    IFNE     SpoolLen
+	DBEntry	UTPRINTER
+    ENDC
+
+    IFNE     FunctionKeys
+	DBEntry	UTFUNCT
+	DBEntry	UTFUNCT            ;less hassle than synonym
+    ENDC
+
+	DBEntry	UTCREDIT
+	DBEntry	UTHINT
+
+    IFNE     Wimp                         ;poor definition
+	DBEntry	UTFOREGROUND
+	DBEntry	UTBACKGROUND
+	DBEntry	UTSCROLLCOLOUR
+    ENDC
+
+    IFNE     YCHEAT
+	DBEntry	DBCOUNT
+    ENDC
+
+    IFNE     SpeechAvail
+	DBEntry	UTSPEECH
+    ENDC
+
+
+    IFNE	PCW8256				;hmmmmm
+	DBEntry	PCWSTIPPLE
+	DBEntry	PCWDITHER
+    ENDC
+
+    IFNE	IBM
+	DBEntry	IBMTITLE
+	DBEntry	IBMMORE
+	DBEntry	IBMPICTURE
+	DBEntry	IBMTEXT
+	DBEntry	IBMFASTER
+	DBEntry	IBMSLOWER
+    ENDC
+
+
+    IFNE	YCHEAT
+	DBEntry	DBSYN
+	DBEntry	DBVNET
+    ENDC
+
+    IFD	C64Pict
+	DBEntry	DBC64Pict
+    ENDC
+
+
+	IFNE	GENERIC
+	DBEntry	UndoDiff
+	ENDC
+
+	IFD	wantVerbPreFilter
+	DBEntry	VerbPreFilter
+	ENDC
+
+
+	END

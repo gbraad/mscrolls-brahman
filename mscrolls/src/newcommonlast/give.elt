@@ -1,0 +1,166 @@
+*************************************************************
+*
+*   3/12/89
+*   @(#)give.elt    2.6
+*
+**************************************************************
+
+
+    SECTION "ADV",CODE
+
+
+    include "equates.i"
+    include "macros.i"
+    include "verbequ.i"
+    include "nounequ1.i"
+    include "scenequ.i"
+    
+
+    IfVerb  GIVE
+
+    XDEF    GIVE
+    XREF    IFLIQUID,WHOOPS,P.MHAVSTOP,SP.GIVE,P.SUBOB
+    XREF    P.SAY2,P.QN,P.OBJPRN,UTIL.BS,FULLSTOP
+    XREF    P.ENDQUOTE,STEADFAST,SUBJECT
+   
+GIVE
+ 
+      IFD   wantGIVEDoesWornCheck
+    XREF    SP.UNWEA
+
+    TST_WORNBYPLAYER
+    BEQ.S   05$
+
+    IFD   wantSP.UNWEA_BEFORE
+    XREF    SP.UNWEA_BEFORE
+    CALL    SP.UNWEA_BEFORE
+    ENDC  ;wantSP.UNWEA_BEFORE
+
+    CALL    SP.UNWEA
+05$
+      ENDC  ;wantGIVEDoesWornCheck
+
+    CALL    IFLIQUID        ;FLOAT UP TO CONTAINER IF A LIQUID
+
+    IFD     wantMOBILES
+    IFD     wantNPC.GIVE
+    TEST_W  SUBJECT(A4)     ;are you doing this ?
+    BNE NPC.GIVE        ;no, then use another routine.
+    ENDC    ;wantNPC.GIVE
+    ENDC    ;wantMOBILES
+
+    MOVEQ   #1,D1
+    DO  CHK4PT  
+    BTST    #6,4(A5)        ;give TO a non-npc?
+    BNE.S   10$
+    MOVE.W  D5,D0
+    ST  WHOOPS(A4)      ;NO MORE
+    DO  P.TN
+    MSGGO   VPSYC           ;GO SEE UR SHRINK
+10$
+    TST_MOVEABLE                ;1=MOVEABLE
+    BEQ     STEADFAST
+ 
+    DO  CHKNPC          ;ABLE?
+    DO  CARRIED         ;MUST HAVE IT
+    BNE P.MHAVSTOP      ;NO
+
+    DO  FIXCHK          ;NOT IF TIED
+    BNE.S   11$         ;not OK
+
+* let's consider whether the NPC is smaller than the object 
+* this will stop us giving the tub to the maggot (crash) etc
+
+    MOVE.B  2(A0),D1        ;get size of object we're giving away
+    LSR.B   #4,D1
+    MOVE.B  2(A5),D2        ;and size of the NPC
+    LSR.B   #4,D2
+    CMP.B   D2,D1           ;if NPC > object then OK
+    BMI.S   12$         ;MI => ok
+11$
+    DOGO    YCANTNOW        ;NOT AT THE MOMENT
+12$
+    TST_NPCREFUSES          ;is it rubbish?
+    BEQ.S   13$
+
+    IFD wanted_OWNERSHIP
+    DO  GETOWNER        ;->d1
+    BEQ.S   14$         ;not owned.
+    CMP.W   D1,D5           ;even rubbish is taken if they own it!
+    BEQ.S   13$         ;yes, then he/she takes it.
+14$
+    ENDC    ;wanted_OWNERSHIP
+
+    IFD wantSP.GIVE_rubbish
+    XREF    SP.GIVE_rubbish
+    CALL    SP.GIVE_rubbish
+    ENDC    ;sp.give_rubbish
+    EXG D0,D5           ;move npc to d0
+    DO  P.SAY2          ;the npc says
+    MSG IDONTNEED       ;I don't need
+    MOVE.W  D5,D0           ;back
+    DO  P.QN
+    DO  UTIL.BS
+    MSG YOUKEEP         ;, you keep
+    DO  P.OBJPRN
+    DO  UTIL.BS
+    DO  FULLSTOP
+    DOGO    P.ENDQUOTE
+
+
+13$
+    CALL    SP.GIVE
+    DO  FIXCONT         ;if contained!
+    MOVE.W  D5,8(A0)
+    MOVE.B  #1,6(A0)
+    BSET    #6,5(A0)        ;SET AS GIVEN
+    MOVE.W  D5,D0
+    MOVE.L  A5,A0
+    DO  P.PRN
+    MSG THANK
+    CALL    P.SUBOB
+    IFD wantSUCCESS
+    XREF    SUCCESS
+    MOVE.W  #RETCODE_SUCCESS,SUCCESS(A4)
+    ENDC
+    DOGO    BSFULLSTOP
+  
+*------------------------------------------
+    IFD wantMOBILES
+    IFD     wantNPC.GIVE
+    XDEF    NPC.GIVE
+    XREF    FORWHAT.PNT,P.IDFY,TEMPBUF
+NPC.GIVE
+    
+* Routine is called when the player in not the subject of this verb.
+*  NPC.GIVE, is restricted compared to the main player give.
+* main use is for:
+*   name, give me the document,  etc.
+*       goes to ask name for the document.
+
+    CMP.W   #NPLAYER,D5     ;give me X ?
+    BNE.S   10$         ;no.
+    MOVE.W  SUBJECT(A4),D2      ;entry to forwhat
+    LEA TEMPBUF(A4),A0
+    TEST_W  (A0)            ;endo?
+    BEQ P.IDFY
+    MOVE.W  2(A0),(A0)+     ;move in
+    CLR.W   (A0)            ;zap
+    CALL    FORWHAT.PNT     ;try for it.
+    BRA.S   90$         ;quit./
+10$
+    DO  P.SAY
+    MSG DEF0
+    DO  P.ENDQUOTE
+90$
+    RET
+    
+    ENDC    ;wantNPC.GIVE
+    ENDC    ;wantMOBILES
+
+    ENDC    ;give
+
+*------------------------------------------
+
+
+    END

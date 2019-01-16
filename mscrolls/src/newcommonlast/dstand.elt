@@ -1,0 +1,31 @@
+**************************************************************
+*
+*	10/27/87
+*	@(#)dstand.elt	1.2
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+
+
+*--------------------------------
+	
+	XDEF	DSTAND
+	XREF	PRTWRD
+ 
+DSTAND 
+ 
+	CMP.B   #2,D7
+	BEQ.S   90$
+	MSG	JNSP
+	CALL    PRTWRD
+90$
+	DOGO	D72
+
+
+
+	END

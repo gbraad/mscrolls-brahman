@@ -1,0 +1,183 @@
+**************************************************************
+*
+*	11/19/87
+*	@(#)p_exits.elt	2.1
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"scenequ.i"
+	include	"linemacros.i"
+	include "nway.i"
+	include "verbequ.i"
+
+	IFD	wantVerbPreFilter
+
+	XDEF	VerbPreFilter,NounPreFilter
+	XREF	DBEXIT,GETWRD,ROOM,P.TN,BACK.AWRD,INBUFF
+
+NounPreFilter
+;* This will be called by the "Front End" passing a noun number in ??? (D0)?
+;* This will plumb it through the filter and return a word in INBUFF(A4)
+;* That points to a word which is the mask of 9 bits.
+	LEA 	INBUFF(A4),A1
+	GETINFO
+	BTST	#6,6(A0)	; Is it a room?
+	BNE.S	20$
+10$
+	BTST	#3,6(A0)	;Intrinsic?
+	BEQ.S	30$
+20$
+	CLR.W	(A1)
+	RET	
+30$
+	MOVEQ	#-1,D6		; To tell the main routine to return here.
+	BRA	noun_entry
+
+noun_return
+	LEA	INBUFF(A4),A1
+	MOVE.W	2(A1),(A1)	; Shift it back for paul..
+	RET
+	
+	
+
+VerbPreFilter
+
+	CALL	GetAllIn	; Takes D2
+	LEA	INBUFF(A4),A1	; The noun buffer is to be used as the
+;				pointer to pass back to Doug's code.
+	MOVE.W	#BUFFLEN/4,D3     ; size of buffer in noun,mask pairs
+	MOVEQ	#0,D6		; Tell the routine...
+
+StartVerbs
+	MOVE.W	(A7)+,D0
+	BEQ	EndVerbPreFilter
+	AND.W	#$7FFF,D0
+	GETINFO
+filt_look:
+	BTST	#6,6(A0)	; Is it a room?
+	BNE.S	StartVerbs
+10$
+	BTST	#3,6(A0)	;Intrinsic?
+	BNE.S	StartVerbs
+noun_entry:
+	MOVEQ	#1,D7		; D7 is our binary counter.
+	MOVE.W	D0,(A1)+	; Put it into nounbuff.
+filt_open:
+	BTST	#5,(A0)		; NE means it is closed.
+	BEQ.S	filt_close
+	BSET	#1,D7	
+filt_close:
+	BTST	#4,(A0)
+	BEQ.S	filt_get
+	BSET	#2,D7
+filt_get:
+	BTST	#4,3(A0)
+	BEQ.S	filt_wear			;not movable
+	TEST_W	8(A0)				;ignor carried.
+	BEQ.S	filt_wear
+	BSET	#3,D7
+filt_wear:
+	MOVE.B	11(A0),D2
+	BTST	#0,D2		; Is it worn by an NPC?
+	BNE.S	filt_drop
+	AND.B	#$6,D2
+	BEQ.S	filt_drop
+	BTST	#2,6(A0)	; Already worn?
+	BNE.S	filt_drop
+	BSET	#4,D7
+filt_drop	
+	BTST	#2,6(A0)
+	BNE.S	filt_remove	;ignor clothing
+	TEST_L	6(A0)		;all zero for on inventory.
+	BNE.S	filt_remove
+	BSET	#5,D7
+filt_remove:
+	BTST	#2,6(A0)	; worn?
+	BEQ.S	filt_drink
+	BSET	#6,D7
+filt_drink:
+; * A liquid?
+	MOVE.B	1(A0),D1
+	AND.B	#$F0,D1
+	CMP.B	#$10,D1
+	BNE.S	filt_eat			;must == 1 for liquid.
+	MOVE.B	11(A0),D1
+	AND.B	#$E0,D1
+	BEQ.S	filt_eat
+	BSET	#7,D7
+filt_eat:
+;* Edible substanmce?
+	MOVE.B	D7,(A1)+		; The first byte of the data.
+	MOVEQ	#0,D7
+	MOVE.B	11(A0),D1
+	AND.B	#$E0,D1
+	BEQ.S	filt_end
+;* is it a liquid?
+	MOVE.B	1(A0),D1
+	AND.B	#$F0,D1
+	CMP.B	#$10,D1
+	BEQ.S	filt_end			;is liquid.
+	MOVEQ	#1,D7
+filt_end:
+	MOVE.B	D7,(A1)+
+	TEST_W	D6				; NE=> return to base
+	BNE	noun_return
+	SUBQ.W	#1,D3				;check buffer size
+	BNE	StartVerbs			;room for at least one more.
+
+EndVerbPreFilter
+						; room, since BUFFLEN+4 really
+	MOVE.W	#-1,(A1)			;terminate the list
+	RET
+	
+GetAllIn:
+* This will really, really, really return a list of all the objects that
+* are associated with an object
+* (and will return it on the stack)
+* Takes D2 as top level (MUST be an object (not a room)).
+* returns stack...
+	MOVE.L	(A7)+,A3	; place where we came from...
+	MOVE.W	#0,-(A7)	; For the termination.
+	MOVE.L	A7,A6		; a6 is our subsiduary pointer
+	MOVE.W	ROOM(A4),D3	; For a future compare
+	MOVE.W	D3,-(A7)	; As well as inventory we need rooms
+	MOVEQ	#7,D6		; For btst on OUT?
+	MOVEQ	#5,D7		; For btst on CLOSED?
+	CLR.W	D2		; Inventory
+10$
+	DO	GETRELN2	; returns A1 pointing at a list.
+15$
+	MOVE.W	(A1)+,D0	; EQ +> fini
+	BEQ.S	20$		; Fini.
+	BMI.S	15$		; hi bit means don't worry
+	CMP.W	D3,D0		; If it is our room continue.
+	BEQ.S	15$
+	GETINFO
+	BTST	D6,6(A0)	; is it OUT?
+	BNE.S	15$
+	TST_ISAROOM		;is it a room?
+	BNE.S	15$		;yes, then 8(a0) was *NOT* a reference.
+	TST_PSEUDO	        ; what about pseudos?
+	BNE.S	15$		;chuck these out as well.
+	BTST	D7,(A0)		; Is it closed?
+	BNE.S	15$
+18$
+	MOVE.W	D0,-(A7)	; save away one we want.
+	BRA.S	15$
+20$
+	CMP.L	A7,A6		; have our pointers met?
+	BEQ.S	30$
+	MOVE.W	-(A6),D2	; the next noun
+	BPL.S	10$
+	BRA.S	20$		; and continue...
+30$
+	JMP	(A3)		;return
+
+
+	ENDC
+

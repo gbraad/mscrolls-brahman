@@ -1,0 +1,94 @@
+
+************************************************************
+*
+*	@(#)d0sinks.elt	1.1
+*	1/22/88
+*
+************************************************************
+
+
+	SECTION		"ADV",CODE
+	include		"equates.i"
+	include		"macros.i"
+	include		"nounequ1.i"
+	include		"scenequ.i"
+	include		"nounequ2.i"
+
+*------------------------------------------
+
+    IFD	wantWETROOMS
+
+	XDEF	D0SINKS
+	XREF	FIXSYS
+D0SINKS
+
+* Evaluate whether D0 sinks
+* Entry
+*	D0=object to sink
+
+* Exit
+*	Eq <=> it sinks
+*	    => A1= pointer to list of objects that sink
+
+	PUSH_L	D0-D1/D5/A0/A3
+    IFD	attribute_FLOATS
+	MOVEQ	#0,D5			;no printing
+	DO	FIXSYS			;generate fixture system-> a3
+10$
+	MOVE.W	(A3)+,D0		;get item
+	BEQ.S	20$			;ok, it does not sink
+	CALL	SINK.SUB		;does d0 sink?
+	BEQ.S	10$			;no, ok so far..
+	; ok it sinks!!
+	SETEQ
+	BRA.S	90$			;true and exit
+20$	;no it does not sink
+    ENDC	;attribute_FLOATS
+80$
+	SETNE
+90$
+	MOVE.L	A3,A1			;return in a1
+	PULL_L	D0-D1/D5/A0/A3
+	RET
+
+    IFD	attribute_FLOATS
+	XREF	Denotation_FLOATS
+	XREF	GET_CONT
+
+SINK.SUB
+* Exit
+*	NE<=> it sinks
+
+	PUSH_L	D0-D2/A0-A2
+	MOVE.W	D0,D2			;save container
+	DO	GET_CONT		;contents (if it exists)
+	BCS.S	50$			;not a container -> a1
+	MOVE.L	A1,A2			;list in a2
+10$
+	MOVE.W	(A2)+,D0		;contents
+	BEQ.S	50$			;done, floats if container does
+	BMI.S	10$			;ignor hi-bits
+	LEA	Denotation_FLOATS(A4),A1
+	DO	ISATTRIBUTE		;does it float?
+	BEQ.S	10$			;yes, next
+	GETINFO				;hmm look at weight
+	MOVE.B	2(A0),D1		;get size & weight
+	AND.B	#$0f,D1			;weight
+	BEQ.S	50$			;void, no sinking
+	CMP.B	#1,D1			;=1 too small
+	BEQ.S	10$			;no sinking yet
+	BRA.S	90$			;yes, sink the lot
+50$
+	MOVE.W	D2,D0			;restore continer
+	LEA	Denotation_FLOATS(A4),A1
+	DO	ISATTRIBUTE		;does it float?
+90$
+	PULL_L	D0-D2/A0-A2
+	RET				;exit
+    ENDC	;attribute_FLOATS
+
+    ENDC	;wantWETROOMS
+
+*------------------------------------------
+
+	END

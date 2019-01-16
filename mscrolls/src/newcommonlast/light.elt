@@ -1,0 +1,160 @@
+**************************************************************
+*
+*	%G%
+*	%W%
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"verbequ.i"
+	include	"scenequ.i"
+
+	IfVerb	LIGHT
+
+	XDEF	V.LIGHT
+	XREF	CONJ,CHKHAVE,P.MHAV
+
+V.LIGHT
+
+	IFEQ	THE_PAWN
+
+	XREF	SP.VLIGHT
+	CALL	SP.VLIGHT		;there's already an SP.LIGHT!
+
+	ENDC
+
+	CMP.W	#FROM,CONJ(A4)		;also allowed
+	BEQ.S	10$
+
+	CLR.W   D1			;WITH
+	DO	CHK4PT			;WITH WHAT?
+10$
+	BTST	#7,(A5)			;Y LIT?
+	BEQ.S   15$			;O.K. IT IS
+	BTST	#7,4(A5)		;LIT & LIGHTABLE = CAN USE TO LIGHT
+	BNE.S   20$			;OK
+15$
+
+    IFD	wantSP.LIGHTWITH_exceptions
+	XREF	SP.LIGHTWITH_exceptions
+	CALL	SP.LIGHTWITH_exceptions
+	BEQ.S	20$			;says ok
+    ENDC	;wantSP.LIGHTWITH_exceptions
+
+	EXG	D0,D5			;NOT LIT
+	EXG	A0,A5			;SWAP OBJECT,SUBJECT
+	DO	P.BTN			;'BUT THE Y
+	DO	ISARE			; IS/ARE
+	MSG	NLIT			; not burning
+	DOGO	BSFULLSTOP
+ 
+20$
+	CALL	CHKHAVE			;must have either
+	BEQ.S	21$			;yep.
+	DOGO	P.MHAV
+21$
+	TST_LIGHTABLE				;LIGHTABLE?
+	BNE.S   25$			;YES
+	TST_WET				;cant light wet things!
+	BNE.S	30$			;then you cant
+	MOVE.B  11(A0),D1		;GET COMBUST BYTE
+	AND.B   #$18,D1			;MASK REST OF BITS
+	BEQ.S   30$			;0=NON FLAM
+	CMP.B   #$18,D1			;3=EXPLODES
+	BEQ.S   40$
+	CMP.B   #$10,D1			;2=MELTS
+	BEQ.S   50$
+	BRA.S   60$			;BURNS AWAY
+25$
+    IFD	wantLIGHT_RESTRICTIONS
+	CALL	LIGHT.RESTRICTION	;can we light d0?
+	BEQ.S	26$
+	MSG	YOUDBETTERNOT
+	MSG	BECOF
+	DOGO	P.TNSTOP		;you'd better not becase of the x.
+26$
+    ENDC	;wantLIGHT_RESTRICTIONS
+
+    IFD	wantSP.LIGHT_After
+	XREF	SP.LIGHT_After
+	CALL	SP.LIGHT_After
+    ENDC	;wantSP.LIGHT_After
+
+	BSET	#7,(A0)			;SET LIT BIT
+	AND.B   #$F0,3(A0)		;ZAP TEXTURE
+	OR.B	#$03,3(A0)		;TO BE HOT
+
+	BeSure	M.LIT
+
+	MOVE.W  #M.LIT,D1		;THE X IS NOW LIT
+
+	DOGO	P.TNIN
+ 
+30$
+	DOGO	YCANT
+ 
+40$
+	CALL_S	70$			;don't care about the SETOUT
+	MSG	EXP			;explodes
+	DOGO	DEAD
+ 
+50$
+	
+	CALL_S  70$			;PUT IT OUT/FIXCONT ETC
+	MSG	MLTS
+	DOGO	FULLSTOP
+ 
+60$
+	CALL_S  70$			;PUT IT OUT ETC
+	MSGGO	BURNAW
+70$
+	DO	SETOUT			;ZAP FROM GAME & CLEAN TIED ETC
+
+	IFD	wantSUCCESS
+	XREF	SUCCESS
+	MOVE.W	#RETCODE_SUCCESS,SUCCESS(A4)
+	ENDC
+	DOGO	P.TN
+
+
+	ENDC	;V.LIGHT
+
+	
+    IFD	wantLIGHT_RESTRICTIONS
+
+* If this is included, then you will not be able to light an object
+* located inside a combustable one.
+
+	XDEF	LIGHT.RESTRICTION
+LIGHT.RESTRICTION
+	
+* Entry;
+*	D0/A0 with D5/A5
+*
+* Exit:
+*	EQ <=> can light
+
+	PUSH_L	D0-D1/A0
+	TST_PSEUDO			;pseudo?
+	BNE.S	80$			;yes, fail
+	TST_CONTAINED			;contained?
+	BEQ.S	90$			;no, then ok
+	MOVE.W	8(A0),D0		;get container
+	GETINFO				;data on container
+	MOVE.B	11(A0),D1		;data4
+	AND.B	#%11<<3,D1		;combustability
+	BEQ.S	90$			;no, then ok
+80$
+	SETNE				;set as fail
+90$
+	PULL_L	D0-D1/A0
+	RET
+
+    ENDC	;wantLIGHT_RESTRICTIONS
+
+
+	END

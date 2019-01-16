@@ -1,0 +1,149 @@
+******************************************************
+*
+*   %W%
+*   %G%
+*
+******************************************************
+
+        SECTION     "ADV",CODE
+
+*--------------------------------
+*
+* SRC.ADV.IN
+*
+*--------------------------------
+
+    include "equates.i"
+
+    include "macros.i"
+
+    include "verbequ.i"
+    include "scenequ.i"
+
+
+
+
+    XDEF        INDIR,DO.GOIN,DO.INONLY
+
+    XREF        MOVE.TAB,VALID.NP,GO.N,PRTTXT,VERB,ADVERB,PROC.LAB
+    XREF        NOUN,CALCNET,R.NOUN2,CHEAT,SCREEN,NOUNBUF
+
+*--------------------------------
+*
+* INDIR
+*
+*   calculate the direction 'in' from the currect location
+*   using either a table of otherwise
+*   register useage:
+*       d0
+*   exit:
+*       d0= item 'in' refers to
+*       or d0=0 => nowhere to go
+*
+
+INDIR
+
+    PUSH_L  D2/D5/A0        ;affected registers
+
+    IFEQ  THE_PAWN
+    DO  CALCNET         ;A0 points at network info for ROOM
+    MOVEQ   #0,D2           ;kill hi bits
+    MOVE.B  DIR_IN(A0),D2
+
+**********************************************************************
+    IFD  wantSP.NWAY
+    XREF    SP.NWAY
+    MOVE.W  #DIR_IN,D5
+    CALL    SP.NWAY
+    BEQ.S   90$         ; want nothing to happen now.
+    TEST_B  D2
+    ENDC
+**********************************************************************
+
+    BEQ.S   10$         ;no way in
+    CMP.B   #MAXROOM,D2     ;an nway_xyzzy message?
+    BCC.S   10$         ;CC => yes
+    DO  R.NOUN2         ;convert room# to noun#
+    BRA.S   90$         ;exit
+
+10$
+
+      ENDC
+
+* getting here means there is no DIR_IN 'in' - so see if there are any
+* objects which may lead somewhere
+
+    LEA MOVE.TAB(A4),A0     ;start of movement vectors
+20$
+    MOVE.W  (A0)+,D0        ;item to go in
+    BEQ.S   90$         ;end, nowhere to go
+    DO  VALID.NP        ;is around?
+    BEQ.S   90$         ;a hit!  
+    ADDQ.L  #2,A0           ;skip rest of data
+    BRA.S   20$         ;next
+90$
+    PULL_L  D2/D5/A0        ;restore
+    RET
+
+
+*--------------------------------
+
+DO.GOIN
+*   entry:
+
+    CMP.W   #VNGO,VERB(A4)      ;go?
+    BNE.S   90$         ;no, forget it 
+    MOVE.W  ADVERB(A4),D0       ;get verb modifier
+    BMI.S   90$         ;is flagged as a direction, forget it
+    CMP.W   #INTO,D0        ;== INTO ?
+    BEQ.S   05$         ;yes, ok
+    CMP.W   #IN,D0          ;== IN ?
+    BNE.S   90$         ;nope.
+05$
+    CALL    INDIR           ;get item to go in -> d0
+    TEST_W  D0          ;nowhere
+    BNE.S   10$         ;no
+    MOVEQ   #2,D7           ;error flag, (no 'eh- ...' )
+    MSG NOENTER         ;<'There is nothing to enter here.'>
+    POPSP
+    DOGO    SCREEN
+10$
+    LEA NOUNBUF(A4),A0
+    MOVE.L  A0,NOUN(A4)         ;set up dobj bufptr.
+    MOVE.W  D0,(A0)+            ;put our noun in.
+    CLR.W   (A0)                ;and terminate.
+    
+;   MOVE.L  NOUN(A4),A0
+;   MOVE.W  D0,(A0)+
+;   CLR.W   (A0)            ;terminate
+    ADDQ.L  #4,A7           ;fod RTS
+    BRA PROC.LAB        ;continue
+90$
+    RET
+
+    
+*--------------------------------
+* 
+* DO.INONLY 
+*
+*   process the command 'in'
+*       gets here from STCONJ
+*
+
+DO.INONLY
+
+    CMP.W   #INTO,D5        ;into?
+    BEQ.S   10$         ;yes
+    CMP.W   #IN,D5          ;in?
+    BNE.S   90$         ;fail
+10$
+    POPSP               ;not going back to STCONJ!
+    MOVE.W  #VNGO,VERB(A4)      ;set verb up
+    MOVE.W  #IN,ADVERB(A4)      ;set to 'in'
+    BRA DO.GOIN         ;take over
+90$
+    RET
+
+*--------------------------------
+
+    END

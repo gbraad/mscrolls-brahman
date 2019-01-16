@@ -1,0 +1,55 @@
+**************************************************************
+*
+*	%G%
+*	%W%
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"verbequ.i"
+	include	"scenequ.i"
+
+*
+* V.HOLD
+*
+	IfVerb	HOLD
+
+	XDEF	V.HOLD
+	XREF	SP.HOLD,GET_,ADVERB,V.TURN,CONJ
+
+V.HOLD
+
+	CALL	SP.HOLD
+    IFD		wantTurnUpsideDown
+	CMP.W	#UPSIDEDOWN,CONJ(A4)	;hold x upside down.
+	BEQ	V.TURN			;let turn deal wi it.
+	CMP.W	#UPSIDEDOWN,ADVERB(A4)	;hold upside down => turn
+	BEQ	V.TURN			;then turn it
+    ENDC	;wantTurnUpsideDown
+
+    IFD		wantHOLDtoUseInventory
+    	TEST_L	6(A0)				;are we Really carrying it?
+	BNE	GET_				;otherwise in pocket etc.
+    ENDC	;wantHOLDtoUseInventory
+
+    IFND	wantHOLDtoUseInventory
+	DO	CARRIED
+	BNE	GET_
+    ENDC	;!wantHOLDtoUseInventory
+
+	DO	P.TN
+	DO	ISARE
+	MSGGO	TIGHTLYHELD		;<' tightly held.^'>
+	
+*------------------------------------------ 
+	
+	ENDC
+
+
+
+	END

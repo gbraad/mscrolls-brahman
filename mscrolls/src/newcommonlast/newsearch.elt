@@ -1,0 +1,439 @@
+******************************************************
+*
+*	@(#)newsearch.elt	1.3
+*	10/27/87
+*
+******************************************************
+
+		SECTION		"ADV",CODE
+
+*--------------------------------
+*
+* newsearch
+*
+*--------------------------------
+
+	include	"equates.i"
+
+
+	XREF	TYPE
+	XREF	SYNONYM,MATCHBUF
+
+	XDEF	NewSearch
+
+type0	EQU	TYPE
+type1	EQU	TYPE+1
+
+*
+* Parameters:
+*
+*  D6 =  sect no. to start at (so we can miss sects)
+*
+*  A6 -> to string to match (as typed by the punter)  (unsigned char *)
+*  A0 -> adjective table (adjs per noun)  (unsigned char *)
+*  A1 -> adjective buffer (adjs encountered) (short *)
+*  A2 -> match (where matches go) (short *)
+*  A3 -> word table (where known words live)
+*
+
+RegList	REG	D2-D7/A0-A1/A3	;registers preserved
+
+c1		EQUR	D0	;char from word table
+c2		EQUR	D1	;char from input line
+
+given		EQUR	D0	;no clash - used with adjective resolve
+adj		EQUR	D1	; ditto
+
+longest_match	EQUR	D2	;so we know how much to change A6 at end
+
+islong		EQUR	D3	;flag long (bottle_of_beer) word
+oneislong	EQUR	D4	;flag at least one match was with a long word
+
+word		EQUR	D5	;word# we're up to
+sect		EQUR	D6	;sect# we're up to
+count		EQUR	D7	;no of chars which have matched
+adjflag		EQUR	D7	;these two used separately
+
+adjtable	EQUR	A0	;start of adj list for each noun
+adjbuffer	EQUR	A1	;the adjectives we've got
+match		EQUR	A2	;pointer to list of match sect, word#'s
+
+newmatch	EQUR	A3	;no overlap with 'real' A3
+oldmatch	EQUR	A6	; ditto wi A6
+
+EndOfSection	EQU	$82	;end of a word group marker
+EndOfTable	EQU	$81	;end of table marker
+SearchSPACE	EQU	0	;' ' and $5F == $20 && $5F = 0!
+CaseMask	EQU	$5F
+
+Enough		EQU	99	;no of chars when we forget about rest
+
+* here goes...
+
+NewSearch
+
+	PUSH_L	RegList			;no not be nobbled
+
+	CLR.W	TYPE(A4)		;nasty, cos it's used as temp.
+
+	CALL	MatchWords
+
+	PUSH_L	A5/A6
+	CALL	ReplaceSynonym
+	CALL	WeedAdjectives
+	PULL_L	A5/A6
+
+	CALL	WeedLong
+	CALL	DoRetParams
+
+	PULL_L	RegList
+	RET
+
+* first find a list of words whitch match the one typed
+
+MatchWords
+
+	MOVE.L	A6,A5			;start of input text to match
+	MOVEQ	#0,islong		;fod 'long' word flag
+	MOVEQ	#0,oneislong
+	MOVEQ	#0,count
+	MOVEQ	#0,word			;sect is given to us
+
+do
+	MOVE.B	(A3)+,c1
+	CMP.B	#EndOfTable,c1
+	BEQ	DoEndOfTable
+	CMP.B	#EndOfSection,c1
+	BEQ	DoEndOfSection
+
+* else see if char matches
+
+NotEndOfSection
+
+	MOVE.B	(A6)+,c2		;get char from input text
+	AND.B	#CaseMask,c2		;nobble case
+
+* is it a space, and is the word table character '_'?
+
+	CMP.B	#SearchSPACE,c2		;is it a space?
+	BNE.S	10$
+	CMP.B	#'_',c1			;underline
+	BNE.S	10$
+
+* they are, set flag + make chars same ('_' in wtable maps to ' ' on keyboard)
+
+	MOVE.W	#$8000,islong		;makes flaging sect# easy
+	MOVEQ	#'_',c2
+
+10$
+
+*
+* are we at the end of the word (in word table or input line)
+* 
+
+	TST.B	c1			;last char in word in word table?
+	BPL.S	20$			;PL=> no, so has Enough chars matched?
+
+* does this last char match with the typed one?
+
+	AND.B	#CaseMask,c1		;kill case
+	CMP.B	c1,c2			;same?
+	BEQ.S	30$
+
+20$
+
+* Enough matched?
+
+	CMP.W	#Enough,count
+	BLT.S	NoMatchYet		;GE=> enough, let it match
+					;else see if it really matches
+
+* found end of word table word, but is it the end of the typed word?
+
+30$
+	TST.B	(A6)			;zero - end of input line
+	BEQ.S	Matched
+	CMP.B	#' ',(A6)		;space - end of input word
+	BEQ.S	Matched
+	CMP.B	#'''',(A6)		;apostrophe (hmmm) - end of word
+	BNE.S	NoMatchYet
+
+	MOVE.B	#2,type0(A4)		;let 'em know about the "'"
+	MOVE.B	1(A6),type1(A4)		;and the next char
+
+Matched
+
+	MOVE.W	sect,(match)		;save sect# of match
+	OR.W	islong,(match)+		;was it long?
+	MOVE.W	word,(match)+		;not forgetting the word#
+
+*  if ( (A6-A5) > longest_match ) longest_match = A6-A5;
+
+	SUB.L	A5,A6			;calc how many chars matched
+	CMP.L	A6,longest_match	;is this longer than any other?
+	BPL.S	10$			;PL=> nope
+	MOVE.L	A6,longest_match
+10$
+	SUBQ.W	#1,A3			;else NextWord will skip some
+	BRA.S	NextWord
+	
+
+NoMatchYet
+
+	TST.B	-1(A3)			;were we at end of word in table?
+	BPL.S	10$			;PL=> nope, still hope
+
+* failed, update word#, point A6 at start again, clear flag
+
+	ADDQ.W	#1,word
+	MOVE.L	A5,A6
+	MOVEQ	#0,islong
+	BRA	do			;try, try again
+
+10$
+	AND.B	#CaseMask,c1		;nobble case
+	CMP.B	c1,c2
+	BNE.S	NextWord		;failed
+	ADDQ.W	#1,count
+	BRA	do
+
+
+
+NextWord
+
+* refresh misc bits
+
+	MOVE.L	A5,A6			;reset start of input word
+	MOVEQ	#0,islong		;not long next word (yet)
+	MOVEQ	#0,count		;zap no. of chars we've matched
+
+* keep track of where we are
+
+	ADDQ.W	#1,word			;up word#
+
+* find start of next word in word table
+
+10$
+	TST.B	(A3)+			;find end of word (byte > $80)
+	BPL.S	10$
+
+	BRA	do
+
+
+* deal with new sect
+
+DoEndOfSection
+
+	MOVEQ	#0,word			;start at word zero
+	MOVEQ	#0,count		;kill no. of chars matched
+	MOVEQ	#0,islong		;no '_' encountered yet
+	MOVE.L	A5,A6			;back to start of word
+	ADDQ.W	#1,sect			;next word group
+
+	BRA	do
+
+* end of table
+
+DoEndOfTable
+
+	MOVE.L	#-1,(match)		;terminate match
+	RET
+
+*
+* replace synonyms with the 'real' words
+* 
+* has to maintain whether or not the ORIGINAL word was 'long'
+* since there take priority if there are both types possible
+
+ReplaceSynonym
+
+	LEA	MATCHBUF(A4),match		;get start of buffer
+10$
+	MOVE.W	2(match),word			;word#
+	BMI.S	90$				;-1 terminator (LONG)
+	MOVE.W	(match),sect			;get sect#
+	BPL.S	20$				;MI => long word
+	AND.W	#$7FFF,sect			
+	CALL	SYNONYM
+	OR.W	#$8000,sect			;maintain 'long word status'
+	BRA.S	30$
+20$
+	CALL	SYNONYM
+30$
+	MOVE.W	sect,(match)+
+	MOVE.W	word,(match)+
+	BRA.S	10$				;next match
+90$
+	RET
+
+*
+* WeedAdjectives - hmmmm resolve adjs against those which nouns really have
+*
+
+WeedAdjectives
+
+	LEA	MATCHBUF(A4),newmatch		;get start of match
+	MOVE.L	newmatch,oldmatch
+while
+	CMP.L	match,oldmatch			;finished?
+	BNE.S	10$
+	MOVE.L	newmatch,match
+	RET					;yes, time to leave
+10$
+	MOVEQ	#0,adjflag
+	MOVE.W	(oldmatch)+,sect
+	MOVE.W	sect,islong			;must be maintained
+	AND.W	#$8000,islong
+	MOVE.W	(oldmatch)+,word
+
+	TST.W	(adjbuffer)			;were there ANY adjectives?
+	BEQ.S	Easy				;EQ => nope
+	
+	CMP.B	#6,sect				;byte wise, so islong is ignored
+	BEQ.S	IsNoun
+
+* if it's not a noun, or there were no adjectives then its's Easy
+
+Easy
+
+	MOVE.W	sect,(newmatch)+
+	MOVE.W	word,(newmatch)+
+	OR.W	islong,oneislong
+	BRA	while
+
+* It's a noun! Must resolve adjectives
+
+IsNoun
+
+	PUSH_L	longest_match/match/adjtable	;I need another pointer
+
+current_noun	EQUR	longest_match	;this isn't in use (much)
+myadjbuffer	EQUR	match	; ditto this
+
+	MOVE.L	adjbuffer,myadjbuffer
+
+FindAdjList
+
+*
+* find the list of adjs for this noun, NOT VERY EFFICIENT
+*
+* shouldn't have to scan complete list for EVERY noun
+* pre-sorted match would save hassle here
+* 
+	MOVE.W	word,current_noun
+	BEQ.S	90$			;else with die of noun#0
+10$
+	TST.B	(adjtable)+
+	BNE.S	10$
+
+	SUBQ.W	#1,current_noun
+	BNE.S	10$
+90$
+
+	MOVE.L	adjtable,-(A7)		;needs to be reloaded for each given adj
+
+WhileThereIsAnAdj
+
+10$
+	MOVE.L	(A7),adjtable		;get start of list of adjs for this noun
+	MOVE.W	(myadjbuffer)+,given
+	BEQ.S	80$			;dealt with all adjs given
+
+20$
+	MOVE.B	(adjtable)+,adj
+	SEQ	adjflag			;waaa, set oops flag
+	BEQ.S	90$			;hit end of adjs in table - no match
+	SUBQ.B	#3,adj			;adjust for historical reasons
+	CMP.B	adj,given		;match?
+	BEQ.S	10$			;ok, consider next given adj
+	BRA.S	20$			;try next adj in list on this given adj
+
+80$
+
+* ok, all the given adjs are in the noun's adj list
+
+	MOVE.W	sect,(newmatch)+
+	MOVE.W	word,(newmatch)+
+	OR.W	islong,oneislong
+
+90$
+
+	MOVE.L	(A7)+,adjtable		;even stack
+	
+	PULL_L	longest_match/match/adjtable
+	BRA	while
+
+
+*
+* WeedLong - if there was a 'long' noun match then nobble rest
+*
+* ie. if 'guild_of_thieves' matched then loose 'guild' match
+*
+
+WeedLong
+
+	TST.W	oneislong
+	BPL.S	90$				;hibit => we had some long uns
+
+	PUSH_L	newmatch/oldmatch
+	
+	LEA	MATCHBUF(A4),newmatch
+	MOVE.L	newmatch,oldmatch
+10$
+	CMP.L	oldmatch,match
+	BEQ.S	80$
+
+	MOVE.W	(oldmatch)+,sect
+	MOVE.W	(oldmatch)+,word
+	TST.W	sect
+	BPL.S	10$
+	AND.W	#$7FFF,sect
+	MOVE.W	sect,(newmatch)+
+	MOVE.W	word,(newmatch)+
+	BRA.S	10$
+
+80$
+	MOVE.L	newmatch,match
+
+	PULL_L	newmatch/oldmatch
+
+	MOVE.L	A5,A6			;calc where text pointer should be
+	ADD.W	longest_match,A6
+	RET
+
+
+90$
+	MOVE.L	A5,A6
+	ADDQ.W	#1,A6
+
+	RET
+
+*
+* DoRetParams - setup registers to countain various bits of junk
+*
+* seemingly random registers so as to be compatible with rest if universe
+*
+* A6 -> points (vaguely) at end of text of word we have been looking at
+* A2 -> at next (non-existant) match record in MATCHBUF
+* 
+* D0 contains the 'type' info 
+* D1 contains the adjflag return (what big green xyzzy?)
+*
+
+DoRetParams
+
+*	MOVE.L	match,A2		;starts there!
+
+	MOVEQ	#0,D1			;NE means 1 really
+	TST.B	adjflag
+	BEQ.S	10$
+	MOVEQ	#1,D1
+10$
+
+	MOVE.B	type0(A4),D0
+	LSL.W	#8,D0
+	MOVE.B	type1(A4),D0
+
+	RET
+
+	END

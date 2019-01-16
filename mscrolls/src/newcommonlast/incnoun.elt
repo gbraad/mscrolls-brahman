@@ -1,0 +1,28 @@
+**************************************************************
+*
+*	10/27/87
+*	@(#)incnoun.elt	1.2
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+
+
+	XDEF	INCNOUN
+	XREF	NOUNBUF,NOUN
+
+INCNOUN
+  
+	LEA     NOUNBUF(A4),A3
+	ADD.W   NOUN(A4),A3
+	MOVE.W  D5,(A3)
+	ADDQ.W  #$2,NOUN(A4)
+	RET
+ 
+
+
+
+	END

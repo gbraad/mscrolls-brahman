@@ -1,0 +1,1514 @@
+OMAIN1 = \
+	roompictures.o \
+	itemicons.o \
+	verbprefilter.o \
+	protect.o \
+	protlist.o \
+	case.o	\
+	post.o \
+	adjusttext.o \
+	again.o \
+	alwindark.o \
+	back_awrd.o \
+	back_wrd.o \
+	badload.o \
+	bbrit.o \
+	bet.o \
+	bichk.o \
+	bite.o \
+	blow.o \
+	break.o \
+	brksub.o \
+	buffers.o \
+	buffix.o \
+	buy.o \
+	calcnet.o \
+	calcwht.o \
+	canreach.o \
+	carried.o \
+	cast.o \
+	catch.o \
+	checksum.o \
+	chew.o \
+	chk4pt.o \
+	chk_own.o \
+	chkhave.o \
+	chknpc.o \
+	cleanup.o \
+	close.o \
+	closedoor.o \
+	clradj.o \
+	connect.o \
+	contrast.o \
+	convse_v.o \
+	convstart.o \
+	copout.o \
+	countexit.o \
+	cross.o \
+	crypt.o \
+	cut.o 
+
+OMAIN2 = \
+	dblist.o \
+	dbpn.o \
+	dbs.o \
+	dead.o \
+	debug1.o \
+	debug2.o \
+	debug3.o \
+	debugadj.o \
+	debugbit.o \
+	decode.o \
+	derr.o \
+	dig.o \
+	dirnpc.o \
+	dismount.o \
+	do_adj.o \
+	do_conj.o \
+	do_conte.o \
+	do_death.o \
+	do_execp.o \
+	do_final.o \
+	do_fix.o \
+	do_message.o \
+	do_one.o \
+	do_pron.o \
+	do_then.o \
+	dodative.o \
+	dohow.o \
+	doneb4.o \
+	doscore.o \
+	doyesno.o \
+	drink.o \
+	drop.o \
+	dstand.o \
+	eat.o \
+	editcmd.o \
+	do_whichbits.o \
+	edtssubs.o \
+	empty.o \
+	exit.o \
+	exits.o
+
+OMAIN3 = \
+	f_apart.o \
+	feed.o \
+	fight.o \
+	fill.o \
+	find.o \
+	findroom.o \
+	finnpc.o \
+	finrelnpc.o \
+	fire.o \
+	firstfile.o \
+	firstglance.o \
+	fish.o \
+	fix.o \
+	fixchk.o \
+	fixcont.o \
+	fixirel.o \
+	fixsys.o \
+	flush.o \
+	flushvar.o \
+	fndseat.o \
+	fndweapon.o \
+	fndwrd.o \
+	forwhat.o \
+	get.o \
+	take.o \
+	get_cont.o \
+	getadjph.o \
+	number.o \
+	getconj.o \
+	getdata.o \
+	getnouns.o \
+	getliterals.o \
+	getnpc.o \
+	getpron.o \
+	gettime.o \
+	getvalue.o \
+	getvect.o \
+	getwrd.o \
+	state.o \
+	do_pprn.o \
+	sortmatch.o \
+	ownership.o \
+	give.o \
+	gngrp.o \
+	go.o \
+	gotoask.o \
+	grab.o \
+	gsilent.o \
+        run.o 
+
+OMAIN4 = \
+	hammer.o \
+	help.o \
+	hide.o \
+	hit.o \
+	hold.o \
+	holderror.o \
+	ifanimal.o \
+	ifliquid.o \
+	illuminate.o \
+	incnoun.o \
+	incnoun2.o \
+	initcom.o \
+	input.o \
+	insist.o \
+	insultsub.o \
+	intext.o \
+	inventory.o \
+	isanyrel.o \
+	isare.o \
+	isaren.o \
+	isbitran.o \
+	isdofre.o \
+	isdoor.o \
+	isnextnoun.o \
+	jump.o \
+	jumpoff.o \
+	kick.o \
+	kill.o \
+	killdoub.o \
+	killpseudo.o \
+	kiss.o
+
+OMAIN5 = \
+	l_bitrans.o \
+	laugh.o \
+	lean.o \
+	leave.o \
+	lever.o \
+	lift.o \
+	light.o \
+	listen.o \
+	loadbios.o \
+	lock.o \
+	looktabs.o \
+	lower.o \
+	make.o	\
+	mend.o \
+	message.o \
+	mix.o \
+	mnph.o \
+	monobits.o \
+	move.o \
+	movenpc.o \
+	msgfromtable.o \
+	mult_wrd.o \
+	multtab.o \
+	must4.o \
+	must4_l.o \
+	nestloop.o \
+	nestspk.o \
+	newst.o \
+	noadj.o \
+	nodos.o \
+	nodos2.o \
+	noverb.o \
+	npc_ok.o \
+	objective.o \
+	onecop.o \
+	oninv.o \
+	onlyrel.o \
+	open.o \
+	opendoor.o
+
+OMAIN6 = \
+	p_alcarry.o \
+	p_anoun.o \
+	p_botn.o \
+	p_btn.o \
+	p_cnto.o \
+	p_desc.o \
+	p_exits.o \
+	p_floo.o \
+	p_from.o \
+	p_idfy.o \
+	p_init.o \
+	p_kywrd.o \
+	p_list.o \
+	p_loc.o \
+	p_message.o \
+	p_mhav.o \
+	p_no_tng.o \
+	p_nodo.o \
+	p_nonly.o \
+	p_norch.o \
+	p_notany.o \
+	p_noun.o \
+	p_prn.o \
+	p_refresh.o \
+	p_say.o \
+	p_sepa.o \
+	p_string.o \
+	p_sub.o \
+	p_subv.o \
+	p_tab.o \
+	p_tninow.o \
+	p_xfergs.o \
+	p_listis.o \
+	padwithspaces.o \
+	parseit.o \
+	parverb.o \
+	pcok.o \
+	pcwbits.o \
+	pick.o \
+	pickone.o \
+	piss.o \
+	plant.o \
+	play.o \
+	point.o \
+	pr_command.o \
+	pr_copout.o \
+	pr_hmuch.o \
+	pr_how.o \
+	pr_question.o \
+	pr_want.o \
+	pray.o \
+	press.o \
+	printerbits.o \
+	process.o \
+	vclass.o \
+	isitemvalid.o \
+	moveplayer.o \
+	getmulticode.o \
+	entrylonglook.o \
+	setpl.o \
+	d0sinks.o \
+	attributes.o \
+	memberofset.o \
+	situation.o \
+	countlist.o \
+	dryout.o \
+	prtnum.o \
+	prttxt.o \
+	prtworddata.o \
+	prtwrd.o \
+	pstop.o \
+	pull.o \
+	punch.o \
+	push.o \
+	put.o \
+	putd0ind5.o
+
+OMAIN7 = \
+	quit.o \
+	quotes.o \
+	r_noun.o \
+	rape.o \
+	reflect.o \
+	remove.o \
+        canmove.o \
+	resadj.o \
+	resrel.o \
+	ride.o \
+	rndcop.o \
+	roll.o \
+	rootnum.o \
+	rub.o \
+	rusure.o \
+	satmsg.o \
+	saveans.o \
+	say.o \
+	scan.o \
+	scan_rep.o \
+	scanner.o \
+	scenery.o \
+	screen.o \
+	screw.o \
+	unscrew.o \
+	set.o \
+	setout.o \
+	setpause.o \
+	setpron.o \
+	shake.o \
+	wave.o \
+	dial.o \
+	stay.o \
+	follow.o \
+	strike.o \
+	warm.o \
+	oil.o \
+	answer.o \
+	write.o \
+	start.o \
+	shave.o \
+	drive.o \
+	use.o \
+	confess.o \
+	dip.o \
+	sacrifice.o \
+	paddle.o \
+	spells.o \
+	shine.o \
+	show.o \
+	sing.o \
+	singv.o \
+	sleep.o \
+	slide.o \
+	smell.o \
+	smoke.o \
+	space.o \
+	speech.o \
+	split.o \
+	stand.o \
+	stconj.o \
+	steal.o \
+	stop.o \
+	stopbrk.o \
+	stotxt.o \
+	strangle.o \
+	stwindow.o \
+	subjective.o \
+	sussinv.o \
+	swim.o \
+	switch.o \
+	syndata.o \
+	synonym.o
+
+OMAIN8 = \
+	taste.o \
+	tear.o \
+	textsize.o \
+	throw.o \
+	tietog.o \
+	toploc.o \
+	topnpc.o \
+	touch.o \
+	transpcont.o \
+	tst_dbug.o \
+	twistturn.o \
+	twopv.o \
+	unlight.o \
+	unlock.o \
+	untie.o \
+	untildisturbed.o \
+	utcount.o \
+	utexit.o \
+	utfunct.o \
+	utgraphics.o \
+	uthint.o \
+	utoutmode.o \
+	utscore.o \
+	utspeech.o \
+	vault.o \
+	verbown.o \
+	verbtype.o \
+	vlist1.o \
+	vlist2.o \
+	vlist3.o \
+	vote.o
+
+OMAIN9 = \
+	wait.o \
+	wake.o \
+	whensat.o \
+	whriding.o \
+	width.o \
+	wind.o \
+	wsyn2.o \
+	ycant.o \
+	yesdos.o \
+	yeserr.o \
+	zapwhfix.o \
+	common.o \
+	exgnoun.o \
+	sit.o \
+	lie.o \
+        seatoccupied.o \
+	count.o \
+	p_smallnum.o \
+	clonebits.o \
+	wash.o \
+	go_n.o \
+	context.o
+
+
+OMAIN10 = \
+	bioslink.o \
+	charin.o \
+	charout.o \
+	charset.o \
+	cover.o \
+	decom.o \
+	direct.o \
+	doall.o \
+	absoluteall.o \
+	evalwht.o \
+	functinf.o \
+	getline.o \
+	hint.o \
+	in.o \
+	inputfrm.o \
+	knock.o \
+	look.o \
+	makelocal.o \
+	melt.o \
+	newsearch.o \
+	palopt.o \
+	parserdat.o \
+	parsnpc1.o \
+	pictcode.o \
+	printbits.o \
+	random.o \
+	read.o \
+	relative.o \
+	search.o \
+	searcher.o \
+	spool.o \
+	suss.o \
+	prthex.o \
+	reveal.o \
+	valid.o \
+	verblist.o \
+	wear.o \
+	chase.o \
+	weigh.o \
+	paint.o \
+	wtable.o \
+	tstbits.o \
+        clonedata.o \
+        newask.o \
+        weirdattire.o \
+        dance.o \
+        suck.o \
+        tap.o \
+        sieve.o 
+
+prog:	$(OMAIN1)
+prog:	$(OMAIN2)
+prog:	$(OMAIN3)
+prog:	$(OMAIN4)
+prog:	$(OMAIN5)
+prog:	$(OMAIN6)
+prog:	$(OMAIN7)
+prog:	$(OMAIN8)
+prog:	$(OMAIN9)
+prog:	$(OMAIN10)
+prog:	$(OSCENARIO)
+prog:	$(OMACHINE)
+#prog: Makeextras.i
+	$(LNK) -l lfile -o prog -p
+
+#scenario dependencies
+
+roompictures.o:	$S/roompictures.asm
+	$(AS) $S/roompictures.asm $(FLAGS) -o roompictures.o $O
+itemicons.o:	$S/itemicons.asm
+	$(AS) $S/itemicons.asm $(FLAGS) -o itemicons.o $O
+protlist.o:	$S/protlist.asm
+	$(AS) $S/protlist.asm $(FLAGS) -o protlist.o $O
+protect.o:	$S/protect.asm
+	$(AS) $S/protect.asm $(FLAGS) -o protect.o $O
+prspcmd.o:	$S/prspcmd.asm $S/nounflag.i
+	$(AS) $S/prspcmd.asm $(FLAGS) -o prspcmd.o $O
+score.o:	$S/score.asm 
+	$(AS) $S/score.asm $(FLAGS) -o score.o $O
+scorecode.o:	$S/scorecode.asm $I/scen.i 
+	$(AS) $S/scorecode.asm $(FLAGS) -o scorecode.o $O
+setmode.o:	$S/setmode.asm $S/nounflag.i 
+	$(AS) $S/setmode.asm $(FLAGS) -o setmode.o $O
+specials.o:	$S/specials.asm $S/nounflag.i 
+	$(AS) $S/specials.asm $(FLAGS) -o specials.o $O
+specialsa.o:	$S/specialsa.asm $S/nounflag.i 
+	$(AS) $S/specialsa.asm $(FLAGS) -o specialsa.o $O
+specialsb.o:	$S/specialsb.asm $S/nounflag.i 
+	$(AS) $S/specialsb.asm $(FLAGS) -o specialsb.o $O
+specialsc.o:	$S/specialsc.asm $S/nounflag.i 
+	$(AS) $S/specialsc.asm $(FLAGS) -o specialsc.o $O
+specialsd.o:	$S/specialsd.asm $S/nounflag.i 
+	$(AS) $S/specialsd.asm $(FLAGS) -o specialsd.o $O
+specialse.o:	$S/specialse.asm $S/nounflag.i 
+	$(AS) $S/specialse.asm $(FLAGS) -o specialse.o $O
+specialsf.o:	$S/specialsf.asm $S/nounflag.i 
+	$(AS) $S/specialsf.asm $(FLAGS) -o specialsf.o $O
+specialsg.o:	$S/specialsg.asm $S/nounflag.i 
+	$(AS) $S/specialsg.asm $(FLAGS) -o specialsg.o $O
+specialsh.o:	$S/specialsh.asm $S/nounflag.i 
+	$(AS) $S/specialsh.asm $(FLAGS) -o specialsh.o $O
+specialsi.o:	$S/specialsi.asm $S/nounflag.i 
+	$(AS) $S/specialsi.asm $(FLAGS) -o specialsi.o $O
+specialsj.o:	$S/specialsj.asm $S/nounflag.i 
+	$(AS) $S/specialsj.asm $(FLAGS) -o specialsj.o $O
+specialsk.o:	$S/specialsk.asm $S/nounflag.i 
+	$(AS) $S/specialsk.asm $(FLAGS) -o specialsk.o $O
+specialsl.o:	$S/specialsl.asm $S/nounflag.i 
+	$(AS) $S/specialsl.asm $(FLAGS) -o specialsl.o $O
+specialsm.o:	$S/specialsm.asm $S/nounflag.i 
+	$(AS) $S/specialsm.asm $(FLAGS) -o specialsm.o $O
+specialsn.o:	$S/specialsn.asm $S/nounflag.i 
+	$(AS) $S/specialsn.asm $(FLAGS) -o specialsn.o $O
+specialso.o:	$S/specialso.asm $S/nounflag.i 
+	$(AS) $S/specialso.asm $(FLAGS) -o specialso.o $O
+specialsp.o:	$S/specialsp.asm $S/nounflag.i 
+	$(AS) $S/specialsp.asm $(FLAGS) -o specialsp.o $O
+specialsq.o:	$S/specialsq.asm $S/nounflag.i 
+	$(AS) $S/specialsq.asm $(FLAGS) -o specialsq.o $O
+specialsr.o:	$S/specialsr.asm $S/nounflag.i 
+	$(AS) $S/specialsr.asm $(FLAGS) -o specialsr.o $O
+specialss.o:	$S/specialss.asm $S/nounflag.i 
+	$(AS) $S/specialss.asm $(FLAGS) -o specialss.o $O
+specialst.o:	$S/specialst.asm $S/nounflag.i 
+	$(AS) $S/specialst.asm $(FLAGS) -o specialst.o $O
+specialsu.o:	$S/specialsu.asm $S/nounflag.i 
+	$(AS) $S/specialsu.asm $(FLAGS) -o specialsu.o $O
+specialsv.o:	$S/specialsv.asm $S/nounflag.i 
+	$(AS) $S/specialsv.asm $(FLAGS) -o specialsv.o $O
+specialsw.o:	$S/specialsw.asm $S/nounflag.i 
+	$(AS) $S/specialsw.asm $(FLAGS) -o specialsw.o $O
+specialsx.o:	$S/specialsx.asm $S/nounflag.i 
+	$(AS) $S/specialsx.asm $(FLAGS) -o specialsx.o $O
+specialsy.o:	$S/specialsy.asm $S/nounflag.i 
+	$(AS) $S/specialsy.asm $(FLAGS) -o specialsy.o $O
+specialsz.o:	$S/specialsz.asm $S/nounflag.i 
+	$(AS) $S/specialsz.asm $(FLAGS) -o specialsz.o $O
+scenmsg.o:	$S/scenmsg.asm $S/scenmsg.i
+	$(AS) $S/scenmsg.asm $(FLAGS) -o scenmsg.o $O
+timer.o:	$S/timer.asm $I/scen.i $S/nounflag.i 
+	$(AS) $S/timer.asm $(FLAGS) -o timer.o $O
+adjectiv.o:	$S/adjectiv.asm  $S/nounflag.i
+	$(AS) $S/adjectiv.asm $(FLAGS) -o adjectiv.o $O
+ask.o:	$S/ask.asm $S/askabout.i $S/nounflag.i
+	$(AS) $S/ask.asm $(FLAGS) -o ask.o $O
+charts.o:	$S/charts.asm 
+	$(AS) $S/charts.asm $(FLAGS) -o charts.o $O
+data2.o:	$S/data2.asm $S/nounflag.i $S/npcdata.i $S/npclist.i
+	$(AS) $S/data2.asm $(FLAGS) -o data2.o $O
+data3.o:	$S/data3.asm 
+	$(AS) $S/data3.asm $(FLAGS) -o data3.o $O
+gmverbs.o:	$S/gmverbs.asm 
+	$(AS) $S/gmverbs.asm $(FLAGS) -o gmverbs.o $O
+info24.o:	$S/info24.asm $S/nounflag.i 
+	$(AS) $S/info24.asm $(FLAGS) -o info24.o $O
+init.o:	$S/init.asm $S/nounflag.i $S/nounequ2.i
+	$(AS) $S/init.asm $(FLAGS) -o init.o $O
+network.o:	$S/network.asm  $S/nway.i
+	$(AS) $S/network.asm $(FLAGS) -o network.o $O
+noundat1.o:	$S/noundat1.asm $S/nounflag.i 
+	$(AS) $S/noundat1.asm $(FLAGS) -o noundat1.o $O
+clonedata.o:	$S/clonedata.asm $S/nounflag.i 
+	$(AS) $S/clonedata.asm $(FLAGS) -o clonedata.o $O
+pictures.o:	$S/pictures.asm 
+	$(AS) $S/pictures.asm $(FLAGS) -o pictures.o $O
+
+# common dependencies
+
+verbprefilter.o:	$M/verbprefilter.elt  
+	$(AS) $M/verbprefilter.elt $(FLAGS) -o verbprefilter.o $O
+adjusttext.o:	$M/adjusttext.elt  
+	$(AS) $M/adjusttext.elt $(FLAGS) -o adjusttext.o $O
+again.o:	$M/again.elt   
+	$(AS) $M/again.elt $(FLAGS) -o again.o $O
+alwindark.o:	$M/alwindark.elt   
+	$(AS) $M/alwindark.elt $(FLAGS) -o alwindark.o $O
+back_awrd.o:	$M/back_awrd.elt  
+	$(AS) $M/back_awrd.elt $(FLAGS) -o back_awrd.o $O
+back_wrd.o:	$M/back_wrd.elt  
+	$(AS) $M/back_wrd.elt $(FLAGS) -o back_wrd.o $O
+badload.o:	$M/badload.elt   $I/scen.i 
+	$(AS) $M/badload.elt $(FLAGS) -o badload.o $O
+bbrit.o:	$M/bbrit.elt   
+	$(AS) $M/bbrit.elt $(FLAGS) -o bbrit.o $O
+bet.o:	$M/bet.elt   $S/verbflag.i 
+	$(AS) $M/bet.elt $(FLAGS) -o bet.o $O
+bichk.o:	$M/bichk.elt   
+	$(AS) $M/bichk.elt $(FLAGS) -o bichk.o $O
+bite.o:	$M/bite.elt   
+	$(AS) $M/bite.elt $(FLAGS) -o bite.o $O
+blow.o:	$M/blow.elt   $S/verbflag.i 
+	$(AS) $M/blow.elt $(FLAGS) -o blow.o $O
+break.o:	$M/break.elt   $S/verbflag.i 
+	$(AS) $M/break.elt $(FLAGS) -o break.o $O
+brksub.o:	$M/brksub.elt   $S/verbflag.i 
+	$(AS) $M/brksub.elt $(FLAGS) -o brksub.o $O
+buffers.o:	$M/buffers.elt  
+	$(AS) $M/buffers.elt $(FLAGS) -o buffers.o $O
+buffix.o:	$M/buffix.elt   
+	$(AS) $M/buffix.elt $(FLAGS) -o buffix.o $O
+buy.o:	$M/buy.elt   $S/verbflag.i 
+	$(AS) $M/buy.elt $(FLAGS) -o buy.o $O
+calcnet.o:	$M/calcnet.elt  
+	$(AS) $M/calcnet.elt $(FLAGS) -o calcnet.o $O
+calcwht.o:	$M/calcwht.elt   
+	$(AS) $M/calcwht.elt $(FLAGS) -o calcwht.o $O
+canreach.o:	$M/canreach.elt   
+	$(AS) $M/canreach.elt $(FLAGS) -o canreach.o $O
+carried.o:	$M/carried.elt   
+	$(AS) $M/carried.elt $(FLAGS) -o carried.o $O
+cast.o:	$M/cast.elt   $S/verbflag.i 
+	$(AS) $M/cast.elt $(FLAGS) -o cast.o $O
+catch.o:	$M/catch.elt   $S/verbflag.i 
+	$(AS) $M/catch.elt $(FLAGS) -o catch.o $O
+checksum.o:	$M/checksum.elt   
+	$(AS) $M/checksum.elt $(FLAGS) -o checksum.o $O
+chew.o:	$M/chew.elt   $S/verbflag.i 
+	$(AS) $M/chew.elt $(FLAGS) -o chew.o $O
+chk4pt.o:	$M/chk4pt.elt   
+	$(AS) $M/chk4pt.elt $(FLAGS) -o chk4pt.o $O
+chk_own.o:	$M/chk_own.elt   $S/verbflag.i 
+	$(AS) $M/chk_own.elt $(FLAGS) -o chk_own.o $O
+chkhave.o:	$M/chkhave.elt   
+	$(AS) $M/chkhave.elt $(FLAGS) -o chkhave.o $O
+chknpc.o:	$M/chknpc.elt   
+	$(AS) $M/chknpc.elt $(FLAGS) -o chknpc.o $O
+cleanup.o:	$M/cleanup.elt  
+	$(AS) $M/cleanup.elt $(FLAGS) -o cleanup.o $O
+close.o:	$M/close.elt   $S/verbflag.i 
+	$(AS) $M/close.elt $(FLAGS) -o close.o $O
+closedoor.o:	$M/closedoor.elt   
+	$(AS) $M/closedoor.elt $(FLAGS) -o closedoor.o $O
+clradj.o:	$M/clradj.elt  
+	$(AS) $M/clradj.elt $(FLAGS) -o clradj.o $O
+connect.o:	$M/connect.elt   
+	$(AS) $M/connect.elt $(FLAGS) -o connect.o $O
+contrast.o:	$M/contrast.elt  
+	$(AS) $M/contrast.elt $(FLAGS) -o contrast.o $O
+convse_v.o:	$M/convse_v.elt  $S/verbflag.i 
+	$(AS) $M/convse_v.elt $(FLAGS) -o convse_v.o $O
+convstart.o:	$M/convstart.elt   $S/verbflag.i 
+	$(AS) $M/convstart.elt $(FLAGS) -o convstart.o $O
+copout.o:	$M/copout.elt   
+	$(AS) $M/copout.elt $(FLAGS) -o copout.o $O
+countexit.o:	$M/countexit.elt   
+	$(AS) $M/countexit.elt $(FLAGS) -o countexit.o $O
+cross.o:	$M/cross.elt   $S/verbflag.i 
+	$(AS) $M/cross.elt $(FLAGS) -o cross.o $O
+crypt.o:	$M/crypt.elt   
+	$(AS) $M/crypt.elt $(FLAGS) -o crypt.o $O
+cut.o:	$M/cut.elt   $S/verbflag.i 
+	$(AS) $M/cut.elt $(FLAGS) -o cut.o $O
+dblist.o:	$M/dblist.elt  
+	$(AS) $M/dblist.elt $(FLAGS) -o dblist.o $O
+dbpn.o:	$M/dbpn.elt   
+	$(AS) $M/dbpn.elt $(FLAGS) -o dbpn.o $O
+dbs.o:	$M/dbs.elt   
+	$(AS) $M/dbs.elt $(FLAGS) -o dbs.o $O
+dead.o:	$M/dead.elt  
+	$(AS) $M/dead.elt $(FLAGS) -o dead.o $O
+debug1.o:	$M/debug1.elt   
+	$(AS) $M/debug1.elt $(FLAGS) -o debug1.o $O
+debug2.o:	$M/debug2.elt   $S/verbflag.i 
+	$(AS) $M/debug2.elt $(FLAGS) -o debug2.o $O
+debug3.o:	$M/debug3.elt   
+	$(AS) $M/debug3.elt $(FLAGS) -o debug3.o $O
+debugadj.o:	$M/debugadj.elt   
+	$(AS) $M/debugadj.elt $(FLAGS) -o debugadj.o $O
+debugbit.o:	$M/debugbit.elt   
+	$(AS) $M/debugbit.elt $(FLAGS) -o debugbit.o $O
+decode.o:	$M/decode.elt   $S/verbflag.i 
+	$(AS) $M/decode.elt $(FLAGS) -o decode.o $O
+derr.o:	$M/derr.elt   
+	$(AS) $M/derr.elt $(FLAGS) -o derr.o $O
+dig.o:	$M/dig.elt   
+	$(AS) $M/dig.elt $(FLAGS) -o dig.o $O
+dirnpc.o:	$M/dirnpc.elt   $S/verbflag.i 
+	$(AS) $M/dirnpc.elt $(FLAGS) -o dirnpc.o $O
+dismount.o:	$M/dismount.elt   $S/verbflag.i 
+	$(AS) $M/dismount.elt $(FLAGS) -o dismount.o $O
+do_adj.o:	$M/do_adj.elt   
+	$(AS) $M/do_adj.elt $(FLAGS) -o do_adj.o $O
+do_conj.o:	$M/do_conj.elt   $S/verbflag.i 
+	$(AS) $M/do_conj.elt $(FLAGS) -o do_conj.o $O
+do_conte.o:	$M/do_conte.elt   
+	$(AS) $M/do_conte.elt $(FLAGS) -o do_conte.o $O
+do_death.o:	$M/do_death.elt   
+	$(AS) $M/do_death.elt $(FLAGS) -o do_death.o $O
+do_execp.o:	$M/do_execp.elt   
+	$(AS) $M/do_execp.elt $(FLAGS) -o do_execp.o $O
+do_final.o:	$M/do_final.elt 
+	$(AS) $M/do_final.elt $(FLAGS) -o do_final.o $O
+do_fix.o:	$M/do_fix.elt   
+	$(AS) $M/do_fix.elt $(FLAGS) -o do_fix.o $O
+do_message.o:	$M/do_message.elt   
+	$(AS) $M/do_message.elt $(FLAGS) -o do_message.o $O
+do_one.o:	$M/do_one.elt   
+	$(AS) $M/do_one.elt $(FLAGS) -o do_one.o $O
+do_pron.o:	$M/do_pron.elt   
+	$(AS) $M/do_pron.elt $(FLAGS) -o do_pron.o $O
+do_then.o:	$M/do_then.elt   
+	$(AS) $M/do_then.elt $(FLAGS) -o do_then.o $O
+dodative.o:	$M/dodative.elt  
+	$(AS) $M/dodative.elt $(FLAGS) -o dodative.o $O
+dohow.o:	$M/dohow.elt   
+	$(AS) $M/dohow.elt $(FLAGS) -o dohow.o $O
+doneb4.o:	$M/doneb4.elt  
+	$(AS) $M/doneb4.elt $(FLAGS) -o doneb4.o $O
+doscore.o:	$M/doscore.elt  
+	$(AS) $M/doscore.elt $(FLAGS) -o doscore.o $O
+doyesno.o:	$M/doyesno.elt   
+	$(AS) $M/doyesno.elt $(FLAGS) -o doyesno.o $O
+drink.o:	$M/drink.elt   $S/verbflag.i 
+	$(AS) $M/drink.elt $(FLAGS) -o drink.o $O
+drop.o:	$M/drop.elt   
+	$(AS) $M/drop.elt $(FLAGS) -o drop.o $O
+dstand.o:	$M/dstand.elt   
+	$(AS) $M/dstand.elt $(FLAGS) -o dstand.o $O
+eat.o:	$M/eat.elt   $S/verbflag.i 
+	$(AS) $M/eat.elt $(FLAGS) -o eat.o $O
+editcmd.o:	$M/editcmd.elt   
+	$(AS) $M/editcmd.elt $(FLAGS) -o editcmd.o $O
+do_whichbits.o:	$M/do_whichbits.elt
+	$(AS) $M/do_whichbits.elt $(FLAGS) -o do_whichbits.o $O
+edtssubs.o:	$M/edtssubs.elt   $S/verbflag.i 
+	$(AS) $M/edtssubs.elt $(FLAGS) -o edtssubs.o $O
+empty.o:	$M/empty.elt   $S/verbflag.i 
+	$(AS) $M/empty.elt $(FLAGS) -o empty.o $O
+exit.o:	$M/exit.elt   $S/verbflag.i 
+	$(AS) $M/exit.elt $(FLAGS) -o exit.o $O
+exits.o:	$M/exits.elt   $S/verbflag.i 
+	$(AS) $M/exits.elt $(FLAGS) -o exits.o $O
+f_apart.o:	$M/f_apart.elt   
+	$(AS) $M/f_apart.elt $(FLAGS) -o f_apart.o $O
+feed.o:	$M/feed.elt   $S/verbflag.i 
+	$(AS) $M/feed.elt $(FLAGS) -o feed.o $O
+fight.o:	$M/fight.elt   $S/verbflag.i 
+	$(AS) $M/fight.elt $(FLAGS) -o fight.o $O
+fill.o:	$M/fill.elt   $S/verbflag.i 
+	$(AS) $M/fill.elt $(FLAGS) -o fill.o $O
+find.o:	$M/find.elt   $S/verbflag.i 
+	$(AS) $M/find.elt $(FLAGS) -o find.o $O
+findroom.o:	$M/findroom.elt   
+	$(AS) $M/findroom.elt $(FLAGS) -o findroom.o $O
+finnpc.o:	$M/finnpc.elt   
+	$(AS) $M/finnpc.elt $(FLAGS) -o finnpc.o $O
+finrelnpc.o:	$M/finrelnpc.elt   
+	$(AS) $M/finrelnpc.elt $(FLAGS) -o finrelnpc.o $O
+fire.o:	$M/fire.elt   $S/verbflag.i 
+	$(AS) $M/fire.elt $(FLAGS) -o fire.o $O
+firstfile.o:	$M/firstfile.elt   
+	$(AS) $M/firstfile.elt $(FLAGS) -o firstfile.o $O
+firstglance.o:	$M/firstglance.elt   $E/nounbits.i 
+	$(AS) $M/firstglance.elt $(FLAGS) -o firstglance.o $O
+fish.o:	$M/fish.elt   $S/verbflag.i 
+	$(AS) $M/fish.elt $(FLAGS) -o fish.o $O
+fix.o:	$M/fix.elt   $S/verbflag.i 
+	$(AS) $M/fix.elt $(FLAGS) -o fix.o $O
+fixchk.o:	$M/fixchk.elt   
+	$(AS) $M/fixchk.elt $(FLAGS) -o fixchk.o $O
+fixcont.o:	$M/fixcont.elt   
+	$(AS) $M/fixcont.elt $(FLAGS) -o fixcont.o $O
+fixirel.o:	$M/fixirel.elt   $S/verbflag.i 
+	$(AS) $M/fixirel.elt $(FLAGS) -o fixirel.o $O
+fixsys.o:	$M/fixsys.elt   $I/nounequ2.i 
+	$(AS) $M/fixsys.elt $(FLAGS) -o fixsys.o $O
+flush.o:	$M/flush.elt   $S/verbflag.i 
+	$(AS) $M/flush.elt $(FLAGS) -o flush.o $O
+flushvar.o:	$M/flushvar.elt  
+	$(AS) $M/flushvar.elt $(FLAGS) -o flushvar.o $O
+fndseat.o:	$M/fndseat.elt   
+	$(AS) $M/fndseat.elt $(FLAGS) -o fndseat.o $O
+fndweapon.o:	$M/fndweapon.elt   
+	$(AS) $M/fndweapon.elt $(FLAGS) -o fndweapon.o $O
+fndwrd.o:	$M/fndwrd.elt  
+	$(AS) $M/fndwrd.elt $(FLAGS) -o fndwrd.o $O
+forwhat.o:	$M/forwhat.elt   
+	$(AS) $M/forwhat.elt $(FLAGS) -o forwhat.o $O
+get.o:	$M/get.elt   $S/verbflag.i 
+	$(AS) $M/get.elt $(FLAGS) -o get.o $O
+take.o:	$M/take.elt $S/verbflag.i
+	$(AS) $M/take.elt $(FLAGS) -o take.o $O
+get_cont.o:	$M/get_cont.elt   
+	$(AS) $M/get_cont.elt $(FLAGS) -o get_cont.o $O
+getadjph.o:	$M/getadjph.elt   
+	$(AS) $M/getadjph.elt $(FLAGS) -o getadjph.o $O
+number.o:	$M/number.elt
+	$(AS) $M/number.elt $(FLAGS) -o number.o $O
+getconj.o:	$M/getconj.elt   
+	$(AS) $M/getconj.elt $(FLAGS) -o getconj.o $O
+getdata.o:	$M/getdata.elt  $S/nounequ2.i
+	$(AS) $M/getdata.elt $(FLAGS) -o getdata.o $O
+getnouns.o:	$M/getnouns.elt   $I/nounequ2.i 
+	$(AS) $M/getnouns.elt $(FLAGS) -o getnouns.o $O
+getliterals.o:	$M/getliterals.elt
+	$(AS) $M/getliterals.elt $(FLAGS) -o getliterals.o $O
+getnpc.o:	$M/getnpc.elt   
+	$(AS) $M/getnpc.elt $(FLAGS) -o getnpc.o $O
+getpron.o:	$M/getpron.elt   
+	$(AS) $M/getpron.elt $(FLAGS) -o getpron.o $O
+gettime.o:	$M/gettime.elt  
+	$(AS) $M/gettime.elt $(FLAGS) -o gettime.o $O
+getvalue.o:	$M/getvalue.elt  
+	$(AS) $M/getvalue.elt $(FLAGS) -o getvalue.o $O
+getvect.o:	$M/getvect.elt  
+	$(AS) $M/getvect.elt $(FLAGS) -o getvect.o $O
+getwrd.o:	$M/getwrd.elt   $S/verbflag.i 
+	$(AS) $M/getwrd.elt $(FLAGS) -o getwrd.o $O
+state.o:	$M/state.elt
+	$(AS) $M/state.elt $(FLAGS) -o state.o $O
+do_pprn.o:	$M/do_pprn.elt $M/l_bitrans.elt
+	$(AS) $M/do_pprn.elt $(FLAGS) -o do_pprn.o $O
+sortmatch.o:	$M/sortmatch.elt
+	$(AS) $M/sortmatch.elt $(FLAGS) -o sortmatch.o $O
+ownership.o:	$M/ownership.elt
+	$(AS) $M/ownership.elt $(FLAGS) -o ownership.o $O
+give.o:	$M/give.elt   $S/verbflag.i 
+	$(AS) $M/give.elt $(FLAGS) -o give.o $O
+gngrp.o:	$M/gngrp.elt   $S/verbflag.i 
+	$(AS) $M/gngrp.elt $(FLAGS) -o gngrp.o $O
+go_n.o:	$M/go_n.elt   $S/verbflag.i 
+	$(AS) $M/go_n.elt $(FLAGS) -o go_n.o $O
+run.o:	$M/run.elt	$S/verbflag.i
+	$(AS) $M/run.elt $(FLAGS) -o run.o $O
+gotoask.o:	$M/gotoask.elt   $S/verbflag.i 
+	$(AS) $M/gotoask.elt $(FLAGS) -o gotoask.o $O
+grab.o:	$M/grab.elt   $S/verbflag.i 
+	$(AS) $M/grab.elt $(FLAGS) -o grab.o $O
+gsilent.o:	$M/gsilent.elt   
+	$(AS) $M/gsilent.elt $(FLAGS) -o gsilent.o $O
+hammer.o:	$M/hammer.elt   $S/verbflag.i 
+	$(AS) $M/hammer.elt $(FLAGS) -o hammer.o $O
+help.o:	$M/help.elt   $S/verbflag.i $I/nounflag.i 
+	$(AS) $M/help.elt $(FLAGS) -o help.o $O
+hide.o:	$M/hide.elt   $S/verbflag.i 
+	$(AS) $M/hide.elt $(FLAGS) -o hide.o $O
+hit.o:	$M/hit.elt   $S/verbflag.i 
+	$(AS) $M/hit.elt $(FLAGS) -o hit.o $O
+hold.o:	$M/hold.elt   $S/verbflag.i 
+	$(AS) $M/hold.elt $(FLAGS) -o hold.o $O
+holderror.o:	$M/holderror.elt   
+	$(AS) $M/holderror.elt $(FLAGS) -o holderror.o $O
+ifanimal.o:	$M/ifanimal.elt   
+	$(AS) $M/ifanimal.elt $(FLAGS) -o ifanimal.o $O
+ifliquid.o:	$M/ifliquid.elt   $S/verbflag.i 
+	$(AS) $M/ifliquid.elt $(FLAGS) -o ifliquid.o $O
+illuminate.o:	$M/illuminate.elt   $S/verbflag.i 
+	$(AS) $M/illuminate.elt $(FLAGS) -o illuminate.o $O
+incnoun.o:	$M/incnoun.elt  
+	$(AS) $M/incnoun.elt $(FLAGS) -o incnoun.o $O
+incnoun2.o:	$M/incnoun2.elt   
+	$(AS) $M/incnoun2.elt $(FLAGS) -o incnoun2.o $O
+initcom.o:	$M/initcom.elt  
+	$(AS) $M/initcom.elt $(FLAGS) -o initcom.o $O
+input.o:	$M/input.elt   
+	$(AS) $M/input.elt $(FLAGS) -o input.o $O
+insist.o:	$M/insist.elt   
+	$(AS) $M/insist.elt $(FLAGS) -o insist.o $O
+insultsub.o:	$M/insultsub.elt   $I/nounequ2.i 
+	$(AS) $M/insultsub.elt $(FLAGS) -o insultsub.o $O
+intext.o:	$M/intext.elt   
+	$(AS) $M/intext.elt $(FLAGS) -o intext.o $O
+inventory.o:	$M/inventory.elt   $S/verbflag.i 
+	$(AS) $M/inventory.elt $(FLAGS) -o inventory.o $O
+isanyrel.o:	$M/isanyrel.elt   $S/verbflag.i 
+	$(AS) $M/isanyrel.elt $(FLAGS) -o isanyrel.o $O
+isare.o:	$M/isare.elt   
+	$(AS) $M/isare.elt $(FLAGS) -o isare.o $O
+isaren.o:	$M/isaren.elt   
+	$(AS) $M/isaren.elt $(FLAGS) -o isaren.o $O
+isbitran.o:	$M/isbitran.elt   
+	$(AS) $M/isbitran.elt $(FLAGS) -o isbitran.o $O
+isdofre.o:	$M/isdofre.elt   
+	$(AS) $M/isdofre.elt $(FLAGS) -o isdofre.o $O
+isdoor.o:	$M/isdoor.elt   
+	$(AS) $M/isdoor.elt $(FLAGS) -o isdoor.o $O
+isnextnoun.o:	$M/isnextnoun.elt   
+	$(AS) $M/isnextnoun.elt $(FLAGS) -o isnextnoun.o $O
+jump.o:	$M/jump.elt   $S/verbflag.i 
+	$(AS) $M/jump.elt $(FLAGS) -o jump.o $O
+jumpoff.o:	$M/jumpoff.elt   $S/verbflag.i 
+	$(AS) $M/jumpoff.elt $(FLAGS) -o jumpoff.o $O
+kick.o:	$M/kick.elt   $S/verbflag.i 
+	$(AS) $M/kick.elt $(FLAGS) -o kick.o $O
+kill.o:	$M/kill.elt   $S/verbflag.i $I/nounflag.i 
+	$(AS) $M/kill.elt $(FLAGS) -o kill.o $O
+killdoub.o:	$M/killdoub.elt   
+	$(AS) $M/killdoub.elt $(FLAGS) -o killdoub.o $O
+killpseudo.o:	$M/killpseudo.elt   
+	$(AS) $M/killpseudo.elt $(FLAGS) -o killpseudo.o $O
+kiss.o:	$M/kiss.elt   $S/verbflag.i 
+	$(AS) $M/kiss.elt $(FLAGS) -o kiss.o $O
+l_bitrans.o:	$M/l_bitrans.elt   $S/verbflag.i 
+	$(AS) $M/l_bitrans.elt $(FLAGS) -o l_bitrans.o $O
+laugh.o:	$M/laugh.elt   $S/verbflag.i 
+	$(AS) $M/laugh.elt $(FLAGS) -o laugh.o $O
+lean.o:	$M/lean.elt   $S/verbflag.i 
+	$(AS) $M/lean.elt $(FLAGS) -o lean.o $O
+leave.o:	$M/leave.elt   $S/verbflag.i 
+	$(AS) $M/leave.elt $(FLAGS) -o leave.o $O
+lever.o:	$M/lever.elt   $S/verbflag.i 
+	$(AS) $M/lever.elt $(FLAGS) -o lever.o $O
+lift.o:	$M/lift.elt   $S/verbflag.i 
+	$(AS) $M/lift.elt $(FLAGS) -o lift.o $O
+light.o:	$M/light.elt   $S/verbflag.i 
+	$(AS) $M/light.elt $(FLAGS) -o light.o $O
+listen.o:	$M/listen.elt   $S/verbflag.i 
+	$(AS) $M/listen.elt $(FLAGS) -o listen.o $O
+loadbios.o:	$M/loadbios.elt  
+	$(AS) $M/loadbios.elt $(FLAGS) -o loadbios.o $O
+lock.o:	$M/lock.elt   $S/verbflag.i 
+	$(AS) $M/lock.elt $(FLAGS) -o lock.o $O
+looktabs.o:	$M/looktabs.elt   
+	$(AS) $M/looktabs.elt $(FLAGS) -o looktabs.o $O
+lower.o:	$M/lower.elt   $S/verbflag.i 
+	$(AS) $M/lower.elt $(FLAGS) -o lower.o $O
+make.o:	$M/make.elt   $S/verbflag.i 
+	$(AS) $M/make.elt $(FLAGS) -o make.o $O
+mend.o:	$M/mend.elt   $S/verbflag.i 
+	$(AS) $M/mend.elt $(FLAGS) -o mend.o $O
+message.o: $M/message.elt
+	$(AS) $M/message.elt $(FLAGS) -o message.o $O
+mix.o:	$M/mix.elt   $S/verbflag.i 
+	$(AS) $M/mix.elt $(FLAGS) -o mix.o $O
+mnph.o:	$M/mnph.elt   
+	$(AS) $M/mnph.elt $(FLAGS) -o mnph.o $O
+monobits.o:	$M/monobits.elt   
+	$(AS) $M/monobits.elt $(FLAGS) -o monobits.o $O
+move.o:	$M/move.elt   $S/verbflag.i 
+	$(AS) $M/move.elt $(FLAGS) -o move.o $O
+movenpc.o:	$M/movenpc.elt   
+	$(AS) $M/movenpc.elt $(FLAGS) -o movenpc.o $O
+msgfromtable.o:	$M/msgfromtable.elt   
+	$(AS) $M/msgfromtable.elt $(FLAGS) -o msgfromtable.o $O
+mult_wrd.o:	$M/mult_wrd.elt   $S/nounequ2.i
+	$(AS) $M/mult_wrd.elt $(FLAGS) -o mult_wrd.o $O
+multtab.o:	$M/multtab.elt $S/sets.i $S/nounflag.i
+	$(AS) $M/multtab.elt $(FLAGS) -o multtab.o $O
+must4.o:	$M/must4.elt   
+	$(AS) $M/must4.elt $(FLAGS) -o must4.o $O
+must4_l.o:	$M/must4_l.elt   
+	$(AS) $M/must4_l.elt $(FLAGS) -o must4_l.o $O
+nestloop.o:	$M/nestloop.elt   
+	$(AS) $M/nestloop.elt $(FLAGS) -o nestloop.o $O
+nestspk.o:	$M/nestspk.elt   
+	$(AS) $M/nestspk.elt $(FLAGS) -o nestspk.o $O
+newst.o:	$M/newst.elt   
+	$(AS) $M/newst.elt $(FLAGS) -o newst.o $O
+noadj.o:	$M/noadj.elt   
+	$(AS) $M/noadj.elt $(FLAGS) -o noadj.o $O
+nodos.o:	$M/nodos.elt   $S/verbflag.i $I/scen.i 
+	$(AS) $M/nodos.elt $(FLAGS) -o nodos.o $O
+nodos2.o:	$M/nodos2.elt   
+	$(AS) $M/nodos2.elt $(FLAGS) -o nodos2.o $O
+noverb.o:	$M/noverb.elt   
+	$(AS) $M/noverb.elt $(FLAGS) -o noverb.o $O
+npc_ok.o:	$M/npc_ok.elt   
+	$(AS) $M/npc_ok.elt $(FLAGS) -o npc_ok.o $O
+objective.o:	$M/objective.elt   
+	$(AS) $M/objective.elt $(FLAGS) -o objective.o $O
+onecop.o:	$M/onecop.elt   
+	$(AS) $M/onecop.elt $(FLAGS) -o onecop.o $O
+oninv.o:	$M/oninv.elt   
+	$(AS) $M/oninv.elt $(FLAGS) -o oninv.o $O
+onlyrel.o:	$M/onlyrel.elt   
+	$(AS) $M/onlyrel.elt $(FLAGS) -o onlyrel.o $O
+open.o:	$M/open.elt   $S/verbflag.i 
+	$(AS) $M/open.elt $(FLAGS) -o open.o $O
+opendoor.o:	$M/opendoor.elt   $I/scendata.i
+	$(AS) $M/opendoor.elt $(FLAGS) -o opendoor.o $O
+p_alcarry.o:	$M/p_alcarry.elt   
+	$(AS) $M/p_alcarry.elt $(FLAGS) -o p_alcarry.o $O
+p_anoun.o:	$M/p_anoun.elt   
+	$(AS) $M/p_anoun.elt $(FLAGS) -o p_anoun.o $O
+p_botn.o:	$M/p_botn.elt   
+	$(AS) $M/p_botn.elt $(FLAGS) -o p_botn.o $O
+p_btn.o:	$M/p_btn.elt   
+	$(AS) $M/p_btn.elt $(FLAGS) -o p_btn.o $O
+p_cnto.o:	$M/p_cnto.elt   
+	$(AS) $M/p_cnto.elt $(FLAGS) -o p_cnto.o $O
+p_desc.o:	$M/p_desc.elt   $S/nounequ2.i
+	$(AS) $M/p_desc.elt $(FLAGS) -o p_desc.o $O
+p_exits.o:	$M/p_exits.elt   
+	$(AS) $M/p_exits.elt $(FLAGS) -o p_exits.o $O
+p_floo.o:	$M/p_floo.elt   
+	$(AS) $M/p_floo.elt $(FLAGS) -o p_floo.o $O
+p_from.o:	$M/p_from.elt   
+	$(AS) $M/p_from.elt $(FLAGS) -o p_from.o $O
+p_idfy.o:	$M/p_idfy.elt   
+	$(AS) $M/p_idfy.elt $(FLAGS) -o p_idfy.o $O
+p_init.o:	$M/p_init.elt   
+	$(AS) $M/p_init.elt $(FLAGS) -o p_init.o $O
+p_kywrd.o:	$M/p_kywrd.elt   
+	$(AS) $M/p_kywrd.elt $(FLAGS) -o p_kywrd.o $O
+p_list.o:	$M/p_list.elt   
+	$(AS) $M/p_list.elt $(FLAGS) -o p_list.o $O
+p_loc.o:	$M/p_loc.elt   
+	$(AS) $M/p_loc.elt $(FLAGS) -o p_loc.o $O
+p_message.o:	$M/p_message.elt   $I/nounequ2.i $I/msginfo.i 
+	$(AS) $M/p_message.elt $(FLAGS) -o p_message.o $O
+p_mhav.o:	$M/p_mhav.elt   
+	$(AS) $M/p_mhav.elt $(FLAGS) -o p_mhav.o $O
+p_no_tng.o:	$M/p_no_tng.elt   
+	$(AS) $M/p_no_tng.elt $(FLAGS) -o p_no_tng.o $O
+p_nodo.o:	$M/p_nodo.elt   
+	$(AS) $M/p_nodo.elt $(FLAGS) -o p_nodo.o $O
+p_nonly.o:	$M/p_nonly.elt   
+	$(AS) $M/p_nonly.elt $(FLAGS) -o p_nonly.o $O
+p_norch.o:	$M/p_norch.elt   
+	$(AS) $M/p_norch.elt $(FLAGS) -o p_norch.o $O
+p_notany.o:	$M/p_notany.elt   
+	$(AS) $M/p_notany.elt $(FLAGS) -o p_notany.o $O
+p_noun.o:	$M/p_noun.elt   
+	$(AS) $M/p_noun.elt $(FLAGS) -o p_noun.o $O
+p_prn.o:	$M/p_prn.elt   
+	$(AS) $M/p_prn.elt $(FLAGS) -o p_prn.o $O
+p_refresh.o:	$M/p_refresh.elt   
+	$(AS) $M/p_refresh.elt $(FLAGS) -o p_refresh.o $O
+p_say.o:	$M/p_say.elt   
+	$(AS) $M/p_say.elt $(FLAGS) -o p_say.o $O
+p_sepa.o:	$M/p_sepa.elt   
+	$(AS) $M/p_sepa.elt $(FLAGS) -o p_sepa.o $O
+p_string.o:	$M/p_string.elt   
+	$(AS) $M/p_string.elt $(FLAGS) -o p_string.o $O
+p_sub.o:	$M/p_sub.elt   
+	$(AS) $M/p_sub.elt $(FLAGS) -o p_sub.o $O
+p_subv.o:	$M/p_subv.elt   
+	$(AS) $M/p_subv.elt $(FLAGS) -o p_subv.o $O
+p_tab.o:	$M/p_tab.elt   
+	$(AS) $M/p_tab.elt $(FLAGS) -o p_tab.o $O
+p_tninow.o:	$M/p_tninow.elt   
+	$(AS) $M/p_tninow.elt $(FLAGS) -o p_tninow.o $O
+p_xfergs.o:	$M/p_xfergs.elt   
+	$(AS) $M/p_xfergs.elt $(FLAGS) -o p_xfergs.o $O
+p_listis.o:	$M/p_listis.elt
+	$(AS) $M/p_listis.elt $(FLAGS) -o p_listis.o $O
+padwithspaces.o:	$M/padwithspaces.elt   
+	$(AS) $M/padwithspaces.elt $(FLAGS) -o padwithspaces.o $O
+parseit.o:	$M/parseit.elt   $S/verbflag.i 
+	$(AS) $M/parseit.elt $(FLAGS) -o parseit.o $O
+parverb.o:	$M/parverb.elt   $S/verbflag.i 
+	$(AS) $M/parverb.elt $(FLAGS) -o parverb.o $O
+pcok.o:	$M/pcok.elt   
+	$(AS) $M/pcok.elt $(FLAGS) -o pcok.o $O
+pcwbits.o:	$M/pcwbits.elt   
+	$(AS) $M/pcwbits.elt $(FLAGS) -o pcwbits.o $O
+pick.o:	$M/pick.elt   $S/verbflag.i 
+	$(AS) $M/pick.elt $(FLAGS) -o pick.o $O
+pickone.o:	$M/pickone.elt   
+	$(AS) $M/pickone.elt $(FLAGS) -o pickone.o $O
+piss.o:	$M/piss.elt   $S/verbflag.i 
+	$(AS) $M/piss.elt $(FLAGS) -o piss.o $O
+plant.o:	$M/plant.elt   $S/verbflag.i 
+	$(AS) $M/plant.elt $(FLAGS) -o plant.o $O
+play.o:	$M/play.elt   $S/verbflag.i 
+	$(AS) $M/play.elt $(FLAGS) -o play.o $O
+point.o:	$M/point.elt   $S/verbflag.i 
+	$(AS) $M/point.elt $(FLAGS) -o point.o $O
+pr_command.o:	$M/pr_command.elt   $S/verbflag.i 
+	$(AS) $M/pr_command.elt $(FLAGS) -o pr_command.o $O
+pr_copout.o:	$M/pr_copout.elt   
+	$(AS) $M/pr_copout.elt $(FLAGS) -o pr_copout.o $O
+pr_hmuch.o:	$M/pr_hmuch.elt   
+	$(AS) $M/pr_hmuch.elt $(FLAGS) -o pr_hmuch.o $O
+pr_how.o:	$M/pr_how.elt   
+	$(AS) $M/pr_how.elt $(FLAGS) -o pr_how.o $O
+pr_question.o:	$M/pr_question.elt   
+	$(AS) $M/pr_question.elt $(FLAGS) -o pr_question.o $O
+pr_want.o:	$M/pr_want.elt   
+	$(AS) $M/pr_want.elt $(FLAGS) -o pr_want.o $O
+pray.o:	$M/pray.elt   $S/verbflag.i 
+	$(AS) $M/pray.elt $(FLAGS) -o pray.o $O
+press.o:	$M/press.elt   $S/verbflag.i 
+	$(AS) $M/press.elt $(FLAGS) -o press.o $O
+printerbits.o:	$M/printerbits.elt   
+	$(AS) $M/printerbits.elt $(FLAGS) -o printerbits.o $O
+process.o:	$M/process.elt   $S/verbflag.i 
+	$(AS) $M/process.elt $(FLAGS) -o process.o $O
+situation.o:	$M/situation.elt 
+	$(AS) $M/situation.elt $(FLAGS) -o situation.o $O
+isitemvalid.o:	$M/isitemvalid.elt 
+	$(AS) $M/isitemvalid.elt $(FLAGS) -o isitemvalid.o $O
+moveplayer.o:	$M/moveplayer.elt 
+	$(AS) $M/moveplayer.elt $(FLAGS) -o moveplayer.o $O
+getmulticode.o:	$M/getmulticode.elt 
+	$(AS) $M/getmulticode.elt $(FLAGS) -o getmulticode.o $O
+entrylonglook.o:	$M/entrylonglook.elt 
+	$(AS) $M/entrylonglook.elt $(FLAGS) -o entrylonglook.o $O
+setpl.o:	$M/setpl.elt 
+	$(AS) $M/setpl.elt $(FLAGS) -o setpl.o $O
+d0sinks.o:	$M/d0sinks.elt 
+	$(AS) $M/d0sinks.elt $(FLAGS) -o d0sinks.o $O
+attributes.o:	$M/attributes.elt  $S/nounequ2.i
+	$(AS) $M/attributes.elt $(FLAGS) -o attributes.o $O
+memberofset.o:	$M/memberofset.elt 
+	$(AS) $M/memberofset.elt $(FLAGS) -o memberofset.o $O
+countlist.o:	$M/countlist.elt 
+	$(AS) $M/countlist.elt $(FLAGS) -o countlist.o $O
+p_smallnum.o:	$M/p_smallnum.elt
+	$(AS) $M/p_smallnum.elt $(FLAGS) -o p_smallnum.o $O
+clonebits.o:	$M/clonebits.elt $S/nounequ2.i
+	$(AS) $M/clonebits.elt $(FLAGS) -o clonebits.o $O
+dryout.o:	$M/dryout.elt $S/nounequ2.i
+	$(AS) $M/dryout.elt $(FLAGS) -o dryout.o $O
+vclass.o:	$M/vclass.elt $M/vclassequ.i
+	$(AS) $M/vclass.elt $(FLAGS) -o vclass.o $O
+prtnum.o:	$M/prtnum.elt   
+	$(AS) $M/prtnum.elt $(FLAGS) -o prtnum.o $O
+prttxt.o:	$M/prttxt.elt   
+	$(AS) $M/prttxt.elt $(FLAGS) -o prttxt.o $O
+prtworddata.o:	$M/prtworddata.elt 
+	$(AS) $M/prtworddata.elt $(FLAGS) -o prtworddata.o $O
+prtwrd.o:	$M/prtwrd.elt   
+	$(AS) $M/prtwrd.elt $(FLAGS) -o prtwrd.o $O
+pstop.o:	$M/pstop.elt   
+	$(AS) $M/pstop.elt $(FLAGS) -o pstop.o $O
+pull.o:	$M/pull.elt   $S/verbflag.i 
+	$(AS) $M/pull.elt $(FLAGS) -o pull.o $O
+punch.o:	$M/punch.elt   $S/verbflag.i $I/nounflag.i 
+	$(AS) $M/punch.elt $(FLAGS) -o punch.o $O
+push.o:	$M/push.elt   $S/verbflag.i 
+	$(AS) $M/push.elt $(FLAGS) -o push.o $O
+put.o:	$M/put.elt   $S/verbflag.i 
+	$(AS) $M/put.elt $(FLAGS) -o put.o $O
+putd0ind5.o:	$M/putd0ind5.elt   
+	$(AS) $M/putd0ind5.elt $(FLAGS) -o putd0ind5.o $O
+quit.o:	$M/quit.elt   
+	$(AS) $M/quit.elt $(FLAGS) -o quit.o $O
+quotes.o:	$M/quotes.elt   
+	$(AS) $M/quotes.elt $(FLAGS) -o quotes.o $O
+r_noun.o:	$M/r_noun.elt   
+	$(AS) $M/r_noun.elt $(FLAGS) -o r_noun.o $O
+rape.o:	$M/rape.elt   
+	$(AS) $M/rape.elt $(FLAGS) -o rape.o $O
+reflect.o:	$M/reflect.elt   
+	$(AS) $M/reflect.elt $(FLAGS) -o reflect.o $O
+remove.o:	$M/remove.elt   
+	$(AS) $M/remove.elt $(FLAGS) -o remove.o $O
+canmove.o:	$M/canmove.elt
+	$(AS) $M/canmove.elt $(FLAGS) -o canmove.o $O
+resadj.o:	$M/resadj.elt   
+	$(AS) $M/resadj.elt $(FLAGS) -o resadj.o $O
+resrel.o:	$M/resrel.elt   
+	$(AS) $M/resrel.elt $(FLAGS) -o resrel.o $O
+ride.o:	$M/ride.elt   $S/verbflag.i 
+	$(AS) $M/ride.elt $(FLAGS) -o ride.o $O
+rndcop.o:	$M/rndcop.elt   
+	$(AS) $M/rndcop.elt $(FLAGS) -o rndcop.o $O
+roll.o:	$M/roll.elt   
+	$(AS) $M/roll.elt $(FLAGS) -o roll.o $O
+rootnum.o:	$M/rootnum.elt   
+	$(AS) $M/rootnum.elt $(FLAGS) -o rootnum.o $O
+rub.o:	$M/rub.elt   $S/verbflag.i 
+	$(AS) $M/rub.elt $(FLAGS) -o rub.o $O
+rusure.o:	$M/rusure.elt   
+	$(AS) $M/rusure.elt $(FLAGS) -o rusure.o $O
+satmsg.o:	$M/satmsg.elt   
+	$(AS) $M/satmsg.elt $(FLAGS) -o satmsg.o $O
+saveans.o:	$M/saveans.elt   
+	$(AS) $M/saveans.elt $(FLAGS) -o saveans.o $O
+say.o:	$M/say.elt   $S/verbflag.i 
+	$(AS) $M/say.elt $(FLAGS) -o say.o $O
+scan.o:	$M/scan.elt   
+	$(AS) $M/scan.elt $(FLAGS) -o scan.o $O
+scan_rep.o:	$M/scan_rep.elt   
+	$(AS) $M/scan_rep.elt $(FLAGS) -o scan_rep.o $O
+scanner.o:	$M/scanner.elt   $S/verbflag.i 
+	$(AS) $M/scanner.elt $(FLAGS) -o scanner.o $O
+scenery.o:	$M/scenery.elt   $S/verbflag.i 
+	$(AS) $M/scenery.elt $(FLAGS) -o scenery.o $O
+screen.o:	$M/screen.elt   $S/verbflag.i 
+	$(AS) $M/screen.elt $(FLAGS) -o screen.o $O
+set.o:	$M/set.elt   $S/verbflag.i 
+	$(AS) $M/set.elt $(FLAGS) -o set.o $O
+setout.o:	$M/setout.elt   
+	$(AS) $M/setout.elt $(FLAGS) -o setout.o $O
+setpause.o:	$M/setpause.elt   $S/verbflag.i
+	$(AS) $M/setpause.elt $(FLAGS) -o setpause.o $O
+setpron.o:	$M/setpron.elt   
+	$(AS) $M/setpron.elt $(FLAGS) -o setpron.o $O
+shake.o:	$M/shake.elt   $S/verbflag.i 
+	$(AS) $M/shake.elt $(FLAGS) -o shake.o $O
+wave.o:	$M/wave.elt $S/verbflag.i
+	$(AS) $M/wave.elt $(FLAGS) -o wave.o $O
+paddle.o:	$M/paddle.elt $S/verbflag.i
+	$(AS) $M/paddle.elt $(FLAGS) -o paddle.o $O
+spells.o:	$M/spells.elt $S/verbflag.i
+	$(AS) $M/spells.elt $(FLAGS) -o spells.o $O
+dial.o:	$M/dial.elt $S/verbflag.i
+	$(AS) $M/dial.elt $(FLAGS) -o dial.o $O
+stay.o:	$M/stay.elt $S/verbflag.i
+	$(AS) $M/stay.elt $(FLAGS) -o stay.o $O
+follow.o:	$M/follow.elt $S/verbflag.i
+	$(AS) $M/follow.elt $(FLAGS) -o follow.o $O
+strike.o:	$M/strike.elt	$S/verbflag.i
+	$(AS) $M/strike.elt $(FLAGS) -o strike.o $O
+warm.o:	$M/warm.elt $S/verbflag.i
+	$(AS) $M/warm.elt $(FLAGS) -o warm.o $O
+oil.o:	$M/oil.elt $S/verbflag.i
+	$(AS) $M/oil.elt $(FLAGS) -o oil.o $O
+answer.o:	$M/answer.elt $S/verbflag.i
+	$(AS) $M/answer.elt $(FLAGS) -o answer.o $O
+write.o:	$M/write.elt $S/verbflag.i
+	$(AS) $M/write.elt $(FLAGS) -o write.o $O
+start.o:	$M/start.elt $S/verbflag.i
+	$(AS) $M/start.elt $(FLAGS) -o start.o $O
+shave.o:	$M/shave.elt
+	$(AS) $M/shave.elt $(FLAGS) -o shave.o $O
+unscrew.o:	$M/unscrew.elt $S/verbflag.i
+	$(AS) $M/unscrew.elt $(FLAGS) -o unscrew.o $O
+screw.o:	$M/screw.elt $S/verbflag.i
+	$(AS) $M/screw.elt $(FLAGS) -o screw.o $O
+tune.o:	$M/tune.elt	$S/verbflag.i
+	$(AS) $M/tune.elt $(FLAGS) -o tune.o $O
+drive.o:	$M/drive.elt
+	$(AS) $M/drive.elt $(FLAGS) -o drive.o $O
+use.o:		$M/use.elt $S/verbflag.i
+	$(AS) $M/use.elt $(FLAGS) -o use.o $O
+confess.o:	$M/confess.elt $S/verbflag.i
+	$(AS) $M/confess.elt $(FLAGS) -o confess.o $O
+dip.o:		$M/dip.elt $S/verbflag.i
+	$(AS) $M/dip.elt $(FLAGS) -o dip.o $O
+sacrifice.o:		$M/sacrifice.elt $S/verbflag.i
+	$(AS) $M/sacrifice.elt $(FLAGS) -o sacrifice.o $O
+shine.o:	$M/shine.elt   $S/verbflag.i 
+	$(AS) $M/shine.elt $(FLAGS) -o shine.o $O
+show.o:	$M/show.elt   $S/verbflag.i 
+	$(AS) $M/show.elt $(FLAGS) -o show.o $O
+sing.o:	$M/sing.elt   $S/verbflag.i 
+	$(AS) $M/sing.elt $(FLAGS) -o sing.o $O
+singv.o:	$M/singv.elt   
+	$(AS) $M/singv.elt $(FLAGS) -o singv.o $O
+sleep.o:	$M/sleep.elt   $S/verbflag.i 
+	$(AS) $M/sleep.elt $(FLAGS) -o sleep.o $O
+slide.o:	$M/slide.elt   $S/verbflag.i 
+	$(AS) $M/slide.elt $(FLAGS) -o slide.o $O
+smell.o:	$M/smell.elt   $S/verbflag.i 
+	$(AS) $M/smell.elt $(FLAGS) -o smell.o $O
+smoke.o:	$M/smoke.elt   $S/verbflag.i 
+	$(AS) $M/smoke.elt $(FLAGS) -o smoke.o $O
+space.o:	$M/space.elt   
+	$(AS) $M/space.elt $(FLAGS) -o space.o $O
+speech.o:	$M/speech.elt   $S/verbflag.i 
+	$(AS) $M/speech.elt $(FLAGS) -o speech.o $O
+split.o:	$M/split.elt   $S/verbflag.i 
+	$(AS) $M/split.elt $(FLAGS) -o split.o $O
+stand.o:	$M/stand.elt   $S/verbflag.i 
+	$(AS) $M/stand.elt $(FLAGS) -o stand.o $O
+seatoccupied.o:	$M/seatoccupied.elt $S/nounequ2.i
+	$(AS) $M/seatoccupied.elt $(FLAGS) -o seatoccupied.o $O
+stconj.o:	$M/stconj.elt   
+	$(AS) $M/stconj.elt $(FLAGS) -o stconj.o $O
+steal.o:	$M/steal.elt   $S/verbflag.i 
+	$(AS) $M/steal.elt $(FLAGS) -o steal.o $O
+stop.o:	$M/stop.elt   $S/verbflag.i 
+	$(AS) $M/stop.elt $(FLAGS) -o stop.o $O
+stopbrk.o:	$M/stopbrk.elt   
+	$(AS) $M/stopbrk.elt $(FLAGS) -o stopbrk.o $O
+stotxt.o:	$M/stotxt.elt   
+	$(AS) $M/stotxt.elt $(FLAGS) -o stotxt.o $O
+strangle.o:	$M/strangle.elt   $S/verbflag.i 
+	$(AS) $M/strangle.elt $(FLAGS) -o strangle.o $O
+stwindow.o:	$M/stwindow.elt   
+	$(AS) $M/stwindow.elt $(FLAGS) -o stwindow.o $O
+subjective.o:	$M/subjective.elt   
+	$(AS) $M/subjective.elt $(FLAGS) -o subjective.o $O
+sussinv.o:	$M/sussinv.elt   
+	$(AS) $M/sussinv.elt $(FLAGS) -o sussinv.o $O
+swim.o:	$M/swim.elt   $S/verbflag.i 
+	$(AS) $M/swim.elt $(FLAGS) -o swim.o $O
+switch.o:	$M/switch.elt   
+	$(AS) $M/switch.elt $(FLAGS) -o switch.o $O
+syndata.o:	$M/syndata.elt $S/nounsyms.i $M/miscsyms.i $S/nounflag.i $S/verbflag.i
+	$(AS) $M/syndata.elt $(FLAGS) -o syndata.o $O
+synonym.o:	$M/synonym.elt   
+	$(AS) $M/synonym.elt $(FLAGS) -o synonym.o $O
+taste.o:	$M/taste.elt   $S/verbflag.i 
+	$(AS) $M/taste.elt $(FLAGS) -o taste.o $O
+tear.o:	$M/tear.elt   $S/verbflag.i 
+	$(AS) $M/tear.elt $(FLAGS) -o tear.o $O
+textsize.o:	$M/textsize.elt   
+	$(AS) $M/textsize.elt $(FLAGS) -o textsize.o $O
+throw.o:	$M/throw.elt   $S/verbflag.i 
+	$(AS) $M/throw.elt $(FLAGS) -o throw.o $O
+tietog.o:	$M/tietog.elt   $S/verbflag.i 
+	$(AS) $M/tietog.elt $(FLAGS) -o tietog.o $O
+toploc.o:	$M/toploc.elt   
+	$(AS) $M/toploc.elt $(FLAGS) -o toploc.o $O
+topnpc.o:	$M/topnpc.elt   
+	$(AS) $M/topnpc.elt $(FLAGS) -o topnpc.o $O
+touch.o:	$M/touch.elt   $S/verbflag.i 
+	$(AS) $M/touch.elt $(FLAGS) -o touch.o $O
+transpcont.o:	$M/transpcont.elt   
+	$(AS) $M/transpcont.elt $(FLAGS) -o transpcont.o $O
+tst_dbug.o:	$M/tst_dbug.elt   
+	$(AS) $M/tst_dbug.elt $(FLAGS) -o tst_dbug.o $O
+twistturn.o:	$M/twistturn.elt   $S/verbflag.i 
+	$(AS) $M/twistturn.elt $(FLAGS) -o twistturn.o $O
+twopv.o:	$M/twopv.elt   
+	$(AS) $M/twopv.elt $(FLAGS) -o twopv.o $O
+unlight.o:	$M/unlight.elt   $S/verbflag.i 
+	$(AS) $M/unlight.elt $(FLAGS) -o unlight.o $O
+unlock.o:	$M/unlock.elt   $S/verbflag.i 
+	$(AS) $M/unlock.elt $(FLAGS) -o unlock.o $O
+untie.o:	$M/untie.elt   $S/verbflag.i 
+	$(AS) $M/untie.elt $(FLAGS) -o untie.o $O
+untildisturbed.o:	$M/untildisturbed.elt   
+	$(AS) $M/untildisturbed.elt $(FLAGS) -o untildisturbed.o $O
+utcount.o:	$M/utcount.elt   
+	$(AS) $M/utcount.elt $(FLAGS) -o utcount.o $O
+utexit.o:	$M/utexit.elt   
+	$(AS) $M/utexit.elt $(FLAGS) -o utexit.o $O
+utfunct.o:	$M/utfunct.elt   
+	$(AS) $M/utfunct.elt $(FLAGS) -o utfunct.o $O
+utgraphics.o:	$M/utgraphics.elt   
+	$(AS) $M/utgraphics.elt $(FLAGS) -o utgraphics.o $O
+uthint.o:	$M/uthint.elt   
+	$(AS) $M/uthint.elt $(FLAGS) -o uthint.o $O
+utoutmode.o:	$M/utoutmode.elt   $I/scen.i 
+	$(AS) $M/utoutmode.elt $(FLAGS) -o utoutmode.o $O
+utscore.o:	$M/utscore.elt   
+	$(AS) $M/utscore.elt $(FLAGS) -o utscore.o $O
+utspeech.o:	$M/utspeech.elt   
+	$(AS) $M/utspeech.elt $(FLAGS) -o utspeech.o $O
+vault.o:	$M/vault.elt   $S/verbflag.i 
+	$(AS) $M/vault.elt $(FLAGS) -o vault.o $O
+verbown.o:	$M/verbown.elt   $S/verbflag.i 
+	$(AS) $M/verbown.elt $(FLAGS) -o verbown.o $O
+verbtype.o:	$M/verbtype.elt   
+	$(AS) $M/verbtype.elt $(FLAGS) -o verbtype.o $O
+vlist1.o:	$M/vlist1.elt   $S/verbflag.i 
+	$(AS) $M/vlist1.elt $(FLAGS) -o vlist1.o $O
+vlist2.o:	$M/vlist2.elt   $S/verbflag.i 
+	$(AS) $M/vlist2.elt $(FLAGS) -o vlist2.o $O
+vlist3.o:	$M/vlist3.elt   $S/verbflag.i 
+	$(AS) $M/vlist3.elt $(FLAGS) -o vlist3.o $O
+vote.o:	$M/vote.elt   $S/verbflag.i 
+	$(AS) $M/vote.elt $(FLAGS) -o vote.o $O
+wait.o:	$M/wait.elt   $S/verbflag.i 
+	$(AS) $M/wait.elt $(FLAGS) -o wait.o $O
+wake.o:	$M/wake.elt   $S/verbflag.i 
+	$(AS) $M/wake.elt $(FLAGS) -o wake.o $O
+whensat.o:	$M/whensat.elt   
+	$(AS) $M/whensat.elt $(FLAGS) -o whensat.o $O
+whriding.o:	$M/whriding.elt   
+	$(AS) $M/whriding.elt $(FLAGS) -o whriding.o $O
+width.o:	$M/width.elt   
+	$(AS) $M/width.elt $(FLAGS) -o width.o $O
+wind.o:	$M/wind.elt   $S/verbflag.i 
+	$(AS) $M/wind.elt $(FLAGS) -o wind.o $O
+wsyn2.o:	$M/wsyn2.elt   
+	$(AS) $M/wsyn2.elt $(FLAGS) -o wsyn2.o $O
+ycant.o:	$M/ycant.elt   
+	$(AS) $M/ycant.elt $(FLAGS) -o ycant.o $O
+yesdos.o:	$M/yesdos.elt   
+	$(AS) $M/yesdos.elt $(FLAGS) -o yesdos.o $O
+yeserr.o:	$M/yeserr.elt   
+	$(AS) $M/yeserr.elt $(FLAGS) -o yeserr.o $O
+zapwhfix.o:	$M/zapwhfix.elt   
+	$(AS) $M/zapwhfix.elt $(FLAGS) -o zapwhfix.o $O
+common.o:	$M/common.elt $S/scendata.i $S/nounflag.i
+	$(AS) $M/common.elt $(FLAGS) -o common.o $O
+data1.o:	$M/data1.elt $S/nounflag.i $S/scenrw.i
+	$(AS) $M/data1.elt $(FLAGS) -o data1.o $O
+bioslink.o:	$M/bioslink.elt  
+	$(AS) $M/bioslink.elt $(FLAGS) -o bioslink.o $O
+charin.o:	$M/charin.elt 
+	$(AS) $M/charin.elt $(FLAGS) -o charin.o $O
+charout.o:	$M/charout.elt   
+	$(AS) $M/charout.elt $(FLAGS) -o charout.o $O
+charset.o:	$M/charset.elt 
+	$(AS) $M/charset.elt $(FLAGS) -o charset.o $O
+cover.o:	$M/cover.elt   $S/verbflag.i 
+	$(AS) $M/cover.elt $(FLAGS) -o cover.o $O
+decom.o:	$M/decom.elt   
+	$(AS) $M/decom.elt $(FLAGS) -o decom.o $O
+go.o:	$M/go.elt   
+	$(AS) $M/go.elt $(FLAGS) -o go.o $O
+doall.o:	$M/doall.elt   
+	$(AS) $M/doall.elt $(FLAGS) -o doall.o $O
+absoluteall.o: $M/absoluteall.elt 
+	$(AS) $M/absoluteall.elt $(FLAGS) -o absoluteall.o $O
+evalwht.o:	$M/evalwht.elt  $I/nounequ2.i  
+	$(AS) $M/evalwht.elt $(FLAGS) -o evalwht.o $O
+functinf.o:	$M/functinf.elt  
+	$(AS) $M/functinf.elt $(FLAGS) -o functinf.o $O
+getline.o:	$M/getline.elt   
+	$(AS) $M/getline.elt $(FLAGS) -o getline.o $O
+hint.o:	$M/hint.elt   
+	$(AS) $M/hint.elt $(FLAGS) -o hint.o $O
+in.o:	$M/in.elt   $S/verbflag.i 
+	$(AS) $M/in.elt $(FLAGS) -o in.o $O
+inputfrm.o:	$M/inputfrm.elt   
+	$(AS) $M/inputfrm.elt $(FLAGS) -o inputfrm.o $O
+knock.o:	$M/knock.elt   $S/verbflag.i 
+	$(AS) $M/knock.elt $(FLAGS) -o knock.o $O
+look.o:	$M/look.elt   $S/verbflag.i 
+	$(AS) $M/look.elt $(FLAGS) -o look.o $O
+makelocal.o:	$M/makelocal.elt   $S/verbflag.i $I/roomequ.i 
+	$(AS) $M/makelocal.elt $(FLAGS) -o makelocal.o $O
+melt.o:	$M/melt.elt   $S/verbflag.i 
+	$(AS) $M/melt.elt $(FLAGS) -o melt.o $O
+newsearch.o:	$M/newsearch.elt  
+	$(AS) $M/newsearch.elt $(FLAGS) -o newsearch.o $O
+palopt.o:	$M/palopt.elt   
+	$(AS) $M/palopt.elt $(FLAGS) -o palopt.o $O
+parserdat.o:	$M/parserdat.elt  
+	$(AS) $M/parserdat.elt $(FLAGS) -o parserdat.o $O
+parsnpc1.o:	$M/parsnpc1.elt   
+	$(AS) $M/parsnpc1.elt $(FLAGS) -o parsnpc1.o $O
+pictcode.o:	$M/pictcode.elt   
+	$(AS) $M/pictcode.elt $(FLAGS) -o pictcode.o $O
+printbits.o:	$M/printbits.elt   
+	$(AS) $M/printbits.elt $(FLAGS) -o printbits.o $O
+random.o:	$M/random.elt  
+	$(AS) $M/random.elt $(FLAGS) -o random.o $O
+read.o:	$M/read.elt  $I/nounflag.i $I/nounequ2.i  $S/verbflag.i 
+	$(AS) $M/read.elt $(FLAGS) -o read.o $O
+relative.o:	$M/relative.elt   
+	$(AS) $M/relative.elt $(FLAGS) -o relative.o $O
+search.o:	$M/search.elt   
+	$(AS) $M/search.elt $(FLAGS) -o search.o $O
+searcher.o:	$M/searcher.elt   
+	$(AS) $M/searcher.elt $(FLAGS) -o searcher.o $O
+spool.o:	$M/spool.elt  
+	$(AS) $M/spool.elt $(FLAGS) -o spool.o $O
+suss.o:	$M/suss.elt  $I/nounflag.i $I/nounequ2.i  
+	$(AS) $M/suss.elt $(FLAGS) -o suss.o $O
+prthex.o:	$M/prthex.elt
+	$(AS) $M/prthex.elt $(FLAGS) -o prthex.o $O
+reveal.o:	$M/reveal.elt $S/verbflag.i $S/nounflag.i $S/nounequ2.i
+	$(AS) $M/reveal.elt $(FLAGS) -o reveal.o $O
+valid.o:	$M/valid.elt $S/nounequ2.i
+	$(AS) $M/valid.elt $(FLAGS) -o valid.o $O
+verblist.o:	$M/verblist.elt  $S/verbflag.i $S/verbequ.i
+	$(AS) $M/verblist.elt $(FLAGS) -o verblist.o $O
+wear.o:	$M/wear.elt   $S/verbflag.i 
+	$(AS) $M/wear.elt $(FLAGS) -o wear.o $O
+exgnoun.o: $M/exgnoun.elt
+	$(AS) $M/exgnoun.elt $(FLAGS) -o exgnoun.o $O
+sit.o:	$M/sit.elt
+	$(AS) $M/sit.elt $(FLAGS) -o sit.o $O
+lie.o:	$M/lie.elt
+	$(AS) $M/lie.elt $(FLAGS) -o lie.o $O
+count.o:	$M/count.elt	$S/verbflag.i
+	$(AS) $M/count.elt $(FLAGS) -o count.o $O
+wash.o:	$M/wash.elt $S/verbflag.i
+	$(AS) $M/wash.elt $(FLAGS) -o wash.o $O
+direct.o:	$M/direct.elt
+	$(AS) $M/direct.elt $(FLAGS) -o direct.o $O
+context.o:	$M/context.elt
+	$(AS) $M/context.elt $(FLAGS) -o context.o $O
+suck.o:	$M/suck.elt
+	$(AS) $M/suck.elt $(FLAGS) -o suck.o $O
+tap.o:	$M/tap.elt $S/verbflag.i
+	$(AS) $M/tap.elt $(FLAGS) -o tap.o $O
+dance.o:	$M/dance.elt $S/verbflag.i
+	$(AS) $M/dance.elt $(FLAGS) -o dance.o $O
+case.o:	$M/case.elt
+	$(AS) $M/case.elt $(FLAGS) -o case.o $O
+post.o:	$M/post.elt $S/verbflag.i
+	$(AS) $M/post.elt $(FLAGS) -o post.o $O
+sieve.o:	$M/sieve.elt $S/verbflag.i
+	$(AS) $M/sieve.elt $(FLAGS) -o sieve.o $O
+chase.o:	$M/chase.elt $S/verbflag.i
+	$(AS) $M/chase.elt $(FLAGS) -o chase.o $O
+weigh.o:	$M/weigh.elt $S/verbflag.i
+	$(AS) $M/weigh.elt $(FLAGS) -o weigh.o $O
+paint.o:	$M/paint.elt $S/verbflag.i
+	$(AS) $M/paint.elt $(FLAGS) -o paint.o $O
+newask.o:	$M/newask.elt $S/askabout.i $S/nounflag.i
+	$(AS) $M/newask.elt $(FLAGS) -o newask.o $O
+weirdattire.o:	$M/weirdattire.elt
+	$(AS) $M/weirdattire.elt $(FLAGS) -o weirdattire.o $O
+Makeextras.i: $S/Makeextras
+	make -f $S/Makeextras ; touch Makeextras.i
+tstbits.o:	$M/tstbits.elt
+	$(AS) $M/tstbits.elt $(FLAGS) -o tstbits.o $O
+# the word tables
+
+wtable.o : $M/wtable.elt equates.i $M/wtable1.i $S/wtable5.i $S/wtable6.i \
+	$M/wtable7.i \
+	$S/wtable11noun.i $M/wtable11misc.i $S/wtable18.i $S/wtable24.i \
+	$S/wtable4.i
+	$(AS) $M/wtable.elt $(FLAGS) -o wtable.o $O

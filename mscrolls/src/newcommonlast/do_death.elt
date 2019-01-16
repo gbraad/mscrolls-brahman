@@ -1,0 +1,43 @@
+**************************************************************
+*
+*	10/27/87
+*	@(#)do_death.elt	1.2
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+
+	XDEF	DO.DEATH
+	XREF	USER.DB,DIED,DO.QUIT
+
+DO.DEATH
+ 
+	MSG	DEADED
+	
+    IFNE    YCHEAT
+	XREF	DBUG.ON
+	TEST_W  DBUG.ON(A4)
+	BNE.S   10$
+    ENDC
+	
+	TEST_W  USER.DB(A4)
+	BEQ.S   20$
+10$
+	CLR.W   DIED(A4)
+	MSG	LETOFF 
+	DOGO	SCREEN                ;STACK SHOULD BE OK
+ 
+20$
+	PEA	30$(PC)
+30$
+	LEA	30$(PC),A0            ;COME HERE IF WILL NOT SAY OK
+
+	BRA	DO.QUIT
+
+
+
+	END

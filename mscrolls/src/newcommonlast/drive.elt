@@ -1,0 +1,30 @@
+***********************************************************
+*
+*	%W%
+*	%G%
+*
+************************************************************
+
+		SECTION	"ADV",CODE
+
+		include	"equates.i"
+		include	"macros.i"
+		include	"verbequ.i"
+		include	"scenequ.i"
+
+	    IfVerb	DRIVE
+
+		XDEF	V.DRIVE
+		XREF	SP.DRIVE,YCANT
+V.DRIVE
+
+	
+	CALL	SP.DRIVE
+	BRA	YCANT
+
+
+	ENDC	;DRIVE
+*------------------------------------------
+
+		END
+	

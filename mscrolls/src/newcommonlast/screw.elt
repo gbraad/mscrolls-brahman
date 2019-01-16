@@ -1,0 +1,126 @@
+***********************************************************
+*
+*	%W%
+*	%G%
+*
+************************************************************
+
+		SECTION	"ADV",CODE
+
+		include	"equates.i"
+		include	"macros.i"
+		include	"verbequ.i"
+		include	"scenequ.i"
+
+	    IfVerb	SCREW
+
+	XDEF	V.SCREW
+	XREF	SP.SCREW,CHK6PART,ADVERB,CONJ,CHK6PART,YCANTWSTOP
+	XREF	P.IDFY,ADDNOUN
+	
+*------------------------------------------ 
+* Synopsis:
+*
+*
+*
+*	
+*	Prep	=	IN | INTO | AGAINST | TO ;
+*
+*	Form1	=	SCREW <X> <Prep> <Y> [ WITH <Z> ]
+*		|	SCREW <X> WITH <Z> [ <Prep> <Y> ]
+*		|	SCREW <X> DOWN WITH <Z>
+*		;
+*	
+*	Form2	=	SCREW <X> UP 
+*		|	SCREW UP <X>
+*		;	
+*	
+*	Form3	=	SCREW <Npc> ;
+*
+*------------------------------------------ 
+
+ValidScrewPrepositions
+	
+		DC.W	IN
+		DC.W	INTO
+		DC.W	AGAINST
+		DC.W	TO
+		DC.W	-1
+		
+V.SCREW
+
+	MOVE.W	ADVERB(A4),D1			;fetch verb modifier.
+	BPL.S	10$				;a real adverb.
+	CMP.W	#-1,D1				;blank?
+	BEQ.S	10$				;then consider another form.
+	CMP.W	#DIR_U+HI,D1			;'screw up x'?
+	BEQ.S	20$				;form2.
+	CMP.W	#DIR_D+HI,D1			;screw down x?
+	BNE	P.IDFY				;not acceptable form.
+	
+	;form 1, 'screw down x', 'screw x down'
+
+	TST_PSEUDO				;cant to pseudos.
+	BNE	YCANTWSTOP
+	TEST_B	6(A0)				;complex relation?
+	BEQ.S	30$				;no, check as form1.
+	MOVE.W	#WITH,D1			;we insist 'with Z.'
+	DO	CHK4PT				;and check it.
+	MOVE.W	D5,ADDNOUN+2(A4)		;make it Z.
+	MOVE.W	#WITH,CONJ+2(A4)		;with Z.
+	MOVE.W	8(A0),D5			;fetch to Y.
+	MOVE.W	#TO,CONJ(A4)			;make out to Y with Z.
+	BRA.S	38$				;and consider form1.
+20$
+    	;form2, 'screw x up' or 'screw up x'
+	; assume x exists since not singv.
+	
+	CALL	SP.SCREW				     ;call to special.
+	MSG	SCREWUP					     ;default.
+	BRA.S	90$					     ;exit.
+10$
+    	TST_NPC					;screw npc (form3)
+	BEQ.S	30$				;no.
+
+	; form 3, 'screw npc'
+	
+	CALL	SP.SCREW			;catch here.
+	
+    IFD		VNRAPE
+	XREF	V.RAPE
+	BRA	V.RAPE				;and goto rape.
+    ENDC	;VNRAPE
+
+    IFND	VNRAPE
+	XREF	YCANT
+	BRA	YCANT
+    ENDC	;!VNRAPE
+
+30$
+    	;from here on we are looking for a variation on form1.
+	;so the sentence must be at least a 4part. (possibly six).
+	
+	MOVE.W	CONJ(A4),D2
+	BMI.S	35$				;no, then moan.
+	LEA	ValidScrewPrepositions(PC),A1	;-1 terminated list.
+32$
+	MOVE.W	(A1)+,D3			;get one.
+	BMI.S	35$				;none, then moan.
+	CMP.W	D3,D2				;is our prep?
+	BNE.S	32$				;no, keep looking.
+35$
+	MOVE.L	#TO<<16+WITH,D1			;set up for chk6part.
+	ST	D7				;ne => at least 4 part.
+	CALL	CHK6PART			;check syntax.
+38$
+	CALL	SP.SCREW			;and call special.
+	BRA	YCANTWSTOP			;nocando.
+90$
+	RET
+		
+    ENDC	;V.SCREW
+	
+*------------------------------------------ 
+	
+	END	
+	

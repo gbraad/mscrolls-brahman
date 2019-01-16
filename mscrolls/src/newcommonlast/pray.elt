@@ -1,0 +1,32 @@
+**************************************************************
+*
+*	10/27/87
+*	@(#)pray.elt	1.2
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"verbequ.i"
+
+
+*
+* V.PRAY
+*
+	IfVerb	PRAY
+
+	XDEF	V.PRAY
+	XREF	SP.PRAY
+
+V.PRAY
+	CALL	SP.PRAY
+	MSGGO	NOONE
+
+	ENDC
+
+
+
+	END

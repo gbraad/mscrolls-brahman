@@ -1,0 +1,73 @@
+**************************************************************
+*
+*	10/27/87
+*	@(#)utoutmode.elt	1.3
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"scen.i"
+
+	XDEF	UTNORMAL,UTVERBOSE,UTOUTMODE,UTBRIEF
+	XREF	OUTMODE,OK
+
+UTNORMAL  
+
+	MOVEQ   #0,D5                 ;SET TO NORMAL
+	BRA.S   UTOUTMODE
+
+UTVERBOSE
+
+	MOVEQ   #1,D5                 ;SET TO VERBOSE
+	BRA.S   UTOUTMODE
+
+UTBRIEF
+
+	MOVEQ   #2,D5                 ;SET TO BRIEF
+
+UTOUTMODE
+
+	MOVE.B  D5,OUTMODE(A4)
+	CALL    OK                    ;DOES ANYTHING ELSE CALL OK?
+	DOGO	UTEXIT
+
+	XDEF	UTSERIAL,UTID
+
+UTSERIAL
+UTID 
+
+    IFNE       YCHEAT 
+	PRINT   <'NOT YET!'>
+	
+	DOGO	UTEXIT
+
+    ENDC
+
+	XDEF	UTVERSION
+
+UTVERSION
+
+	FIXED_SCN	Copyright	;COPYRIGHT NOTICE ETC
+
+    IFNE    YCHEAT
+
+	PRINT   <'YCHEAT ON'>
+
+    ENDC
+
+	DOGO	UTEXIT   
+
+	XDEF	UTCREDIT
+
+UTCREDIT
+
+	FIXED_SCN	Credits		;credits text
+	DOGO	UTEXIT
+
+
+
+	END

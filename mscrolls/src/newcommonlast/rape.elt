@@ -1,0 +1,56 @@
+**************************************************************
+*
+*	%G%
+*	%W%
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"verbequ.i"
+	include	"scenequ.i"
+
+*--------------------------------
+
+	IfVerb	RAPE
+
+	XDEF	V.RAPE
+ 
+V.RAPE
+ 
+	TST_NPC				;
+	BNE.S   10$
+	MSGGO	NOVEL
+10$
+	TST_DEAD				;DEAD?
+	BEQ.S	15$
+	MSGGO	NNA            ;NECROPHILIACS NOT ALLOWED
+15$
+	DO	GETNPC
+	MOVE.B  2(A3),D1
+	LSR.B   #4,D1
+	CMP.B   #7,D1
+	BEQ.S   20$
+	MOVEQ   #1,D1
+	RND_D1
+    IFD	wantSUCCESS
+	XREF	SUCCESS
+	;never succeeds
+    ENDC
+    
+	BeSure	M.CLDSHR		;incase not inc'ed
+	
+	ADD.W   #M.CLDSHR,D1
+	DOGO	P.MSG
+20$
+	DO	P.SUB
+	MSGGO	HFUN   
+
+
+	ENDC
+
+
+	END

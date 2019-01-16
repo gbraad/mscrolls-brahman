@@ -1,0 +1,205 @@
+**************************************************************
+*
+*	1/13/89
+*	@(#)checksum.elt	2.2
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"scenequ.i"
+
+*--------------------------------
+*
+* CHK.DO - CALCULATE CHECKSUMS
+*
+* RETURNS D1.W = ADDITION.W
+*         D2.W = EOR.W
+*         D3.W = MULT.W
+*         D4.L = ADDITION.L
+*         D6.W = NO. OF ZEROS
+*
+*--------------------------------
+	
+
+	IFND	wantNoCrypt
+
+	XDEF	CHK.DO
+	XREF	SLADDR,SLADDR.E,SUM.CHK,BD.MEDIUM.LD
+ 
+CHK.DO
+
+      IFNE	VAX
+
+	MOVEQ	#0,D5
+	RET
+
+      ENDC
+	
+	LEA     SLADDR(A4),A0            ;START OF SAVE/LOAD AREA
+	MOVE.L  #SLADDR.E,D0             ;Calculate NO. OF WORDS
+	SUB.L   #SLADDR,D0               ;Bloody stupid linker!
+
+	MOVEQ   #0,D5                 ;SCRATCH
+
+      IFNE    M68000
+
+	LSR.L   #1,D0                    ;DIV 2 for word wise
+	
+	LEA     SUM.CHK(A4),A1
+	CLR.L   (A1)+
+	CLR.L   (A1)+   
+	CLR.L   (A1)
+  
+	MOVEQ   #0,D1
+	MOVEQ   #0,D2
+	MOVEQ   #1,D3                 ;MULT!
+	MOVEQ   #0,D4
+	MOVEQ   #0,D6                 ;COUNT ZEROS
+ 
+10$:
+	MOVE.W  (A0)+,D5              ;SAVE LOTS OF MEM ACCESS
+	ADD.W   D5,D1                 ;WORD ADD
+	EOR.W   D5,D2                 ;EOR
+	ADD.L   D5,D4  
+	TEST_W  D5                    ;ZERO?
+	BEQ.S   20$
+	MULU    D5,D3                 ;MULT IF NOT ZERO
+	SWAP    D3                    ;AVOID LOTS OF TRAILING ZEROS
+	ADDQ.W  #1,D3                 ;AVOID ZEROS
+	BRA.S   30$
+20$
+	ADDQ.W  #1,D6                 ;OK, ADD TO ZERO COUNT
+30$
+	DBRA    D0,10$
+
+      ENDC
+
+      IFEQ    M68000
+
+	CLR.L	SUM.CHK(A4)
+	LSR.L	#2,D0			;div 4 for LONG wordwise
+	SUBQ.W	#2,D0			;safety margin!	
+10$:
+	ADD.L	(A0)+,D5
+	DBRA    D0,10$                ;NEXT..
+
+      ENDC
+
+	RET
+ 
+      ENDC	;!wantNoCrypt
+
+
+*----------------------------------------------------------------
+
+	XDEF	CALC.DATA
+  
+CALC.DATA
+ 
+      IFND	wantNoCrypt
+
+	CALL_S  CHK.DO                ;CLEAR CHECKSUMS + CALC NEW ONES
+	LEA     SUM.CHK(PC),A0        ;START OF BLOCK
+
+      IFNE	M68000
+
+	MOVE.W  D1,(A0)+              ;SUM.WORD
+	MOVE.W  D2,(A0)+              ;EOR.WORD
+	MOVE.W  D3,(A0)+              ;MULT.WORD
+	MOVE.W  D6,(A0)+              ;ZERO COUNT
+	MOVE.L  D4,(A0)               ;SUM.LONG
+      
+      ENDC
+
+      IFEQ	M68000
+
+	MOVE.L	D5,(A0)
+
+      ENDC
+
+      ENDC	;!wantNoCrypt
+
+	RET                           ;BYE BYE
+
+*---------------------------------------------------------------------
+
+	XDEF	CHK.DATA
+  
+CHK.DATA
+
+      IFD	wantNoCrypt
+	RET
+      ENDC
+ 
+      IFND	wantNoCrypt
+
+	LEA     SUM.CHK(PC),A1        ;SAVE LOADED SET
+
+      IFEQ	M68000
+
+	MOVE.L	(A1),-(A7)		;push sum (long)
+	CLR.L	(A1)+			; clear it as it was originally
+
+* AJS changed this because it was checksumming it first with SUM.CHK 
+* cleared - and then with SUM.CHK with the checksum in it !!!!!!!
+* THIS WAS A VICIOUS BUG!!!
+
+      ENDC
+
+      IFNE	M68000
+	MOVE.L  (A1)+,-(A7)           ;PUSH SUM & EOR
+	MOVE.L  (A1)+,-(A7)           ; ..  MULT & ZERO COUNT
+	MOVE.L  (A1)+,-(A7)           ; ..  LONG SUM
+      ENDC
+ 
+	CALL_S  CHK.DO                ;CLEAR CHECKSUMS + CALC NEW ONES
+    
+      IFNE	M68000
+	LEA     SUM.CHK(PC),A0        ;START OF BLOCK
+	CMP.L   (A7)+,D4              ;CHECK LONG SUM
+	BNE.S   10$
+	CMP.W   (A7)+,D3              ; & MULT
+	BNE.S   20$
+	CMP.W   (A7)+,D6              ; & ZERO COUNT
+	BNE.S   30$
+	CMP.W   (A7)+,D1              ; & SUM.W
+	BNE.S   40$
+	CMP.W   (A7)+,D2              ; & EOR.W
+	BNE.S   50$
+      ENDC
+
+      IFEQ	M68000
+	CMP.L	(A7)+,D5
+	BNE.S	50$
+      ENDC
+
+ 
+* GET HERE = OK
+ 
+	RET                           ;EXIT - GOOD
+
+      IFNE	M68000
+   
+10$
+	TEST_W  (A7)+                 ;STACK=STACK+2
+20$
+	TEST_W  (A7)+                 ; DITTO
+30$
+	TEST_W  (A7)+                 ; DITTO
+40$
+	TEST_W  (A7)+                 ;LAST OF THESE
+
+      ENDC
+
+50$
+	TEST_L  (A7)+                 ;THIS POPS THE RET
+	BRA      BD.MEDIUM.LD         ;EXIT - BAD
+
+      ENDC	;!wantNoCrypt
+
+
+	END

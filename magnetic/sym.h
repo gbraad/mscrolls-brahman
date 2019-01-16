@@ -71,8 +71,8 @@ struct Symbols
         int b = get_word(fp);
         return (a << 16) | b;
     }
-    
-    bool load_syms(FILE* fp)
+
+    int load_syms(FILE* fp)
     {
         /* format of a very simple AmigaDOS load file:
 
@@ -95,51 +95,33 @@ struct Symbols
            hunk_end
         */
 
-        bool res = false;
+        int cc = 0;
 
         for (;;)
         {
-            int v = get_int(fp);
-            if (v == hunk_reloc32)
+            int sz = get_int(fp);
+            if (sz <= 0) break;
+
+            string s;
+            for (int i = 0; i < sz*4; ++i)
             {
-                // skip reloc
-                for (;;)
-                {
-                    int n = get_int(fp);
-                    if (n <= 0) break;
-                    get_int(fp); // hn
-                    while (n--) get_int(fp);
-                }
+                int c = getc(fp);
+                if (c > 0) s += (char)c;
             }
-            else if (v == hunk_symbol)
+
+            int val = get_int(fp);
+
+            if (s.size())
             {
-                res = true;
-                for (;;)
-                {
-                    int sz = get_int(fp);
-                    if (sz <= 0) break;
-
-                    string s;
-                    for (int i = 0; i < sz*4; ++i)
-                    {
-                        int c = getc(fp);
-                        if (c > 0) s += (char)c;
-                    }
-
-                    int val = get_int(fp);
-
-                    if (s.size())
-                    {
-                        bool skip = isdigit(s[0]);
+                bool skip = isdigit(s[0]);
                         
-                        if (!skip)
-                            add_symbol(s, val);
-                    }
-                }
-            }
-            else break; // unknown
-        }
+                if (!skip)
+                    add_symbol(s, val);
 
-        return res;
+                ++cc;
+            }
+        }
+        return cc;
     }
+
 };

@@ -1,0 +1,56 @@
+**************************************************************
+*
+*	2/12/89
+*	@(#)point.elt	2.5
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"verbequ.i"
+	include "scenequ.i"
+
+	IfVerb	POINT
+
+	XDEF	V.POINT
+	XREF	ADVERB,CONJ,SP.POINT
+
+V.POINT
+ 
+      IFD	wantSP.POINT_Before
+
+	XREF	SP.POINT_Before
+	CALL	SP.POINT_Before
+
+      ENDC	;wantSP.POINT_Before
+
+	CMP.W   #AT,ADVERB(A4)    ;POINT AT
+	BEQ.S   50$
+	CMP.W   #TO,ADVERB(A4)      ;POINT TO
+	BEQ.S   50$
+	TEST_W  D5
+	BNE.S   04$
+	MOVEQ   #AT,D1              ;'AT WHAT?'
+	DO	CHK4PT	             ;WONT EVER COME BACK
+04$
+ 
+	CMP.W   #TO,CONJ(A4)        ;POINT HOBBITS TO DRAGON?
+	BEQ.S   50$
+	CMP.W   #AT,CONJ(A4)        ;PONIT X AT Y?
+	BEQ.S	10$
+	MSGGO	IDFY
+10$
+	EXG     A0,A5
+	EXG     D0,D5
+50$
+	CALL    SP.POINT
+	MSGGO	NHAP
+
+	ENDC
+
+
+
+	END

@@ -1,0 +1,77 @@
+**************************************************************
+*
+*	%G%
+*	%W%
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"scenequ.i"
+
+*--------------------------------
+	
+	XDEF	IFANIMAL
+	XREF	SP.ODREP
+	
+IFANIMAL
+	
+*IF TRYING TO TALK TO AN ANIMAL
+	
+*ENTRY:
+*D0=NPC
+	
+*EXIT:
+*EQ = IS NON-ANIMAL
+*NE = IS ANIMAL, MESSAGE PRINTED.
+	                        
+	CALL    SP.ODREP		;DO ODD REPLY TYPE
+	DO	GETNPC			;TO A3
+	BTST    #2,2(A3)		;ANIMAL?
+	BEQ.S   90$			;NO
+	DO	P.TN
+	MSG	WPRI			;WOULD PROBABLY REPLY IF
+	GETINFO
+	DO	P.PRN
+	MSG	COULD
+	SETNE
+90$
+	RET
+
+*--------------------------------
+	
+    IFD		wantUNIFIEDTEXT
+	
+	XDEF	IsAnimal
+
+IsAnimal
+
+* Determine whether an item is an animal.
+* Entry;
+*	D0 = item.
+*
+* Exit;
+*	EQ <=> d0 is an animal.
+	
+	
+	PUSH_L	A0/A3
+	GETINFO
+	TST_NPC					;is item an npc?
+	BEQ.S	80$				;no, then fail  now.
+	DO	GETNPC				;a3-> npc data.
+	BTST	#2,2(A3)			;animal bit?
+80$
+	EOR	#4,CCR				;invert for exit condition.
+	PULL_L	A0/A3
+	RET
+	
+    ENDC	;wantUNIFIEDTEXT
+
+
+*------------------------------------------ 
+
+	END

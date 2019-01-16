@@ -1,0 +1,185 @@
+**************************************************************
+*
+*	10/27/87
+*	@(#)pr_how.elt	1.5
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+*	include	"msgequates.i"
+	include	"macros.i"
+	include	"scenequ.i"
+
+
+    IFND	wantNOQUOTES
+
+	XDEF	PR.HOWAB,PR.HOWCOP
+	XDEF	PR.HOWQ
+
+	XREF	PR20,NOUNBUF
+
+PR.HOWAB
+
+	PEA     PR20(PC)
+	MOVE.W  NOUNBUF(A4),D0       ;ANY FOUND?
+	BEQ.S	10$
+	MSG     WHAT
+	MSG     ABOUT
+	GETINFO
+	DOGO	P.OBJPRN             ;WHAT ABOUT IT
+10$
+	MSGGO	IDNK
+	
+*--------------------------------
+	
+	XREF	NPCMODEL
+
+PR.HOWQ
+	
+	MOVE.W  NPCMODEL(A4),D5
+	CMP.W   #1,D1                ;PERSON?
+	BHI     PR.HOWCOP            ;COPOUT
+	
+	CMP.W   #$1,D5               ;CAN?
+	BEQ.S   PR.HOWCAN
+ 
+	CMP.W   #$4,D5               ;SHALL
+	BEQ.S   PR.HOWCAN
+	CMP.W   #$2,D5               ;MAY
+	BEQ.S   PR.HOWMAY
+	CMP.W   #$3,D5               ;WILL
+	BEQ.S   PR.HOWWILL
+	CMP.W   #$4,D5               ;SHOULD
+	BEQ.S   PR.HOWSHOULD
+	MSG	DUST			;dont understand what u r talking about
+	RET
+	
+*--------------------------------
+	
+	
+PR.HOWCAN
+	
+	TEST_W  D1
+	BNE.S	10$
+	MOVEQ   #4,D1
+	RND_D1
+
+	BeSure	M.USEBRAIN
+
+	ADD.W   #M.USEBRAIN,D1
+	DOGO	P.MSG
+10$
+	MSGGO	ICDOAN
+
+*--------------------------------
+	
+PR.HOWMAY
+	
+	
+	TEST_W  D1
+	
+	BNE.S   PR.HOWCOP
+	MSGGO	SLIM
+	
+	
+*--------------------------------
+	
+	
+PR.HOWWILL
+	       
+	
+	TEST_W  D1
+	BNE.S	10$
+	MOVEQ   #3,D1
+	RND_D1
+
+	BeSure	M.DONTWRY
+
+	ADD.W   #M.DONTWRY,D1
+	DOGO	P.MSG
+10$
+	MSGGO	DWAM
+
+*--------------------------------
+	
+	
+PR.HOWSHOULD
+	       
+	
+	TEST_W  D1
+	BEQ.S	10$
+	MOVEQ   #3,D1
+	RND_D1
+
+	BeSure	M.DEV
+
+	ADD.W   #M.DEV,D1
+	DOGO	P.MSG
+10$
+	MSGGO	SHUTUP
+	
+	
+*--------------------------------
+	
+PR.HOWCOP
+	
+	MOVEQ   #7,D1
+	RND_D1
+
+	BeSure	M.IHNI
+
+	ADD.W   #M.IHNI,D1
+	DOGO	P.MSG
+   
+*--------------------------------
+;       
+;PR.CAN
+;     
+;      CALL    SCANSUB
+;      MOVE.B  IUFLAG(A4),D1
+;      MOVE.W  SCAN.SUB(A4),D0
+;      BNE.S   10$
+;      MOVE.W  SCAN.OBJ(A4),D0
+;      BNE.S   10$
+;      OR.B    #3,D1
+;      BEQ     W.CANCOP
+;0$
+;      BTST    #1,D1
+;      BNE.S   CAN.SUBJ
+;      BTST    #0,D1
+;      BNE.S   CAN.YOU
+;      MSG     IDNATA
+;      MSG     ONLY
+;      GETINFO
+;      MOVE.W  D0,D5
+;      MOVE.W  A0,A5
+;      MOVE.W  CONVNPC(A4),A0
+;      MOVE.W  CONVNPC+4(A4),D0
+;      GETINFO
+;      MOVEQ   #VNASK,D2
+;      DO	GETVECT
+;      MOVE.W  #$12,CONJ(A4)
+;      MOVE.W  D5,ADDNOUN(A4)
+;      JSR     (A1)
+;      DOGO	PR20
+;              
+;      
+;--------------------------------
+;      
+;      
+;CAN.SUBJ
+;      
+;      
+;      MSG     IYAUPT
+;      DOGO	PR20
+;      
+;      
+*--------------------------------
+
+
+    ENDC	;wantNOQUOTES
+
+	END

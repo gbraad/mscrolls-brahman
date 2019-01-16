@@ -1,0 +1,67 @@
+**************************************************************
+*
+*	@(#)unlight.elt	2.2
+*	4/28/89
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"verbequ.i"
+
+	IfVerb	UNLIGHT
+
+	IFEQ	THE_PAWN
+
+
+	XDEF	V.UNLIGHT
+
+	XREF	SP.UNLIGHT,ISARE
+
+*
+* V.UNLIGHT	- unlight/extinguish - particularly lamps!
+*
+
+V.UNLIGHT
+
+	CALL	SP.UNLIGHT
+	GETINFO
+	MOVE.B	2(A0),D1		;set size & weight
+	LSR.B	#4,D1			;size
+	BEQ.S	80$			;void => no
+	CMP.B	#2,D1			;can snuff if size <= 2
+	BHI.S	80$			;otherwise not
+	TST_LIT				;lit?
+	BEQ.S	10$			;not lit
+	TST_LIGHTABLE				;& lightable => flame
+	BEQ.S	10$			;otherwise glowing => not alight
+	BCLR	#7,(A0)			;not lit anymore
+	DO	P.SUB			;you
+	PRINT	<'snuff '>
+	DO	P.TN			;the item
+	BRA.S	90$			;and exit
+10$
+	DO	P.BTN
+	DO	ISARE
+	MSG	NOT
+	MSG	LIT			;but x is not alight
+	BRA.S	90$			;exit
+80$
+	DO	P.SUB
+	MSG	YCNDTT
+	DO	P.TN
+90$
+	DO	BSFULLSTOP
+	RET
+
+
+	ENDC
+
+	ENDC
+
+
+
+	END

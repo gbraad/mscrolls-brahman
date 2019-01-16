@@ -1,0 +1,38 @@
+***********************************************************
+*
+*	@(#)use.elt	1.2
+*	1/10/89
+*
+************************************************************
+
+		SECTION	"ADV",CODE
+
+		include	"equates.i"
+		include	"macros.i"
+		include	"verbequ.i"
+		include	"scenequ.i"
+
+    IFD		wantV.USE
+
+    IfVerb	USE
+	XDEF	V.USE
+
+V.USE
+	
+      IFD	wantSP.USE
+
+	XREF	SP.USE
+	CALL	SP.USE
+
+      ENDC
+
+	MSGGO	USEUSAGE
+
+    ENDC	;USE
+    ENDC	;wantV.USE
+
+	
+*------------------------------------------ 
+	
+	END
+	

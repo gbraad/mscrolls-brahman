@@ -1,0 +1,60 @@
+******************************************************
+*
+*	%W%
+*	%G%
+*
+******************************************************
+
+		SECTION		"ADV",CODE
+
+*--------------------------------
+*
+* COMMON ROUTINES - *NOT* SAVED
+* WITH SAVE/LOAD GAME
+*
+* NOT TO BE MODIFIED BY PROG!!
+*
+*--------------------------------
+ 
+	include	"equates.i"
+	include	"macros.i"
+	include	"nounequ1.i"
+	include	"nounequ2.i"
+	include	"verbequ.i"
+	include	"roomequ.i"
+	include	"scenequ.i"
+
+
+	XDEF	INIT.TAB,MLISTNGO
+	XDEF	MOVE.TAB,PP.OP.CL,DOORS,TBL.DOOR,SP.JVTBL,JVTBLEND
+
+	IFD	wantPLURAL_Override
+	XDEF	PLURAL_Override
+PLURAL_Override	DC.W	0
+	ENDC	;wantPLURAL_Override
+
+	XDEF	LINKADDRESS
+LINKADDRESS	DC.L	0		;used to unlink verbs.
+
+	ALIGN
+	include	"scendata.i"
+
+
+
+	IFNE	GENERIC
+
+	IFD	wantGenericInterface	;hmmm
+
+	XDEF	InterfaceBuffer
+
+InterfaceBuffer
+	DS.B	256			;a place for the front end to grab
+					;stuff from
+
+	ENDC
+
+	XDEF	SessionEnd
+SessionEnd
+	ENDC
+
+	END

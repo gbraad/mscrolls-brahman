@@ -1,0 +1,43 @@
+**************************************************************
+*
+*	10/27/87
+*	@(#)piss.elt	1.2
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"verbequ.i"
+
+*
+* V.PISS
+*
+	IfVerb	PISS
+
+	XDEF	V.PISS
+	XREF	SP.PISS,ADVERB,P.IDFY,VERB
+
+V.PISS
+
+	CMP.W	#IN,ADVERB(A4)		;must give a target
+	BEQ.S	10$			;in/into/on ok
+	CMP.W	#ON,ADVERB(A4)
+	BEQ.S	10$
+	CMP.W	#INTO,ADVERB(A4)
+	BNE	P.IDFY
+10$
+	CALL	SP.PISS
+	MSG	CANTALLOW		;' allowed to '
+	MOVE.W	VERB(A4),D1		;piss/shit/crap etc
+	DO	P.VERB
+	MSGGO	RESTRAIN		;<' just anywhere you know!
+					; Restrain yourself please!^'>
+
+	ENDC
+
+
+
+	END

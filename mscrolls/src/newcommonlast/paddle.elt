@@ -1,0 +1,88 @@
+******************************************************
+*
+*	@(#)paddle.elt	2.4
+*	3/10/89
+*
+*******************************************************
+
+		SECTION	"ADV",CODE
+
+		include	"equates.i"
+		include	"macros.i"
+		include	"verbequ.i"
+		include	"scenequ.i"
+
+	IfVerb	PADDLE
+
+	XDEF	V.PADDLE
+
+V.PADDLE
+
+    IFD	attribute_INFINITE_CONTAINER
+
+	XREF	ADVERB,P.SUB,CHK4PT,P.SUBV,SEATED,GOTOGO
+	XREF	SP.PADDLE,GO.N,VERB,DBS
+	XREF	Denotation_INFINITE_CONTAINER	;This MUST be defined for
+						;paddle
+	XREF	ISATTRIBUTE,SEATED_RELATOR,VERB
+
+
+	CMP.W	#IN,SEATED_RELATOR(A4)	;must be in something
+	BEQ.S	01$			;fine
+	DO	P.SUBV
+
+      IFND	wantCorrectFullStops
+	MSGGO	UNABLE			;you are unable
+      ENDC	;!wantCorrectFullStops
+
+      IFD	wantCorrectFullStops
+	MSG	UNABLE			;you are unable
+	DOGO	BSFULLSTOP
+      ENDC	;wantCorrectFullStops
+
+01$
+	CALL	SP.PADDLE
+	MOVE.W	ADVERB(A4),D1	;fetch modifier
+	CMP.W	#-1,D1		;empty modifier
+	BNE.S	10$		;no
+05$
+	DO	P.SUB
+	MSG	PADDLESOMEWHERE	;must paddle somewhere.
+	BRA.S	90$		;exit
+10$
+	BMI.S	20$		;is a direction code
+	TEST_W	D0		;paddle prep object?
+	BMI.S	05$		;no
+	BRA	GO.N
+20$
+	; eg paddle canoe south
+	CMP.W	SEATED(A4),D0	;are you in it?
+	BEQ.S	30$
+	LEA	Denotation_INFINITE_CONTAINER(A4),A1	;you must be in an
+	DO	ISATTRIBUTE				;are you in one?
+	BNE	DBS					;no, dbs
+	MOVE.W	D0,-(A7)
+	MSG	BUT
+	DO	P.SUBV
+	MSG	NOTIN			;not in
+	MOVE.W	(A7)+,D0
+	DO	P.TN
+	BRA.S	90$
+30$
+	BCLR	#15,D1		;to a direction
+	MOVE.W	D1,D5		;set for go
+	CMP.B	#8,D1		;>='up'?
+	BHS	DBS
+	BRA	GOTOGO
+
+    ENDC	;Denotation_INFINITE_CONTAINER
+
+90$
+	RET
+
+
+*------------------------------------------
+
+	ENDC	;paddle
+
+	END

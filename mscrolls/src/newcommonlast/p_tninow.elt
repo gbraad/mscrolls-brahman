@@ -1,0 +1,32 @@
+**************************************************************
+*
+*	10/27/87
+*	@(#)p_tninow.elt	1.2
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+
+*--------------------------------
+*
+* P.TNINOW
+*
+* PRINT THE NOUN IS NOW MSG. D1
+*
+*--------------------------------
+ 
+	XDEF	P.TNIN
+ 
+P.TNIN
+ 
+	DO	P.TN
+	DO	ISARE
+	MSG	NOW
+	DOGO	P.MSG
+
+
+	END

@@ -49,6 +49,10 @@
 #include "utils.h"
 #include "growbuf.h"
 
+#ifdef USE_KL
+#include "kl.h"
+#endif
+
 // forward
 struct PuzzleManager;
 class IFMagnetic;
@@ -74,7 +78,7 @@ struct PuzzleBase
         
         IItems items;
 
-        // parse and resolve by adjectives
+        // parse and resolve by adjectives & exact resolve
         IItem::parse(items, s);
 
         // must also be local
@@ -347,10 +351,38 @@ struct PuzzleManager: public PuzzleBase
     PChooser            _pchooser;
     bool                _enabled = true;
 
+#ifdef USE_KL
+    struct OStream: public StdStream
+    {
+        PuzzleManager* _host;
+        bool _emit(StdStreamBuf* buf) override
+        {
+            _host->text((const char*)*buf);
+            return true;
+        }
+    };
+
+    struct InStream: public Stream
+    {
+        // Compliance
+        PuzzleManager* _host;
+        int __get() override { return 0; }
+        const char* name() const override { return "input"; }
+    };
+
+    KL                  _kl;
+    InStream            _klIn;
+    OStream             _klOut;
+#endif    
+
+
     ~PuzzleManager() { purge(_puzzles); }
 
     void start(IFMagnetic* host);
     void enabled(bool v);
+    void setRemaster(bool v);
+
+    void _initKL();
 
     Puzzle* find(const char* name) const
     {
@@ -401,6 +433,10 @@ struct PuzzleManager: public PuzzleBase
 
     void applyGameFixes();
     void buildProductInfoJSON(GrowString&, const string& credits);
+
+    void handleEvent(int quiet);
+    void handleEventJinxter(int quiet);
+    void evalKL(const char* s, bool cr = false);
 };
 
 inline void PuzzleBase::_action(const char* s)
@@ -411,8 +447,9 @@ inline void PuzzleBase::_action(const char* s)
 inline void Puzzle::text(const char* s, int st)
 {
     assert(_pm);
+    _pm->text("\n\n");
     _pm->text(s);
-    _pm->text("\n");
+    _pm->text("\n\n");
     state(st);
 
     // emitting text marks state as false to signal something was output

@@ -1,0 +1,162 @@
+**************************************************************
+*
+*	7/4/88
+*	@(#)prtnum.elt	2.4
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"scenequ.i"
+
+*--------------------------------
+
+	XDEF	PRTNUM,PRTNUM.SUB
+ 
+PRTNUM
+	
+    IFND    	wantLongPRTNUM
+	MOVE.L	D3,-(A7)
+    ENDC	;!wantLongPRTNUM
+	
+    IFD		wantLongPRTNUM
+	PUSH_L	D3/D6
+	AND.L	#$FFFF,D6		;zap any hi-word.
+    ENDC	;wantLongPRTNUM
+	
+	ST	D3			;print no leading zeros.
+	CALL_S	PRTNUM.SUB
+	
+    IFND	wantLongPRTNUM
+	MOVE.L	(A7)+,D3
+    ENDC	;!wantLongPRTNUM
+	
+    IFD		wantLongPRTNUM
+	PULL_L	D3/D6
+    ENDC	;wantLongPRTNUM
+	
+	RET
+
+
+*------------------------------------------
+    IFD		wantLongPRTNUM
+	
+	XDEF	PRTNUML
+
+PRTNUML
+	MOVE.L	D3,-(A7)
+	ST	D3
+	CALL_S	PRTNUM.SUB
+	MOVE.L	(A7)+,D3
+	RET
+    
+    ENDC	;wantLongPRTNUM
+	
+*------------------------------------------
+	
+    IFND	wantLongPRTNUM
+	
+PRTNUM.SUB
+
+* print a number in decimal.
+* Entry;
+*	D6.W = number to print
+
+*	6-D3.B	= number of digits to print, at least.
+
+	PUSH_L  D0-D2/A0
+	MOVE.L  D6,D2
+	LEA     DECTAB(PC),A0
+10$
+	MOVE.W  (A0)+,D0
+	BEQ.S   PRTOUT
+	CLR.B   D1
+	TEST_B	D3			;digit counter active?
+	BEQ.S	20$			;no.
+	SUBQ.B	#1,D3			;else, dec digit counter.
+20$
+	SUB.W   D0,D2
+	BCS.S   30$
+	ADDQ.B  #1,D1
+	BRA.S   20$
+30$
+	ADD.W   D0,D2
+	TEST_B  D1
+	BNE.S   40$
+	TEST_B  D3
+	BNE.S	10$			;we always print if digitcount=0
+40$
+	SF      D3			;print from now on.
+	ADD.B   #'0',D1
+	DO	CHAROUT
+	BRA.S   10$
+
+PRTOUT
+	MOVE.B  D2,D1
+	ADD.B   #'0',D1
+	DO	CHAROUT
+	PULL_L 	D0-D2/A0
+	RET
+ 
+DECTAB
+	DC.W 10000,1000,100,10,0
+
+    ENDC	;!wantLongPRTNUM
+
+*------------------------------------------
+    IFD		wantLongPRTNUM
+	
+PRTNUM.SUB
+
+* print a number in decimal.
+* Entry;
+*	D6.L = number to print
+
+*	11-D3.B	= number of digits to print, at least.
+
+	PUSH_L  D0-D2/A0
+	MOVE.L  D6,D2
+	LEA     DECTAB(PC),A0
+10$
+	MOVE.L  (A0)+,D0
+	BEQ.S   PRTOUT
+	CLR.B   D1
+	TEST_B	D3			;digit counter active?
+	BEQ.S	20$			;no.
+	SUBQ.B	#1,D3			;else, dec digit counter.
+20$
+	SUB.L   D0,D2
+	BLO.S   30$
+	ADDQ.B  #1,D1
+	BRA.S   20$
+30$
+	ADD.L   D0,D2
+	TEST_B  D1
+	BNE.S   40$
+	TEST_B  D3
+	BNE.S	10$			;we always print if digitcount=0
+40$
+	SF      D3			;print from now on.
+	ADD.B   #'0',D1
+	DO	CHAROUT
+	BRA.S   10$
+
+PRTOUT
+	MOVE.B  D2,D1
+	ADD.B   #'0',D1
+	DO	CHAROUT
+	PULL_L 	D0-D2/A0
+	RET
+ 
+DECTAB
+	DC.L	1000000000,100000000,10000000,1000000,100000
+	DC.L	10000,1000,100,10,0
+	
+    ENDC	;wantLongPRTNUM
+	
+*------------------------------------------ 
+
+	END

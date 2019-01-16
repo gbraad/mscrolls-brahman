@@ -1,0 +1,100 @@
+**************************************************************
+*
+*	10/27/87
+*	@(#)resrel.elt	1.3
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+
+*--------------------------------
+
+	XDEF	RESREL
+	XREF	DEPTH,RelBuf,RelPnt,MATCHBUF,CLEANUP
+	
+	
+RESREL
+	
+*RESOLVE  RelBuf
+
+	CMP.W   #1,DEPTH(A4)      ;are we in the middle of a relphrase?
+	BGT.S   05$               ;EQ => no, so do normally
+	RET
+
+05$
+	PUSH_L  D0-D3/A0-A1       ;Beware stompings
+
+	MOVEQ   #0,D3             ;count (very) good relations
+
+	LEA     RelBuf-2(A4),A1   ;'noun stack'  (-2 to miss current term.)
+	ADD.W   RelPnt(A4),A1     ;and pointer (well ok, so it's an offset
+	                          ;really
+	MOVE.B  1(A1),D1          ;get relation type required
+10$
+	TEST_W  -(A1)             ;Find start of relevant entry
+	BPL.S   10$
+	ADDQ.L  #2,A1             ;move past terminator and relation type
+20$
+	MOVE.W  (A1)+,D0          ;Get a noun
+	BMI.S   50$               ;end of entry on stack
+	ADDQ.W  #1,D0             ;convert word# to noun#
+	GETINFO        
+	MOVE.B  6(A0),D0          ;get relation type
+	AND.B   D1,D0             ;mask (since insep. n/a compare is no good)
+	BEQ.S   20$               ;EQ => no good, wrong relationship
+
+* now lets see if this noun is related to any of the nouns in MATCHBUF
+
+	MOVE.W  8(A0),D0          ;location noun#
+	SUBQ.W  #1,D0             ;convert to word#
+	LEA     MATCHBUF(A4),A0
+30$
+	MOVE.W  (A0)+,D2          ;Get an entry from MATCHBUF
+	BMI.S   20$               ;MI=> end of matches, try next noun on 'stack'
+	CMP.W   #SECT.NOUN,D2     ;gotta be a noun
+	BNE.S   40$
+	CMP.W   (A0),D0           ;any good?
+	BNE.S   40$
+	BSET    #7,(A0)           ;YES! - flag word# hi bit
+	ADDQ.W  #1,D3             ;count good ones
+40$
+	ADDQ.L  #2,A0             ;next entry in MATCHBUF
+	BRA.S   30$
+
+	
+* ok, lets see where that got us..
+
+50$
+
+	  LEA      MATCHBUF(A4),A0
+60$
+	  MOVE.L   (A0)+,D0
+	  BMI.S    90$
+	  BCHG     #7,-2(A0)         ;CLEANUP wants bitset=> no good
+	  TEST_W   D3
+	  BNE.S    60$
+	  BCLR     #7,-2(A0)         ;if we didnt find ANY matches then do a
+	                             ;normal RESADJ
+	  BRA.S    60$
+
+90$
+	  CALL     CLEANUP           ;lose hi bit set noun# from MATCHBUF
+	  PULL_L   D0-D3/A0-A1
+
+	  LEA      MATCHBUF(A4),A0
+	  MOVEQ    #0,D4             ;Count
+95$
+	  TEST_L   (A0)+
+	  BMI.S    99$
+	  ADDQ.W   #1,D4             ;return D4 = no of matches still left
+	  BRA.S    95$
+99$
+	  RET
+
+
+
+	END

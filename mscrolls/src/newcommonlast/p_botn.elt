@@ -1,0 +1,28 @@
+**************************************************************
+*
+*	10/27/87
+*	@(#)p_botn.elt	1.2
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+
+	XDEF	P.BOTN
+	        
+P.BOTN
+	
+*PRINTS BECAUSE OF (THE NOUN)
+ 
+	MSG     BECOF
+	DOGO	P.TN
+	
+*--------------------------------
+	
+
+
+
+	END

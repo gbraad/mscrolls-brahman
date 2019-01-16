@@ -1,0 +1,33 @@
+**************************************************************
+*
+*	10/27/87
+*	@(#)do_then.elt	1.2
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+
+*--------------------------------
+
+	XDEF	DO.THEN2,DO.THEN
+	XREF	POSWRD,EXTRAPNT,EXTRA,CONJBUF,CONJ
+  
+DO.THEN2
+  
+	MOVE.L  POSWRD(A4),A6
+	SUBQ.L  #1,A6
+  
+DO.THEN
+  
+	MOVE.L  A6,EXTRAPNT(A4)
+	MOVE.W  #1,EXTRA(A4)
+	MOVE.L  CONJBUF(A4),CONJ(A4)
+	RET
+
+
+
+	END

@@ -1,0 +1,130 @@
+***********************************************************
+*
+*	%W%
+*	%G%
+*
+***********************************************************
+
+		SECTION	"ADV",CODE
+
+		include	"equates.i"
+		include	"macros.i"
+		include	"nounequ1.i"
+		include	"scenequ.i"
+
+* possessive pronouns
+
+* Entry:
+*		d6=section no.
+*		d5=word no.
+
+* Exit:		EQ<=>was such a pronoun
+*		IF (EQ) d0=noun#
+
+    IFD	wantPOSSESSIVE_PRONOUNS
+	    XDEF	DOPPRN
+	    XDEF	POSSRES
+
+	    XREF	PRONHIM,PRONHER,OLDBUF
+	    XREF	SECTION_,WORD_
+	    XREF	HERFLAG,IGNORQ
+	    XREF	FNDWRD,TOPNPC
+	    XREF	POSSESS,L.BITRANS,VERB
+	    XREF	EOL,OWNORHAVE
+
+
+DOPPRN
+
+	CMP.B	#SECT.PPRN,D6		;possessive prn?
+	BNE.S	90$			;no, exit
+	CLR.B	HERFLAG(A4)		;refresh flag every time
+	TEST_W	D5			;=my?
+	BNE.S	10$			;no
+	MOVE.W	#NPLAYER,D0		;set possessor as player
+	BRA.S	80$			;exit, as ok
+10$
+	CMP.W	#2,D5			;=her?
+	BNE.S	20$			;no
+	MOVE.W	PRONHER(A4),D0
+	BEQ.S	80$			;fail, just exit
+	MOVE.W	D0,WORD_(A4)		;set-up as last noun parsed
+	SUBQ.W	#1,WORD_(A4)		;adjust to be a raw wordcode
+	MOVE.W	#SECT.NOUN,SECTION_(A4)	;fake as noun
+	ST	HERFLAG(A4)		;need to flag, for ambiguous case
+	BRA.S	85$			;exit as ok.
+20$
+	CMP.W	#1,D5			;his
+	BNE.S	30$
+	MOVE.W	PRONHIM(A4),D0
+	BRA.S	80$			;exit
+30$
+	MOVE.W	OLDBUF(A4),D0		;for their
+80$
+	CMP.W	#1,D0			;makes sense?
+	BHS.S	85$			;ok.
+	SETNE
+	BRA.S	90$			;quit
+85$
+	SETEQ
+90$
+	RET
+*----------------------------------------------------------
+
+
+* Possessive resolve
+* eg. give her handbag ...
+* 
+* Entry:
+*		D0= object that may be possessed
+* Exit:
+*		EQ => possessive construct (yes)
+*		NE => bitransitive construct (no)
+
+POSSRES
+
+	PUSH_L	D4/D7
+	TEST_W	IGNORQ(A4)		;was there an article separator?
+	BPL.S	80$			;yes, exit no
+	CALL	ISBTN			;is the verb bitransitive
+	BEQ.S	90$			;no, exit (yes).
+	CALL	EOL			;anymore sentence?
+	BEQ.S	90$			;yes, exit
+					;now have the case
+					;'give her briefcase'
+	DO	CARRIED			;have you got one?
+	BEQ.S	80$			;yes, exit (no)
+	CALL	OWNORHAVE		;check ownership
+	BEQ.S	90$			;yes, exit (yes)
+80$
+	SETNE
+90$
+	PULL_L	D4/D7
+	RET
+
+*---------------------------------------------------------
+
+ISBTN
+
+* Is the VERB bitransitive
+* same as ISBITRAN but does not set up DATIVE
+
+* Exit:
+*
+*	EQ <=> not bitransitive
+
+	PUSH_L	A0/D0
+	LEA	L.BITRANS(A4),A0		;start of table
+10$
+	MOVE.B	(A0)+,D0
+	BEQ.S	90$				;eo table, fail
+	CMP.B	VERB+1(A4),D0			;same?
+	BNE.S	10$				;no, continue
+	SETNE
+90$
+	PULL_L	A0/D0
+	RET
+
+*----------------------------------------------------------
+
+	ENDC	;wantPOSSESSIVE_PRONOUNS
+	END

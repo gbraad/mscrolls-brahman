@@ -1,0 +1,52 @@
+**************************************************************
+*
+*	10/27/87
+*	@(#)jumpoff.elt	1.2
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"verbequ.i"
+
+WantJumpOFF	SET	FALSE
+
+	IfVerb	JUMP
+WantJumpOFF	SET	TRUE
+	ENDC
+
+	IfVerb	VAULT
+WantJumpOFF	SET	TRUE
+	ENDC
+
+	IFNE	WantJumpOFF
+
+	XDEF	V.JUMPOF
+	XREF	SP.JVTBL,JVTBLEND 
+ 
+V.JUMPOF
+ 
+	DO	R.NOUN
+	LEA     SP.JVTBL(A4),A0
+10$
+	CMP.W   (A0),D0
+	BEQ.S   20$
+	ADDQ.L  #4,A0
+	LEA     JVTBLEND(A4),A1
+	CMP.L   A0,A1
+	BNE.S   10$
+	MSGGO	FUN
+  
+20$
+	MOVE.W  2(A0),D1
+	DO	P.SCN
+	DOGO	DEAD
+
+	ENDC
+
+
+
+	END

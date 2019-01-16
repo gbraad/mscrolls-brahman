@@ -1,0 +1,293 @@
+**************************************************************
+*
+*   %G%
+*   %W%
+*
+**************************************************************
+
+
+    SECTION "ADV",CODE
+
+    include "equates.i"
+    include "macros.i"
+    include "verbequ.i"
+    include "scenequ.i"
+
+    XDEF    NOTOUT,DECODE,DECODE.LAB,NPCCMDPT
+    XDEF    DEC.N,DEC.Nafter
+
+    XREF    INTEXT,INITCOM,ERR4,EXTRA,BRKWCH,STCONJ,AGAIN
+    XREF    EXTRAPNT,GO,DO.SING,SPIEL,PEND2,DIRECT
+    XREF    INBUFF,CONVSE.V,SPEECH,PARVERB,EXTRAFIX,TEMPBUF,NOUNBUF
+    XREF    NEWST,DO.THEN,DO.THEN2,DO.CONJ,MVERB_L,VERB,ADVERB
+    XREF    DoScenery,DSTAND,SUBJECT,STOTXT,DATIVE
+
+*--------------------------------
+* 
+* DECODE - 
+*
+* CONVERTS  INBUFF (ASCII WORDS)
+* 
+* ON EXIT
+*
+* NOUN  = # IN NOUNBUFFER
+* CONJ  = CONJNUM # 
+* ADDNOUN = EXTRA NOUN
+*
+*
+*--------------------------------
+
+DECODE
+ 
+    CLR.L   SUBJECT(A4)
+ 
+    IFNE    YCHEATMORE
+    TEST_W  CHEAT2(A4)
+    BEQ.S   10$
+    MOVE.L  A7,D6
+    CALL    PRTHEX
+10$
+    ENDC
+ 
+    DO  YESERR
+
+    IFNE    BookProtection
+    XREF    PROTECT
+
+    CALL    PROTECT         ;This does the word protection with books
+                    ;this can be moved to anywhere else if
+                    ;it gets yukky.!
+    ENDC
+
+    CALL    INTEXT
+   
+NOTOUT
+ 
+    IFNE  GENERIC
+    XREF    MakeUndoDiff
+*   PRINT   "making diff^"
+*   CALL    MakeUndoDiff
+    ENDC
+
+    CLR.W   ERR4(A4)
+    CALL    INITCOM
+
+    IFEQ    THE_PAWN
+    XREF    DecodeSpecials
+    CALL    DecodeSpecials      ;things that want to tweek parser's
+                    ;view of the world (like NearNPC)
+    ENDC
+
+    CLR.W   EXTRA(A4)
+ 
+DECODE.LAB
+ 
+10$
+ 
+    CLR.B   D3          ;NOUN FLAG
+    DO  GETADJPH
+    TEST_W  BRKWCH(A4)      ;break context- direct which?
+    BEQ.S   15$         ;no- carry on
+    CLR.L   D7          ;zap error.
+15$
+    TEST_B  D7
+    BNE.S   DECODE
+    CMP.B   #SECT.CONJ,D6
+    BEQ STCONJ
+    CMP.B   #SECT.SPEC,D6
+    BNE.S   11$
+    CMP.B   #$07,D5
+    BEQ AGAIN
+    TEST_W  D5          ;AND?
+    BEQ.S   DECODE.LAB
+    CMP.W   #8,D5           ;THEN
+    BEQ.S   DECODE.LAB
+11$
+    CALL    STOTXT
+
+NPCCMDPT
+
+    IFD wantSP.AFTERVERB
+    XREF    SP.AFTERVERB,PROC.EX
+    CALL    SP.AFTERVERB        ;this BETTER not affect much!
+    BEQ.S   01$         ;fine.
+    POPSP               ;the return to screen
+    BRA PROC.EX         ;exit (ie dogo screen)
+01$
+    ENDC    ;wantSP.AFTERVERB
+
+    CMP.B   #SECT.DIR,D6        ;DIRECTION
+    BNE.S   13$
+    TEST_W  D7          ;END?
+    BNE.S   14$         ;NO
+
+    MOVE.L  A6,EXTRAPNT(A4)
+    ST  EXTRA(A4)       ;FLAG
+14$
+    CALL    GO
+    DOGO    SCREEN
+13$
+    CMP.B   #SECT.CONT,D6       ;CONTROL
+    BEQ DO.SING
+    CMP.B   #SECT.VERB,D6
+    BEQ.S   12$
+
+    IFND    wantNOCONVERSATION
+    XREF    CONVSTART
+    CALL    CONVSTART       ;must it be conversation anyway?
+    BEQ SPIEL           ;yes,
+    ENDC    ;!wantNOCONVERSATION
+
+    TEST_W  PEND2(A4)
+    BMI DIRECT
+    MOVE.W  PEND2(A4),D5
+    LEA INBUFF(PC),A6
+    BRA STCONJ
+12$
+    MOVE.W  D5,VERB(A4)
+    CALL    CONVSE.V        ;SAY GROUP
+    BEQ SPEECH
+    CALL    PARVERB         ;PARSE A VERB
+    CMP.W   #1,D7
+    BEQ EXTRAFIX        ;ENMD
+*   CMP.W   #2,D7           ;printed error?
+*   BEQ EXTRAFIX
+*   ;this was once a bugfix now it is a bug (or is it???)
+DEC.N
+
+    IFD wantGLOBALIO
+    XREF    DirectOrIndirect
+    CLR.B   DirectOrIndirect(A4)    ;set to direct object (=0)
+    ENDC    ;wantGLOBALIO
+
+    MOVEQ   #-1,D6          ;INCASE OF E O S
+    DO  MNPH    
+    
+DEC.Nafter              ;we continue here for pend verbs
+    
+    TEST_L  DATIVE(A4)
+    BNE EXTRAFIX
+ 
+    LEA TEMPBUF(PC),A0
+    LEA NOUNBUF(PC),A1
+    
+ 
+10$
+    MOVE.W  (A0)+,(A1)+
+    BNE.S   10$
+11$
+    CMP.B   #1,D7           ;MATCH NOT FOUND.
+    BHI NEWST 
+    CMP.B   #15,D6          ;NOT
+    BNE.S   20$
+    TEST_W  D5
+    BEQ DECODE
+20$
+    CMP.B   #SECT.SPEC,D6
+    BNE.S   30$         ;NOT SPECIAL
+    CMP.B   #$08,D5
+    BEQ DO.THEN         ;PROCESS MULTIPLE COMMAND
+    TEST_W  D3          ;hanging 'and' ?
+    BEQ.S   30$         ;yes,
+    TEST_W  d7          ;can be end?
+    BNE.S   30$
+    TEST_W  D5          ;and?
+    BEQ DO.THEN         ;yes, multiple command
+30$
+    CMP.B   #SECT.CONJ,D6  
+    BEQ DO.CONJ         ;MEETS CONJUNCTION  
+    CMP.B   #SECT.VERB,D6       ;VERB
+    BNE.S   33$         ;nope
+    CMP.W   #VNEXIT,D5      ;out? (get key out)
+    BNE     DO.THEN2        ;no, it is an ordinary verb
+    TEST_W  D3          ;get key and out?
+    BEQ     DO.THEN2        ;yes, proc as 2 commands
+    BRA.S   34$         ;next word & continue
+33$
+    CMP.B   #SECT.DIR,D6
+    BNE.S   BadContext
+    
+    IFD wantRADJUNCTS
+    XREF    DO.THEN
+    CALL    DO.RADJUNCT     ;trailing directions
+    BEQ DO.THEN         ;is the next word this time
+    ENDC    ;wantRADJUNCTS
+    
+    CMP.B   #8,D5
+    BLT DO.THEN2        ;IF A SENSIBLE DIRECTION
+    CMP.W   #$FFFF,ADVERB(A4)   ;no adj? (NB: can't BMI)
+    BNE DO.THEN2        ;yes, an adj, assume a new command
+    TEST_W  D3          ;cant be a PUT X DOWN if AND exists  
+    BEQ DO.THEN
+    LEA MVERB_L(PC),A1
+32$
+    MOVE.B  (A1)+,D1        ;GET A VERB
+    CMP.B   #-1,D1          ;TERM?
+    BEQ DO.THEN2        ;NOT IN LIST  
+    CMP.B   VERB+1(A4),D1       ;SAME?
+    BNE.S   32$         ;NO, TRY ANOTHER
+    BSET    #15,D5          ;SET HI-BIT
+    MOVE.W  D5,ADVERB(A4)       ;SET AS PART OF VERB 
+34$
+    DO  GETWRD
+    TEST_W  D7          ;END?
+    BEQ 11$
+
+BadContext
+
+    TEST_W  D7          ;E O S
+    BNE EXTRAFIX
+
+    IFEQ    THE_PAWN
+    CMP.W   #SECT.SCEN,D6       ;scenary noun?
+    BEQ DoScenery
+    ENDC
+
+    CALL    DSTAND
+    MSG CTEXT
+    DOGO    DECODE
+
+*---------------------------------------------
+
+    IFD wantRADJUNCTS
+
+    XDEF    DO.RADJUNCT
+    XREF    RADJUNCT.TBL,VERB,ADVERB
+DO.RADJUNCT
+
+* Handle right adjucntions but only allow then with certain verbs
+* This wil minimise any ambiguites.
+* eg. paddle canoe south
+* eg. push the barrow north
+
+* Entry:
+* this routine is called directly following a major noun phrase
+* when there is a direction encountered.
+* (d5,d6) set up as that direction.
+
+* Exit
+* if succeeds, sets ADVERB for the verbs to examine
+* return status:    EQ<=> was a right adjunct.
+
+    PUSH_L  D0/A0
+    LEA RADJUNCT.TBL(A4),A0
+    MOVEQ   #0,D0           ;clear for word compare
+10$
+    MOVE.B  (A0)+,D0        ;get a verb
+    BEQ.S   80$         ;fail, exit
+                    ;NB: look cant be in the list
+    CMP.W   VERB(A4),D0     ;this one?
+    BNE.S   10$         ;no, look in rest of list
+    BSET    #15,D5          ;hi-bit as flag
+    MOVE.W  D5,ADVERB(A4)       ;acts as a verb modifier
+    SETNE
+80$
+    EOR #4,CCR          ;invert status
+90$
+    PULL_L  D0/A0           ;return registers
+    RET
+*---------------------------------------------
+    ENDC;   wantRADJUNCTS
+
+
+    END

@@ -1,0 +1,146 @@
+**************************************************************
+*
+*   6/13/89
+*   @(#)screen.elt  2.6
+*
+**************************************************************
+
+
+    SECTION "ADV",CODE
+
+    include "equates.i"
+    include "macros.i"
+    include "verbequ.i"
+    include "scenequ.i"
+    include "linemacros.i"
+
+*--------------------------------
+*
+* REALBAD   -  HMM IF THE PROG DOES AN
+*              EXTRA RET WE HAD BETTER
+*              STOP IT CRASHING
+*
+*  SO FAR ONLY (!?!) FRED ABOUT .....     fixed this! (do I leave fudge in?)
+*  SEEMS TO NEED THIS!
+*
+*--------------------------------
+
+    XDEF    REALBAD,SCREEN,SC70
+
+    XREF    BIOSA4,DIED,DO.DEATH,ENERGY,CLOCK,EVALWHT,SP.LIGHT,SCRPNT
+    XREF    P.Refresh,P.LOC,SPECIALS,GameFinished,DO.FINAL,EXTRA
+    XREF    EXTRAPNT,NOTOUT,PROCESS,LINKADDRESS
+ 
+REALBAD
+ 
+*       LEA     BIOS-$20(PC),A7    ;PUT STACK @ SENSIBLE PLACE
+*       PEA     REALBAD(PC)
+ 
+SCREEN
+
+    MOVE.L  A7,LINKADDRESS(A4)
+
+    MOVE.W  #InfoAtScreen,-(A7)
+    InfoTrap    
+    
+    IFNE  VAX&YCHEAT
+    CMP.L   #$1F400,A7
+    BEQ.S   05$
+    PRINT   <'Waaaa - unhealthy sp!!!!!!^'>
+05$
+    ENDC
+ 
+    CALL    BIOSA4        ;SO THAT  *32698G WONT KILL MACHINE! 
+  
+    DO  YESERR             ;INCASE FROZEN
+    MSG     LINE
+ 
+    TEST_B  DIED(A4)           ;DID WE DIE LAST MOVE?
+    BNE     DO.DEATH           ;YES - PROCESS DEATH
+    TEST_B  GameFinished(A4)   ;or is the game over?
+    BNE DO.FINAL       ;yes, too bad.
+  
+    SUBQ.W  #1,ENERGY(A4)      ;LIMIT ON MOVES
+    ADDQ.W  #1,CLOCK(A4)       ;MOVE TIMER    
+    CALL    EVALWHT
+    DO  R.NOUN
+    GETINFO        
+    CALL    SP.LIGHT           ;! - CALC 'LIGHT' FOR THIS GO
+
+    IFEQ  THE_PAWN
+    XREF    SPECIALS_Before
+    CALL    SPECIALS_Before
+    ENDC
+
+    TEST_W  SCRPNT(A4)      ;CHANGED ROOM?
+    BEQ.S   10$         ;nope, only do top line
+    CALL    P.Refresh
+    BRA.S   NOTNEWROOM
+10$
+    DO  R.NOUN
+    CALL    P.LOC
+
+NOTNEWROOM
+
+    DO  R.NOUN          ;room# ->D0
+    GETINFO             ;   ->A0
+
+    IFNE    Graphics
+    XREF    PICTURES
+    
+    IFD     wantLoadToRefresh
+    XREF    DontLoadPicture
+    TEST_B  DontLoadPicture(A4)     ;not yet....
+    BNE.S   04$             ;skip, then
+    ENDC    ;wantLoadToRefresh
+
+    CALL    PICTURES
+04$
+    ENDC    ;Graphics
+        
+
+    MSG     LINE
+    CALL    SPECIALS           ;do timers, misc specials
+    MSG     LINE
+    TEST_B  DIED(A4)           ;SPECIALS KILLED U?
+    BNE     DO.DEATH           ;YES - GO SUSS HOW DEAD
+    TEST_B  GameFinished(A4)    ; Is the game over?
+    BNE DO.FINAL
+
+    IFD     wantSecondP.Refresh
+    TEST_W  SCRPNT(A4)          ;do we want to refesh?
+    BEQ.S   05$             ;no.
+    CALL    P.Refresh           ;again (oh no).
+05$
+    ENDC    ;wantSecondP.Refresh
+
+    IFNE    YCHEATMORE
+    XREF    CHEAT2,PRTHEX
+
+    TEST_W  CHEAT2(A4)         ;'DEBUG BAND' info
+    BEQ.S   10$
+    MSG     LINE
+    MOVE.L  A7,D6              ;print current stack pointer, should ALWAYS
+    CALL    PRTHEX             ;be same through here
+    MSG     LINE
+10$
+    ENDC
+
+    ;; this should be after the check for EXTRA. but it doesn't work!
+    MOVE.W  #InfoAtCommand,-(A7)
+    InfoTrap
+    
+    TEST_W  EXTRA(A4)          ;PENDING COMMAND?
+    BEQ.S   SC70               ;EQ => no
+    MOVE.L  EXTRAPNT(A4),A6    ;Get addr of current posn in command line
+    CALL    NOTOUT             ;Entry into DECODE after new cmd line fetch
+    BRA     PROCESS            ;Process a single verb
+
+SC70
+    DO  DECODE             ;Get new command line and parse first verb
+    BRA     PROCESS            ;process the verb
+
+
+
+
+    END

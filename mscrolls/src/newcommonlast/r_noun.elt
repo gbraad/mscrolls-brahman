@@ -1,0 +1,100 @@
+**************************************************************
+*
+*	%G%
+*	%W%
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"roomequ.i"
+	include	"scenequ.i"
+
+*--------------------------------
+*
+* R.NOUN - GIVES NOUN NO. OF
+*          CURRENT ROOM
+* (ROOM# IN D2 IF R.NOUN2)
+* 
+* THIS ROUTINE IS NOT QUICK (CALLS GETNOUNS)
+* AND MIGHT BE IMPROVED SO AS IT REMEMBERS THE
+* LAST ROOM NO. U ASKED FOR, SO AS IF U ASK FOR
+* IF AGAIN IT DOESNT HAVE TO THINK ABOUT IT
+*
+*--------------------------------
+
+	XDEF	R.NOUN,R.NOUN2
+	XREF	ROOM,RNOUNRES,RNOUNLST
+ 
+R.NOUN
+  
+	MOVE.W  ROOM(A4),D2
+ 
+R.NOUN2
+
+    IFND	wantRoomsFirst
+	CMP.W   RNOUNLST(A4),D2    ; Is it the same as the last time..?
+	BEQ     R.NOUN.EASY        ; Yes, so its an easy one
+
+	MOVE.W  D2,RNOUNLST(A4)    ; save which room we were scanning for
+	MOVEQ   #1,D6              ;SO GETNOUNS IGNORES VALID
+	PUSH_L  D1/D5/A0/A1
+	MOVEQ   #8,D1   
+	MOVEQ   #1,D5  
+	DO	GETNOUN2
+10$
+	MOVE.W  (A1)+,D0
+	BEQ.S   50$
+	GETINFO
+	TST_ISAROOM				;ROOM?
+	BEQ.S   10$
+	PULL_L  D1/D5/A0/A1
+	MOVE.W  D0,RNOUNRES(A4)
+	RET
+50$
+      IFEQ    PROD
+	PRINT   <'NO ROOM'>
+      ENDC
+  
+	PULL_L  D1/D5/A0/A1
+
+    IFEQ	PROD
+	XREF	DERR
+	BRA     DERR
+    ENDC	;!PROD
+
+    IFNE	PROD
+	RET
+    ENDC	;PROD
+
+R.NOUN.EASY
+
+	MOVE.W  RNOUNRES(A4),D0     ;Just re-fetch the last result
+	RET
+	
+    
+    ENDC	;!wantRoomsFirst
+
+*------------------------------------------ 
+    IFD		wantRoomsFirst
+    IFNE	YCHEAT
+	CMP.W	#NROOMS,D2			;nrooms = max_room +1
+	BLT.S	10$				;is ok.
+	PRINT	<'NO ROOM'>
+10$
+    ENDC	;YCHEAT
+	MOVE.W	D2,D0				;else return in D0
+	RET
+    ENDC	;wantRoomsFirst
+
+	
+
+*------------------------------------------ 
+
+	END
+
+
+

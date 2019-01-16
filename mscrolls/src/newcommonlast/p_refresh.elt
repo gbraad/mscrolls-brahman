@@ -1,0 +1,350 @@
+**************************************************************
+*
+*   %G%
+*   %W%
+*
+**************************************************************
+
+
+    SECTION "ADV",CODE
+
+    include "equates.i"
+    include "macros.i"
+    include "scenequ.i"
+
+
+*************************************************************
+*
+* ForceRefresh - forces a full description (if u can see)
+*               of ROOM
+*
+* includes all-sorts of bits like lists of npcs/items
+*
+
+    XDEF    ForceRefresh
+    XREF    SCRPNT
+
+ForceRefresh
+
+    MOVE.W  #2,SCRPNT(A4)       ;fake a 'look'
+*   BRA R.Refresh
+    
+ 
+*--------------------------------
+*
+* P.Refresh - refreshes the view the player is getting
+*
+* Calls P.LOC/PICTURES/P.DESC/etc
+*
+* This used to live in SCREEN, but can now be used from anywhere
+*
+* WARNING - this seems (!?!) to step on VERB, leaving it as FFFF
+*       this may cause some embarasment (a la MAKELOCAL!)
+*
+    XDEF    P.Refresh
+    XREF    P.INIT,DNOUNBUF,KILLNOTNPC,ONLYREL.SUB,ISANYREL.SUB
+    XREF    KILLNPC,SEATED,FINNPC,RIDPRT,ROOM,FINRELNPC
+    XREF    FMSG,OUTMODE,SATMSG,P.LOC,LIGHT,KILLPSEUDO
+    XREF    SATOBJLOC,P.Description
+
+P.Refresh
+
+    PUSH_L  D0-D7/A0-A6     ;save registers
+
+    TEST_W  LIGHT(A4)       ;Can people see?
+    BNE.S   10$         ;NE=>yes
+    MSG I2DARK          ;EQ=> too dark to see
+    MSG LINE
+    BRA DoInits         ;miss print room desc etc
+10$
+    DO  R.NOUN          ;get noun# of room
+    CALL    P.LOC           ;top line
+    
+    GETINFO     
+
+    MOVE.W  D1,-(A7)
+    MOVEQ   #-1,D1          ;now, to FOD capital call CHAROUT with
+    DO  CHAROUT         ;D1 = -1
+    MOVE.W  (A7)+,D1
+
+    IFNE    (YCHEAT&VAX)
+    IFD     wantMOBILES
+    XREF    PrintTime2
+    CALL    PrintTime2
+    ENDC    ;wantMOBILES
+    ENDC    ;(YCHEAT&VAX)
+
+    IFD     wantToplineModifier
+    CALL    ToplineModifier
+    ENDC
+
+    IFD     wantCapitaliseRooms
+    XREF    Capitalise
+    ST  Capitalise(A4)      ;so all bits of room name start
+    ENDC                ;with a capital
+
+    DO  P.NOUN
+
+    IFD     wantCapitaliseRooms
+    SF  Capitalise(A4)
+    ENDC
+
+   IFNE Graphics&C64
+
+    XREF    CAMEOS
+    CALL    CAMEOS          ;NB takes D0/A0 as current room!
+                    ;and wants to look at D1 !! 
+                    ;sneeky call to PICTURES
+   ENDC
+
+    CALL    SATMSG
+
+    CMP.W   #2,SCRPNT(A4)       ;did we do a look last go?
+    BEQ.S   30$         ;EQ=> yes so force room desc etc.
+
+    BSET    #4,4(A0)        ;been here before (explored bit)
+    BEQ.S   20$         ;No, do room desc unless BRIEF mode
+    CMP.B   #1,OUTMODE(A4)      ;0=NORMAL
+    BNE.S   40$         ;1=VERBOSE
+
+20$     
+    CMP.B   #2,OUTMODE(A4)      ;2=BRIEF
+    BEQ.S   40$
+
+30$
+
+    CALL    P.Description
+
+    IFD wantSP.P.Refresh
+    XREF    SP.P.Refresh
+    CALL    SP.P.Refresh
+    ENDC    ;wantSP.P.Refresh
+
+40$
+
+    CALL    FINRELNPC
+
+    IFNE    YCHEAT          ;If able to be in REAL DB mode
+    XREF    CHEAT
+    TEST_W  CHEAT(A4)       ;and in it
+    BNE.S   50$         ;then do all the (invis) junk anyhow
+    ENDC
+
+    IFNE    THE_PAWN!YCHEAT
+    XREF    SUSSINV,USER.DB
+    TEST_W  USER.DB(A4)     ;THEY WON & 'DBING'?
+    BEQ.S   60$         ;EQ => no, don't do (invis) stuff
+50$
+    CALL    SUSSINV         ;Print a (list) of invis (related) objects
+    ENDC
+    
+60$
+    MOVE.W  ROOM(A4),D2     ;get current room no.
+    TEST_W  SEATED(A4)      ;are we all sitting comfortably?
+    BEQ.S   ListOBJ         ;OK, we're no (eq)
+    BSET    #1,RIDPRT(A4)       ;SET AS DONE
+    BNE DoInits         ;ALREADY, SKIP IT
+    CALL    SATOBJLOC       ;seated objects local?
+    IFND    attribute_SINGLESEAT
+    BNE DoInits         ;no
+    ENDC    ;!attribute_SINGLESEAT
+    
+    IFD     attribute_SINGLESEAT
+    BEQ.S   70$             ;local, hence generate.
+    MOVE.W  SEATED(A4),-(A7)        ;the target, since it pops.
+    BRA ListNPCs        ;since they  can be mentioned.
+70$
+    ENDC    ;attribute_SINGLESEAT
+
+
+    MOVE.W  SEATED(A4),D2
+
+* First list the objects in the room (simply in room)
+
+ListOBJ
+
+    MSG LINE
+    IFD wantCompleteNPCINRM
+    CALL    FINNPC          ;has to do GETRELN
+    ENDC    ;wantCompleteNPCINRM
+
+    IFD wantLONGLOOK
+    MOVE.W  D2,-(A7)        ;save buffer target
+    ENDC    ;wantLONGLOOK
+
+    DO  GETRELN         ;CREATE BUFFER
+
+    IFD wantCompleteNPCINRM
+    XREF    ONLYREL.SUB
+    CLR.W   D1          ;simple only
+    CALL    ONLYREL.SUB     ;zap rest.
+    ENDC    ;wantCompleteNPCINRM
+
+    IFND    wantCompleteNPCINRM
+    CALL    FINNPC          ;separate listsofNPC's & ordinary nouns
+    ENDC    ;!wantCompleteNPCINRM
+
+    CALL    KILLPSEUDO      ;don't list pseudo nouns
+    TEST_W  SEATED(A4)
+    BNE.S   20$         ;do not supress NPC list if riding
+    CALL    KILLNPC         ;loose NPC's from list
+10$
+    MOVE.W  (A1)+,D0
+    BMI.S   10$         ;HIGH BIT = NOT REALLY THERE
+    BEQ.S   ListNPCs        ;0 = END OF BUFFER
+    BRA.S   30$
+20$
+    IFD wantLONGLOOK
+    CLR.W   (A7)            ;blank it
+    ENDC    ;wantLONGLOOK
+    CALL    GenSeatMask     ;->d1
+    CALL    ONLYREL.SUB     ;Remove RELATED objects from list
+    CALL    ISANYREL.SUB
+    TEST_W  D0          ;any?
+    BEQ.S   ListNPCs        ;if none related forget list entirely
+30$
+
+    IFD wantLONGLOOK
+    LEA DNOUNBUF(A4),A0
+    MOVE.L  A0,A1
+    XREF    P.LongList
+    CALL    P.LongList
+    ENDC    ;wantLONGLOOK
+
+    IFND    wantLONGLOOK
+    GETINFO     
+    MSG THERE
+    DO  ISARE           ;  } print list of non-NPC nouns
+    LEA DNOUNBUF(A4),A0
+    DO  P.LIST  
+    MSG HERE
+    ENDC    ;!wantLONGLOOK
+
+
+* Now list the NPCS hanging around
+
+ListNPCs
+
+    IFD wantLONGLOOK
+    MOVE.W  (A7)+,D2        ;regenerate?
+    
+    IFND    attribute_SINGLESEAT
+    BEQ.S   01$         ;no
+    DO  GETRELN         ;yes go for it
+01$
+    ENDC    ;!attribute_SINGLESEAT
+    
+    ENDC    ;wantLONGLOOK
+    
+    IFD attribute_SINGLESEAT
+    XREF    GenNpcsInRoom
+    CALL    GenNpcsInRoom       ;->A1
+    ENDC    ;attribute_SINGLESEAT
+
+
+    IFND    attribute_SINGLESEAT
+    LEA DNOUNBUF(A4),A1
+    CALL    KILLNOTNPC
+    ENDC    ;!attribute_SINGLESEAT
+    
+    IFD     wantPseudoNpcs
+    CALL    KILLPSEUDO
+    ENDC    ;wantPseudoNpcs
+
+
+    IFD wantMOBILES
+    XREF    RemoveActiveNpcs
+    CALL    RemoveActiveNpcs
+    ENDC    ;wantMOBILES
+    
+    IFD wantHackNpcList
+    XREF    HackNpcList
+    CALL    HackNpcList
+    ENDC    ;wantHackNpcList
+
+10$
+    MOVE.W  (A1)+,D0
+    BMI.S   10$
+    BEQ.S   DoInits
+    IFD     attribute_SINGLESEAT
+    XREF    NPCINRM
+    TEST_W  NPCINRM(A4)         ;instantiated yet?
+    BPL.S   1001$               ;yes, ok
+    MOVE.W  D0,NPCINRM(A4)          ;else this wil do.
+1001$
+    ENDC    ;attribute_SINGLESEAT
+    
+
+    IFD wantLONGLOOK
+    XREF    P.LongList
+    LEA DNOUNBUF(A4),A0
+    MOVE.L  A0,A1
+    CALL    P.LongList
+    ENDC    ;wantLONGLOOK
+
+    IFND    wantLONGLOOK
+    LEA DNOUNBUF(A4),A0
+    DO  P.LIST  
+    GETINFO 
+    TST_PLURAL              ;
+    BNE.S   20$
+    TEST_B  D6
+    BNE.S   20$             ;   } print list of NPC's in room
+    MSG IS
+    BRA.S   30$
+20$
+    MSG ARE
+30$
+    MSG HERE
+    ENDC    ;!wantLONGLOOK
+
+* do the initial states, fod flag forcing description (SCRPNT)
+
+DoInits
+
+    CLR.W   SCRPNT(A4)      ;Only give one description of room!
+    CALL    P.INIT          ;do initial state descriptions
+
+    PULL_L  D0-D7/A0-A6     ;recover
+    RET
+*--------------------------------------
+
+    XDEF    GenSeatMask
+GenSeatMask
+
+    XREF    SEATED_RELATOR
+
+    MOVE.W  SEATED_RELATOR(A4),D1   ;get relation to object
+    CMP.W   #IN,D1          ;in it?
+    BNE.S   10$         ;no
+    MOVE.B  #1<<5,D1        ;contained
+    RET
+10$
+    MOVE.B  #1,D1           ;just related by default
+    RET
+
+*--------------------------------------
+
+    IFD   wantToplineModifier
+
+    XDEF    ToplineModifier
+    XREF    TBL.TOPLINE
+
+ToplineModifier
+
+    PUSH_L  D1/A0
+    GETINFO
+    
+    MOVEQ   #0,D1           ;kill high bits
+    MOVE.B  1(A0),D1        ;0 => normal room
+    BEQ.S   90$
+    LEA TBL.TOPLINE(A4),A0
+    LSL.W   #1,D1
+    MOVE.W  -2(A0,D1.W),D1
+    DO  P.SCN
+90$
+    PULL_L  D1/A0
+    RET
+
+    ENDC
+    END

@@ -1,0 +1,233 @@
+**************************************************************
+*
+*   7/17/89
+*   @(#)gngrp.elt   2.3
+*
+**************************************************************
+
+
+    SECTION "ADV",CODE
+
+
+    include "equates.i"
+    include "macros.i"
+    include "verbequ.i"
+    include "scenequ.i"
+    
+*--------------------------------
+*
+* GET NOUN GROUP
+*
+* NOUN = POINTER TO INPUT BUFFER
+*   D3 = FLAG
+*   D7 = EXIT FLAGS
+*   
+*   0 = OK, CONTINUE
+*   1 = END OF SENTENCE
+*   2 = ERROR, MSG DONE
+*
+*--------------------------------
+
+    XDEF    GNGRP,GNG1,GNG2,EOL
+
+    XREF    NOUN,GNGTEMP,WRDPNT,BICHK,DO.ALL,DO.PRON,DO.CONTE
+    XREF    ISBITRAN,MULT.WRD,PERSON,ERR4,WSYN2
+ 
+ 
+GNGRP
+    DO  CLRADJ          ;kill pending adjectives
+    MOVE.W  #0,NOUN(A4)     ;no. of nouns in this noun group
+    ST  GNGTEMP(A4)     ;NULL
+GNG1
+    CLR.W   D3          ;'AND' FLAG
+GNG2
+    MOVE.L  A6,WRDPNT(A4)       ;UPDATE
+    DO  GETADJPH
+    TEST_W  D7
+    BNE.S   90$         ;EXIT
+    CMP.B   #SECT.SPEC,D6       ;SPEC
+    BNE.S   10$
+    TEST_W  D5          ;AND?
+    BEQ.S   GNG1            ;LTS NOT WORRY ABOUT TOO MANY..
+    CMP.W   #$8,D5          ;= THEN?
+    BHS.S   01$         ;YES = MISS BITRANS TEST
+    CALL    BICHK           ;TEST BITRANS IF 'SPECIAL' IS A NOUN
+*                   ;GROUP EG IT,THEM,ALL... (1-6)
+01$
+    CMP.B   #2,D5           ;ALL?
+    BLS DO.ALL          ;YES
+    CMP.B   #6,D5           ;PRON
+    BLS DO.PRON
+    CMP.W   #$A,D5          ;CONT?
+    BEQ DO.CONTE
+13$
+    CLR.W   D7          ;OK
+90$
+    RET
+10$
+
+    IFD   wantMULTSpreferedtoNOUNS
+    CMP.W   #SECT.MULT,D6       ;MULTIPLE
+    BNE.S   19$
+    CALL    BICHK
+    BRA MULT.WRD
+19$
+    ENDC
+    
+    CMP.W   #SECT.NOUN,D6       ;NOUN?
+    BNE.S   12$
+
+    TEST_W  D3          ;AND FLAG?
+    BEQ.S   21$
+    CMP.W   GNGTEMP(A4),D5      ;SAME AS B4?
+    BEQ.S   GNG2
+    CALL    ISBITRAN        ;BITRANSITIVE?
+    BEQ WSYN2           ;NOT, THUS ERROR
+21$
+    MOVE.W  D5,GNGTEMP(A4)      ;STO
+    ADDQ.W  #1,D5
+    DO  INCNOUN2
+    BRA.S   GNG2
+12$
+
+    IFND  wantMULTSpreferedtoNOUNS
+    CMP.W   #SECT.MULT,D6       ;MULTIPLE
+    BNE.S   19$
+    CALL    BICHK
+    BRA MULT.WRD
+19$
+    ENDC
+    
+    CMP.W   #SECT.YOU,D6        ;YOU?
+    BNE.S   14$
+    MOVEQ   #1,D5           ;SECOND PERSON
+    BRA.S   16$         ;DUMY
+14$
+    CMP.W   #SECT.VERB,D6
+    BNE.S   20$
+    CALL    NOUNREALLY      ;resolve verb-noun ambiguity
+    BEQ.S   21$         ;go back to nouncase
+    CMP.B   #1,D7           ;what happened?
+    BEQ 13$         ;eol or verb, break anyway
+    BHI 90$         ;exit
+    CMP.W   #VNINVENTORY,D5     ;I (SPECIAL CASE)
+    BNE.S   13$         ;NO, FAIL
+    MOVEQ   #0,D5           ;1ST PERSON
+16$
+    CMP.W   #2,PERSON(A4)       ;ALREADY?
+    BNE.S   17$         ;FAIL, DONE ALREADY
+    MOVE.W  D5,PERSON(A4)
+17$
+    
+    TEST_W  ERR4(A4)
+    BNE.S   18$         ;I IS TREATED AS A NOUN IN THIS CONTEXT
+    BRA.S   13$         ;SET TO FAIL
+20$
+    CMP.B   #SECT.NOT,D6        ;BUT NOT...
+    BNE.S   13$         ;NO, FAIL
+    BRA GNG1            ;SKIP WRD, CLR SYNTAX
+18$
+    
+    CLR.W   D5
+    DO  INCNOUN2        ;DUMMY
+    BRA GNG2
+
+*---------------------------------------------------
+
+EOL
+    XREF    FNDWRD
+
+* detect end of sentence.
+*
+* Exit
+*       EQ <=> more sentence
+
+    PUSH_L  D0/D7/A6        ;save relevent reg.
+    DO  FNDWRD          ;to next word if Exists
+    TEST_W  D7          ;end?
+    PULL_L  D0/D7/A6        ;get back registers
+    RET
+
+*----------------------------------------------------------
+
+    XREF    MATCHBUF,GSILENT,POSWRD
+    XREF    VerbNODOBJ
+NOUNREALLY
+
+* find out whether a presuposed verb is really a noun in this
+* context
+*
+* eg.   close case and lock
+*   close case and lock it  
+*   close case and lock, bottle
+
+* Exit
+*   EQ<=>is a verb
+*   NE=>(d6,d5) set to the noun
+
+
+    PUSH_L  D0-D4/A0
+    CALL    VerbNODOBJ      ;is the verb of no dobj type?
+    BEQ.S   50$         ;yes, then we have a new verb
+    LEA MATCHBUF(A4),A0     ;buffer of possibilities
+    MOVE.L  POSWRD(A4),D3       ;save pointer to vague word
+    CLR.W   D4          ;use as a nonlocal noun store
+10$
+    MOVE.L  (A0)+,D0        ;get entry
+    BMI.S   25$         ;end, definite verb or error noun
+    SWAP    D0
+    CMP.B   #SECT.NOUN,D0       ;found a noun as well?
+    BNE.S   10$         ;next
+    SWAP    D0
+    IFD     wantCantSeeFirstNoun
+    TEST_W  D4          ;have one already (we want 1st)?
+    BNE.S   11$
+    ENDC    ;wantCantSeeFirstNoun
+
+    MOVE.W  D0,D4           ;save possible, for error
+11$
+    DO  VALID.WO        ;choose one that is local!
+    BNE.S   10$         ;else ignor.
+    MOVE.W  D5,-(A7)
+    MOVE.W  D6,-(A7)        ;store old result
+    PUSH_L  D0/D3/A6
+    CALL    GSILENT         ;have to look ahead.
+    PULL_L  D0/D3/A6
+    MOVE.W  (A7)+,D2        
+    MOVE.W  (A7)+,D1        ;retrive old value in (d1,d2)
+    CMP.B   #1,D7           ;error?
+    BEQ.S   20$         ;eol, treat as a noun
+    BHI.S   50$         ;error msg, exit
+    CMP.W   #SECT.SPEC,D6       ;we will test for 'and'
+    BNE.S   15$         ;no, treat as verb
+    TEST_W  D5          ;='and'?
+    BEQ.S   20$         ;yes, is a noun
+15$
+    CMP.B   #SECT.CONJ,D6       ;preposition?
+    BNE.S   40$         ;no is a verb
+20$
+    MOVE.W  #SECT.NOUN,D6       ;make it a noun
+    MOVE.W  D0,D5           ;restore word number
+    MOVEQ   #0,D7           ;clear code & seteq
+    BRA.S   90$         ;and exit
+25$
+    TEST_W  D4          ;do we have a noun, but not local?
+    BEQ.S   50$         ;no, then exit as a verb
+    MOVE.W  D4,D0           ;there was a noun but not local
+    BRA.S   20$         ;set to this rather than a verb
+                    ;eg. look phone, when not local
+                    ;treats phone as a NOUN still
+40$
+    MOVE.W  D1,D5
+    MOVE.W  D2,D6           ;restore old pair
+*   MOVE.L  WRDPNT(A4),POSWRD(A4)   ;I don't know why this worked?? (hugh)
+    MOVE.L  D3,POSWRD(A4)       ;restore old pointer
+                    ;exit wi word already got
+    MOVEQ   #1,D7           ;exit code
+50$
+    SETNE               ;flag as failed.
+90$
+    PULL_L  D0-D4/A0        ;retreive registers
+    RET
+
+    END

@@ -1,0 +1,56 @@
+**************************************************************
+*
+*	%G%
+*	%W%
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"scenequ.i"
+
+
+*--------------------------------
+*
+* DBS - PRINTS A DO BE SERIOUS COMMENT
+*
+* IF THIS IS NOT THE FIRST TIME ITS
+* BEEN CALLED OF LATE THEN IT PRINTS NOUN-COMMENT
+*
+*--------------------------------
+
+	XDEF	DBS,OK
+	XREF	DBSFLG,P.NODO
+ 
+DBS
+
+	TEST_W  DBSFLG(A4)
+	BEQ.S   10$
+	DO	P.NOUN
+	PRINT   <' - '>
+10$
+	CALL    P.NODO
+	ADD.W   #1,DBSFLG(A4)
+	MSGGO   LINE 
+  
+*--------------------------------
+*
+* OK - THIS IS AN ANCIENT ROUTINE
+*      WHICH IS ONLY HERE DUE TO 
+*      HISTORIC INTEREST
+* until today! (11/3/88)
+* is called from untie, to prevent a null response.
+*
+*--------------------------------
+  
+OK
+	PRINT   <'ok. '>
+	RET
+
+
+
+	END

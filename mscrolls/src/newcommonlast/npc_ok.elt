@@ -1,0 +1,44 @@
+**************************************************************
+*
+*	10/27/87
+*	@(#)npc_ok.elt	1.2
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+
+	
+	XDEF	NPC.OK
+
+NPC.OK
+	
+*DETERMINE WHETHER NPC IS CONSCIOUS
+*ENTRY:
+*D0,A0 NPC INFO
+*EXIT:
+*EQ = OK
+*NE = NOT OK
+	
+	PUSH_L  D1/A3
+	TST_DEAD				;DEAD
+	BNE.S   99$                ;EXIT
+	DO	GETNPC	           ;GETDATA
+	MOVE.B  2(A3),D1
+	AND.B   #$F0,D1            ;JUST HI-NIBLE
+	CMP.B   #$50,D1            ;UNCON
+	BEQ.S   98$                ;NO GOOD
+	CMP.B   #$40,D1            ;ALSEEP
+98$
+	EOR     #4,CCR             ;INVERT
+99$
+	PULL_L  D1/A3
+	RET
+
+
+
+
+	END

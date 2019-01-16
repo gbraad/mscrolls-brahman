@@ -1,0 +1,294 @@
+**************************************************************
+*
+*	3/22/89
+*	@(#)yesdos.elt	2.19
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"scenequ.i"
+
+   IFNE     DosPresent
+
+	XDEF	UTRESTORE,UTRESTORE2
+	XREF	UTEXIT,SLADDR,SLADDR.E,POSWRD,READFILE,WRITEFIL,DIED
+	XREF	CRYPT,CHK.DATA,CALC.DATA,INPUT,INBUFF
+	XREF	P.Refresh
+
+UTRESTORE
+
+	LEA      UTEXIT(PC),A0        ;if unsure exit
+
+UTRESTORE2
+
+      IFNE      0	;AMIGA512
+
+* this is now done such that the error gets caught properly
+* no more nasty second screen shit - Ken 7/11/88
+
+	XREF	AD_COUT,OldCLIST
+
+	MOVE.L   A4,A6
+	MOVEQ    #10,D1
+
+	JSR      AD_COUT(A6)
+
+	JSR      OldCLIST(A6)         ;AmigaDos screen please!
+
+      ENDC
+
+      IFEQ     MAC512!GENERIC!IIGS
+
+	CALL    CHECK_FILE_NAME      ;Make sure we have a filename of some sort
+	LEA	UTEXIT(PC),A0		; because check_file.. fucks it
+	DO	RUSURE
+
+      ENDC
+
+      IFNE	CPC6128			;this must be as late as possible
+
+	CALL	GetSavedGameDisk
+      
+      ENDC
+
+	LEA      SLADDR(A4),A1        ;Start of buffer
+
+	MOVE.L   #SLADDR.E+511,D1     ;End of buffer
+	SUB.L    #SLADDR,D1           ;Calculate length
+	MOVE.L   POSWRD(A4),A0        ;Pointer to name
+
+	CALL     READFILE
+	TEST_B   D7                   ;Error?
+	BEQ.S    10$
+
+	MSG	OBLOAD			;<'Ouch - bad load^'>
+	TEST_W	DIED(A4)		;in case they chose 'LOAD' option
+	BNE	UTRESTORE2		;from a death message
+					;stop them cancelling the load
+	BRA.S    20$                  ;Only decode if we really loaded a game
+10$
+	CALL     CRYPT                ;Decode game
+	CALL     CHK.DATA             ;Check if its been messed around
+
+20$
+      IFNE	PCW8256
+
+	XREF	RestartFlag
+
+	TEST_B	RestartFlag(A4)
+	BEQ.S	30$
+	RET
+30$
+      ENDC
+
+      IFNE      0	;AMIGA512
+
+* this is now done such that the error gets caught properly
+* no more nasty second screen shit - Ken 7/11/88
+	
+	XREF	NewCLIST
+
+	JSR     NewCLIST(A4)         ;our screen please!
+
+      ENDC
+
+
+      IFNE      BookProtection
+
+	XREF	PROTECT2
+ 
+	CALL    PROTECT2
+
+      ENDC
+
+    IFD		wantLoadToRefresh
+	XREF	DontLoadPicture
+	
+	ST	DontLoadPicture(A4)
+	CALL	P.Refresh
+	CLR.B	DontLoadPicture(A4)		;zap it back.
+    ENDC	;wantLoadToRefresh
+
+	DOGO	UTEXIT
+
+	XDEF	UTSAVE
+UTSAVE
+
+      IFNE      0	;AMIGA512
+
+* this is now done such that the error gets caught properly
+* no more nasty second screen shit - Ken 7/11/88
+
+	MOVE.L   A4,A6
+	MOVEQ    #10,D1
+
+	JSR      AD_COUT(A6)
+
+	JSR      OldCLIST(A4)   ;AmigaDos screen please!
+
+      ENDC
+
+
+      IFEQ     MAC512!GENERIC!IIGS
+
+	CALL    CHECK_FILE_NAME         ;If we don't have a file name get one
+
+	LEA     UTEXIT(PC),A0           ;if unsure exit
+	DO	RUSURE
+
+      ENDC
+
+      IFNE	CPC6128			 ;do this as late as possible
+
+	CALL	GetSavedGameDisk
+      
+      ENDC
+
+	MOVE.L   POSWRD(A4),-(A7)        ;Save pointer to filename
+
+	CALL     CALC.DATA               ;Calculate checksums
+	CALL     CRYPT                   ;Encode game info
+
+	LEA      SLADDR(A4),A1           ;Start of buffer
+	MOVE.L   #SLADDR.E+511,D1        ;End of buffer
+	SUB.L    #SLADDR,D1              ;Calculate length
+
+	MOVE.L   (A7)+,A0                ;Pointer to name
+
+	CALL     WRITEFIL
+
+
+	MOVE.L   D7,-(A7)
+
+
+	CALL     CRYPT                   ;Decode game again
+	CALL     CHK.DATA
+
+
+	MOVE.L   (A7)+,D7
+
+	TEST_B   D7                   ;Error?
+	BEQ.S    10$                  ;EQ=> nope
+
+	MSG	OBSAVE			;<'Ouch - bad save^'>
+10$
+      IFNE	PCW8256
+
+	TEST_B	RestartFlag(A4)
+	BEQ.S	20$
+	RET
+20$
+      ENDC
+
+      IFNE      0	;AMIGA512
+
+* this is now done such that the error gets caught properly
+* no more nasty second screen shit - Ken 7/11/88
+
+	JSR      NewCLIST(A4)         ;our screen please!
+
+      ENDC
+
+	DOGO	UTEXIT
+
+
+      IFNE	CPC6128
+
+GetSavedGameDisk
+
+	XREF	GETCHAR2
+
+* THIS message MUST stay as a print text, cos msgs from disk won't be avail!
+
+* WARNING!!! don't put a line feed on the end of this!!
+
+	PRINT	<'Please insert your saved games disk.^Press return.'>
+	MOVE.L	D1,-(A7)
+10$
+	CALL	GETCHAR2
+	CMP.B	#10,D1
+	BNE.S	10$
+	DO	CHAROUT
+	MOVE.L	(A7)+,D1
+	RET
+
+      ENDC	;CPC6128
+
+
+      IFEQ	IIGS!MAC512!GENERIC
+
+
+CHECK_FILE_NAME
+
+      IFNE	PCW8256
+
+	TEST_B	RestartFlag(A4)
+	BEQ.S	Real_CHECK_FILENAME
+	LEA	RestartName(PC),A0
+	MOVE.L	A0,POSWRD(A4)
+	RET
+
+RestartName	DC.B	' M:THEPAWN.GAM',0,0
+
+Real_CHECK_FILENAME
+
+      ENDC
+
+	MOVE.L   A0,-(A7)
+
+	BRA.S    20$
+10$
+	MOVE.L   POSWRD(A4),A6        ;Get addr of filename
+	TEST_B   (A6)                 ;We do have something?
+	BNE.S    90$                  ;NE => yes
+20$
+
+	MSG	PLSENTFIL		;<'^Please enter filename :  '>
+
+  IFNE   Wimp!IBM!IIGS
+	XREF	SCR_IGNO
+	ST      SCR_IGNO(A4)      ;Ignore input from pulldown scrolls for a bit
+  ENDC
+
+	CALL     INPUT                ;Get a line from keyboard
+
+  IFNE   Wimp!IBM!IIGS
+	SF       SCR_IGNO(A4)         ;Stop ignoring scrolls
+  ENDC
+
+	LEA      INBUFF(A4),A6        ;Find new text
+	DO	FNDWRD               ;lose initial spaces
+	MOVE.L   A6,POSWRD(A4)        ;Make sure rest of world knows
+
+     IFNE	VAX
+
+	TEST_B	(A6)+
+	BEQ.S	10$
+30$
+	TEST_B	(A6)+
+	BNE.S	30$
+	MOVE.B	#'.',-1(A6)
+	MOVE.B	#'S',(A6)+
+	MOVE.B	#'A',(A6)+
+	MOVE.B	#'V',(A6)+
+	CLR.B	(A6)
+
+      ENDC
+
+	BRA.S    10$                  ;check this one is ok
+90$
+	MOVE.L   (A7)+,A0
+	RET
+
+      ENDC	;IIGS!MAC512!GENERIC
+
+   ENDC
+
+
+
+
+	END

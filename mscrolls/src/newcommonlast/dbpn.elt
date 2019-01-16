@@ -1,0 +1,52 @@
+**************************************************************
+*
+*	10/27/87
+*	@(#)dbpn.elt	1.2
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+	include	"equates.i"
+	include	"macros.i"
+
+
+	XDEF	DBPN
+	XREF	DBDASH,DBEXIT,OLDBUF,PRONHIM,PRONHER
+ 
+DBPN
+	MSG	LINE
+	MSG     IT
+	CALL    DBDASH
+	MOVE.W  OLDBUF(A4),D0
+	BEQ.S   10$
+	DO	P.TN
+10$
+	MSG	LINE
+	MSG     THEM
+	CALL    DBDASH
+	LEA     OLDBUF(A4),A0
+	TEST_W  (A0)
+	BEQ.S   20$
+	DO	P.LIST
+20$
+	MSG	LINE
+	MSG     HIM
+	CALL    DBDASH
+	MOVE.W  PRONHIM(A4),D0
+	BEQ.S   30$
+	DO	P.TN
+30$
+	MSG	LINE
+	MSG     HER
+	CALL    DBDASH
+	MOVE.W  PRONHER(A4),D0
+	BEQ.S   40$
+	DO	P.TN
+40$
+	MSG	LINE  
+	DOGO	DBEXIT	
+
+
+
+	END

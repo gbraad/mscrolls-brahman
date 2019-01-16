@@ -1,0 +1,62 @@
+**************************************************************
+*
+*	%G%
+*	%W%
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"scenequ.i"
+	include	"verbequ.i"
+
+
+*
+* V.PLAY
+*
+	IfVerb	PLAY
+
+	XDEF	V.PLAY
+	XREF	SP.PLAY,ISATTRIBUTE,P.SUB,P.QN,P.MHAV
+	XREF	YCANTNOW,ADVERB
+
+V.PLAY
+	CMP.W	#WITH,ADVERB(A4)		;play with x?
+	BEQ.S	PLAY.WITH
+	CALL	SP.PLAY
+
+    IFD	attribute_INSTRUMENT			;in this game?
+	XREF	Denotation_INSTRUMENT
+	LEA	Denotation_INSTRUMENT(A4),A1	;get list
+	DO	ISATTRIBUTE			;can u play this?
+	BEQ.S	10$
+	DO	P.SUB
+	MSG	CANTPLAY			;can't play
+	DO	P.QN				;a noun
+	DOGO	BSFULLSTOP			;'.'
+10$
+	DO	P.SUB
+	MSG	PLAYADITTY			;play a little ditty on
+	DOGO	P.TNSTOP
+    ENDC	;attribute_INSTRUMENT
+
+    IFND	attribute_INSTRUMENT
+	DOGO	DBS
+
+    ENDC	;!attribute_INSTRUMENT
+
+PLAY.WITH
+
+	XREF	YCANTWSTOP
+
+	CALL	SP.PLAY				;for the present, the same
+	BRA	YCANTWSTOP			;else cannot
+
+*------------------------------------------
+
+	ENDC	;v.play
+
+	END

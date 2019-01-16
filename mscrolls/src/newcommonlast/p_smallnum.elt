@@ -1,0 +1,69 @@
+***********************************************************
+*
+*	@(#)p_smallnum.elt	1.2
+*	4/28/89
+*
+************************************************************
+
+		SECTION	"ADV",CODE
+
+		include	"equates.i"
+		include	"macros.i"
+		include	"verbequ.i"
+		include	"scenequ.i"
+
+
+	XDEF	P.SMALLNUM
+	XREF	WTABLE.NUMBERS,P.TAB,PRTNUM,PLURAL_Override
+
+; Prints a small number 0-20 (ish!)
+; Number in D1, corrupts nothing.
+
+wantNumbersAsWordsORwantNUMBERS	SET	FALSE
+
+      IFD	wantNumbersAsWords
+wantNumbersAsWordsORwantNUMBERS	SET	TRUE
+      ENDC	;wantNumbersAsWords
+
+      IFD	wantNUMBERS
+wantNumbersAsWordsORwantNUMBERS	SET	TRUE
+      ENDC	;wantNUMBERS
+
+P.SMALLNUM
+	PUSH_L	D1/D2/D6/A1
+
+      IFNE	wantNumbersAsWordsORwantNUMBERS
+	CMP.W	#20,D1			;up to 20?
+	BLS.S	01$			;ok.
+	MOVE.W	D1,D6
+	CALL	PRTNUM
+	BRA.S	05$			;and continue
+01$
+      IFND	wantBIGPROG
+ 	LEA	WTABLE.NUMBERS(A4),A1
+      ENDC
+
+      IFD	wantBIGPROG
+ 	LEA	WTABLE.NUMBERS,A1
+      ENDC
+
+	DO	P.TAB
+05$
+
+    ENDC	;wantNumbersAsWordsORwantNUMBERS
+
+    IFEQ	wantNumbersAsWordsORwantNUMBERS
+	MOVE.W	D1,D6			;otherwise use numerals anyway
+	CALL	PRTNUM
+    ENDC	;!wantNumbersAsWordsORwantNUMBERS
+
+	PULL_L	D1/D2/D6/A1
+	ST	PLURAL_Override(A4)	;if (singular) override = NE
+	CMP.B	#1,D1			;single item?
+	SEQ	PLURAL_Override+1(A4)
+10$:
+	RET
+
+*------------------------------------------
+
+	END

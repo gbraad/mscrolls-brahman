@@ -1,0 +1,61 @@
+**************************************************************
+*
+*	%G%
+*	%W%
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"scenequ.i"
+
+*--------------------------------
+*
+* SETPRON: 
+*
+* SET HIM/HER PRONOUNS TO BE D0
+* 
+* WHEN D0 IS A NPC, NO ERROR
+* 
+* RETURNS, STOMPS A0,A3
+*
+*--------------------------------
+
+	XDEF	SETPRON
+	XREF	PRONHER,PRONHIM,OLDBUF
+ 
+SETPRON
+ 
+	GETINFO        
+	TST_NPC				;NPC?
+	BEQ.S   20$                 ;0= NOT NPC, SO SET 'IT'
+    IFD		wantPronounITKept
+	TST_PLURAL				;plural npc's set 'them'
+	BNE.S	20$				;update buffer as normal.
+    ENDC	;wantPronounITKept
+
+	DO	GETNPC			;GET NPC DATA, A3
+	BTST    #0,2(A3)            ;1=MALE, 0=FEMALE
+	BNE.S   10$
+	MOVE.W  D0,PRONHER(A4)      ;SET PRONOUN
+	RET
+10$
+	MOVE.W  D0,PRONHIM(A4)
+	RET
+20$
+	MOVE.W  D0,OLDBUF(A4)       ;IT/THEM BUFFER
+	
+    IFD		wantPronounITKept
+	CLR.W	OLDBUF+2(A4)	    ;and terminate.
+    ENDC	;wantPronounITKept
+
+	RET
+
+*--------------------------------
+
+
+
+	END

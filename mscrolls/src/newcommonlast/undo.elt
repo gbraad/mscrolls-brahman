@@ -1,0 +1,55 @@
+**************************************************************
+*
+*	4/10/89
+*	@(#)undo.elt	1.1
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"scenequ.i"
+
+
+	IFNE	GENERIC
+
+	XDEF	UndoDiff,MakeUndoDiff
+	XREF	CLOCK,PRTNUM,ForceRefresh,SC70,INVENT
+
+UndoDiff
+
+      IFNE	M68000
+	NOP
+      ENDC
+
+      IFEQ	M68000
+	DC.W	$A0E2
+      ENDC
+
+	CALL	ForceRefresh
+	LEA	INVENT,A0
+	ADD.L	A4,A0
+	JSR	(A0)
+	MOVE.L	(A7)+,D0
+	BRA	SC70
+
+MakeUndoDiff
+
+
+	MOVE.W	CLOCK(A4),D0
+
+      IFNE	M68000
+	NOP
+      ENDC
+
+      IFEQ	M68000
+	DC.W	$A0E3
+      ENDC
+
+	RET					;back to screen
+
+      ENDC
+
+	END

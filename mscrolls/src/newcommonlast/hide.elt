@@ -1,0 +1,186 @@
+**************************************************************
+*
+*	%G%
+*	%W%
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"verbequ.i"
+	include	"nounequ1.i"
+	include	"scenequ.i"
+
+*--------------------------------
+
+	IfVerb	HIDE
+
+	XDEF	V.HIDE
+	
+	XREF	CONJ,GO.N,ADVERB,CHK4PT,P.SUB,P.SUBV,P.QN,V.PUT
+	XREF	VALID.NP,P.TN,P.CONJ,SEATED,SEATED_RELATOR
+	XREF	ROOM
+
+V.HIDE
+
+    IFD	Version2_V.HIDE
+
+	TEST_W	CONJ(A4)		;hide x PREP obj?
+	BPL.S	50$			;yes
+	TEST_W	ADVERB(A4)		;hide prep x?
+	BPL.S	30$			;yes
+	TEST_W	D0			;just hide?
+	BMI.S	HIDE.ME			;hide the player
+	CMP.W	#NPLAYER,D0		;hide the player?
+	BEQ.S	HIDE.ME			;yes
+					;hide object
+	MOVE.W	#IN,D1			;'in what'
+	DO	CHK4PT			;do error
+30$
+	MOVE.W	ADVERB(A4),D1		;get adverb
+	MOVE.W	D0,D2			;set up object to hide prep to
+	CMP.W	#BEHIND,D1		;hide behind
+	BNE.S	31$			;nope
+	CALL	HIDE.BEHIND		;try it
+	BRA	HIDE.CANT		;no- tough
+31$
+	CMP.W	#UNDER,D1		;hide under something?
+	BNE.S	32$			;no
+	CALL	HIDE.UNDER		;see if we can
+	BRA	HIDE.CANT		;no.
+32$
+	CMP.W	#ON,D1			;hide on things?
+	BNE.S	33$			;no
+	DO	P.SUB			;'you'
+	MSG	CANTHIDEON		;cant hide on
+	DOGO	P.QN			;'a thing'
+33$
+	CMP.W	#IN,D1			;hide in something?
+	BNE.S	34$			;no
+	GETINFO				;on dobj
+	TST_ISAROOM			;can only hide in rooms
+	BEQ.S	HIDE.CANT		;sorry no items!
+	BRA	GO.N			;try going there
+34$	
+	MSGGO	IDFY			;doesn't make sense
+
+50$	;hide x prep object
+
+	BRA	V.PUT			;do this for now
+
+
+*---------------------------------------------------------
+	IFD	attribute_HIDINGPLACE
+	XREF	GETATTRIBUTE
+	ENDC	;attribute_HIDINGPLACE
+
+HIDE.ME
+
+	MOVEQ	#0,D2			;signifies any noun will do
+	IFD	attribute_HIDINGPLACE
+	XREF	Denotation_HIDINGPLACE
+	LEA	Denotation_HIDINGPLACE(A4),A1	;start of table
+10$
+	DO	GETATTRIBUTE			;ok get one -> d0
+	BEQ.S	20$				;nonesuch
+	GETINFO
+	MOVE.W	ROOM(A4),D1			;fetch current room
+	CMP.W	8(A0),D1			;is it this room?
+	BEQ.S	20$				;can't dash here!
+	DO	P.SUB				;you
+	MSG	MAKEADASH			;make a dash for
+	DO	P.TN				;the hideing place
+	GETINFO
+	BRA	GO.N				;try to go there
+20$
+	ENDC	;attribute_HIDINGPLACE
+	CALL	HIDE.BEHIND			;try behind things
+	CALL	HIDE.UNDER			;then under things
+	BRA	HIDE.FAIL
+
+    ENDC	;Version2_V.HIDE
+
+HIDE.CANT
+	DO	P.SUBV				;you are
+	MSG	UNABLE				;'unable'
+	DOGO	BSFULLSTOP
+
+    IFD	Version2_V.HIDE
+
+HideUnderOrBehind	SET	FALSE
+	IFD	attribute_HIDEBEHIND
+HideUnderOrBehind	SET	TRUE
+	ENDC	;attribute_HIDEBEHIND
+	IFD	attribute_HIDEUNDER
+HideUnderOrBehind	SET	TRUE
+	ENDC	;attribute_HIDEUNDER
+
+HIDE.BEHIND
+
+	MOVE.W	#BEHIND,D1			;relative word
+    IFD	attribute_HIDEBEHIND		;somewhere exists in game
+	XREF	Denotation_HIDEBEHIND
+	LEA	Denotation_HIDEBEHIND(A4),A1	;start of table
+	CALL	HIDE.SUB			;look in table
+    ENDC	;attribute_HIDEBEHIND
+	RET
+
+HIDE.UNDER
+
+	MOVE.W	#UNDER,D1			;relative word
+    IFD	attribute_HIDEUNDER		;somewhere exists in game
+	XREF	Denotation_HIDEUNDER
+	LEA	Denotation_HIDEUNDER(A4),A1	;start of table
+	CALL	HIDE.SUB			;look in table
+    ENDC	;attribute_HIDEUNDER
+	RET
+
+
+	IFNE	HideUnderOrBehind
+
+HIDE.SUB
+
+* Common hide prep subroutine
+* Entry
+*	A1= table of hide prep nouns
+*	D1= relative preposition
+*	D2!=0 => must = d2
+
+10$
+	DO	GETATTRIBUTE			;fetch an item wi attribute
+	BEQ.S	20$				;none
+	TEST_W	D2				;must it be this item?
+	BEQ.S	11$				;no anywhere
+	CMP.W	D0,D2				;is it this item
+	BNE.S	10$				;no, look for it in table
+11$
+	DO	P.SUB				;'you'
+	MSG	HIDES				;hide@
+	DO	P.CONJ
+	DO	P.TNSTOP			;the object
+	MOVE.W	D0,SEATED(A4)			;as related to object
+	MOVE.W	D1,SEATED_RELATOR(A4)		;and related to it
+	POPSP					;return from verb
+	POPSP					;return from verb
+20$
+	RET
+
+    ENDC	;HideUnderOrBehind
+
+HIDE.FAIL
+
+	MSG	NOTHINGTOHIDE			;there is nothing to hide
+	DO	P.CONJ
+	MSG	HERE
+	RET
+
+    ENDC	;Version2_V.HIDE
+
+*---------------------------------------------------------
+
+	ENDC	;verb hide
+	END

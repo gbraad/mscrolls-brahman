@@ -1,0 +1,32 @@
+***********************************************************
+*
+*	@(#)confess.elt	1.2
+*	7/17/88
+*
+************************************************************
+
+		SECTION	"ADV",CODE
+
+		include	"equates.i"
+		include	"macros.i"
+		include	"verbequ.i"
+		include	"scenequ.i"
+
+
+    IfVerb	CONFESS
+	
+	XDEF	V.CONFESS
+	XREF	SP.CONFESS
+
+
+V.CONFESS
+	
+	CALL	SP.CONFESS
+	DO	P.SUBV				;you are SPACE
+	MSG	UNABLE				;'unable to do that '
+	MSGGO	ATMOMT				;'at the moment.'
+
+
+    ENDC	;CONFESS
+*------------------------------------------ 
+	END

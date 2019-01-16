@@ -1,0 +1,46 @@
+**************************************************************
+*
+*	5/29/89
+*	@(#)taste.elt	2.2
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"verbequ.i"
+	include	"scenequ.i"
+
+	IfVerb	TASTE
+
+	XDEF	V.TASTE,V.TASTE2
+	XREF	EDTS.OK,EDTS.DO
+
+V.TASTE
+	
+      IFD	wantSP.TASTE
+	XREF	SP.TASTE
+
+	CALL	SP.TASTE
+	BEQ.S	10$
+	RET			; NE=>give up
+10$
+      ENDC	;wantSP.TASTE
+
+	CALL    EDTS.OK
+	DO	P.TN
+	MSG	TASTES
+ 
+V.TASTE2
+ 
+    IFD	wantSUCCESS
+	XREF	SUCCESS
+	MOVE.W	#RETCODE_SUCCESS,SUCCESS(A4)
+    ENDC
+	BRA     EDTS.DO
+
+	ENDC
+
+	END

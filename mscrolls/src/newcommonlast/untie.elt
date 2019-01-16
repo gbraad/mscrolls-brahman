@@ -1,0 +1,136 @@
+**************************************************************
+*
+*	%G%
+*	%W%
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"verbequ.i"
+	include	"scenequ.i"
+
+
+	IfVerb	UNTIE
+
+	XDEF	UNTIE
+	XREF	CONJ,F.APART,OK
+
+UNTIE
+	TEST_W  CONJ(A4)
+	BMI.S   10$
+	MOVEQ   #2,D1			;FROM
+	DO	CHK4PT
+10$
+    IFD		Version2_FIX
+	XREF	REMOVE
+	TEST_B	7(A0)			;is it conneted to a pseudo?
+	BNE	REMOVE			;then just remove it.
+    ENDC	;Version2_FIX
+
+	MOVE.W	D0,D6			;save dobj
+
+      IFEQ	THE_PAWN
+	XREF	SP.UNTIE
+	CALL	SP.UNTIE
+      ENDC	;!THE_PAWN
+
+	DO	FIXCHK			;is it fixed to anything?
+	BNE.S   20$			;yes
+	DO	P.BTN
+	DO	ISAREN
+	MSG	CON
+	MSGGO	ANYT			;"but it is not connected.."
+60$
+90$
+	CALL	OK			;"ok."
+    IFD	wantSP.UNTIE_After
+	XREF	SP.UNTIE_After
+	MOVE.W	D6,D0			;restore old dobj
+	CALL	SP.UNTIE_After
+    ENDC	;wantSP.UNTIE_After
+	BRA     F.APART
+20$
+	MOVE.W  12(A0),D1		;fetch tied-to noun
+	BPL.S	21$			;not permanent
+2101$
+	DO	P.SUBV
+	MSG	UNABLE
+	MSG	BECAUS
+	DO	P.TN
+	DO	ISARE
+	MSGGO	FXPERM			;you are unble because x is perm.
+21$
+	CLR.W   D4
+	TEST_W  CONJ(A4)		;iobj exists?
+	BMI.S   70$			;no
+	AND.W   #$3FFF,D1		;zap top 2 bits
+	BEQ.S   40$			;not connected?, maybe things are
+					;connected to it?
+	CMP.W   D5,D1			;is it connected to what u said?
+	BNE.S   40$			;no!
+	CLR.W   12(A0)			;disconnect
+	ADDQ.W  #1,D4
+40$
+	MOVE.W  D0,D2			;save away dobj for later.
+	MOVE.L  A0,A2
+41$
+	MOVE.W  (A1)+,D0		;1st element of fixture system
+	BEQ.S   50$			;finished
+	CMP.W   D5,D0			;is it fixed to the target?
+	BNE.S   41$			;no, carry on
+	GETINFO        			;yes 
+	CLR.W   12(A0)			;disconnect item
+	ADDQ.B  #1,D4			;count no. of items fixed.
+	BRA.S   41$			;any more?
+50$
+	TEST_B  D4			;how many items did we remove?
+	BNE.S   60$			;some, they fall appart
+	MOVE.W  D2,D0			;none, fetch noun back
+	MOVE.L  A2,A0
+	DO	P.BTN			;'but it wasn't connected!!'
+	DO	ISAREN
+	MSG	FXTO
+	MOVE.W  D5,D0
+	DOGO	P.TNSTOP
+70$
+	MOVE.W  12(A0),D2		;get item fixed to
+	AND.W   #$3FFF,D2		;use only low 14 bits
+	BEQ.S   73$
+	MOVE.W	D1,-(A7)
+	DO	P.FROM			;be helpful and print (from xyzzy)
+	MOVE.W	(A7)+,D1		;NEED d1
+	CLR.W   12(A0)
+	MOVE.W  D2,D5
+71$
+	MOVE.W  D0,D3
+72$
+	MOVE.W  (A1)+,D0
+	BEQ     90$
+	GETINFO        
+	MOVE.W  12(A0),D7            ;THERE IS A BUG HERE (17/3/86)
+	AND.W   #$3FFF,D7
+	BEQ.S   72$
+	CMP.W   D3,D7
+	BNE.S   72$
+	MOVE.W  D0,D2
+	DO	P.FROM
+	BTST	#7,12(A0)			;fixed permanently?
+	BEQ.S	74$				;no, then ok.
+	MOVE.W	D3,D0				;restore our noun.
+	BRA	2101$				;and say it's fixed perm.
+74$
+	CLR.W   12(A0)
+	BRA.S   72$
+73$
+	MOVE.W  D0,D5
+	BRA.S   71$
+
+	ENDC
+*------------------------------------------ 
+
+
+	END

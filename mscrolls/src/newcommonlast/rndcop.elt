@@ -1,0 +1,40 @@
+**************************************************************
+*
+*	%G%
+*	%W%
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+
+    IFND	wantNOQUOTES
+
+	XDEF	RNDCOP
+
+	
+RNDCOP 
+	
+*GENERATE A RANDOM COMMENT
+	
+	CLR.W   D7
+	MOVEQ   #$7F,D1			;LIKELY HOOD
+	RND_D1				;RANDOMIZE
+	CMP.B   #2,D1			;UPPER LIMIT
+	BHI.S   90$			;NO RANDOM COMMENT
+
+	BeSure	M.OUTWEIRD
+
+	ADD.W   #M.OUTWEIRD,D1		;START OF TABLE
+	DO	P.MSG			;PRINT IT
+	MOVEQ   #1,D7  
+90$
+	RET
+
+
+    ENDC	;!wantNOQUOTES
+
+	END

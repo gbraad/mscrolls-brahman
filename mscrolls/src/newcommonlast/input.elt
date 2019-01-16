@@ -1,0 +1,133 @@
+**************************************************************
+*
+*	%G%
+*	%W%
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"scenequ.i"
+
+
+*--------------------------------
+*
+* INPUT TEXT INTO BUFFER
+*
+*--------------------------------
+
+	XDEF	INPUT
+	XREF	BIOSA6,BIOS.INP,INBUFF
+ 
+INPUT
+	
+	PUSH_L  D0-D7/A0/A2-A5
+	CALL	BIOSA6
+	JSR     BIOS.INP(A4)        ;(A6)
+	CALL	FodHashes
+
+      IFEQ	GENERIC
+	CLR.B   (A1) 
+	CLR.B   1(A1)
+      ENDC
+
+	MSG	LINE
+	LEA     INBUFF(A4),A6
+
+    IFD	wantHACK.INPUT		;for devious text hacks
+	XREF	HACK.INPUT
+	CALL	HACK.INPUT
+    ENDC	;wantHACK.INPUT
+
+     IFNE    YCHEATMORE
+	CMP.B   #'*',(A6)          ;GO MONITOR?
+	BNE.S   10$
+	NOP				;to avoid zero len branch
+
+      IFNE    ST520
+
+	PULL_L  D0-D7/A0/A2-A5       ;Restore regs,so SID gets 'em.
+	CALL	BIOSA6
+
+    IFNE	Wimp
+
+	XREF	MS_END
+	CALL    MS_END                     ;END OF MOUSE
+
+    ENDC
+
+	CLR.L   -(SP)
+	MOVE.W  #$20,-(SP)                 ;supervisor mode
+	TRAP    #1
+	ADD.W   #6,SP
+
+	XREF	CONTERM
+
+	BCLR    #3,CONTERM                 ;fix hassles with ED and del/bs
+	MOVE.L  D0,-(SP)
+
+    IFNE	Wimp
+
+	XREF	GRA_EXIT
+
+	CALL    GRA_EXIT
+
+    ENDC
+
+	MOVE.W  #$20,-(SP)
+	TRAP    #1
+	ADD.W   #6,SP
+*      ILLEGAL
+	DC.W    $4AFC
+      ENDC
+    
+
+      IFNE    QL128
+
+	DC.W     $4AFC
+
+      ENDC
+
+      IFEQ     M68000
+
+	DC.W     $4AFC
+
+      ENDC
+
+
+      IFNE     AMIGA512!MAC512
+
+	DC.W     $4AFC
+
+      ENDC
+
+
+10$
+     ENDC
+  
+	PULL_L  D0-D7/A0/A2-A5
+	RET
+  
+*-------------------------------
+
+FodHashes
+
+	MOVE.L	A1,-(A7)
+10$
+	TEST_B	-(A1)
+	BEQ.S	10$
+	CMP.B	#']',(A1)	;or these.
+	BEQ.S	20$		;annoying.
+	CMP.B	#'#',(A1)	;hash on end?
+	BNE.S	90$		;no, exit
+20$
+	CLR.B	(A1)		;otherwise fod it
+90$
+	MOVE.L	(A7)+,A1
+	RET
+*------------------------------------------ 
+
+	END

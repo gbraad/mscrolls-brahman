@@ -1,0 +1,28 @@
+**************************************************************
+*
+*	10/27/87
+*	@(#)p_sepa.elt	1.2
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+
+*--------------------------------
+
+	XDEF	P.SEPA
+	
+P.SEPA
+	
+	DO	P.TN
+	DO	SETOUT			;SET AS OUT (NOCAN TIE LIQUIDS)
+*					;BUT CALLIS SHORTER THAN BSET
+	MSGGO	SEPAWY
+	
+
+
+
+	END

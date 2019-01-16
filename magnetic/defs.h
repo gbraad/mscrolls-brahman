@@ -175,7 +175,7 @@ type8 ms_getchar(type8 trans);
 * Note: For retrieving the raw data of a picture call ms_extract (see below)
 \****************************************************************************/
 
-void ms_showpic(type32 picnum, type32 picAddr, type8 mode, type8 ver, float*);
+void ms_showpic(type32 picnum, type32 picAddr, type8 mode, type8 ver, float*, int picVer);
 
 /****************************************************************************\
 * Function: ms_fatal
@@ -471,6 +471,9 @@ void ms_status(void);
 *
 * Return:  Instruction count
 \****************************************************************************/
+
+void ms_playsound(int room, const char* name);
+void ms_event_hook(int quiet);
 
 type32 ms_count(void);
 

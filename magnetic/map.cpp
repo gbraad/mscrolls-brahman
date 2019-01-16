@@ -39,6 +39,9 @@
 // room ids for The Guild
 #include "roomsguild.h"
 
+// room ids for Jinxter
+#include "roomsjinxter.h"
+
 using namespace std;
 
 #define MAP_ROWS 24
@@ -94,28 +97,28 @@ static int gmaps[10][MAP_ROWS][MAP_COLS] = {
        {  0     ,  0      ,  0     ,  0    ,  0        ,  0         ,  0     ,  0      , RNGREENSQUARE2, RNYELLOWSQUARE3, RNINDIGOSQUARE3, RNREDSQUARE1   , RNWHITESQUARE  ,  0         ,  0      ,  0},
        {  0     ,  0      ,  0     ,  0    ,  0        ,  0         ,  0     ,  0      ,  0            ,  0             ,  0             ,  0             ,  0             , RNCRYPT    , RNSHRINE, RNLIBRARY2}
     },
-                        { // Jinxter
-                            {  0,  0,  9,  0,  0, 12,  0,  0,  0,  0,  0,  0,  0,  0,  0},
-                            {  0,  0,  8,  0,  0, 13, 15, 17,  0,  0, 72,  0, 77,  0,  0},
-                            {  3,  0,  7,  0,  0, 14, 19, 18,  0, 71,  0,  0,  0, 78,  0},
-                            {  0,  5,  0,  0, 21, 20,  0, 26,  0,  0, 35,  0,  0,  0,  0},
-                            {  4,  0,  6,  0, 22, 23,  0, 27,  0, 76,  0,  0,  0,  0,  0},
-                            {  0, 11,  0, 24,  0,  0,  0, 28,  0,  0, 36, 31, 73,  0,  0},
-                            {  0,  2,  0, 25,  0,  0, 38, 29,  0,  0,  0, 32, 37,  0,  0},
-                            { 68, 10, 67,  0,  0,  0,  0, 30, 69, 34,  0,  0,  0,  0,  0},
-                            {  0,  1,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0},
-                            {  0,  0,  0,  0, 41,  0,  0, 74,  0,  0, 56, 66,  0,  0,  0},
-                            {  0, 45, 46,  0, 42, 75, 39, 49,  0,  0, 64,  0,  0,  0,  0},
-                            {  0, 44,  0,  0,  0, 40,  0, 47, 33,  0, 63,  0,  0,  0,  0},
-                            { 16, 43,  0,  0,  0,  0,  0,  0,  0,  0, 62, 57, 65, 48, 95},
-                            {  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 61,  0,  0,  0},
-                            {  0,  0,  0,  0,  0,  0, 88, 85,  0,  0,  0, 93,  0,  0,  0},
-                            {  0,  0,  0,  0,  0, 53, 84, 86,  0,  0,  0, 94,  0,  0,  0},
-                            {  0,  0,  0,  0,  0,  0, 82,  0, 58, 59, 91, 55,  0,  0,  0},
-                            {  0,  0,  0,  0,  0, 83, 81,  0, 54, 60, 92,  0,  0,  0,  0},
-                            {  0,  0,  0,  0,  0,  0, 80, 89, 90,  0,  0,  0,  0,  0,  0},
-                            {  0,  0,  0,  0, 50, 51, 52,  0,  0,  0,  0,  0,  0,  0,  0}
-                        },
+    { // Jinxter
+       {  0            ,  0            , JRCOUNTRYLANE2,  0           ,  0               , JRFIELD1       ,  0              ,  0                ,  0                  ,  0           ,  0                ,  0               ,  0              ,  0          ,  0},
+       {  0            ,  0            , JRBACKGARDEN1 ,  0           ,  0               , JRWOOD1        , JRORCHARD       , JRSTREAM1         ,  0                  ,  0           ,  0                ,  0               ,  0              ,  0          ,  0},
+       {  JRKITCHEN1   ,  0            , JRCONSERVATORY,  0           ,  0               , JRFIELD2       , JRFRONTGARDEN2  , JRBRIDGE1         , JROVER_HATCH        , JRAIRLOCK    , JRCORRIDOR1       , JRTOPOF_LIBRARY2 ,  0              ,  0          ,  0},
+       {  0            , JRBATHROOM1   ,  0            ,  0           , JRDININGROOM1    , JRKITCHEN2     ,  0              , JRBOATHOUSE       ,  0                  , JRONLAKE     , JROFFICE          , JRLIBRARY2       ,  0              ,  0          ,  0},
+       {  JRBEDROOM1   ,  0            , JRLIBRARY1    ,  0           , JRSTUDY1         , JRCELLAR2      ,  0              , JRCANOE_MOORING   , JRUNDERWATER2       , JRINF_UNDERWATER, 0              , JROVER_WRECK     ,  0              ,  0          ,  0},
+       {  0            , JRHALLWAY1    ,  0            , JRBACKGARDEN2,  0               ,  0             ,  0              , JRLAKE1           ,  0                  , JRUNDERWATER ,  0                , JRSHIPWRECK      ,  0              ,  0          ,  0},
+       {  0            , JRFRONTGARDEN1,  0            , JRHOLLYBUSH  ,  0               ,  0             , JRWOOD2         , JRPAGODA          ,  0                  ,  0           ,  0                ,  0               ,  0              ,  0          ,  0},
+       {  JRINFINITE2  , JRCOUNTRYLANE1, JRINFINITE1   ,  0           ,  0               ,  0             ,  0              , JRSTEPS1          , JRCONNECTING_PASSAGE, JRDIVERS_ROOM,  0                ,  0               ,  0              ,  0          ,  0},
+       {  0            , JRONBUS       ,  0            ,  0           , JRINOVEN         , JRBAKERY       ,  0              , JRPOSTOFFICE      ,  0                  , JRWITCH_CHAMBER, JRBALCONY       ,  0               ,  0              ,  0          ,  0},
+       {  0            ,  0            ,  0            ,  0           , JRBAKERY_LARDER  , JRBAKERY_OVEN  , JRFAIRGROUND    , JRBEERGARDEN      ,  0                  , JRHALLWAY    ,  0                ,  0               ,  0              ,  0          ,  0},
+       {  0            ,  0            ,  0            ,  0           ,  0               , JRCAROUSEL     , JREND_OF_BEAM   , JRPUB             , JRBOTTOM_WELL       , JRSPIRAL_STAIRCASE,  0           ,  0               ,  0              ,  0          ,  0},
+       {  0            , JRWATERFALL   ,  0            ,  0           , JRCLOCKMAKERS    , JRCLOCK        , JRON_PLATFORM   ,  0                ,  0                  , JRTOWER_ENTRANCE, JRCHIMNEY      , JRANTECHAMBER    , JRLIBRARY4      , JRJEWEL_ROOM,  0},
+       {  0            ,  0            , JRTHEATRE     , JRRAILWAY_TRACK, JRGUARDS_VAN   ,  0             ,  0              ,  0                ,  0                  ,  0           , JRBANQUET_HALL    ,  0               , JRCASTLE_KITCHEN,  0          ,  0},
+       {  0            ,  0            , JRPOST_DEPOT  , JRPLATFORM3  , JRTRAIN_ROOF     ,  0             ,  0              ,  0                ,  0                  ,  0           ,  0                ,  0               , JRIN_HATCH      ,  0          ,  0},
+       {  0            ,  0            ,  0            , JRPLATFORM2  , JRPLATFORM_BRIDGE,JROTHER_PLATFORM,  0              ,  0                ,  0                  , JRCASTLE_PARAPETS, JRARCHWAY     , JRPASSAGE        , JRDUNGEON       ,  0          ,  0},
+       {  0            , JROUTSIDE_STATION, JRTRAIN_STATION, JRPLATFORM1, JRON_TRAIN     ,  0             , JRTOP_MOUNTAIN  ,  0                ,  0                  , JRWALLED_GARDEN, JRQUADRANGLE    ,  0               , JRGAOL          ,  0          ,  0},
+       {  0            ,  0            ,  0            ,  0           ,  0               ,  0             ,  0              ,  0                ,  0                  ,  0           ,  0                ,  0               ,  0              ,  0          ,  0},
+       {  0            ,  0            ,  0            ,  0           ,  0               ,  0             ,  0              ,  0                ,  0                  ,  0           ,  0                ,  0               ,  0              ,  0          ,  0},
+       {  0            ,  0            ,  0            ,  0           ,  0               ,  0             ,  0              ,  0                ,  0                  ,  0           ,  0                ,  0               ,  0              ,  0          ,  0},
+       {  0            ,  0            ,  0            ,  0           ,  0               ,  0             ,  0              ,  0                ,  0                  ,  0           ,  0                ,  0               ,  0              ,  0          ,  0}
+    },
                         { // Corruption
                            {  0, 37,  0, 16,  0, 22,  0,  0,  0,  0, 12, 13},
                            { 35, 36,  0,  0, 24, 23, 26,  0,  0,  2,  3,  4},
@@ -240,7 +243,7 @@ void GameMap::build_map_poslist(int gameid)
      if (!gameid) return; // not supported
 
      room_mpos.reserve(MAX_ROOMS);
-     
+
      for (int y=0; y < MAP_ROWS; ++y)
          for (int x=0; x < MAP_COLS; ++x)
          {
@@ -351,6 +354,3 @@ string GameMap::find_path(int src, int dest)
     }
     return "";
 }
-
-
-

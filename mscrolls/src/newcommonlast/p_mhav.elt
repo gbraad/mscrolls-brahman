@@ -1,0 +1,40 @@
+**************************************************************
+*
+*	10/27/87
+*	@(#)p_mhav.elt	1.2
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+
+	        
+*--------------------------------
+	        
+P.MHAV_SUB
+ 
+	DO	P.SUB
+	MSGGO	HN
+
+	XDEF	P.MHAV,P.MHAVSTOP
+
+P.MHAV
+
+	CALL_S	P.MHAV_SUB
+	DOGO	P.TN
+
+P.MHAVSTOP
+
+	CALL_S	P.MHAV_SUB
+	DOGO	P.TNSTOP
+	
+*--------------------------------
+
+
+
+
+
+	END

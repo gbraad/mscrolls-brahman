@@ -1,0 +1,118 @@
+**************************************************************
+*
+*	%G%
+*	%W%
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"scenequ.i"
+	
+	XDEF	ISDOFRE
+	XREF	GlobalVerbs_DO,VERB
+
+
+*IS DIRECT OR INDIRECT OBJECT FREE (= GLOBAL)
+* EXIT:
+* EQ= IS FREE
+* NE= NOT FREE
+
+* This routine is/was used to detect those verbs whose direct object need not be
+* local. However, It is used for both the direct and indirect objects in code
+* These days.
+* SO
+* as per today (20/10/87), is KNOWS in what sense it is being used.
+* providing wantGLOBALIO is defined.
+
+ISDOFRE
+
+    IFD	wantGLOBALIO
+	XREF	DirectOrIndirect
+	TEST_B	DirectOrIndirect(A4)	;in what mode (direct or indirect)?
+	BNE.S	ISIOFRE			;NE => indirect (do that instead)
+    ENDC	;wantGLOBALIO
+
+	MOVE.L	A1,-(A7)		;SCRATCH
+	LEA     GlobalVerbs_DO(A4),A1	;LIST OF VERBS WI GLOBAL DIR OBJ
+	CALL	VerbInList
+	MOVE.L	(A7)+,A1
+	RET
+
+*
+* VerbInList - returns EQ if VERB is in a list pointed to by A1
+* 
+* The list must be BYTES terminated by a -1 NOT ZERO!
+*
+	XDEF	VerbInList
+
+VerbInList
+
+	MOVE.L	D0,-(A7)
+	MOVE.W	VERB(A4),D0
+	CALL_S	D0InList
+	PULL_L	D0
+	RET
+
+*------------------------------------------
+
+	XDEF	D0InList
+
+D0InList
+
+* This used to be VerbInList, but in some cercumstances it needs to be
+* OLDVERB in list, so the above replaces the standard call.
+* and this routine tests against D0.
+
+	PUSH_L	D1/A1		;save scratch
+	CLR.W	D1		;clear to start
+10$
+	MOVE.B	(A1)+,D1	;get a verb from the list
+	CMP.B	#-1,D1		;terminator
+	BNE.S	20$		;nope
+	SETNE			;NE => was not in the list
+	BRA.S	90$		;exit, fail
+20$
+	CMP.W	D0,D1		;right verb (or whatever)?
+	BNE.S	10$		;NE => nope, try next EQ => success
+90$
+	PULL_L	D1/A1
+	RET
+
+*------------------------------------------
+
+      IFD	wantGLOBALIO
+
+*
+* ISIOFRE - can the indirect object be anywhere (like send letter to freddy)
+*
+* No input params (uses VERB)
+*
+* EXIT:
+*	EQ => yes
+*	NE => no
+*
+* How it works - the verbs 'pretend' to take global DIRECT objects and 
+* at the last moment ckeck em out (PROCESS)
+
+	XDEF	ISIOFRE
+	XREF	GlobalVerbs_IO,OLDVERB
+
+ISIOFRE
+
+	PUSH_L	D0/A1
+	LEA     GlobalVerbs_IO(A4),A1	;LIST OF VERBS WI GLOBAL inDIR OBJ
+	MOVE.W	VERB(A4),D0		;normal verb
+	BPL.S	10$			;fine
+	MOVE.W	OLDVERB(A4),D0		;else we are in a chk4pt.
+10$
+	CALL	D0InList		;search for it
+	PULL_L	D0/A1
+	RET
+	
+      ENDC	;wantGLOBALIO	
+
+	END

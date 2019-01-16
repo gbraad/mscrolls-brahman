@@ -1,0 +1,60 @@
+**************************************************************
+*
+*	10/27/87
+*	@(#)carried.elt	1.2
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+
+
+*--------------------------------
+* 
+* CARRIED - SUSSES IF AN ITEM IS
+*           CARRIED
+*
+* ON ENTRY - D0 = NOUN #
+*
+* ON EXIT - EQ = IS CARRIED/WORN/INTRINSIC
+*
+*--------------------------------
+ 
+	XDEF	CARRIED
+	XREF	SUBJECT,LASTA0,TOPNPC
+
+CARRIED
+ 
+	CLR.W   D7                 ;RETURN FLAG
+	PUSH_L  D1/D5              ;SCRATCH
+	TEST_W  SUBJECT(A4)        ;LOOKS LIKE A FRUDGE FOR HORSE..
+	BNE.S   50$                ;SEPARATE CASE (REKONS - KEN)
+	DO	VALID.NP	   ;VALID LEAVES ALLSORTS OF HANDY THINGS
+	MOVE.W  LASTA0+2(A4),D1    ;IN 'LASTA0+2' IS 8(A0).W OF 'TOP' ITEM
+	BEQ.S   90$                ;OF ALL THE VARIOUS THINGS LEADING TO
+	MOVE.B  LASTA0(A4),D1      ;THE NOUN, IN 'LASTA0' IS 6(A0).B
+	AND.B   #$C,D1             ;8(A0)=0 = ON INVE= CARRIED
+	BNE.S   90$                ;'$0C' MASK ALLOWES WORN&INTRINSIC
+10$
+	MOVEQ   #1,D7              ;SET 'NOT CARRIED' (ALSO NE) FLAG
+90$
+	PULL_L  D1/D5              ;RECOVER SCRATCH
+	TEST_B  D7                 ;SET EQ/NE FLAG
+	RET                        ;EXIT
+	
+50$
+	CALL    TOPNPC             ;TO D4 - FIND NPC 'CARRYING' OBJ
+	CMP.W   SUBJECT(A4),D4     ;ON HIS INV?
+	BNE.S   10$                ;NO, FAIL
+	CMP.W   D4,D0              ;NPC DOES *NOT* CARRY HIMSELF!
+	BEQ.S   10$                ;SO D0=D4 = NO GOOD
+	BRA.S   90$                ;ELSE OK
+  
+*--------------------------------
+
+
+
+	END

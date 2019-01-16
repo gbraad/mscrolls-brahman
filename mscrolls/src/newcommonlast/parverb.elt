@@ -1,0 +1,112 @@
+**************************************************************
+*
+*   %G%
+*   %W%
+*
+**************************************************************
+
+
+    SECTION "ADV",CODE
+
+    include "equates.i"
+    include "macros.i"
+    include "verbequ.i"
+    include "scenequ.i"
+
+
+*--------------------------------
+
+    XDEF    PARVERB
+    XREF    VERB2,PARSTO,ADVERB,ERR4,GO
+    
+PARVERB
+    
+*PARSE A VERB
+    
+*ENTRY:
+*D6,D5 ALREADY VERB FOUND
+    
+    IFNE    YCHEAT
+    CMP.W   #VNLOOP,D5
+    BNE.S   01$                ;NO
+
+    IFD wantFAST_GETWORD
+    CALL    FGETWORD
+    ENDC    ;wantFAST_GETWORD
+
+    IFND    wantFAST_GETWORD
+    DO  GETWRD              ;WIL BE A VERB
+    ENDC    ;!wantFAST_GETWORD
+
+    MOVE.W  D5,VERB2(A4)
+01$
+    ENDC
+    
+    DO  NOERR
+    MOVE.L  A6,PARSTO(A4)
+
+    IFD wantFAST_GETWORD
+    CALL    FGETWORD
+    ENDC    ;wantFAST_GETWORD
+    
+    IFND    wantFAST_GETWORD
+    DO  GETWRD              ;NEXT
+    ENDC    ;!wantFAST_GETWORD
+    
+    TEST_W  D7
+    BNE.S   20$
+    CMP.W   #SECT.DIR,D6       ;FOR UP/DOWN
+    BNE.S   10$                ;NO, CHK FOR CONJ TYPE
+    
+    BSET    #15,D5             ;FLAG AS DIR
+    MOVE.W  D5,ADVERB(A4)      ;INCASE IT COMES BACK
+    MOVE.L  (A7)+,A3           ;ADJust stack?
+    BCLR    #15,D5
+    CALL    GO
+    MOVE.L  A3,-(A7)           ;RET, RET
+
+    MOVE.L  A6,PARSTO(A4)
+    DO  GETWRD              ;OK, NEXT
+10$
+    CMP.B   #SECT.VERB,D6
+    BNE.S   11$
+    CMP.W   #VNEXIT,D5         ;SPECIAL CASE
+    BEQ.S   12$
+11$
+    CMP.W   #SECT.CONJ,D6      ;CONJ/
+    BNE.S   20$                ;NO, OK RET POSN
+12$
+    MOVE.W  D5,ADVERB(A4)      ;SAVE IT
+    BRA.S   90$
+20$
+    MOVE.L  PARSTO(A4),A6
+    DO  CLRADJ
+90$
+    CLR.W   ERR4(A4)
+    DOGO    YESERR  
+*-----------------------------------------
+
+    IFD wantFAST_GETWORD
+    XDEF    FGETWORD
+
+    XREF    FNDWRD,LB3,SEARCHER,MATCHBUF
+
+FGETWORD
+
+* Fast getword look ahead (for no ambiguities)
+
+    DO  FNDWRD          ;POP IF NO WORD
+    TEST_B  D7
+    BNE LB3         ;RTS!
+    MOVE.L  A1,-(A7)
+    CALL    SEARCHER
+    MOVE.L  (A7)+,A1        ;restore
+    LEA MATCHBUF(A4),A0     ;get buffer
+    MOVE.W  (A0)+,D6
+    MOVE.W  (A0)+,D5        ;setup section & word number
+    RET
+    ENDC    ;wantFAST_GETWORD
+
+*-----------------------------------------
+
+    END
