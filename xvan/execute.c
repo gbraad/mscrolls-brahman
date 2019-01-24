@@ -34,37 +34,37 @@
 /* Function declarations */
 /*************************/
 
-int32_t  NextOpcode(int32_t**);
-char     *GetDescr(int32_t, int32_t);
-int32_t  GetTrigger(int32_t, int32_t, int32_t**);
-int32_t  EvalCond(int32_t**, int32_t*, usrActionRec*, int32_t, int32_t*);
-int32_t  SkipCond(int32_t**);
-int32_t  Ite(int32_t**, int32_t, int32_t*, usrActionRec*, int32_t, int32_t*);
-int32_t  MatchActionRec(compActionRec*, usrActionRec*, int32_t);
-int32_t  ReplaceItObjects(usrActionRec*);
-int32_t  XeqActionRec(usrActionRec*, int32_t*, int32_t);
-int32_t  XeqPrologue(int32_t);
-int32_t  XeqEpilogue(int32_t);
-int32_t  XeqVerbDefault(usrActionRec*, int32_t);
-int32_t  Execute(int32_t*, usrActionRec*, int32_t, int32_t*);
-int32_t  XeqTrigger(int32_t, int32_t, usrActionRec*, int32_t);
-int32_t  IsWordId(int32_t);
-int32_t  IsVerbId(int32_t);
-int32_t  IsLocId(int32_t);
-int32_t  IsObjId(int32_t);
-int32_t  IsCDescrId(int32_t);
-int32_t  IsLDescrId(int32_t);
-int32_t  IsCFlagId(int32_t);
-int32_t  IsLFlagId(int32_t);
-int32_t  IsDescrId(int32_t);
-int32_t  IsCTriggId(int32_t);
-int32_t  IsLTriggId(int32_t);
-int32_t  IsTriggId(int32_t);
-int32_t  IsTimerId(int32_t);
-int32_t  IsTestFun(int32_t);
-int32_t  IsIntAct(int32_t);
-int32_t  IsCAttrId(int32_t);
-int32_t  IsLAttrId(int32_t);
+int32_t      NextOpcode(int32_t**);
+char         *GetDescr(int32_t, int32_t);
+int32_t      GetTrigger(int32_t, int32_t, int32_t**);
+int32_t      EvalCond(int32_t**, int32_t*, usrActionRec*, int32_t, int32_t*);
+int32_t      SkipCond(int32_t**);
+resultStruct Ite(int32_t**, int32_t, int32_t*, usrActionRec*, int32_t, int32_t*);
+int32_t      MatchActionRec(compActionRec*, usrActionRec*, int32_t);
+int32_t      ReplaceItObjects(usrActionRec*);
+resultStruct XeqActionRec(usrActionRec*, int32_t*, int32_t);
+resultStruct XeqPrologue(int32_t);
+resultStruct XeqEpilogue(int32_t);
+resultStruct XeqVerbDefault(usrActionRec*, int32_t);
+resultStruct Execute(int32_t*, usrActionRec*, int32_t, int32_t*);
+resultStruct XeqTrigger(int32_t, int32_t, usrActionRec*, int32_t);
+int32_t      IsWordId(int32_t);
+int32_t      IsVerbId(int32_t);
+int32_t      IsLocId(int32_t);
+int32_t      IsObjId(int32_t);
+int32_t      IsCDescrId(int32_t);
+int32_t      IsLDescrId(int32_t);
+int32_t      IsCFlagId(int32_t);
+int32_t      IsLFlagId(int32_t);
+int32_t      IsDescrId(int32_t);
+int32_t      IsCTriggId(int32_t);
+int32_t      IsLTriggId(int32_t);
+int32_t      IsTriggId(int32_t);
+int32_t      IsTimerId(int32_t);
+int32_t      IsTestFun(int32_t);
+int32_t      IsIntAct(int32_t);
+int32_t      IsCAttrId(int32_t);
+int32_t      IsLAttrId(int32_t);
 
 /************************/
 /* Function definitions */
@@ -290,7 +290,7 @@ int32_t SkipCond(trigger)
 }
 
 
-int32_t Ite(trigger, state, opcode, action_rec, subject_index, com_trig)
+resultStruct Ite(trigger, state, opcode, action_rec, subject_index, com_trig)
  int32_t      **trigger;
  int32_t      state;
  int32_t      *opcode;
@@ -298,9 +298,9 @@ int32_t Ite(trigger, state, opcode, action_rec, subject_index, com_trig)
  int32_t      subject_index;
  int32_t      *com_trig;
 {
-  int32_t new_state  = XEQ;
-  int32_t result     = CONTINUE;
-  int32_t first_else = 1;         /* The next ELSE will be the first. */
+  int32_t      new_state  = XEQ;
+  resultStruct result     = {CONTINUE, 0};
+  int32_t      first_else = 1;               /* The next ELSE will be the first. */
 
   /* The IF keyword has been read by the caller */
 
@@ -337,11 +337,11 @@ int32_t Ite(trigger, state, opcode, action_rec, subject_index, com_trig)
             break;
           default:
             PrintError(13, NULL, "Ite()");
-            return(ERROR);
+            return( (resultStruct) {ERROR, 0} );
         } /* switch */
 
         result = Ite(trigger, new_state, opcode, action_rec, subject_index, com_trig);
-        if (result != CONTINUE)
+        if (result.tag != CONTINUE)
           /* Finished with this trigger. */
           return(result);
         break;
@@ -367,7 +367,7 @@ int32_t Ite(trigger, state, opcode, action_rec, subject_index, com_trig)
           *opcode = NextOpcode(trigger);
         } /* if */
         else {
-          return(CONTINUE);  /* Don't read new opcode. */}
+          return( (resultStruct) {CONTINUE, 0} );  /* Don't read new opcode. */}
       break;
       case ENDIF:
         *opcode = NextOpcode(trigger);
@@ -379,7 +379,7 @@ int32_t Ite(trigger, state, opcode, action_rec, subject_index, com_trig)
           PrintError(10, &((resultStruct) {VALUE, *opcode}), "Ite()");
           /* Although there is an error, the show must go on. */
           /* We might also return QUIT here.                  */
-          return(DISAGREE);
+          return( (resultStruct) {DISAGREE, 0} );
         }
 
         /* It's an internal action.               */
@@ -397,7 +397,7 @@ int32_t Ite(trigger, state, opcode, action_rec, subject_index, com_trig)
                 /* do nothing */
                 break;
               default:
-                if (result != CONTINUE)
+                if (result.tag != CONTINUE)
                   /* finished with this trigger */
                   return(result);
                 break;
@@ -575,14 +575,14 @@ int32_t ReplaceItObjects(action_rec)
   }
 
   if (action_rec->specifier == IT) {
-    action_rec->specifier = it_value;
+    action_rec->specifier = (it_value == NONE ? NO_ID : it_value);
   }
 
     return(OK);
 }
 
 
-int32_t XeqActionRec(action_rec, xeq_list, subject_index)
+resultStruct XeqActionRec(action_rec, xeq_list, subject_index)
  usrActionRec *action_rec;
  int32_t      *xeq_list;
  int32_t      subject_index; /* Tells which subject to use from */
@@ -592,8 +592,8 @@ int32_t XeqActionRec(action_rec, xeq_list, subject_index)
   compActionRec *arec       = NULL;
   int32_t       found       = 0;
   int32_t       i           = 0;
-  int32_t       result      = NO_MATCH;
-  int32_t       next_result = NO_MATCH;
+  resultStruct  result      = {NO_MATCH, 0};
+  resultStruct  next_result = {NO_MATCH, 0};
 
   /* This function offers action_rec to the locations and objects   */
   /* in xeq_list, until one of them returns DISAGREE, QUIT, GET_XXX */
@@ -604,9 +604,9 @@ int32_t XeqActionRec(action_rec, xeq_list, subject_index)
   /* NO_MATCH is returned only if all executed triggers return it.  */
 
   id = xeq_list[0];
-  while (id != NO_ID && i < (nr_of_locs+nr_of_objs) && result != GET_SUBJECT &&
-        result != GET_SPECIFIER && result != GET_ANSWER &&
-        result != DISAGREE && result != QUIT) {
+  while (id != NO_ID && i < (nr_of_locs+nr_of_objs) && result.tag != GET_SUBJECT &&
+        result.tag != GET_SPECIFIER && result.tag != GET_ANSWER &&
+        result.tag != DISAGREE && result.tag != QUIT) {
 
     /* Try to find a matching action record within id.  */
       if (!InMem(id))
@@ -624,7 +624,7 @@ int32_t XeqActionRec(action_rec, xeq_list, subject_index)
 
     else {
       PrintError(11, NULL, NULL);
-      return(DISAGREE);
+      return( (resultStruct) {DISAGREE, 0} );
     }
 
     while (arec != NULL && !found) {
@@ -634,8 +634,10 @@ int32_t XeqActionRec(action_rec, xeq_list, subject_index)
 
         /* Execute arec's trigger. */
         next_result = XeqTrigger(arec->execute[0], arec->execute[1], action_rec, subject_index);
-        if (next_result != NO_MATCH)
-          result = next_result;
+        if (next_result.tag != NO_MATCH) {
+          result.tag   = next_result.tag;
+          result.value = next_result.value;
+        }
       }
       else
         arec = arec->next;
@@ -645,8 +647,10 @@ int32_t XeqActionRec(action_rec, xeq_list, subject_index)
     /* execute the default trigger if it was defined.              */
     if (!found) {
       next_result = XeqTrigger(id, DEFAULT_TRIGG, action_rec, subject_index);
-        if (next_result != NO_MATCH)
-          result = next_result;
+        if (next_result.tag != NO_MATCH) {
+          result.tag   = next_result.tag;
+          result.value = next_result.value;
+        }
     }
 
     /* Reset found variable for next loop. */
@@ -660,7 +664,7 @@ int32_t XeqActionRec(action_rec, xeq_list, subject_index)
 }
 
 
-int32_t XeqPrologue(verb_id)
+resultStruct XeqPrologue(verb_id)
  int32_t verb_id;
 {
   /* This routine executes the verb's prologue.             */
@@ -677,9 +681,9 @@ int32_t XeqPrologue(verb_id)
     switch (Load(verb_id)) {
       case ERROR:
         PrintError(12, &((resultStruct) {VALUE, verb_id}), "XeqPrologue()");
-        return(QUIT);
+        return( (resultStruct) {QUIT, 0} );
       case NO_MATCH:
-        return(NO_MATCH);
+        return( (resultStruct) {NO_MATCH, 0} );
       default:
         /* OK */
         break;
@@ -695,13 +699,14 @@ int32_t XeqPrologue(verb_id)
     /* compiler) we can set action_rec  and com_trig to */
     /* NULL and subject_index to -1 here, because they  */
     /* will not be used.                                */
+
     return(Execute(verb->code, NULL, -1, NULL));
 
-  return(NO_MATCH);
+  return( (resultStruct) {NO_MATCH, 0} );
 }
 
 
-int32_t XeqEpilogue(verb_id)
+resultStruct XeqEpilogue(verb_id)
  int32_t verb_id;
 {
   /* This routine executes the verb's epilogue.           */
@@ -720,9 +725,9 @@ int32_t XeqEpilogue(verb_id)
     switch (Load(verb_id)) {
       case ERROR:
         PrintError(12, &((resultStruct) {VALUE, verb_id}), "XeqEpilogue()");
-        return(QUIT);
+        return( (resultStruct) {QUIT, 0} );
       case NO_MATCH:
-        return(NO_MATCH);
+        return( (resultStruct) {NO_MATCH, 0} );
       default:
         /* OK */
         break;
@@ -737,7 +742,7 @@ int32_t XeqEpilogue(verb_id)
     code = verb->next->code;
   else
     /* No epilogue. */
-    return(NO_MATCH);
+    return( (resultStruct) {NO_MATCH, 0} );
 
     /* Execute() needs action_rec, subject_index and    */
     /* com_trig vars for functions runverb() and        */
@@ -746,11 +751,12 @@ int32_t XeqEpilogue(verb_id)
     /* compiler) we can set action_rec  and com_trig to */
     /* NULL and subject_index to -1 here, because they  */
     /* will not be used.                                */
+
   return(Execute(code, NULL, -1, NULL));
 }
 
 
-int32_t XeqVerbDefault(action_rec, subject_index)
+resultStruct XeqVerbDefault(action_rec, subject_index)
  usrActionRec *action_rec;
  int32_t      subject_index;
 {
@@ -780,16 +786,16 @@ int32_t XeqVerbDefault(action_rec, subject_index)
 
   verbInfo      *verb  = NULL;
   int32_t       cont   = 1;
-  int32_t       result = NO_MATCH;
+  resultStruct  result = {NO_MATCH, 0};
   compActionRec *arec  = NULL;
 
   if (!InMem(action_rec->action1))
     switch (Load(action_rec->action1)) {
       case ERROR:
         PrintError(12, &((resultStruct) {VALUE, action_rec->action1}), "XeqVerbDefault()");
-        return(QUIT);
+        return( (resultStruct) {QUIT, 0} );
       case NO_MATCH: /* printf("Load geeft no_match\n"); */
-        return(NO_MATCH);
+        return( (resultStruct) {NO_MATCH, 0} );
       default: /* printf("Load geeft ok\n"); */
         /* OK */
         break;
@@ -816,7 +822,7 @@ int32_t XeqVerbDefault(action_rec, subject_index)
 }
 
 
-int32_t Execute(trigger, action_rec, subject_index, com_trig)
+resultStruct Execute(trigger, action_rec, subject_index, com_trig)
  int32_t      *trigger;
  usrActionRec *action_rec;
  int32_t      subject_index;
@@ -827,17 +833,17 @@ int32_t Execute(trigger, action_rec, subject_index, com_trig)
   /* Executing a trigger returns either: AGREE, */
   /* DISAGREE, GET_XXX, QUIT or NO_MATCH.       */
 
-  int32_t state     = XEQ;
-  int32_t new_state = XEQ;
-  int32_t opcode;
-  int32_t result    = AGREE; /* By default, a trigger returns agree. */
+  int32_t      state     = XEQ;
+  int32_t      new_state = XEQ;
+  int32_t      opcode;
+  resultStruct result    = {AGREE, 0}; /* By default, a trigger returns agree. */
 
   opcode = NextOpcode(&trigger);
 
   while (1) {
     switch (opcode) {
       case END_OF_CODE:
-        return((result == CONTINUE? AGREE : result));
+        return((result.tag == CONTINUE? (resultStruct) {AGREE, 0} : result));
       case IF:
         switch (state) {
           case XEQ:
@@ -851,10 +857,11 @@ int32_t Execute(trigger, action_rec, subject_index, com_trig)
             break;
           default:
             PrintError(13, NULL, "Execute()");
-            return(QUIT);
+            return( (resultStruct) {QUIT, 0} );
         } /* switch */
 
-        if ((result = Ite(&trigger, new_state, &opcode, action_rec, subject_index, com_trig)) != CONTINUE)
+        result = Ite(&trigger, new_state, &opcode, action_rec, subject_index, com_trig);
+        if (result.tag != CONTINUE)
           /* Finished with this trigger. */
           return(result);
         break;
@@ -863,7 +870,7 @@ int32_t Execute(trigger, action_rec, subject_index, com_trig)
         if (!(IsIntAct(opcode) || IsCAttrId(opcode) ||
                                   IsLAttrId(opcode))) {
           PrintError(12, &((resultStruct) {VALUE,opcode}), "Execute()");
-          return(QUIT);
+          return( (resultStruct) {QUIT, 0} );
         }
 
         /* It's an internal action.                     */
@@ -877,6 +884,7 @@ int32_t Execute(trigger, action_rec, subject_index, com_trig)
             /* return the next opcode.            */
 
             result = XeqIntAct(opcode, &trigger, action_rec, subject_index);
+
             /* Following are internal actions that return something */
             /* other than agree/disagree/nomatch or quit (like a    */
             /* number). In case we test the return value against    */
@@ -895,11 +903,11 @@ int32_t Execute(trigger, action_rec, subject_index, com_trig)
               case SYNCHRONIZE: /* returns a number    */
               case SCORE:       /* returns a number    */
               case FIRSTDIR:    /* returns a direction */
-              case DEST:        /* returns a direction */
+              case DEST:        /* returns a location  */
                 /* do nothing */
                 break;
               default:
-                if (result != CONTINUE)
+                if (result.tag != CONTINUE)
                   /* finished with this trigger */
                   return(result);
                 break;
@@ -921,18 +929,18 @@ int32_t Execute(trigger, action_rec, subject_index, com_trig)
 }
 
 
-int32_t XeqTrigger(owner, id, action_rec, subject_index)
+resultStruct XeqTrigger(owner, id, action_rec, subject_index)
  int32_t      owner;
  int32_t      id;
  usrActionRec *action_rec;
  int32_t      subject_index;
 {
-  int32_t *triggers[2];         /* Pointers to start of trigger code. */
-  int32_t result = NO_MATCH;
-  int32_t old_active_entity = active_entity;
+  int32_t      *triggers[2];                        /* Pointers to start of trigger code. */
+  resultStruct result            = {NO_MATCH, 0};
+  int32_t      old_active_entity = active_entity;
 
   if (!GetTrigger(owner, id, triggers))
-    return(QUIT);
+    return( (resultStruct) {QUIT, 0} );
 
   /* triggers[0] is override code (defined with loc/obj). */
   /* triggers[1] is common trigger code.                  */
@@ -953,7 +961,8 @@ int32_t XeqTrigger(owner, id, action_rec, subject_index)
   if (triggers[0] != NULL) {
     /* there is override code (local trigger). Pass on  */
     /* the pointer to the common trigger to Execute()   */
-    if ((result = Execute(triggers[0], action_rec, subject_index, triggers[1])) == NO_MATCH)
+    result = Execute(triggers[0], action_rec, subject_index, triggers[1]);
+    if (result.tag == NO_MATCH)
       /* Execute the common trigger code, if it exists. */
       if (triggers[1] != NULL)
         /* there is a common trigger. From the common   */

@@ -76,7 +76,8 @@ int32_t HandleTimers(action_rec, subject_index)
  usrActionRec *action_rec;
  int32_t      subject_index;
 {
-  int32_t i = 0;
+  int32_t      i = 0;
+  resultStruct result;
 
   /* HandleTimers() returns either OK or QUIT. */
   for (i=0; i<nr_of_timers; i++) {
@@ -101,24 +102,24 @@ int32_t HandleTimers(action_rec, subject_index)
             /* to be executed only once, set timer to STOP after  */
             /* first time executing the trigger.                  */
 
-            if (XeqTrigger(timers[i].execute[0],
-                           timers[i].execute[1], action_rec, subject_index ) == QUIT)
+            result = XeqTrigger(timers[i].execute[0], timers[i].execute[1], action_rec, subject_index);
+            if (result.tag == QUIT)
               return(QUIT);
           break;
         case OR_MORE:
           if (timers[i].value >= timers[i].trigger_at)
             /* Trigger has fired. */
             /* If trigger returns QUIT, we must exit immediately. */
-            if (XeqTrigger(timers[i].execute[0],
-                           timers[i].execute[1], action_rec, subject_index) == QUIT)
+            result = XeqTrigger(timers[i].execute[0], timers[i].execute[1], action_rec, subject_index);
+            if (result.tag == QUIT)
               return(QUIT);
           break;
         case OR_LESS:
           if (timers[i].value <= timers[i].trigger_at)
             /* Trigger has fired. */
             /* If trigger returns QUIT, we must exit immediately. */
-            if (XeqTrigger(timers[i].execute[0],
-                           timers[i].execute[1], action_rec, subject_index) == QUIT)
+            result = XeqTrigger(timers[i].execute[0], timers[i].execute[1], action_rec, subject_index);
+            if ( result.tag == QUIT)
               return(QUIT);
           break;
         default:

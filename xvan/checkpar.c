@@ -494,6 +494,30 @@ int32_t CheckPars(fun_code, type1, type2, type3, type4, type5)
       return(OK);
       break;
 
+    case GET_SPECIFIER:
+      /*****************/
+      /* getspec(word) */
+      /*****************/
+
+      if (type1 != WORD_ID) {
+        TypeErr(1, "GET_SPEC", "word");
+        return(ERROR);
+      }
+      return(OK);
+      break;
+
+    case GET_SUBJECT:
+      /********************/
+      /* getsubject(word) */
+      /********************/
+
+      if (type1 != WORD_ID) {
+        TypeErr(1, "GET_SUBJECT", "word");
+        return(ERROR);
+      }
+      return(OK);
+      break;
+
     case GO_TO:
       /***********************/
       /* goto(obj, loc, num) */

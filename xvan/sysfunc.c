@@ -180,11 +180,11 @@ void ConvSpecId(id, type)
 
 
 int32_t GetPar(owner, par, type, str, trigger)
- int32_t *owner;
- int32_t *par;
- int32_t *type;
- char    **str;      /* Needed to return address of string par. */
- int32_t **trigger;
+ int32_t  *owner;
+ int32_t  *par;
+ int32_t  *type;
+ char     **str;      /* Needed to return address of string par. */
+ int32_t  **trigger;
 {
   /* This routine expects a parameter at the start of *trigger.   */
   /* It fills out the parameter plus it's owner (if any). In case */
@@ -197,11 +197,12 @@ int32_t GetPar(owner, par, type, str, trigger)
   /*                   loc/obj attr [attr attr ..] EOP */
   /*                   <wildcard> EOP                  */
 
-  int32_t  ratio;
-  int32_t  i;
-  attrInfo *attributes;
-  int32_t  index;
-  int32_t  next;
+  int32_t      ratio;
+  int32_t      i;
+  attrInfo     *attributes;
+  int32_t      index;
+  int32_t      next;
+  resultStruct result;
 
   next = NextOpcode(trigger);
 
@@ -259,7 +260,7 @@ int32_t GetPar(owner, par, type, str, trigger)
   /* In case an attribute parameter is encountered, GetPar() will return the value   */
   /* and type of the content of the attribute (it will not return the attribute id). */
   /* In case the attribute id must be returned (e.g. for function SetAttribute()),   */
-  /* the function GetLvaluePar() should be used.                                  */
+  /* the function GetLvaluePar() should be used.                                     */
 
   else if (IsCAttrId(next) || IsLAttrId(next)) {
     *owner = *par;
@@ -302,7 +303,8 @@ int32_t GetPar(owner, par, type, str, trigger)
     /* set action_rec to NULL and             */
     /* subject_index to -1                    */
     *owner = NO_ID;
-    *par   = XeqIntAct(next, trigger, NULL, -1);
+    result = XeqIntAct(next, trigger, NULL, -1);
+    *par   = result.value;
 
     /* Do not test for QUIT here. If rnd()    */
     /* returns the numerical value for        */
@@ -313,19 +315,15 @@ int32_t GetPar(owner, par, type, str, trigger)
       case RAND:
         *type = NUMBER;
         break;
-
       case DISTANCE:
         *type = NUMBER;
         break;
-
       case COUNT:
         *type = NUMBER;
         break;
-
       case SYNCHRONIZE:
         *type = NUMBER;
         break;
-
       case FIRSTDIR:
         if (*par == NONE)
           *type = NO_TYPE;
@@ -335,7 +333,6 @@ int32_t GetPar(owner, par, type, str, trigger)
           else
             *type = DIRECTIONS;
         break;
-
       case DEST:
         if (*par == NONE)
           *type = NO_TYPE;
@@ -345,7 +342,6 @@ int32_t GetPar(owner, par, type, str, trigger)
           else
             *type = LOC_ID;
         break;
-
       case OWNER:
         /* possible returns for owner are */
         /* location, object or NONE       */
@@ -357,7 +353,6 @@ int32_t GetPar(owner, par, type, str, trigger)
           else
             *type = IsLocId(*par) ? LOC_ID : OBJ_ID;
         break;
-
       default:
         /* all other internal actions */
         *type = NO_TYPE;
@@ -463,13 +458,14 @@ int32_t GetLvaluePar(owner, par, type, str, trigger)
  int32_t **trigger;
 {
   /* This routine expects an attribute parameter at the start of *trigger. */
-  /* It returns the attribute id plus it's owner (if any). If the actual   */
-  /* value of the attribute (it's content) is needed, function GetPar()    */
+  /* It returns the attribute id plus its owner (if any). If the actual    */
+  /* value of the attribute (its content) is needed, function GetPar()     */
   /* should be used.                                                       */
 
   /* Parameter syntax: loc/obj attribute EOP */
 
-  int32_t next;
+  int32_t      next;
+  resultStruct result;
 
   next = NextOpcode(trigger);
 
@@ -479,7 +475,8 @@ int32_t GetLvaluePar(owner, par, type, str, trigger)
     /* subject_index to -1                    */
     switch (next) {
       case OWNER:
-        next = XeqIntAct(next, trigger, NULL, -1);
+        result = XeqIntAct(next, trigger, NULL, -1);
+        next   = result.value;
         /* error in return value are caught by the last else statement of this function. */
         break;
       default:
@@ -524,7 +521,7 @@ int32_t GetLvaluePar(owner, par, type, str, trigger)
     } /* else */
   } /* else */
   /* skip EOP */
-  NextOpcode (trigger);
+  NextOpcode(trigger);
   return(OK);
 }
 
@@ -943,10 +940,10 @@ int32_t Exit(par, action_rec, subject_index)
   /* Executes the t_exit triggers for par and all its */
   /* contained objects.                               */
 
-  int32_t next_result = AGREE;
-  int32_t result      = AGREE; /* Not NO_MATCH, since we have no */
-  int32_t i           = 0;     /* default t_exit.                */
-  int32_t* list = _alloca((nr_of_locs+nr_of_objs)*sizeof(int32_t));
+  resultStruct next_result = {AGREE, 0};
+  resultStruct result      = {AGREE, 0}; /* Not NO_MATCH, since we have no */
+  int32_t i = 0;                         /* default t_exit.                */
+  int32_t list[nr_of_locs+nr_of_objs];
 
   /* Create the containment list for par. */
   /* par is placed at start of list.      */
@@ -954,14 +951,16 @@ int32_t Exit(par, action_rec, subject_index)
 
   par = list[i];
 
-  while (par != NO_ID && i < (nr_of_locs+nr_of_objs) && result != DISAGREE && result != QUIT) {
+  while (par != NO_ID && i < (nr_of_locs+nr_of_objs) && result.tag != DISAGREE && result.tag != QUIT) {
     next_result = XeqTrigger(par, EXITT, action_rec, subject_index);
-    if (next_result != AGREE && next_result != NO_MATCH)
-      result = next_result;
+    if (next_result.tag != AGREE && next_result.tag != NO_MATCH) {
+      result.tag   = next_result.tag;
+      result.value = next_result.value;
+    }
     par = list[++i];
   }
 
-  return(result);
+  return(result.tag);
 }
 
 
@@ -973,10 +972,10 @@ int32_t Entrance(par, action_rec, subject_index)
   /* Executes the t_entrance triggers for par and all its */
   /* contained objects.                                   */
 
-  int32_t next_result = AGREE;
-  int32_t result      = AGREE; /* Not NO_MATCH, since we have no */
-  int32_t i           = 0;     /* default t_entrance.            */
-  int32_t* list = _alloca((nr_of_locs+nr_of_objs)*sizeof(int32_t));
+  resultStruct next_result = {AGREE, 0};
+  resultStruct result      = {AGREE, 0}; /* Not NO_MATCH, since we have no */
+  int32_t i = 0;                         /* default t_entrance.            */
+  int32_t list[nr_of_locs+nr_of_objs];
 
   /* Create the containment list for par. */
   /* par is placed at start of list.      */
@@ -984,14 +983,16 @@ int32_t Entrance(par, action_rec, subject_index)
 
   par = list[i];
 
-  while (par != NO_ID && i < nr_of_locs+nr_of_objs && result != DISAGREE && result != QUIT) {
+  while (par != NO_ID && i < nr_of_locs+nr_of_objs && result.tag != DISAGREE && result.tag != QUIT) {
     next_result = XeqTrigger(par, ENTR, action_rec, subject_index);
-    if (next_result != AGREE && next_result != NO_MATCH)
-      result = next_result;
+    if (next_result.tag != AGREE && next_result.tag != NO_MATCH) {
+      result.tag   = next_result.tag;
+      result.value = next_result.value;
+    }
     par = list[++i];
   }
 
-  return(result);
+  return(result.tag);
 }
 
 
@@ -1354,12 +1355,12 @@ int32_t Synchronize(id, trigger_id, flag, flag_val, level, action_rec, subject_i
  usrActionRec *action_rec;
  int32_t      subject_index;
 {
-  int      i        = 0;
-  int32_t  count    = 0;
-  int32_t  cont     = 1;
-  int32_t  index    = 0;
-  int32_t  result   = NO_MATCH;
-  int32_t* list     = _alloca((nr_of_objs + 1)*sizeof(int32_t));
+  int          i        = 0;
+  int32_t      count    = 0;
+  int32_t      cont     = 1;
+  int32_t      list[nr_of_objs+1];
+  int32_t      index    = 0;
+  resultStruct result   = {NO_MATCH, 0};
 
   /* Calls trigger_id for each object that is    */
   /* contained in id with flag set to flag_val.  */
@@ -1385,7 +1386,7 @@ int32_t Synchronize(id, trigger_id, flag, flag_val, level, action_rec, subject_i
       /* execute trigger_id */
       /* returns either: AGREE, DISAGREE, GET_XXX, QUIT or NO_MATCH. */
       result = XeqTrigger(list[i], trigger_id, action_rec, subject_index);
-      switch (result) {
+      switch (result.tag) {
         case AGREE:
           count++;
           break;
@@ -1398,7 +1399,7 @@ int32_t Synchronize(id, trigger_id, flag, flag_val, level, action_rec, subject_i
           /* do not update the count */
           break;
         default:
-          PrintError(71, &((resultStruct) {VALUE,result}), NULL);
+          PrintError(71, &((resultStruct) {VALUE,result.tag}), NULL);
           break;
       }
     }

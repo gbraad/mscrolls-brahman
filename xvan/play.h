@@ -28,37 +28,37 @@
 /* External declarations */
 /*************************/
 
-extern int32_t   nr_of_locs;                                   /* fileio.c   */
-extern int32_t   nr_of_objs;                                   /* fileio.c   */
-extern dirInfo   *obj_dir;                                     /* fileio.c   */
-extern storyInfo story_info;                                   /* init.c     */
+extern int32_t      nr_of_locs;                                     /* fileio.c   */
+extern int32_t      nr_of_objs;                                     /* fileio.c   */
+extern dirInfo      *obj_dir;                                       /* fileio.c   */
+extern storyInfo    story_info;                                     /* init.c     */
 
-extern int32_t   subject;                                      /* letsplay.c */
-extern int32_t   capital;                                      /* letsplay.c */
-extern int32_t   curr_loc;                                     /* letsplay.c */
+extern int32_t      subject;                                        /* letsplay.c */
+extern int32_t      capital;                                        /* letsplay.c */
+extern int32_t      curr_loc;                                       /* letsplay.c */
 
-extern char    *outputline;                                    /* init.c     */
+extern char         *outputline;                                    /* init.c     */
 
-extern void    Output(char*, int);                             /* output.c   */
-extern void    PrintError(int16_t, resultStruct*, char*);      /* errors.c   */
-extern void    PrintString(char*, int);                        /* output.c   */
-extern int32_t FilledOut(extendedSysDescr*);                   /* trnslate.c */
-extern int32_t CountSubjectsInParsedInput(parsedInput*);       /* trnslate.h */
-extern int32_t SplitSubject(parsedInput*, int32_t);            /* trnslate.c */
-extern void    PrintNotFound(extendedSysDescr*);               /* trnslate.c */
-extern int32_t CheckDoTimers(void);                            /* timers.c   */
-extern int32_t HandleTimers(usrActionRec*, int32_t);           /* timers.c   */
-extern void    InitParsedInput(parsedInput*);                  /* syntax.c   */
-extern void    PrintParsedInput(parsedInput*);                 /* debug.c    */
-extern int32_t InitUsrActionRec(usrActionRec*);                /* trnslate.c */
-extern int32_t PrintUsrActionRec(usrActionRec*);               /* debug.c    */
-extern int32_t ParseInput(char*, parsedInput*, int32_t);       /* syntax.c   */
-extern int32_t ReplaceItObjects(usrActionRec*);                /* execute.c  */
-extern int32_t XeqPrologue(int32_t);                           /* execute.c  */
-extern int32_t XeqEpilogue(int32_t);                           /* execute.c  */
-extern int32_t XeqActionRec(usrActionRec*, int32_t*, int32_t); /* execute.c  */
-extern int32_t XeqVerbDefault(usrActionRec*, int32_t);         /* execute.c  */
-extern int32_t ContList(int32_t, int32_t*, int32_t);           /* sysfunc.c  */
+extern void         Output(char*, int);                             /* output.c   */
+extern void         PrintError(int16_t, resultStruct*, char*);      /* errors.c   */
+extern void         PrintString(char*, int);                        /* output.c   */
+extern int32_t      FilledOut(extendedSysDescr*);                   /* trnslate.c */
+extern int32_t      CountSubjectsInParsedInput(parsedInput*);       /* trnslate.h */
+extern int32_t      SplitSubject(parsedInput*, int32_t);            /* trnslate.c */
+extern void         PrintNotFound(extendedSysDescr*);               /* trnslate.c */
+extern int32_t      CheckDoTimers(void);                            /* timers.c   */
+extern int32_t      HandleTimers(usrActionRec*, int32_t);           /* timers.c   */
+extern void         InitParsedInput(parsedInput*);                  /* syntax.c   */
+extern void         PrintParsedInput(parsedInput*);                 /* debug.c    */
+extern int32_t      InitUsrActionRec(usrActionRec*);                /* trnslate.c */
+extern int32_t      PrintUsrActionRec(usrActionRec*);               /* debug.c    */
+extern int32_t      ParseInput(char*, parsedInput*, int32_t);       /* syntax.c   */
+extern int32_t      ReplaceItObjects(usrActionRec*);                /* execute.c  */
+extern resultStruct XeqPrologue(int32_t);                           /* execute.c  */
+extern resultStruct XeqEpilogue(int32_t);                           /* execute.c  */
+extern resultStruct XeqActionRec(usrActionRec*, int32_t*, int32_t); /* execute.c  */
+extern resultStruct XeqVerbDefault(usrActionRec*, int32_t);         /* execute.c  */
+extern int32_t      ContList(int32_t, int32_t*, int32_t);           /* sysfunc.c  */
 
 extern resultStruct Translate(parsedInput*, int32_t, usrActionRec*, char*);  /* trnslate.c */
 

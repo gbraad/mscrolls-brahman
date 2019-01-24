@@ -54,12 +54,15 @@ int32_t Play(user_input)
   static usrActionRec action_rec;
   static int32_t      parse_syntax = LINE;  /* Tells what syntax to parse. */
   int32_t             subject_index = 0;    /* Tells which subject to use  */
-                                     /* from action_rec.            */
-
-  static int32_t      parse_result; /* Needed to process result of ParseInput(). */
-  static resultStruct translate_result = {OK, OK};
+                                            /* from action_rec.            */
 
   int32_t* cont_list = _alloca((nr_of_locs+nr_of_objs)*sizeof(int32_t));
+
+  static int32_t      parse_result; /* Needed to process result of ParseInput(). */
+  static resultStruct translate_result = {OK, 0};
+  static resultStruct arec_result;
+  static resultStruct prologue_result;
+  static resultStruct verb_def_result;
 
 
   /* 17dec2016: added nr_of_subjects because introducing the parser  */
@@ -150,7 +153,8 @@ int32_t Play(user_input)
           /* Set the global subject variable. */
           subject = action_rec.subject[subject_index];
 
-          switch (XeqPrologue(action_rec.action1)) {
+            prologue_result = XeqPrologue(action_rec.action1);
+            switch (prologue_result.tag) {
             case QUIT:
               /* exit */
               return(QUIT);
@@ -166,13 +170,30 @@ int32_t Play(user_input)
               }
               break;
             case GET_SUBJECT:
-              /* The subject wasn't specified in the input. */
-              parse_syntax = SUBJECT;
-              break;
+                /* The subject wasn't specified in the input.  */
+                /* prologue_result.value may contain a word id */
+                /* that must be copied to the prepositions in  */
+                /* the parsed_input struct                     */
+                if (prologue_result.value != NO_ID) {
+                   if (parsed_input.prepositions.nr_of_prepositions != MAX_PARSE_PREPOS) {
+                    /* room for an extra preposition*/
+                    parsed_input.prepositions.preposition[parsed_input.
+                         prepositions.nr_of_prepositions++] = prologue_result.value;
+                  }
+                }
+                parse_syntax = SUBJECT;
+                break;
             case GET_SPECIFIER:
-              /* The specifier wasn't specified in the input. */
-              parse_syntax = SPECIFIER;
-              break;
+                /* The specifier wasn't specified in the input. */
+                if (prologue_result.value != NO_ID) {
+                   if (parsed_input.prepositions.nr_of_prepositions != MAX_PARSE_PREPOS) {
+                    /* room for an extra preposition*/
+                    parsed_input.prepositions.preposition[parsed_input.
+                         prepositions.nr_of_prepositions++] = prologue_result.value;
+                  }
+                }
+                parse_syntax = SPECIFIER;
+                break;
             case GET_ANSWER:
               /* We need an answer from the player. */
               parse_syntax = ANSWER;
@@ -184,21 +205,43 @@ int32_t Play(user_input)
                 return(ERROR); /* actually, is an error */
 
               /* Execute action_rec for list. */
-              switch (XeqActionRec(&action_rec, cont_list, subject_index)) {
+                arec_result = XeqActionRec(&action_rec, cont_list, subject_index);
+                switch (arec_result.tag) {
                 case NO_MATCH:
                   /* No match; execute the default verb code. */
-                  switch (XeqVerbDefault(&action_rec, subject_index)) {
+                    verb_def_result = XeqVerbDefault(&action_rec, subject_index);
+                    switch (verb_def_result.tag) {
                     case QUIT:
                       /* Stop */
                       return(QUIT);
                     case GET_SUBJECT:
-                      /* The subject wasn't specified in the input. */
-                      parse_syntax = SUBJECT;
-                      break;
+                        /* The subject wasn't specified in the input. */
+                        /* verb_def_result.value may contain a word id  */
+                        /* that must be copied to the prepositions in   */
+                        /* the parsed_input struct                      */
+                        if (verb_def_result.value != NO_ID) {
+                          if (parsed_input.prepositions.nr_of_prepositions != MAX_PARSE_PREPOS) {
+                            /* room for an extra preposition*/
+                            parsed_input.prepositions.preposition[parsed_input.
+                                 prepositions.nr_of_prepositions++] = verb_def_result.value;
+                          }
+                        }
+                        parse_syntax = SUBJECT;
+                        break;
                     case GET_SPECIFIER:
-                      /* The specifier wasn't specified in the input. */
-                      parse_syntax = SPECIFIER;
-                      break;
+                        /* The specifier wasn't specified in the input. */
+                        /* verb_def_result.value may contain a word id  */
+                        /* that must be copied to the prepositions in   */
+                        /* the parsed_input struct                      */ PrintString("Hoi", 0);
+                        if (verb_def_result.value != NO_ID) {
+                          if (parsed_input.prepositions.nr_of_prepositions != MAX_PARSE_PREPOS) {
+                            /* room for an extra preposition*/
+                            parsed_input.prepositions.preposition[parsed_input.
+                                 prepositions.nr_of_prepositions++] = verb_def_result.value;
+                          }
+                        }
+                        parse_syntax = SPECIFIER;
+                        break;
                     case GET_ANSWER:
                       /* We need an answer from the player. */
                       parse_syntax = ANSWER;
@@ -229,13 +272,33 @@ int32_t Play(user_input)
                   /*scanf("%c", &ch);*/
                   return(QUIT);
                 case GET_SUBJECT:
-                  /* The subject wasn't specified in the input. */
-                  parse_syntax = SUBJECT;
-                  break;
+                    /* The subject wasn't specified in the input. */
+                    /* arec_result.value may contain a word id that */
+                    /* must be copied to the prepositions in the    */
+                    /* parsed_input struct                          */
+                    if (arec_result.value != NO_ID) {
+                      if (parsed_input.prepositions.nr_of_prepositions != MAX_PARSE_PREPOS) {
+                        /* room for an extra preposition*/
+                        parsed_input.prepositions.preposition[parsed_input.
+                             prepositions.nr_of_prepositions++] = arec_result.value;
+                      }
+                    }
+                    parse_syntax = SUBJECT;
+                    break;
                 case GET_SPECIFIER:
-                  /* The specifier wasn't specified in the input. */
-                  parse_syntax = SPECIFIER;
-                  break;
+                    /* The specifier wasn't specified in the input. */
+                    /* arec_result.value may contain a word id that */
+                    /* must be copied to the prepositions in the    */
+                    /* parsed_input struct                          */
+                    if (arec_result.value != NO_ID) {
+                      if (parsed_input.prepositions.nr_of_prepositions != MAX_PARSE_PREPOS) {
+                        /* room for an extra preposition*/
+                        parsed_input.prepositions.preposition[parsed_input.
+                             prepositions.nr_of_prepositions++] = arec_result.value;
+                      }
+                    }
+                    parse_syntax = SPECIFIER;
+                    break;
                 case GET_ANSWER:
                     /* We need an answer from the player. */
                   parse_syntax = ANSWER;

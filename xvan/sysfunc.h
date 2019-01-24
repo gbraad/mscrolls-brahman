@@ -78,25 +78,25 @@ extern int32_t specifier;           /* letsplay.c */
 extern int32_t value;               /* letsplay.c */
 extern int32_t ordinal;             /* letsplay.c */
 
-extern void    PrintError(int16_t, resultStruct*, char*);                        /* errors.c  */
-extern int32_t NextOpcode(int32_t**);
-extern int32_t XeqTrigger(int32_t, int32_t, usrActionRec*, int32_t);             /* execute.c */
-extern int32_t XeqTestFun(int32_t, int32_t**, usrActionRec*, int32_t, int32_t*); /* xeqfun.c  */
-extern int32_t XeqIntAct(int32_t, int32_t**, usrActionRec*, int32_t);            /* xeqfun.c  */
-extern int32_t IsWordId(int32_t);
-extern int32_t IsLocId(int32_t);
-extern int32_t IsObjId(int32_t);
-extern int32_t IsTimerId(int32_t);
-extern int32_t IsTestFun(int32_t);
-extern int32_t IsIntAct(int32_t);
-extern int32_t IsCDescrId(int32_t);
-extern int32_t IsLDescrId(int32_t);
-extern int32_t IsCFlagId(int32_t);
-extern int32_t IsLFlagId(int32_t);
-extern int32_t IsCTriggId(int32_t);
-extern int32_t IsLTriggId(int32_t);
-extern int32_t IsCAttrId(int32_t);
-extern int32_t IsLAttrId(int32_t);
-extern int32_t IsVerbId(int32_t);             /* execute.c */
+extern void         PrintError(int16_t, resultStruct*, char*);                        /* errors.c  */
+extern int32_t      NextOpcode(int32_t**);
+extern resultStruct XeqTrigger(int32_t, int32_t, usrActionRec*, int32_t);             /* execute.c */
+extern int32_t      XeqTestFun(int32_t, int32_t**, usrActionRec*, int32_t, int32_t*); /* xeqfun.c  */
+extern resultStruct XeqIntAct(int32_t, int32_t**, usrActionRec*, int32_t);            /* xeqfun.c  */
+extern int32_t      IsWordId(int32_t);
+extern int32_t      IsLocId(int32_t);
+extern int32_t      IsObjId(int32_t);
+extern int32_t      IsTimerId(int32_t);
+extern int32_t      IsTestFun(int32_t);
+extern int32_t      IsIntAct(int32_t);
+extern int32_t      IsCDescrId(int32_t);
+extern int32_t      IsLDescrId(int32_t);
+extern int32_t      IsCFlagId(int32_t);
+extern int32_t      IsLFlagId(int32_t);
+extern int32_t      IsCTriggId(int32_t);
+extern int32_t      IsLTriggId(int32_t);
+extern int32_t      IsCAttrId(int32_t);
+extern int32_t      IsLAttrId(int32_t);
+extern int32_t      IsVerbId(int32_t);             /* execute.c */
 
 #endif

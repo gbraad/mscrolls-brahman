@@ -28,12 +28,13 @@
 /* External declarations */
 /*************************/
 
-extern int32_t   nr_of_timers;                                         /* fileio.c  */
-extern timerInfo *timers;                                              /* fileio.c  */
+extern int32_t   nr_of_timers;    /* fileio.c */
+extern timerInfo *timers;         /* fileio.c */
 
-extern void     PrintError(int16_t, resultStruct*, char*);             /* errors.c  */
-extern char     *TranslateKeyword(char*);                              /* errors.c  */
-extern int32_t  XeqTrigger(int32_t, int32_t, usrActionRec*, int32_t);  /* execute.c */
-extern int32_t  LookUpId(char*);                                       /* syntax.c  */
+extern void         Output(char*);                                         /* output.c  */
+extern void         PrintError(int16_t, resultStruct*, char*);             /* errors.c  */
+extern char         *TranslateKeyword(char*);                              /* errors.c  */
+extern resultStruct XeqTrigger(int32_t, int32_t, usrActionRec*, int32_t);  /* execute.c */
+extern int32_t      LookUpId(char*);                                       /* syntax.c  */
 
 #endif

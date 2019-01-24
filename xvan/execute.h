@@ -58,15 +58,15 @@ extern void         PrintError(int16_t, resultStruct*, char*);                  
 extern int32_t      InMem(int32_t);                                                   /* fileio.c   */
 extern int32_t      Load(int32_t);                                                    /* fileio.c   */
 extern void         SkipFun(int32_t**);                                               /* sysfunc.c  */
-extern int32_t      LookUpId(char*);                                                  /* syntax.c   */
-extern int32_t      Exit(int32_t, usrActionRec*, int32_t);                            /* sysfunc.c  */
-extern int32_t      Entrance(int32_t, usrActionRec*, int32_t);                        /* sysfunc.c  */
-extern int32_t      Move(int32_t, int32_t);                                           /* sysfunc.c  */
-extern int32_t      XeqTestFun(int32_t, int32_t**, usrActionRec*, int32_t, int32_t*); /* xeqfun.c   */
-extern int32_t      XeqIntAct(int32_t, int32_t**, usrActionRec*, int32_t);            /* xeqfun.c   */
-extern void         SkipIntAct(int32_t**);                                            /* xeqfun.c   */
-extern void         PrintId(int32_t, int);                                            /* output.c   */
-extern int32_t      GetAttributeInfo(int32_t, int32_t, attrInfo**, int32_t*);         /* sysfunc.h  */
+extern int32_t      LookUpId(char*);                                                  /* syntax.c  */
+extern int32_t      Exit(int32_t, usrActionRec*, int32_t);                            /* sysfunc.c */
+extern int32_t      Entrance(int32_t, usrActionRec*, int32_t);                        /* sysfunc.c */
+extern int32_t      Move(int32_t, int32_t);                                           /* sysfunc.c */
+extern int32_t      XeqTestFun(int32_t, int32_t**, usrActionRec*, int32_t, int32_t*); /* xeqfun.c  */
+extern resultStruct XeqIntAct(int32_t, int32_t**, usrActionRec*, int32_t);            /* xeqfun.c  */
+extern void         SkipIntAct(int32_t**);                                            /* xeqfun.c  */
+extern void         PrintId(int32_t);                                                 /* output.c  */
+extern int32_t      GetAttributeInfo(int32_t, int32_t, attrInfo**, int32_t*);         /* sysfunc.h */
 
 /***********************************/
 /* System function implementations */
