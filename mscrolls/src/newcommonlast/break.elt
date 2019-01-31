@@ -1,0 +1,74 @@
+**************************************************************
+*
+*	2/23/89
+*	@(#)break.elt	2.4
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"verbequ.i"
+	include "scenequ.i"
+
+	IfVerb	BREAK
+
+	XDEF	V.BREAK
+	XREF	SP.BREAK,CONJ,P.MHAVSTOP,P.FLOO,FIGHT,BRKD0,BRKSUB
+
+V.BREAK
+
+	CALL	SP.BREAK
+	MOVE.W  CONJ(A4),D1
+	CMP.W   #AGAINST,D1			;AGAINST
+	BEQ.S   05$
+	CMP.W   #OVER,D1			;OVER
+	BEQ.S   05$
+	MOVEQ   #0,D1			;set 'with' as apropriate conj
+	DO	CHK4PT			;make sure sytntax is correct
+05$
+	EXG	D0,D5			;must have 'with Y'
+	DO	CARRIED			;Y is carried?
+	BNE	P.MHAVSTOP		;no,MUST HAVE ITEM
+	EXG	D0,D5			;swap back
+	BTST	#6,4(A5)		;WITH A PERSON??
+	BNE	P.FLOO			;STRANGE
+	TST_NPC				;ATTACKIG A PERSON?
+	BEQ.S   10$				;NO
+	CLR.W   CONJ(A4)		;INCASE
+	BRA	FIGHT			;ATTACK X W Y
+10$
+
+      IFD	wantSP.BREAK_After
+	XREF	SP.BREAK_After
+	CALL	SP.BREAK_After
+      ENDC	;wantSP.BREAK_After
+
+	CALL	BRKSUB
+	EXG	D0,D5
+	EXG	A0,A5			;TO CHECK MAIN NOUN
+	CALL	BRKSUB			;PC OF MAIN
+	MOVE.B  1(A5),D1		;PC OF X
+	AND.B   #$F,D1			;STR OF X
+	MOVE.B  1(A0),D2		;PC OF Y
+	AND.B   #$F,D2
+	CMP.B   D2,D1			;COMPARE STRENGTHS
+	BHI.S	20$			;BRKD0			;Y BREAKS (HUH)
+	EXG	D0,D5
+20$
+
+    IFD	wantSUCCESS
+	XREF	SUCCESS
+	MOVE.W	#RETCODE_SUCCESS,SUCCESS(A4)
+    ENDC
+	DOGO	BRKD0			;ELSE X BREAKS
+
+
+	ENDC
+
+
+
+
+	END

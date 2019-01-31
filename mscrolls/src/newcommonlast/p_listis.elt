@@ -1,0 +1,61 @@
+********************************************************
+*
+*	%W%
+*	%G%
+*
+********************************************************
+
+	SECTION		"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"scenequ.i"
+
+	XDEF	P.LISTIS
+	XREF	P.LIST2
+
+* Prints a list of objects pointed to by a0 followed by 'is'
+* or 'are' depending on the number of objects printed and the plurality
+* of the item if a singleton.
+* hibit flagged nouns are ignored.
+* eg. "the king and the queen are offended".
+*     "the rabbit is not interested"
+*
+* Entry:
+*		a0 = pointer to noun list
+*		d5 = 'the' flag (cf. P.LIST)
+
+P.LISTIS
+	PUSH_L	D0/A4
+	MOVEQ	#0,D4		;zero counter
+	MOVE.L	A0,-(A7)	;save list start
+10$
+	TEST_W	(A0)+		;is there a noun here?
+	BEQ.S	20$		;EO list
+	BMI.S	10$		;<0 don't count.
+	MOVE.W	-2(A0),D0	;save a noun.
+	ADDQ.B	#1,D4		;inc noun counter.
+	CMP.B	#1,D4		;more than 1?
+	BLS.S	10$		;no, keep going.
+20$
+	MOVE.L	(A7)+,A0	;get back list start
+	MOVE.W	D4,-(A7)	;push noun count
+	DO	P.LIST2		;print list with relevant d5
+	MOVE.W	(A7)+,D4	;restore noun count
+	CMP.B	#1,D4		;how many are there.
+	BHI.S	30$		;'are'
+	GETINFO			;on the 1st noun.
+	TST_PLURAL		;is it plural?
+	BNE.S	30$		;yes, then use 'are'
+	MSG	IS		;print 'is'
+	BRA.S	40$		;skip over
+30$
+	MSG	ARE		;print 'are'
+40$
+	PULL_L	D0/D4
+	RET			
+
+*----------------------------------------------
+
+
+	END

@@ -1,0 +1,89 @@
+**************************************************************
+*
+*	3/1/89
+*	@(#)stand.elt	2.7
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"verbequ.i"
+	include	"scenequ.i"
+
+
+	IfVerb	STAND
+
+	XDEF	V.STAND
+	XREF	SEATED,P.BYAN,RIDING,SEATED_RELATOR
+	XREF	ROOM
+
+	        
+V.STAND
+	        
+    IFD	wantSP.STAND_Before
+	XREF	SP.STAND_Before
+	CALL	SP.STAND_Before
+    ENDC	;wantSP.STAND_Before
+
+    IFD	wantSTANDON
+	XREF	ADVERB,SEATED,YCANT,YCANTNOW
+	CMP.W	#ON,ADVERB(A4)
+	BNE.S	09$			;no
+	TST_SITTABLE			;must be sittable?
+	BEQ	YCANT			;no chance.
+	DO	CARRIED			;no portable seats!
+	BEQ	YCANTNOW		;not yet.
+
+    IFD	attribute_SINGLESEAT
+	XREF	SeatOccupied
+	CALL	SeatOccupied
+	BNE.S	03$
+	MSGGO	CANTSIT			;occupied by @
+03$
+    ENDC	;attribute_SINGLESEAT
+
+    IFD		wantSTANDONcallSP.SIT
+	XREF	SP.SIT
+	CALL	SP.SIT
+    ENDC	;wantSTANDONcallSP.SIT
+
+	MOVE.W	D0,SEATED(A4)		;else you r on it now.
+
+      IFD	wantSITfromSTAND
+	CLR.W	SEATED_RELATOR(A4)	;zero SEATED_RELATOR and non-zero
+      ENDC	;wantSITfromSTAND	;SEATED means standing on
+
+	DO	P.SUB
+	MSG	STAND
+	MSG	ON
+	DOGO	P.TNSTOP
+09$
+    ENDC	;wantSTANDON
+
+	TEST_W  D0                  ;A NOUN?
+	BMI.S	10$
+	MSGGO	IDFY
+10$	
+	TEST_W  SEATED(A4)
+	BEQ     P.BYAN            ;BUT YOU ARE NOT SEATED
+
+    IFD	wantSP.STAND
+	XREF	SP.STAND
+	CALL	SP.STAND
+    ENDC	;wantSP.STAND
+	DO	P.SUBV
+	CLR.W   RIDING(A4)
+	MOVE.W	ROOM(A4),D1
+	DO	MovePlayer
+	MSGGO	ONFEET
+
+	ENDC
+
+*--------------------------------
+
+
+
+	END

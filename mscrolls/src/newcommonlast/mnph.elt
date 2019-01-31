@@ -1,0 +1,101 @@
+**************************************************************
+*
+*   %G%
+*   %W%
+*
+**************************************************************
+
+
+    SECTION "ADV",CODE
+
+    include "equates.i"
+    include "macros.i"
+    include "scenequ.i"
+
+*--------------------------------
+
+    XDEF    MNPH,MNPHREC
+    XREF    DEPTH,DATIVE,TEMPBUF,TMPPNTR,GNGRP,DODATIVE,NOUN
+    XREF    EXBUFF,DO.EXCEP,BUFFIX
+  
+MNPH 
+   
+* MAJOR NOUN PHRASE (WHOEVER HE IS)
+
+    CLR.W   DEPTH(A4)          ;RECURSION LEVEL
+
+MNPHREC
+
+*RECURSIVE MNPH ENTRY POINT
+
+    CMP.W   #RECLIM,DEPTH(A4)  ;RECUSION LIMIT
+    BLT.S   02$                ;OK
+    MSG HASSLE
+    DO  NOERR              ;MASK ERRORS 4 NOW
+    DOGO    D72
+02$
+   
+    ADDQ.W  #1,DEPTH(A4)       ;INC RECUSION LEVEL
+    
+    CLR.L   DATIVE(A4)         ;RESET
+    MOVE.L  A3,-(A7)
+    LEA     TEMPBUF(A4),A3
+    MOVE.L  A3,TMPPNTR(A4)
+    CLR.W   (A3)           ;clear the 1st element
+    MOVE.L  (A7)+,A3
+    CALL    GNGRP
+    MOVE.W  D5,D2
+    
+    IFD     wantNoDobjVerbs
+    XREF    TBL.NoDobjVerbs
+    
+    TEST_W  TEMPBUF(A4)    ;is the buffer empty?
+    BNE.S   0201$          ; no then does not apply.
+    MOVE.L  A1,-(A7)       ; save
+    LEA TBL.NoDobjVerbs(A4),A1
+    DO  VerbInList     ; is our verb one of these?
+    MOVE.L  (A7)+,A1       ; restore.
+    BNE.S   0201$          ; no, then just continue.
+    ST  D3         ; else pretend things are ok.
+0201$
+    ENDC    ;wantNoDobjVerbs
+        
+    CLR.W   D5
+    MOVE.W  D3,-(A7)       ; save 'and' flag
+    DO  INCNOUN2           ;ADD 0
+    MOVE.W  (A7)+,D3
+    MOVE.W  D2,D5              ;BAK
+    TEST_L  DATIVE(A4)
+    BEQ.S   01$
+    CALL    DODATIVE
+    BRA     20$                ;EXIT
+01$
+    CMP.B   #1,D7              ;ERROR?
+    BEQ.S   20$                ;END
+    BHI.S   90$                ;YES JUST EXIT
+    CMP.W   #SECT.SPEC,D6      ;SP?   
+    BNE.S   20$                ;ANOTHER
+    CMP.W   #09,D5             ;EXCEPT?
+    BNE.S   20$                ;ANOTHER
+    CMP.W   #4,NOUN(A4)        ;ONLY ONE NOUN SPECIFIED?
+    BHI.S   03$                ;NO
+    CMP.W   #2,DEPTH(A4)       ;AMBIGUOUS POSITION?
+    BHS.S   20$
+03$
+    MOVE.L  A3,-(A7)
+    LEA     EXBUFF(A4),A3
+    MOVE.L  A3,TMPPNTR(A4)
+    MOVE.L  (A7)+,A3
+    CALL    DO.EXCEP           ;HMMMMMMMMMMM
+    BRA.S   01$
+20$
+    MOVE.W  D5,-(A7)
+    CALL    BUFFIX             ;ACTUALLY SQUASH BUFF THIS TIME
+    DO  FIXIREL
+    MOVE.W  (A7)+,D5  
+90$
+    SUBQ.W  #1,DEPTH(A4)       ;GOING UP ONE
+    RET
+  
+*------------------------------------------ 
+    END

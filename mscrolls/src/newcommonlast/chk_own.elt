@@ -1,0 +1,153 @@
+**************************************************************
+*
+*	%G%
+*	%W%
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"verbequ.i"
+	include	"scenequ.i"
+ 
+*--------------------------------
+
+	XDEF	CHK.OWN
+	XREF	VERB,NPC.OK,REP1,P.SUBOB,SUBJECT
+  
+CHK.OWN
+ 
+	PUSH_L	D0-D2/A0
+	CLR.W   D7
+	MOVE.W  VERB(A4),D1
+	CMP.W   #VNEXAMINE,D1		;look or examine?
+	BLS	99$
+
+    IfVerb	MAKELOCAL
+	CMP.W	#VNMAKELOCAL,D1		;npc can't stop u till u get there
+	BEQ	99$
+    ENDC
+
+	TST_PSEUDO			;pseudo?
+	BNE	99$			;cannot have owned pseudos
+	MOVE.B  6(A0),D2		;SAVE INITIAL RELATION
+	AND.B   #$3B,D2		   	;rel/hid/intrinsic/insep/contained.
+	BEQ	99$			;NOT INIT
+05$
+	MOVE.B  6(A0),D1		;REL?
+	AND.B   #$3B,D1
+	BEQ   99$			;OK
+	MOVE.W  8(A0),D0
+	GETINFO
+;	TST_PSEUDO			;item was in/on a pseudo?
+;	BNE	99$			;we allow this as pseudos arn't carried
+	TST_NPC				;
+	BEQ.S   05$
+	DO	NPC.OK
+	BNE.S   05$
+20$
+	DO	GETNPC			;TO A3
+	BTST	#1,3(A3)		;LETS U?
+	BEQ.S   22$  			;NO
+	CMP.B   #1,D1			;MUST BE SIMPLY RELATED
+	BNE.S   22$ 			;NO
+	TEST_B  6(A0)
+	BEQ.S   99$
+	BRA.S   05$
+22$ 
+	TEST_W  REP1(A4)
+	BNE.S   21$			;SKIP
+	ST	REP1(A4)
+	CMP.W   SUBJECT(A4),D0
+	BNE.S   23$ 			;OK
+	MSG	NOTMY
+	PULL_L  D0-D2/A0
+	DO	P.NOUN
+	MOVEQ   #1,D7
+	RET
+23$
+
+	IFEQ	THE_PAWN
+
+	XREF	ListNPCAllow
+
+	LEA	ListNPCAllow(A4),A3
+10$
+	MOVE.L	(A3)+,D2
+	BEQ.S	12$			;zero long terminator
+	CMP.W	D0,D2			;right npc?
+	BNE.S	10$
+	SWAP	D2
+	CMP.W	VERB(A4),D2		;format dc.w verb,npc
+	BNE.S	10$
+	BRA.S	99$			;yes, allowed then
+12$
+
+	ENDC
+
+	DO	P.BTN			;but the <npc>
+	MSG	WNTLT			;won't let
+	CALL	P.SUBOB			;you
+	DO	BSFULLSTOP
+21$
+	MOVEQ   #1,D7
+99$
+	PULL_L	D0-D2/A0
+	RET
+
+*------------------------------------------ 
+	
+    IFD	    	wantCovetousNPCs
+	
+	XREF	GETNPCOWNER,VERB
+	
+	XDEF	CHK.NPCOWNER
+	
+CHK.NPCOWNER
+	
+* Entry;
+* D0 = object to test.
+	
+* Determine whether an owner of the object won't let you
+* this is the case for items of value owned by coveteous npc's
+
+* exit;
+* NE <=> an npc won't let you & message produced.
+
+	
+	PUSH_L	D0-D2/D7/A0/A3
+	CMP.B	#VNEXAMINE,VERB+1(A4)		;look or examine?
+	BLS.S	09$				;allow these.
+	CALL	GETNPCOWNER			;npc->d1
+	BEQ.S	90$				;not owned, exit.
+	MOVE.W	D1,D2				;save owner
+	DO	GetValue			;of d0 ->d1.w
+	BEQ.S	90$				;no, value ok.
+	MOVE.W	D2,D0				;the owner.
+	DO	VALID.NP			;are they here?
+	BEQ.S	10$				;yes, continue.
+09$	
+	SETEQ
+	BRA.S	90$				;and exit.
+10$
+	DO	GETNPC				;data ->a3
+	BTST	#4,3(A3)			;coveteous?
+	BEQ.S	90$				;no, exit.
+	DO	P.BTN				;but the <npc>
+	MSG	WNTLT				;won't let
+	CALL	P.SUBOB				;you
+	DO	BSFULLSTOP
+	SETNE
+90$
+	PULL_L	D0-D2/D7/A0/A3
+	RET
+
+    ENDC	;wantCovetousNPCs
+
+	
+*------------------------------------------ 
+
+	END

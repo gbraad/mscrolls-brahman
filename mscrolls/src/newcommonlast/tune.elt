@@ -1,0 +1,28 @@
+***********************************************************
+*
+*	%W%
+*	%G%
+*
+************************************************************
+
+		SECTION	"ADV",CODE
+
+		include	"equates.i"
+		include	"macros.i"
+		include	"verbequ.i"
+		include	"scenequ.i"
+
+	    IfVerb	TUNE
+	    XDEF	V.TUNE
+	    XREF	YCANT,SP.TUNE
+V.TUNE
+
+	CALL	SP.TUNE
+	BRA	YCANT
+
+
+*------------------------------------------
+
+	ENDC	;V.TUNE
+
+	END

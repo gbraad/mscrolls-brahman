@@ -1,0 +1,159 @@
+**************************************************************
+*
+*	%G%
+*	%W%
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"scenequ.i"
+
+	XDEF	P.XFERGS
+	XREF	PLURAL,PRTNUM
+
+P.XFERGS
+	
+	IFND	wantPoundsAndPence
+*ENTRY:
+*D1=NUMBER TO PRINT (SINGLE CHR)
+	
+    IFND	wantPLURAL_Override
+	MOVE.W  #2,PLURAL(A4)      ;SET TO PLURAL AGREEMENT
+	CMP.B   #1,D1              ;SINGLE?
+	BNE.S   10$                ;NO
+	SUBQ.W  #1,PLURAL(A4)      ;SET TO 1
+10$
+    ENDC	;!wantPLURAL_Override
+
+    IFD		wantPLURAL_Override
+	XREF	PLURAL_Override
+
+	CMP.B	#1,D1			;single?
+	SEQ	PLURAL_Override(A4)
+	SEQ	PLURAL_Override+1(A4)
+    ENDC	;wantPLURAL_Override
+	
+
+	PUSH_L	D0-D3/D6
+	MOVE.W	D1,D6
+
+      IFNE	THE_PAWN
+
+	AND.W	#$000F,D6
+
+      ENDC
+
+	CALL	PRTNUM
+	PULL_L	D0-D3/D6
+
+	MSG	SPACE
+	MSGGO	FERG
+	
+    ENDC	;!wantPoundsAndPence
+	
+*--------------------------------
+
+    IFD	wantPoundsAndPence
+
+	XREF	PLURAL_Override
+*ENTRY:
+*D1.L =NUMBER TO PRINT (SINGLE CHR)
+	
+
+	PUSH_L	D0-D3/D6
+	MOVE.L	D1,D6
+	CALL	Div10		;d1/10->d2
+	MOVE.L	D2,D1
+	CALL	Div10		;d1/100->D2
+	EXG	D2,D6		;->d6
+	TEST_L	D6		;any?
+	BEQ.S	05$		;no. pounds
+	
+    IFD		wantLongPRTNUM
+	XREF	PRTNUML
+	CALL	PRTNUML
+    ENDC	;wantLongPRTNUM
+	
+    IFND    	wantLongPRTNUM
+	CALL	PRTNUM
+    ENDC	;!wantLongPRTNUM
+	
+	MSG	SPACE
+	ST	PLURAL_Override(A4)
+	CMP.W	#1,D6			;single?
+	SEQ	PLURAL_Override+1(A4)
+	MSG	POUNDS
+	CALL_S	MUL100		;d6* 100 -> d6
+	SUB.L	D6,D2		;remainder.
+	BEQ.S	10$		;no change
+	MSG	SPACE
+	MSG	AND
+05$
+	MOVE.L	D2,D6
+	CALL	PRTNUM		;so many
+	MSG	SPACE
+	MSG	PENCE
+10$
+	PULL_L	D0-D3/D6
+	RET
+
+
+*------------------------------------------
+
+	XDEF	Div10
+Div10
+
+* d1/10 ->D2, D1 mod 10 ->d1
+
+
+	MOVE.L	D0,-(A7)
+	MOVEQ	#0,D2			;answer
+10$
+	MOVE.L	D1,D0
+	LSR.L	#4,D0			;/16 ->D0
+	ADD.L	D0,D2
+	AND.L	#$0f,D1			;mod16
+	LSL.L	#1,D0			;*2
+	ADD.L	D0,D1			;
+	LSL.L	#1,D0
+	ADD.L	D0,D1
+	CMP.L	#16,D1			;<=16?
+	BHI.S	10$			;no, carry on.
+	CMP.L	#10,D1			;>=10?
+	BLT.S	20$			;no.
+	ADDQ.L	#1,D2			;else inc result
+	SUB.L	#10,D1			;& calc remainder.
+20$
+	MOVE.L	(A7)+,D0		;restore
+	RET
+
+    ENDC	;wantPoundsAndPence
+
+*------------------------------------------
+
+	XDEF	MUL100
+
+MUL100
+
+* multiply d6.L by 100
+* return value in d6
+
+	MOVE.L	D1,-(A7)
+	ASL.L	#2,D6		;*4
+	MOVE.L	D6,D1		;store.
+	ASL.L	#3,D6		;*32
+	ADD.L	D6,D1		;*4 + *32
+	ASL.L	#1,D6		;*64
+	ADD.L	D1,D6		;*100
+	MOVE.L	(A7)+,D1
+	RET
+
+*------------------------------------------
+
+	END
+
+

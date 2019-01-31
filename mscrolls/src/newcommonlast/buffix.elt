@@ -1,0 +1,46 @@
+**************************************************************
+*
+*	10/27/87
+*	@(#)buffix.elt	1.2
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+
+	XDEF	BUFFIX
+	XREF	KILLDOUB,TEMPBUF,NOUN
+
+BUFFIX
+  
+	CALL    KILLDOUB
+ 
+* ZAP DUPLICATE ENTRIES IN TEMPBUF
+*
+* REMOVE ALL NOUNS W HI BIT SET
+* FROM TEMPBUF  
+  
+05$
+	LEA     TEMPBUF(A4),A1
+10$
+	TEST_W  (A1)+
+	BEQ.S   90$                ;DONE
+	BPL.S   10$                ;OK, NEXT
+15$
+	MOVE.W  (A1),-(A1)         ;BACK
+	BEQ.S   20$                ;END?
+	ADDQ.L  #4,A1              ;EXT
+	BRA.S   15$
+20$
+	SUB.W   #2,NOUN(A4)
+	BRA.S   05$ 
+90$
+  
+	RET
+
+
+
+	END

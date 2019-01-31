@@ -1,0 +1,444 @@
+**************************************************************
+*
+*	1/12/89
+*	@(#)p_loc.elt	2.17
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"scenequ.i"
+
+*--------------------------------
+*
+* WARNING - DO NOT mess around with CALLs via MSG/DO
+*           top line stuff may not like it!
+*
+*--------------------------------------
+
+	XDEF	P.LOC
+
+	XREF	LINE,CHANNEL,CURSX,CURSY,P.NOUN,WIDTH,SPACE,SCORE_
+	XREF	PRTNUM,CLOCK,CHAROUT
+  
+
+DoIPrintTime	SET	0
+    IFD		wantTimeDisplay
+DoIPrintTime	SET	1
+    ENDC	;wantTimeDisplay
+
+    IFNE	VAX
+DoIPrintTime	SET	0
+    ENDC	;VAX
+
+      IFD	wantToplineModifier
+	XREF	ToplineModifier
+      ENDC
+
+
+P.LOC
+ 
+      IFNE    QL128
+	CALL    LINE
+	PUSH_L  D0-D7/A0-A6     ;SAVE ALL
+	MOVE.L  CURSX(A4),-(A7)       ;SAVE CURRENT CURSOR POS
+	ST      CHANNEL(A4)           ;SO CHAROUT KNOWS
+	MOVE.L  #TOPCURS1,CURSX(A4)   ;ROOM NAME POS   
+
+      IFD	wantToplineModifier
+	CALL	ToplineModifier
+      ENDC
+
+	DO	P.NOUN	               ;ROOM NAME
+	MOVE.W  WIDTH(A4),D4
+	SUB.W   #10,D4
+10$
+	CALL    SPACE
+	CMP.W   CURSX(A4),D4
+	BNE.S   10$
+	
+    IFND	wantTimeDisplay
+	MOVE.W  SCORE_(A4),D6
+      IFNE	THE_PAWN
+	MULU    #5,D6
+      ENDC
+	CALL    PRTNUM
+	PRINT   <'/'>
+  
+	MOVE.W  CLOCK(A4),D6
+	CALL    PRTNUM    
+    ENDC	;!wantTimeDisplay
+
+
+    IFNE	DoIPrintTime
+	CALL	PrintTime
+    ENDC	;DoIPrintTime
+
+	CALL    LINE                  ;SO AS THE LAST CHAR WAS A LF
+*                                    ;TO FOOL COUT TO SUPPRESS NEXT ONE
+	CLR.B   CHANNEL(A4)
+	MOVE.L  (A7)+,CURSX(A4)       ;PUT BACK ORIG XY POS
+	PULL_L  D0-D7/A0-A6
+	RET
+
+	ENDC
+
+
+      IFNE    ST520
+
+	CALL    LINE
+	PUSH_L  D0-D7/A0-A6     ;SAVE ALL
+	ST      CHANNEL(A4)           ;SO CHAROUT KNOWS
+
+*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+	CLR.B	CURSX(A4)
+
+
+      IFD	wantToplineModifier
+	CALL	ToplineModifier
+      ENDC
+
+
+
+	DO	P.NOUN	               ;ROOM NAME
+	MOVE.W  WIDTH(A4),D4
+	SUB.W   #10,D4
+10$
+	CALL    SPACE
+	CMP.B   CURSX(A4),D4          ;Anita's CURSX is a byte
+	BNE.S   10$
+	
+	
+    IFND	wantTimeDisplay
+	MOVE.W  SCORE_(A4),D0
+      IFNE	THE_PAWN
+	MULU    #5,D0
+      ENDC
+
+	MOVE.W	CLOCK(A4),D1
+	MOVEQ	#9,D2
+	MOVE.W	D0,-(A7)
+	CALL	PadWithSpaces
+	MOVE.W	(A7)+,D6
+
+	CALL    PRTNUM
+	PRINT   <'/'>
+  
+	MOVE.W  CLOCK(A4),D6
+	CALL    PRTNUM    
+    ENDC	;!wantTimeDisplay
+
+    IFNE	DoIPrintTime
+	CALL	PrintTime
+    ENDC	;DoIPrintTime
+
+	MOVE.W  WIDTH(A4),D4
+20$
+	CMP.B   CURSX(A4),D4          ;Anita's CURSX is a byte
+	BEQ.S	30$
+	CALL    SPACE
+	BRA.S	20$
+30$
+
+	CALL    LINE                  ;SO AS THE LAST CHAR WAS A LF
+*                                    ;TO FOOL COUT TO SUPPRESS NEXT ONE
+	SF      CHANNEL(A4)
+	PULL_L  D0-D7/A0-A6
+	RET
+
+      ENDC  
+ 
+ 
+      IFNE    AMIGA512!MAC512
+
+	CALL    LINE
+	PUSH_L  D0-D7/A0-A6     ;SAVE ALL
+	ST      CHANNEL(A4)           ;SO CHAROUT KNOWS
+
+* !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+	CLR.W	CURSX(A4)
+
+
+      IFD	wantToplineModifier
+	CALL	ToplineModifier
+      ENDC
+
+
+
+	DO	P.NOUN	               ;ROOM NAME
+	MOVE.W  WIDTH(A4),D4
+	SUB.W   #10,D4
+10$
+	CALL    SPACE
+	CMP.W   CURSX(A4),D4
+	BNE.S   10$
+	
+    IFND	wantTimeDisplay
+	MOVE.W  SCORE_(A4),D0
+      IFNE	THE_PAWN
+	MULU    #5,D0
+      ENDC
+
+	MOVE.W	CLOCK(A4),D1
+	MOVEQ	#9,D2
+	MOVE.W	D0,-(A7)
+	CALL	PadWithSpaces
+	MOVE.W	(A7)+,D6
+
+	CALL    PRTNUM
+	PRINT   <'/'>
+  
+	MOVE.W  CLOCK(A4),D6
+	CALL    PRTNUM    
+    ENDC	;!wantTimeDisplay
+
+    IFNE	DoIPrintTime
+	CALL	PrintTime
+    ENDC	;DoIPrintTime
+
+
+	CALL	SPACE
+	IFNE	0
+
+	MOVE.W  WIDTH(A4),D4
+	SUBQ.W  #1,D4
+20$
+	CALL    SPACE
+	CMP.W   CURSX(A4),D4
+	BNE.S   20$
+
+	ENDC
+
+	CALL    LINE                  ;SO AS THE LAST CHAR WAS A LF
+*                                    ;TO FOOL COUT TO SUPPRESS NEXT ONE
+	SF      CHANNEL(A4)
+	CLR.W   CURSX(A4)
+	PULL_L  D0-D7/A0-A6
+	RET
+
+	ENDC
+
+
+	IFNE    (IBM!APPLE2!C128!C64!BBC_SWR!CPC6128!VAX!PCW8256!ATARI!SPECTRUM!GENERIC!IIGS)
+
+	CALL    LINE			;Must be CALL not MSG!
+	PUSH_L  D0-D7/A0-A6     ;SAVE ALL
+	ST      CHANNEL(A4)           ;SO CHAROUT KNOWS
+
+      IFD	wantToplineModifier
+	CALL	ToplineModifier
+      ENDC
+
+	DO	P.NOUN	               ;ROOM NAME
+	MOVEQ   #9,D1
+	CALL    CHAROUT		     ; Output a top line 'tab'
+
+
+    IFND	wantTimeDisplay
+
+	MOVE.W  SCORE_(A4),D0         ; Mul. by 5
+
+      IFNE	THE_PAWN
+	ASL.W   #2,D0
+	ADD.W   SCORE_(A4),D0
+      ENDC
+
+	MOVE.W	D0,-(A7)
+
+* Now pad spaced before score/moves such that total = 9 
+
+	MOVE.W	CLOCK(A4),D1		;value 2
+	MOVEQ	#9,D2			;target size for field (inc '/')
+
+	CALL	PadWithSpaces
+
+	MOVE.W	(A7)+,D6
+
+
+	CALL    PRTNUM
+	PRINT   <'/'>
+  
+	MOVE.W  CLOCK(A4),D6
+	CALL    PRTNUM    
+
+    ENDC	;!wantTimeDisplay
+
+    IFNE	DoIPrintTime
+	CALL	PrintTime
+    ENDC	;DoIPrintTime
+
+	CALL    LINE                  ;SO AS THE LAST CHAR WAS A LF
+*                                    ;TO FOOL COUT TO SUPPRESS NEXT ONE
+	SF      CHANNEL(A4)
+	PULL_L  D0-D7/A0-A6
+
+	RET
+
+	ENDC
+
+*------------------------------------------
+
+	IFND	wantTimeDisplay
+
+* Pad with spaces - print (D2-((log10(D0)+log10(D1)+2)) spaces
+
+PadWithSpaces
+
+	LEA	DecTab(PC),A0
+10$
+	CMP.W	(A0)+,D0
+	BPL.S	15$
+      IFEQ	SPECTRUM
+	CALL	SPACE
+      ENDC
+      IFNE	SPECTRUM
+	PRINT	<'@'>			;non proportional space
+      ENDC
+	BRA.S	10$
+15$
+	LEA	DecTab(PC),A0
+20$
+	CMP.W	(A0)+,D1
+	BPL.S	25$
+      IFEQ	SPECTRUM
+	CALL	SPACE
+      ENDC
+      IFNE	SPECTRUM
+	PRINT	<'@'>			;non proportional space
+      ENDC
+	BRA.S	20$
+25$
+
+	RET
+
+	
+DecTab
+	DC.W	1000,100,10,0	
+
+    ENDC	;!wantTimeDisplay
+
+*------------------------------------------
+
+    IFD	wantTimeDisplay
+	XDEF	PrintTime,Mod60
+
+	XREF	SNOOP,CLOCK,PRTNUM,PRTNUM.SUB,PLURAL
+PrintTime
+
+	PUSH_L	D0-D3/D6
+	MOVEQ	#2-1,D2			;number of spaces to pad-1.
+01$
+
+    IFEQ	CPC6128
+    IFEQ	SPECTRUM
+	MSG	SPACE			;else put a space.
+    ENDC	;!SPECTRUM
+    ENDC	;!CPC6128
+
+    IFNE	SPECTRUM
+	CALL.S	PrintTimeSpace
+    ENDC	;SPECTRUM
+	
+    IFNE	CPC6128
+	PRINT	<' '>
+    ENDC	;CPC6128
+
+	DBRA	D2,01$			;print them spaces.
+	MOVE.W	CLOCK(A4),D0		;get curtent time.
+	ADD.W	#TimeGameStarts,D0	;offset the start time
+	CMP.W	#12*60,D0		;afternoon?
+	SGE	D2			;flag afternoon.
+	CALL_S	Mod60
+	CMP.W	#13,D6			;afternoon?
+	BLT.S	09$			;no.
+	SUB.W	#12,D6			;convert to 12 hr time.
+09$
+	CMP.W	#10,D6			;2 digits?
+	BHS.S	10$			;yes, leave
+
+    IFEQ	CPC6128
+    IFEQ	SPECTRUM
+	MSG	SPACE			;else put a space.
+    ENDC	;!SPECTRUM
+    ENDC	;!CPC6128
+
+    IFNE	SPECTRUM
+	CALL.S	PrintTimeSpace
+    ENDC	;SPECTRUM
+
+    IFNE	CPC6128
+	PRINT	<' '>
+    ENDC	;CPC6128
+
+10$
+	CALL	PRTNUM			;print d6
+	MOVEQ	#':',D1
+	DO	CHAROUT
+	MOVE.W	D0,D6
+    IFND	wantLongPRTNUM
+	MOVEQ	#4,D3			;print 2 digits at least
+    ENDC	;!wantLongPRTNUM
+    
+    IFD		wantLongPRTNUM
+	MOVEQ	#9,D3			;print 2 digits 
+	AND.L	#$FFFF,D6		;lose any junk here.
+    ENDC	;wantLongPRTNUM
+	
+	CALL	PRTNUM.SUB
+	TEST_B	D2			;afternoon or morning?
+	BNE.S	20$			;afternoon.
+	PRINT	<'AM'>			;no
+	BRA.S	90$
+20$
+	PRINT	<'PM'>
+90$
+	PULL_L	D0-D3/D6
+
+    IFEQ	CPC6128
+	MSGGO	SPACE
+    ENDC	;!CPC6128
+	
+    IFNE	CPC6128
+	PRINT	<' '>
+	RET
+    ENDC	;CPC6128
+
+    IFNE	SPECTRUM
+	XREF	CHANNEL
+PrintTimeSpace
+	
+	TEST_B	CHANNEL(A4)			;top line?
+	BEQ.S	10$				;no.
+	PRINT	<'@'>				;use '@' type space.
+	RET
+10$
+	MSGGO	SPACE				;else normal.
+    ENDC	;SPECTRUM
+
+Mod60
+
+* D0/60 -> d6, D0 mod 60 ->d0
+
+
+	CLR.W	D6
+10$
+	CMP.W	#60,D0
+	BLT.S	20$			;less
+	ADDQ.W	#1,D6			;inc count.
+	SUB.W	#60,D0			;less 1 go.
+	BRA.S	10$			;next
+20$
+	RET
+
+    ENDC	;wantTimeDisplay
+
+*------------------------------------------
+
+	END

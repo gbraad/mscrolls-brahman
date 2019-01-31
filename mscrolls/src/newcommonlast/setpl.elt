@@ -1,0 +1,44 @@
+
+************************************************************
+*
+*	@(#)setpl.elt	1.1
+*	1/22/88
+*
+************************************************************
+
+
+	SECTION		"ADV",CODE
+	include		"equates.i"
+	include		"macros.i"
+	include		"nounequ1.i"
+	include		"scenequ.i"
+	include		"nounequ2.i"
+
+*------------------------------------------
+	XDEF	SETPL
+	XREF	PLURAL_Override
+SETPL
+
+* Sets the pluralisity on the basis of the length of buffer at a0
+* and the plurilisity of the elements in it.
+
+	PUSH_L	D0/D4/A0-A1
+	MOVE.L	A0,A1
+	MOVE.W	#$0100,PLURAL_Override(A4)	;set override to 's' mode
+	DO	COUNTLIST		;how many?
+	BEQ.S	90$			;EQ => none in list
+
+	CMP.B	#1,D4			;plural number?
+	BNE.S	10$
+	MOVE.W	(A1),D0
+	GETINFO
+	TST_PLURAL				;
+	BEQ.S	90$
+10$
+	MOVE.W	#-1,PLURAL_Override(A4)	;set to NO 's'
+90$
+	PULL_L	D0/D4/A0-A1
+	RET
+*----------------------------------------
+
+	END

@@ -1,0 +1,101 @@
+**************************************************************
+*
+*	3/16/89
+*	@(#)lock.elt	2.2
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"verbequ.i"
+	include	"nounequ1.i"
+	include	"scenequ.i"
+
+*--------------------------------
+
+	IfVerb	LOCK
+
+	XDEF	V.LOCK
+	XREF	P.BTNI,TBL.DOOR,EXGNOUN,VERB
+ 
+V.LOCK
+
+      IFD	wantSP.LOCK_Before
+
+	XREF	SP.LOCK_Before
+
+	CALL	SP.LOCK_Before
+	
+      ENDC
+
+	MOVEQ   #0,D1              	;WITH
+	DO	CHK4PT
+	TST_LOCKED				;LOCKED?
+	BEQ.S   20$
+
+	BeSure	M.LOCKED
+
+	MOVE.W  #M.LOCKED,D1
+	CALL    P.BTNI
+	DOGO	BSFULLSTOP
+20$
+	TST_OPEN				;OPEN?
+	BEQ.S   22$                	;NO - OK
+	DO	P.BTN	             	;BUT THE NOUN
+	DO	ISARE	             	;IS
+	MSGGO	OPN              	;OPEN
+22$
+	LEA     TBL.DOOR(A4),A1
+30$  
+	CMP.W   (A1)+,D0
+	BEQ.S   40$
+	TEST_W  (A1)+              	;FINISHED?
+	BNE.S   30$
+35$
+	DOGO	YCANT
+ 
+40$
+	CMP.W   (A1),D5            	;CORRECT KEY?  ONLY ONE PER DOOR!
+	BEQ.S   50$
+	MOVE.B  2(A5),D1           	;S&W OF KEY
+	AND.B   #$F0,D1            	;SIZE ONL
+	CMP.B   #$10,D1            	;KEYS = 1
+	BEQ.S   45$
+	MSG	IDNTT              	;'I DO NOT THINK THAT
+	CALL    EXGNOUN        
+	DO	P.QN
+	DO	ISARE	
+	MSG	QSUIT            	;'IS QUITE SUITABLE
+	DOGO	BSFULLSTOP
+45$
+	CALL    EXGNOUN
+	DO	P.TN
+	DO	ISARE
+
+      IFD	wantCorrectFullStops
+	MSG	UNABLE
+	DOGO	BSFULLSTOP
+      ENDC	;wantCorrectFullStops
+
+      IFND	wantCorrectFullStops
+	MSGGO	UNABLE 
+      ENDC	;!wantCorrectFullStops
+ 
+50$
+	BSET    #6,(A0)            	;LOCKED     
+	CMP.W   #VNLOCK,VERB(A4)
+	BNE.S   60$
+	MOVE.W  #M.LOCKED,D1
+	DO	P.TNIN
+	DOGO	BSFULLSTOP
+60$
+	RET
+
+	ENDC
+
+
+
+	END

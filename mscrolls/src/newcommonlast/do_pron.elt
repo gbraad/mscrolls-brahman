@@ -1,0 +1,92 @@
+**************************************************************
+*
+*	5/21/88
+*	@(#)do_pron.elt	2.4
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+
+
+*--------------------------------
+	
+	XDEF	DO.PRON
+	XREF	ISBITRAN,WSYN2,PRONHIM,PRONHER,OLDBUF,GNG2,P.NFND
+	XREF	ERR4
+
+  
+DO.PRON
+   
+	TEST_W  D3                 ;NOUN ALREADY?
+	BEQ.S   01$                ;NO, OK
+	CALL    ISBITRAN           ;VERB ALLOWED?
+	BEQ     WSYN2              ;NO, ERROR
+01$
+	CMP.B   #4,D5              ;THEM?
+	BEQ.S   40$                ;YES
+	CMP.B   #6,D5              ;HIM?
+	BNE.S   10$
+	MOVE.W  PRONHIM(A4),D5
+	BEQ.S   70$
+	BRA.S   30$                ;DONE
+10$
+	CMP.B   #5,D5              ;HER
+	BNE.S   20$
+	MOVE.W  PRONHER(A4),D5 
+	BEQ.S   70$  
+	BRA.S   30$                ;DONE
+20$
+	MOVE.W  OLDBUF(A4),D5      ;ELSE
+	BEQ.S   70$
+30$
+	CALL_S  DO.PROD.VALID      ;CHECK VALID
+	TEST_W  D7                 ;?
+	BNE.S   90$                ;EXIT
+	DO	INCNOUN2
+	BRA.S   60$ 
+40$
+	LEA     OLDBUF(A4),A2
+	TEST_W  (A2)
+	BEQ.S   70$
+50$
+	MOVE.W  (A2)+,D5
+	BEQ.S   60$                ;FIN
+	CALL_S  DO.PROD.VALID      ;VALID?
+	TEST_W  D7
+	BNE.S   90$                ;NO EXIT
+	DO	INCNOUN2           ;ADD
+	BRA.S   50$
+60$
+	MOVEQ   #1,D3
+	BRA     GNG2
+ 
+70$
+	DOGO	P.IDFY
+90$
+	MOVEQ   #2,D7
+	RET
+  
+	
+DO.PROD.VALID
+
+	MOVE.W  D0,-(A7)          ;SAVE IT
+	MOVE.W  D5,D0
+	DO	ISDOFRE			;do we need valid?
+	BEQ.S	10$			;no, ok
+	DO	VALID             ;ONLY IF LOCAL
+	BEQ.S   10$               ;OK
+	TEST_W  ERR4(A4) 	  ; mask?
+	BNE.S   10$
+	CALL    P.NFND            ;NOT FOUND
+10$
+	MOVE.W  (A7)+,D0          ;BAK
+	RET
+
+
+
+
+	END

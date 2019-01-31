@@ -1,0 +1,186 @@
+**************************************************************
+*
+*	5/25/88
+*	@(#)bet.elt	2.6
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"verbequ.i"
+	include	"scenequ.i"
+
+	IfVerb	BET
+
+    IFND	Version2_V.BET
+
+*
+* V.BET
+*
+* call SP.BET with 
+*
+* D0 = stake
+* D1 = NPC
+* D5 = runner
+*
+* if SP.BET returns then we have to print the <D1> refuses your bet
+* if D1 = 0 use NPCINRM
+*
+
+	XDEF	V.BET
+	XREF	SP.BET,ADVERB,CONJ,NOUNBUF3,WHOOPS,NPCINRM
+
+V.BET
+
+	CMP.W	#ON,ADVERB(A4)		;bet on x with y?
+	BNE.S	30$
+	TEST_W	CONJ(A4)		;with?
+	BEQ.S	20$
+10$
+	MOVEQ	#0,D1			;with
+	DO	CHK4PT			;exit doing a 'with what?'
+20$
+	TEST_W	D5
+	BMI.S	10$
+	MOVEQ	#0,D1
+	EXG	D0,D5
+	EXG	A0,A5			;proably spurious
+	BRA.S	Bet_CallSP
+
+* deal with 'bet x on y (with z)' z is bookie
+
+30$
+	MOVEQ	#ON,D1
+	DO	CHK4PT			;make sure of the on
+
+	MOVEQ	#0,D1			;default bookie
+	TEST_W	CONJ+2(A4)		;with x?
+	BNE.S	Bet_CallSP		;nope
+	MOVE.L	NOUNBUF3(A4),D1		;get bookie
+
+
+Bet_CallSP
+
+	ST	WHOOPS(A4)		;no multiple betting!
+	CALL	SP.BET
+
+	TEST_W	D1
+	BNE.S	10$
+	MOVE.W	NPCINRM(A4),D1
+10$
+	MOVE.W	D1,D0
+	BGT.S	20$
+	MSGGO	NOBODYBET		;<'There is nobody here to bet with!^'>
+20$
+	DO	P.TN
+	MSGGO	REFUSEBET		;<'refuses your bet.^'>
+
+    ENDC	;!Version2_V.BET
+
+*------------------------------------------
+
+    IFD	Version2_V.BET
+
+	XDEF	V.BET
+	XREF	SP.BET
+
+* syntax:
+*
+*	bet <number> x [ ON y [ with z] ].
+* 	or
+*	bet on x [ with y ]
+
+* 	Bet must know what the player is betting on, but in some
+*	cercumstances it looks bad for the player to have to keep
+*	saying what he is betting on.
+*	eg. in Blackjack, just say "bet 50 pounds", should be ok.
+
+* 	The code looks in ObjectToBetOn, to see if it is initialized
+*	if not, it insists ON y be stated.
+
+	XREF	ObjectToBetOn,GetNumber
+	XREF	ADVERB,CONJ,P.IDFY,SetValue
+	XREF	P.MHAV,NumberExists,DBS
+
+V.BET
+	
+	CMP.W	#ON,ADVERB(A4)		;bet on x?
+	BEQ.S	40$
+01$
+	
+    IFD	wantSP.BET_Before
+	XREF	SP.BET_Before
+	CALL	SP.BET_Before
+    ENDC	;wantSP.BET_Before
+	
+	DO	CARRIED		        ;have you got the chips.
+	BNE	P.MHAV			;insist carried.
+	DO	GetValue		;of d0 ->d1.L
+	MOVE.L	D1,D3			;set up amount to gamble
+	BEQ.S	50$			;has no value
+	TEST_B	NumberExists(A4)	;is there a number in the sentence?
+	BEQ.S	10$			;then use value of object.
+	MOVE.L	D3,-(A7)
+	CALL	GetNumber		;-> D2,D3
+	MOVE.L	(A7)+,D3		;dont destroy d3.
+	TEST_L	D2			;value stated?
+	BEQ	DBS			;can't bet zero.
+	CMP.L	D2,D1			;d1<d2?
+	BCS.S	60$			;not worth that much!
+	MOVE.L	D2,D3			;amount is value said.
+10$
+	CMP.W	#ON,CONJ(A4)		;bet x fergs on?
+	BEQ.S	20$			;yes.
+	TEST_W	CONJ(A4)		;defined?
+	BPL	P.IDFY			;no.
+	MOVE.W	ObjectToBetOn(A4),D5	;object.
+	BNE.S	21$			;defined, use default
+20$
+	MOVE.L	D1,D2
+	MOVE.W	#ON,D1
+	DO	CHK4PT			;else insist.
+	MOVE.W	D5,ObjectToBetOn(A4)	;and update
+	MOVE.L	D2,D1
+21$
+	; called with;
+	;	d3 = amount to gamble, D1 = total item value
+	;	D0 = object of value. ( d5= what you are betting on.)
+	CALL	SP.BET			;can you bet?
+	SUB.L	D3,D1			;value left
+	MOVE.W	D0,D5
+	CALL	SetValue		;to amount left
+	RET
+40$
+	; bet on x [ with y ].
+	TEST_W	D5			;on something?
+	BNE.S	45$			;yes, fine.
+	CLR.W	D1			;with.
+	DO	CHK4PT			;make sure with what?
+45$
+	EXG	D0,D5			;swap to be,
+	EXG	A0,A5			;bet y on x.
+	MOVE.W	#-1,ADVERB(A4)		;not beton.
+	MOVE.W	#ON,CONJ(A4)		;make up the on x.
+	BRA.S	01$			;and re-enter.
+50$
+	DO	P.BTN			;but the x
+	DO	ISARE
+	MSGGO	WLESS			;is worthless.
+60$
+	DO	P.BTN
+	DO	ISARE
+	MSG	ONLY
+	MSG	WORTH			;but the x is only worth
+	DOGO	P.XFERGS		;x fergs.
+
+
+    ENDC	;Version2_V.BET
+
+*------------------------------------------
+	ENDC	;v.bet
+
+
+	END

@@ -1,0 +1,73 @@
+**************************************************************
+*
+*	5/2/89
+*	@(#)getdata.elt	2.5
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"nounequ2.i"
+	include	"scenequ.i"
+
+
+*--------------------------------
+*
+*	the famous getdata....
+*
+* Given D0 returns A0 -> to noundata
+*
+*--------------------------------
+
+	IFEQ	FastBits
+
+	XDEF	GETDATA
+	XREF	D.NOUNS
+    IFD		wanted_CLONES
+	XREF	CLONEDATA
+    ENDC	;wanted_CLONES
+
+GETDATA
+ 
+      IFNE	M68000&GENERIC
+	XREF	CheckNeedToSleep	;should the session sleep?
+	CALL	CheckNeedToSleep
+      ENDC
+
+	MOVE.L  D0,-(A7)
+	AND.L   #$3FFF,D0		;MASK
+    IFD		wanted_CLONES
+	CMP.W	#NMAXNOUN,D0		;is it a clone?
+	BLS.S	10$			;<=maxnoun.
+	SUB.W	#NMAXNOUN+1,D0		;clone number
+	ADD.W	D0,D0			;*2 (assume < 2^16 clones)
+	LEA	CLONEDATA(A4),A0	;start of data.
+	MOVE.W	0(A0,D0.W),D0		;get real noun.
+    ENDC	;wanted_CLONES
+10$
+	MULU	#14,D0			;EACH RECORD 14 BYTES LONG
+	LEA	D.NOUNS-14(A4),A0	;ADJUST SINCE NOUN#0 NOT REAL
+	ADD.L   D0,A0
+	MOVE.L  (A7)+,D0
+	RET
+
+	ENDC
+
+	IFNE	FastBits 
+
+	XDEF	GETDATA
+
+GETDATA
+	DC.W   $A0FE		;non 68k GETDATA
+	RET
+
+	ENDC
+ 
+
+
+*------------------------------------------
+
+	END

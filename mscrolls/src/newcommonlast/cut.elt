@@ -1,0 +1,133 @@
+**************************************************************
+*
+*	%G%
+*	%W%
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"verbequ.i"
+	include	"nounequ1.i"
+	include	"scenequ.i"
+	
+	IfVerb	CUT
+
+	XDEF	V.CUT
+	XREF	P.MHAVSTOP,FIGHT,NPC.OK,TRC.SUB
+ 
+V.CUT
+	MOVEQ   #0,D1		;'WITH'
+	DO	CHK4PT
+	EXG	D0,D5		;get indirect object
+	DO	CARRIED		;must have object to cut with it.
+	BNE	P.MHAVSTOP	;if not, print mess. & return.
+	EXG	D0,D5		;exchange back for use.
+
+     IFD	wantSP.CUT
+
+	XREF	SP.CUT
+	CALL	SP.CUT
+
+     ENDC
+
+	MOVE.B  3(A5),D1       ;GET SHARPNESS OF IMPLEMENT  
+	LSR.B   #6,D1          ;TOP 2 BITS
+	BEQ.S   60$            ;CAN'T CUT ANYTHING IF ZERO SHARPNESS
+	MOVE.B  3(A5),D1	;GET SHARPNESS OF IMPLEMENT  
+	LSR.B   #6,D1		;TOP 2 BITS
+	BEQ.S   60$		;CAN'T CUT ANYTHING IF ZERO SHARPNESS
+	TST_NPC				;NPC?
+	BEQ.S   10$		;NO
+	DO	NPC.OK		;OK?
+	BEQ	FIGHT		;ATTACK
+10$
+	MOVE.B  1(A0),D2	;GET PHYS CHAR
+	LSR.B   #4,D2		;TOP NIBBLE ONLY, for hardness.
+	CMP.B   #3,D2		;ANYTHING SHARP WILL CUT 'SOFT'
+	BLT.S   CANTCUT		;not applicable.(quantities,liquids,voids)
+	BEQ	TRC.SUB		;tear it & setit out.
+	CMP.B	#12,D2		;tieable => cuttable
+	BEQ	CutTieable	;deal with it elsewhere
+	CMP.B   #4,D2		;RUBBER CAN BE CUT
+	BNE.S   80$		;'TOO TOUGH'
+	CMP.B   #1,D1		;SHARP ENOUGH?
+	BGE	TRC.SUB		;YES
+ 
+60$ 
+	EXG	D0,D5		;GET IMPLEMENT
+	EXG	A0,A5		;NOUN DATA ETC
+	DO	P.BTN		;'BUT THE XYZ '
+	DO	ISAREN		;' IS NOT'
+	MSG	SHP		;' SHARP"
+	MSG	ENOUGH
+	DOGO	BSFULLSTOP
+ 
+ 
+80$
+	DO	P.TN		;'THE XYZ'
+	DO	ISARE
+	MSG	TOO
+	MSG	TOUGH  
+	DOGO	BSFULLSTOP	; backspace then fullstop for pretty end
+
+ 
+CANTCUT
+	DO	P.SUB		;'YOU
+	MSGGO	NOCUT		; CAN'T CUT THAT!'
+
+	ENDC
+
+*------------------------------------------
+	XREF	CONJ,BRKD0QUIET,UNTIE
+
+CutTieable
+
+* Arrived at when d0 is cut with d5, and d0 is possibly
+* tied to a connected system.
+
+      IFND	wantNewCutTieable
+	DO	FIXCHK		;is it tied to anything
+      ENDC	;!wantNewCutTieable
+
+      IFD	wantNewCutTieable
+	TEST_W	12(A0)		;is it tied to anything?
+      ENDC	;wantNewCutTieable
+
+	BEQ	TRC.SUB		;if not then we can cut it ok
+	BTST	#15,12(A0)	;fixed permenantly?
+	BNE.S	CANTCUT		;dont allow the cutting.
+    ; ok this is the mean bit-
+    ; cutting a tied system
+
+	MOVE.W	D0,D5
+	MOVE.L	A0,A5
+	MOVE.W	12(A0),D0	;fetch target
+	GETINFO
+	EXG	A0,A5
+	EXG	D0,D5		;into correct registers
+	MOVE.W	#FROM,CONJ(A4)	;pretent for untie
+
+      IFD	wantNewCutTieable
+	MOVE.W	D0,-(A7)
+      ENDC	;wantNewCutTieable
+
+	CALL	UNTIE		;if specials, it'l pop & return
+				;else it'l comeback	
+
+      IFD	wantNewCutTieable
+	MOVE.W	(A7)+,D0
+      ENDC	;wantNewCutTieable
+
+	CALL	BRKD0QUIET	;zap contents
+	DO	SETOUT		;and fod the item
+	RET
+
+*------------------------------------------
+
+
+	END

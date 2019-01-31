@@ -1,0 +1,177 @@
+**************************************************************
+*
+*	10/27/87
+*	@(#)debug1.elt	1.2
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+
+    IFNE     YCHEAT
+
+
+	 XDEF	DBWHATIS,DBSG,DBMSG,DBSCN,DBWHEREIS
+	 XREF	TST.DBUG
+	 
+DBWHATIS
+ 
+	CALL    TST.DBUG           ;ARE THEY ALLOWED???
+	GETINFO        
+	DO	P.TN
+	DOGO	DBEXIT
+ 
+DBSG
+ 
+	CALL    TST.DBUG
+	GETINFO        
+	TST_ISAROOM				;ROOM???
+	BNE.S   10$
+	CLR.L   6(A0)
+	PRINT   <'OK..^'>
+05$
+	DO	P.TN
+	DOGO	DBEXIT
+ 
+10$
+	MSG     NOCHAN
+	BRA.S   05$
+ 
+DBWHEREIS
+	
+    IFNE     0
+  
+	CALL    TST.DBUG
+	GETINFO        
+	MOVE.W  6(A0),D1
+	BNE.S   10$
+	MOVE.W  8(A0),D2
+	BEQ.S   50$
+	DO	R.NOUN2
+	BRA     DBWHATIS
+10$
+	TST_OUT				;
+	BEQ.S   20$
+	PRINT   <'OUT'>
+	BRA.S   99$
+ 
+50$
+	PRINT   <'INVENT!'>
+	BRA     DBWHATIS
+20$
+	TST_ISAROOM				;
+	BEQ.S   30$
+	PRINT   <'IT IS - '>
+   
+	MOVE.W  8(A0),D0
+	BRA     DBWHATIS 
+30$            
+	PRINT   <'ATT TO '>
+	MOVE.W  8(A0),D0
+	BRA     DBWHATIS    
+40$
+	PRINT   <'PSEUDO'>
+99$
+ 
+    ENDC
+	
+	DOGO	DBEXIT
+	
+	XDEF	DBGOTO,DBZAP
+	XREF	ROOM,GETHEX
+
+ 
+DBGOTO
+ 
+	CALL    TST.DBUG
+	GETINFO        
+	TST_ISAROOM				;ROOM?
+	BEQ     DBWHATIS 
+	PRINT   <'PUFF..'>
+	MOVE.W  8(A0),ROOM(A4)
+	DOGO	DBEXIT
+ 
+DBZAP
+ 
+	CALL    TST.DBUG
+	MOVE.W  D0,-(A7)
+	DO	FNDWRD
+	CALL    GETHEX
+	MOVE.W  D6,-(A7)
+	DO	FNDWRD
+	CALL    GETHEX
+	MOVE.W  (A7)+,D2
+	MOVE.W  (A7)+,D0
+	GETINFO        
+	ADD.W   D2,A0
+	MOVE.B  D6,(A0)
+	BRA     DBWHATIS
+ 
+    ENDC
+
+
+    IFNE     YCHEAT
+ 
+	XDEF	DBTELE
+	XREF	POSWRD,MATCHBUF
+ 
+DBTELE
+ 
+	CALL    TST.DBUG
+	TEST_W  D0
+	BNE.S	10$
+	MOVE.L	POSWRD(A4),A6
+	DO	SEARCH
+	MOVE.L	#-1,(A2)
+	LEA	MATCHBUF(A4),A2
+	CMP.W	#SECT.NOUN,(A2)+
+	BNE.S	20$			;ouch!
+	MOVE.W	(A2)+,D0
+	ADDQ.W	#1,D0
+	GETINFO
+	TST_ISAROOM				;room?
+	BEQ.S	20$
+	MOVE.W	8(A0),D0
+	PRINT	<'Puff..^'>
+10$
+	MOVE.W	D0,ROOM(A4)
+20$
+	DO	R.NOUN
+	BRA     DBWHATIS
+ 
+	
+	XDEF	DBNOUN
+	XREF	P.DESC
+ 
+DBNOUN
+ 
+	CALL    TST.DBUG
+	MOVE.W  D0,D1
+	CALL    P.DESC
+	MSG	SPACE
+	MSG	SPACE
+ 
+	BRA     DBWHATIS            ;BACK TO SCREEN
+ 
+DBMSG
+ 
+	CALL    TST.DBUG
+	MOVE.W  D0,D1
+	DO	P.MSG
+	DOGO	DBEXIT
+ 
+DBSCN
+ 
+	CALL    TST.DBUG
+	MOVE.W  D0,D1
+	DO	P.SCN
+	DOGO	DBEXIT
+  
+    ENDC
+
+
+
+	END

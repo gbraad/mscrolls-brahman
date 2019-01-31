@@ -1,0 +1,84 @@
+**************************************************************
+*
+*	11/19/87
+*	@(#)syndata.elt	2.2
+*
+**************************************************************
+
+
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"scenequ.i"
+
+
+      IFND	wantBIGPROG	
+	SECTION	"ADV",CODE
+      ENDC
+
+      IFD	wantBIGPROG	
+	SECTION	"WTAB",DATA
+      ENDC
+
+
+*--------------------------------
+*
+* SYN.L - TABLE OF SYNONYMS
+*
+* FORMAT - WORD,WORD
+*
+* FIRST WORD = ITEM NO IN SECTION
+*              =======
+*
+* THUS IT IS NOT THE NOUN# ETC
+*
+* SECOND WORD = SECTION NO.
+*
+* SECTION NO.S     0-QUANTIFIERS
+* 1-ADVERBS..    2-CONJUCTIONS
+* 3-SPECIALS     4-VERBS
+* 5-ADJ          6-NOUNS
+* 7-DIRECTIONS   8-CONTROL
+* 9-QUESTIONS   10-TO BE
+* 11-SYNONYMS(!)
+*
+*--------------------------------
+
+SYNMACRO      MACRO
+
+	       DC.W        (\1)*$20+\2
+	       ENDM
+
+	IFNE	YCHEATMORE&VAX
+
+SYNMACRO2     MACRO
+	       DC.W        (\1)*$20+\2
+	       ENDM
+	
+	ENDC
+
+	IFEQ	YCHEATMORE&VAX
+
+SYNMACRO2	MACRO
+		ENDM
+	ENDC
+
+	ALIGN
+
+	XDEF	SYN_L
+
+SYN_L
+	include "verbequ.i"
+	include "nounequ1.i"
+	include	"adjequ.i"
+
+	include	"miscsyms.i"
+	include	"nounsyms.i"
+
+	XDEF	SYN_L_Len
+SYN_L_Len	EQU	(*-SYN_L)/2
+
+
+
+
+	END

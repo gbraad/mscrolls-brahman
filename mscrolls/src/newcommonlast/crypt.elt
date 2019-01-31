@@ -1,0 +1,98 @@
+**************************************************************
+*
+*	%G%
+*	%W%
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"scenequ.i"
+
+*--------------------------------
+* 
+*  CRYPT - EORS SAVE/LOAD GAME
+*          BITS WI RANDOM NO.S
+*
+*--------------------------------
+
+	XDEF	CRYPT
+ 
+CRYPT
+
+	IFND	wantNoCrypt
+
+**** THIS IS A FRIG - SEE AJS
+      IFNE	VAX!ST520
+
+	RET
+
+      ENDC
+
+      IFNE    M68000 		**** THIS IS A FRIG
+
+	XREF	RND.CHIN,RND.DATA,INITRND,SLADDR,SLADDR.E,RNDGEN
+	
+	LEA	RND.CHIN(PC),A5
+	LEA	RND.DATA(PC),A6
+
+	MOVE.W  (A5),-(A7)
+	MOVE.L  (A6),-(A7)          ;SAVE THE OLD RND NO. DATA
+	MOVE.L  4(A6),-(A7)
+	MOVE.W  8(A6),-(A7)
+
+	MOVEM.L	A5/A6,-(A7)
+ 
+	MOVE.L  #$12345678,(A6)        ;PUT PRE-SET NO.S THERE
+	MOVE.L  #$9ABCDEF0,4(A6)
+	MOVE.W  #12345,8(A6)
+	MOVE.W  #6789,(A5)
+ 
+	CALL    INITRND               ;RANDOMISE
+	LEA     SLADDR(A4),A0         ;WHERE TO START
+	MOVE.L  #SLADDR.E,D3          ;NO. OF WORDS TO DO
+	SUB.L   #SLADDR,D3            ;All this is the linkers fault!
+	LSR.L   #1,D3                 ;DIV 2
+	
+10$
+	CALL    RNDGEN                ;RND WORD - D0
+	EOR.W   D0,(A0)+              ;ZAP A WORD
+	DBRA    D3,10$                ;DO UNTIL END OF SAVED AREA
+
+	MOVEM.L	(A7)+,A5/A6
+ 
+	MOVE.W  (A7)+,8(A6)  ;RECOVER OLD SEED ETC
+	MOVE.L  (A7)+,4(A6)
+	MOVE.L  (A7)+,(A6)
+	MOVE.W  (A7)+,(A5)
+ 
+      ENDC
+
+      IFEQ    M68000
+
+	XREF	SLADDR,SLADDR.E
+
+	LEA	SLADDR(A4),A0
+	MOVE.L  #SLADDR.E,D3
+	SUB.L   #SLADDR,D3
+	LSR.L   #2,D3			; Long word encrypt
+
+	MOVE.L  #'Pawn',D0
+
+10$:
+	EOR.L	D0,(A0)+
+	DBRA	D3,10$
+
+      ENDC
+
+      ENDC	;!wantNoCrypt
+
+	RET
+ 
+
+
+
+	END

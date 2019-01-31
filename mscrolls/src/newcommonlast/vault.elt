@@ -1,0 +1,157 @@
+**************************************************************
+*
+*	3/16/89
+*	@(#)vault.elt	2.3
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"verbequ.i"
+
+	XDEF	V.VAULT 
+
+	IFND	VNVAULT
+
+V.VAULT
+	MSGGO	IDFY
+    
+	ENDC
+
+
+	IfVerb	VAULT
+
+	XREF	ADVERB,PRTTXT,SEATED,RIDING,VERB,CONJ,BRKD0
+	XREF	DBS,V.JUMPOF,M.JMP,M.VLT
+
+V.VAULT
+
+	TEST_W  D0                 ;ZERO= NO NOUN
+	BEQ     V.JUMPOF
+ 
+	TEST_W  8(A0)
+	BNE.S   05$
+	TST_PSEUDO				;
+	BNE.S   05$
+	MSG	BUT
+	CALL    PRTTXT
+	DC.W    $8100               ;YOU HAVE
+	MSG	GOT
+	DOGO	P.TNSTOP
+ 
+05$
+	TEST_W  ADVERB(A4)
+	BMI.S   10$
+	CMP.W   #8,ADVERB(A4)      ;8='OVER'
+	BEQ.S   10$
+	CMP.W   #10,ADVERB(A4)     ;10='ACROSS'
+	BEQ.S   10$
+	TEST_W  SEATED(A4)         ;WHEN SITTING?
+	BEQ.S   11$                ;NOPE
+	DO	P.SUB
+	CLR.W   SEATED(A4)
+	CLR.W   RIDING(A4)
+	MSGGO	LEAP
+11$
+	TST_ISAROOM				;room?
+	BNE	V.JUMPOF
+	MSGGO	IDFY
+10$
+	MOVEQ   #M.JMP,D6
+	MOVE.W  VERB(A4),D1
+	CMP.W   #VNJUMP,D1         ;JUMP?
+	BEQ.S   30$
+	TEST_W  CONJ(A4)
+	BMI.S   20$
+	CLR.W   D1                 ;0=WITH
+	DO	CHK4PT	            ;WITH WHAT EVER
+	MOVE.B  2(A5),D1           ;GET SIZE
+	LSR.B   #4,D1
+	CMP.B   #5,D1
+	BMI     DBS                ;TOO SMALL TO USE FOR VAULTING
+	MOVE.B  1(A5),D1           ;GET HARDNESS OF ITEM TO BE USED
+	LSR.B   #4,D1
+	CMP.B   #5,D1
+	BMI     DBS
+	CMP.B   #12,D1             ;FLEXIBLE
+	BEQ     DBS
+	CMP.B   #10,D1
+	BEQ     JV.SNAPS
+	MOVE.B  1(A5),D1           ;GET STRENGTH
+	AND.B   #$0F,D1
+	CMP.B   #5,D1
+	BMI     JV.SNAPS
+20$
+	MOVEQ   #M.VLT,D6        ;'VAULTING ' FOR LATER USE
+  
+*--------------------------------
+  
+  
+30$
+  
+	TEST_B  6(A0)              ;CANNOT VAULT IF HIDDEN/RELATED/WORN ETC
+	BNE.S   L50
+L35
+	MOVE.B  2(A0),D1           ;SIZE &WEIGHT
+	LSR.B   #4,D1              ;GET SIZE ONLY
+	BEQ     DBS                ;CANNOT JUMP OVER ROOMS ETC
+	CMP.B   #5,D1
+	BPL.S   40$                ;TOO BIG
+ 
+	DO	P.SUB	             ;YOU/HE
+	MSG	YSI
+	MOVE.W  D6,D1              ;VAULT OR JUMP
+	DO	P.MSG
+	DO	P.TNSTOP
+	MSGGO   LINE
+ 
+ 
+40$
+	
+	DO	P.TN
+	DO	ISARE
+	MSG	2BIG           ;TOO BIG
+	DOGO	BSFULLSTOP
+  
+  
+*--------------------------------
+  
+L50
+	BTST    #0,6(A0)           ;RELATED ?
+	BEQ.S   VAULT.60
+	MOVE.W  D0,D1
+	MOVE.W  8(A0),D0
+	GETINFO
+	TST_ISAROOM				;ROOM?
+	BEQ.S   L55
+	MOVE.W  D1,D0
+	GETINFO
+	BRA.S   L35
+L55
+	DO	P.BTN
+	DO	ISARE
+	MSGGO	INW            ;IF RELATED THEN ?'BUT XYZ IS IN THE WAY'  
+    
+VAULT.60
+
+	TST_ISAROOM				;ROOM
+	BNE     V.JUMPOF
+	MSGGO	BZ
+
+
+
+JV.SNAPS
+ 
+	MOVE.W  D5,D0
+	DO	P.TN
+	MSG	SNPS           ;SNAPS
+	DOGO	BRKD0
+
+	ENDC
+
+
+
+	END

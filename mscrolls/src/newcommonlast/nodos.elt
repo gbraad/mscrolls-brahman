@@ -1,0 +1,126 @@
+**************************************************************
+*
+*	8/25/88
+*	@(#)nodos.elt	2.10
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"verbequ.i"
+	include	"scenequ.i"
+	include	"scen.i"
+
+
+	XREF	OLDTEXT,SLGAMENO,GETCHAR,DRIVE,BIOS,UTEXIT,DBUG.ON,USER.DB
+	XREF	DIED,DO.QUIT,LEFTM,LEFTM.SV,DISPTYPE
+	XREF	DISP.SV,FILENO,SLADDR,SLADDR.E,DEST,FILESIZE,INBUFF
+	XREF	WRITEIT,WRITEFILE,READFILE,WIDTH,LJPOS,LAST.CH2,CHANNEL
+	XREF	SUM.CHK,POSWRD,INPUT
+
+	XREF	RND.DATA,INITRND,CWID_FLG,SCR_IGNO,RNDGEN,FUNCBASE
+	XREF	RND.CHIN
+
+	XREF	CRYPT,CALC.DATA,CHK.DATA,CHK.DO
+
+   IFEQ		DosPresent
+
+	XDEF	UTSAVE
+	XREF	SAVEGAME,GETGAME,LOADGAME
+ 
+UTSAVE
+ 
+	CALL    SAVEGAME
+	DOGO	UTEXIT
+
+	XDEF	UTRESTORE
+	XREF	P.Refresh
+
+ 
+UTRESTORE
+ 
+	CALL    LOADGAME
+	CLR.B   OLDTEXT(A4)           ;USED AS SECTOR 0 BUFFER!
+
+    IFD		wantLoadToRefresh
+
+    IFNE	Graphics
+	XREF	DontLoadPicture
+	ST	DontLoadPicture(A4)
+    ENDC	;Graphics
+
+	CALL	P.Refresh
+
+    IFNE	Graphics
+	CLR.B	DontLoadPicture(A4)		;zap it back.
+    ENDC	;Graphics
+    ENDC	;wantLoadToRefresh
+
+	DOGO	UTEXIT
+
+	XDEF	UTRESTORE
+
+UTRESTORE2
+ 
+	LEA	UTRESTORE2(PC),A0
+	CALL    GETGAME
+	CLR.B   OLDTEXT(A4)           ;USED AS SECTOR 0 BUFFER!
+
+	CALL	P.Refresh
+	DOGO	UTEXIT
+ 
+    ENDC
+
+
+    IFNE	QL128
+ 
+	XDEF	UTQUIT
+
+UTQUIT
+ 
+	LEA     UTEXIT(PC),A0         ;SAVE RET ADDR
+ 
+DO.QUIT
+
+    IFD		wantSP.DO.QUIT
+	XREF	SP.DO.QUIT
+	CALL	SP.DO.QUIT 
+    ENDC	;wantSP.DO.QUIT
+
+	MSG	QUIT                ;'DO U WANT TO QUIT OR RESTART
+	LEA     SLGAMENO+2(A4),A2     ;POINT AT 'R' - RESTART DEFAULT
+	CALL    GETCHAR               ;DO CURSOR ETC
+	DO	CHAR.SUB
+	AND.B   #$5F,D1               ;SORT CASE
+	CMP.B   #'Q',D1               ;IF NOT QUIT THEN RESTART
+	BNE.S   UTRESTART2            ;OK THEN
+	MOVE.L  A0,-(A7)              ;SOMEWHERE TO RETURN TO
+	DO	RUSURE                ;FIND OUT
+	RESET                         ;YES!!!.....
+  
+ 
+	XDEF	UTRESTART
+
+UTRESTART 
+	
+	PEA     UTEXIT(PC)
+	DO	RUSURE                ;DO Y REALLY WANT TO?
+ 
+	XDEF	UTRESTART2
+
+UTRESTART2
+ 
+	MSG	ENSURE              ;MAKE SURE 'THE PAWN...
+	LEA     SLGAMENO+4(A4),A2        ;POINT AT A SPACE
+	CALL    GETCHAR               ;WAIT FOR CHAR
+	MOVEQ   #4,D0                 ;= FILE #5
+	MOVE.W  #1,DRIVE(A4)          ;DRIVE #
+ 
+	BRA     BIOS
+ 
+    ENDC
+
+	END

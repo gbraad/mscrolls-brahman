@@ -1,0 +1,233 @@
+******************************************************
+*
+*	%W%
+*	%G%
+*
+******************************************************
+
+		SECTION		"ADV",CODE
+
+********************************************
+*
+* HINT.ASM -
+*
+********************************************
+
+
+	include "equates.i"
+	include	"macros.i"
+	include	"scenequ.i"
+
+
+	XREF     CHAROUT,LINE,PRTTXT,SCORE_
+
+	XDEF     UNDOHINT
+
+UNDOHINT
+
+	CALL    UNCODE_A_HINT     ;Returns A6 -> msg D7=0 => ok
+	TEST_L  D7
+	BEQ.S   10$
+	MSGGO	TRYAGAIN	;<'^Sorry, try that one again.'>
+10$
+	SUB.B   #'A',(A6)         ;A=> zero points ok
+	MOVE.B  (A6)+,D0
+	AND.W   #$FF,D0
+	LEA     SCORE_LIST(PC),A0
+	MOVE.B  0(A0,D0),D0
+	CMP.W   SCORE_(A4),D0
+	BHI.S   BAD_SCORE
+	CALL    LINE
+20$
+	MOVE.B  (A6)+,D1
+	BEQ.S   90$
+	CALL    CHAROUT
+	BRA.S   20$
+90$
+	RET
+
+BAD_SCORE
+
+	MSGGO	MOREPOINTS	;'^You will need more points to find that out!'
+
+
+SCORE_LIST
+
+	DC.B     0           ;A = 0 
+	DC.B     5           ;B = 5
+	DC.B     50
+	DC.B     100
+	DC.B     150
+
+	ALIGN
+
+
+* Decrypt - this programme, passed a pointer to a line of ASCII by A6
+* will decrypt it back into itself -
+* and checksum it
+* and make sure you're allowed it with your score
+* I HOPE - ajs
+
+      IFD	Version2_HINTS
+
+* version2 uses only 16 upper-case alphabetics to make it easier!
+
+UNCODE_A_HINT
+
+	MOVE.L  A6,A5			;target pointer
+	MOVE.L  A6,A0			;source pointer
+05$
+	MOVE.B  (A0)+,D0		;get a char (hi nibble)
+	BEQ.S   20$			;EQ=> finished
+	CMP.B   #' ',D0			;ignore spaces
+	BEQ.S   05$
+	CMP.B	#'<',D0			;also the '<' & '>'
+	BEQ.S	05$
+	CMP.B	#'>',D0
+	BEQ.S	05$
+
+	MOVE.B  D0,D1
+	CALL    RETURNCHAR
+	AND.B   #$0F,D2
+	LSL.B   #4,D2
+	MOVE.B  D2,D0
+10$
+	MOVE.B  (A0)+,D1
+	BEQ.S   20$
+	CMP.B   #' ',D1			;ignore spaces
+	BEQ.S   05$
+	CMP.B	#'<',D1			;also the '<' & '>'
+	BEQ.S	05$
+	CMP.B	#'>',D1
+	BEQ.S	05$
+
+	CALL    RETURNCHAR
+	AND.B   #$0F,D2
+	OR.B    D0,D2
+	MOVE.B  D2,(A5)+		;save it away
+	BRA.S   05$
+20$
+	MOVEQ	#0,D6
+	MOVEQ	#0,D5			;total
+	MOVE.L  A6,A1                   ;A0 POINTS AT END
+	CMP.L   A1,A5			;check there were chars done
+	BEQ.S   RETURNFAIL		;none - complain
+
+30$
+	MOVE.B  (A1),D0			;now undo the eors
+	EOR.B   D0,D6			;get REAL byte
+	ADD.B	D6,D5			;sum bytewise
+	MOVE.B  D6,(A1)+
+	MOVE.B	D0,D6
+	CMP.L	A1,A5			;finished?
+	BNE.S   30$
+40$
+	SUB.B	-1(A1),D5		;cos we just added it!
+	CLR.B	-1(A1)			;a terminator
+	CMP.B	D5,D6			;totals same?
+	BNE.S   RETURNFAIL
+50$
+	MOVEQ   #0,D7
+	RET
+
+      ENDC	;Version2_HINTS
+
+      IFND	Version2_HINTS
+
+UNCODE_A_HINT
+
+	MOVE.L  A6,A5			;target pointer
+	MOVE.L  A6,A0			;source pointer
+05$
+	MOVE.B  (A0)+,D0		;get a char (hi nibble)
+	BEQ.S   20$			;EQ=> finished
+	CMP.B   #' ',D0			;ignore spaces
+	BEQ.S   05$
+	CMP.B	#'<',D0			;also the '<' & '>'
+	BEQ.S	05$
+	CMP.B	#'>',D0
+	BEQ.S	05$
+
+	MOVE.B  D0,D1
+	CALL    RETURNCHAR
+	AND.B   #$1C,D2
+	LSL.B   #3,D2
+	MOVE.B  D2,D0
+10$
+	MOVE.B  (A0)+,D1
+	BEQ.S   20$
+	CMP.B   #' ',D0			;ignore spaces
+	BEQ.S   05$
+	CMP.B	#'<',D0			;also the '<' & '>'
+	BEQ.S	05$
+	CMP.B	#'>',D0
+	BEQ.S	05$
+
+	CALL    RETURNCHAR
+	SUBQ.W  #1,D2
+	AND.B   #$1F,D2
+	OR.B    D0,D2
+	MOVE.B  D2,(A5)+
+	BRA.S   05$
+20$
+	MOVE.B  #10,D6
+	MOVE.L  A6,A1                   ;A0 POINTS AT END
+	CMP.L   A1,A5
+	BEQ.S   RETURNFAIL
+
+30$
+	MOVE.B  (A1),D0
+	EOR.B   D6,D0
+	MOVE.B  D0,(A1)+
+	EOR.B   D0,D6
+
+	BNE.S   30$
+40$
+	
+	TEST_B  D0
+	BNE.S   RETURNFAIL
+50$
+	MOVEQ   #0,D7
+	RET
+
+      ENDC	;!Version2_HINTS
+
+RETURNFAIL
+
+	MOVEQ   #-1,D7
+	RET
+
+RETURNCHAR
+
+	CMP.B  #$60,D1           ;kill case with care (numerics)
+	BMI.S  05$
+	AND.B  #$5F,D1
+05$
+	LEA    INDEXLOOP(PC),A3
+	CLR.W  D2
+10$
+	CMP.B   (A3)+,D1
+	BEQ.S   90$
+	ADDQ.W  #1,D2
+	CMP.B   #32,D2
+	BNE.S   10$
+	BRA     RETURNFAIL
+90$
+	RET
+
+	IFD	Version2_HINTS
+
+INDEXLOOP
+	DC.B    'CAPYRKGHTBQMSDEF'
+
+	ENDC
+
+	IFND	Version2_HINTS
+
+INDEXLOOP
+	DC.B    'COPYRIGHTMA5NE7XSKW0JLZ1986BDFQUV234!'
+
+
+	ENDC
+
+	END

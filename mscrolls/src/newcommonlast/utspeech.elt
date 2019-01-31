@@ -1,0 +1,37 @@
+**************************************************************
+*
+*	10/27/87
+*	@(#)utspeech.elt	1.2
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+
+
+    IFNE       SpeechAvail
+
+	XDEF	UTSPEECH
+	XREF	UTEXIT,SpeechOn,Switch
+
+UTSPEECH
+
+	PEA     UTEXIT(PC)
+	LEA     SpeechOn(A4),A0
+	CALL	Switch
+	PRINT   <'^Speech '>
+	TEST_B  SpeechOn(A4)
+	BEQ.S	10$
+	MSGGO	ON
+10$
+	MSGGO	OFF
+
+
+    ENDC
+
+
+
+	END

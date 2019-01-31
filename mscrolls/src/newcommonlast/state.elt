@@ -1,0 +1,223 @@
+**********************************************************
+*
+*   %W%
+*   %G%
+*
+**********************************************************
+
+        SECTION "ADV",CODE
+
+        include "equates.i"
+        include "macros.i"
+        include "scenequ.i"
+        include "nounequ2.i"
+
+    IFD wantSTATES
+
+    XDEF    DOSTATES
+    XDEF    LOOKUPCODE
+    XDEF    STATERES
+
+
+    XREF    INCNOUN2,VALID,MATCHBUF,QCARRIED
+    XREF    STATEBUF
+        
+*------------------------------------------------------
+*  FILTERS
+*  
+* Entry:
+*   D0= noun# of item
+
+* NOTE:   ALL FILTERS MUST GO BEFORE THE STATE TABLE
+
+FILTER.CARRIED
+
+    CALL    QCARRIED
+    RET
+
+*------------------------------------------------------
+
+FILTER.SMALL
+
+    GETINFO
+    MOVE.B  2(A0),D0    ;size and weight
+    LSR.B   #4,D0       ;adjust for size only
+    CMP.B   #1,D0       ;small=1
+                ;return condition of cmp
+    RET
+*------------------------------------------------------
+
+FILTER.LARGE
+
+    GETINFO         ;find it's data
+    MOVE.B  2(A0),D0    ;size and weight
+    LSR.B   #4,D0       ;adjust for size only
+    CMP.B   #$f,D0      ;15=> void
+    BEQ.S   70$     ;fail
+    CMP.B   #3,D0       ;large is >3
+    BGT.S   80$     ;ok
+70$
+    SETNE
+    BRA.S   90$     ;and exit
+80$
+    SETEQ
+90$
+    RET
+
+*------------------------------------------------------
+
+STATE.TBL
+*
+* NOTE: THIS TABLE MUST BE AFTER ALL FILTER ROUTINES.
+
+* Format of table:
+*
+* DC.B  byte index, data mask
+*
+*   filter true if (byteindex(A0)&mask)
+* OR
+* DC.W  adress of filter routine returning
+*   EQ<=> filter true
+* NOTE: must have a negative offset
+
+    DC.B    0,%00010000     ;open    (code 1)
+    DC.B    0,%10000000     ;lit
+    DC.B    0,%01000000     ;locked
+    DC.B    0,%00100000     ;closed
+    DC.B    0,%00000100     ;broken
+    DC.B    0,%00000010     ;dead
+    DC.B    11,%11100000        ;edible
+    DC.W    FILTER.CARRIED-STATE.TBL    ;carried
+    DC.W    FILTER.SMALL-STATE.TBL      ;small
+    DC.W    FILTER.LARGE-STATE.TBL      ;large
+
+    ALIGN
+    
+*------------------------------------------------------
+
+    XREF    SECTION_
+    XREF    WORD_
+
+DOSTATES
+
+* Filter part of a noun buffer on a specific state
+*
+* Entry:
+*       D1.W= state code index (into table)
+
+    PUSH_L  D0-D3/A0/A1
+    LEA MATCHBUF(A4),A1     ;start of buffer
+    LEA STATE.TBL(PC),A0    ;start of table
+    SUBQ.W  #1,D1           ;adjust to start at 0
+    LSL.W   #1,D1           ;*2 for entry size
+    MOVE.W  0(A0,D1),D2     ;fetch entry
+    BMI.S   50$         ;is a routine name
+    MOVE.B  D2,D1           ;save mask in d1
+    LSR.B   #8,D2           ;fetch offset (hibyte=0)
+10$
+    MOVE.L  (A1)+,D0        ;get element
+    BMI.S   90$         ;done
+    SWAP    D0
+    CMP.W   #SECT.NOUN,D0       ;right type?
+    BNE.S   10$         ;no, forget it
+    SWAP    D0          ;otherwise get back no.
+    ADDQ.W  #1,D0           ;adjust to game number.
+    GETINFO             ;and its data
+    MOVE.B  0(A0,D2),D3     ;get byte of data
+    AND.B   D1,D3           ;and wi mask
+    BNE.S   10$         ;ok, leave it
+    CALL    FODENTRY        ;fiod previous entry
+    BRA.S   10$         ;and try again
+
+50$
+    MOVE.L  (A1)+,D0        ;get element
+    BMI.S   90$         ;done
+    SWAP    D0
+    CMP.W   #SECT.NOUN,D0       ;right type?
+    BNE.S   50$         ;no, forget it
+    SWAP    D0          ;otherwise get back no.
+    ADDQ.W  #1,D0           ;adjust to game number.
+    LEA STATE.TBL(PC),A0    ;offset base
+    PUSH_L  D2          ;too important
+    JSR 0(A0,D2)        ;and try filter
+    PULL_L  D2
+    BEQ.S   50$         ;return ok, next.
+    CALL    FODENTRY        ;or kill it
+    BRA.S   50$         ;and continue
+90$
+    CMP.B   #1,D4           ;single
+    BNE.S   99$         ;if not exit
+    LEA MATCHBUF(A4),A1     ;buffer start
+91$
+    MOVE.L  (A1)+,D0        ;get one entry
+    BMI.S   99$         ;opps
+    DO  VALID.WO        ;until local found.
+    BNE.S   91$         ;until
+    MOVE.W  D0,WORD_(A4)        ;set up section#
+    SWAP    D0
+    MOVE.W  D0,SECTION_(A4)     ;and the word
+99$
+    PULL_L  D0-D3/A0/A1
+    RET
+    
+
+*------------------------------------------------------
+    XREF    VALID.WO
+
+FODENTRY
+
+
+
+    PUSH_L  D0/D5/A1
+    MOVE.W  -2(A1),D0       ;fetch the noun-1
+    DO  VALID.WO        ;local
+    BNE.S   10$         ;no
+    SUBQ.W  #1,D4           ;dec noun counter
+10$
+    MOVE.L  (A1),-(A1)      ;move one element
+    BMI.S   90$         ;end
+    ADDQ.L  #8,A1           ;forward two
+    BRA.S   10$         ;and loop to end of list
+90$
+    PULL_L  D0/D5/A1
+    SUBQ.L  #4,A1           ;step back as one less in list
+    RET
+
+*------------------------------------------------------
+
+LOOKUPCODE
+
+* return the state code corresponding to SECT.STATE
+* Entry: D0= word index
+
+    CMP.B   #SECT.VERB,D1   ;'open' is a special case
+    BNE.S   10$     ;no, we are ok
+    MOVEQ   #1,D0       ;must be 'open' if a verb (code=1)
+    BRA.S   90$     ;exit
+10$
+    ADDQ.W  #2,D0       ;code is wnumber+2
+90$
+    RET
+
+
+*------------------------------------------------------
+
+STATERES
+
+* resolve the matchbuf now we have found the noun with all codes
+* stored on statebuf
+
+    LEA STATEBUF(A4),A0     ;start of state list
+10$ 
+    MOVE.W  (A0)+,D1        ;get a code
+    BEQ.S   90$         ;done
+    CALL    DOSTATES        ;and fix that buffer
+    BRA.S   10$         ;any more states to do?
+90$
+    RET
+
+*------------------------------------------------------
+
+    ENDC    ;wantSTATES
+
+    END

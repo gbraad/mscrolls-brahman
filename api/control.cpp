@@ -55,7 +55,7 @@
 
 // 1.1.X pre ifi
 // 1.2.X post ifi
-#define VERSION_STRING  "1.2.7"
+#define VERSION_STRING  "1.2.12"
 
 struct ControlImpBase
 {
@@ -1089,6 +1089,32 @@ struct Control::Imp :
         return true;
     }
 
+    string findLatestSave() const
+    {
+        string res;
+        time_t best = 0;
+        std::vector<string> files;
+        if (FD::getDirectory(_host->_dataPath.c_str(), files))
+        {
+            for (size_t i = 0; i < files.size(); ++i)
+            {
+                if (equalsIgnoreCase(suffixOf(files[i]), ".sav"))
+                {
+                    string fpath = makeDataPath(files[i]);
+                    time_t t = FD::mtime(fpath.c_str());
+                    if (t > best)
+                    {
+                        best = t;
+                        res = fpath;
+                    }
+                }
+            }
+        }
+        
+        //LOG3("API, findLatestSave best ", res);
+        return res;
+    }
+
     bool ifiLoadData(const string& s) override
     {
         // expect this to be a response from the engine,
@@ -1096,6 +1122,8 @@ struct Control::Imp :
 
         string f = s.empty() ? _lastSaveFilename :
             makeDataPath(changeSuffix(s, ".sav"));
+
+        if (f.empty()) f = findLatestSave();
 
         LOG3("API ifiLoadData ", f);
 
@@ -2010,12 +2038,11 @@ struct Control::Imp :
     {
         bool r = false;
 
-        //string fn = makeDataPath(changeSuffix(name, ".sav"));
-        string fn = changeSuffix(name, ".sav");
-        LOG3("loadGame, ", fn);
-        
         if (_be)
         {
+            string fn = changeSuffix(name, ".sav");
+            LOG3("loadGame, ", fn);
+            
             r = _be->loadGame(fn.c_str());
 
             // refresh after loading game
@@ -2023,6 +2050,9 @@ struct Control::Imp :
         }
         else if (_ifi)
         {
+            string fn = makeDataPath(changeSuffix(name, ".sav"));
+            LOG3("loadGame, ", fn);
+            
             r = ImpIFI::loadGame(fn);
         }
         

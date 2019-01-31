@@ -1,0 +1,47 @@
+**************************************************************
+*
+*	10/27/87
+*	@(#)prtwrd.elt	1.2
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+
+*--------------------------------
+*
+* PRTWRD - PRINTS WORD A (POSWRD)
+*
+* ENDS ON ZERO,SPACE OR HI BIT SET
+*
+*--------------------------------
+
+	XDEF	PRTWRD,PRTWRD2
+	XREF	POSWRD
+ 
+PRTWRD
+ 
+	MOVE.L  POSWRD(A4),A5
+
+PRTWRD2
+
+	MOVE.B  (A5)+,D1
+	BEQ.S   90$                ;END
+	BMI.S   80$                ;END WI A SPACE
+	CMP.B   #$20,D1
+	BEQ.S   90$
+	DO	CHAROUT
+	BRA.S   PRTWRD2
+	
+80$
+	DO	CHAROUT
+90$
+	MSGGO     SPACE
+ 
+
+
+
+	END

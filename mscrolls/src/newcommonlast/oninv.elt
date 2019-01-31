@@ -1,0 +1,51 @@
+**************************************************************
+*
+*	%G%
+*	%W%
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"scenequ.i"
+
+    IFND	wantSparseBuy
+	
+*--------------------------------
+
+	XDEF	ONINV,RETURN
+	XREF	WCARR,ROOM,SUBJECT
+   
+ONINV
+	DO	FIXCONT            ;WAS PROBABLY CONTAINED (IN CART)
+	CLR.W   6(A0)
+	MOVE.B  2(A0),D1 
+	AND.B   #$0F,D1
+	ADD.W   WCARR(A4),D1
+	CMP.B   #MAXWGHT,D1
+	BLS.S   10$
+	MOVE.W  ROOM(A4),8(A0)  
+	DO	P.SUB
+	MSG	CNTCAR
+	DO	P.OBJPRN
+	MSG	SO
+	DO	P.SUB
+	MSG	PUT
+	DO	P.OBJPRN
+	MSGGO	ONGND
+10$
+	MOVE.W  SUBJECT(A4),8(A0)
+ 
+RETURN
+ 
+	RET
+
+*------------------------------------------ 
+	
+	
+    ENDC	;!wantSparseBuy
+
+	END

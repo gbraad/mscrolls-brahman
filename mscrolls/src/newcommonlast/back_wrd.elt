@@ -1,0 +1,30 @@
+**************************************************************
+*
+*	10/27/87
+*	@(#)back_wrd.elt	1.2
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+
+	XDEF	BACK.WRD
+	XREF	POSWRD,INBUFF
+
+BACK.WRD 
+	
+*MOVE BACK 1 WORD
+	
+	MOVE.L  A1,-(A7)
+	MOVE.L  POSWRD(A4),A6
+	LEA     INBUFF(A4),A1
+	CMP.L   A1,A6                  ;AT BEGINING
+	BEQ.S   90$                    ;OK
+	SUBQ.L  #1,A6                  ;DEC
+90$
+	MOVE.L  (A7)+,A1
+	RET
+
+	END

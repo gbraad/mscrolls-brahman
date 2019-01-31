@@ -1,0 +1,36 @@
+	
+	SECTION	"ADV",code
+
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"scenequ.i"
+
+;	IFNE	M68000
+
+     IFD	wantPassWordProtection
+
+	XDEF	FlagProtectionDone
+FlagProtectionDone	DC.W	0
+
+     ENDC	;wantPassWordProtection
+
+
+	XDEF	StackStart,StackEnd
+
+StackStart	DS.B	STACKLEN
+StackEnd
+
+	XDEF	SessionStart
+
+SessionStart
+
+
+*	for generic 68000 versions only:
+*	this goes in the link where BIOSLINK would have been
+
+
+;	ENDC	;m68000
+
+
+	END

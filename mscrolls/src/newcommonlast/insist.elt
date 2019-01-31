@@ -1,0 +1,131 @@
+**************************************************************
+*
+*	10/27/87
+*	@(#)insist.elt	1.2
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+
+*
+* INSIST - this is intended to allow bits of game to insist that one of
+*          a given list of replies is make by the player
+*
+* eg - (Please answer YES or NO)>>
+*
+* the text is supplied by the caller via a string pointer (see below)
+* and the list of allowed words also vi a pointer.
+*
+* ENTRY:
+*        D0.W = no. of tries before returning failure (-1 => forever)
+*        A0 points at the text (WORD zero term)
+*        A1 points at the matchbuf list (LONG -1 term)
+*
+* EXIT: 
+*        D0.W = no. of tries which happened
+*        D1 = which entry in list matched (ie 0 => first 1 => second etc)
+*             (-1 => none, failed)
+*        D5 = word no. of word we got (nouns beware!!)
+*        D6 = section no. of word we got
+*
+	
+	XDEF	INSIST
+	XREF	INPUT,INFORMAT,INBUFF,SEARCHER,P.STRING,MATCHBUF
+
+INSIST
+
+	PUSH_L	D2-D4/D7/A0-A6		;save things that are not returns
+	MOVEQ	#0,D2			;no. of attempts it took
+10$
+	ADDQ.W	#1,D2
+	TEST_W	D0			;neg => don't count down
+	BMI.S	20$
+	SUBQ.W	#1,D0
+	BMI.S	80$			;waa - ran out of goes
+20$
+	PUSH_L	D0/D2/A0/A1
+
+	CALL	P.STRING		;print our fancy message
+	MSG	SPACE			;make sure text is flushed
+	DO	UTIL.BS
+	CALL	INPUT			;get the line
+	CALL	INFORMAT		;kill mult-spaces &,. etc
+
+	PULL_L	D0/D2/A0/A1
+	TEST_B	D7			;any hassle?
+	BNE.S	10$			;yes, ask again
+
+	LEA	INBUFF(A4),A6
+
+	PUSH_L	D0/D2/A0/A1
+
+	DO	FNDWRD			;suss initial spaces
+
+	PULL_L	D0/D2/A0/A1
+	TEST_B	D7
+	BNE.S	10$			;waa - no word!
+
+	PUSH_L	D0/D2/A0/A1
+
+	CALL	SEARCHER
+	MOVE.L	#-1,(A2)		;terminate buffer
+	LEA	MATCHBUF(A4),A2
+
+	PULL_L	D0/D2/A0/A1
+
+* this bit will be non-obvious since there are about 3 ply of meaning to
+* 'match' here - so I'll try to say what's going on first
+
+* A1 points at a matchbuf of ALLOWED words
+* A2 points at a matchbuf of the ENTERED word
+*
+* the two are compared, if an ALLOWED word is found in the ENTERED list we
+* have won, and exit ok, else we try asking again
+*
+* the compare is done by getting the first ALLOWED word and trying it
+* against all the ENTERED words, if none same then getting the next ALLOWED...
+*
+* Phew..
+
+	MOVE.L	A1,A3			;required matchbuf
+	MOVEQ	#-1,D1			;count which allowed word it was
+30$
+	ADDQ.W	#1,D1			;so caller can easilly tell
+	MOVE.L	(A3)+,D6		;get section,word
+	BMI.S	10$			;we're out of allowed matched - retry
+
+	MOVE.L	A2,A5			;user's one
+40$
+	MOVE.L	(A5)+,D5		;get section,word
+	BMI.S	30$			;this one's not it
+
+	CMP.L	D5,D6			;allowed?
+	BNE.S	40$			;nope - see if more there
+
+* OK we got one!!!!!!
+
+	SWAP	D6			;cos it's got section,word now
+	MOVE.W	D2,D0			;how many tries it took
+
+	SETEQ				;flag passed
+	BRA.S	90$			;exit
+
+* failures come here
+
+80$
+	MOVEQ	#-1,D0
+	MOVEQ	#-1,D1
+
+*	SETNE				;moveq does this
+90$
+	PULL_L	D2-D4/D7/A0-A6
+	RET
+
+
+
+
+	END

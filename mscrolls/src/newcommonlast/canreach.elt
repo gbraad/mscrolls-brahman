@@ -1,0 +1,268 @@
+**************************************************************
+*
+*	%G%
+*	%W%
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"scenequ.i"
+
+
+****************************************************************
+*
+* CanReach - susses if u can reach this object while seated 
+* 
+* On entry: D0 = noun# in question
+*           SEATED = noun# of object u'r sitting on
+*
+* uses ReachTable in scenrw.asm
+*
+* format is:    object,seat
+*               long word -1 terminated
+*
+* In exit: EQ => can reach it
+*
+	XDEF	CanReach
+	XREF	ReachTable,SEATED,VERB
+
+	IFD	wantSP.CanReach
+
+	XREF	SP.CanReach
+
+	ENDC
+
+CanReach
+
+	PUSH_L	D1/A0
+
+      IFD	wantSP.CanReach
+
+	CALL	SP.CanReach		;returns EQ => can def reach it
+	BEQ.S	90$
+
+      ENDC
+
+
+	LEA	ReachTable(A4),A0
+10$
+	MOVE.L	(A0)+,D1
+	BMI.S	90$
+
+	TEST_W	D1			;MI => is a verb#
+	BPL.S	20$
+	CMP.B	VERB+1(A4),D1		;to allow stuff like 'feed bear'
+	BEQ.S	30$
+	BRA.S	10$
+20$
+	CMP.W	SEATED(A4),D1		;bottom word is object we're on?
+	BNE.S	10$
+30$
+	SWAP	D1
+	
+    IFD		wantRelatedReachable
+	MOVE.L	D0,-(A7)		;save our original.
+31$
+	CMP.W	D0,D1			;is it our object (straight away)?
+	BEQ.S	39$			;yes, wow, that wil do.
+	GETINFO
+	BTST	#0,6(A0)		;is our item related to something?
+	BEQ.S	35$			;no, too bad, dont alow contained yet.
+   	TST_PSEUDO			;just checking.
+	BNE.S	39$			;fail.
+	MOVE.W	8(A0),D0		;get parent of our object.
+	BRA.S	31$			;go around again to find out.
+35$
+	SETNE
+39$
+	PULL_L	D0			;restore tobe nice.
+    ENDC	wantRelatedReachable
+	
+    IFND	wantRelatedReachable
+	CMP.W	D0,D1
+	BNE.S	10$
+    ENDC	;!wantRelatedReachable
+
+90$
+	PULL_L	D1/A0
+	RET
+
+****************************************************************
+*
+* NoCanReachD2 - checks if this verb doesn't want to let D2 go
+*                by without checking reach/npc ownership
+*
+* takes D2 = noun# of indirect object
+*
+* returns NE => fail
+*
+
+	XDEF	NoCanReachD2
+	XREF	VLIST.NOREACHD5,VERBOWN,CHK.OWN,P.NORCH
+
+NoCanReachD2
+
+	PUSH_L	D0/A0-A1
+	CLR.B	D7
+	LEA	VLIST.NOREACHD5(A4),A1
+	DO	VerbInList		;in our list?
+	BNE.S	80$			;no
+	MOVE.W	D2,D0
+    IFD	wantNoReachD5Seated
+	XREF	SEATED,WHENSAT,Vlist.NoReachD5Seated
+	TEST_W	SEATED(A4)		;are you sitting down?
+	BEQ.S	10$			;no, then normal.
+	LEA	Vlist.NoReachD5Seated(A4),A1
+	DO	VerbInList		;can reach the iobj if seated?
+	BEQ.S	20$			;yes, fine
+	CALL	WHENSAT			;check that d5 is far
+	BEQ.S	20$			;allowed!
+	BNE.S	15$			;else noway.
+10$
+    ENDC	;wantNoReachD5Seated
+
+	CALL_S	NoCanReach
+	BEQ.S	20$			;NE => fail, can't reach it
+	CALL	CanReach
+	BEQ.S	20$
+15$
+    IFD		wantSP.TranspCont
+	
+	XREF	SP.TranspCont
+	CALL	TranspCont
+	BEQ.S	16$
+	CALL	SP.TranspCont
+	BRA.S	17$
+16$
+    ENDC	;wantSP.TranspCont
+
+	CALL	P.NORCH
+17$
+	SETNE
+	BRA.S	90$
+20$
+	CALL	VERBOWN
+	BEQ.S	90$
+	GETINFO				;waaa - CHK.OWN is takky
+	CALL	CHK.OWN
+80$
+	TEST_B	D7
+90$
+	PULL_L	D0/A0-A1
+	RET
+
+
+****************************************************************
+*
+* NoCanReach - susses if u cannot reach this object
+* 
+* On entry: D0 = noun# in question
+*           VERB = verb in use
+*
+* uses NoReachTable in scenrw.asm
+*
+* format is:    verb,object
+*               long word ZERO terminated
+*
+* In exit: EQ => can reach it
+*
+
+    IFND	Version2_NoCanReach
+
+	XDEF	NoCanReach
+	XREF	TranspCont,NoReachTable
+
+NoCanReach
+
+      IFD	wantSP.NoCanReach
+
+	XREF	SP.NoCanReach
+	CALL	SP.NoCanReach		;returns NE => no
+	BNE.S	99$
+
+      ENDC	;wantSP.NoCanReach
+
+	CALL	TranspCont		;returns NE => cannot get at obj
+	BNE.S	99$			;with current verb
+
+	PUSH_L	D1/D2/A0
+	LEA	NoReachTable(A4),A0	;get table of objects not normally
+	MOVEQ	#0,D2			;reachable
+10$
+	MOVE.L	(A0)+,D1		;table format DC.W verb#,noun#
+	BEQ.S	90$
+
+	CMP.W	D0,D1			;check noun#
+	BNE.S	10$
+
+	MOVEQ	#-1,D2			;return code -1 => cannot reach
+
+	SWAP	D1
+
+	CMP.W	VERB(A4),D1		;bottom word is object we're on?
+	BNE.S	10$
+	MOVEQ	#0,D2			;verb is allowed - can reach
+90$
+	TEST_B	D2
+	PULL_L	D1/D2/A0
+99$
+	RET
+
+    ENDC	;!Version2_NoCanReach
+
+*------------------------------------------
+
+    IFD		Version2_NoCanReach
+
+	XDEF	NoCanReach
+	XREF	TranspCont,NoReachTable
+	XREF	IsVerbLookOrExamine
+
+NoCanReach
+
+      IFD	wantSP.NoCanReach
+
+	XREF	SP.NoCanReach
+	CALL	SP.NoCanReach		;returns NE => no
+	BNE.S	99$
+
+      ENDC	;wantSP.NoCanReach
+
+	CALL	TranspCont		;returns NE => cannot get at obj
+	BNE.S	99$			;with current verb
+
+	PUSH_L	D1/D2/A0
+	CALL	IsVerbLookOrExamine
+	BEQ.S	80$			;exit as ok
+	LEA	NoReachTable(A4),A0	;get table of objects not normally
+	MOVEQ	#0,D2			;reachable
+10$
+	MOVE.L	(A0)+,D1		;table format DC.W verb#,noun#
+	BEQ.S	90$
+
+	CMP.W	D0,D1			;check noun#
+	BNE.S	10$
+
+	MOVEQ	#-1,D2			;return code -1 => cannot reach
+
+	SWAP	D1
+
+	CMP.W	VERB(A4),D1		;bottom word is object we're on?
+	BNE.S	10$
+80$
+	MOVEQ	#0,D2			;verb is allowed - can reach
+90$
+	TEST_B	D2
+	PULL_L	D1/D2/A0
+99$
+	RET
+
+    ENDC	;Version2_NoCanReach
+
+*------------------------------------------
+
+	END

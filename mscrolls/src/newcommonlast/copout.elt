@@ -1,0 +1,118 @@
+**************************************************************
+*
+*	%G%
+*	%W%
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"scenequ.i"
+
+
+*--------------------------------
+
+    IFND	wantUNIFIEDTEXT
+
+	XDEF	COPOUT
+	XREF	RNDGEN
+   
+COPOUT
+
+	MOVE.L  D2,D1		;get list of copouts 
+	BNE.S	10$
+	MSGGO	IDNATA        ;eq=>none ->I DON'T KNOW ANYTHING ABOUT THAT
+10$
+	CALL    RNDGEN		;random num into d0
+	AND.W   #3,d0		;just from 0-3
+	ADDQ.B  #1,d0		;from 1-4
+16$
+	SUBQ.B  #1,D0
+	BEQ.S   20$
+	ROR.L   #8,D1
+	BRA.S   16$
+15$
+	ROR.L   #8,D1
+20$
+	TEST_B  D1
+	BEQ.S   15$		;until something
+	AND.W   #$FF,D1
+	DOGO	P.SCN
+
+    ENDC	;!wantUNIFIEDTEXT
+*------------------------------------------
+
+    IFD	wantUNIFIEDTEXT
+
+	XDEF	COPOUT
+	XREF	RNDGEN,NOUNBUF2
+	XREF	CONVNPC,NPCINRM,STOPRON,IsAnimal
+
+    IFD	wantSTOPRONFlag
+	XREF	STOPRONFlag
+    ENDC	;wantSTOPRONFlag
+
+* Entry;
+* 	a1 -> list of copouts (wordwise)
+*	-D1.L = no. of copouts (possibly 0)
+   
+COPOUT
+
+	TEST_L	D1		;any?
+	BNE.S	10$
+	MOVE.W	CONVNPC+4(A4),D0	;are we in a conversation?
+	BNE.S	05$			;yes
+	MOVE.W	NPCINRM(A4),D0		;else use default.
+05$
+;	DO	P.SAY2			;NO NO NO, called from p.say2
+	MSG	IDNATA        ;eq=>none ->I DON'T KNOW ANYTHING ABOUT THAT
+;	DOGO	P.ENDQUOTE
+10$
+	NEG.L	D1		;make +ve
+	MOVE.W	NOUNBUF2(A4),D0
+	BMI.S	11$		;empty list
+	GETINFO
+	TST_NPC			;asking about an npc?
+	BEQ.S	11$		;no.
+	CALL	IsAnimal	;animals cant use npc copout.
+	BNE.S	20$		;no, then use npc copout.
+11$
+	TEST_W	(A1)		;is it an npc copout?
+	BPL.S	12$		;no
+	ADDQ.L	#2,A1		;else skip it.
+	SUBQ.W	#1,D1		;one less copout to choose.
+12$
+	DO	RND.D1		;from 0 to d1-1
+	ADD.W	D1,D1		;*2
+	MOVE.W	0(A1,D1.W),D1	;get msg.
+	BRA.S	50$		;and print it.
+20$
+	TEST_W	(A1)		;have we an npc copout?
+	BPL.S	12$		;no, then just choose.
+	MOVE.W	(A1),D1		;get npc copout?
+	BCLR	#15,D1		;lose npc bit flag.
+	BSET	#14,D0		;no trailing space.
+	MOVE.W	D0,STOPRON(A4)	;set incase used in message.
+
+
+    IFD	wantSTOPRONFlag
+	MOVE.B	#2,STOPRONFlag(A4)	;set to use object pronoun.
+    ENDC	;wantSTOPONFlag
+
+50$
+	DO	P.SCN			;print this one instead.
+
+    IFD	wantSTOPRONFlag
+	CLR.B	STOPRONFlag(A4)		;we dont want to leave it.
+    ENDC	;wantSTOPONFlag
+
+	RET
+
+    ENDC	wantUNIFIEDTEXT
+
+*------------------------------------------
+
+	END

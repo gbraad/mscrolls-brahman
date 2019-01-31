@@ -1,0 +1,32 @@
+**************************************************************
+*
+*	3/8/89
+*	@(#)p_notany.elt	2.2
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+
+	XDEF	P.NOTANY
+	XREF	ERR1
+	
+P.NOTANY
+	
+	TEST_W  ERR1(A4)           ;ERRORS ON?
+	BNE.S   90$                ;NO, EXIT
+	CMP.W   #2,D7              ;HAS AN ERROR ALREADY HAPPENED?
+	BEQ.S   90$                ;YES = DONT PRINT ANOTHER
+	MSG     BTINA              ;PRINT ERROR ' BUT THERE AREN7T ANY...
+	MOVEQ   #2,D7              ;SET ERROR HAS HAPPEND FLAG
+90$
+	RET
+	    
+*--------------------------------
+
+
+
+	END

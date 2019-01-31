@@ -1,0 +1,147 @@
+**************************************************************
+*
+*	%G%
+*	%W%
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"verbequ.i"
+	include	"nounequ1.i"
+	include	"scenequ.i"
+
+	IfVerb	FIGHT
+
+	XDEF	FIGHT
+	XREF	P.BTNI,SP.ATTACK,YCANT,SUBJECT,SUBJECT2
+	XREF	P.MHAV,PCOK,VERB,FNDWEAPO,SP.ATTAC
+	XREF	CONJ
+	
+FIGHT
+ 
+	TST_DEAD				;
+	BEQ.S   20$
+
+	BeSure	M.DEAD
+
+	MOVE.W  #M.DEAD,D1
+	BRA	P.BTNI			;IS ALREADY DEAD
+20$
+	CALL	SP.ATTAC
+
+    IFD		wantFistDefault 
+	TEST_W	CONJ(A4)		;specified?
+	BPL.S	21$			;yes, check etc.
+	CLR.W	CONJ(A4)		;with.
+	MOVE.L	A0,A5
+	MOVE.W	D0,D5
+	MOVE.W	#NFIST,D0
+	GETINFO
+	EXG	D0,D5
+	EXG	A0,A5
+	BRA.S	22$			;continue.
+21$
+    ENDC	;wantFistDefault
+	
+	CLR.W   D1			;set 'with' as conj
+	DO	CHK4PT			;VALID?
+22$
+	TST_NPC				;LIVE?
+	BEQ	YCANT			;attacking a non-npc?
+	BTST	#3,6(A5)		;intrinsic?
+	BNE.S	30$			;yes, can use it as a weapon	
+	MOVE.L  6(A5),D1
+	CMP.W   SUBJECT(A4),D1   
+	BNE.S   29$
+	SWAP	D1
+	CMP.W   SUBJECT2(A4),D1   
+	BEQ.S   30$			;OK
+29$
+	MOVE.W  D5,D0
+	DOGO	P.MHAVSTOP
+30$
+
+
+	IFND	wantATTACKBITS		;dont want it (guild/magic)
+	MSGGO	NOMURDER
+	ENDC	;!attackbits
+
+
+	IFD	wantATTACKBITS
+	CALL	PCOK			;check weapon is ok.
+	BNE	FI90			;no, too bad
+    IFD	wantSUCCESS
+	XREF	SUCCESS
+	MOVE.W	#RETCODE_SUCCESS,SUCCESS(A4)
+    ENDC
+	DO	GETNPC			;fetch extra data on npc
+	MOVE.B  2(A3),D1		;fetch npc state
+	AND.B   #$F0,D1			;top nibble is state
+	CMP.B   #$50,D1			;unconsious?
+	BEQ	FI51			;yep, print easy target..
+	CALL	FNDWEAPO		;ok, the npc defends (d3=best defence)
+	DO	P.TN
+	MOVE.W  D0,D6			;SAVE NOUN
+	TEST_W  D3			;did npc have a defence?
+	BNE.S   40$			;yes, ok fight away!
+	DO	ISARE			;no, the npc is
+	MSG	DFLESS			;'defenceless'
+	MOVE.B  #4,D3			
+	BRA.S   50$
+40$
+	MOVE.W  D3,D0			;'defends wi the X'
+	MSG	DFND
+	DO	P.TN
+50$
+	BTST	#7,3(A5)		;your weapon is vsharp?
+	BNE.S   53$			;yes, extra vicious
+	MOVE.B  1(A5),D1 		;fetch H&S
+	AND.B   #$0F,D1			;mask out hardness
+54$
+	CMP.B   D1,D2			;ok, clash strengths
+	BLS.S   60$			;you win.
+	MOVE.W  D6,D0
+	DO	P.PRN			;he/she beats you up
+	MSGGO	BEATRB			;'real bad'
+53$
+	MOVE.B  2(A3),D1		;????weird???
+	LSR.B   #4,D1
+	BRA.S   54$
+60$
+	DO	P.SUB			;u defeat it.
+	MSG	DEFET
+	MOVE.W  D6,D0
+	GETINFO
+	DO	P.OBJPRN
+	DO	GETNPC
+	MOVE.B  2(A3),D1
+	AND.B   #$0F,D1
+	OR.B	#$50,D1			;set npc as unconscous now
+	MOVE.B  D1,2(A3)
+	CMP.W   #VNKILL,VERB(A4)	;if verb=kill, finish off npc
+	BNE.S   FI90
+FI52
+	MSG	AYKILL			;.. and you kill it.
+	DO	P.OBJPRN
+	BSET	#1,(A0)			;set DEAD.
+FI90
+	RET
+FI51
+	DO	P.TN			;an unconscous npc is an
+	DO	ISARE			;'easy target'
+	MSG	AETARG
+
+	BRA.S   FI52
+
+
+	ENDC	;attackbits
+
+	ENDC	;ifverb
+
+
+
+	END

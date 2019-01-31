@@ -1,0 +1,108 @@
+******************************************************
+*
+*	%W%
+*	%G%
+*
+******************************************************
+
+	SECTION		"ADV",CODE
+
+* 	parserdat.asm
+* 	temporary data used by the parser
+*
+
+	include		"equates.i"
+	include	"macros.i"
+	include	"scenequ.i"
+
+
+	XDEF		CMDPNT,OLDWRDNUM,WHICHFIX,WDEPTH,QUIETWH,RELTXT
+	XDEF		PADV,PVERB,FNOUN,MKLSaved,LastDirection,OLDADVERB
+	XDEF		ISNPC,POSADJ,POSSESSFLG
+
+ISNPC	DC.W	0	;flag used by Anita's npc stuff (and makelocal)
+
+CMDPNT	DC.L	0	;command point (text ptr) [ parser3.asm.getadjph ]
+WDEPTH	DC.W	0			;level of nested which questions
+QUIETWH	DC.W	0			;used to prevent PICKONE
+OLDWRDNUM
+		DC.L	0		;to hold posn b4 relresolve
+PVERB   DC.W	0			;store pending verb.
+PADV	DC.W	0			;pending adverb
+WHICHFIX
+		DC.W	0,0,0,0,0,0
+		DC.W	0,0,0,0,0,0
+		DC.W	0,0,0,0,0,0
+		DC.W	0,0,0,0,0,0
+		DC.W	0,0,0,0,0,0
+		DC.L	0		;end
+RELTXT
+		DS.B	BUFFLEN
+
+FNOUN		DC.W	0		;flag to force noun
+MKLSaved	DC.W	0		;somewhere for makelocal to look
+LastDirection	DC.W	-1		;DIRECT puts dir here before SETMODE
+OLDADVERB	DC.W	-1		;clear is -1 (not 0).
+POSADJ		DC.L	0		;start of noun (including 'THE' etc)
+POSSESSFLG	DC.W	0		;do we bother about possessives.
+
+*---------------------------------------------
+
+	XDEF	NOTVERB,ADJVERB
+	XDEF	PLURALMODE,BRKADJ,HADANOUN
+
+
+ADJVERB		DC.W	0
+NOTVERB		DC.B	0
+PLURALMODE	DC.B	0
+BRKADJ		DC.W	0		;break in adjective stream
+HADANOUN	DC.B	0		;for getword to know to stop 
+
+	IFD	wantMULTIPLES
+	XDEF	MULTICODE,LASTMULTICODE,PLURALDESC
+MULTICODE	DC.B	0		;for passing to verbs by process
+LASTMULTICODE	DC.B	0		;in verb storage
+PLURALDESC	DC.B	0		;make description plural flag
+	ENDC	;wantMULTIPLES
+
+	IFD	wantPOSSESSIVE_PRONOUNS
+	XDEF	HERFLAG
+HERFLAG		DC.B	0
+	ALIGN
+	ENDC
+
+	IFD	wantSUCCESS
+	XDEF	SUCCESS
+SUCCESS		DC.W	0		;flag for return value from verbs
+	ENDC
+	IFD	wantNUMBERS
+	XDEF	NUMBERFLAG,NUMBERBUF,NUMBUF_FMT,NumMulFlg
+	XDEF	NumberExists
+
+NumberExists	DC.B	0
+NUMBUF_FMT	DC.B	0		;format of buffer
+NumMulFlg	DC.B	0		;flag to shift left number
+NUMBERFLAG	DC.W	0
+NUMBERBUF	DC.L	0
+		DC.L	0		;numberbuf+4
+	ENDC	;wantNUMBERS
+
+	IFD	wantSTATES
+	XDEF	STATEPTR
+STATEPTR	DC.L	0
+	ENDC
+
+	IFD	wantGLOBALIO
+	XDEF	DirectOrIndirect
+DirectOrIndirect	DC.B	0
+	ENDC	;wantGLOBALIO
+
+	IFD	wantSP.WHICHONE
+	XDEF	WhichOneFlag
+WhichOneFlag	DC.B	0
+	ENDC	;wantSP.WHICHONE
+
+	ALIGN
+*------------------------------------------
+
+		END

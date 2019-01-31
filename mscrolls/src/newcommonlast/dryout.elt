@@ -1,0 +1,85 @@
+***********************************************************
+*
+*	%W%
+*	%G%
+*
+************************************************************
+
+		SECTION	"ADV",CODE
+
+		include	"equates.i"
+		include	"macros.i"
+		include	"nounequ2.i"
+		include	"scenequ.i"
+
+		IFD	wantDRYOUT
+	    
+		XDEF	DryOut
+
+		XREF	D.NOUNS,GET_CONT,TOPLOC,R.NOUN2
+DryOut
+
+* Dry out items in game
+* drys out all wet items in the data, except rooms, liquids and quantities
+* (ie hardness==2)
+* nor do items with void hardness.
+* if they are in a dry location.
+
+	PUSH_L	D0-D2/D4/A0-A2
+	MOVE.W	#NMAXNOUN-1,D4		;total no. of nouns -1
+	MOVEQ	#1,D2			;noun numbers.
+	LEA	D.NOUNS(A4),A2		;data pointer, in sync.
+10$
+	BTST	#5,3(A2)		;wet?
+	BEQ.S	20$			;no, next.
+	BTST	#6,6(A2)		;is it a room?
+	BNE.S	20$			;rooms dont dry out.
+	MOVE.B	1(A2),D1		;get hardness & strength
+	LSR.B	#4,D1			;hardness only
+	CMP.B	#2,D1			;void, liquid or quantity?
+	BLS.S	20$			;yes, these dont either.
+	BTST	#5,6(A2)		;contained?
+	BNE.S	13$			;yes
+	BTST	#0,5(A2)		;pseudo?
+	BNE.S	20$			;they dont dry out (today).
+	MOVE.W	D2,D0			;set noun#
+	DO	TOPLOC			;top->D0
+	TEST_W	D0			;on inv?
+	BEQ.S	12$			;they dry.
+	MOVE.W	D2,-(A7)
+	MOVE.W	D0,D2
+	CALL	R.NOUN2			;find noun #	->d0
+	MOVE.W	(A7)+,D2		;restore counter
+	GETINFO				;on top
+	TST_WET				;wet room?
+	BEQ.S	12$			;no, it dries.
+	BRA.S	20$			;next.
+13$
+	MOVE.W	8(A2),D0		;get container
+	DO	GET_CONT		;evaluate contents->a1
+11$
+	MOVE.W	(A1)+,D0		;get item
+	BEQ.S	12$			;done, wil now dry
+	BMI.S	11$			;ignor hi-bits
+	GETINFO				;on contents
+	LIQUID	D1			;is it a liquid?
+	BEQ.S	20$			;yes, do not dry & continue
+	CMP.B	#2,D1			;quantity?
+	BNE.S	12$			;no, ok ,dry it
+	TST_WET				;is quantity wet?
+	BNE.S	20$			;yes, dont dry & continue
+12$
+	BCLR	#5,3(A2)		;item dries then..
+20$
+	ADD.L	#14,A2			;next noun data
+	ADDQ.W	#1,D2			;update noun#
+	DBRA	D4,10$			;thru' all nouns.
+90$
+	PULL_L	D0-D2/D4/A0-A2
+	RET
+
+*-----------------------------------------------------
+	ENDC	;wantDRYOUT
+
+	END
+

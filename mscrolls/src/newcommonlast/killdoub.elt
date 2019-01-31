@@ -1,0 +1,50 @@
+**************************************************************
+*
+*	10/27/87
+*	@(#)killdoub.elt	1.2
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+
+*--------------------------------
+*
+* KILLDOUB -   IF NOUN IS IN
+*              TEMPBUF TWICE
+*              THEN SECOND ONE
+*              IS NOBBLED
+*
+* SO 'L X,X' DOES 'L X'
+*
+*--------------------------------
+
+	XDEF	KILLDOUB
+	XREF	TEMPBUF
+ 
+KILLDOUB
+ 
+	LEA     TEMPBUF(A4),A1      ;GET START OF BUFFER
+10$
+	MOVE.W  (A1)+,D1            ;GET FIRST ENTRY
+	BMI.S   10$                 ;ALREADY NOBBLES?
+	BEQ.S   90$                 ;END OF BUFFER?
+	MOVE.L  A1,A2               ;NOPE - GET POINTER TO REST OF BUFFER
+20$
+	MOVE.W  (A2)+,D2            ;GET A NOUN TO COMPARE AGAINST
+	BMI.S   20$                 ;NOBBLED?
+	BEQ.S   10$                 ;FINISHED (FOR THIS NOUN)
+	CMP.W   D1,D2               ;OK - DO COMPARE
+	BNE.S   20$                 ;DIFFERENT - NEXT..
+	OR.W    #$8000,-(A2)        ;SAME - NOBBLE
+	BRA.S   20$                 ;NEXT ...
+90$
+	RET                         ;LET BUFFIX TIDY UP
+
+
+
+
+	END

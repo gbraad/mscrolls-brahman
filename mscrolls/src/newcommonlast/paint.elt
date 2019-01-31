@@ -1,0 +1,33 @@
+***********************************************************
+*
+*	@(#)paint.elt	1.1
+*	11/7/88
+*
+************************************************************
+
+		SECTION	"ADV",CODE
+
+		include	"equates.i"
+		include	"macros.i"
+		include	"scenequ.i"
+		include	"verbequ.i"
+
+      IfVerb	PAINT
+
+	XDEF	V.PAINT
+	XREF	SP.PAINT
+	XREF	DBS
+
+V.PAINT
+
+	LIQUID	D1			;painting a liquid?
+	BEQ	DBS			;silly.
+
+	CALL	SP.PAINT
+
+	MSGGO	HOWQMARK		;how ?
+
+
+      ENDC	;PAINT
+
+	END

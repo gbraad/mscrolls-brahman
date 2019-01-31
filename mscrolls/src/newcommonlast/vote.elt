@@ -1,0 +1,36 @@
+**************************************************************
+*
+*	10/27/87
+*	@(#)vote.elt	1.2
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"verbequ.i"
+
+*--------------------------------
+
+	IfVerb	VOTE
+
+	XDEF	V.VOTE
+	XREF	ADVERB,P.IDFY
+	
+V.VOTE
+	MOVE.W  ADVERB(A4),D1
+	CMP.W   #6,D1                ;FOR?
+	BEQ.S   10$                  ;OK
+	CMP.W   #$11,D1              ;AGAINST
+	BNE     P.IDFY
+10$
+	PRINT  <'HOW?'>
+	RET
+
+	ENDC
+
+
+
+	END

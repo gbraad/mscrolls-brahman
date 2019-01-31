@@ -1,0 +1,257 @@
+**************************************************************
+*
+*	4/28/89
+*	@(#)brksub.elt	2.9
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"verbequ.i"
+	include	"scenequ.i"
+
+*--------------------------------
+
+	XDEF	BRKSUB,BRKQ,BRKD0QUIET
+	XDEF	BRKD0,DESITTABLE
+
+	XREF	PCOK,P.SEPA,GETRELN
+	
+BRKSUB
+	
+*CHECK OUT BREAKING POTENTIAL OF D5/A5
+*requires:
+*	D0= target object
+*	D5= object being used
+*	A5= getinfo(D5)
+*
+*fods:	A2
+	
+	MOVE.L  (A7)+,A2		;RTS, MIGHT NOT RETURN?
+	MOVE.B  1(A5),D1		;GET PC
+	LSR.B   #4,D1			;GET HARDNESS
+	BNE.S   08$			;applicable?
+	MOVE.W  D5,D0
+	DOGO	DBS			;does not make sence.
+08$
+	CMP.B   #1,D1			;LIQUID?
+	BEQ.S   09$			;YES  
+	CMP.B   #$F,D1			;UNBREAKABLE MEANS NOTHING BREAKS
+	BNE.S   10$			;NO
+09$
+	DO	P.SUBV
+
+    IFD	wantSUCCESS
+	XREF	SUCCESS
+	MOVE.W	#RETCODE_NOTQUITE,SUCCESS(A4)
+    ENDC	;wantSUCCESS
+
+	MSG	UNABLE
+	DOGO	BSFULLSTOP
+10$
+	CALL	PCOK			;TOO SOFT??
+	BNE.S   99$			;YES, ERROR PRINTED
+
+      IFND	wantProperBreak
+	MOVE.B  1(A5),D1 
+	LSR.B   #4,D1			;GET HARDNESS
+	CMP.B   #$0A,D1			;BRITTLE?
+	BNE.S   20$
+	EXG	D0,D5
+	CALL	BRKD0			;D0 BREAKS (PROPERLY THIS TIME!)
+	EXG	D0,D5			;BAK
+20$ 
+      ENDC	;wantProperBreak
+
+	MOVE.L  A2,-(A7)		;RTS BAK
+99$
+	RET
+	
+*--------------------------------
+
+	XREF	SP.BRKD0
+
+
+	
+BRKD0
+	
+*BREAK D0
+	
+	PUSH_L  D0/D1/A0-A2
+	GETINFO
+	BTST	#$2,(A0)
+	BNE.S   20$			;ALREADY
+	
+	IFEQ	THE_PAWN
+	XREF	SP.BRKD0
+	CALL	SP.BRKD0
+	BEQ.S	10$		;EQ => we've said something, be quiet
+	ENDC
+
+	DO	P.TN
+
+    IFD	wantLoseBrittles
+	MOVE.B	1(A0),D1	;hardness
+	LSR.B	#4,D1
+	CMP.B	#10,D1		;brittle?
+	BNE.S	09$		;no.
+	MSG	SHATTERS	;else shatters
+	CALL_S	BRKD0QUIET	;smash
+	DO	SETOUT		;fod.
+	BRA.S	20$		;exit.
+09$
+    ENDC	;wantLoseBrittles
+
+	MSG	BRKS
+	DO	FULLSTOP
+10$
+	CALL_S	BRKQ
+20$
+	PULL_L  D0/D1/A0-A2
+	RET
+
+BRKD0QUIET
+	
+	MOVE.L	D0,-(A7)
+	CALL_S	BRKQ
+	MOVE.L	(A7)+,D0
+	RET
+
+BRKQ
+	
+	PUSH_L  D1-D2/A0-A2
+	GETINFO
+	BSET	#$2,(A0)
+	BNE	11$			;ALREADY broken?
+	BCLR	#7,(A0)			;GOES OUT IF LIT
+	BCLR	#7,4(A0)		;AND NO LONGER LIGHTABLE
+	AND.B   #$8F,(A0)		;ZAP LOCKED/OPEN/CLOSED
+
+      IFND	wantFullBreakingSurvival
+	DO	GET_CONT
+	BCS.S   11$			;NOT A CONTAINER
+      ENDC	;!wantFullBreakingSurvival
+
+	AND.B   #$F8,10(A0)		;NO LONGER A  CONTAINER
+
+      IFD	wantFullBreakingSurvival
+	XREF	SCANFLAG
+
+	MOVE.W	D0,D2
+	ST	SCANFLAG(A4)
+	DO	GETRELN			;related nouns
+	CLR.W	SCANFLAG(A4)
+	PUSH_L	A1/D0
+	MOVEQ	#0,D2			;indicate nothing found
+10$
+	MOVE.W	(A1)+,D0
+	BMI.S	10$			;already not allowed
+	BEQ.S	14$			;end of list
+	GETINFO
+	TST_HIDDEN	
+	BNE.S	12$			;always reveal hidden items
+	MOVE.B	6(A0),D1
+	BEQ.S	13$			;simply in room not allowed
+	AND.B	#$DE,D1			;all but related and contained..
+	BNE.S	13$			;..not allowed
+	TST_MOVEABLE
+	BEQ.S	13$			;only allow moveables
+12$
+	ST	D2			;indicate something found
+	BRA.S	10$
+13$
+	BSET	#7,-2(A1)		;flag not allowed
+	BRA.S	10$
+14$
+	PULL_L	A1/D0
+      ENDC	;wantFullBreakingSurvival
+
+      IFD	wantNoisyBRKQ
+
+      IFD	wantFullBreakingSurvival
+	TEST_B	D2			;anything found?
+	BEQ.S	19$
+      ENDC	;wantFullBreakingSurvival
+
+	DO	P.SUB			;you
+	MSG	FIND			;find
+	MOVE.L	A1,A0			;for p.list
+	DO	P.LISTSTOP
+19$
+      ENDC	;wantNoisyBRKQ
+
+20$
+	MOVE.W  (A1)+,D0		;GET CONTENTS
+	BMI.S   20$			;N/A
+	BEQ.S   11$			;END OF LIST
+	GETINFO
+	MOVE.B  1(A0),D1		;PHYS CHAR
+	LSR.B   #4,D1			;HARDNESS
+	CMP.B   #1,D1			;1=LIQUID
+	BNE.S   30$			;IF SOLID= FALL OUT
+	MSG	LINE
+	CALL	P.SEPA			;liquids seep away.
+	BRA.S   20$			;anymore?
+30$
+	MOVE.L  A0,A2			;SAVE DATA ON CUR NOUN
+	MOVE.W  8(A0),D0		;location of object
+	GETINFO				;ON D0
+
+      IFD	wantBRKQFixesVol
+	XREF	PUTD0IND5
+
+	TST_CONTAINED			;if the broken object is contained..
+	BEQ.S	31$
+	MOVE.W	8(A0),D5		;put found objects in its container..
+	MOVE.W	-2(A1),D0		;properly
+	CALL	PUTD0IND5
+31$
+      ENDC	;wantBRKQFixesVol
+
+	MOVE.L  6(A0),6(A2)		;SHIFT ENTIRE LOCATION OVER
+	BRA.S   20$			;NEXT
+11$
+	PULL_L  D1-D2/A0-A2
+	RET
+
+*------------------------------------------
+
+	XREF	GETRELN2
+
+DESITTABLE
+
+* removes the sittable property of object in d0
+* ENTRY
+*	D0= object to be de-sitted.
+
+	PUSH_L	A0/A1/D0-D2
+	GETINFO				;on d0
+	BCLR	#3,5(A0)		;sittable at the moment? (&clr)
+	BEQ.S	90$			;no, exit
+	MOVE.W	D0,D2			;target
+	DO	GETRELN2		;all related objects ->a1
+	MOVE.L	6(A0),D1		;complete loc of main obj
+	MOVE.W	8(A0),D0		;it's location
+	GETINFO				;on
+	TST_ISAROOM				;it it related to a room?
+	BEQ.S	10$			;no, continue
+	MOVEQ	#0,D1
+	MOVE.W	8(A0),D1		;fetch the target room#
+10$
+	MOVE.W	(A1)+,D0		;fetch one
+	BEQ.S	20$			;done
+	GETINFO				;on this item
+	CMP.B	#1,6(A0)		;must be simply related
+	BNE.S	10$			;no, next
+	MOVE.L	D1,6(A0)		;zap location (falls off)
+	BRA.S	10$			;next
+20$
+90$
+	PULL_L	A0/A1/D0-D2
+	RET
+
+
+	END

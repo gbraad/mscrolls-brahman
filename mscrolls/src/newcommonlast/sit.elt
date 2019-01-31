@@ -1,0 +1,213 @@
+******************************************************
+*
+*	@(#)sit.elt	2.6
+*	3/1/89
+*
+******************************************************
+
+		SECTION		"ADV",CODE
+
+*--------------------------------
+*
+*  sit
+*
+*--------------------------------
+
+	include	"equates.i"
+	include	"verbequ.i"
+	include	"macros.i"
+	include	"scenequ.i"
+
+
+	XREF	VERB,ADVERB,W.IDFY,SP.RIDE,SEATED,P.SUBV,W.NSO,P.TN
+	XREF	P.SUB,W.CSOT,W.CSJA,FNDSEAT,W.NOLIE,W.SITUP,W.ASO,PRTTXT
+	XREF	CARRIED,DBS,BSFULLSTOP,P.TNSTOP
+	XREF	SEATED_RELATOR,CONJST,P.TAB,ISATTRIBUTE
+
+	IfVerb	SIT
+
+	XDEF	V.SIT
+
+V.SIT
+	
+	MOVE.W  #VNSIT,VERB(A4)		;ENFORCE
+	MOVE.W  ADVERB(A4),D1		;ANY? 
+	
+	TEST_W  D0			;NOUN?
+	BMI	VSIT2			;NO NOUN SPECIFIED
+	CMP.W   #-1,D1
+	BNE.S	01$			;no
+	MOVE.W	#ON,D1			;select on by default
+	BRA.S	40$
+01$
+	EXT.W   D1
+	BMI.S   30$			;UP/DOWN  
+	CMP.W   #ON,D1			;ON
+	BEQ.S	40$			;OK
+	CMP.W	#ONTO,D1		; sitting onto something..
+					; ie climb onto x should work..
+	BEQ.S	40$
+	CMP.W   #AT,D1			;AT?
+	BEQ.S	40$			;OK
+
+
+    IFD	set_CHAIRS			;have we chairs in the game?
+	XREF	Denotation_CHAIRS
+;	CMP.W	#IN,D1			;sit in something?
+;	BNE.S	30$
+	MOVE.L	A1,-(A7)		;save relation.
+	LEA	Denotation_CHAIRS(A4),A1
+	DO	MEMBEROFSET		;sit in a chair?
+	PULL_L	A1
+	BNE.S	02$
+	MOVE.W	#ON,D1			;sit in chair => sit on chair
+	BRA.S	40$
+02$
+    ENDC	;set_CHAIRS
+
+    IFD	attribute_INFINITE_CONTAINER
+	CMP.W	#IN,D1			;attempt to sit in?
+	BNE.S	30$			;nope, then fail
+	XREF	Denotation_INFINITE_CONTAINER
+	LEA	Denotation_INFINITE_CONTAINER(A4),A1
+	DO	ISATTRIBUTE		;only makes sence for these items
+	BEQ.S	40$			;yes, fine
+    ENDC	;attribute_INFINITE_CONTAINER
+
+30$
+	MSGGO	IDFY
+40$
+	CALL	SP.RIDE
+	GETINFO
+	TST_SITTABLE			;SITTABLE?
+	BEQ.S   CantSit			;NO
+	TEST_W  SEATED(A4)		;ALREADY?
+	BNE	SIT18			;ALREADY
+DoSit
+	DO	CARRIED			;cant sit on things that are carried!
+	BEQ	DBS			;may prefer a special message
+
+    IFD	attribute_SINGLESEAT
+	XREF	SeatOccupied
+	CALL	SeatOccupied
+	BNE.S	42$			;no
+	MSGGO	CANTSIT			;nocandu
+42$
+    ENDC	;attribute_SINGLESEAT
+
+    IFEQ	THE_PAWN
+	XREF	SP.SIT
+	CALL	SP.SIT			;Specials for sitting - popsp to abort
+    ENDC	;!THE_PAWN
+
+	MOVE.W  D0,SEATED(A4)		;SITTING
+	MOVE.W	D1,SEATED_RELATOR(A4)	;set as prep it
+
+    IFD	attribute_LIEONABLE
+    IFD	wantSEATED_LIEON
+	XREF	SEATED_LIEON
+	CLR.B	SEATED_LIEON(A4)	;you sit up (effectively)
+    ENDC	;wantSEATED_LIEON
+    ENDC	;attribute_LIEONABLE
+
+	DO	P.SUBV
+	MSG	NSO
+
+    IFND	wantBIGPROG
+	LEA	CONJST(A4),A1
+    ENDC	;!wantBIGPROG
+
+    IFD		wantBIGPROG
+	LEA	CONJST,A1
+    ENDC	;wantBIGPROG
+
+	DO	P.TAB			;prep
+
+	IFEQ	THE_PAWN
+
+	TST_PLURAL				;plural?
+	BEQ.S	10$
+	PRINT	<'one of '>
+10$
+	
+	ENDC
+
+	DOGO	P.TNSTOP
+CantSit
+	DO	P.SUB
+	MSGGO	CSOT
+	
+VSIT2
+	CMP.W   #-1,D1			;ANY?
+	BNE.S   11$			;YES
+	DO	P.SUB
+	MSGGO	CSJA
+11$
+	EXT.W   D1
+	BMI.S   12$			;UP/DOWN
+17$
+	CALL	FNDSEAT
+	MOVE.W	ADVERB(A4),D2		;save old adverb for differentaiation.
+	MOVE.W  #3,ADVERB(A4)		;SET TO 'ON'
+	TEST_W  D7			;FOUND?
+	BEQ	V.SIT			;YES, CONTINUE
+	RET
+12$
+	CMP.W   #DIR_U,D1		;UP
+	BNE.S   13$
+	TEST_W  SEATED+2(A4)		;LIED DOWN?
+	BNE.S   14$			;YES
+	DO	P.SUBV
+	MSGGO	NOLIE
+14$
+	DO	P.SUB
+	MSG	SITUP
+	CLR.W   SEATED+2(A4)
+	RET
+13$
+	CMP.W   #10,D1			;?????????????????????????????
+	BNE.S   SIT16			;BAD?
+	TEST_W  SEATED(A4)
+	BEQ.S   17$			;NOPE
+SIT18
+    IFD	attribute_LIEONABLE
+    IFD	wantSEATED_LIEON
+	XREF	SEATED_LIEON
+
+	TEST_B	SEATED_LIEON(A4)	;lieing down?
+	BEQ.S	10$			;no
+	DO	P.SUB
+	PRINT	<'sit up.'>
+	CLR.W	SEATED_LIEON(A4)	;not anymore.
+	BRA.S	SIT90$
+10$
+    ENDC	;wantSEATED_LIEON
+    ENDC	;attribute_LIEONABLE
+
+      IFD	wantSITfromSTAND
+	TEST_W	SEATED_RELATOR(A4)	;standing on item
+	BNE.S	20$
+	CMP.W	SEATED(A4),D0		;the same object we're already on?
+	BEQ	DoSit
+20$
+      ENDC	;wantSITfromSTAND
+
+	DO	P.SUBV
+	MSG	ASO
+	MOVE.W  SEATED(A4),D0
+	GETINFO
+	DO	P.TN
+	DOGO	BSFULLSTOP
+SIT16
+	IFNE	YCHEAT
+	PRINT  <'(HELP)'>
+	ENDC	;YCHEAT
+SIT90
+	RET
+
+	ENDC
+
+*--------------------------------
+
+	END
+

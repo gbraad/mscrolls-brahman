@@ -1,0 +1,107 @@
+**************************************************************
+*
+*   2/13/89
+*   @(#)getadjph.elt    2.7
+*
+**************************************************************
+
+
+    SECTION "ADV",CODE
+
+    include "equates.i"
+    include "macros.i"
+    include "scenequ.i"
+
+*--------------------------------
+
+    XDEF    GETADJPH
+    XREF    DONEB4,EDITCMD,WDEPTH,OLDWRDNUM,NOADJ,DO.ADJ,ERR4
+
+    IFD wantSTATES
+    XREF    STATEBUF,STATEPTR
+    ENDC    ;wantSTATES
+    
+   
+GETADJPH
+
+    IFD wantSTATES
+    CLR.L   STATEPTR(A4)        ;clear state buffer
+    CLR.W   STATEBUF(A4)        ;and the first entry
+    ENDC    ;wantSTATES
+    
+    CALL    DONEB4          ;has it already been resolved?
+    MOVE.L  A6,-(A7)
+    TEST_W  WDEPTH(A4)
+    BNE.S   01$
+    MOVE.L  A6,OLDWRDNUM(A4)    ;save this as original position
+01$
+    DO  GETWRD
+    CMP.B   #4,D7           ;which one?
+    BEQ EDITCMD         ;insert new text.
+    TEST_B  D7
+    BNE.S   90$
+    CMP.B   #SECT.ADJ,D6
+    BNE.S   80$         ;not an adjective
+    CALL    DO.ADJ
+
+    IFD   wantSameAdjAndSet
+    BEQ.S   02$
+    CMP.B   #SECT.MULT,D6
+    BEQ.S   80$
+    ENDC  ;wantSameAdjAndSet
+
+    BNE.S   90$
+02$
+    CMP.B   #4,D7               ;suss problems with small sphere?
+    BEQ EDITCMD
+;   TEST_W  ERR4(A4)            ;ESCAPE?
+;   BNE.S   90$                 ;YES
+
+
+* this mod (poping 4 rather than 8 made 4/12/86 to stop 'put all on adj'
+* crash - side effects not totally clear yet
+
+*   PULL_L  D0/D1
+    IFND    wantAdjsAndDigits
+    POPSP
+    ENDC    ;!wantAdjsAndDigits
+
+    IFD wantAdjsAndDigits
+    XREF    VerbInList,AlsoADigit,FGETWORD,CLRADJ
+    XREF    SINGV.TB,ADJBUF
+
+;   LEA SINGV.TB(A4),A1     ;list of  singv's
+;   CALL    VerbInList      ;only applies to singv's
+;   BNE.S   69$         ;no, exit
+    CALL    CLRADJ
+    MOVE.L  A6,A1
+    MOVE.L  OLDWRDNUM(A4),A6    ;back to place b4 adjectives
+    CALL    FGETWORD        ;get code back
+    CALL    AlsoADigit      ;and a digit?
+    BEQ.S   80$         ;yes, go for it.
+    MOVE.L  A1,A6
+69$
+    POPSP
+    ENDC    wantAdjsAndDigits
+70$
+
+    BRA     NOADJ
+80$
+
+    IFD wantNUMBERS
+    XREF    DONUMBERS
+    CALL    DONUMBERS       ;see if it is a number
+    BEQ.S   90$         ;no, carry on
+    ADDQ.L  #4,A7           ;fod data on stack
+    BRA.S   GETADJPH        ;jump round again
+    ENDC    ;wantnumbers
+    
+90$
+    MOVE.L  (A7)+,D0
+91$
+    RET
+
+
+
+
+    END

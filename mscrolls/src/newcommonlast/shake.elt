@@ -1,0 +1,106 @@
+**************************************************************
+*
+*	%G%
+*	%W%
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"verbequ.i"
+
+*--------------------------------
+
+	IfVerb	SHAKE
+
+	IFEQ	THE_PAWN
+
+	XDEF	V.SHAKE
+	XREF	SP.SHAKE,GLOBAL.F,DBS
+*
+* Shaking objects:
+*  Liquids spill out of open objects
+*  Hard objects containing hard objects rattle
+*  Liquids in containers slop around
+*  Other things are shaken vigourously
+*
+
+V.SHAKE
+
+	CALL	SP.SHAKE
+	
+	MOVE.W	D0,D2			;save.
+	MOVE.L	A0,A2
+	MOVE.B	2(A0),D1		;size & weight
+	AND.B	#$0F,D1			;zero weight?
+	BEQ	DBS			;shake the guild of thieves etc!
+	MOVE.B	1(A0),D1		
+	LSR.B	#4,D1			;hardness -> d1
+	CMP.B	#3,D1			;limit
+	BLT	50$			;too soft (void,liquid, or qtty).
+	MOVE.B	3(A0),D1		;shape & texture
+	AND.B	#$0F,D1			;tex
+	CMP.B	#8,D1			;soft?
+	BEQ	50$			;yes.. too bad.
+	ST	GLOBAL.F(A4)		;all! contents
+	DO	GET_CONT		;ok D0 -> A1
+	BCS	50$			; Carry set = not container
+	CLR.W	GLOBAL.F(A4)		;back
+10$
+	MOVE.W	(A1)+,D0		;get element.
+	BMI.S	10$			;MI => not just contained (rel maybe)
+	BEQ	50$			;done. (zero term list)
+	GETINFO				;of item.
+
+* exclude 'out' objects
+
+	TST_OUT				;may now include out items!
+	BNE.S	10$			;yes, forget it.
+
+	MOVE.B	3(A0),D1		;texture.
+	AND.B	#$0F,D1			;texture
+	CMP.B	#8,D1			;soft?
+	BEQ.S	10$			;yes.
+	LIQUID	D1			;is it a liquid?
+	BEQ.S	30$			;do liquids.
+15$
+	MOVE.W	D2,D0
+	DO	P.TN
+	MSGGO	CONTSOME		;<'contains something.'>
+30$
+	MOVE.B	(A2),D1			;state.
+	BTST	#4,D1			;open?
+	BNE.S	40$
+	MSG	SOMESLOSH		;<'Something sloshes around in '>
+	MOVE.W	D2,D0
+	DO	P.TNSTOP
+	BRA.S	90$
+40$
+	DO	P.TN
+	MSG	SPILLAND		;'spills and '
+	MSG	SEPAWY			;seeps away.
+	DO	SETOUT
+	BRA.S	90$			;exit
+50$
+	CLR.W	GLOBAL.F(A4)		;back
+	MOVE.W	D2,D0
+	DO	P.SUB
+	MOVE.W	#VNSHAKE,D1
+	DO	P.VERB
+	DO	P.TN
+	MSG	VIGOUR			;<'vigourously for a few moments.'>
+90$
+	RET
+
+	ENDC
+
+	ENDC
+
+*--------------------------------
+
+
+
+	END

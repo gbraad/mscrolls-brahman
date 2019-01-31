@@ -30,6 +30,7 @@
  */
 
 // included from puzzle.cpp
+#include "puzzle.h"
 
 struct BoulderPuzzle: public Puzzle
 {

@@ -1,0 +1,66 @@
+**************************************************************
+*
+*	10/27/87
+*	@(#)fndseat.elt	1.2
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+
+
+	XDEF	FNDSEAT
+	XREF	ROOM
+
+FNDSEAT
+	
+*FIND SOMEWHERE TO SIT DOWN
+	
+	CLR.W   D7
+	MOVE.W  ROOM(A4),D2
+	DO	GETRELN			;TO A1    
+10$
+	MOVE.W  (A1)+,D0		;GET ONE
+	BEQ.S   20$			;NONE FOUND
+	GETINFO        
+	TEST_B  6(A0)			;IS A ROOM LOC
+	BNE.S   10$			;NO, IS SOMEWHERE ELSE
+	TST_SITTABLE				;IS IT SITTABLE?
+	BEQ.S   10$			;NO
+	BRA.S   99$			;EXIT
+20$
+	DO	R.NOUN
+	MOVE.W  D0,D2			;SET UP TARGET.
+	DO	GETNOUNS
+40$
+	MOVE.W  (A1)+,D0
+	BEQ.S   30$			;NOWHERE TO SIT
+	GETINFO        
+	TST_SITTABLE				;SITTABLE?
+	BEQ.S   40$			;NO
+	BRA.S   99$			;OPK
+30$
+	MSG	NOSEAT
+	MOVEQ   #1,D7			;ERROR
+99$
+	RET				;EXIT
+  
+*--------------------------------
+
+	XDEF	P.BYAN
+	        
+P.BYAN
+	
+*PRINT "BUT (YOU ARE) NOT SEATED."
+	
+	MSG	BUT
+	DO	P.SUBV
+	MSGGO	NOTSEA
+	
+
+
+
+	END

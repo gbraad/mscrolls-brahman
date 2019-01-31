@@ -1,0 +1,58 @@
+**************************************************************
+*
+*	%G%
+*	%W%
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"verbequ.i"
+	include	"scenequ.i"
+
+*--------------------------------
+
+	IfVerb	KISS
+
+	XDEF	V.KISS
+	XREF	DBS
+	
+V.KISS
+
+    IFD		wantSP.KISS
+	XREF	SP.KISS
+	CALL	SP.KISS
+    ENDC	;wantSP.KISS
+		
+	TST_NPC				;ALIVE?
+	BEQ     DBS
+	MOVE.W  D0,D5
+	MOVE.L  A0,A5
+	DO	CHKNPC
+	DO	GETNPC	   	;GET DATA TO A3
+	BTST    #2,2(A3)  	;ANIMAL?
+	BEQ.S   10$       	;NO
+	MSG	SQLCH  
+	MOVE.B  2(A3),D1
+	AND.B   #$0F,D1
+	OR.B    #$80,D1
+	MOVE.B  D1,2(A3)  	;BACK
+	BRA.S   99$       	;EXIT
+10$
+	DO	P.SUB
+	MSG	GIVE
+	DO	P.OBJPRN
+	MSG	ABSKIS		;a sloppy kiss
+99$
+	RET
+
+	ENDC	;V.KISS 
+	
+*------------------------------------------ 
+
+
+
+	END

@@ -1,0 +1,55 @@
+**************************************************************
+*
+*	10/27/87
+*	@(#)switch.elt	1.2
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+
+*
+* Switch - sets a toggle byte according to next word in input stream
+*
+* if word = 'off' sets to zero
+*           'on' sets to FF
+* if none changes state (also if a random word)
+*
+* On entry A0 points at the flag byte
+* 
+* On exit D0 stomped D5/D6 reflect word/section
+*
+	XDEF	Switch
+	XREF	POSWRD
+
+Switch
+
+	MOVE.L	POSWRD(A4),A6
+	PUSH_L 	D0-D4/A0-A5	;carefull - search WILL fod A0!
+	DO	SEARCH
+	PULL_L 	D0-D4/A0-A5
+	CMP.W	#SECT.CONJ,D6
+	BNE.S	Toggle
+	CMP.W	#ON,D5
+	BEQ.S	10$
+	CMP.W	#OFF,D5
+	BNE.S	Toggle
+	MOVEQ	#0,D0
+	BRA.S	20$		;do
+10$
+	MOVEQ	#-1,D0
+20$
+	MOVE.B	D0,(A0)
+	RET
+    
+Toggle
+	NOT.B	(A0)
+	RET
+
+
+
+
+	END

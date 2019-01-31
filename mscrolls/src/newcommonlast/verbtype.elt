@@ -1,0 +1,41 @@
+**************************************************************
+*
+*	10/27/87
+*	@(#)verbtype.elt	1.3
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+
+*--------------------------------
+*
+*  VERBTYPE - SUSSES WHETHER TO
+*             USE INVENTORY OR
+*             ROOM CONTENTS FOR
+*             'ALL'  USES LIST
+*             VLST.INVV
+*
+*  RETURNS  D7 = 1 = USE INVENT
+*           D7 = 0 = USE ROOM
+*
+*--------------------------------
+
+	XDEF	VERBTYPE
+	XREF	VLST.INV,VerbInList
+ 
+VERBTYPE
+  
+	MOVE.L	A1,-(A7)		;save pointer
+	LEA	VLST.INV(A4),A1		;list of verbs
+	DO	VerbInList
+	MOVE.L	(A7)+,A1		;restore pointer
+	RET
+
+*------------------------------------------
+
+
+	END

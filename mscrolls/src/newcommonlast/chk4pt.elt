@@ -1,0 +1,127 @@
+**************************************************************
+*
+*   %G%
+*   %W%
+*
+**************************************************************
+
+
+    SECTION "ADV",CODE
+
+    include "equates.i"
+    include "macros.i"
+    include "scenequ.i"
+
+
+*--------------------------------
+
+    XDEF    P.CWHT
+    XREF    PEND2,ADVERB,OLDADVERB,P.CONJ,NOTVERB
+    
+P.CWHT
+    
+* PRINT CONJ WHAT, SET PEND   
+* DOES NOT RETURN
+    
+    MOVE.W  D1,PEND2(A4)
+    ST  NOTVERB(A4)         ;we'd rather not have a verb
+                        ;after the question.
+    IFD wantGLOBALIO
+    XREF    DirectOrIndirect
+    ST  DirectOrIndirect(A4)        ;we are now in the iobj.
+    ENDC    wantGLOBALIO
+
+    MOVE.W  ADVERB(A4),OLDADVERB(A4)    ;so we can maintain it 
+    DO  P.CONJ
+    MSG     WT               ;'CONJ WHAT?'
+    MSG LINE
+    MOVE.L  (A7)+,D7           ;AND SET NE (TYPICALLY VERBOSE HUGH REM)
+    RET
+    
+*--------------------------------
+*
+*  CHECK FOUR PART
+*
+* SUSSES IF THE SUPPLIED CONJ IS
+* AS PER TYPED (AND SO OK FOR 
+* THE VERB) AND THAT THERE ARE
+* REQUIRED NO. OF NOUNS (2)
+*
+* DOESNT RETURN IF BAD CONJ/NOUNS
+* IT SETS UP LIFE,UNI,ETC TO KNOW
+* ABOUT COMMING 'WITH WHAT?'
+*
+*--------------------------------
+
+    XDEF    CHK4PT
+    XREF    CONJ,WHOOPS,ADDNOUN
+  
+CHK4PT
+ 
+* D1=RELEVENT CONJ
+ 
+    MOVEQ   #0,D7
+    CMP.W   CONJ(A4),D1
+    BEQ.S   40$
+    TEST_W  CONJ(A4)
+    BMI     P.CWHT
+    ST      WHOOPS(A4)
+    MSG     IDFY
+    MSG LINE
+    MOVE.L  (A7)+,D7
+    BRA.S   90$
+40$
+    TEST_W  ADDNOUN(A4)
+    BEQ     P.CWHT
+90$
+    RET
+ 
+*--------------------------------
+    
+    XDEF    CHK6PART
+   
+CHK6PART
+ 
+* D1=CONJ'S      D7=FORCE 4 PART
+  
+    CMP.L   CONJ(A4),D1
+    BEQ.S   10$
+    SWAP    D1
+    CMP.L   CONJ(A4),D1
+    BEQ.S   30$
+    TEST_B  D7
+    BNE.S   20$
+    RET
+20$
+    CMP.W   CONJ(A4),D1        ;SAME?
+    BNE     P.CWHT
+    BRA.S   CHK4PT
+30$
+    PUSH_L  D0/A0        ;SAVE
+    SWAP    D1                 ;KEEP CONJ CONSISTENT INCASE
+    MOVE.L  D1,CONJ(A4)
+    MOVE.W  ADDNOUN+2(A4),D0
+    GETINFO
+    MOVE.L  ADDNOUN(A4),D0
+    MOVE.L  A0,A5              ;NEW DATA
+    MOVE.W  D0,D5              ;NEW
+    SWAP    D0
+    MOVE.L  D0,ADDNOUN(A4)
+    PULL_L  D0/A0
+     
+10$
+    MOVE.L  ADDNOUN(A4),D1
+    TEST_W  D1
+    BEQ.S   40$
+    SWAP    D1
+    TEST_W  D1
+    BEQ.S   40$
+    RET
+40$
+    MOVE.W  CONJ(A4),D1
+    BRA     P.CWHT
+
+
+
+
+    END

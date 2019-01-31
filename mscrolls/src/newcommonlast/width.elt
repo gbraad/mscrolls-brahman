@@ -1,0 +1,76 @@
+**************************************************************
+*
+*	10/4/88
+*	@(#)width.elt	2.2
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+
+
+    IFNE	QL128
+
+	XDEF	DBLEFT
+	XREF	RIGHTM
+DBLEFT 
+ 
+	MOVE.W  RIGHTM(A4),D1
+	BRA.S   DBWIDTH
+
+	XDEF	DBRIGHT
+	XREF	LEFTM
+
+DBRIGHT
+
+   IFNE    ST520
+
+	MOVEQ   #76,D1
+
+   ENDC
+
+   IFNE    QL128
+
+	MOVEQ   #60,D1
+
+   ENDC
+
+	SUB.W   D0,D1                 ;SET UP RIGHT MARGIN
+	MOVE.W  LEFTM(A4),D0          ;GET LEFT MARGIN
+
+	XDEF	DBWIDTH
+	XREF	WIDTH,SWIDTH,VWIDTH,STWINDOW
+
+DBWIDTH
+
+      IFNE     QL128
+
+	MOVE.W  D1,D2                 ;COPY RIGHT MARGIN
+	SUB.W   D0,D2                 ;CALC WIDTH
+	CMP.W   #$10,D2               ;BIG ENOUGH?
+	BPL.S   10$                   ;OK
+	MSG     BADW                  ;BAD WIDTH
+	BRA.S   90$
+10$
+	MOVE.W  D2,WIDTH(A4)
+	ADDQ.W  #2,D2
+	MOVE.W  D2,SWIDTH(A4)
+	ADDQ.W  #1,D2
+	MOVE.W  D2,VWIDTH(A4)
+	MOVE.W  D0,LEFTM(A4)
+	MOVE.W  D1,RIGHTM(A4)
+	CALL    STWINDOW
+90$
+
+   ENDC
+
+	DOGO	DBEXIT
+
+    ENDC
+
+
+
+	END

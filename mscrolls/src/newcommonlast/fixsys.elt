@@ -1,0 +1,212 @@
+**************************************************************
+*
+*	%G%
+*	%W%
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"nounequ2.i"
+	include	"scenequ.i"
+
+*--------------------------------
+
+    IFND	Version2_FNDEND
+
+	XDEF	FNDEND
+	XREF	LOOPBUF,NMOVEFLG
+
+FNDEND
+
+* FIND THE END OF A STRING OF CONNECTED 
+* PARTICLES
+
+	GETINFO
+	LEA	LOOPBUF(A4),A1
+	CLR.W   (A1)			;INIT
+10$
+	MOVE.W  12(A0),D1		;FIX DATA
+	AND.W   #$3FFF,D1		;MASK TOP 2
+	BEQ.S   90$			;THE END
+	MOVE.L  A1,A2			;SAVE
+	LEA	LOOPBUF(A4),A1
+20$
+	MOVE.W  (A1)+,D3		;GET ENTRY
+	BEQ.S   50$			;SCANNED
+	CMP.W   D3,D1			;SCAN FOR MATCH
+	BNE.S   20$			;NONE, OK
+	LEA	LOOPBUF(A4),A1
+	CLR.W   D0
+11$
+	MOVE.W  (A1)+,D1
+	BEQ.S   90$
+	CMP.W   D1,D0
+	BHI.S   11$
+	MOVE.W  D1,D0
+	BRA.S   11$
+90$
+	RET
+50$	
+	MOVE.L  A2,A1			;BACK
+	MOVE.W  D1,(A1)+		;ONTO BUF
+	CLR.W   (A1)
+	MOVE.W  D1,D0
+	GETINFO
+	TST_MOVEABLE			;MOVEABLE?
+	BNE.S   80$			;ZERO=NO
+	ST	NMOVEFLG(A4)
+80$
+	BRA.S   10$			;DO REST
+
+    ENDC	;!Version2_FNDEND
+
+*--------------------------------
+
+    IFND	Version2_FIXSYS
+
+	XDEF	FIXSYS
+	XREF	EXBUFF,P.LIST2
+  
+FIXSYS
+	PUSH_L  D0-D7/A0-A6		;STASH
+	CLR.W   NMOVEFLG(A4)		;CLEAR NOT MOVEABLE FLAG
+	LEA	EXBUFF(A4),A3		;TARGET FOR SYS
+	CALL_S  FNDEND			;OF CHOICE
+	MOVE.W  D0,D4			;SAVE
+	MOVE.W  #NOUNNUM,D2		;COUNTER
+05$	
+	IFNE	FastBits
+
+* GETTIED finds the previous noun which has (12(A0) & 0x3FFF) !=0
+* it takes and returns D2.W
+* if a tied noun IS found CARRY is set, else cleared
+
+	DC.W	$A0F2			;GETTIED
+	BCC.S	20$
+
+	ENDC
+
+	MOVE.W  D2,D0
+	CALL_S  FNDEND			;OF EACH
+	CMP.W   D0,D4			;FIXED TO END?
+	BNE.S   10$			;NO
+	MOVE.W  D2,(A3)+		;YES, ONTO BUF
+10$
+	SUBQ.W  #1,D2
+	BNE.S   05$			;DO ALL
+20$
+	CLR.W   (A3)			;DT=0
+	TEST_B  D5
+	BEQ.S   FX90
+FX20
+	LEA	EXBUFF(A4),A0
+	MOVEQ   #1,D5
+	DO	P.LIST2
+	MSG	ACON
+FX90
+	PULL_L  D0-D7/A0-A6		;RESTORE 
+	LEA	EXBUFF(A4),A3
+	RET
+
+	ENDC	;!Version2_FIXSYS
+
+*------------------------------------------
+	
+	IFD	Version2_FNDEND
+
+	XDEF	FNDEND
+FNDEND
+
+	PUSH_L	D1-D3/A0/A6
+	CLR.W	-(A7)			;zerminated list on the stack.
+	CLR.W	D3			;we will maintain highest buffer entry
+	GETINFO				;on d0
+10$
+	MOVE.W	12(A0),D1		;get tied to information.
+	AND.W	#$3fff,D1		;lose bit flags
+	BEQ.S	90$			;none, exit
+	MOVE.L	A7,A6			;start of stack buffer
+20$
+	MOVE.W	(A6)+,D2		;get entry.
+	BEQ.S	50$			;not in a loop.
+	CMP.W	D1,D2			;in the buffer?
+	BNE.S	20$			;not this one, continue.
+	MOVE.W	D3,D0			;return highest buffer entry.
+	BRA.S	90$			;and exit.
+50$
+	MOVE.W	D1,-(A7)		;store this item in buffer.
+	CMP.W	D1,D3			;larger than our best (in d3)?
+	BHS.S	51$			;d3 is bigger (or same)
+	MOVE.W	D1,D3			;else update d3.
+51$
+	MOVE.W	D1,D0
+	GETINFO
+	TST_MOVEABLE			;is it moveable?
+	BNE.S	10$			;yes continue.
+	ST	NMOVEFLG(A4)		;set a random flag (unknown)
+	BRA.S	10$			;and continue.
+90$
+	TEST_W	(A7)+			;pop util zterminator.
+	BNE.S	90$			;keep looking.
+	PULL_L	D1-D3/A0/A6
+	RET
+
+    ENDC	;Version2_FNDEND
+
+*------------------------------------------
+
+    IFD	Version2_FIXSYS
+
+	XDEF	FIXSYS
+	XREF	LOOPBUF,P.LIST2,NMOVEFLG
+  
+FIXSYS
+	PUSH_L  D0-D7/A0-A6		;STASH
+	CLR.W   NMOVEFLG(A4)		;CLEAR NOT MOVEABLE FLAG
+	LEA	LOOPBUF(A4),A3		;TARGET FOR SYS
+	CALL_S  FNDEND			;OF CHOICE
+	MOVE.W  D0,D4			;SAVE
+	MOVE.W  #NOUNNUM,D2		;COUNTER
+05$	
+	IFNE	FastBits
+
+* GETTIED finds the previous noun which has (12(A0) & 0x3FFF) !=0
+* it takes and returns D2.W
+* if a tied noun IS found CARRY is set, else cleared
+
+	DC.W	$A0F2			;GETTIED
+	BCC.S	20$
+
+	ENDC
+
+	MOVE.W  D2,D0
+	CALL_S  FNDEND			;OF EACH
+	CMP.W   D0,D4			;FIXED TO END?
+	BNE.S   10$			;NO
+	MOVE.W  D2,(A3)+		;YES, ONTO BUF
+10$
+	SUBQ.W  #1,D2
+	BNE.S   05$			;DO ALL
+20$
+	CLR.W   (A3)			;DT=0
+	TEST_B  D5
+	BEQ.S   FX90
+FX20
+	LEA	LOOPBUF(A4),A0
+	MOVEQ   #1,D5
+	DO	P.LIST2
+	MSG	ACON
+FX90
+	PULL_L  D0-D7/A0-A6		;RESTORE 
+	LEA	LOOPBUF(A4),A3
+	RET
+
+    ENDC	;Version2_FIXSYS
+
+*------------------------------------------
+
+	END

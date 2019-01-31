@@ -1,0 +1,42 @@
+**************************************************************
+*
+*	10/27/87
+*	@(#)p_cnto.elt	1.2
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+
+*--------------------------------
+*
+* P.CNTO - the <noun1> is/are connected to the <noun2>
+*
+* D0 = noun1
+* D1 = noun2
+*
+	XDEF	P.CNTO
+   
+P.CNTO
+
+	GETINFO
+	MOVE.W  12(A0),D1
+	AND.W   #$3FFF,D1
+	BEQ.S   90$
+	DO	P.TN
+	DO	ISARE
+	MSG     CON
+	MOVE.W  D1,D0
+	DO	P.TN
+	GETINFO
+	TEST_W  D1
+90$
+	RET
+
+
+
+
+	END

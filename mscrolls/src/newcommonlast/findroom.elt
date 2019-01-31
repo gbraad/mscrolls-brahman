@@ -1,0 +1,115 @@
+**************************************************************
+*
+*	%G%
+*	%W%
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"verbequ.i"
+
+*
+* FindRoom - find the room# of a given noun.
+*
+* entry:   D0 = noun#
+*
+* exit:    D0 = room#, D7 = status
+*
+* if the object is OUT                         D7 =-1
+* if it is carried by the player               D7 = 4
+* if it may be got to (ie none of the above)   D7 = 0
+*
+* if the object is a pseudo the first location it's in is returned
+* if it's related to one & secondary location is zero ditto
+* if it's related but only in one place, thats what u get
+
+
+    IfVerb	MAKELOCAL
+
+	XDEF	FindRoom
+	XREF	ROOM,PSUDAT
+
+FindRoom
+
+	PUSH_L	D1/A0		;trying not to stomp too much
+10$
+	GETINFO
+	TST_PSEUDO				;pseudo?
+	BNE.S	50$
+
+	MOVE.W	6(A0),D1
+	BTST	#7+8,D1			;out?
+	BNE.S	30$
+
+	BTST	#6+8,D1			;room?
+	BNE.S	35$
+
+	TEST_B	D1			;check secondary loc.
+	BNE.S	60$			;is related(ish) to one occurance of
+					;a pseudo
+
+	AND.W	#$3300,D1		;contained/insep/hidden/related allowed
+	BEQ.S	20$			;else player must have it
+
+	MOVE.W	8(A0),D0		;next noun up
+	BRA.S	10$
+
+* get here => player has it - so give 'em player's room#
+
+20$
+	MOVE.W	8(A0),D0		;really in a room?
+	BNE.S	40$			;NE => yes, so pass
+	MOVE.W	ROOM(A4),D0		;setup room#
+	MOVEQ	#4,D7			;flag it's on the player
+	BRA.S	90$
+
+
+* get here => it's out or associated with a pseudo
+
+30$
+	MOVEQ	#-1,D7
+	BRA.S	90$
+
+* get here if it's in a room, then pass
+
+35$
+	MOVE.W	8(A0),D0
+
+* get here => pass!!
+
+40$
+	MOVEQ	#0,D7
+	BRA.S	90$
+
+* get here if a pseudo is involved
+
+50$
+	MOVE.W	8(A0),D1			;get pseudo offset
+	LEA	PSUDAT(A4),A0			;and start of data
+	MOVEQ	#0,D0				;kill odd bits
+	MOVE.B	0(A0,D1.W),D0
+	BRA.S	40$				;pass
+
+* get here if the secondary loc. is non zero
+
+60$
+	MOVEQ	#0,D0
+	MOVE.B	D1,D0		;get room#
+	BRA.S	40$		;pass
+
+90$
+	PULL_L	D1/A0
+	RET
+	
+
+    ENDC	;MAKELOCAL
+    
+
+*------------------------------------------
+
+
+	END

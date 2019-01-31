@@ -1,0 +1,106 @@
+
+************************************************************
+*
+*	@(#)attributes.elt	1.1
+*	1/22/88
+*
+************************************************************
+
+
+	SECTION		"ADV",CODE
+	include		"equates.i"
+	include		"macros.i"
+	include		"nounequ1.i"
+	include		"scenequ.i"
+	include		"nounequ2.i"
+
+
+    IFD	wanted_ATTRIBUTES
+
+	XDEF	ISATTRIBUTE
+
+ISATTRIBUTE
+
+* Does an object have a certain attribute
+* Entry
+*	d0=noun# of object
+*	A1=pointer to attribute denotation (in any format)
+
+* Exit
+*	EQ<=> yes
+
+	PUSH_L	D0-D1/A1
+	TEST_W	(A1)+		;format specifier
+	BNE.S	50$		;bitmap table
+10$
+	MOVE.W	(A1)+,D1	;get object
+	BEQ.S	80$		;end of table, fail
+	CMP.W	D0,D1		;this item?
+	BEQ.S	90$		;yes, exit true
+	BRA.S	10$		;no, carry on
+50$
+	SUBQ.W	#1,D0		;adjust to begin at 0
+	MOVE.W	D0,D1		;save noun#
+	LSR.W	#3,D1		;/8
+	MOVE.B	0(A1,D1.W),D1	;fetch byte at that address
+	AND.W	#7,D0		;low 3 bits
+	BTST	D0,D1		;test that bit
+	EOR	#4,CCR		;invert eq=>yes, ne=>no
+	BRA.S	90$		;and exit
+80$
+	SETNE			;fail
+90$
+	PULL_L	D0-D1/A1	;restore
+	RET
+
+*--------------------------------------------------
+
+	    XDEF	GETATTRIBUTE
+	    XREF	VALID.NP
+GETATTRIBUTE
+
+* Gets the first local item satisfying the given attribute
+
+* Entry
+*	A1= pointer to attribute denotation (in any format)
+
+* Exit
+*	D0= chosen item (0=> nosuch)
+*	flags on d0
+
+	PUSH_L	D1/D2		;save these
+	TEST_W	(A1)+		;what format?
+	BNE.S	50$		;bit map
+10$
+	MOVE.W	(A1)+,D0	;get item
+	BEQ.S	90$		;end of table, exit
+	DO	VALID.NP	;is it local?
+	BEQ.S	90$		;yes, ok quit with this one
+	BRA.S	10$		;no, try another
+50$
+	MOVEQ	#0,D0		;we'l use a noun counter (0 to max-1)
+60$
+	MOVE.W	D0,D1		;save
+	LSR.W	#3,D1		;/8
+	MOVE.B	0(A1,D1.W),D1	;fetch that byte
+	MOVE.W	D0,D2		;and again
+	AND.W	#7,D2		;bit index
+	BTST	D2,D1		;is it set wi this attribute?
+	BEQ.S	70$		;no, skip
+	DO	VALID.NP	;and is it local?
+	BEQ.S	90$		;ok this will do
+70$
+	ADDQ.W	#1,D0		;inc
+	CMP.W	#NMAXNOUN,D0	;have we done all?
+	BNE.S	60$		;no, try next
+	MOVEQ	#0,D0		;otherwise clear
+90$
+	PULL_L	D1/D2
+	TEST_W	D0		;set flags
+	RET
+
+*--------------------------------------------------
+
+    ENDC	;wanted_ATTRIBUTES
+
+	END

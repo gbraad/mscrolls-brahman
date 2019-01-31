@@ -1,0 +1,68 @@
+**************************************************************
+*
+*	10/27/87
+*	@(#)p_string.elt	1.2
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+
+	include	"equates.i"
+	include	"macros.i"
+
+
+*
+* P.STRING - this prints out a fancy string which may have SCN & prog MSG's
+*            as sub strings
+*
+* ENTRY: A0 points at the start of a string
+*
+* format of a string:
+*
+* consists of a series of WORDS which may be ASCII or message #'s
+*
+* if a word < 0x8000 then both bytes are assumed to be ASCII, if the
+* hi byte is zero it's taken as END of message, if the low bytes is zero
+* it's taken as a padding byte (cos msg words got to be ALIGNED)
+*
+* if a word > 0x8000 it's taken as a message no. 
+* if greater than 0xC000 it's taken as a SCENARIO message
+*
+
+	XDEF	P.STRING
+
+P.STRING
+
+	PUSH_L	D0-D1/A0
+10$
+	MOVE.W	(A0)+,D1
+	BPL.S	30$			;chars!
+	AND.W	#$7FFF,D1
+	BCLR	#14,D1			;NE => SCN message
+	BEQ.S	20$
+	DO	P.SCN
+	BRA.S	10$
+20$
+	DO	P.MSG
+	BRA.S	10$
+
+30$
+	BEQ.S	90$			;word of zero => we've finished
+	MOVE.B	D1,D0			;save second char
+	LSR.W	#8,D1			;get first one
+	DO	CHAROUT
+	MOVE.B	D0,D1
+	BEQ.S	10$			;EQ => padding
+	DO	CHAROUT
+	BRA.S	10$
+90$
+	PULL_L	D0-D1/A0
+	RET
+
+
+
+
+
+	END

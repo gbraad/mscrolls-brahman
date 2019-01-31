@@ -1,0 +1,103 @@
+**************************************************************
+*
+*	%G%
+*	%W%
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"scenequ.i"
+
+	XDEF	F.APART
+	XREF	P.LIST2,LISWRD,DNOUNBUF
+   
+F.APART
+
+    IFD		Version2_FIX
+
+	; D0 = flex item untied.
+	; D1 = it's original target.
+
+	MOVE.W	D1,D0				;get target
+	GETINFO
+	MOVE.B	1(A0),D1
+	LSR.B	#4,D1				;hardness.
+	CMP.W	#12,D1				;is it flex?
+	BEQ.S	90$				;yes, nothing separates.
+	MOVE.W	12(A0),D1			;it's target (if any).
+	BLE.S	90$				;is insep/none, quit.
+	CLR.W	12(A0)				;we clear it temporarily.
+	AND.W	#$3fff,D1			;lose bit flags.
+	EXG	D0,D1				;D0 = fix(fix(flex)), d1=fix(x)
+	CLR.W	D5				;no print mode
+	DO	FIXSYS				;generate system.
+10$
+	MOVE.W	(A3)+,D2			;get entry.
+	BEQ.S	20$				;not there => fall apart.
+	CMP.W	D2,D1				;to our first item?
+	BNE.S	10$				;no, keep looking.
+	MOVE.W	D1,12(A0)			;there, put it back!
+90$
+	RET					;was there, no fall apart.
+20$
+	EXG	D0,D1				;a friendly order
+	DO	P.TN				;the fix(x)
+	MSG	AND
+	MOVE.W	D1,D0
+	DO	P.TN				;the fix(fix(x))
+	MSG	FAPART				;fall apart.
+	BRA.S	90$				;quit.
+
+    ENDC	;Version2_FIX
+
+    IFND	Version2_FIX
+
+	MOVE.W  D5,D0
+	GETINFO		
+	CLR.W   D5
+	DO	FIXSYS
+	CLR.W   D4
+	MOVE.L  A3,A5
+	TEST_W  2(A3)			;ONE?
+	BEQ.S   90$
+10$
+	MOVE.W  (A3)+,D0
+	BEQ.S   20$
+	GETINFO		
+	MOVE.B  1(A0),D0
+	LSR.B   #4,D0
+	CMP.B   #12,D0			;FLEX?
+	BNE.S   10$
+	ADDQ.W  #1,D4
+	BRA.S   10$
+20$
+	TEST_W  D4
+	BNE.S   90$
+	MOVE.L  A5,A3
+30$
+	MOVE.W  (A3)+,D0
+	BEQ.S   40$
+	GETINFO
+	CLR.W   12(A0)
+	BRA.S   30$
+40$
+	MOVE.L  A5,A0
+	MOVEQ   #1,D5			;FLAG
+	TEST_W  (A0)
+	BEQ.S   90$
+	BeSure	M.AND
+	MOVE.W  #M.AND,LISWRD(A4)
+	DO	P.LIST2
+	MSG	FAPART
+90$
+	RET
+
+    ENDC	;!Version2_FIX
+
+*------------------------------------------
+
+	END

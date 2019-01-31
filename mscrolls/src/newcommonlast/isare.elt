@@ -1,0 +1,50 @@
+**************************************************************
+*
+*	10/27/87
+*	@(#)isare.elt	1.2
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+
+	include	"equates.i"
+	include	"macros.i"
+
+*--------------------------------
+
+	XDEF	P.PV
+  
+P.PV
+ 
+	DO	P.PRN
+*	DOGO	ISARE
+* Fall through...  
+*--------------------------------
+
+	XDEF	ISARE
+
+ISARE
+ 
+* PRINTS "IS " OR "ARE "
+* ON DATA AT A0
+  
+	TST_PLURAL				;PLURAL?
+	BEQ.S	10$
+	MSGGO	ARE 			;YES
+10$
+	MSGGO	IS 
+ 
+*--------------------------------
+
+	XDEF	P.VQN
+  
+P.VQN
+ 
+	CALL_S  ISARE
+	DOGO	P.QN
+
+
+
+	END

@@ -1,0 +1,58 @@
+**************************************************************
+*
+*	%G%
+*	%W%
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"nway.i"
+	include	"scenequ.i"
+
+
+      IFEQ	THE_PAWN
+
+	XDEF	COUNTEXIT
+	XREF	CALCNET
+
+COUNTEXIT
+*
+* This will count the number of exits available from ROOM
+* it will return the result in D7 
+* this shall also test d7 before it returns to inform you 
+* if EQ
+* and d1 will be stomped!
+
+	PUSH_L	D0/A0
+	DO	CALCNET		    ;returns A0 pointing to start of network
+	MOVE.W	#Sizeof_NET-1,D0    ;amount of rooms
+	MOVEQ	#0,D7
+10$
+	MOVE.B	0(A0,D0.W),D1   	;is it greater than maximum?
+	BEQ.S	20$
+
+    IFND	wantPWAYS	
+	CMP.B   #MAXROOM,D1
+    ENDC	;!wantPWAYS
+    
+    IFD		wantPWAYS
+	CMP.B	#MAXPWAY,D1
+    ENDC	;wantPWAYS
+
+	BCC.S	20$			;not an exit
+	ADDQ.W	#1,D7			;add one to our counter
+20$
+	DBRA	D0,10$			;To finish
+	TEST_B	D7			;for room count
+	PULL_L	D0/A0
+	RET
+	
+	
+    ENDC	;!THE_PAWN
+*------------------------------------------ 
+
+	END

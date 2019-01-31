@@ -1,0 +1,312 @@
+**************************************************************
+*
+*	%G%
+*	%W%
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include "windows.i"
+	include "roomequ.i"
+
+
+*
+* CONNECT3 - used by Connect macro
+*
+* picks d0/d1/d2 forom code
+*
+
+
+CONNECT3
+	
+	MOVE.L	(A7),A0			;get PC (CONNECT2 steps on A0)
+	MOVE.B	(A0)+,D0
+	MOVE.B	(A0)+,D1
+	MOVE.B	(A0)+,D2
+	ADDQ.W	#1,A0
+	MOVE.L	A0,(A7)			;restore ret addr
+	BRA.S	CONNECT2
+  
+	
+*--------------------------------
+*
+* CONNECT - PUTS ROOM# IN D2
+*		INTO NETWORK AS DIR
+*		GIVEN IN D1 FROM ROOM
+*		THAT PLAYER IS IN 
+*
+*--------------------------------
+ 
+	XDEF	CONNECT,CONNECT2
+	XDEF	CONNECT3
+
+	XREF	ROOM,NETWORK
+   
+CONNECT
+ 
+	CLR.L   D0
+	MOVE.W  ROOM(A4),D0
+ 
+ 
+*--------------------------------
+*
+* CONNECT2 -	 AS ABOVE BUT FROM 
+*		ROOM GIVEN IN D0
+*--------------------------------
+ 
+ 
+CONNECT2
+	
+	AND.L   #$FF,D1
+	AND.W   #$FF,D0				;ROOM # LESS THAN $7F
+    IFD		wantWindowsNotifyExits
+	MOVE.W	D0,-(A7)			;save the room number.
+    ENDC	;wantWindowsNotifyExits
+
+	SUBQ.W  #1,D0
+
+	IFNE	M68000
+	MULU	#Sizeof_NET,D0
+	ENDC
+
+	IFEQ	M68000
+    IFEQ	Sizeof_NET-10
+	ADD.W	D0,D0			;*2
+	MOVE.W	D0,-(A7)
+	ASL.W	#2,D0			;*8
+	ADD.W	(A7)+,D0		;*10
+    ENDC	;!Sizeof_NET-10
+
+    IFNE	Sizeof_NET-10		;otherwise *12
+	ASL.W	#2,D0			;*4
+	MOVE.W	D0,-(A7)
+	ADD.W	D0,D0			;*8
+	ADD.W	(A7)+,D0		;*12
+    ENDC	;Sizeof_NET-10
+
+	ENDC	;!M68000
+
+	ADD.L   D1,D0
+	LEA	NETWORK(A4),A0
+	ADD.W   D0,A0
+	MOVE.B  D2,(A0)			;FIX
+	
+    IFD		wantWindowsNotifyExits		;Warning: changes D0
+	XREF	RelBuf,WindowsNotify,ROOM
+	
+	MOVE.W	(A7)+,D0			;fetch room#
+	MOVE.L	A0,-(A7)			;preserve A0
+	CMP.B	ROOM+1(A4),D0			;where you are?
+	BEQ.S	10$				;yes, choose that room
+	MOVE.W	D2,D0				;otherwise the other room.
+10$
+	CALL_S	SendNotifyExits			;common routine.
+	MOVE.L	(A7)+,A0			;restore A0
+    ENDC	;wantWindowsNotifyExits
+
+	RET
+*------------------------------------------ 
+
+    IFD		wantWindowsNotifyExits
+wantSendNotifyExits	SET	TRUE
+    ENDC	;wantWindowsNotifyExits
+    IFD		wantWindowsNotifyNetwork
+wantSendNotifyExits	SET	TRUE
+    ENDC	;wantWindowsNotifyNetwork
+
+    IFD		wantSendNotifyExits
+
+SendNotifyExits
+	
+	XREF	HasPicture,ROOM
+	
+* Common routine used by CONNECT2 and
+* WindowsNotifyNetwork.
+* This does the actual sending of the exits to the front
+* end by calling WindowsNotify
+
+	LEA	RelBuf+2(A4),A0			;fetch buffer to pass data
+	MOVE.B	#NotifyExits,(A0)+		;message type id.
+	MOVE.L	A0,-(A7)			;buffer for data
+	MOVE.W	D0,-(A7)			;room#
+	CALL_S	WindowsNotifyExits		;handler(ROOM#, buffer)
+	ADDQ.L	#6,A7				;even stack.
+	MOVEQ	#0,D0				;clear
+	MOVE.B	1(A0),D0			;get n_exits
+	ADDQ.B	#1,D0				;n_exits + 1
+	ASL.W	#1,D0				;(1+n_exits)*2 = size
+	MOVE.W	ROOM(A4),-(A7)			;save the room
+	MOVE.B	(A0),ROOM+1(A4)			;hack to our room.
+	CALL	HasPicture			;EQ => no picture.
+	SNE	0(A0,D0)			;make nonzero if picture.
+	MOVE.W	(A7)+,ROOM(A4)			;restore old room.
+	ADDQ.W	#2,D0				;+1 for id code & picture code.
+	MOVE.W	D0,-(A7)			;param to Notify
+	CALL	WindowsNotify			;generic call to front end.
+	ADDQ.L	#2,A7				;level
+	RET
+    ENDC	;wantSendNotifyExits
+
+
+*------------------------------------------
+	
+    IFD		wantWindowsNotifyExits
+	
+	XDEF	WindowsNotifyExits
+
+	XREF	CALCNET2
+	
+* Build a notify message for the exits of the given `room'
+* into the given `buffer'.
+* The resultant buffer is in the folloing format;
+* room.b, n_exits.b, dir1.b, exit1.b, dir2.b, exit2.b, ..., dirn.b, exitn.b
+
+ArgBase	SET	$8+4*6
+RoomNum	SET	ArgBase+0
+Buffer	SET	ArgBase+2	
+		
+WindowsNotifyExits	;(RoomNum.w, buffer.l)
+	
+	PUSH_L	D0-D3/A0-A1
+	LINK_	A6,#0
+	MOVE.W	RoomNum(A6),D2			;the room in question.
+	AND.W	#$FF,D2				;lose any high byte.
+	MOVE.L	Buffer(A6),A1			;destination buffer.
+	MOVE.B	D2,(A1)				;insert room
+	CALL	CALCNET2			;network ->a0
+	ADDQ.L	#2,A1				;skip bytes for room & n_exits.
+	MOVEQ	#0,D2				;exit count & direction code.
+	MOVE.L	D2,D3				;n_exits = 0.
+05$
+	MOVE.B	(A0)+,D0			;fetch an exit.
+	BEQ.S	10$				;no exit continue.
+	CMP.B	#NROOMS,D0			;>= => not a valid exit.
+	BHS.S	10$				;invalid, fail.
+	MOVE.B	D2,(A1)+			;direction code.
+	MOVE.B	D0,(A1)+			;exit room number.
+	ADDQ.B	#1,D3				;n_exits++
+10$
+	ADDQ.B	#1,D2				;exit count++
+	CMP.B	#Sizeof_NET,D2			;all done?
+	BLT.S	05$				;no, continue.
+	MOVE.L	Buffer(A6),A0			;restore buffer ptr.
+	MOVE.B	D3,1(A0)			;insert n_exits.
+	UNLINK_	A6
+	PULL_L	D0-D3/A0-A1
+	RET
+
+    ENDC	;wantWindowsNotifyExits
+
+*------------------------------------------ 	
+	
+    IFD		wantWindowsNotifyNetwork
+	
+	XDEF	WindowsNotifyNetwork
+	
+* Build a description of the network.
+* Each room in the network is validated by the given
+* validate_function(). A value of NULL for the validate_function
+* Sends the entire network. Usually the validate function will be one
+* to test the explored bit for the room. Thus sending only the known
+* network.
+* This event should be called after a load game or change session.
+* It will be prompted to happed from the front end.
+*
+* The information is not passed as one chunk, but rather as a sequence
+* of NotifyExits events as follows;
+* First a NotifyNetwork message is send detailing the number of
+* NotifyExits to expect, then the NotifyExits messages are sent in
+* sequence. The front end will have to poll in the individual exits.
+
+ArgBase		SET	$8+4*5
+ValFunc		SET	ArgBase
+
+WindowsNotifyNetwork	 ;(validate_function(room.w).l)
+
+	XREF	RelBuf,WindowsNotify
+	
+* NOTE:
+*	for this routine to work sensibly you should
+*	have wantRoomsFirst set TRUE in your game.
+*	 (Otherwise a pass thru' the whole nouns would be quicker)
+
+	PUSH_L	D0-D2/D6/A0
+	LINK_	A6,#0
+	MOVE.W	#NROOMS-1,D2			;the last room.
+	MOVE.L	A7,D1				;top of valid list.
+	MOVE.L	ValFunc(A6),A0			;validation function.
+10$
+	MOVE.W	D2,-(A7)			;pass room#
+	CMP.L	#0,A0				;a function?
+	BEQ.S	20$				;no, leave on stack.
+	JSR	(A0)				;validate room ->D0
+	TEST_W	D0				;valid?
+	BNE.S	20$				;is valid, dont level stack.
+	ADDQ.L	#2,A7				;trash room# on stack.
+20$
+	SUBQ.W	#1,D2				;dec room counter.
+	BNE.S	10$				;contine if not done.
+	SUB.L	A7,D1				;d1 = 2*n_valid rooms.
+	LSR.W	#1,D1				;d1 = n valid rooms.
+	BEQ.S	90$				;no valid exits, quit.
+	LEA	RelBuf+2(A4),A0			;message data addr
+	MOVE.B	#NotifyNetwork,(A0)+		;message id code.
+	MOVE.B	D1,(A0)				;number of packets to send.
+	MOVE.W	#2,-(A7)			;length of message.
+	CALL	WindowsNotify			;notify front end to expect.
+	ADDQ.L	#2,A7				;level stack.
+	
+    	; Now send the packets of exits on the stack.
+	SUBQ.W	#1,D1				;adjust counter for dbra.
+30$
+	MOVE.W	(A7)+,D0			;fetch a room#
+	CALL	SendNotifyExits			;our private shared routine.
+	DBRA	D1,30$				;until done.
+90$
+	UNLINK_	A6
+	PULL_L	D0-D2/D6/A0
+	RET
+*------------------------------------------
+	
+	XDEF	WindowsNotifyExploredNetwork
+	
+WindowsNotifyExploredNetwork
+
+* Use WindowsNotifyNetwork to send only the explored network.
+
+	PEA	ValFuncExplored(PC)		;address of function.
+	CALL	WindowsNotifyNetwork		;build message in inbuff.
+	ADDQ.L	#4,A7				;level stack.
+	RET
+	
+*------------------------------------------ 
+
+ArgBase		SET	$8+4*3
+RoomNum		SET	ArgBase
+
+	XREF	R.NOUN2
+	
+ValFuncExplored   ;(room#.w)
+
+* Test whether the room is explored by testing the explored bit.
+* return D0 == 0 iff room is NOT explored.
+
+	PUSH_L	D2/D6/A0
+	LINK_	A6,#0
+	MOVE.W	RoomNum(A6),D2			;fetch room.
+	CALL	R.NOUN2				;noun#(room)->d0.
+	GETINFO					;data(d0)->a0.
+	TST_EXPLORED				;explored?
+	SNE	D0				;return value
+	UNLINK_	A6
+	PULL_L	D2/D6/A0
+	RET
+
+    ENDC	;wantWindowsNotifyNetwork
+*------------------------------------------ 	
+
+	END

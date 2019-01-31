@@ -1,0 +1,86 @@
+**************************************************************
+*
+*	%G%
+*	%W%
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+
+	
+	IFEQ	GENERIC
+
+
+    IFEQ    MAC512
+    IFNE    Wimp                          ;must suss better def..
+
+	XDEF	UTFOREGROUND,UTBACKGROUND,UTSCROLLCOLOUR
+	XREF	DO_FOREG,DO_BACKG,DO_SCROL
+
+UTFOREGROUND
+
+	CALL    DO_FOREG
+	DOGO     UTEXIT
+
+UTBACKGROUND
+
+	CALL    DO_BACKG
+	DOGO     UTEXIT
+
+UTSCROLLCOLOUR
+
+	CALL    DO_SCROL
+	DOGO     UTEXIT
+
+    ENDC
+    ENDC
+
+    IFNE	MAC512
+
+
+	XDEF	UTFOREGROUND,UTBACKGROUND,UTSCROLLCOLOUR
+
+UTFOREGROUND
+UTBACKGROUND
+UTSCROLLCOLOUR
+
+	DOGO	UTEXIT
+
+    ENDC
+
+    IFNE	M68000			;rael tack definiti
+
+	XDEF	DBCONTRAST
+
+DBCONTRAST
+
+    IFNE    ST520  ; Wimp                          ;not a good definition.....
+
+	XREF	DO_CONTR
+
+	CALL    DO_CONTR
+
+    ENDC
+
+    IFEQ    Wimp
+
+	XREF	DISPTYPE
+
+	NOT.B   DISPTYPE(A4)
+
+    ENDC
+
+	DOGO	DBEXIT
+
+    ENDC
+    ENDC	;!generic
+
+
+
+
+	END
+

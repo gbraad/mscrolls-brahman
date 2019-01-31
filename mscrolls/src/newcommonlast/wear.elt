@@ -1,0 +1,148 @@
+******************************************************
+*
+*	%W%
+*	%G%
+*
+******************************************************
+
+		SECTION		"ADV",CODE
+
+
+	include "equates.i"
+	include "macros.i"
+	include	"verbequ.i"
+	include	"scenequ.i"
+
+	IfVerb	WEAR
+
+*------------------------------------------
+	IFD	Version2_WEAR
+
+	XREF	W.BUT,P.SUBV,W.WEARNG,P.TN,GETDATA,P.SUB,W.PUTON,SP.WEAR
+	XREF	W.ICNDTW,ISARE,P.TNSTOP,SP.SCORE.NOUN,P.BTN,FIXCHK,YCANTNOW
+
+
+	XDEF	WEAR
+
+WEAR
+ 
+	IFD	wantSP.WEAR_Before
+	XREF	SP.WEAR_Before
+	CALL	SP.WEAR_Before
+	ENDC	;wantSP.WEAR_Before
+
+	DO	FIXCHK			;tied/has things tied to it?
+	BNE	YCANTNOW
+	TST_WORNBYPLAYER		;ALREADY?
+	BEQ.S   10$			;OK
+	MSG	BUT
+	DO	P.SUBV
+	MSG	WEARNG
+	DOGO	P.TNSTOP
+10$
+	BTST	#0,11(A0)
+	BEQ.S   20$			;NOT WORN
+	MOVE.W  8(A0),D1
+	EXG	D0,D1
+	DO	P.BTN
+	GETINFO
+	DO	ISARE
+	MSG	WEARNG
+	EXG	D1,D0
+	DOGO	P.TNSTOP
+20$
+	MOVE.B  11(A0),D1
+	AND.B   #6,D1
+	BEQ	YCANTNOW
+
+WEAR.DO
+
+	CALL	SP.WEAR
+	BNE.S	90$
+	DO	FIXCONT			;incase contained.
+	DO	P.SUB
+	MSG	PUTON
+	DO	P.TNSTOP
+	MOVE.L	#$04000000,6(A0)	;make worn only
+
+      IFNE	GENERIC
+	XREF	PromptWORN_EVENT
+	JSR	PromptWORN_EVENT(A4)
+      ENDC	;GENERIC
+
+
+90$
+	RET
+
+	ENDC	;Version2_WEAR
+
+*------------------------------------------
+
+	IFND	Version2_WEAR
+
+	XREF	W.BUT,P.SUBV,W.WEARNG,P.TN,GETDATA,P.SUB,W.PUTON,SP.WEAR
+	XREF	W.ICNDTW,ISARE,P.TNSTOP,SP.SCORE.NOUN,P.BTN,FIXCHK,YCANTNOW
+
+
+	XDEF	WEAR,WEAR.DO
+
+WEAR
+ 
+	IFD	wantSP.WEAR_Before
+	XREF	SP.WEAR_Before
+	CALL	SP.WEAR_Before
+	ENDC	;wantSP.WEAR_Before
+
+	DO	FIXCHK			;tied/has things tied to it?
+	BNE.S   30$
+	TST_WORNBYPLAYER		;ALREADY?
+	BEQ.S   10$			;OK
+	MSG	BUT
+	DO	P.SUBV
+	MSG	WEARNG
+	DOGO	P.TNSTOP
+10$
+	BTST	#0,11(A0)
+	BEQ.S   20$			;NOT WORN
+	MOVE.W  8(A0),D1
+	EXG	D0,D1
+	DO	P.BTN
+	GETINFO
+	DO	ISARE
+	MSG	WEARNG
+	EXG	D1,D0
+	DOGO	P.TNSTOP
+20$
+	MOVE.B  11(A0),D1
+	AND.B   #6,D1
+	BEQ.S   30$			;NOT POS
+	CALL_S	WEAR.DO
+	BRA	SP.WEAR
+30$
+	DOGO	YCANTNOW
+
+WEAR.DO
+
+	DO	FIXCONT
+	DO	P.SUB
+	MSG	PUTON
+	DO	P.TNSTOP
+	MOVE.L	#$04000000,6(A0)	;make worn only
+
+      IFNE	GENERIC
+	XREF	PromptWORN_EVENT
+	JSR	PromptWORN_EVENT(A4)
+      ENDC	;GENERIC
+
+
+	RET
+
+
+	ENDC	;!Version2_WEAR
+
+	ENDC	;WEAR
+
+*------------------------------------------
+
+	END
+

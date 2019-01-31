@@ -1,0 +1,107 @@
+************************************************************
+*
+*	%W%
+*	%G%
+*
+*************************************************************
+
+		SECTION	"ADV",CODE
+
+
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"verbequ.i"
+
+*--------------------------------
+
+	IfVerb	DOODAH
+
+	XDEF	V.DOODAH
+	XREF	SP.DOODAH
+	
+V.DOODAH
+
+	TEST_W	D0			;Trying to 'DOODAH' a noun?
+	BMI.S	10$			;=> nope
+	DOGO	YCANT			;'You can't do that to the xyzzy.'
+
+10$
+	CALL	SP.DOODAH
+	MSG	NHAP			;'Nothing happens.'
+	RET
+
+	ENDC
+
+*-----------------------------------------
+
+	IfVerb	WATCHERCALLIT
+
+	XDEF	V.WATCHERCALLIT
+	XREF	SP.WATCHERCALLIT
+	
+V.WATCHERCALLIT
+
+	CALL	SP.WATCHERCALLIT
+	MSG	NHAP			;'Nothing happens.'
+	RET
+
+	ENDC
+	
+*-----------------------------------------
+
+	IfVerb	DOOFER
+
+
+	XDEF	V.DOOFER
+	XREF	SP.DOOFER
+	
+
+V.DOOFER
+
+	CALL	SP.DOOFER
+	MSG	NHAP			;'Nothing happens'
+	RET
+
+	ENDC
+
+*-----------------------------------------
+
+	IfVerb	THINGY
+
+	XDEF	V.THINGY
+	XREF	SP.THINGY
+	
+V.THINGY
+
+	TEST_W	D0			;Trying to 'THINGY' summit?
+	BMI.S	10$			;=> nope
+	DOGO	YCANT			;'You can't do that to the xyzzy.'
+
+10$
+	CALL	SP.THINGY
+	MSG	NHAP			;'Nothing happens.'
+	RET
+
+	ENDC
+
+*-----------------------------------------
+
+	IfVerb	OOJIMY
+
+
+	XDEF	V.OOJIMY
+	XREF	SP.OOJIMY
+	
+
+V.OOJIMY
+
+	CALL	SP.OOJIMY
+	MSG	NHAP			;'Nothing happens'
+	RET
+
+	ENDC
+
+*-----------------------------------------
+
+	END

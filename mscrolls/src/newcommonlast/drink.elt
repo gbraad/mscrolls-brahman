@@ -1,0 +1,46 @@
+**************************************************************
+*
+*	11/4/87
+*	@(#)drink.elt	1.5
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"verbequ.i"
+	include	"scenequ.i"
+
+	IfVerb	DRINK
+	
+	XDEF	V.DRINK
+	XREF	SP.DRINK,EDTS.OK,EDTS.FNDED,EDTS.CONSUME
+   
+V.DRINK
+  
+	CALL	SP.DRINK
+
+      IFD	wantDRINKisSINGV
+	
+	XREF	CHK2PART
+	CALL	CHK2PART		;returns IF there is a D.O.
+
+      ENDC
+
+	CALL	EDTS.OK
+	CALL	EDTS.FNDED
+	BEQ.S	10$
+	MOVE.B  1(A0),D1		;PHYS CHAR		
+	AND.B   #$F0,D1			;GET HARDNESS ONLY	
+	CMP.B   #$10,D1			;can only drink a liquid
+	BEQ	EDTS.CONSUME
+10$
+	DOGO	DBS			;IF NOT LIQUID PRINT DBR
+
+	ENDC
+
+
+	END

@@ -1,0 +1,160 @@
+**************************************************************
+*
+*	%G%
+*	%W%
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"verbequ.i"
+
+	IfVerb	EXIT
+
+	XDEF	V.EXIT
+	XREF	SP.EXIT,GO.LEAVE,VERB,P.EXITS,GO.N,DBS,MOVE.TAB,ROOM
+	XREF	R.NOUN
+
+V.EXIT
+
+	TEST_W	D0		;dobj specified?
+	BPL.S	01$		;yes.
+	CALL	R.NOUN		;noun# of room ->d0
+01$
+
+	CALL    SP.EXIT
+	CALL    GO.LEAVE           ;CATCH 'EXIT SHED' ETC
+05$
+ 
+	LEA     MOVE.TAB(A4),A1
+10$
+	MOVE.W  (A1)+,D1
+	BEQ.S   NoDirectExit
+	ADDQ.L  #2,A1
+	CMP.W   D1,D0
+	BNE.S   10$
+	MOVE.W  -(A1),D1
+	CMP.B   ROOM+1(A4),D1
+	BNE     ButNotInTN		;wrong room!!!!!!!
+	LSR.W   #8,D1
+	CMP.B   #DIR_D,D1          ;DOWN?
+	BEQ.S   20$
+	CMP.B   #DIR_U,D1          ;UP
+	BEQ.S   25$
+	ADDQ.B  #4,D1
+	CMP.B   #7,D1
+	BLS.S   15$
+	SUBQ.B  #8,D1
+15$
+	CLR.L   D5
+	MOVE.B  D1,D5
+	MOVE.W  #VNGO,VERB(A4)
+	BRA	GOTOGO
+20$
+	SUBQ.B  #1,D1
+	BRA.S   15$
+25$
+	ADDQ.B  #1,D1
+	BRA.S   15$
+
+* find 'best' exit from this room (using network)
+
+NoDirectExit
+
+
+	TST_ISAROOM				;ROOM?
+	BEQ     DBS                ;OK
+
+	DO	CALCNET			;-> A0 pointer to net info
+
+      IFEQ	THE_PAWN
+
+	CLR.W	D2			;used wordwise later.
+	MOVE.B	DIR_OUT(A0),D2
+	BEQ.S	10$			;nothing in 'out' dir
+	CMP.W	#MAXROOM,D2		;an nway_xyzzy?
+	BCC.S	10$			;CC=>yes
+
+	DO	R.NOUN2			;get noun#
+	GETINFO				;and noun data
+	MOVE.W	#VNGO,VERB(A4)
+
+	BRA	GO.N			;and fake a 'go xyzzy'
+
+      ENDC
+
+
+10$
+
+	CLR.B   D0
+	CLR.W   D4
+40$
+	MOVE.B  (A0)+,D1
+	BMI.S   45$
+	BNE.S   55$                ;VALID
+45$
+	ADDQ.W  #1,D0
+	CMP.B   #9,D0
+	BLS.S   40$
+	CMP.B   #1,D4              ;# VALID
+	BEQ.S   50$
+	DO	CALCNET
+	MOVE.B  #$FF,D1 
+	MOVEQ   #9,D3
+41$
+	MOVE.B  0(A0,D3),D5   
+	BEQ.S   42$
+	CMP.W   D5,D1
+	BMI.S   42$
+	MOVE.B  D5,D1
+	MOVE.L  D3,D2
+42$
+	DBRA    D3,41$
+	TEST_B  D1
+	BPL.S   50$
+
+	MSG	WWAY
+	BRA     P.EXITS
+50$
+	CLR.L   D5
+	MOVE.B  D2,D5
+	MOVE.W  #VNGO,VERB(A4)
+	BRA.S	GOTOGO
+55$
+	MOVE.W  D0,D2
+	ADDQ.W  #1,D4
+	BRA.S   45$
+
+ButNotInTN
+
+	MSG	BUT
+	DO	P.SUBV
+	MSG	NOT
+	MSG	IN
+	DO	P.TN
+	DOGO	BSFULLSTOP	
+
+	ENDC
+
+*------------------------------------------
+	
+	XDEF	GOTOGO,GOTOGO.OK
+	XREF	LINKADDRESS,GO,GO.OK
+
+GOTOGO
+
+	MOVE.L	LINKADDRESS(A4),A7
+	SUBQ.L	#8,A7				;adjust
+	BRA	GO
+
+GOTOGO.OK
+
+	MOVE.L	LINKADDRESS(A4),A7
+	SUBQ.L	#8,A7				;adjust
+	BRA	GO.OK
+*------------------------------------------
+
+	END

@@ -1,0 +1,162 @@
+**************************************************************
+*
+*	3/1/89
+*	@(#)forwhat.elt	2.5
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"scenequ.i"
+
+	XDEF	FORWHAT,FORWHAT.PNT
+	XREF	ERR4,NPCINRM,TEMPBUFF,STOPRON,P.NQEN,NOTRAIL,SUBJECT
+	XREF	TEMPBUF,TOPNPC,GETOWNER
+			
+FORWHAT
+	
+*'FOR' CONSTRUCTION
+*ASK X FOR (NOUNS) ..
+	
+	MOVE.W  D0,-(A7)
+	PUSH_L	D0/D5/A0/A3/A5
+	DO	MNPH			;DO NP
+	PULL_L	D0/D5/A0/A3/A5
+	MOVE.W  (A7)+,D2
+
+FORWHAT.PNT
+
+	; can enter here, for npc.give, when the parse has
+	; already happened.
+	; entry;
+	;	D2 = npc, asking.
+
+	ST	ERR4(A4)		;NO WHICH/WHAT PROBLEMS
+	MOVE.W  NPCINRM(A4),D0
+	MOVE.W  D0,D5
+	GETINFO		
+	MOVE.L  A0,A5
+	DO	GETNPC			;TRO A3
+
+
+    IFD	wantSP.ASKFOR
+	CALL	SPECIAL.ASKFOR
+	BEQ.S	01$			;continue.
+	RET				;otherwise break
+01$
+    ENDC	;wantSP.ASKFOR
+
+
+;	TST_PLURAL				;PLURAL?
+;	BEQ.S   09$			;NO
+;	MSG	ONEOF
+;09$
+	DO	CHKNPC
+	DO	P.SAY2			;deals with quotes for us
+	LEA	TEMPBUF(A4),A1
+	TEST_W  (A1)			;ANY?
+	BNE.S   10$			;OK
+	MSG	IDNK
+	BNE.S	10$
+
+      IFD	wantCorrectQuotes
+	MSG	GOTNON
+	BRA	90$			;do the endquotes
+      ENDC	;wantCorrectQuotes
+
+      IFND	wantCorrectQuotes
+	MSGGO	GOTNON
+      ENDC	;wantCorrectQuotes
+
+10$
+	MOVE.W  (A1)+,D0		;GET ITEM 
+	BEQ	90$
+	CMP.W   D0,D2			;FOR NPC ITSELF?
+	BEQ.S   11$			; HMM
+	GETINFO		
+	MOVE.W  D0,STOPRON(A4)
+	CALL	TOPNPC
+	CMP.W   D4,D2			;TOP?
+	BEQ.S   12$
+	MSG	BIDHIT			;BUT I DONT HAVE
+	CALL	P.NQEN
+	DO	BSFULLSTOP
+	BRA.S	90$
+12$
+	BTST	#0,11(A0)		;WORN?
+	BEQ.S   20$			;NO
+11$
+	MSG	YMBJ			;YOU MUST BE JOKING
+	BRA.S	90$
+20$
+	TST_MONEY				;MONEY?
+	BEQ.S	2005$
+	MSG	NOCHAN
+	BRA.S	90$
+2005$
+	IFD	wanted_OWNERSHIP
+	XREF	GETOWNER
+	DO	GETOWNER		;to d1
+	CMP.B	D1,D2			;this person?
+	BEQ.S	22$			;yes, no it's mine
+	ENDC	;wanted_ownership
+	BTST	#6,5(A0)		;GIVEN?
+	BNE.S   21$			;K
+	BTST	#1,3(A3)		;NPC IS NICE?
+	BEQ.S   22$			;NO
+	CMP.B   #1,6(A0)		;IS SIMPLE REL?
+	BEQ.S   21$			;YES, OK
+22$
+	MSG	NO
+	DO	P.PRN
+	DO	ISARE
+	MSG	MINE
+	BRA.S   90$
+21$
+	ST	NOTRAIL(A4)
+	MSG	NONEED			;OK, MESG
+	SF	NOTRAIL(A4)
+	MOVE.W  SUBJECT(A4),8(A0)	;BLAT
+	CLR.W   6(A0)
+	BRA	10$			;ANOTHER
+90$
+	DOGO	P.ENDQUOTE
+
+*-------------------------------------
+
+	IFD	wantSP.ASKFOR
+	XREF	SP.ASKFOR
+
+SPECIAL.ASKFOR
+
+* Since SP.ASKFOR is not called from a verb routine
+* This intermeadiate routine attempts to set the data up
+* in a handy way for the specials.
+
+* Entry to SP.ASKFOR
+* expects sp.askfor to return, flag conventions:
+*	NE= > break out
+*	EQ=> continue
+
+*
+*	D0/A0 = noun asked for
+*	D5/A5 = npc asked
+*	A3 = getnpc(d5)
+
+	PUSH_L	D0/D5/A0/A3/A5
+	MOVE.L	A0,A5			;save data on npc
+	MOVE.W	TEMPBUF(A4),D0		;fetch asked for noun
+	GETINFO
+	EXG	A0,A5			;a0=getdata(npc), A5=getdata(obj)
+	MOVE.W	D0,D5			;set up noun asked for
+	MOVE.W	D2,D0			;set up npc
+	CALL	SP.ASKFOR
+	PULL_L	D0/D5/A0/A3/A5
+	RET
+
+	ENDC	;wantSP.ASKFOR
+
+	END

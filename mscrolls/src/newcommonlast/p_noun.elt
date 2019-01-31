@@ -1,0 +1,618 @@
+**************************************************************
+*
+*	%G%
+*	%W%
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"scenequ.i"
+	include	"linemacros.i"
+
+
+*--------------------------------
+
+	XDEF	P.QN
+
+P.QN
+
+	BeSure	M.SOME
+  
+	MOVE.W	#M.SOME,D3
+*	BRA	P.QN.SUB
+* Fall through....
+*--------------------------------
+
+	XDEF	P.QN.SUB
+  
+P.QN.SUB
+  
+	MOVE.L  D3,-(A7)
+	BSET	#15,D3
+	CALL_S	P.NOUN2
+	MOVE.L  (A7)+,D3
+	RET
+ 
+*--------------------------------
+
+	XDEF	P.NQN
+  
+P.NQN
+  
+	BeSure	M.ANY
+
+	MOVE.W  #M.ANY,D3
+	BRA.S	P.QN.SUB
+ 
+*--------------------------------
+*
+* SetupCapital - forces next character to be a capital if Capitalize(A4) set
+*
+      IFD	wantALLCAP
+
+	XREF	Capitalise
+
+SetupCapital
+	
+	TEST_B	Capitalise(A4)
+	BEQ.S	90$
+	MOVE.L	D1,-(A7)		;save char
+	MOVEQ	#-1,D1
+	CALL	CHAROUT			;call is quicker
+	MOVE.L	(A7)+,D1
+90$
+	RET
+
+      ENDC	;wantALLCAP
+
+*------------------------------------------ 
+	XDEF	P.NOUN,P.NOUN2,NONLY,P.NOUNSTOP
+	XREF	INITNUM,ROOTNUM,ADJ.TBL,LIST.N
+	XREF	ADJECTIV,CHAROUT,SPACE,NOTRAIL,NOTRAIL2
+	XREF	ISATTRIBUTE,CHANNEL,P.TAB
+
+P.NOUNSTOP
+
+	MOVE.W	D3,-(A7)
+	ST	NOTRAIL(A4)			;side effect is this is cleared
+	CALL_S	P.NOUN
+	SF	NOTRAIL(A4)
+	MOVE.W	(A7)+,D3
+	DOGO	FULLSTOP
+  
+P.NOUN
+ 
+	CLR.W   D3
+   
+P.NOUN2
+   
+	TEST_W  D0				;PRINT NOUN #0?
+	BNE.S   05$
+
+	IFNE	YCHEATMORE
+	PRINT   <'WHOOPS NOUN # ZERO!!^'>
+	ENDC
+
+	RET
+
+05$
+	PUSH_L  D0-D7/A0-A1/A3/A5
+	GETINFO		
+	TST_NPC				;NPC?
+	BEQ.S   10$			;NO - DON'T SET 'IT'
+	DO	SETPRON			;ALSO FIXES A0,A3 (IF REQUIRED)
+10$
+	MOVE.L  A0,A5
+	MOVE.B  (A0),D5
+	MOVE.B  #2,D4
+	BTST	#4,5(A0)		;FORCE ADJ?
+	BNE.S   NONLY
+	MOVE.B  INITNUM(A4),D4		;NO. IN LOCALITY
+	BTST	#7,5(A0)		;CONSIDER IF 1 IN 1 LOC POS?
+	BEQ.S   NONLY			;NOPE - NOT POS   
+
+	CALL	ROOTNUM			;CALC NO. IN LOC - D4
+   
+*  BE CAREFUL HERE
+*  DO NOT CALL NONLY UNLESS YOU PRESET THE STACK
+*  IT IS NOT A SELF-CONTAINED ROUTINE.
+*  
+*  DO NOT CHANGE THE STACK LEVEL IN THIS ROUTINE
+*   
+
+NONLY
+
+
+      IFD	attribute_ALLADJS
+	MOVE.L	A2,-(A7)		;used for scratch
+      ENDC
+
+	LEA	ADJ.TBL(A4),A1		;list of adjs for each noun
+
+      IFND	wantBIGPROG
+	LEA	LIST.N(A4),A0		;GET TAB
+      ENDC
+
+      IFD	wantBIGPROG
+	LEA	LIST.N,A0		;GET TAB
+      ENDC
+
+	MOVE.L	D0,-(A7)		;save noun#
+	SUBQ.W  #1,D0			;DEC NOUN#
+	BEQ.S   10$			;FIRST
+
+      IFNE   FastBits 
+	NounScan			;find the adjs for this noun (->A1)
+      ENDC
+
+      IFEQ	FastBits
+15$
+	MOVE.B  (A0)+,D1		;GET CHAR
+	BPL.S   15$			;UNTIL END 
+16$
+	MOVE.B  (A1)+,D1		;COUNT ADJS
+	BNE.S   16$			;ADJ LIST STILL 00 TERM
+ 
+	SUBQ.W  #1,D0			;DEC NOUN#
+	BNE.S   15$			;UNTIL CORRECT POS
+
+      ENDC
+
+10$
+	MOVE.L	(A7)+,D0		;restore
+	MOVE.B  (A1)+,D1		;GET ADJ
+      IFD	attribute_ALLADJS
+	MOVE.L	A1,A2			;keep pointer to adj list
+      ENDC
+	BNE.S   20$			;OK NON 0 = WE HAVE ONE
+      IFD	attribute_ALLADJS
+	SUBQ.L	#1,A2			;point at the zero
+      ENDC
+
+11$
+      IFND	wantBIGPROG
+	MOVE.B  (A0),D1
+      ENDC
+
+      IFD	wantBIGPROG
+	EXG	A0,A1
+	GetWTabByte			;like MOVE.B (A1),D1
+	EXG	A0,A1
+      ENDC	;wantBIGPROG
+	
+	; we are about to print an quantifier and no adjective.
+	; consider here the feature, attribute_article_when_no_adj.
+
+    IFD		attribute_ARTICLE_WHEN_NO_ADJ
+	XREF	Denotation_ARTICLE_WHEN_NO_ADJ
+	LEA	Denotation_ARTICLE_WHEN_NO_ADJ(A4),A1
+	DO	ISATTRIBUTE
+	BNE.S	12$				;not the case, continue.
+	BTST	#6,6(A5)			;it only works for rooms.
+	BEQ.S	12$				;not a room; tough.
+	MOVE.B	10(A5),-(A7)			;save the value.
+	BCLR	#7,10(A5)			;select article.
+	CALL	P.QUANT				;print article.
+	MOVE.B	(A7)+,10(A5)			;restore.
+	BRA.S	31$				;and exit.
+12$
+    ENDC	;attribute_ARTICLE_WHEN_NO_ADJ
+
+	BTST	#15,D3
+	BEQ.S   31$
+	CALL	P.QUANT
+	BRA.S   31$
+20$
+	CMP.B   #1,D4 			;do we need to print adj?
+	BLS.S   11$			; LS => nope
+	SUBQ.B  #3,D1			;FOR CONTROL DISP.
+
+      IFND	wantBIGPROG
+	LEA	ADJECTIV(A4),A1
+      ENDC
+
+      IFD	wantBIGPROG
+	LEA	ADJECTIV,A1
+      ENDC
+
+	MOVEQ   #0,D2
+	MOVE.B  D1,D2			;D2=AD
+	SUBQ.B  #1,D2	
+	BEQ.S   27$			;FIRST?
+
+      IFNE	FastBits
+	WordScan			;word table scanner
+      ENDC
+
+
+      IFEQ   FastBits 
+25$
+	MOVE.B  (A1)+,D1		;GET CHAR
+	BPL.S   25$			;UNTIL END OF WRD  
+	SUBQ.B  #1,D2			;DEC COUNTER
+	BNE.S   25$
+
+      ENDC
+
+27$
+	
+	BTST	#15,D3			;do we want a quantifier?
+	BEQ.S   28$			;EQ=> no quantifier
+      
+    IFND	wantBIGPROG
+	MOVE.B  (A1),D1			;need to know first char of first word
+    ENDC	;!wantBIGPROG
+    IFD		wantBIGPROG
+	GetWTabByte
+    ENDC	;wantBIGPROG
+
+
+29$
+	CALL	P.QUANT
+28$
+    IFND	wantBIGPROG
+	
+       IFD	wantALLCAP
+	CALL	SetupCapital
+       ENDC
+2801$
+	MOVE.B  (A1)+,D1		;GET CHAR
+	CALL	CHAROUT			;is a CALL not a DO for speed
+	TEST_B  -1(A1)
+	BPL.S   2801$			;PRINT WRD
+
+	CALL	SPACE			;is a CALL not a MSG for topline!
+      
+      IFD	attribute_ALLADJS
+	
+	XREF	Denotation_ALLADJS
+	LEA	Denotation_ALLADJS(A4),A1
+	DO	ISATTRIBUTE		;does this noun want all adjs printed
+	BNE.S	31$			;NE => nope
+2901$
+	MOVEQ	#0,D1			;cos word#s are words, adj# bytes
+	MOVE.B	(A2)+,D1		;get next adj no.
+	BEQ.S	31$			;EQ => end of list
+	SUBQ.W	#4,D1			;adjust to word#
+       IFD	wantBIGPROG
+	LEA	ADJECTIV,A1		;get pointer into wtab
+       ENDC
+
+       IFND	wantBIGPROG
+	LEA	ADJECTIV(A4),A1
+       ENDC
+
+       IFD	wantALLCAP
+	CALL	SetupCapital
+       ENDC
+
+	DO	P.TAB			;print the adj
+	BRA.S	2901$			;next
+
+      ENDC
+31$
+       IFD	wantALLCAP
+	CALL	SetupCapital
+       ENDC
+3101$
+	MOVE.B  (A0)+,D1   
+	CALL	CHAROUT			;CALL for SPEED
+	TEST_B  -1(A0)
+	BPL.S   3101$
+90$
+      
+      ENDC	;!wantBIGPROG
+
+      IFD	wantBIGPROG
+
+	MOVE.B	CHANNEL(A4),D1		;trap needs to know about top line
+       IFD	wantALLCAP
+	CALL	SetupCapital
+       ENDC
+	PrtWTabWord			;A1 points at word table text (DATA)
+
+	CALL	SPACE			;is a CALL not a MSG for topline!
+
+      IFD	attribute_ALLADJS
+	
+	XREF	Denotation_ALLADJS
+	LEA	Denotation_ALLADJS(A4),A1
+	DO	ISATTRIBUTE		;does this noun want all adjs printed
+	BNE.S	31$			;NE => nope
+2901$
+	MOVEQ	#0,D1			;cos word#s are words, adj# bytes
+	MOVE.B	(A2)+,D1		;get next adj no.
+	BEQ.S	31$			;EQ => end of list
+	SUBQ.W	#4,D1			;adjust to word#
+       IFD	wantBIGPROG
+	LEA	ADJECTIV,A1		;get pointer into wtab
+       ENDC
+
+       IFND	wantBIGPROG
+	LEA	ADJECTIV(A4),A1
+       ENDC
+
+       IFD	wantALLCAP
+	CALL	SetupCapital
+       ENDC
+
+	DO	P.TAB			;print the adj
+	BRA.S	2901$			;next
+
+      ENDC
+
+31$
+	MOVE.L	A0,A1
+	MOVE.B	CHANNEL(A4),D1
+       IFD	wantALLCAP
+	CALL	SetupCapital
+       ENDC
+
+	PrtWTabWord			;A1 points at word table text (DATA)
+					;A1 is post incremented by this
+90$
+      
+      ENDC
+
+      IFD	attribute_ALLADJS
+	MOVE.L	(A7)+,A2		;restore scratch
+      ENDC
+
+    IFD	wantMULTIPLES
+
+	XREF	PLURALMODE
+	MOVE.B	PLURALMODE(A4),D0	;what plural mode?
+	BEQ.S	91$			;none
+	CLR.B	PLURALMODE(A4)		;auto-cleared
+	CMP.B	#1,D0			;simple?
+	BNE.S	92$			;no
+94$
+	MOVEQ	#'s',D1
+	DO	CHAROUT			;add an 's'
+	BRA.S	91$			;quit
+92$
+	CMP.B	#2,D0			;'es' mode?
+	BNE.S	93$			;no
+95$
+	MOVEQ	#'e',D1
+	DO	CHAROUT
+	BRA.S	94$			;'es' on end
+93$
+	MOVEQ	#'i',D1
+	DO	CHAROUT			;'ies' mode
+	BRA.S	95$
+
+    ENDC	;wantMULTIPLES
+
+91$
+	PULL_L  D0-D7/A0/A1/A3/A5
+	TEST_B	NOTRAIL2(A4)		;insist lose space?
+	BNE.S	99$			;NE => yes
+	TEST_B  NOTRAIL(A4)		;LOSE TRAILING SPACE?
+	BEQ	SPACE			;NOPE - SO PRINT ONE
+99$
+	RET
+ 
+ 
+*--------------------------------
+
+	XDEF	P.TN
+	XREF	GETNPC
+  
+P.TN
+	PUSH_L  D1/D3/A0/A3
+	GETINFO		
+
+    IFD	wantMULTIPLES
+	XREF	MULTICODE
+	TEST_B	MULTICODE(A4)		;in a position to use pluralmode?
+	BEQ.S	01$			;ok
+	DO	P.QN			;otherwise do a quant. noun
+	BRA.S	90$
+01$
+    ENDC	;wantMULTIPLES
+
+	IFEQ	THE_PAWN
+
+	TST_ISAROOM				;is it a room?
+	BEQ.S	05$
+	BTST	#7,10(A0)		;rooms cannot be clothing
+					;so see if article killed
+	BNE.S	20$			;NE => it is, loose 'the'
+					;cos 'the Upon Westminster Bridge'
+	ENDC				;looks really silly!
+
+05$
+	TST_NPC				;
+	BEQ.S   10$
+	DO	GETNPC		
+	BTST	#3,2(A3)		;MISS ARTICLE?
+	BNE.S   20$
+10$
+    IFD	attribute_NO_ARTICLE
+	XREF	Denotation_NO_ARTICLE
+	MOVE.L	A1,-(A7)
+	LEA	Denotation_NO_ARTICLE(A4),A1
+	DO	ISATTRIBUTE		;no article?
+	MOVE.L	(A7)+,A1		;restore.
+	BEQ.S	20$			;yes, quit.
+    ENDC	;attribute_NO_ARTICLE
+
+	MSG	THE
+20$
+	CALL	P.NOUN			;call for speed
+90$
+	PULL_L	D1/D3/A0/A3
+	RET
+ 
+*--------------------------------
+*
+* warning!!! noun data is in A5 here!
+* also expects:
+*	A3 -> npc data of item (if it is an npc)
+*	D0 = noun# of item in question.
+
+	XDEF	P.QUANT
+	
+P.QUANT
+
+
+    IFEQ	THE_PAWN
+	BTST	#6,6(A5)		;room?
+	BEQ.S	05$
+	BTST	#7,10(A5)		;kill article
+	BNE.S	10$			;loose quant
+    ENDC	;!THE_PAWN
+
+05$ 
+	BTST	#6,4(A5)		;NPC?
+	BEQ.S   20$
+	BTST	#3,2(A3)		;SUPPRESS ARTICLE?
+	BEQ.S   20$
+10$
+	RET
+20$
+    IFD	attribute_ARTICLE_NULL
+	XREF	Denotation_ARTICLE_NULL
+	MOVE.L	A1,-(A7)
+	LEA	Denotation_ARTICLE_NULL(A4),A1
+	DO	ISATTRIBUTE		;use 'the' instead?
+	PULL_L	A1
+	BEQ.S	10$			;no article, ret.
+    ENDC	;attribute_ARTICLE_NULL
+
+    IFD	attribute_ARTICLE_THE
+
+	XREF	Denotation_ARTICLE_THE
+
+	MOVE.L	A1,-(A7)
+	LEA	Denotation_ARTICLE_THE(A4),A1
+	DO	ISATTRIBUTE		;use 'the' instead?
+	MOVE.L	(A7)+,A1
+	BNE.S	21$			;no
+	MSGGO	THE
+21$
+    ENDC	;attribute_ARTICLE_THE
+
+	BTST	#0,(A5)			;PLURAL ?
+	BNE.S   50$			;YES PRINT SOME/ANY
+
+    IFD	Version2_ROOTNUM
+	BTST	#0,4(A5)		;modified_quantity?
+	BEQ.S	22$
+	CMP.B	#1,D4			;are we printing from an adj?
+	BEQ	50$			;yes, then use quantity quantifier.
+22$
+    ENDC	;Version2_ROOTNUM
+
+	MOVE.B  1(A5),D5		;LIQUID ?
+	LSR.B   #4,D5
+	CMP.B   #1,D5
+	BEQ.S   50$			;YES PRINT SOME/ANY
+	BTST	#5,5(A5)		;FORCED SOME/ANY
+	BNE.S   50$			;YES - THEN 50$
+	AND.B   #$5F,D1			;FIX CASE
+
+    IFD	attribute_ARTICLE_A
+	XREF	Denotation_ARTICLE_A
+	MOVE.L	A1,-(A7)
+	LEA	Denotation_ARTICLE_A(A4),A1
+	DO	ISATTRIBUTE
+	PULL_L	A1
+	BEQ.S	23$			;use 'a' anyway
+    ENDC	;attribute_ARTICLE_A
+
+	CMP.B   #'A',D1			;STARTS WITH A VOWEL ?
+	BEQ.S   30$			;YES - PRINT AN...
+	CMP.B   #'E',D1			;REST OF VOWELS
+	BEQ.S   30$
+	CMP.B   #'I',D1
+	BEQ.S   30$
+	CMP.B   #'O',D1
+	BEQ.S   30$
+	CMP.B   #'U',D1
+	BEQ.S   30$
+23$
+	MSGGO	LETTERA			;print 'a '
+30$
+	MSGGO	AN
+50$
+	MOVE.W  D3,D1
+	BCLR	#15,D1
+	DOGO	P.MSG
+
+*----------------------------------------
+
+	IFD	wantMULTIPLES
+	XDEF	P.PQN,P.TPN
+	XREF	PLURALMODE
+P.TPN
+
+* print the plural noun
+* Entry noun# in d0
+
+	PUSH_L	A1
+	MSG	THE
+	BRA.S	P.PQN.SUB	;continue as P.PQN
+
+P.PQN
+
+* print plural quantity noun
+* Entry noun# in d0
+
+	PUSH_L	A1
+	MSG	SOME		;always plural
+	; fall through
+
+P.PQN.SUB
+
+    IFD	attribute_PLURAL_S
+
+	XREF	Denotation_PLURAL_S
+	LEA	Denotation_PLURAL_S(A4),A1
+	DO	ISATTRIBUTE		;this type?
+	BNE.S	10$			;no
+	MOVE.B	#1,PLURALMODE(A4)	;set to simple plural
+	BRA.S	80$			;do it
+10$
+
+    ENDC	;attribute_PLURAL_S
+
+    IFD	attribute_PLURAL_ES
+
+	XREF	Denotation_PLURAL_ES
+	LEA	Denotation_PLURAL_ES(A4),A1
+	DO	ISATTRIBUTE		;es type?
+	BNE.S	20$			;no
+	MOVE.B	#2,PLURALMODE(A4)
+	BRA.S	80$
+20$
+
+    ENDC	;attribute_PLURAL_ES
+
+    IFD	attribute_PLURAL_IES
+
+	XREF	Denotation_PLURAL_IES
+	LEA	Denotation_PLURAL_IES(A4),A1
+	DO	ISATTRIBUTE
+	BNE.S	80$
+	MOVE.B	#3,PLURALMODE(A4)
+
+    ENDC	;attribute_PLURAL_IES
+
+	NOP
+80$
+	DO	P.NOUN
+	PULL_L	A1
+	RET
+
+    ENDC	;wantMULTIPLES
+
+*--------------------------------------------------
+
+
+	END

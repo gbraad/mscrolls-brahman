@@ -1,0 +1,81 @@
+**************************************************************
+*
+*	%G%
+*	%W%
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"scenequ.i"
+
+
+*--------------------------------
+
+	XDEF	INTEXT,PrintPrompt
+	XREF	INFORMAT,INPUT,INBUFF,PRTTXT
+  
+INTEXT
+  
+	MSG	LINE
+01$
+	CALL 	PrintPrompt
+	CALL    INPUT
+	TEST_B  INBUFF(A4)
+	BEQ.S   01$
+	CALL    INFORMAT
+	TEST_B  D7
+	BNE.S   INTEXT
+	RET
+
+
+PrintPrompt
+	
+	IFNE     YCHEAT
+
+	XREF	CHEAT,CHEAT2
+	
+	TEST_W  CHEAT(A4)
+	BEQ.S   02$
+	PRINT   <'---'>
+02$
+	TEST_W  CHEAT2(A4)
+	BEQ.S   03$
+	CALL    PRTTXT
+	DC.B     '< ',0
+	ALIGN
+
+	BRA.S   04$
+03$
+	ENDC
+
+      IFNE	THE_PAWN
+	XREF	USER.DB
+ 
+	TEST_B  USER.DB(A4) 	;IN 'USER' DEBUG MODE?   
+	BEQ.S   06$         	;EQ=NOPE
+	PRINT   <'] '>        	;YES - CHANGE PROMPT
+	BRA.S   04$
+06$
+      ENDC	;THE_PAWN
+  
+    IFD	wantSpecialPrompt
+	XREF	SP.PrintPrompt
+    	CALL	SP.PrintPrompt
+	BNE.S	04$		 ;done something.
+    ENDC  	wantSpecialPrompt
+
+  	CALL    PRTTXT
+	DC.B    '> ',0
+	ALIGN
+04$
+
+	DO	UTIL.BS
+	RET
+*------------------------------------------ 
+
+	END
+

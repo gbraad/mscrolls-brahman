@@ -1,0 +1,74 @@
+**************************************************************
+*
+*	10/27/87
+*	@(#)open.elt	1.7
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"verbequ.i"
+	include	"scenequ.i"
+
+
+	IfVerb	OPEN
+
+	XDEF	OPEN
+	XREF	SP.OPEN,P.BTNI,UNLOCK,YCANT,SEATED,OpenDoor
+  
+OPEN
+
+      IFD	wantSP.OPEN_Before
+	
+	XREF	SP.OPEN_Before
+
+	CALL	SP.OPEN_Before
+
+      ENDC
+
+	BeSure	M.OPN
+ 
+	MOVE.W  #M.OPN,D1
+	TST_OPEN				;TEST IF OPEN
+	BNE     P.BTNI            	;BUT THE NOUN IS ALREADY OPEN.
+ 
+	CALL    SP.OPEN
+ 
+	TEST_W  D5                	;SECOND NOUN?
+	BEQ.S   10$               	;0= NOT
+	CALL    UNLOCK            	;TRY TO UNLOCK WI IT
+	TEST_L  D6                	;UNLOCK SUCCESSFUL?
+	BNE.S   90$               	;NE= NOT SUCCESSFUL,MSG PRINTED
+10$
+	TST_LOCKED				;LOCKED?
+	BEQ.S   20$               	;EQ = NO
+	DO	P.BTN	            	;CANNOT OPEN IF LOCKED!
+	DO	ISARE
+	MSG	LOCKED
+	DOGO	BSFULLSTOP
+20$
+	TST_CLOSED				;closed?
+	BEQ     YCANT
+	CMP.W	SEATED(A4),D0		;are we sitting on it?
+	BEQ	YCANT			;yes - bad news
+	MOVE.W  #M.OPN,D1         	;'THE NOUN IS NOW OPEN'
+	DO	P.TNIN            	;DO IT
+	DO	OpenDoor
+
+    IFD	wantSP.OPEN_After
+	XREF	SP.OPEN_After
+	CALL	SP.OPEN_After
+    ENDC	;wantSP.OPEN_After
+
+90$
+	RET
+
+
+	ENDC
+
+
+
+	END

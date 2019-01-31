@@ -1,0 +1,41 @@
+***********************************************************
+*
+*	%W%
+*	%G%
+*
+************************************************************
+
+		SECTION	"ADV",CODE
+
+		include	"equates.i"
+		include	"macros.i"
+		include	"scenequ.i"
+		include	"verbequ.i"
+
+      IfVerb	POST
+
+	XDEF	V.POST
+	XREF	SP.POST,P.MHAVSTOP,YCANTNOW
+	XREF	IsPermanent,DBS
+
+V.POST
+
+	MOVE.W	#TO,D1			;post x to y
+	DO	CHK4PT			;MUST be a y
+	LIQUID	D1			;posting a liquid?
+	BEQ	DBS			;silly.
+	DO	CARRIED			;x must be here
+	BNE	P.MHAVSTOP
+	CALL	IsPermanent		;wil it move?
+	BEQ	YCANTNOW		;no, then u cannot
+	DO	FIXCHK			;is it fixed
+	BNE	YCANTNOW		;same for this
+
+	CALL	SP.POST
+
+	MSGGO	HOWQMARK		;how ?
+
+
+      ENDC	;post
+
+	END

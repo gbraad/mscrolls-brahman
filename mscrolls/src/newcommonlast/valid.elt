@@ -1,0 +1,455 @@
+******************************************************
+*
+*   @(#)valid.elt   1.7
+*   10/28/87
+*
+******************************************************
+
+        SECTION     "ADV",CODE
+
+
+    include "equates.i"
+    include "macros.i"
+    include "nounequ2.i"
+    include "verbequ.i"
+    include "scenequ.i"
+
+
+
+    XREF    GETDATA,PSUDAT,PLY.TIED,LIGHT,SUBJECT,SUBJECT2
+    XREF    TOPLOC,SCANFLAG,GLOBAL.F,CHEAT,P.NFND,ROOM
+    XREF    LASTA0,VLST.GO2,VLEN.GO2,NETWORK,VERB
+    XREF    D.NOUNS
+
+    XREF    XRAY_VLIST
+
+    IFEQ    THE_PAWN
+
+    XREF    NearbyVerbs,VLEN_NBVerb
+
+    ENDC
+
+
+    XDEF    VALID,VALID.NP,VALID.WD,VALID.WO
+
+*-------------------------------
+*
+* VALID - SUSSES IF NOUN D0 IS
+*       LOCAL, PRINTS ERROR
+*       MSG IF D5=0 WHEN NOT
+*       LOCAL.
+*
+* IF GLOBAL.F < 0 THEN
+* ALWAYS LOCAL
+*
+* RETURNS D7 = 0 = LOCAL
+*       D7 < 0 = NOT
+*
+* ALTERNATIVE ENTRIES:
+* ====================
+*
+* VALID.WD - ENTRY POINT TO DO A
+*           VALID ON A WORD NO.
+*           RATHER THAN A NOUN#
+*           *ALWAYS* NO ERRORS
+*
+* VALID.NP - ENTRY POINT SETS NO ERROR 
+*           PRINTING, SAME RETURNS   
+*
+*------------------------------
+
+VALID.WO 
+VALID.WD
+ 
+    ADDQ.W  #1,D0           ;CONVERT WORD# TO NOUN#
+    CALL_S  VALID.NP        ;SUSS IF VALID (NO PRINTING)
+    SUBQ.W  #1,D0           ;CONVERT BACK TO WORN#
+    TEST_B  D7
+    RET
+ 
+ 
+VALID.NP
+ 
+    MOVE.W  D5,-(A7)
+    MOVEQ   #1,D5           ;SET NO ERROR PRINTING FLAG
+    CALL_S  VALID
+    MOVE.W  (A7)+,D5        ;restore
+    TEST_B  D7
+    RET
+  
+*
+*  FALL THROUGH TO VALID
+*
+ 
+VALID 
+
+    MOVE.W  #5,PLY.TIED(A4) ;MAX TIMES TO CONSIDER TIED OBJ
+    PUSH_L  D0-D6/A0-A6
+    GETINFO     
+    CLR.L   D7      ;ERR FLG
+    MOVE.W  D0,D2       ;SAVE, so we know noun# u can's see (VALNO)
+    MOVE.L  A0,A2       ;save data adress as well
+    TST_OUT             ;OUT?
+    BNE VALNO       ;NE=YES=NOT VALID
+    TEST_W  LIGHT(A4)   ;0= DARK
+    BNE.S   VALDO
+ 
+* DARK ROOM STUFF..
+  
+    TST_LIT             ;LIT OR 'SLIGHTLY LIT'
+    BNE.S   VALDO           ;OK - U CAN SEE IT
+    TST_PSEUDO              ;PSEUDO?
+    BNE VALNO           ;CANNOT SEE IT IN DARK
+    DO  TOPLOC          ;CARRIED/IN POCKET/ETC?
+    MOVE.W  SUBJECT(A4),D1
+    EXT.L   D1
+    CMP.L   6(A0),D1
+    BEQ.S   05$
+    MOVE.W  D2,D0           ;GET 'REAL' NOUN# BACK
+    GETINFO             ;AND DATA
+    BRA VALNO           ;PRINT 'CAN'T SEE XYZZY HERE'  
+05$
+    MOVE.W  D2,D0
+    GETINFO     
+ 
+* IF NOT A DARK ROOM COME HERE
+  
+VALDO
+
+    TST_PSEUDO              ;PSEUDO ?
+    BNE VALPSEUDO       ;YES - WE HAVE A PSEUDO NOUN
+    MOVE.B  6(A0),D1        ;GET HB OF LOCATION INFO
+    BEQ VALTOP          ;ONLY CHK ROOM - AT TOP OF NOUN NEST
+    BTST    #7,D1           ;OUT?
+    BNE.S   VALNO           ;NO GOOD 
+    BTST    #6,D1           ;ROOM?
+    BNE VALROOM         ;SEE IF ROOM IS ADJACENT  
+    AND.B   #$0C,D1         ;YES
+    BNE VALONU          ;MUST BE INTRINSIC OR WORN (BY U)
+    TEST_W  SCANFLAG(A4)        ;HAVE WE COME FROM SCAN?
+    BNE.S   20$         ;YES, IGNORE HIDDEN FLAG   
+    TST_HIDDEN              ;HIDDEN?
+    BNE.S   VALNO           ;NOT IN ROOM (HONEST)   
+20$
+    CALL    VALCLOTHING     ;clothing is more awkward
+    MOVE.W  8(A0),D0        ;POINTED NOUN
+    MOVE.B  6(A0),D3        ;SAVE SO WE CAN CHECK IF CONTAINED
+    GETINFO     
+    MOVE.B  10(A0),D1       ;GET CONTAINER VOL
+    AND.B   #$0F,D1         ;MASK REST OUT
+    BEQ.S   VALDO           ;NOT A CONTAINER OK,BACK AND REPEAT
+    MOVE.B  (A0),D1         ;GET STATUS
+    AND.B   #$60,D1         ;TEST IF LOCKED OR CLOSED
+    BEQ.S   VALDO           ;OK,BACK AND REPEAT
+    BTST    #5,D3           ;CONTAINED?
+    BEQ.S   VALDO           ;NOPE - IS ALLOWED
+
+
+* See if verb forces a 'get without opening' condition to apply
+* eg BUY BEER ... buys the beer (bottle) although it's not really VALID
+
+    TST_LOCKED              ;Locked?
+    BNE.S   40$         ;XRAY won't work then
+
+    LEA XRAY_VLIST(A4),A1
+30$
+    MOVE.B  (A1)+,D1
+    BEQ.S   40$
+    CMP.B   VERB+1(A4),D1
+    BNE.S   30$
+    BRA.S   VALDO
+
+40$
+    TST_LOCALCONTENTS               ;BUT IS IT A TRANSPARENT CONTAINER?
+
+    BNE.S   VALDO           ;YES, SO I'L LET YOU OFF...
+
+*
+* NOT VALID SINCE IN A CLOSED CONTAINER
+*
+ 
+VALNO
+    MOVE.W  D2,D0           ;GET BACK ORIGINAL NOUN#
+    TEST_W  D5          ;SUPRESS ERROR PRINTING?
+    BNE.S   10$         ;NE = YES = DONT PRINT
+    TEST_W  GLOBAL.F(A4)        ;ALLOWED ANYWHERE FLAG SET?
+    BNE.S   10$         ;NE = YES = DONT PRINT
+ 
+    IFNE    YCHEAT          ;ASSEMBLING WITH CHEAT MODE?
+ 
+    TEST_W  CHEAT(A4)       ;YES, THERE FOR TEST THE FLAG
+    BNE.S   10$         ;HMM - NE = IN CHEAT MODE
+ 
+    ENDC                ;END OF CONDITIONAL BIT..
+ 
+    CALL    P.NFND          ;PRINT THE ERROR
+  
+10$
+    MOVEQ   #1,D7           ;FLAG THE ERROR
+    BRA.S   VALEXIT         ;EXIT
+ 
+VALPSEUDO
+ 
+    LEA PSUDAT(A4),A1       ;GET LIST OF PSEUDO LOCS
+    ADD.W   8(A0),A1        ;ADD OFFSET TO GET FIRST LOC
+    MOVEQ   #0,D1           ;SO AS HI BYTE OF LOW WORD IS OK
+ 
+10$
+    MOVE.B  (A1)+,D1        ;GET LOC
+    BEQ VALNO           ;NO MORE LOCS = NOT IN ONE OF THEM
+    CMP.W   ROOM(A4),D1     ;WE IN LOC FROM LIST?
+    BNE.S   10$         ;NOT YET - TRY MORE
+ 
+    MOVE.W  D2,D0           ;GET REAL NOUN#
+    GETINFO             ;AND INFO
+    TEST_B  7(A0)           ;SEC. LOC. SET? (NO NESTED REL TO PS.)
+    BEQ.S   20$         ;NO - OK AT ALL OF THEM!
+    CMP.B   7(A0),D1        ;IS IT AT THIS ONE?
+    BNE VALNO           ;NOPE - NOT VALID!
+20$
+    BRA.S   VALEXIT 
+ 
+VALTOP
+ 
+    MOVE.W  8(A0),D1
+    CMP.W   SUBJECT(A4),D1  
+    BNE.S   01$         ;NO
+    MOVE.W  6(A0),D0
+    CMP.B   SUBJECT2(A4),D0     ;MUST BE 
+    BEQ VALEXIT         ;YES, OK
+    
+01$
+    CMP.W   ROOM(A4),D1     ;IN ROOM?
+    BEQ.S   VALEXIT
+ 
+    MOVE.W  D2,D0           ;LAST DITCH - SUSS IF TIED TO A LOCAL
+    GETINFO             ;OBJECT
+    
+    IFEQ    THE_PAWN
+    TEST_W  12(A0)          ;TIED?
+    BEQ VALNearbyRoom2      ;IF NOT is verb such that next room is ok?
+    ENDC
+
+    MOVE.W  12(A0),D0       ;TIED?
+    BEQ VALNO           ;IF NOT THEN CERTAINLY NOT LOCAL
+    SUBQ.W  #1,PLY.TIED(A4)     ;STOP TIE A TO B THEN B TO A CRASH
+    BMI VALNO           ;TO MANY PLY - ERROR
+    GETINFO     
+    BRA VALDO           ;SEE IF TIED TO LOCAL OBJ
+ 
+  
+VALEXIT
+ 
+    MOVE.L  6(A0),LASTA0(A4)    ;save D0,A0 to suss toploc
+    MOVE.W  D0,LASTA0+4(A4)
+  
+    PULL_L  D0-D6/A0-A6     ;retrieve regs  
+ 
+    TEST_W  GLOBAL.F(A4)        ;global??
+            
+    IFNE    YCHEAT
+    BNE.S   10$
+    TEST_W  CHEAT(A4)       ;CHEAT MODE?   
+    BEQ.S   20$
+    ENDC
+
+    IFEQ    YCHEAT
+    BEQ.S   20$
+    ENDC
+
+10$
+    CLR.L   D7      ;FORCE GLOBAL
+20$
+    TEST_B  D7      ;cos ken thinks it should work this way
+    RET
+ 
+VALROOM
+ 
+    MOVE.W  8(A0),D3        ;GET ROOM #
+    CMP.W   ROOM(A4),D3     ;LOCAL IF CURRENT ROOM
+    BEQ.S   VALEXIT         ;OK ALLOWED
+    
+    CMP.W   D2,D0           ;ORIGINAL NOUN?
+
+    IFEQ    THE_PAWN
+    BNE VALNearbyRoom       ;No, But is it like shout? 
+    ENDC
+
+    IFNE    THE_PAWN
+    BNE VALNO           ;NO=No good since only rooms allowed
+    ENDC
+    
+    IFD wantAdjacentRooms
+    CALL    IsVerbLookOrExamine ;we'll allow these
+    BEQ.S   VALAdjacentRoom     ;then ok providing it is adj
+    ENDC    ;wantAdjacentRooms
+
+    LEA VLST.GO2(A4),A1 ;SUSS IF VERB IS A 'GO' TYPE
+*               ;MISS -1 FIRST VERB
+    MOVE.W  #VLEN.GO2,D0    ;NO OF ALLOWED VERBS (-1)
+    MOVE.W  VERB(A4),D4 ;GET CURRENT VERB
+10$
+    CMP.B   (A1)+,D4    ;SCAN LIST FOR VERB
+    DBEQ    D0,10$
+    BNE VALNO       ;NOPE - NOT IN LIST   
+ 
+* SINCE WE GOT THIS FAR VERB MUST BE OK
+
+
+VALAdjacentRoom
+
+* Checks if room in D3 is adjacent to the current room 
+
+    LEA NETWORK(A4),A1          ;GET ADDR OF NETWORK
+    MOVE.W  ROOM(A4),D4
+
+    IFNE    M68000
+    MULU    #Sizeof_NET,D4          ;10 BYTES/ROOM
+    ENDC
+
+    IFEQ    M68000
+    IFEQ    Sizeof_NET-10
+    ADD.W   D4,D4           ;*2
+    MOVE.W  D4,-(A7)
+    ASL.W   #2,D4           ;*8
+    ADD.W   (A7)+,D4        ;*10
+    ENDC    ;!Sizeof_NET-10
+
+    IFNE    Sizeof_NET-10       ;otherwise *12
+    ASL.W   #2,D4           ;*4
+    MOVE.W  D4,-(A7)
+    ADD.W   D4,D4           ;*8
+    ADD.W   (A7)+,D4        ;*12
+    ENDC    ;Sizeof_NET-10
+
+    ENDC    ;!M68000
+
+
+    ADD.W   D4,A1           ;GET ADDR OF THIS ROOM (+10)
+    MOVEQ   #Sizeof_NET-1,D4    ;START AT LAST ROOM
+20$
+    CMP.B   -Sizeof_NET(A1,D4.W),D3 ;IS IT ADJACENT?
+    BEQ VALEXIT         ;OK - LOCAL
+    DBRA    D4,20$
+
+     IFD    wantExtraAdjacentRooms
+    XREF    TBL.ADJ_ROOMS
+
+    LEA TBL.ADJ_ROOMS(A4),A1    ;table of rooms which are adjacent
+30$                 ;and connecting door
+    MOVE.L  (A1)+,D4        ;get two word sized entries
+    BEQ.S   90$         ;end of list?
+    ADDQ.L  #2,A1           ;skip door entry in table
+    CMP.W   D4,D3           ;is d3 one of the rooms?
+    BEQ.S   40$
+    SWAP    D4
+    CMP.W   D4,D3
+    BNE.S   30$
+40$
+    SWAP    D4          ;is ROOM the other one?
+    CMP.W   ROOM(A4),D4
+    BEQ VALEXIT         ;yes - so D3 valid
+    BRA.S   30$
+90$
+     ENDC   ;wantExtraAdjacentRooms
+ 
+    BRA VALNO           ;NOT ADJACENT
+
+VALONU
+    
+    TEST_W   SUBJECT(A4)        ;YOU?
+    BEQ VALEXIT         ;OK, PASS
+    MOVE.W  SUBJECT(A4),D0      ;who is it.
+    MOVE.L  SUBJECT(A4),-(A7)   ;save name.
+    CLR.L   SUBJECT(A4)     ;pretend to be player.
+    CALL    VALID.NP        ;around?
+    MOVE.L  (A7)+,SUBJECT(A4)   ;restore.
+    BRA VALEXIT         ;and leave
+
+    IFEQ    THE_PAWN
+
+* Is the verb like shout,throw etc.. ie: it can be direct object can be 
+* valid in neighbouring room 
+
+VALNearbyRoom2
+
+    MOVE.W  D1,D3           ;cos VALTOP looses D0 (urk!)
+
+VALNearbyRoom
+
+    IFD wantAdjacentRooms
+    CALL    IsVerbLookOrExamine
+    BNE.S   01$         ;else not a chance matey
+    CMP.B   #$11,6(A2)      ;insep related ONLY
+    BNE.S   01$         ;nope.
+    CMP.W   8(A2),D0        ;must be to this room
+    BEQ VALAdjacentRoom     ;then ok providing the room IS adj.
+01$
+    ENDC    ;wantAdjacentRooms
+    
+    LEA NearbyVerbs(A4),A1  ;list of verbs that allow objects to
+                    ;be valid when in adjacent room
+    MOVEQ   #VLEN_NBVerb,D0     ;number of these verbs (-1)
+    MOVE.W  VERB(A4),D4
+10$
+    CMP.B   (A1)+,D4        ;Verb in list?
+    DBEQ    D0,10$
+    BNE VALNO           ;NE => not in list
+    BRA VALAdjacentRoom     ;this wants D3 (room in question)
+
+VALCLOTHING
+
+* If no-go then jumps to valno
+
+    BTST    #0,11(A0)       ;worn by npc?
+    BEQ 50$         ;no, continue
+    MOVE.W  8(A0),D1        ;fetch npc who is wearing it
+    MOVE.W  #NMAXNOUN-1,D6      ;no of nouns in game -1
+    LEA D.NOUNS(A4),A1      ;start of all data
+    MOVEQ   #0,D3           ;clear mask
+10$
+    BTST    #0,11(A1)       ;worn (by an npc)?
+    BEQ.S   20$     
+    CMP.W   8(A1),D1        ;is this npc wearing it?
+    BNE.S   20$         ;no, try next
+    MOVE.B  D3,D4           ;SAVE MASK
+    OR.B    10(A1),D3       ;WITH BITS
+    AND.B   #$F8,D3         ;TOP 4 ONLY
+    CMP.B   D4,D3           ;DIFFERENT
+    BEQ.S   30$         ;if same then not local
+    CMP.L   A0,A1           ;this item?
+    BEQ.S   50$         ;finished ok
+20$
+    CMP.L   A0,A1           ;just done relevant obj?
+    BEQ.S   30$         ;yes, failed
+    ADD.L   #14,A1          ;next noun
+    DBRA    D6,10$          ;continue thru' list
+30$
+    POPSP
+    BRA VALNO           ;if it did, don't let'em have it
+50$
+    RET
+
+    
+    ENDC
+
+*------------------------------------------
+
+    XREF    VERB
+    XDEF    IsVerbLookOrExamine
+
+IsVerbLookOrExamine
+
+* Exit
+*   EQ <=> verb is such
+
+    TEST_W  VERB(A4)        ;test verb
+    BEQ.S   90$         ;exit yes
+    CMP.W   #VNEXAMINE,VERB(A4) ;or examine
+90$
+    RET
+
+
+*------------------------------------------
+
+    END

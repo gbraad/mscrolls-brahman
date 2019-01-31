@@ -1,0 +1,96 @@
+
+************************************************************
+*
+*	@(#)entrylonglook.elt	1.1
+*	1/22/88
+*
+************************************************************
+
+
+	SECTION		"ADV",CODE
+	include		"equates.i"
+	include		"macros.i"
+	include		"nounequ1.i"
+	include		"scenequ.i"
+	include		"nounequ2.i"
+
+
+*------------------------------------------
+
+    IFD	wantLONGLOOK
+
+	XDEF	EntryLongLook
+	XREF	LongLookTable,LongLookTable.Blank
+
+EntryLongLook
+
+* make an entry in the LongLookTable
+* Entry
+*	d1.L = entry (HI=scen#, LO=noun#)
+
+
+	PUSH_L	D4/A0
+	LEA	LongLookTable(A4),A0	;start
+	MOVE.W	#20-1,D4		;max table length
+10$
+	TEST_L	(A0)+			;end?
+	DBEQ	D4,10$			;until end
+	TEST_W	D4			;was it the end?
+	BMI.S	50$			;yes, table is full
+	MOVE.L	D1,-4(A0)		;entry in table
+	CLR.L	(A0)			;terminate
+	BRA.S	90$			;quit
+50$
+	LEA	LongLookTable.Blank(A4),A0	;start
+	ADDQ.L	#4,A0			;point to next
+60$
+	MOVE.L	(A0),-(A0)		;move back 1 entry
+	BEQ.S	70$			;done
+	ADDQ.L	#8,A0			;+2
+	BRA.S	60$			;next
+70$
+	MOVE.L	D1,(A0)			;move in last place
+90$
+	PULL_L	D4/A0
+	RET
+
+*-------------------------------------------
+	XDEF	FodLongLook,FodLongLooks
+
+	XREF	LongLookTable
+
+FodLongLook
+
+* fod entry for d0
+
+	PUSH_L	D0-D1/A0
+	LEA	LongLookTable(A4),A0	;start
+10$
+	MOVE.L	(A0)+,D1		;get entry
+	BEQ.S	90$			;not there, exit!
+	CMP.W	D1,D0			;this one?
+	BNE.S	10$			;no, find it
+20$
+	MOVE.L	(A0),-(A0)		;lose that entry
+	BEQ.S	90$			;end, exit
+	ADDQ.L	#8,A0			;next
+	BRA.S	20$			;keep goin
+90$
+	PULL_L	D0-D1/A0
+	RET
+
+FodLongLooks
+
+	MOVE.L	D0,-(A7)
+	CALL_S	FodLongLook
+	BCHG	#15,D0			;any hi-bit?
+	CALL_S	FodLongLook		;and any other
+90$
+	MOVE.L	(A7)+,D0
+	RET
+
+    ENDC	;wantLONGLOOK
+
+*---------------------------------------------
+
+	END

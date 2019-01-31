@@ -1,0 +1,53 @@
+***********************************************************
+*
+*	%W%
+*	%G%
+*
+************************************************************
+
+		SECTION	"ADV",CODE
+
+		include	"equates.i"
+		include	"macros.i"
+		include	"verbequ.i"
+		include	"scenequ.i"
+
+	    IfVerb	SHAVE
+
+		XDEF	V.SHAVE
+
+		XREF	ADVERB,PCOK,SP.SHAVE
+
+V.SHAVE
+
+	MOVE.W	ADVERB(A4),D1		;shave off?
+	BMI.S	10$			;none.
+	CMP.W	#OFF,D1			;shave off?
+	BEQ.S	10$
+	DOGO	P.IDFY			;else dunno.
+10$
+	CLR.W	D1			;with
+	DO	CHK4PT			;with what?
+	CALL	PCOK			;is item suitable?
+	TEST_B	D1			;error
+	BNE.S	90$			;exit.
+	MOVE.B	3(A5),D1
+	LSR.B	#6,D1			;sharpness ->d1
+	BNE.S	20$			;has some sharpness.
+	MOVE.W	D5,D0
+	DO	P.BTN
+	GETINFO				;set up a0.
+	DO	ISAREN
+	MSG	SHP			;but x is not sharp.
+	DOGO	BSFULLSTOP
+20$
+	CALL	SP.SHAVE
+	DO	YCANT			;you cant to d0.
+90$
+	RET
+
+    ENDC	;V.SHAVE
+*------------------------------------------
+
+	END
+

@@ -1,0 +1,253 @@
+**************************************************************
+*
+*   2/23/89
+*   @(#)go_n.elt    2.8
+*
+**************************************************************
+
+
+    SECTION "ADV",CODE
+
+
+    include "equates.i"
+    include "macros.i"
+    include "verbequ.i"
+    include "scenequ.i"
+    
+    IfVerb  GO      ;hmmmm will this every be missing?
+
+    XDEF    GO.N
+    XREF    SP.GO.N,V.SIT,LastDirection,SETMODE,WHOOPS
+
+GO.N
+  
+* HANDLE 'GO NOUN' (ALSO 'ENTER NOUN' ETC)
+  
+    CALL    SP.GO.N     ;TEST FOR SHED etc...
+    TST_SITTABLE        ;SITTABLE?
+    BNE     V.SIT       ;NO
+    
+    TST_ISAROOM     ;ROOM?
+    BEQ.S   10$     ;NO  
+
+    IFD   wantExtraAdjacentRooms
+    CALL    LookForDoor ;returns door in D0 and NE if ROOM and D0
+    BNE.S   10$     ;are a pair in TBL.ADJ_ROOMS and there is
+    BMI.S   20$     ;a connecting door
+                ;returns MI if no connecting door
+    ENDC  ;wantExtraAdjacentRooms
+
+    MOVE.W  8(A0),D1
+    CMP.W   ROOM(A4),D1 ;going to same room as we are in?
+    BNE.S   05$
+    DO  P.SUBV      ;EQ so let's tell them about it!
+    MSG THERE
+    MSG ARDY        ;there already.
+    DOGO    BSFULLSTOP
+05$
+    MOVE.W  #-1,LastDirection(A4)   ;'cos we went 'go xyzzy' not 'go dir
+    BRA     SETMODE
+10$
+    CALL_S  GO.LEAVE    ;RETURNS IF CANNOT GO NOUN
+20$
+    DO  P.SUB       ;'YOU CAN'T GO THAT WAY'
+    ST      WHOOPS(A4)  ;AVOID MULTIPLE MSGS
+    MSGGO   CGTW
+
+
+    ENDC
+
+*--------------------------------
+*
+* GO.LEAVE   (GO.LEAVE.SUB)
+*
+*      DOES A GO NOUN IF IT
+*      IS A DOOR OR A VECTORED
+*      NOUN (EG SHED)
+*
+*  ELSE IT RETURNS
+* *--------------------------------
+WantGoLeave SET FALSE
+
+      IfVerb    GO          ;hmmmm will this every be missing?
+WantGoLeave SET TRUE
+      ENDC
+
+      IfVerb    LEAVE
+WantGoLeave SET TRUE
+      ENDC
+
+
+    IFNE    WantGoLeave
+
+    XDEF    GO.LEAVE
+    XREF    MOVE.TAB,DOORS,PSUDAT,ROOM,MLISTNGO,SCRPNT
+ 
+GO.LEAVE
+ 
+    LEA     MOVE.TAB-2(A4),A1   ;GET 'TELEPORT' TYPE NOUNS
+10$
+    ADDQ.L  #2,A1
+11$
+    MOVE.W  (A1)+,D1    ;GET A NON FROM LIST
+    BEQ.S   60$     ;END OF LIST?
+    SMI D2      ;so we know to check (MI=> conditional)
+    AND.W   #$7FFF,D1   ;kill hi-bit flag
+
+    CMP.W   D0,D1       ;IS IT THIS NOUN?
+    BNE.S   10$     ;NOPE - GET ANOTHER
+    MOVE.B  (A1),D1     ;fetch the direction
+    EXT.W   D1      ;to a word
+    MOVE.W  D1,LastDirection(A4)        ;update last attempt
+    TEST_B  D2      ;NE => conditional
+    BEQ.S   15$     ;EQ => go anyway
+    DO  CALCNET     ;net pntr to A0 for current room
+    MOVE.B  0(A0,D1.W),D1   ;suss if an nway
+
+    IFD     wantLEAVEinMOVE.TAB
+    BEQ.S   10$     ;if entry is void, look for another entry.
+    ENDC    ;wantLEAVEinMOVE.TAB
+    
+      IFNE  THE_PAWN
+    BMI.S   85$     ;OK NEW ROOM..
+      ENDC
+    
+      IFEQ  THE_PAWN
+    CMP.B   #MAXROOM,D1 ;is it an nway msg?
+    BHI 85$     ;HI => yes, print it
+      ENDC
+
+15$
+    MOVE.B  1(A1),D1    ;GET TARGET ROOM#
+    
+    IFD     wantLEAVEinMOVE.TAB
+    CMP.B   ROOM+1(A4),D1   ;are you already there => a dead end?
+    BEQ.S   10$     ;yes, then there might be another way.
+    ENDC    ;wantLEAVEinMOVE.TAB
+    
+20$
+    MOVE.L  (A7)+,A1    ;POP STACK
+    BRA     SETMODE     ;SEE IF WE CAN GO THERE
+60$
+    IFD     wantAutoDoors
+    MOVE.W  D0,D3       ;save our door number for later
+    ENDC    ;wantAutoDoors
+    
+    LEA     DOORS(A4),A1    ;GET DOORS LIST (REALY PSEUDOS)
+65$
+    CMP.W   (A1)+,D0    ;IS IT THIS ONE IN LIST?
+    BEQ.S   70$     ;YES - SUSS WHERE OTHER SIDE IS
+    TEST_W  (A1)+       ;END OF LIST?
+    BNE.S   65$     ;NO - TEST NEXT
+67$
+    RET         ;NOT A DOOR SO CANNOT GO THERE - RET
+70$
+    LEA     PSUDAT(A4),A2
+    ADD.W   8(A0),A2    ;GET POINTER TO PSEUDO DATA
+    CLR.L   D1
+    MOVE.W  ROOM(A4),D0 ;GET CURRENT ROOM
+    CMP.B   (A2),D0     ;WHICH SIDE OF DOOR?
+    BEQ.S   75$     ;OK WE'RE AT SIDE A
+    MOVE.B  1(A1),D1    ;GET DIR B-A
+    BRA.S   80$
+75$
+    MOVE.B  (A1),D1     ;GET DIR A-B
+80$
+    DO  CALCNET     ;A0 POINTS TO NETWORK
+    MOVE.W  D1,LastDirection(A4)    ;update last dir. attempt
+    MOVE.B  0(A0,D1),D1 ;GET ROOM NO.
+    BEQ.S   67$     ;CAN'T GO THAT WAY
+      
+      IFNE  THE_PAWN
+    BPL.S   20$     ;OK NEW ROOM..
+      ENDC
+
+      IFEQ  THE_PAWN
+    CMP.B   #MAXROOM,D1 ;is it an nway msg?
+    BLS 20$     ;LS => nope
+      ENDC
+
+    
+    IFD     wantAutoDoors
+    XREF    SP.OPEN
+    CMP.B   (A2),D0     ;which side?
+    BNE.S   81$     ;is already the other.
+    ADDQ.L  #1,A2       ;the other
+81$
+    MOVE.W  D3,D0       ;restore door
+    GETINFO
+    TST_LOCKED      ;if locked then no hope.
+    BNE.S   85$     ;continue as before.
+    TST_OPEN        ;ok if already open.
+    BNE.S   85$     ;just carry on. 
+
+    MOVE.B  (A2),D1     ;fetch next room.
+
+    XREF    OpenFirst
+    CALL    OpenFirst
+    BNE 67$     ;failed - just ret
+    BRA 20$     ;success - now to setmode
+    
+    ENDC    ;wantAutoDoors
+    
+85$
+    NEG.B   D1      ;SORRY DOOR CLOSED..
+    AND.L   #$FF,D1
+    LSL.W   #1,D1
+    LEA     MLISTNGO(A4),A1
+    ADD.L   D1,A1
+
+* this stuff is to fake up a 'go x' -> you enter the x + get thrown out
+* + old room refresh
+
+    MOVE.W  (A1),D1
+    BPL.S   86$     ;MI => pway+redo current room
+    AND.W   #$7FFF,D1
+    MOVE.W  #1,SCRPNT(A4)
+86$
+    POPSP           ;POP stack - don't return if it was a
+                ;closed door.
+    DOGO    P.SCN
+
+    ENDC
+
+      IFD   wantExtraAdjacentRooms
+    XREF    TBL.ADJ_ROOMS
+
+* If player typed 'go room' we look to see if current room and this room are
+* a pair in the adjacent rooms table TBL.ADJ_ROOMS. If they are and there is
+* a door in the table connecting the two rooms set up D0/A0 to  be the door
+* and do 'go door' instead.
+* Return conditions:
+* NE => rooms are in table and there is a door
+* EQ and not MI => rooms were not in table; or they were, there was no door
+* but you are still allowed to go
+* EQ and MI=> rooms in table but no door so 'can't go that way'
+
+LookForDoor
+    LEA TBL.ADJ_ROOMS(A4),A1
+10$
+    MOVE.L  (A1)+,D1        ;get pair of adjacent rooms
+    BEQ.S   90$         ;EQ=>end of table so no door
+    ADDQ.L  #2,A1           ;step past door
+    CMP.W   D0,D1           ;is D1 ROOM and D0.W
+    BEQ.S   20$
+    SWAP    D1
+    CMP.W   D0,D1
+    BNE.S   10$
+20$
+    SWAP    D1
+    CMP.W   ROOM(A4),D1
+    BNE.S   10$         ;EQ=>found room pair in table
+    TEST_W  -2(A1)
+    BLE.S   90$         ;LE=>rooms in table but no door
+    MOVE.W  -2(A1),D0       ;get the door
+    GETINFO             ;its now 'go door'
+80$
+    SETNE_RET           ;return NE=> there is a door
+90$
+    SETEQ_RET           ;return EQ=> no door but can go
+                    ;MI=> no door 'can't go..'
+      ENDC  ;wantExtraAdjacentDoors
+
+    END

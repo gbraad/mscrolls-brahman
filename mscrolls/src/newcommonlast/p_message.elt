@@ -1,0 +1,101 @@
+**************************************************************
+*
+*	4/28/89
+*	@(#)p_message.elt	2.5
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"nounequ2.i"
+	include	"scenequ.i"
+
+*--------------------------------
+*
+* PRINTS MESSAGE NO. IN D0
+*
+* (ADDS #NOUNNUM THEN CALL
+* FMSG TO DECOMPRESS IT)
+*
+*--------------------------------
+
+	include	"msginfo.i"
+
+	XDEF	MsgMSGBASE		;no of nouns really
+    IFND	wantUNIFIEDTEXT
+	XDEF	MsgSCNBASE		;no of prog messages
+	XDEF	MsgNPCBASE		;no of scen msgs and prog msgs
+    ENDC	;!wantUNIFIEDTEXT
+
+    IFD		wantNPCMSG
+	
+	XDEF	P.NPCMSG
+
+P.NPCMSG
+
+	ADD.W	#MsgNPCBASE,D1
+	BRA.S	P.MSG
+    ENDC	;wantNPCMSG
+
+    
+*--------------------------------
+*
+* P.SCN - FOR SCENARIO MSGS
+*
+*--------------------------------
+	
+	XDEF	P.SCN
+ 
+P.SCN
+ 
+    IFND	wantUNIFIEDTEXT
+*	ADD.W   #PMSGNUM,D1
+	ADD.W	#MsgSCNBASE,D1
+    ENDC	;!wantUNIFIEDTEXT
+    IFNE	YCHEAT
+	NOP			;!!
+    ENDC	;YCHEAT
+   
+*--------------------------------
+*
+* P.MSG - FOR PROGRAM MSGS
+*
+*--------------------------------
+
+	XDEF	P.MSG
+	XREF	PLURAL,FMSG
+ 
+P.MSG
+ 
+*	ADD.W   #NOUNNUM,D1
+	ADD.W	#MsgMSGBASE,D1
+
+      IFD	NMAXCLONEDESC
+	CMP.W	#NMAXCLONEDESC,D0
+      ENDC	;NMAXCLONEDESC
+
+      IFND	NMAXCLONEDESC
+	CMP.W	#NOUNNUM,D0
+      ENDC	;!NMAXCLONEDESC
+
+	BCC.S	10$			;don't try on non-real noun#
+	MOVE.L	A0,-(A7)
+	GETINFO
+	TST_PLURAL				;is noun plural?
+	SNE	PLURAL(A4)
+	SNE	PLURAL+1(A4)		;horrid eh...
+	MOVE.L	(A7)+,A0
+10$
+	EXG     D0,D1
+	CALL    FMSG
+	EXG     D0,D1
+	RET
+ 
+*------------------------------------------ 
+
+
+	END
+

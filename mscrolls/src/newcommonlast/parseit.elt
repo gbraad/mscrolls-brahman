@@ -1,0 +1,116 @@
+**************************************************************
+*
+*	10/27/87
+*	@(#)parseit.elt	1.3
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"verbequ.i"
+	include	"scenequ.i"
+
+    IFND	wantNOQUOTES
+
+	XDEF	DO.CONJ2,NPC.WSYN,NOTWSYN2,PARSEIT
+
+	XREF	WSYN2,PFAIL,CONJPNTR,GETCONJ,VERB,VERB2,ADDNOUN
+	XREF	NOUNBUF2,NOUNBUF3,DO.THEN,EXTRAPNTR,EXTRA,CONJPNTR
+	XREF	PEND2,CONJ,ERR4,NPC.WRD,PARSETHR,PARSEFOU,FLUSHVAR,ERR4
+	XREF	DO.THEN2,EXTRAPNT,PEND,SETADN
+
+DO.CONJ2
+ 
+	TEST_B  D3
+	BNE.S   NOTWSYN2
+
+NPC.WSYN
+
+	CALL    WSYN2
+	BRA     PFAIL
+ 
+NOTWSYN2
+ 
+	MOVE.L  CONJPNTR(A4),A0
+	MOVE.W  D5,(A0)
+	ADDQ.L  #2,CONJPNTR(A4)
+ 
+01$
+ 
+	CALL    GETCONJ
+	CMP.B   #1,D7
+	BEQ.S   20$
+	BHI     PFAIL 
+	CMP.B   #SECT.VERB,D6       ;VERB?
+	BNE.S   10$
+	CMP.W   #VNUSE,VERB(A4)     ;USE?   
+	BNE.S   10$
+	MOVE.W  D5,VERB2(A4)        ;ALSO
+	BRA.S   01$
+10$
+	CMP.W   #SECT.CONJ,D6       ;CONJ?
+	BEQ.S   NOTWSYN2
+	
+	CMP.W   #SECT.VERB,D6       ;VERB??
+	BNE     NPC.WSYN
+
+    CALL    SETADN
+*	MOVE.W  NOUNBUF2(A4),ADDNOUN(A4)
+*	MOVE.W  NOUNBUF3(A4),ADDNOUN+2(A4)
+ 
+	BRA     DO.THEN2
+ 
+20$
+    CALL    SETADN
+*	MOVE.W  NOUNBUF2(A4),ADDNOUN(A4)
+*	MOVE.W  NOUNBUF3(A4),ADDNOUN+2(A4)
+    
+	TEST_W  PEND(A4)
+	BEQ     DO.THEN
+	MOVE.L  A6,EXTRAPNT(A4)
+	MOVE.W  #1,EXTRA(A4)
+	MOVE.L  CONJPNTR(A4),A0
+	TEST_W  PEND2(A4)
+	BMI.S   30$
+	SUBQ.L  #2,A0
+30$
+	MOVE.W  (A0),CONJ(A4)
+	RET
+ 
+*--------------------------------
+	
+PARSEIT
+	        
+*PERFORM THE PARSE.
+*EXIT VARIABLES ARE LEFT INTH
+*FOLLOWING AREAS:
+	
+*NPC.LBFBUF1
+*NPC.LBFBUF2   ;AUX NP USED ONLY FOR "MANY"
+*THE USUAL DATA AREAS.
+* AND THE VARABLES DEFINED ABOVE.
+	
+*ASSUME 1STWRD IS GOT.
+	
+	ST      ERR4(A4)           ;MASK NASTIES
+	MOVE.L  A6,NPC.WRD(A4)
+	CALL    FLUSHVAR
+	CALL    PARSEFOU           ;EG. WHERE CAN..
+	TEST_W  D7                 ;ERROR?
+	BEQ.S   90$                ;DONE.
+	CALL    PARSETHR           ;JUST
+	TEST_W  D7
+	BEQ.S   90$                ;DONE
+	MOVE.L  NPC.WRD(A4),A6
+90$
+	CLR.W   ERR4(A4)           ;LET THEM OFF  
+	RET
+
+
+
+    ENDC	;wantNOQUOTES
+
+	END

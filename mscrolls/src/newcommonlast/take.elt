@@ -1,0 +1,37 @@
+***********************************************************
+*
+*	%W%
+*	%G%
+*
+************************************************************
+
+		SECTION	"ADV",CODE
+
+		include	"equates.i"
+		include	"macros.i"
+		include	"verbequ.i"
+		include	"scenequ.i"
+
+
+		IfVerb	TAKE
+
+		XDEF	V.TAKE
+		XREF	ADVERB,GET_
+
+V.TAKE
+
+    IFD	wantSP.TAKE
+	XREF	SP.TAKE
+
+	TEST_W	ADVERB(A4)		;any modifier?
+	BPL	GET_			;yes, then do as get
+	CALL	SP.TAKE
+    ENDC	;wantSP.TAKE
+     
+	BRA	GET_			;else do a get
+
+
+	ENDC	;V.TAKE
+
+
+	END

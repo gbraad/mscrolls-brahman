@@ -1,0 +1,43 @@
+**************************************************************
+*
+*	10/27/87
+*	@(#)getvect.elt	1.2
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+
+
+
+*--------------------------------
+*
+* GETVECT - GET ADDR OF VERB
+*           ROUTINE (VN# IN D2)
+*
+* ON EXIT: A1 = ADDR OF VERB (ABS)
+*
+*--------------------------------
+
+* Warning!!!! Now PC relative - cos of alink - 9/8/86 Ken
+
+	XDEF	GETVECT
+	XREF	VECT.V
+
+ 
+GETVECT
+	
+	LSL.W   #1,D2              ;*2
+	LEA     VECT.V(PC),A1
+	LEA     0(A1,D2.W),A1		;get address our word is at.
+	MOVE.W  (A1),D2
+	AND.L   #$FFFF,D2          ; Now 16 bit UNSIGNED (pc) offsets.
+	ADD.W   #$8000,D2          ;REALLY WORDWIZE !which are frigged a bit
+	LEA     0(A1,D2.L),A1
+	RET
+
+
+
+	END

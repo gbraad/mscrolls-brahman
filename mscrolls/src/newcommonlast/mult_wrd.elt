@@ -1,0 +1,160 @@
+**************************************************************
+*
+*	%G%
+*	%W%
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"nounequ2.i"
+	include	"scenequ.i"
+
+*--------------------------------
+
+	XDEF	MULT.WRD
+	XREF	GNG2,MATCHBUF,RELPH,RESADJ,P.NOTANY,MULT.TAB,D72
+	XREF	D.NOUNS,IGNORQ
+
+    IFD	wantSTATES
+	XREF	STATERES
+    ENDC	;wantSTATES
+   
+MULT.WRD 
+  
+	CLR.B   D4
+	LEA     MULT.TAB(A4),A0
+	TEST_W  D5
+	BEQ.S   08$
+05$
+	MOVE.W  (A0)+,D0
+	BNE.S   05$
+	SUBQ.W  #1,D5
+	BNE.S   05$
+08$
+	LEA     MATCHBUF(A4),A1
+	MOVE.W  D7,-(A7)
+
+    IFD	wanted_NEGSETS
+	TEST_W	(A0)			;is 1st entry negative?
+	BPL.S	09$
+	CALL	INCLUDE.ALLELSE		;then neg-set
+	BRA.S	20$			;terminate and resolve
+    ENDC	;wanted_NEGSETS
+
+09$
+	MOVEQ   #SECT.NOUN,D0
+	DO	ISDOFRE			;does verb allow completely anything?
+	SNE	D5			;flag EQ => don't call valid
+	SWAP    D0
+	
+10$
+	MOVE.W  (A0)+,D0
+	BEQ.S   20$
+	AND.W	#$3fff,D0		;lose top 2 bits
+	TEST_B	D5			;is D0 free?
+	BEQ.S	15$			;eq => yes, don't use valid
+	DO	VALID
+	BNE.S   10$
+15$
+	SUBQ.W  #1,D0          ;ADJUST TO PRENOUN#
+	MOVE.L  D0,(A1)+       ;ONTO MATCHBUF
+	ADDQ.B  #1,D4
+	BRA.S   10$
+20$
+	MOVE.W  (A7)+,D7
+	MOVE.W  #-1,(A1)        ;TERMINATE MATCHBUF
+    
+	TEST_B  D4
+	BNE.S   30$
+21$
+	BRA     P.NOTANY
+30$
+    IFD	wantSTATES
+	CALL	STATERES
+    ENDC	;wantSTATES
+	CALL    RESADJ
+	TEST_W  D7
+	BNE.S   34$
+	CALL    RELPH           ;PROCESS POSSIBLE REL PHRASE
+34$
+	CMP.B   #1,D7           ;ERROR TYPE?
+	BHI     D72             ;PRINTED
+	BEQ.S   33$             ;WANT OND BUFFER BACK
+	TEST_W  D4              ;ANY?
+	BNE.S   31$             ;SOME
+33$
+	MOVE.W  #SECT.NOUN,MATCHBUF(A4)    ;A CUNNING AND DEVIOUS WAY..
+31$
+	LEA     MATCHBUF(A4),A0
+	TEST_W	IGNORQ(A4)	;='the'?
+	BEQ.S	32$		;yes, dont fod it
+	CMP.W	#2,IGNORQ(A4)	;='an' or 'a'?
+	BHI.S	32$		;no, skip
+	MOVE.W	#-1,4(A0)	;fod entry
+32$
+	MOVE.L  (A0)+,D5        ;GET ONE
+	BMI     GNG2            ;DONE
+	ADDQ.W  #1,D5
+  
+	DO	INCNOUN2
+   
+	BRA.S   32$             ;NEXT
+90$
+	RET
+*---------------------------------------------------- 
+
+    IFD	wanted_NEGSETS
+
+INCLUDE.ALLELSE
+
+* put all items onto matchbuf in the game except those in the list
+* pointed to by a0
+
+* Entry
+*	 A1= matchbuf pointer to start including
+*	 A0= pointer to nouns not to include (in order)
+*	 (A0).w negative (rest +ve)
+*	D4=0, for a counter
+
+	PUSH_L	D0/D3/A0/A2/A3
+	MOVE.W	#NMAXNOUN-1,D3		;noun counter
+	LEA	D.NOUNS(A4),A2		;we'l keep this in sync
+	MOVE.L	#$00060001,D0		;fake a matchbuf entry
+	BCLR	#0,(A0)			;back to normal
+10$
+	CMP.W	(A0),D0			;are we at the next neg noun?
+	BLS.S	11$			;not yet, this one is ok
+	ADDQ.L	#2,A0			;next neg noun.
+	TEST_W	(A0)			;end of list?
+	BEQ.S	30$			;yes, quit
+	BRA.S	30$			;was EQ, so skip this one
+11$
+	BTST	#6,6(A2)		;is it a room?
+	BNE.S	20$			;no rooms allowed.
+	BTST	#6,4(A2)		;and npc?
+	BNE.S	20$			;no npc's either.
+	BTST	#3,6(A2)		;don't count intrinsics either
+	BNE.S	20$
+	DO	VALID.NP		;is it around?
+	BNE.S	20$			;no, next
+	MOVE.L	D0,(A1)			;onto matchbuf
+	SUBQ.L	#1,(A1)+		;adjust it
+	ADDQ.W	#1,D4			;inc counter
+20$
+	ADD.L	#14,A2			;next noun data.
+	ADDQ.W	#1,D0			;next noun#
+	DBRA	D3,10$			;and loop for it.
+30$
+	PULL_L	D0/D3/A0/A2/A3
+	RET
+
+    ENDC	wanted_NEGSETS
+
+*------------------------------------------
+
+
+	END

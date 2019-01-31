@@ -1,0 +1,33 @@
+**************************************************************
+*
+*	7/14/87
+*	@(#)space.elt	1.1
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	XDEF	SPACE
+
+	include	"equates.i"
+	include	"macros.i"
+
+*--------------------------------
+*
+* SPACE - PRINTS A SPACE!
+*
+* PRETTY SIMPLE, SAVE REGS
+* NO STOMPING
+*
+*--------------------------------
+ 
+SPACE
+ 
+	MOVE.L  D1,-(A7)  
+	MOVEQ   #$20,D1 
+	DO	CHAROUT
+	MOVE.L  (A7)+,D1  
+	RET
+
+	END

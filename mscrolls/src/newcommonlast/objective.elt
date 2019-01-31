@@ -1,0 +1,67 @@
+**************************************************************
+*
+*	10/27/87
+*	@(#)objective.elt	1.3
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"scenequ.i"
+
+	IFNE	ELIZA
+
+	XDEF	OBJECTIVE
+	XREF	INSULTSUB,NEG_,SCAN.SUB,PR.COPOUT,P.ANOUN
+	XREF	PR17
+
+   
+OBJECTIVE
+	
+	DO	P.SAY
+	BTST    #5,D2              ;AM
+	BEQ.S   60$
+	BTST    #4,D2
+	BNE     INSULTSUB
+	TEST_W  NEG_(A4)
+	BNE.S   50$                ;ARE NOT
+	TEST_W  SCAN.SUB(A4)
+	BNE.S   10$
+51$
+	BTST    #4,D2
+	BNE     INSULTSUB
+	MSG     FALSEI
+	BRA.S   IAM
+10$
+	CMP.W   SCAN.SUB(A4),D5
+	BNE.S   51$
+	MOVEQ   #1,D1
+	RND_D1
+
+	BeSure	M.COP9
+
+	ADD.W   #M.COP9,D1
+	BRA     PR17   
+50$
+	CMP.W   SCAN.SUB(A4),D5
+	BEQ.S   51$
+	MSG     TRUEI
+	BRA.S   IAM
+60$
+	BTST    #4,D2
+	BEQ     PR.COPOUT
+	BRA     INSULTSUB
+IAM
+	MOVE.W  D5,D0
+	BRA     P.ANOUN
+
+*--------------------------------
+
+	ENDC	;ELIZA
+
+
+
+	END

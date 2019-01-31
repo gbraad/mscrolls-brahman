@@ -1,0 +1,76 @@
+**************************************************************
+*
+*   %G%
+*   %W%
+*
+**************************************************************
+
+
+    SECTION "ADV",CODE
+
+    include "equates.i"
+    include "macros.i"
+    include "scenequ.i"
+
+ 
+*--------------------------------
+* 
+* FIXCONT - FIXS THE 'SIZE' OF
+*           A CONTAINER IF
+*           SOMETHING IS REMOVED
+*           FROM IT
+*
+* REMOVE ITEM IN D0
+*
+*
+* 
+*
+*--------------------------------
+
+    XDEF    FIXCONT
+    XREF    ISATTRIBUTE
+  
+FIXCONT
+ 
+    PUSH_L  D0/D1/A0-A2
+    GETINFO
+    MOVE.L  A0,A2
+    TST_CONTAINED               ;CONTAINED?
+    BEQ.S   90$
+    MOVE.W  8(A0),D0           ;GET CONTAINER
+    
+    IFD attribute_INFINITE_CONTAINER
+    XREF    Denotation_INFINITE_CONTAINER
+    LEA Denotation_INFINITE_CONTAINER(A4),A1
+    DO  ISATTRIBUTE     ;is container infinite?
+    BEQ.S   90$         ;yes, quit
+    ENDC    ;attribute_infinite_container
+    
+    GETINFO                 ;TO A0
+    MOVE.B  10(A0),D0          ;HB OF DATA
+    AND.B   #7,D0              ;LOW 3
+    MOVE.B  2(A2),D1           ;S&WEIGHT
+    LSR.B   #4,D1              ;SIZE
+    ADD.B   D1,D0              ;INC
+    CMP.B   #7,D0
+
+    IFEQ    PROD
+    XREF    DERR
+    BHI     DERR
+    ENDC    ;!PROD
+
+    IFNE    PROD        ;otherwise
+    BHI.S   90$     ;else, dont change it
+    ENDC    ;PROD
+
+    MOVE.B  10(A0),D1          ;AGAIN
+    AND.B   #$F8,D1            ;TOP 5
+    OR.B    D0,D1              ;COMBINE
+    MOVE.B  D1,10(A0)          ;UPDATE
+90$
+    PULL_L  D0/D1/A0-A2
+    RET
+ 
+*------------------------------------------
+
+    END

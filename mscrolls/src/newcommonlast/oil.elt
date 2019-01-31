@@ -1,0 +1,45 @@
+************************************************************
+*
+*	%W%
+*	%G%
+*
+*************************************************************
+
+		SECTION	"ADV",CODE
+
+		include	"equates.i"
+		include	"macros.i"
+		include	"verbequ.i"
+		include	"scenequ.i"
+
+
+      IfVerb	OIL
+
+	XDEF	V.OIL
+	XREF	SP.OIL,YCANTWSTOP,DBS,P.FLOO
+
+V.OIL
+
+	MOVE.B	1(A0),D1
+	LSR.B	#4,D1		;hardness
+	CMP.B	#2,D1
+	BLS	DBS		;silly
+	TST_INTRINSIC
+	BNE	DBS
+	TST_ISAROOM		;oil a room?
+	BNE	DBS		;silly
+	TST_NPC			;oil a person
+	BNE	P.FLOO		;funny look
+
+	MOVEQ	#WITH,D1
+	DO	CHK4PT
+
+	CALL	SP.OIL
+	MOVE.W	D5,D0		; so it whinges about the ind. object
+	BRA	YCANTWSTOP
+
+      ENDC
+
+*------------------------------------------
+
+      END

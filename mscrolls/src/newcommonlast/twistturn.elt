@@ -1,0 +1,113 @@
+**************************************************************
+*
+*	%G%
+*	%W%
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"verbequ.i"
+	include	"scenequ.i"
+
+
+
+	IfVerb	TWIST
+TwistOrTurn	SET	TRUE
+	ENDC	;TWIST
+	IfVerb	TURN
+TwistOrTurn	SET	TRUE
+	ENDC	;TURN
+
+    IFD	TwistOrTurn
+ 
+
+	XDEF	V.TWIST,V.TURN
+	XREF	ADVERB,CONJ,SP.TURN,P.MHAVSTOP
+
+V.TWIST
+V.TURN
+ 
+	CMP.W   #-1,ADVERB(A4)
+	BEQ.S   05$  
+	MOVE.W  ADVERB(A4),CONJ(A4)
+	AND.W   #$7FFF,CONJ(A4)
+05$
+	CALL    SP.TURN
+
+      IFD	wantTURNisSINGV
+	XREF	CHK2PART
+	CALL	CHK2PART		;insist on a Dir obj
+      ENDC
+
+	CMP.W   #ON,CONJ(A4)        ;ON
+	BEQ.S   10$
+	CMP.W   #OFF,CONJ(A4)      ;OFF
+	BEQ.S	10$
+
+      IFD	wantTurnUpsideDown
+	CMP.W	#UPSIDEDOWN,CONJ(A4)
+	BEQ.S	TurnUpsideDown
+	CMP.W	#OVER,CONJ(A4)
+	BEQ.S	TurnUpsideDown
+      ENDC
+
+	MSGGO	IDFY
+10$
+
+    IFD		wantSP.TurnOn
+	XREF	SP.TurnOn
+	CALL	SP.TurnOn
+	BNE.S	90$				;all done, exit.
+    ENDC	;wantSP.TurnOn
+
+	TST_NPC
+	BNE.S   30$
+	DO	P.SUB
+	MSG	YCNDTT
+	DOGO	P.TNSTOP
+ 
+30$
+	CMP.W   #ON,CONJ(A4)        ;ON
+	BEQ.S	40$
+	MSGGO	IFONLY
+40$
+	MSG	YBLUKY
+90$
+	RET
+
+*-------------------------------------
+
+      IFD	wantTurnUpsideDown
+
+	XREF	CARRIED,EMPTY,SP.TurnUpsideDown
+
+TurnUpsideDown
+
+	CALL	SP.TurnUpsideDown
+    
+	DO	CARRIED		;for safty you can only invert carried items
+	BNE	P.MHAVSTOP	;else no
+	MOVE.B	10(A0),D1
+	AND.B	#7,D1		;get container volume
+	BEQ.S	90$		;ok but nothing happens
+	TST_CLOSED		;closed?
+	BNE.S	90$		;no-go
+	TST_LOCKED
+	BNE.S	90$
+	MOVE.B	(A0),D1		;refresh d1
+	BRA	EMPTY		;else empty it
+90$
+	MSGGO	NHAP
+
+
+      ENDC	;wantTurnUpsideDown
+
+    ENDC	;TwistOrTurn
+
+*------------------------------------------
+
+	END

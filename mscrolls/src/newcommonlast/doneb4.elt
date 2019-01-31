@@ -1,0 +1,53 @@
+**************************************************************
+*
+*	10/27/87
+*	@(#)doneb4.elt	1.2
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+
+*--------------------------------------
+
+*	doesnt come back if successful
+*	keys on a6 and wdepth
+* 	info packet:
+*	wrdnum.l,wdepth.w,result.w,newa6.L
+
+	XDEF	DONEB4
+	XREF	WHICHFIX,WDEPTH
+
+DONEB4
+
+	PUSH_L	D5/A0
+	LEA	WHICHFIX(A4),A0		;start of list
+10$
+	MOVE.L	(A0)+,D5			
+	BEQ.S	90$			;no, end of list
+	CMP.L	A6,D5
+	BNE.S	30$			;no, try another
+	MOVE.W	(A0)+,D5		;get depth
+	CMP.W	WDEPTH(A4),D5		;must be at the same depth
+	BEQ.S	20$			;yep, a match!
+	ADDQ.L	#6,A0			;skip
+	BRA.S	10$			;next
+30$
+	ADDQ.L	#8,A0			;skip other bytes
+	BRA.S	10$			;next
+20$
+	MOVE.W	(A0)+,D5		;get noun
+	MOVE.L	(A0),A6			;then new text position.
+	MOVEQ	#SECT.NOUN,D6		;set up as done.
+	ADD.W	#$0C,A7			;forget this routine & 2longs
+	RET
+90$
+	PULL_L	D5/A0
+	RET				;continue.
+
+
+
+
+	END

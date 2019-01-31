@@ -1,0 +1,45 @@
+******************************************************
+*
+*	%W%
+*	%G%
+*
+******************************************************
+
+		SECTION		"ADV",CODE
+
+*--------------------------------
+*
+*  SRC.ADV.COVER
+*
+*--------------------------------
+
+	include "equates.i"
+
+	include	"macros.i"
+
+	include "verbequ.i"
+
+      XREF     CHK4PT,CONJ,FIX
+
+	IfVerb	COVER
+
+	XDEF     V.COVER
+ 
+V.COVER
+	
+	MOVEQ   #0,D1
+	DO	CHK4PT
+	EXG     D0,D5  
+	EXG     A0,A5
+	
+    IFD	wantCoverToQuit
+	ST	WHOOPS(A4)	   ;covert (a & b) with c, ignor b
+    ENDC	;wantCoverToQuit
+
+	MOVE.W  #1,CONJ(A4)        ;TIE B TO A
+	BRA     FIX
+
+	ENDC
+
+	END
+

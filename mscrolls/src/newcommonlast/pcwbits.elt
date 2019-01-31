@@ -1,0 +1,49 @@
+**************************************************************
+*
+*	10/27/87
+*	@(#)pcwbits.elt	1.2
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+
+
+    IFNE	PCW8256
+
+* hacks for 'semi-mono' (ie no freehand) PCW8256 machine
+
+	XDEF	PCWSTIPPLE,PCWDITHER
+	XREF	DitherFlag,PICTNUM,GRAPHICS,PICTURES
+
+PCWSTIPPLE
+
+	ST	GRAPHICS(A4)
+	BCLR	#0,DitherFlag(A4)
+	BEQ.S	10$
+	ST	PICTNUM(A4)
+	CALL	PICTURES
+10$
+	MSG	PCWSTIPPLE		;PRINT	<'Using stippled pictures.^'>
+	DOGO	DBEXIT
+	
+PCWDITHER
+
+	ST	GRAPHICS(A4)
+	BSET	#0,DitherFlag(A4)
+	BNE.S	10$
+	ST	PICTNUM(A4)
+	CALL	PICTURES
+10$
+	MSG	DITHER		;PRINT	<'Using dithered pictures.^'>
+	DOGO	DBEXIT
+	
+
+    ENDC
+
+
+
+	END

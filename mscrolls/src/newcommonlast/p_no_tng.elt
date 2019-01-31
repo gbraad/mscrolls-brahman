@@ -1,0 +1,33 @@
+**************************************************************
+*
+*	5/19/88
+*	@(#)p_no_tng.elt	2.2
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+
+	XDEF	P.NO.TNG
+	XREF	ERR1
+
+P.NO.TNG
+	
+*PRINTS BUT THERE ARN'T ANY
+	
+	TEST_W  ERR1(A4)           ;ERRORS ON?
+	BNE.S   90$                ;NO, EXIT WITHOUT PRINTING
+	MSG     NO.TNG
+	MSG	HERE
+	DO	D72                ;SET D7 = 2 
+90$
+	RET
+	
+*--------------------------------
+
+
+
+	END

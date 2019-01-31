@@ -1,0 +1,99 @@
+************************************************************
+*
+*	@(#)vclass.elt	1.5
+*	10/27/87
+*
+************************************************************
+
+
+* Verb class tables, used to evaluate npc reaction.
+
+	SECTION		"ADV",CODE
+
+	include	"equates.i"
+	include "macros.i"
+	include	"vclassequ.i"
+	include "verbequ.i"
+	include	"scenequ.i"
+
+	
+	IFD	wantSITUATION
+
+
+	XDEF	VCLASS.TBL
+
+VCLASS.TBL
+
+	DC.B	Vclass_acquisition	/* table typecode */
+
+	SVERB	GET
+	SVERB	STEAL
+	SVERB	BUY
+	SVERB	REMOVE
+	SVERB	GRAB
+
+	DC.B	0		;terminate
+	DC.B	Vclass_unacquisition		/* typecode */
+
+	SVERB	DROP
+	SVERB	GIVE
+	SVERB	OFFER
+
+	DC.B	0		;terminate
+	DC.B	Vclass_moveitem			/* typecode */
+
+	SVERB	MOVE
+	SVERB	LIFT
+	SVERB	PUSH
+	SVERB	PULL
+	SVERB	LEVER
+
+	DC.B	0		;terminate
+	DC.B	Vclass_sense		/* typecode */
+
+	SVERB	SMELL
+	SVERB	TASTE
+	SVERB	LOOK
+	SVERB	FEEL
+	SVERB	READ
+	SVERB	LISTEN
+
+	DC.B	0		;terminate
+	DC.B	Vclass_consume		/* typecode */
+
+	SVERB	EAT
+	SVERB	DRINK
+
+	DC.B	0		;terminate
+	DC.B	Vclass_aggressive	/* typecode */
+
+	SVERB	PUNCH
+	SVERB	KICK
+	SVERB	ATTACK
+	SVERB	KILL
+	SVERB	STRANGLE
+	SVERB	HIT
+	SVERB	RAPE
+
+	DC.B	0		;terminate
+	DC.B	Vclass_destructive	/* typecode */
+
+	SVERB	BREAK
+	SVERB	HIT
+	SVERB	BURN
+	SVERB	IGNITE
+	SVERB	MELT
+	SVERB	CUT
+	SVERB	TEAR
+
+	DC.B	0		;terminate 
+
+	DC.B	0		;terminate table
+
+	ALIGN
+
+
+	ENDC	;wantSITUATION
+
+	END
+

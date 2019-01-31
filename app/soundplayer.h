@@ -30,6 +30,7 @@
  *
  */
 
+#pragma once
 
 #include <QObject>
 #include <QString>
@@ -163,6 +164,7 @@ public:
                                                       aout,
                                                       _host->_format, name);
 
+                if (!s) return false;
                 _bind(s);
 
                 s->loops(_host->_loops);

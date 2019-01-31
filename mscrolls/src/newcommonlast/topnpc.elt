@@ -1,0 +1,51 @@
+**************************************************************
+*
+*	5/29/89
+*	@(#)topnpc.elt	2.2
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"nounequ1.i"
+	include	"macros.i"
+
+	XDEF	TOPNPC
+
+	XREF	QCARRIED
+
+TOPNPC
+	
+*FINDS NEXT NPC
+*(CF TOPLOC, VALID)
+*PRESEVES D0/A0
+*RETURN NPC, OR ITEM IN D4 
+	
+	PUSH_L  D0-D1/D7/A0		;SAVE
+	CALL	QCARRIED		; but is it carried?
+	BNE.S	01$			;no
+	MOVE.W	#NPLAYER,D4		;return the player
+	BRA.S	90$			;exit
+01$
+	TST_NPC				;NPC AT START
+	BNE.S   20$			;DONT CHK
+10$
+	TST_NPC				;NPC?
+	BNE.S   99$			;YES
+20$
+	MOVE.B  6(A0),D1  
+	BMI.S	90$			;out?
+	AND.B   #$3D,D1			;MASK
+	BEQ.S   99$			;DONE
+	MOVE.W  8(A0),D0		;NEXT ITEM
+	GETINFO
+	BRA.S   10$			;NEXT
+99$
+	MOVE.W  D0,D4
+90$
+	PULL_L  D0-D1/D7/A0
+	RET
+	
+	END

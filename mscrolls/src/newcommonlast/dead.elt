@@ -1,0 +1,42 @@
+**************************************************************
+*
+*	10/27/87
+*	@(#)dead.elt	1.2
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+	include	"equates.i"
+
+
+*--------------------------------
+*
+* DEAD - NOT REALLY A SUB
+*        BUT *CERTAINLY*
+*        NOT A SPECIAL
+*
+* SO ITS HERE!
+*
+* GENERALLY HALTS PARSING &
+* PROCESSING OF COMMANDS
+* AND SETS DIED FLAG TO LET
+* SCREEN KNOW ABOUT DEATH
+*
+*--------------------------------
+	
+	XDEF	DEAD
+	XREF	WHOOPS,EXTRA,DIED
+ 
+DEAD
+ 
+	ST      WHOOPS(A4)         ;FORCE EXIT PROCESS
+	CLR.W   EXTRA(A4)          ;KILL FOLLOWING COMMANDS
+	ST      DIED(A4)           ;FLAG DEATH FOR SCREEN
+	RET                        ;BYE
+ 
+ 
+
+
+
+	END

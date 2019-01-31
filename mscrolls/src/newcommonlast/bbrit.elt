@@ -1,0 +1,52 @@
+**************************************************************
+*
+*	3/22/89
+*	@(#)bbrit.elt	2.2
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include "scenequ.i"
+
+	XDEF	BBRIT
+	XREF	BRKD0
+
+*--------------------------------
+	
+BBRIT
+	
+*BREAK D0 IF BRITTLE
+	
+*EXIT: D7 !=0 IF BRITLE
+	
+	PUSH_L  D1/A0
+	GETINFO
+	MOVE.B  1(A0),D1        ;GET H&S
+	LSR.B   #4,D1           ;HARDNESS
+	CMP.B   #$A,D1          ;BRITTLE?
+	BNE.S   90$             ;NO, EXIT
+
+      IFD	wantBBRITchecksD5
+	EXG	D0,D5
+	GETINFO
+	EXG	D0,D5
+	MOVE.B	1(A0),D1
+	LSR.B	#4,D1
+	CMP.B	#3,D1
+	BLE.S	90$
+	CMP.B	#12,D1
+	BEQ.S	90$
+      ENDC	;wantBBRITchecksD5
+
+	DO	BRKD0	          ;BREAK IT
+	MOVEQ   #1,D7           ;ERROR
+90$
+	PULL_L  D1/A0
+	RET
+
+
+	END

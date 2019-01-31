@@ -1,0 +1,45 @@
+**************************************************************
+*
+*	10/27/87
+*	@(#)satmsg.elt	1.3
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+
+	XDEF	SATMSG
+	XREF	SEATED,SEATED_RELATOR,P.CONJ
+	
+SATMSG
+	        
+*PRINTS OUT SITTING ON X...
+*WHEN SAT
+	
+	TEST_W  SEATED(A4)
+	BEQ.S   90$                  ;NO
+	PUSH_L  D0-D1/A0
+	MOVE.W  SEATED(A4),D0
+	MOVEQ   #'(',D1
+	DO	CHAROUT
+	MOVE.W	SEATED_RELATOR(A4),D1	;relation to object
+	BNE.S	10$
+	MOVE.W	#ON,D1
+10$
+	DO	P.CONJ			;print the word
+	DO	P.TN
+	DO	UTIL.BS
+	MOVEQ   #')',D1
+	DO	CHAROUT
+	PULL_L  D0-D1/A0
+90$
+	MSGGO     LINE
+  
+*--------------------------------
+
+
+
+	END

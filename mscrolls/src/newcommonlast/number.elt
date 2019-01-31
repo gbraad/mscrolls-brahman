@@ -1,0 +1,154 @@
+*********************************************************
+*
+*	%W%
+*	%G%
+*
+********************************************************
+
+		SECTION	"ADV",CODE
+
+		include	"equates.i"
+		include	"macros.i"
+		include	"scenequ.i"
+
+		IFD	wantNUMBERS
+		XREF	NUMBERFLAG,NUMBERBUF,MATCHBUF
+
+		XDEF	DONUMBERS
+COLON		EQU	30		;!!!hh move this later
+
+MUL10		MACRO
+		ADD.L	\1,\1		;*2
+		MOVE.L	\1,\2		;temp store
+		ASL.L	#2,\2		;*4
+		ADD.L	\2,\1		;result *10
+		ENDM
+
+* DoNUmbers
+* process numeric input in command line
+* 
+* current number stored in NUMBERBUF.L
+* Exit:
+*	EQ=>no such number
+*	NE=>numeric processing happened
+
+	XREF	NUMBUF_FMT,NumMulFlg,NumberExists
+
+DONUMBERS
+
+	PUSH_L	D0-D1/A0
+	MOVEQ	#0,D0			;make sure clear to start.
+	MOVE.W	D5,D0
+	CMP.B	#SECT.NUM,D6		;specifically numeric?
+	BEQ.S	50$			;aha! what a giveaway.
+	CALL	AlsoADigit		;a digit as well?
+	BNE.S	10$			;no
+50$
+	TEST_W	NUMBERFLAG(A4)		;are we in a number
+	BNE.S	60$			;yes, continue
+	ST	NUMBERFLAG(A4)
+	CLR.B	NUMBUF_FMT(A4)		;start as singleton format
+	CLR.B	NumMulFlg(A4)		;clear the dont shift flag
+	CLR.L	NUMBERBUF(A4)		;start wi zero
+	CLR.L	NUMBERBUF+4(A4)		;and the other one.
+	ST	NumberExists(A4)	;flag this sentence has a number.
+60$
+	CMP.W	#COLON,D5		;numeric delimiter?
+	BEQ	NUMDELIMITER		;do that then
+	CMP.W	#11,D0			;is it the right number already?
+	BLS	80$			;yes
+	CMP.W	#27,D0			;<100?
+	BHI.S	61$			;no
+	SUB.W	#20,D0			;adjust to no. of tens
+	EXT.L	D0			;make it same size.
+	MUL10	D0,D1			;d0*10 -> d0
+	ADD.L	#20,D0			;add 20 back
+	MOVE.L	D0,-(A7)		;save value
+	MOVE.L	NUMBERBUF(A4),D0	;get current
+	MUL10	D0,D1
+	MUL10	D0,D1			;*100 for double number
+	ADD.L	(A7)+,D0		;add old
+	ST	NumMulFlg(A4)		;dont shift after a ten
+	BRA.S	85$			;ok d0 is right now
+10$
+	CLR.W	NUMBERFLAG(A4)		;e o number processing
+	BRA.S	90$			;quit
+61$
+	CMP.W	#28,D0			;=100?
+	BHI.S	62$			;yes then 1000
+	MOVE.L	NUMBERBUF(A4),D0	;get current value
+	MUL10	D0,D1			;*10
+	MUL10	D0,D1			;*100
+	ST	NumMulFlg(A4)		;dont shift after a ten
+	BRA.S	85$			;ok
+62$
+	MOVE.L	NUMBERBUF(A4),D0	;get current value
+	MUL10	D0,D1	
+	MUL10	D0,D1
+	MUL10	D0,D1			;*1000
+	ST	NumMulFlg(A4)		;dont shift after a ten
+	BRA.S	85$			;and modify
+80$
+	MOVE.L	D0,-(A7)		;save it
+	MOVE.L	NUMBERBUF(A4),D0
+	TEST_B	NumMulFlg(A4)		;do we *10?
+	BNE.S	81$			;not this time
+	MUL10	D0,D1			;old *10
+81$
+	CLR.B	NumMulFlg(A4)		;clear for next time
+	ADD.L	(A7)+,D0		;addin new value
+85$
+	MOVE.L	D0,NUMBERBUF(A4)	;put it back
+	SETNE				;flag as happened
+90$
+	PULL_L	D0-D1/A0
+	RET
+
+*----------------------------------------------
+
+	XREF	NUMBUF_FMT
+
+NUMDELIMITER
+
+	MOVE.L	NUMBERBUF(A4),NUMBERBUF+4(A4)	;there is more!
+	CLR.L	NUMBERBUF(A4)			;this is zero now.
+	ST	NUMBUF_FMT(A4)			;flag as double format
+	SETNE
+	PULL_L	D0-D1/A0
+	RET
+
+*------------------------------------------
+
+	XDEF	AlsoADigit
+	XREF	MATCHBUF
+
+AlsoADigit
+
+* Look at the entries in MATCHBUF to find out if the current 
+* word is a digit in addition to anything else.
+
+* exit;
+*	EQ <=> a digit
+*	Code in d0
+
+	MOVE.L	A0,-(A7)
+	LEA	MATCHBUF(A4),A0		;start
+10$
+	MOVE.L	(A0)+,D0		;get an entry.
+	BMI.S	90$			;end of list.
+	SWAP	D0			;get section.
+	CMP.W	#SECT.NUM,D0		;a digit?
+	BNE.S	10$			;next.
+	SWAP	D0
+	EXT.L	D0
+	SETEQ
+90$
+	MOVE.L	(A7)+,A0
+	RET
+
+*------------------------------------------
+
+	ENDC	;wantNUMBERS
+
+	END
+	

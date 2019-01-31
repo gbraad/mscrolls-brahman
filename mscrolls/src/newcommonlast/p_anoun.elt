@@ -1,0 +1,35 @@
+**************************************************************
+*
+*	%G%
+*	%W%
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+
+	XDEF	P.ANOUN
+	XREF	UTIL.DEL
+	
+P.ANOUN
+	
+*PRINT NOUN IN SINGULAR FORM
+*THIS ROUTINE IS REALLY, REALLY BAD!
+	
+	GETINFO
+	TST_PLURAL				;PL?
+     
+	BNE.S	01$
+	DOGO	P.TN
+01$
+	MSG	LETTERA		;print a 'a '
+	DO	P.NOUN	          ;QUANTIFIER + NOUN
+	CALL    UTIL.DEL         ;DELETE
+	BRA     UTIL.DEL
+
+
+
+	END

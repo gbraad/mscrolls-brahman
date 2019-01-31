@@ -1,0 +1,63 @@
+**************************************************************
+*
+*	%G%
+*	%W%
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+
+*--------------------------------
+*
+* FINRELNPC - FIND RELATED NPC'S
+*
+* SETS 'NPCINRM' IF THERE ARE
+*
+* ANY NPC'S RELATED TO CURRENT 
+*
+* ROOM
+*
+*--------------------------------
+
+	XDEF	FINRELNPC
+	XREF	LASTNPC,NPCINRM,ONLYREL
+ 
+FINRELNPC
+ 
+	MOVE.W  NPCINRM(A4),D0
+	BMI.S   10$
+	CLR.W   D5
+	DO	VALID.NP		;NO ERRORS PRINTED
+	BEQ.S   90$
+	MOVE.W  #-1,NPCINRM(A4)		;ZAP IY
+10$
+	DO	R.NOUN			;GET ROOM# ->d0
+	MOVE.W  D0,D2			;TARG
+	DO	GETRELN			;REL TO ROOM ->a1
+	CALL	ONLYREL			;remove those not just related
+20$
+	MOVE.W  (A1)+,D0		;GET N#
+	BEQ.S   90$
+	BMI.S	20$			;ignor these
+	GETINFO				;ON D0
+	TST_NPC				;NPC?
+	BEQ.S   20$			;NO
+	DO	NPC.OK			;alive & kicking?
+	BNE.S   20$			;NO
+	MOVE.W  D0,NPCINRM(A4)		;ITS OK (WOW!)
+90$
+	MOVE.W  NPCINRM(A4),D0
+	CMP.W   LASTNPC(A4),D0
+	BEQ.S   99$
+	CLR.W   LASTNPC(A4)
+99$
+	RET
+
+*------------------------------------------
+
+
+	END

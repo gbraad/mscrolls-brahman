@@ -1,0 +1,45 @@
+**************************************************************
+*
+*	10/27/87
+*	@(#)stwindow.elt	1.2
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+
+*--------------------------------
+*
+* STWINDOWS
+*
+* SET UP CHANNEL 0 AS A LARGE
+* WINDOW.
+*
+* SET UP CHANNEL 1 AS SMALL
+* STATUS DISPLAY AT TOP OF SCREEN
+*
+*--------------------------------
+
+	XDEF	STWINDOW
+ 
+STWINDOW
+ 
+      IFNE     QL128
+
+	LEA     $20000,A0
+	LEA     $28000,A1
+10$
+	CLR.L   (A0)+
+	CMP.L   A0,A1
+	BNE.S   10$
+
+      ENDC
+ 
+	RET
+
+
+
+	END

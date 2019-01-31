@@ -1,0 +1,110 @@
+***********************************************************
+*
+*	%W%
+*	%G%
+*
+************************************************************
+
+		SECTION	"ADV",CODE
+
+		include	"equates.i"
+		include	"macros.i"
+		include	"scenequ.i"
+		include	"verbequ.i"
+
+	    IfVerb	DANCE
+
+	    XDEF	V.DANCE,ROOMTODANCE
+
+	    XREF	ADVERB,P.IDFY,P.SUB,P.QN
+	    XREF	P.SUBV,PRTTXT,CHKNPC
+	    XREF	SP.DANCE
+V.DANCE
+
+	MOVE.W	ADVERB(A4),D1		;dance prep X?
+	BPL.S	10$			;yes
+	TEST_W	D0			;dobj?
+	BPL	P.IDFY
+	ARGW	#0			;no quiet
+	CALLS	2,ROOMTODANCE
+	BNE	90$			;no exit
+	CALL	SP.DANCE
+	DO	P.SUB
+	MSGGO	DANCEAJIG		;dance a jig for a while.
+10$
+	CMP.W	#ON,D1			;dance on
+	BNE.S	20$			;nope
+	TST_SITTABLE
+	BNE.S	11$			;yes
+	DO	P.SUB
+	MSG	CANTDANCEON		;can't dance on
+	DO	P.QN
+	RET
+11$
+	ARGW	#0			;noquietmode
+	CALLS	2,ROOMTODANCE
+	BNE	90$			;quit
+	CALL	SP.DANCE
+	DO	P.SUB
+	MSG	DANCEUPANDDOWN		;dance up and down on
+	DO	P.TN
+	MSGGO	FORAWHILE		;for a while.
+20$
+	TEST_W	D1			;with
+	BNE	P.IDFY
+	TST_NPC				;an npc
+	BNE.S	21$			;yes
+	DO	P.SUBV
+	MSGGO	ALOONY			;a loony!
+21$
+	CALL	SP.DANCE
+	MOVE.L	A0,A5
+	MOVE.W	D0,D5
+	DO	CHKNPC			;& message
+	DO	P.TN
+	TST_PLURAL				;plural?
+	BNE.S	22$			;yes
+	MSG	DOES			;does
+	BRA.S	23$
+22$
+	MSG	DO			;do
+23$
+	MSG	NOTWANTTO		;not want to.
+90$
+	RET
+
+
+
+ROOMTODANCE	;(quiet.w)
+	XREF	R.NOUN,SEATED
+
+	LINK_	A6,#0
+	PUSH_L	D0-D1/A0
+	DO	R.NOUN
+	GETINFO
+	MOVE.B	2(A0),D1
+	LSR.B	#4,D1			;size
+	BNE.S	80$			;too small
+    IFD	wantWETROOMS			;cant dance underwater?
+	TST_WET				;wet room?
+	BNE.S	80$			;nocando
+    ENDC	;wantWETROOMS		
+	TEST_W	SEATED(A4)		;sitting or hideing?
+	BNE.S	80$			;yes, nogo
+	SETEQ
+	BRA.S	90$			;yes, ok , exit
+80$
+	TEST_W	4(A6)			;quiet var?
+	BNE.S	90$			;yes
+	DO	P.SUB
+	MSG	CANTDANCEHERE		;can't dance here.
+	SETNE				;cant dance
+90$
+	PULL_L	D0-D1/A0
+	UNLINK_	A6
+	RTD_	#2
+
+	ENDC	;v.dance
+
+	END
+

@@ -1,0 +1,99 @@
+**************************************************************
+*
+*	10/27/87
+*	@(#)p_subv.elt	1.2
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+
+*--------------------------------
+*
+*  P.SUBV - PRINTS SUBJECT,VERB
+*
+* EG - 'YOU ARE'
+*      'HE IS' (IF SUBJECT = HORSE SAY)
+*
+* P.S. - VERB IS ALWAYS 'TO BE'
+*
+*--------------------------------
+ 
+	XDEF	P.SUBV
+	XREF	SUBJECT
+  
+P.SUBV
+  
+	TEST_W  SUBJECT(A4)        ;PLAYER?
+	BNE.S   10$                ;NO
+	MSG     YOU
+	MSGGO	ARE  
+10$
+	DO	P.SUB
+	MSGGO	IS
+ 
+*--------------------------------
+*
+* P.NFND - prints the 'You can't see an xyzzy here' message
+*
+* takes D0 = noun#
+* sets D7 = 2 to indicate error message been printed, if it was 2 (ie D7==2)
+* to start with then no message is printed
+*
+
+	XDEF	P.NFND
+   
+P.NFND
+  
+	CMP.W   #2,D7			;ERROR ALREADY?
+	BEQ.S   90$			;YES = BYE...
+
+	DO	P.SUB			;YOU..
+	MSG     CNTSEE			;CANNOT SEE
+	CALL_S  P.NQEN			;NEG ERROR NOUN
+	MSG     HERE			;HERE'
+
+80$
+	MOVEQ   #2,D7			;FLAG ERROR DONE
+90$ 
+	RET				;EXIT
+  
+
+
+
+*--------------------------------
+*
+* P.NQEN -   THIS IS A CLEVER LITTLE NO.
+*            WHICH DEALS WI STUFF LIKE
+*            SUSSING IF IT SHOULD GIVE U
+*            AN ADJ WHEN IT TELLS U IT CANNOT
+*            SEE A NON LOCALLY
+* 
+* DEAD HANDY FOR CASES LIKE A BLUE KEY IN
+* A ROOM, PLAYER TYPES 'L METAL KEY'
+* A REPLY LIKE 'U CANNOT SEE A KEY HERE'
+* IS REAL SILLY, SO IT GIVES 'METAL KEY'
+*
+*--------------------------------
+	
+	XDEF	P.NQEN
+	XREF	INITNUM,P.NQN
+ 
+P.NQEN
+	
+*PRINT NEG QUANTIFYER ERROR NOUN
+	
+	GETINFO
+	MOVE.W  4(A0),-(A7)        ;SAVE SOME DATA
+	BCLR    #4,5(A0)           ;NO FORCE
+	MOVE.B  #1,INITNUM(A4)     ;SET NO. IN ROOM TO 1
+	CALL    P.NQN
+	CLR.B   INITNUM(A4)        
+	MOVE.W  (A7)+,4(A0)
+	RET
+	
+
+	END

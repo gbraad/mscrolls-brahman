@@ -110,6 +110,7 @@ class IFMagnetic : public QObject, public IFEngineInterface
     char                _inbuf[1024];
     size_t              _inpos;
     char*               _imageJSONBuf;
+    char*               _soundJSONBuf;
 
     char                _statusBuf[256];
     size_t              _statusPos;
@@ -126,6 +127,7 @@ class IFMagnetic : public QObject, public IFEngineInterface
 
     bool                _useXBR4;
     bool                _ignoreOutput;
+    bool                _modernMode;
 
     SaveContext         _saveContext;
     RequestExtraFn*     _requestSaveExtraFn = 0;
@@ -133,6 +135,7 @@ class IFMagnetic : public QObject, public IFEngineInterface
 
     RequestExtraFn*     _requestLoadExtraFn = 0;
     void*               _requestLoadExtraCtx = 0;
+    bool                _allMapCheat = false;
 
 public:
 
@@ -144,8 +147,16 @@ public:
         int     _ver;
         float*  _profile = 0;
         bool    _showInline = false;
+        int     _picVer = 0; // classic
 
         bool valid() const { return _picn >= 0; }
+    };
+
+    struct SoundRequest
+    {
+        int         _room = 0; // unknown
+        const char* _soundFile = 0;
+        int         _duration = -1;
     };
     
     PicRequest          _lastPic;
@@ -170,6 +181,7 @@ public:
     void restartCommands();
     void gameStarting();
     void gameRestarting();
+    string configDir() const { return _configDir; }
 
     void emitScene() override;
 
@@ -190,7 +202,7 @@ public:
                         CommandResultI* res = 0) override;
 
     bool evalUseX(const string&, bool frommenu);
-    bool puzzleForX(const string* adj, const string& x, int act);
+    bool puzzleForX(const string* adj2, const string* adj, const string& x, int act);
 
     CommandResultI* makeResult() override { return new CommandResult(); }
     
@@ -200,7 +212,7 @@ public:
     void showImage(const string& filepath, const PicRequest* pr);
     void clearImage() override
     {
-        delete [] _imageJSONBuf;
+        _dropImage();
 
         GrowString gs;
         gs.append("{}");
@@ -210,6 +222,18 @@ public:
         LOG3("MS clear image", _imageJSONBuf);
         
         flushImage();
+    }
+
+    void _dropImage()
+    {
+        delete [] _imageJSONBuf;        
+        _imageJSONBuf = 0;
+    }
+
+    void _dropSound()
+    {
+        delete [] _soundJSONBuf;        
+        _soundJSONBuf = 0;
     }
 
     void flushImage()
@@ -225,8 +249,24 @@ public:
             (_segmentInfoEmit)(_sictx, 0);
 
             // clear
-            delete [] _imageJSONBuf;
-            _imageJSONBuf = 0;
+            _dropImage();
+        }
+    }
+
+    void flushSound()
+    {
+        if (_soundJSONBuf)
+        {
+            // there's an image waiting
+            (_segmentInfoEmit)(_sictx, BRA_SEGMENT_SOUND);
+
+            _emits(_transcriptEmit, _tctx, _soundJSONBuf);
+            (*_transcriptEmit)(_tctx, 0);
+            
+            (_segmentInfoEmit)(_sictx, 0);
+
+            // clear
+            _dropSound();
         }
     }
     
@@ -275,6 +315,7 @@ public:
         }
         
         flushImage();
+        flushSound();
 
         if (!r)
         {
@@ -342,6 +383,7 @@ public:
         _inpos = 0;
         _inbuf[0] = 0;
         _imageJSONBuf = 0;
+        _soundJSONBuf = 0;
 
         _statusPos = 0;
         _statusBuf[0] = 0;
@@ -353,11 +395,12 @@ public:
         
         _useXBR4 = true;
         _ignoreOutput = false;
+        _modernMode = true;
     }
 
     void _purge()
     {
-        delete [] _imageJSONBuf;
+        _dropImage();
     }
 
     void runMsTask();
@@ -461,7 +504,11 @@ public:
     }
 
     string _decodePicture(const PicRequest* pr, const char* imagename);
-    void _showpic(const PicRequest*);
+    void _showpic(PicRequest*);
+    void _showNewVersionPic(PicRequest* pr);
+    void _playSound(SoundRequest*);
+    void _playSoundJSON(GrowString&);
+    void _handleEvent(int quiet) { _puzzles.handleEvent(quiet); }
 
     void updateGameSaveArea(uchar* ptr, size_t size, uint addr);
     bool saveGame(const char* name, SaveGameHeader&, SaveContext&);
@@ -587,12 +634,17 @@ private:
                       CommandResultI* res = 0, 
                       bool echo = false);
     bool _evalCommandSpecial(const char* cmd, CommandResultI* cres);
+    bool _handleTestCommands(const char* cmd);
 
     void _buildRosterJSON(GrowString& buf);
     void _buildMapJSON(GrowString& buf);
     void _buildPictureJSON(GrowString& buf,
                            const string& imagepath, 
                            const PicRequest*);
+
+    void _buildSoundJSON(GrowString& buf,
+                         const string& path, 
+                         const SoundRequest*);
 
     bool _substWordID(string& word);
     bool _substWordsID(std::vector<string>& words);

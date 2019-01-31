@@ -1,0 +1,90 @@
+**************************************************************
+*
+*	%G%
+*	%W%
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include "scenequ.i"
+	include	"verbequ.i"
+
+
+	IFND	wantNOQUOTES
+
+*--------------------------------
+
+	XDEF	PR.COMMAND
+	XREF	POSWRD,BACK.WRD,TRYPNT,PRSPCMD
+
+	IFNE	ELIZA
+	XREF	SCANNER
+	ENDC	;Eliza
+
+PR.COMMAND
+
+	CMP.W   #VNINVENTORY,D5
+	BNE.S   10$
+
+	IFNE	ELIZA
+	DO	BACK.WRD	;adjustment
+	CALL    SCANNER
+	CMP.B   #3,D7		;special case
+	BEQ     TRYPNT		;try again
+	ENDC	;Eliza
+
+	IFEQ	ELIZA
+	MSG	PLUSE		;ask about
+	ENDC	;!Eliza
+	DOGO	PR20
+10$
+      IFNE	THE_PAWN
+
+	DO	P.SAY
+      
+      ENDC
+
+	CALL    PRSPCMD        ;4 BYTES = NOT NEGATIVE!!!!
+	MSG     DEF0           ;DEFINITELY NOT
+	DOGO	PR20
+
+*--------------------------------
+
+	XDEF	PR.INVQ
+
+PR.INVQ
+
+	DO	P.SAY
+	MOVEQ   #2,D1            ;RANDOM
+	RND_D1	          ;SPIN
+	TEST_W  D1
+	BNE.S   10$              ;NO
+	MSG     MB    
+	DOGO	PR20
+10$
+	BRA.S	P.VAGE
+	DOGO	PR20
+	
+*--------------------------------
+
+	XDEF	P.VAGE
+	
+P.VAGE
+
+	MOVEQ   #5,D1     
+	RND_D1	               ;SPIN
+
+	BeSure	M.PERHAPS
+
+	ADD.W   #M.PERHAPS,D1
+	DOGO	P.MSG
+
+
+	ENDC	;wantNOQUOTES
+
+
+	END

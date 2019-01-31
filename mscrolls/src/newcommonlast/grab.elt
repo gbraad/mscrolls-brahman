@@ -1,0 +1,49 @@
+**************************************************************
+*
+*	10/27/87
+*	@(#)grab.elt	1.2
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"verbequ.i"
+
+*--------------------------------
+
+	IfVerb	GRAB
+
+	XDEF	V.GRAB,GRABorRUB
+   
+V.GRAB
+
+	TST_NPC				;npc?
+	BNE.S	GRABorRUB
+
+
+GET.GRAB
+	
+	XREF	GET_
+
+	BRA	GET_
+
+	IFD	VNTOUCH
+
+GRABorRUB
+
+	XREF	VERB,ADVERB,V.TOUCH
+
+	MOVE.W  #VNTOUCH,VERB(A4)
+	MOVE.W  #$8008,ADVERB(A4)	;up?
+	BRA     V.TOUCH
+
+	ENDC
+
+	ENDC
+
+
+
+	END

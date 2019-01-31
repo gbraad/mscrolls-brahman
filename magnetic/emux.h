@@ -57,10 +57,10 @@ Byte #0; Noun States:
 Byte #1;  Physical Characteristics
 
         ---------------------------------
-      	| 7 | 6 | 5 | 4 | 3 | 2 | 1 | 0 |
-      	---------------------------------
-       	  ------------:	  -------------:
-	        Hardness            Strength
+        | 7 | 6 | 5 | 4 | 3 | 2 | 1 | 0 |
+        ---------------------------------
+          ------------:   -------------:
+            Hardness            Strength
 
          0,     Void
          1,     Liquid
@@ -78,40 +78,40 @@ Byte #1;  Physical Characteristics
 
 Byte #2;  Size & Weight.
 
-	---------------------------------
+        ---------------------------------
         | 7 | 6 | 5 | 4 | 3 | 2 | 1 | 0 |
         ---------------------------------
-	  ------------:   ------------:
-	            Size           Weight
+         ------------:   ------------:
+                Size           Weight
 
-	The sizes of objects vary coarsely,
-	approximates,
-	0,      Void.
-	1,      like a key or matchbook,
-	2,      like a bottle or paperback,
-	3       like a bag small box,
-	4, 	a chair
-	5,	a person.
-	6-14	not clearly defined. bed ~ 10
-	15,     large
+    The sizes of objects vary coarsely,
+    approximates,
+    0,      Void.
+    1,      like a key or matchbook,
+    2,      like a bottle or paperback,
+    3       like a bag small box,
+    4,  a chair
+    5,  a person.
+    6-14    not clearly defined. bed ~ 10
+    15,     large
 
         Weight:
         person ~ 5
 
-	If the object is a `room' the sizes mean the following,
-	0,	Normal
-	1,	Narrow Crevice (must drop all objects).
-	2,	confined space (cubicle or booth, only 1 person at a time).
-	3,	Low ceiling, no riding vehicles here.
-	4-9, 	Undefined.
-	10,	"Whack, you hit your head."
-	11,	"The `vehicle' stumbles."
-	12,	"Ridiculous to ride in there".
-	13-15,  Undefined message type.
+    If the object is a `room' the sizes mean the following,
+    0,  Normal
+    1,  Narrow Crevice (must drop all objects).
+    2,  confined space (cubicle or booth, only 1 person at a time).
+    3,  Low ceiling, no riding vehicles here.
+    4-9,    Undefined.
+    10, "Whack, you hit your head."
+    11, "The `vehicle' stumbles."
+    12, "Ridiculous to ride in there".
+    13-15,  Undefined message type.
 
 Byte #3;  Shape & Texture
 
-	---------------------------------
+        ---------------------------------
         | 7 | 6 | 5 | 4 | 3 | 2 | 1 | 0 |
         ---------------------------------
           :---    |   |   ------------:
@@ -121,167 +121,177 @@ Byte #3;  Shape & Texture
     1, Blunt      |   |     1,  Smooth      8,   Soft
     2, Sharp      |   |     2,  Rough       9,   Hard
     3, Very Sharp |   |     3,  Hot         10,  Warm
-	          |   |     4,  Cold        11,  "`npc' doesn't like it"
-	         Wet  |     5,  Slippery    12,  Thorny
+              |   |     4,  Cold        11,  "`npc' doesn't like it"
+             Wet  |     5,  Slippery    12,  Thorny
      Wet rooms are    |     6,  Furry       13,  Sticky
-    feet in water     |	 		    14,  Ice Cold
-     like a stream    |         	    15,  Crunchy.
-		      Movable
+    feet in water     |             14,  Ice Cold
+     like a stream    |                 15,  Crunchy.
+              Movable
 
 Byte #4; Data1
 
 
-	---------------------------------
-	| 7 | 6 | 5 | 4 | 3 | 2 | 1 | 0 |
-        ---------------------------------
-          |   |   |   |   |   |	  |   Modified Quantity
-	  |   |   |   |   |   |   |     Something that is really plural but
+    ---------------------------------
+    | 7 | 6 | 5 | 4 | 3 | 2 | 1 | 0 |
+    ---------------------------------
+          |   |   |   |   |   |   |   Modified Quantity
+      |   |   |   |   |   |   |     Something that is really plural but
           |   |   |   |   |   |   |     Singulared by an adjective, such as
           |   |   |   |   |   |   |     'a pair of trousers'
           |   |   |   |   |   |   |
           |   |   |   |   |   |   Description Only (Do not name the item)
-	  |   |   |   |   |   Short Look, no extras to description.
-	  |   |   |   |   Money
-	  |   |   |   Explored
-	  |   |   Npc's refuse to accept it (Rubbish)
-	  |   Object is an NPC.
-	Lightable
-	   (lightable & lit  => a flame)
-	   (!lightable & lit => glowing)
+      |   |   |   |   |   Short Look, no extras to description.
+      |   |   |   |   Money
+      |   |   |   Explored
+      |   |   Npc's refuse to accept it (Rubbish)
+      |   Object is an NPC.
+    Lightable
+       (lightable & lit  => a flame)
+       (!lightable & lit => glowing)
 
 
 
 Byte #5; Data2
 
 
-	---------------------------------
-        | 7 | 6 | 5 | 4 | 3 | 2 | 1 | 0 |
-        ---------------------------------
-	  |   |   |   |   |   |   |   Pseudo
-	  |   |   |   |   |   |   Initial State Done
-	  |   |   |   |   |   A Lit Room
-	  |   |   |   |   Has a surface & can be sat on
-	  |   |   |   Force Adjective (eg Blue jeans)
-	  |   |   Force Plural
-	  |   |     For such things as uncountable nouns, ones taking
-	  |   |     any/some but not 'are' eg.
-	  |   |     there IS SOME furniture here.
-	  |   Has been given to the npc
-	  |    Who will give it back unless it has value or money.
-	Another Noun
-	  There is another noun in the game with the same name.
+    ---------------------------------
+    | 7 | 6 | 5 | 4 | 3 | 2 | 1 | 0 |
+    ---------------------------------
+      |   |   |   |   |   |   |   Pseudo
+      |   |   |   |   |   |   Initial State Done
+      |   |   |   |   |   A Lit Room
+      |   |   |   |   Has a surface & can be sat on
+      |   |   |   Force Adjective (eg Blue jeans)
+      |   |   Force Plural
+      |   |     For such things as uncountable nouns, ones taking
+      |   |     any/some but not 'are' eg.
+      |   |     there IS SOME furniture here.
+      |   Has been given to the npc
+      |    Who will give it back unless it has value or money.
+    Another Noun
+      There is another noun in the game with the same name.
 
 The Location
  This is a 32 + 1 bit quantity most of which lives in bytes 6-9. However
  the pseudo bit is in byte #5.
  Format
 
-byte#	 6 		7	 	8	   9
+byte#    6      7       8      9
        --------------------------------------------------
        |HEAD | Secondary Locator | High Byte | Low Byte |
        --------------------------------------------------
 
-Head
+ Head
  This determines the relationship between the object and that which
  it is located to.
 
-    	---------------------------------
-        | 7 | 6 | 5 | 4 | 3 | 2 | 1 | 0 |
-        ---------------------------------
-	  |   |   |   |	  |   |	  |   Related
-	  |   |   |   |   |   |   Hidden, will automatically appear when
-	  |   |   |   |   |   | 	  related object is explored.
-	  |   |   |   |   |   Worn by player
-	  |   |   |   |   Intrinsic (hands, feet etc)
-	  |   |   |   |     NB: other npc's are assumed to also have these.
-	  |   |   |   Inseparable (a permanent feature)
-	  |   |   Contained
-	  |   A Room, bytes 8&9 contain the room#.
-	 Out, The object does not exist at present.
+    ---------------------------------
+    | 7 | 6 | 5 | 4 | 3 | 2 | 1 | 0 |
+    ---------------------------------
+      |   |   |   |   |   |   |   Related
+      |   |   |   |   |   |   Hidden, will automatically appear when
+      |   |   |   |   |   |       related object is explored.
+      |   |   |   |   |   Worn by player
+      |   |   |   |   Intrinsic (hands, feet etc)
+      |   |   |   |     NB: other npc's are assumed to also have these.
+      |   |   |   Inseparable (a permanent feature)
+      |   |   Contained
+      |   A Room, bytes 8&9 contain the room#.
+     Out, The object does not exist at present.
 
 Secondary Locator, Byte #7
 
-	This byte applies only to pseudos.
-	Pseudos are items that are effectively related to many rooms
-	simultaneously & shouldn't be movable by the player.
+    This byte applies only to pseudos.
+    Pseudos are items that are effectively related to many rooms
+    simultaneously & shouldn't be movable by the player.
 
-	In many cases the player can put things on pseudos & generally
-	relate objects to them. In these cases the 'Secondary Locator'
-	of such an object contains the room# of the pseudo instance,
-	ie. it picks out one of the pseudo occurrences.
+    In many cases the player can put things on pseudos & generally
+    relate objects to them. In these cases the 'Secondary Locator'
+    of such an object contains the room# of the pseudo instance,
+    ie. it picks out one of the pseudo occurrences.
 
 Data Field, Bytes 8&9
 
-	These 16 bits can be either a noun#, room# or pointer as follows;
+    These 16 bits can be either a noun#, room# or pointer as follows;
 
-	Case				Description of bytes 8&9
+    Case                Description of bytes 8&9
 
-        Item is simply located,	    	Item is in room# 8&9.
-	ie, byte #6 == 0
+    Item is simply located, Item is in room# 8&9.
+    ie, byte #6 == 0
 
-	Item is a room 			8&9 contain the room# of the room.
+    Item is a room          8&9 contain the room# of the room.
 
-	Item is a pseudo 		8&9 point to a zero terminated list
-	      	       	   		of room#'s (possibly read only)
+    Item is a pseudo        8&9 point to a zero terminated list
+                            of room#'s (possibly read only)
 
-	Item is neither a room nor	8&9 contain the noun# of the object
-	a pseudo and not simply		the item is in/on/near etc.
-	located
+    Item is neither a room nor  8&9 contain the noun# of the object
+    a pseudo and not simply     the item is in/on/near etc.
+    located
 
 Byte #10; Data3
 
 
-	---------------------------------
-        | 7 | 6 | 5 | 4 | 3 | 2 | 1 | 0 |
-        ---------------------------------
-	  |   |	  |   |	  |   --------:
-	 Clothing Cover	  |        Container Volume & flag
-	  |   |   |   |  Chest          capacity = vol -1
-	  |   |   |  Head
-	  |   |  Arms		    The Volume must never reduce to zero,
-	  |  Groin		    for otherwise the object is no longer
-       Feet & Legs		    a container.
+    ---------------------------------
+    | 7 | 6 | 5 | 4 | 3 | 2 | 1 | 0 |
+    ---------------------------------
+      |   |   |   |   |   --------:
+     Clothing Cover   |        Container Volume & flag
+      |   |   |   |  Chest          capacity = vol -1
+      |   |   |  Head
+      |   |  Arms           The Volume must never reduce to zero,
+      |  Groin          for otherwise the object is no longer
+       Feet & Legs          a container.
 
-       * bit 7 => no article for rooms.
-       * bit 6 => visible on map (only applies for rooms)
+       * bit 7 => no article for rooms (put in by Anita)
 
+       GUI BITS
+       * bit 6 "gui_show_map" => visible on map (only applies for rooms)
+
+         eg squares of rainbow room in guild. need to show all on map
+         before explored. NB: flag set in code not f23 for guild.
+
+       * bit 5 "gui_show_inv" => visible on inventory bar override.
+
+         eg keys in keyring in Jinxter. they are inseparable to suppress 
+         description but need to show on inv. but (eg) jeans pocket in pawn 
+         does not.
 
 Byte #11, Data4
 
 
-	---------------------------------
-        | 7 | 6 | 5 | 4 | 3 | 2 | 1 | 0 |
-        ---------------------------------
-	  :-------    :----   ----:   Worn By Npc
-	  |           |         Wearability
-	  |           |
-	  |           |        0,   Can't be worn
-	  |           |        1,   clothing (normal)
-	  |           | 	       For rooms this is no_article
+    ---------------------------------
+    | 7 | 6 | 5 | 4 | 3 | 2 | 1 | 0 |
+    ---------------------------------
+      :-------    :----   ----:   Worn By Npc
+      |           |         Wearability
+      |           |
+      |           |        0,   Can't be worn
+      |           |        1,   clothing (normal)
+      |           |            For rooms this is no_article
           |           |        2-3, magical protection
-	  |           |
-	  |          Combustibility
-	  |           0,   non-flammable
-	  |           1,   burns away (like paper)
-	  |           2,   melts (like wax)
-	  |           3,   explodes.
+      |           |
+      |          Combustibility
+      |           0,   non-flammable
+      |           1,   burns away (like paper)
+      |           2,   melts (like wax)
+      |           3,   explodes.
       Edibility
-       0,   not edible.	  4,   edible
-       1,   Fatal      	  5,   tasty
-       2,   Poisoned   	  6,   Very tasty
-       3,   become ill.	  7,   magical (healing etc.)
+       0,   not edible.   4,   edible
+       1,   Fatal         5,   tasty
+       2,   Poisoned      6,   Very tasty
+       3,   become ill.   7,   magical (healing etc.)
 
 
 Bytes #12,13; Fixtures
 
-	-----------------------------------------------------------------
-        | 7 | 6 | 5 | 4 | 3 | 2 | 1 | 0 | 7 | 6 | 5 | 4 | 3 | 2 | 1 | 0 |
-        -----------------------------------------------------------------
-	  |   |   ------------ Data Field -----------------------------
-	  |   |
-	  |   |
-	  |  mixing liquids (not implemented)
-	  |
+    -----------------------------------------------------------------
+    | 7 | 6 | 5 | 4 | 3 | 2 | 1 | 0 | 7 | 6 | 5 | 4 | 3 | 2 | 1 | 0 |
+    -----------------------------------------------------------------
+      |   |   ------------ Data Field -----------------------------
+      |   |
+      |   |
+      |  mixing liquids (not implemented)
+      |
       Fixed permanently, Cannot be untied.
 
 
@@ -292,44 +302,44 @@ Npc Data
 
 Bytes 0&1
 
-	Undefined.
+    Undefined.
 
 
 Byte #2
 
-	---------------------------------
-        | 7 | 6 | 5 | 4 | 3 | 2 | 1 | 0 |
-        ---------------------------------
-	  :------------   |   |   |   Sex
-	 Emotion          |   |   |     0, Female.
+    ---------------------------------
+    | 7 | 6 | 5 | 4 | 3 | 2 | 1 | 0 |
+    ---------------------------------
+      :------------   |   |   |   Sex
+     Emotion          |   |   |     0, Female.
        0,  Null           |   |   |     1, Male.
        1,  Happy          |   |   |
        2,  Angry          |   |  Suppress Clothing
        3,  Violent        |  Animal
        4,  Asleep        No Article
        5,  Unconscious
-       6,  Peaceful   	11, Tired
-       7,  Exited     	12, Suffering
+       6,  Peaceful     11, Tired
+       7,  Exited       12, Suffering
        8,  Friendly     13, Frightened
-       9,  Drunk      	14, Cheerful
-       10, Sad	      	15, Mischievous
+       9,  Drunk        14, Cheerful
+       10, Sad          15, Mischievous
 
 
 Byte #3
 
-     	---------------------------------
+        ---------------------------------
         | 7 | 6 | 5 | 4 | 3 | 2 | 1 | 0 |
         ---------------------------------
-	  :--------   |   |   |   |   Paused, from scripts & MoveNpc
-	  Spare.      |   |   |   |
-	              |   |   |  Nice, will give you things except
-	              |   |   | 	clothing, money & valuables.
-	              /   |   |
-	    Covetous     |  Non-pausable,
-	                  |        Npc is in a rush
-	        	  |
-			  Quiet,
-			     Produce no output from scripts.
+      :--------   |   |   |   |   Paused, from scripts & MoveNpc
+      Spare.      |   |   |   |
+                  |   |   |  Nice, will give you things except
+                  |   |   |     clothing, money & valuables.
+                  /   |   |
+        Covetous     |  Non-pausable,
+                      |        Npc is in a rush
+                  |
+              Quiet,
+                 Produce no output from scripts.
 
 
 **************************************************************************/
@@ -382,16 +392,18 @@ struct IItem
     enum Dir 
     {
         dir_n = 0,
-        dir_ne = 1,
-        dir_e = 2,
-        dir_se = 3,
-        dir_s = 4,
-        dir_sw = 5,
-        dir_w = 6,
-        dir_nw = 7,
-        dir_u = 8,
-        dir_d = 9,
-        dir_count = 10
+        dir_ne,
+        dir_e,
+        dir_se,
+        dir_s,
+        dir_sw,
+        dir_w,
+        dir_nw,
+        dir_u,
+        dir_d,
+        dir_in,
+        dir_out,
+        dir_count,
     };
 
     static inline uint _word(uchar* p) { return (((uint)p[0])<<8) | p[1]; }
@@ -413,7 +425,6 @@ struct IItem
     {
         _init();
         _item = i;
-        
     }
 
     IItem(const string& s)
@@ -424,6 +435,7 @@ struct IItem
 
     IItem(const char* s)
     {
+        _init();
         string s1(s);
         parse(s1);
     }
@@ -446,7 +458,7 @@ struct IItem
     bool wordIs(const char* s) const
     {
         const char* w = word();
-        return w && equalsIgnoreCase(w, s);
+        return w && sameWithUnderscore(w, s);
     }
 
     int adj(int i) const
@@ -500,18 +512,55 @@ struct IItem
         return s;
     }
 
+    bool isInSet(const char * set) const
+    {
+        int addr = get_sym_value(set);
+        assert(addr);
+        uchar* itemSet = getcode() + addr;
+        for (int i = 0; ; ++i)
+        {
+            //LOG4("Next item in set: ",_word(itemSet+i*2));
+            int iis = _word(itemSet+i*2);
+            if (iis==0)
+                break;
+            if (iis == id())
+            {
+                LOG4("Item is in set ", set);
+                return true;
+            }
+        }
+        return false;
+
+    }
+
     bool isKey() const
     {
-        // are we a key?
-        // there is no data property for key, so use the word
-        const char* w = word();
-        return w ? !u_stricmp(w, "key") : false;
+        if (prog_format)
+        {
+            // is door if in set Denotation_KEYS
+            return isInSet("Denotation_KEYS");
+        }
+        else
+        {
+            // are we a key?
+            // there is no data property for key, so use the word
+            const char* w = word();
+            return w ? !u_stricmp(w, "key") : false;
+        }
     }
 
     bool isDoor() const
     {
-        // are we a door?
-        return wordIs("door") || wordIs("gate");
+        if (prog_format)
+        {
+            // is door if in set Denotation_DOORS
+            return isInSet("Denotation_DOORS");
+        }
+        else
+        {
+            // are we a door?
+            return wordIs("door") || wordIs("gate");
+        }
     }
 
     static string toWordCaps(const string& s)
@@ -590,6 +639,17 @@ struct IItem
     bool isClosedOrLocked() const { return _item && _item->data[0] & 0x60; }
     bool isOpen() const { return _item && _item->data[0] & 0x10; }
     uint volume() const { return _item ? _item->data[10] & 0x7 : 0; }
+    void setVolume(int v)
+    {
+        if (_item)
+        {
+            if (v > 7) v = 7; // clamp to max
+            if (v < 1) v = 1; // clamp to min
+            uint t = (_item->data[10] & ~7) | v;
+            _item->data[10] = t;
+        }
+    }
+    
     bool isContainer() const { return volume() > 0; }
     uint weight() const { return _item ? _item->data[2] & 0xf : 0; }
     uint size() const { return _item ? _item->data[2] >> 4 : 0; }
@@ -650,6 +710,7 @@ struct IItem
     bool visibleOnMap() const
     {
         bool v = isExplored();
+        // test gui_show_map bit
         if (!v && isRoom()) v = (_item->data[10] & 0x40) != 0;
         return v;
     }
@@ -662,6 +723,21 @@ struct IItem
             else _item->data[10] &= ~0x40;
         }
     }
+
+    bool guiShowInv()
+    {
+        // check show inv override.
+        // NB:only applies for non-wearables
+        // assume not out
+        
+        bool v = !isWearable();
+        if (v)
+        {
+            v = (_item->data[10] & 0x20) != 0;
+        }
+        return v;
+    }
+
 
     bool omitArticle() const
     {
@@ -686,10 +762,6 @@ struct IItem
         return c;
     }
     
-    void resetOut()
-    {
-        if (_item) _item->data[6] &= 0x7f;
-    }
 
     bool couldGet() const
     {
@@ -712,6 +784,16 @@ struct IItem
     IItem fixedTo() const
     {
         return _item ? find_item(_word(_item->data + 12) & 0x3fff) : 0;
+    }
+
+    void setFixedTo(const IItem& f)
+    {
+        // f can be null to unfix
+        if (_item)
+        {
+            uint t = f.id() & 0x3fff;
+            _setWord(_item->data + 12, t);
+        }
     }
 
     void setExplored(bool v = true)
@@ -770,13 +852,131 @@ struct IItem
         }
     }
 
-    void setLocation(int room)
+    void _fixcont(bool out = true)
     {
-        if (_item && !pseudo())
+        // fix containers a la fixcont.elt
+        // NB: does not handle infinite containers.
+        IItem ct = container();
+        if (ct)
         {
+            // current volume of holding container
+            int v = ct.volume();
+            assert(v > 0);
+
+            // our size
+            int sz = size();
+
+            // if we adjusting out, then add volume to container
+            // otherwise subtract it.
+            if (out)
+                v += sz;
+            else
+                v -= sz;
+
+            ct.setVolume(v);
+        }
+    }
+
+    void _fixsys()
+    {
+        // fix connected items a la fixsys.elt
+        IItems clist;
+        getConnectedSystem(clist);
+
+        // disconnect
+        for (IItems::iterator it = clist.begin(); it != clist.end(); ++it)
+            it->setFixedTo(IItem());
+    }
+
+    bool setOut()
+    {
+        bool r = _item && !isOut() && !pseudo() && !isRoom();
+        if (r)
+        {
+            _fixsys();
+            _fixcont();
+            _item->data[6] |= 0x80;
+        }
+        return r;
+    }
+
+    void resetOut()
+    {
+        if (_item && isOut() && !pseudo() && !isRoom())
+        {
+            _item->data[6] &= 0x7f;
+
+            // we're going back in now...
+            _fixcont(false);
+        }
+    }
+
+    bool setLocation(int room)
+    {
+        // to a simple room#
+        // NB: room = 0 => player
+        bool r = room >= 0 && _item && !pseudo();
+        if (r)
+        {
+            // bring item in if been set "out".
+            resetOut();
+
+            // adjust container, if any
+            _fixcont();
+
+            // drop from connected items, if any
+            _fixsys();
+            
             _item->data[6] = 0; // loc head simple room#
             _setWord(&_item->data[8], room);
         }
+        return r;
+    }
+
+    void setCarried()
+    {
+        // will handle containers etc.
+        setLocation(0);
+    }
+
+    bool setRelatedTo(const IItem& to)
+    {
+        bool r = _item && !pseudo() && !isRoom();
+        if (r)
+        {
+            // bring item in if been set "out".
+            resetOut();
+
+            // adjust container, if any
+            _fixcont();
+
+            // change to simple "related to"
+            _item->data[6] = 1;
+            
+            _setWord(_item->data + 8, to.id());
+        }
+        return r;
+    }
+    
+    bool setContainedBy(const IItem& c)
+    {
+        bool r = _item && !pseudo() && !isRoom() && c.isContainer();
+        if (r)
+        {
+            // bring item in if been set "out".
+            resetOut();
+
+            // adjust any container
+            _fixcont();
+
+            // change to simple "contained"
+            _item->data[6] = 0x20;
+            _setWord(_item->data + 8, c.id());
+
+            // adjust new container
+            _fixcont(false);
+        }
+        return r;
     }
 
     void setBroken(bool v = true)
@@ -813,13 +1013,61 @@ struct IItem
         // ignore intrinsic (eg hands, feet etc).
         // always include things worn, even if inseparable (eg wristband)
         // allow intrinsic edibles (eg chewing gum).
+        // allow things carried that have gui_show_inv override
             
         for (size_t i = 1; i <= itemCount; ++i)
         {
             IItem ii(find_item(i));
 
-            if (!ii.isOut() &&
-                (ii.isWorn() || (ii.isIntrinsic() && ii.isEdible()) || (!ii.isInseparable() && !ii.isIntrinsic() && ii.carried())))
+            bool fail = false;
+            bool pass = false;
+
+            // never show anything "out"
+            fail = ii.isOut(); 
+
+            if (!fail)
+            {
+                // always include things worn,
+                // even if inseparable (eg wristband)
+                pass = ii.isWorn();
+            }
+
+            if (!fail && !pass)
+            {
+                // allow intrinsic edibles (eg chewing gum).
+                pass = ii.isIntrinsic() && ii.isEdible();
+            }
+
+            if (!fail && !pass)
+            {
+                // must be on player spine
+                fail = !ii.carried(true);
+            }
+
+            if (!fail && !pass)
+            {
+                // if carried and GUI override, then show
+                pass = ii.guiShowInv() && ii.isExplored();
+                //if (pass) LOG4("Gui show inv: ",ii.toString());
+            }
+
+            if (!fail && !pass)
+            {
+                // added for jinxter?
+                // must be on player spine
+                fail = !ii.simplyCarried();
+                //if (fail) LOG4("Item not carried (2): ",ii.toString());
+            }
+
+            // tests below assume item on player spine (ie carried)
+
+            if (!fail && !pass)
+            {
+                // block carried items that are inseparable or intrinsic
+                fail = ii.isInseparable() || ii.isIntrinsic();
+            }
+
+            if (!fail)
                 items.push_back(ii);
         }
     }
@@ -879,11 +1127,19 @@ struct IItem
         getInventory(items);
             
         string inv;
+        int wtotal = 0;
         for (size_t i = 0; i < items.size(); ++i)
         {
             if (!inv.empty()) inv += ',';
             inv += items[i].adjWord();
+            if (!items[i].isWorn())
+            {
+                int w = items[i].weight();
+                if (w) inv += '(' + std::to_string(w) + ')';
+                wtotal += w;
+            }
         }
+        inv += " total=" + std::to_string(wtotal);
         return inv;
     }
 
@@ -1019,6 +1275,8 @@ struct IItem
         return room;
     }
 
+    IItem locationTop(bool ignoreout = false) const;
+
     bool reachable(bool xray = false) const
     {
         // reachable by player?
@@ -1042,16 +1300,6 @@ struct IItem
         return !pseudo() && ((loc_head() & 0xc1) == 1) && loc_data() == n;
     }
 
-    void setRelatedTo(int id)
-    {
-        if (_item && !pseudo() && !isRoom())
-        {
-            resetOut(); // bring item in if been set "out".
-            _item->data[6] |= 1;
-            _setWord(_item->data + 8, id);
-        }
-    }
-
     bool simplyCarried() const
     {
         // object is directly on inventory, not inside something carried etc.
@@ -1064,18 +1312,43 @@ struct IItem
 
     static void initDiction();
 
-    static void findItems(const string& word, IItems& items) 
+    static void findItems(const string& word, IItems& items)
     {
         findItems(word.c_str(), items);
     }
 
-    static void findItems(const char* word, IItems& items) 
+    static void findItems(const char* word, IItems& items)
     {
         // use dictionary to lookup base word, then convert to items
         Diction::Words words;
         _nouns.findMatches(word, words);
         for (size_t i = 0; i < words.size(); ++i)
             items.emplace_back(find_item(words[i]._id));
+    }
+
+    static int findPhraseItems(const char* phrase, IItems& items)
+    {
+        // use dictionary to lookup phrase items, then convert to items
+
+        // only return matches if result is unique
+        // return number of words of phrase matched
+
+        int nw = 0;
+        Diction::Words words;
+        _nouns.findPhraseMatches(phrase, words);
+
+        if (words.size() == 1)
+        {
+            nw = words[0].phraseLength();
+            items.emplace_back(find_item(words[0]._id));
+        }
+        else
+        {
+            // whenever there are multiple phrase matches, act as
+            // if there is no match as this cannot be resolved to a single
+            // item
+        }
+        return nw;
     }
 
     static int findAdjective(const string& word)
@@ -1098,7 +1371,8 @@ struct IItem
         w = replaceAll(w, '_', ' ');
 
         Diction::Words words;
-        return _adjectives.findMatches(w, words) ? words[0]._id : 0;
+        _adjectives.findMatches(w, words);
+        return !words.empty() ? words[0]._id : 0;
     }
 
     static void resolveAdjective(IItems& items, int adj)
@@ -1134,7 +1408,8 @@ struct IItem
     }
     
     static void parse(IItems& items, const string& phrase);
-    
+    static void phraseResolve(IItems& items, const string& phrase);
+
     void expose() const
     {
         if (!_item) return;

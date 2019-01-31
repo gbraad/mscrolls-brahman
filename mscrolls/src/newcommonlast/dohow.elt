@@ -1,0 +1,81 @@
+**************************************************************
+*
+*	10/27/87
+*	@(#)dohow.elt	1.4
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"scenequ.i"
+
+
+    IFND	wantNOQUOTES
+
+*--------------------------------
+	
+	
+* DEAL WITH THE EXCEPTIONAL COMBINATIN
+* HOW MUCH...
+* HOW MANY...
+*	
+* ENTRY:
+* WRD DATA SET UP ALREADY
+*	
+* EXIT:
+* NPCABOUTT BIT FLAGS SET AS FOLLOWS..
+* 0 = ABOUT
+* 2 = MANY
+* 2 = MUCH
+*
+******************************************
+	
+	XDEF	DOHOW
+	XREF	DEC.N2,NPC.LBF1,TEMPBUF,NPCABOUT,PFAIL,PARSEONE,PARSETHR
+
+DOHOW
+	
+	CMP.W   #SECT.VAL,D6      ;MUCH OR MANY?
+	BEQ.S   HOW.VAL
+	CMP.W   #SECT.CONJ,D6
+	BNE     PFAIL
+	CMP.W   #$12,D5           ;ABOUT?
+	BNE     PFAIL
+	MOVE.B  #1,NPCABOUT(A4)   ;FLAG IT
+	CALL    DEC.N2
+	CLR.W   D7                ;OK
+	RET
+
+HOW.VAL
+
+	TEST_W  D5                ;MUCH?
+	BEQ.S   10$
+	CMP.W   #1,D5             ;MANY?
+	BNE     PFAIL
+	BSET    #2,NPCABOUT(A4)   ;FLAG
+	DO	MNPH
+	TEST_W  D7
+	BNE     PFAIL
+	LEA     NPC.LBF1(A4),A0
+	LEA     TEMPBUF(A4),A1
+20$
+	MOVE.W  (A1)+,(A0)+
+	BNE.S   20$                ;SAVE NP
+10$
+	BSET    #1,NPCABOUT(A4)    ;FLAG
+	DO	GETWRD
+	CALL    PARSEONE           ;(BE)+N+S
+	TEST_W  D7
+	BEQ.S   99$                ;EXIT
+	CALL    PARSETHR           ;(MODEL)+N+S
+	TEST_W  D7
+	BNE     PFAIL
+99$
+	RET
+
+    ENDC	;wantNOQUOTES
+
+	END

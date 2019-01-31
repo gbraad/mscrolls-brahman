@@ -1,0 +1,51 @@
+**************************************************************
+*
+*	%G%
+*	%W%
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"verbequ.i"
+	include	"scenequ.i"
+
+*--------------------------------
+
+    IFND	wantNOQUOTES
+	
+	XDEF	GOTOASK
+	XREF	CONVNPC,PERSON,NPC.LBF1,NOUNBUF2
+	
+GOTOASK
+	
+      
+*SET UP VARIABLES THEN MOVE TO ASK
+	
+	MOVE.W  CONVNPC+4(A4),D0   ;MAIN NOUN
+	CMP.W   #1,PERSON(A4)      ;YOU?
+	BEQ.S   10$                ;WHO ARE YOU!
+	GETINFO                    ;ON D0
+	LEA     NPC.LBF1(A4),A1
+	MOVE.W  (A1),D5            ;ABOUT D5
+	MOVE.W  D5,NOUNBUF2(A4)    ;KEEP ASK HAPPY
+	MOVE.W  #VNASK,D2          ;VERB#
+	DO	GETVECT            ;TO A1
+	JSR     (A1)               ;DO IT!
+	DOGO	PR20               ;EXIT
+10$
+	DO	P.SAY
+	MSG     COP6             ;HELLO, I AM..
+	GETINFO
+	DO	P.TN
+	DOGO	PR20 
+ 
+*------------------------------------------
+
+    ENDC	;!wantNOQUOTES
+
+
+	END

@@ -1,0 +1,132 @@
+******************************************************
+*
+*	%W%
+*	%G%
+*
+******************************************************
+
+		SECTION		"ADV",CODE
+
+*--------------------------------
+*
+* ask
+*
+*--------------------------------
+
+
+	include	"equates.i"
+	include	"verbequ.i"
+	include	"nounequ1.i"
+	include	"nounequ2.i"
+	include	"macros.i"
+	include	"scenequ.i"
+
+
+    IFD	wantUNIFIEDTEXT
+
+	XDEF	V.ASK,REPLY
+
+	XREF	DBS,SP.ASK,VERB,NOUNBUF2,W.IDFY,CHKNPC,P.SAY2,WHOOPS,GETDATA
+	XREF	COPOUT,P.SCN,SP.ASK2,P.TN,W.GLARE,P.SUBOB,RND.D1,SCREEN,EXTRA
+	XREF	PRTTXT,QuoteFlag,V.TELL
+	BeSure	M.QUOTE
+	BeSure	M.LINE
+ 
+V.ASK
+ 
+	TST_NPC	
+	BEQ	DBS
+    IFD	wantHeSheSays
+	XREF	CONVNPC
+	MOVE.W	D0,CONVNPC+4(A4)	;set as in converasation
+    ENDC	;wantHeSheSays
+
+	CALL	SP.ASK
+	CMP.W   #VNTELL,VERB(A4)
+	BEQ	V.TELL
+	TEST_W  NOUNBUF2(A4)		;INCASE NOTHING SPEC 
+	BNE.S   10$
+	MOVE.W	#-1,NOUNBUF2(A4)	;let ask produce the cop-out.
+ 
+10$
+	MOVE.W  D0,D5
+	MOVE.L  A0,A5
+	DO	CHKNPC
+	LEA	NOUNBUF2(A4),A1
+	MOVEQ	#-1,D7			;keeps last msg#
+20$	
+	MOVE.W  (A1)+,D0		;ITEM
+	BEQ.S   30$			;DONE
+	TEST_B   WHOOPS(A4)		;ONLY ONE COPOUT PLEASE!
+	BNE.S   30$
+	GETINFO
+	MOVE.L  A1,-(A7)
+	CALL_S  ASKMAIN
+	MOVE.L  (A7)+,A1
+	DO	P.ENDQUOTE
+	MSG	LINE
+	BRA.S   20$
+30$
+    IFD		wantSP.ASK_After
+	XREF	SP.ASK_After
+	MOVE.W	D5,D0
+	MOVE.L	A5,A0
+	CALL	SP.ASK_After
+    ENDC	;wantSP.ASK_After
+
+	RET
+  
+ASKMAIN
+ 
+	LEA	TABLE.ASK(PC),A1	;GET ADDR. OF TABLE OF OFFSETS
+10$
+	MOVE.L	(A1)+,D1		;get entry.
+	BEQ.S	30$
+	CMP.W   D1,D5			;CORRECT NOUN#?
+	BNE.S   10$			;YES!
+20$
+	SWAP	D1
+	ADD.W	D1,A1			;reply list addres.
+	BRA.S   REPLY
+30$
+
+NearCopout
+
+	CALL	SP.ASK2			;COUNT COPOUTS (DEV,PRINCESS)
+	ST	WHOOPS(A4)		;AVOID LOST OF COPOUTS
+	MOVE.W	D5,D0			;get npc back
+	DO	P.SAY2
+	BRA	COPOUT
+ 
+*--------------------------------
+  
+REPLY
+ 
+	PUSH_L	D5/A5
+01$
+	MOVE.L  (A1)+,D1
+	BGT.S	02$			;not terminator.
+	PULL_L	D5/A5
+	BRA.S	NearCopout
+02$
+	CMP.W   D1,D0			;our item?
+	BNE.S   01$
+	SWAP	D1
+	CMP.W	D1,D7			;same as last message?
+	BEQ.S	90$			;yes - don't repeat!
+	MOVE.W	D1,D7			;save for next time
+	MOVE.W	D5,D0			;get npc back
+	DO	P.SAY2
+	DO	P.SCN
+					;d1 = -no of copouts.
+90$
+	PULL_L	D5/A5
+	RET
+ 
+	include	"askabout.i"
+
+    ENDC	wantUNIFIEDTEXT
+
+*------------------------------------------
+
+	END

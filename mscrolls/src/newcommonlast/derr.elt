@@ -1,0 +1,50 @@
+**************************************************************
+*
+*	5/24/88
+*	@(#)derr.elt	2.3
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+
+*--------------------------------
+*
+* DERR - DATA ERROR LOTS OF MISC
+*        ROUTINES COME HERE WHEN THEY
+*        SUSS THAT THERE IS SOME 
+*        IMPOSSIBLE DATA, STUFF
+*        LIKE CONTENTS OF OBJ
+*        BEING GREATER THAN IT MAX VOL
+*        ETC..
+*
+*--------------------------------
+ 
+*--------------------------------
+* 
+* IF PROD THEN JUST RETURNS
+* IF DEMO THEN PRINTS 'DATA...
+* THEN RETURNS
+* IF NOT DEMO THEN TRAP #6
+*
+*--------------------------------
+
+
+	XDEF	DERR
+  
+DERR
+ 
+      IFNE    YCHEAT
+	PRINT   <'^DATA ERROR^'>
+      ENDC
+
+	RET
+ 
+
+
+*------------------------------------------
+
+	END

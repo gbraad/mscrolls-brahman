@@ -1,0 +1,219 @@
+******************************************************
+*
+*   @(#)go.elt  2.10
+*   4/10/89
+*
+******************************************************
+
+        SECTION     "ADV",CODE
+
+*--------------------------------
+*
+*  SRC.ADV.DIRECTION
+*
+*--------------------------------
+
+    include "equates.i"
+    include "macros.i"
+    include "scenequ.i"
+
+
+
+    XREF   VERB,VLIST.GO,VLEN.GO,CALCNET,SETMODE,SCREEN,P.SUB
+    XREF   W.CGTW,LINE,LIGHT,W.ONLY,P.EXITS,MLISTNGO,P.SCN
+    XREF   W.CSTFH,EXTRA,EXTRAPNT,GETADJPH,LastDirection,SCRPNT
+
+    XDEF   GO
+
+*--------------------------------
+*
+* GO - CALLED IF A DIRECTION
+*      (SECTION 7) IS FOUND BY
+*      THE PARSER. SUSSES IF       !!!!!! must preserve A3
+*      THE VERB (IF ANY) CAN       !!!!!! do to PARVERB
+*      HAVE A DIR_ PROCESSES
+*      ACORDINGLY
+*
+*--------------------------------
+    XDEF    GO.OK
+ 
+GO
+    IFNE  GENERIC
+    XREF    MakeUndoDiff
+    CALL    MakeUndoDiff
+    ENDC
+ 
+    MOVE.W  VERB(A4),D0
+*   CMP.W   #VNLOOK,D0         ;LOOK?  VNLOOK = 0
+    BEQ     GO.CantSee         ;CANNOT SEE THAT FAR FROM HERE
+    LEA     VLIST.GO(A4),A0    ;VERB ALLOWED ?     
+    MOVE.W  #VLEN.GO,D1        ;# OF ALLOWED VERBS (-1) URK!!!!! DR!!
+10$
+    CMP.B   (A0)+,D0           ;IN LIST?
+    DBEQ    D1,10$             ;LOOP 'TIL FOUND OR END OF LIST
+    BNE     GO.Exit            ;NO GOOD - NOT IN LIST
+GO.OK
+    DO  CALCNET            ;GET EXITS LIST FOR THIS ROOM -> A0 
+    MOVE.B  0(A0,D5.W),D2
+**********************************************************************
+    
+    IFD  wantSP.NWAY
+    XREF    SP.NWAY
+
+    CALL    SP.NWAY
+    BEQ     GO.Quit
+    TEST_B  D2
+    ENDC
+    
+**********************************************************************
+
+    BEQ.S   30$                ;NO EXIT
+
+    IFEQ     THE_PAWN
+    CMP.B   #MAXROOM,D2
+    BHI     40$
+    ENDC
+
+    IFNE     THE_PAWN
+    BMI.S   40$                ;NO WAY - BUT SPECIAL MSG
+    ENDC
+
+10$
+    MOVEQ   #0,D1              ;COS ONLY A BYTE!
+    MOVE.B  D2,D1              ;NEW ROOM NO.
+
+    MOVE.W  D5,LastDirection(A4)
+ 
+    CALL    SETMODE            ;TEST SPECIALS - SNOWMAN TYPE & change room#
+
+*
+*  Due to PARVERB and other nasties, we may really be part way through a
+*  command line here. So lets setup EXTRA and EXTRAPNT in case
+*
+ 
+    ST      EXTRA(A4)
+    MOVE.L  A6,EXTRAPNT(A4)
+
+    DO  GETADJPH             ;was there a noun after the dir?
+    CMP.W   #SECT.NOUN,D6
+    BNE   GO.Quit           ;no
+    MOVE.L  A6,EXTRAPNT(A4)     ;yes, lose it
+    BRA GO.Quit
+
+30$
+    DO  P.SUB                ;YOU CANNOT GO THAT WAY ONLY...
+    MSG CGTW
+    MSG LINE
+    TEST_W  LIGHT(A4)          ;DARK ROOM= NO LIST OF EXITS
+    BEQ GO.Quit
+    
+    IFD     wantAlternativeNullExits
+    XREF    COUNTEXIT
+    CALL    COUNTEXIT
+    BNE.S   31$             ;none! (have the new msg).
+    MSG NOWAYOUT
+    BRA GO.Quit
+31$ 
+    ENDC    ;wantAlternativeNullExits
+
+    MSG ONLY
+    CALL    P.EXITS
+    BRA GO.Quit                ;IF ERR STOP PARSING
+40$
+    IFD wantAutoDoors
+    XREF    FindDoor,SP.OPEN,ROOM
+
+    PUSH_L  D0/D2-D3/A0
+    MOVE.W  ROOM(A4),D2
+    MOVE.W  D5,D3           ;direction.
+    CALL    FindDoor        ;->D0 (if exists)
+    BEQ.S   42$         ;no such door.
+    GETINFO             ;on our door
+    TST_OUT             ;is it really in game?
+    BNE.S   42$         ;no, then throw away.
+    TST_LOCKED          ;is it locked?
+    BNE.S   42$         ;yes, no chance.
+
+    CALL    OpenFirst
+    BNE.S   41$         ;NE => failed (POP'ed from a spec)
+
+    ADD.W   #4*4,A7         ;level stack    !!!!!!!!!!
+    MOVE.W  D3,D2           ;target room
+    BRA 10$         ;and go there.
+41$
+    PULL_L  D0/D2-D3/A0 
+    BRA.S   GO.Quit
+42$
+    PULL_L  D0/D2-D3/A0 
+
+    ENDC    ;wantAutoDoors
+
+    CLR.L   D1
+    MOVE.B  D2,D1
+    NEG.B   D1
+    LSL.W   #1,D1
+    LEA     MLISTNGO(A4),A1
+    ADD.L   D1,A1
+    MOVE.W  (A1),D1
+    BPL.S   50$
+    MOVE.W  #1,SCRPNT(A4)       ;so room name happens
+    AND.W   #$7FFF,D1       ;if hi bit of message was set
+50$
+    DO  P.SCN
+    BRA.S   GO.Quit
+GO.CantSee
+    
+    IFD     wantSP.GO.CantSee
+    XREF    SP.GO.CantSee
+    CALL    SP.GO.CantSee
+    BNE.S   51$             ;just quit, wo message.
+    ENDC    ;wantSP.GO.CantSee
+
+    MSG CSTFH          ;CANNOT SEE THAT FAR FROM HERE
+51$
+    
+GO.Quit
+    PULL_L  D0/D1
+    DOGO    SCREEN
+GO.Exit
+    RET
+
+*------------------------------------------
+
+    IFD wantAutoDoors
+
+    XDEF    OpenFirst
+
+OpenFirst
+
+    PEA 10$(PC)         ;incase one of the specials fails
+
+    IFD wantSP.OPEN_Before
+
+    XREF    SP.OPEN_Before
+    CALL    SP.OPEN_Before
+
+    ENDC    ;wantSP.OPEN_Before
+
+    CALL    SP.OPEN         ;triger anything?
+    DO  OpenDoor        ;actually open the door
+    DO  P.SUB           ;you
+    MSG OPENSPACE
+    DO  P.TN            ;open the door
+    MSG FIRSTSTOP
+
+    IFD wantSP.OPEN_After
+
+    XREF    SP.OPEN_After
+    CALL    SP.OPEN_After
+
+    ENDC    ;wantSP.OPEN_After
+    
+    POPSP               ;kill ret to10#
+    SETEQ_RET           ;success
+10$
+    SETNE_RET           ;Failed
+
+
+    ENDC
+

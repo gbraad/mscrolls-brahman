@@ -1,0 +1,128 @@
+**************************************************************
+*
+*	2/17/89
+*	@(#)noadj.elt	2.4
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"scenequ.i"
+
+
+    IFND	Version2_NOADJ
+
+	XDEF	NOADJ
+	XREF	DECODE,WRDPNT,POSWRD,PRTWRD2
+
+NOADJ
+ 
+	CMP.B   #2,D7        	;ALREADY ERROR
+	BPL     DECODE
+	MSG	WHAT
+	CLR.W   D0
+	MOVE.L  WRDPNT(A4),A6
+	SUBQ.L  #1,A6        	;BADHACKS
+*	DO	FNDWRD       	;TO START OF WRD
+	MOVE.L  A6,A5        	;KEEP
+	MOVE.L  POSWRD(A4),A6	;BEGINNING OF LAST WRD
+10$
+	CMP.L   A6,A5        	;THERE YET?
+	BHS.S   20$          	;YES
+	CALL    PRTWRD2  	;BEGINNING OF 1ST WRD
+	BRA.S   10$          	;ANOTHER
+20$
+	CALL    PRTWRD2
+	DO	CLRADJ
+	DO	UTIL.BS
+	MOVEQ   #'?',D1
+	DO	CHAROUT
+  
+	DOGO	D72
+
+    ENDC	;!Version2_NOADJ
+ 
+*------------------------------------------
+ 
+    IFD	Version2_NOADJ
+
+	XDEF	NOADJ
+	XREF	DECODE,WRDPNT,POSWRD,PRTWRD2
+	XREF	P.TAB,FGETWORD,ADJECTIV,POSADJ,BACK.WRD
+	XREF	LIST.N,CLRADJ
+
+NOADJ
+ 
+	CMP.B   #2,D7        	;ALREADY ERROR
+	BPL     DECODE
+	CALL	CLRADJ		;make sure there are no residual adjs
+	MSG	THEREISNOSUCH	;there is no such_
+	CLR.W   D0
+
+* Bob 17/2/89 It is my contention that A6 is already correct after all
+* routes here and that the setting up of A6 below is wrong in certain cases
+* e.g if coat is an adj and not a noun, 'look coat and dress' would reply
+* 'There is no such'
+      IFND	wantVersion2_NoSuch
+	MOVE.L	POSWRD(A4),A6
+	CALL	BACK.WRD
+      ENDC	;wantVersion2_NoSuch
+
+05$
+	CALL	FGETWORD	;a single.
+	TEST_B	D7		;nocando?
+	BNE.S	20$		;help!
+	CMP.W	#1,D6
+	BLS.S	05$
+	CMP.W	#SECT.ADJ,D6	;is an adjective?
+	BNE.S	10$		;no
+06$
+    IFND	wantBIGPROG
+	LEA	ADJECTIV(A4),A1
+    ENDC	;!wantBIGPROG
+
+    IFD		wantBIGPROG
+	LEA	ADJECTIV,A1
+    ENDC	wantBIGPROG
+
+
+	MOVE.W	D5,D1
+	CALL	P.TAB
+08$
+	CALL	FGETWORD	;a single.
+	TEST_B	D7		;nocando?
+	BNE.S	20$		;exit
+	CMP.W	#1,D6
+	BLS.S	08$
+	CMP.W	#SECT.ADJ,D6	;another adjective?
+	BEQ.S	06$
+10$
+	CMP.W	#SECT.NOUN,D6	;better be?
+;	BNE.S	90$		;no, exit
+	BNE.S	20$		;let's have a full stop - Bob
+	MOVE.W	D5,D1
+
+    IFND	wantBIGPROG
+	LEA	LIST.N(A4),A1
+    ENDC	;!wantBIGPROG
+
+    IFD		wantBIGPROG
+	LEA	LIST.N,A1
+    ENDC	;wantBIGPROG
+
+	CALL	P.TAB
+20$
+	DO	BSFULLSTOP
+90$
+	DOGO	D72
+	
+
+    ENDC	;Version2_NOADJ
+
+*------------------------------------------
+
+	END
+

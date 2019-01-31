@@ -1,0 +1,27 @@
+***********************************************************
+*
+*	@(#)tap.elt	1.2
+*	10/27/87
+*
+************************************************************
+
+		SECTION	"ADV",CODE
+
+		include	"equates.i"
+		include	"macros.i"
+		include	"scenequ.i"
+		include	"verbequ.i"
+
+	    IfVerb	TAP
+
+	    XDEF	V.TAP
+	    XREF	V.KNOCK,SP.TAP
+V.TAP
+
+	CALL	SP.TAP
+	BRA	V.KNOCK
+
+
+	ENDC	;tap
+
+	END

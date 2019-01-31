@@ -1,0 +1,113 @@
+
+*
+* Long Lists
+* Longlists is a mechanism by which the name of an object can be 
+* modified by an additional piece of descripive text appended to the
+* name.
+*  Because this text may be used within a list, it should have no
+* punctuation at the end, whense messages can be strung together with
+* commas.
+* The text modifier can optionally be included in the main description
+* of the object(s) in question. constructed as an extra sentence on the
+* end of the main description.
+*
+* eg.
+* >look
+* The tea lady is dancing the waltz.		; is constructed by
+*
+* [A tea lady] [isare] "dancing the waltz" [FULLSTOP]
+*
+* by setting, 'isare' mode
+* Note: Full stops are generated automatically.
+*
+* messages are automatically factored if they apply to more than one
+* object being listed.
+* so for example, the following text may be produced;
+
+* >look
+* A unicorn is dancing the waltz, a pelican is pecking the wall and a 
+* ticket and a paddle are bobbing up and down in the water here.
+
+* Note, the two consecutive 'and's produced by nested lists.
+
+Routines:
+
+EntryLongLook
+
+* make an entry in the LongLookTable
+* Entry
+*	d1.L = entry (HI=scen#, LO=noun#)
+
+ This puts D1.L into the LongLookTable
+at the first avaliable blank space after the label:
+	LongLookTable.Blank
+
+it is intended that there are about ten,
+	DC.L	0
+here as to make enough room, excessive use of entrylonglook
+rotates the table, so that the earliest entry 'falls off' the beginning.
+
+FodLongLook
+
+* Entry;
+*	D0.W = item to fod
+
+ Fods the first longlook entry for the item in D0.W
+
+FodLongLooks
+
+* entry;
+* 	D0.W = item to fod.
+
+Fods all the longlookentries for the item in d0.W
+
+ and in scenrw.i the table;
+
+*********************************************************
+*
+* LongLookTable
+*
+* Format of table:
+*
+*	DC.W	scen msg# [+HI] [+BIT14], noun# [+ HI]
+*	DC.W	...
+*	DC.L	0
+*
+* The nouns wi this message are factored in the list
+* and printed as a group wi the one message.
+* If the scenario msg is hi-bit set, then the 'isare' is suppressed between
+* the name of the objet and the modifying text.
+* If the msg# is BIT14 set, then the modifying text is NOT produced 
+* when the object is LOOKed at.
+*
+**********************************************************
+
+
+	Example: 
+
+LongLookTable
+	DC.W	m.longlook_base+1,NSECRETARY
+	DC.W	m.longlook_base+2,NTEALADY
+	DC.W	m.longlook_base+3,NTHERESA
+	DC.W	m.longlook_base+10+BIT14,NSERGEANT
+	DC.W	m.longlook_base+11+BIT14,NLAWYER
+	DC.W	m.longlook_base+12+BIT14,NWAITER
+	DC.W	m.longlook_base+13+BIT14,NWIFE
+	DC.W	0
+
+LongLookTable.Blank
+
+	DC.L	0
+	DC.L	0
+	DC.L	0
+	DC.L	0
+	DC.L	0
+	DC.L	0
+	DC.L	0
+	DC.L	0
+	DC.L	0
+	DC.L	0
+	DC.L	0
+
+
+

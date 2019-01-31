@@ -1,0 +1,80 @@
+**************************************************************
+*
+*	1/8/89
+*	@(#)ride.elt	2.6
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"verbequ.i"
+	include "scenequ.i"
+
+	IfVerb	RIDE
+
+	XDEF	V.RIDE
+	XREF	SEATED,ADVERB,V.SIT,VERB,RIDING,P.BYAN,P.FLOO,SP.RIDE
+	XREF	GOTOGO
+	
+V.RIDE
+	
+	MOVE.W  ADVERB(A4),D1
+	BMI.S   50$                 ;RIDE (DIRECTION)
+10$
+	TEST_W  D0                  ;NOUN SPEC?
+	BMI.S	52$			;idfy
+
+      IFD	wantSP.RIDE_Before
+
+	XREF	SP.RIDE_Before
+	CALL	SP.RIDE_Before
+
+      ENDC
+
+	TEST_W  SEATED(A4)
+	BNE.S   70$                 ;ERROR
+	CALL    SP.RIDE
+	TST_NPC				;NPC?
+	BEQ.S   60$                 ;OK
+	TST_DEAD				;Dead NPC?
+	BEQ     P.FLOO
+	MSGGO	NNA		    ;Necrophiliacs not allowed
+50$
+	CMP.W   #-1,D1
+	BEQ.S   10$                 ;NOT REALLY
+	TEST_W  SEATED(A4)
+	BNE.S   51$                 ;OK
+	BRA     P.BYAN              ;BUT YOU ARE NOT SEATED.
+51$
+	MOVE.W  SEATED(A4),RIDING(A4)
+	MOVE.W  #VNGO,VERB(A4)
+	BRA	GOTOGO
+52$
+	MSGGO	IDFY
+	        
+60$
+	TST_SITTABLE				;SITTABLE?
+	BNE.S   90$
+	DO	P.SUB
+	MSG	YCNDTT
+	DOGO	P.TNSTOP
+70$
+	DO	P.SUB
+	CMP.W   SEATED(A4),D0
+	BNE.S   71$
+	MSG	ARE                ;YOU ARE ALREADY
+	MSGGO	ALRDY
+71$
+	MSGGO	CANTH   
+90$
+	MOVE.W  #ON,ADVERB(A4)      ;SET AS 'ON'
+	BRA     V.SIT
+
+	ENDC
+
+
+
+	END

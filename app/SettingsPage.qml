@@ -354,7 +354,7 @@ Page
             {
                 text: "Rate Game"
                 subText: "Open App Store"
-                visible: Device.isIOS() && marketIOS > 0
+                visible: Device.isIOS() && marketIOS.length > 0
                 onClicked: Qt.openUrlExternally(marketIOS)
             }
 

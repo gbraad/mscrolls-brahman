@@ -1,0 +1,62 @@
+**************************************************************
+*
+*	%G%
+*	%W%
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"scenequ.i"
+
+	XDEF	UTHINT
+	XREF	POSWRD,INPUT,INBUFF,UNDOHINT
+
+UTHINT
+
+    IFD	wantSP.UTHINT
+	XREF	SP.UTHINT,UTEXIT
+	CALL	SP.UTHINT
+	BNE	UTEXIT			;=> special coped, exit
+    ENDC	;wantSP.UTHINT
+
+10$
+
+	MOVE.L  POSWRD(A4),A6        ;Get addr of filename
+	TEST_B  (A6)                 ;We do have something?
+	BNE.S   90$                  ;NE => yes
+	MSG	ENTERHINT		<'^Please enter hint :  '>
+
+  IFNE   Wimp!IBM!IIGS
+	
+	XREF	SCR_IGNO
+
+	ST      SCR_IGNO(A4)         ;Ignore input from pulldown scrolls for a bit
+
+  ENDC
+
+	CALL    INPUT                ;Get a line from keyboard
+
+  IFNE   Wimp!IBM!IIGS
+
+	SF      SCR_IGNO(A4)         ;Stop ignoring scrolls
+
+  ENDC
+
+	LEA     INBUFF(A4),A6        ;Find new text
+	DO	FNDWRD               ;lose initial spaces
+	MOVE.L  A6,POSWRD(A4)        ;Make sure rest of world knows
+
+	BRA.S   10$                  ;check this one is ok
+
+90$
+
+	CALL    UNDOHINT
+	DOGO	UTEXIT
+
+
+
+	END

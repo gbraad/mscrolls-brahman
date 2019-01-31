@@ -1,0 +1,47 @@
+**************************************************************
+*
+*	%G%
+*	%W%
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"scenequ.i"
+
+    IFND	wantNOQUOTES
+
+	XDEF	ONECOP
+
+ONECOP
+	        
+	DO	P.SAY
+05$
+	MOVEQ	#8,D1
+	RND_D1			;random 0-7
+	TEST_W	D1
+	BNE.S   10$
+	MSG	TRICKQ
+	BRA.S   90$
+10$
+	CMP.W   #2,D1			;not suitable
+	BEQ.S	05$
+
+	BeSure	M.IHNI
+
+	ADD.W	#M.IHNI-1,D1		;I have ni idea -1
+	DO	P.MSG
+90$
+	MOVEQ   #2,D7               ;FLAG AS DONE
+	MOVE.L  (A7)+,D1            ;DUMP
+	RET
+
+	ENDC	;!wantNOQUOTES
+
+*------------------------------------------
+
+
+	END

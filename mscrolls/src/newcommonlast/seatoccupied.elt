@@ -1,0 +1,115 @@
+***********************************************************
+*
+*	%W%
+*	%G%
+*
+************************************************************
+
+		SECTION	"ADV",CODE
+
+		include	"equates.i"
+		include	"macros.i"
+		include	"nounequ2.i"
+		include	"scenequ.i"
+
+	    IFD		attribute_SINGLESEAT
+
+	    XDEF	SeatOccupied
+	    XREF	Denotation_SINGLESEAT
+	    XREF	ISATTRIBUTE,KILLNOTNPC,COUNTLIST
+	    XREF	STOPRON
+
+
+SeatOccupied
+
+* Entry;
+*	seat (or sittable item) in D0
+*
+* Exit;
+*	EQ <=> is occupied. (or big enough)
+*	    => STOPRON setup for possible message.
+*	else d1 trashed.
+
+	PUSH_L	D0-D2/D4/D6/A0-A1
+	LEA	Denotation_SINGLESEAT(A4),A1
+	DO	ISATTRIBUTE			;is it such?
+	BNE.S	90$				;no, quit
+	MOVE.W	D0,D2				;target
+	DO	GETRELN				;->a1
+10$
+	MOVE.W	(A1)+,D0			;get object.
+	BEQ.S	80$				;no such person.
+	BMI.S	10$				;ignor
+	GETINFO
+	TST_NPC					;is it an npc though?
+	BEQ.S	10$				;no, continue.
+	MOVE.W	D0,STOPRON(A4)			;setup for message.
+80$
+	EOR	#4,CCR				;invert
+90$
+	PULL_L	D0-D2/D4/D6/A0-A1
+	RET
+	
+
+    ENDC	;attribute_SINGLESEAT
+
+*------------------------------------------
+
+WantGenNpcsInRoom	SET	0
+    IFD	wantCompleteNPCINRM
+WantGenNpcsInRoom	SET	1
+    ENDC	wantCompleteNPCINRM
+    IFD	attribute_SINGLESEAT
+WantGenNpcsInRoom	SET	1
+    ENDC	;attribute_SINGLESEAT
+	
+    IFNE	WantGenNpcsInRoom
+
+	XDEF	GenNpcsInRoom
+	XREF	DNOUNBUF,ROOM
+
+GenNpcsInRoom
+
+* Entry;
+*	D2 = target (room)
+
+    IFD		wantMOBILES
+;	XREF	PeopleBuffer
+;	CLR.W	PeopleBuffer(A4)		;erase entry to zap.
+	MOVE.W	ROOM(A4),D2			;the target is always the room.
+    ENDC	;wantMOBILES
+	
+	PUSH_L	D0-D3/A0
+	MOVEQ	#0,D3			;1st noun
+	LEA	DNOUNBUF(A4),A1		;target
+10$
+	ADDQ.W	#1,D3			;inc counter
+	CMP.W	#NMAXNOUN,D3		;at the end?
+	BHI.S	90$			;done.
+20$
+	MOVE.W	D3,D0
+	GETINFO
+	TST_NPC				;an npc?
+	BEQ.S	10$			;no, try next.
+	CMP.B	#1,6(A0)		;just related?
+	BNE.S	21$			;no,
+	CMP.W	8(A0),D2		;to the room?
+	BEQ.S	10$			;yes, then special no-mention.
+21$
+	DO	VALID.NP
+	BNE.S	10$			;not here really, continue.
+	DO	TOPLOC			;where is he/she ultimately?
+	CMP.W	D0,D2			;here?
+	BNE.S	10$			;no, next.
+	MOVE.W	D3,(A1)+		;this one.
+	BRA.S	10$			;anymore?
+90$
+	CLR.W	(A1)			;terminate.
+	LEA	DNOUNBUF(A4),A1		;target
+	PULL_L	D0-D3/A0
+	RET
+
+*------------------------------------------
+    ENDC	;wantGenNpcsInRoom
+
+	END

@@ -1,0 +1,43 @@
+***********************************************************
+*
+*	%W%
+*	%G%
+*
+************************************************************
+
+		SECTION	"ADV",CODE
+
+		include	"equates.i"
+		include	"macros.i"
+		include	"verbequ.i"
+		include	"scenequ.i"
+
+		IfVerb	WEIGH
+		XDEF	V.WEIGH
+
+		XREF	YCANTNOW,SP.WEIGH
+V.WEIGH
+
+
+	TEST_W	6(A0)		;only allow simply related objects
+	BNE	YCANTNOW
+	BTST	#4,3(A0)	;moveable?
+	BEQ	YCANTNOW	;no
+	DO	FIXCHK		;tied?
+	BNE	YCANTNOW	;no chance
+	CALL	SP.WEIGH	;try specials
+				;this will test suitability of d5 etc.
+	
+	MSG	NOSUITABLE	;there is nothing suitable to_
+	MOVE.W	#VNWEIGH,D1	; verb number
+	DO	P.VERB		;weigh
+	DO	P.TN		;the item
+	MSG	ON		;on
+	MSGGO	HERE		;here.
+
+
+*------------------------------------------
+
+    ENDC	;V.WEIGH
+	
+	END

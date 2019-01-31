@@ -1,0 +1,47 @@
+**************************************************************
+*
+*	10/27/87
+*	@(#)must4.elt	1.2
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+
+*--------------------------------
+
+
+*IN AMBIGUOUS CASES SUCH AS
+*PUT ALL IN X  (INTO WHAT?)
+	
+*SOMETIMES A 4PART MUST BE THE CASE
+	
+*EXIT:
+*EQ= 4PART REQUIRED
+*NE= NOT-NECESSARILY
+
+	XDEF	MUST4
+	XREF	MUST4_L,VERB
+	
+MUST4
+	
+	CLR.W   D0
+	LEA     MUST4_L(PC),A1
+10$
+	MOVE.B  (A1)+,D0
+	CMP.B	#-1,D0
+	BNE.S	20$			;not at end of list
+	SETNE				;fail
+	RET
+20$
+	CMP.W   VERB(A4),D0        ;IN LIST?
+	BNE.S   10$
+99$
+	RET
+
+
+
+	END

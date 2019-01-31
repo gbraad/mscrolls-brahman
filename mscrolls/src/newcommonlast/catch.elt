@@ -1,0 +1,32 @@
+**************************************************************
+*
+*	%G%
+*	%W%
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"verbequ.i"
+
+*
+* V.CATCH
+*
+	IfVerb	CATCH
+
+	XDEF	V.CATCH
+	XREF	SP.CATCH,GET_
+
+V.CATCH
+
+	CALL	SP.CATCH
+	BRA	GET_
+
+	ENDC
+
+
+
+	END

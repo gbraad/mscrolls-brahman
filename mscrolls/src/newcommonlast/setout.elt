@@ -1,0 +1,101 @@
+**************************************************************
+*
+*   %G%
+*   %W%
+*
+**************************************************************
+
+
+    SECTION "ADV",CODE
+
+    include "equates.i"
+    include "macros.i"
+
+
+    IFNE    0
+
+* is redundent
+
+*--------------------------------
+*
+*
+* SETOUT2 - to avoid hassle from things which are contained being put 'out'
+*           and annoying the relph stuff we have 'SETOUT2' which sets the
+*           noun out then moves it to room #1 (still with the OUT
+*           bit set).
+*
+    XDEF    SETOUT2
+
+SETOUT2
+
+    MOVE.L  A0,-(A7)
+    CALL_S  SETOUT          ;do the work!
+    GETINFO
+    MOVE.L  #$80000001,6(A0)    ;frig to room 1
+    MOVE.L  (A7)+,A0
+    RET
+ 
+
+    ENDC    ;0
+
+*--------------------------------
+*
+* SETOUT - CLEAN UP AFTER A ZAP
+*
+* SET'S BIT 7,BYTE 6 (OUT FLAG)
+* THEN CLEANS UP FIXTURES
+* AND CONTAINERS
+*
+* SO STUFF LIKE TIE SHIRT TO RED
+* MIX COLOURS,DR SHIRT,L RED
+* DONT SUSS US!!
+*
+*
+*--------------------------------
+ 
+    XDEF    SETOUT
+
+
+SETOUT
+ 
+    PUSH_L  D0-D2/D5/D6/A0-A1/A3
+    GETINFO
+    BSET    #7,6(A0)           ;SET IT TO BE 'OUT'
+    BNE.S   90$         ;already, quit.
+    DO  FIXCONT            ;FIX ANY CONTAINERS
+
+    MOVEQ   #0,D5           ;tell fixsys to be quiet
+    DO  FIXSYS          ;get buffer of tied obj's in A3
+02$
+    MOVE.W  (A3)+,D0
+    BMI.S   02$
+    BEQ.S   90$
+    GETINFO
+    CLR.W   12(A0)
+    BRA.S   02$
+
+    IFNE  0
+
+    MOVE.W  D0,D2              ;TARGET
+    MOVEQ   #1,D5              ;FLAG - LOOKING FOR WORD
+    MOVEQ   #12,D1             ;STARTING WI BYTE 12 (TIED)
+    
+    DO  GETNOUNS           ;BUFFER RETURNED AT A1
+ 
+10$
+    MOVE.W  (A1)+,D0
+    BEQ.S   90$
+    GETINFO
+    CLR.W   12(A0)             ;UNTIE
+    BRA.S   10$
+
+    ENDC
+ 
+90$
+    PULL_L  D0-D2/D5/D6/A0-A1/A3
+    RET
+
+
+
+
+    END

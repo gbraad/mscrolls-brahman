@@ -1,0 +1,40 @@
+**************************************************************
+*
+*	10/27/87
+*	@(#)flushvar.elt	1.4
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"scenequ.i"
+
+    IFND	wantNOQUOTES
+
+*--------------------------------
+
+	XDEF	FLUSHVAR
+	XREF	NPC.TOBE,NPCMODEL,NPCABOUT,NPC.LBF1,NPC.LBF2,PERSON
+	
+FLUSHVAR
+	        
+*CLEAR NPC QUESTION VARIABLES
+*AND ZAP BUFFERS
+	
+	MOVE.L  D0,-(A7)
+	MOVEQ   #-1,D0
+	MOVE.L  D0,NPC.TOBE(A4)
+	MOVE.W  D0,NPCMODEL(A4)
+	CLR.W   NPCABOUT(A4)
+	MOVE.W  D0,NPC.LBF1(A4)
+	MOVE.W  D0,NPC.LBF2(A4)
+	MOVE.L  (A7)+,D0
+	MOVE.W  #2,PERSON(A4)       ;DEFAULT IS 3RD
+	RET
+
+    ENDC	;wantNOQUOTES
+
+	END

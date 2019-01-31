@@ -58,7 +58,7 @@ CONFIG(debug, debug|release) {
 }
 
 CONFIG(release, debug|release) {
-   DEFINES += NDEBUG QT_NO_DEBUG_OUTPUT
+   DEFINES += NDEBUG QT_NO_DEBUG_OUTPUT QT_NO_WARNING_OUTPUT 
    BUILDT=release
    }
 

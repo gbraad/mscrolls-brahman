@@ -1,0 +1,91 @@
+**************************************************************
+*
+*	3/12/89
+*	@(#)feed.elt	2.4
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"verbequ.i"
+	include	"scenequ.i"
+
+      IfVerb	FEED
+
+	XDEF	V.FEED
+	XREF	P.MHAVSTOP,CONJ
+   
+V.FEED
+ 
+	MOVEQ   #0,D1		;'WITH' for CHK4PT
+	CMP.W   #1,CONJ(A4)      ;TO? 
+	BNE.S   01$		;No - so it MUST be 'with' then.
+
+	EXG     D0,D5		;swap nouns and data
+	EXG     A0,A5
+	MOVEQ   #1,D1		;tell CHK4PT that 'TO' is ok
+
+01$
+	DO	CHK4PT
+
+    IFD	wantSP.FEED_Before
+	XREF	SP.FEED_Before
+	CALL	SP.FEED_Before
+    ENDC	;wantSP.FEED_Before
+
+	TST_NPC				;
+	BNE.S   10$
+	MSGGO	NMOUTH
+10$
+	EXG     D0,D5		;CHKNPC takes D5/A5
+	EXG     A0,A5
+	DO	CHKNPC
+
+	DO	CARRIED	           ;MUST HAVE IT
+	BNE     P.MHAVSTOP          ;NO
+	DO	FIXCHK             ;NOT IF TIED
+	BEQ.S   11$                ;OK
+	DO	YCANT
+	MSGGO	ATMOMT         ;NOT AT THE MOMENT
+11$
+	EXG     D0,D5
+	EXG     A0,A5
+
+    IFEQ	THE_PAWN
+	XREF	SP.FEED
+	CALL	SP.FEED		;D0 = pc, D5 = food
+    ENDC
+
+	MOVE.B  11(A5),D1
+	AND.B   #$E0,D1             ;EDIBLE?
+	BNE.S   20$
+15$
+	DO	P.TN
+	DO	ISARE
+	MSGGO	NOTINTERESTED
+20$
+	DO	GETNPC
+	BTST    #2,2(A3)
+	BEQ.S   30$
+	CMP.B   #3,D1
+	BLS.S   15$
+	MSG	MUNCH
+	 
+	BRA.S   40$
+30$
+	DO	P.TN
+	MSG	THANK
+	DO	P.SUB
+	DO	BSFULLSTOP
+40$
+	MOVE.L  D5,D0
+	DOGO	SETOUT
+
+	ENDC
+
+
+
+	END

@@ -1,0 +1,228 @@
+**************************************************************
+*
+*	2/13/89
+*	@(#)do_adj.elt	2.3
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"scenequ.i"
+
+*--------------------------------
+
+	XDEF	DO.ADJ
+	XREF	FNOUN,BACK.AWRD,P.NFND,ADJNOUN,BACK.WRD,ADJPNTR,ERR1
+	XREF	WRDPNT,ADJBUF,NOTVERB,ADJVERB,MATCHBUF,POSWRD
+	XREF	BRKADJ,POSADJ
+ 
+DO.ADJ
+
+*
+*	entry:
+*	 expects a2,a4 to be set up by getwrd
+ 
+	MOVE.L	A6,POSADJ(A4)		;wel save the word pos incase backtrack
+	CMP.W	#SECT.VERB,MATCHBUF(A4)	;also a verb???
+	BEQ.S	02$			;yes!
+	CLR.W	ADJVERB(A4)		;not a verb as well
+	BRA.S	03$
+02$
+	MOVE.W	MATCHBUF+2(A4),ADJVERB(A4)	;store it.
+03$
+	MOVE.L  ADJPNTR(A4),A0
+	SUB.L   A4,A0      	  	;so as next line is ok!!!!!!!!!!
+	CMP.L   #ADJBUF,A0   		;THIS WONT WORK!! - KEN (?)
+	BNE.S   01$
+	MOVE.L  A6,WRDPNT(A4)		;NEW ADJ METHOD!
+01$	ADD.L   A4,A0        		;make up for above
+	ADDQ.L  #1,D5
+	MOVE.W  D5,(A0)+
+	CLR.W   (A0)
+	ADDQ.L  #2,ADJPNTR(A4)
+	MOVE.W  (A2)+,D0		;NEXT
+	MOVE.W	#-1,ADJNOUN(A4)		;clear to -1
+	CMP.B   #SECT.NOUN,D0		;ALSO A NOUN?
+
+      IFD	wantSameAdjAndSet
+	BEQ.S	09$
+	CMP.B	#SECT.MULT,D0		;OR A SET?
+      ENDC	;wantSameAdjAndSet
+
+	BNE.S   40$			;NO
+
+      IFD	wantSameAdjAndSet
+	MOVE.W	(A2)+,D0		;set word number
+	BSET	#14,D0			;indicate it was a set
+	BRA.S	30$
+09$
+      ENDC	;wantSameAdjAndSet
+
+      IFD	wantCantSeeFirstNoun	;so 1st noun in matchbuf used for err
+	XREF	ADJNOUN_First
+	MOVE.W	(A2),ADJNOUN_First(A4)	;save noun# away incase none are local
+      ENDC
+10$
+	MOVE.W	(A2)+,D0		;fetch noun -1
+	TEST_W	ERR1(A4)		;are we ignoring errors?
+	BNE.S	30$			;yes, accept this one.
+	ADDQ.W	#1,D0			;adjust to game noun#
+	DO	ISDOFRE			;do we need it to be valid?
+	BEQ.S	29$			;no, then accept this one.
+	DO	VALID			;is this noun around?
+	BEQ.S	29$			;yes, fine
+	CMP.W	#SECT.NOUN,(A2)+	;is the next entry a noun too?
+	BEQ.S	10$			;yes, so consider that as well
+	BSET	#15,D0			;flag as existed but not local
+	BRA.S	30$			;dont adjust back
+29$	
+	SUBQ.W	#1,D0			;adjust back to word#
+30$
+	MOVE.W  D0,ADJNOUN(A4)		;save this away incase it IS a noun.
+40$    
+	CLR.B	BRKADJ(A4)		;see if an article forces adj break
+	ST	NOTVERB(A4)		;rather not have a verb here
+	DO	GETWRD
+	CMP.B	#2,D7			;printed error?
+	BEQ	52$			;just quit
+	TEST_W	D6			;no match, attempt to recover meaning
+	BMI	51$			;either not recognised or nonesuch.
+	TEST_W	ADJBUF(A4)		;if the buf is empty then cannot have
+					;an adjbrk, NB: This may be a backtrack
+	BEQ.S	41$			;no, then dont consider it.
+	TEST_B	BRKADJ(A4)		;have we encountered an article?
+					;eg. give train ticket
+					;cf. give train the ticket
+	BNE	51$			;yes then resolve the word we do have
+41$
+	CMP.B	#4,D7			;adj resolution failure
+	BNE.S	50$			;no.
+	CLR.W	D5			;clear any bogus looking noun
+	BRA	70$			;seteq & return
+50$
+	TEST_B  D7			;end of command?
+	BNE.S   51$			;attempt to recover
+	CMP.W   #SECT.ADJ,D6 		;ANOTHER ADJ?
+	BEQ     DO.ADJ       		;YES
+	CMP.B   #SECT.NOUN,D6		;NOUN?
+	BEQ.S	52$			;exit as ok (note d5?=0)
+
+	CMP.B   #SECT.MULT,D6
+	BEQ.S   52$
+	CMP.B   #SECT.ONE,D6
+	BNE.S   51$
+52$
+	SETNE
+	RET
+51$				;NOW attempt to recover from data stored.
+
+      IFD	wantSameAdjAndSet
+	MOVE.W	ADJNOUN(A4),D5
+	BMI.S	55$
+	BCLR	#14,D5			;was it a set?
+	BEQ.S	55$
+	CALL	VerbNODOBJ
+	BEQ.S	55$
+	CLR.B	BRKADJ(A4)		;and clear it (incase of hassle)
+	MOVE.W	#SECT.MULT,D6
+	MOVE.L	ADJPNTR(A4),A0
+	CLR.W   -(A0)			;was not an adj, clear last adj
+	BRA.S	90$
+55$
+      ENDC	;wantSameAdjAndSet
+
+	MOVE.L	POSADJ(A4),A6		;at adjective in question
+	DO	BACK.AWRD		;step back 1 word.
+60$
+	CLR.B	BRKADJ(A4)		;and clear it (incase of hassle)
+	TEST_W	ADJNOUN(A4)		;can it be a noun as well
+	BMI.S	62$			;no, just think about verbs
+	CALL	VerbNODOBJ		;must verb have no direct object?
+	BNE.S	61$			;if not let nouns have precedence.
+62$
+	MOVE.W	ADJVERB(A4),D5		;did we have a sneaky verb?
+	BEQ.S	61$			;no (good)
+	MOVE.W	#SECT.VERB,D6		;set it as a verb
+	MOVE.L	ADJPNTR(A4),A0		;retrieve adjbuff index
+	CLR.W   -(A0)			;was not an adj, clear last adj
+	MOVE.L	A6,POSWRD(A4)		;set this as well
+	ADDQ.L	#1,POSWRD(A4)		;since it expects to -1
+	DO	FNDWRD
+	ADDQ.L	#1,A6
+	MOVEQ	#0,D7			;clear error
+	SETNE
+	RET				;try this
+61$
+	MOVE.W  #SECT.NOUN,D6
+	MOVE.W  ADJNOUN(A4),D5
+	CMP.W	#-1,D5			;empty?
+	BEQ.S   92$                	;NONE, EXIT
+
+	BCLR    #15,D5			;EQ => one was local, so use it
+	BEQ.S   80$
+
+      IFND	wantCantSeeFirstNoun
+	MOVE.W  D5,D0
+	MOVE.L	ADJPNTR(A4),A0
+	CLR.W   -(A0)
+      ENDC
+      IFD	wantCantSeeFirstNoun	
+	MOVE.W	ADJNOUN_First(A4),D0	;since none are local, get first for
+	ADDQ.W	#1,D0			;cos it's a word no.
+	GETINFO				;error message
+      ENDC
+
+	CALL    P.NFND
+	MOVEQ   #2,D7
+	BRA.S   70$
+80$
+	MOVE.L	ADJPNTR(A4),A0
+	CLR.W   -(A0)			;was not an adj, clear last adj
+	ST	FNOUN(A4)		;force noun.
+	BRA	40$			;get noun & exit.
+90$
+	CLR.W   D7
+70$
+	TEST_W  D5
+	RET
+91$
+	TEST_W	ADJVERB(A4)		;may still be a verb that tries to be
+					;an adjective => no maches in search
+	BNE.S	62$			;ahah!, go for it
+92$
+	MOVEQ   #0,D5 			; THIS MIGHT NOT WORK
+	BRA.S   90$
+  
+*--------------------------------
+
+	XDEF	VerbNODOBJ
+	XREF	VLIST.NODOBJ,VERB
+VerbNODOBJ
+
+* test if the current verb must not take a direct object
+* such as 'invent'
+
+* Exit:
+*	EQ<=> yes.
+
+	PUSH_L	D0/A0
+	LEA	VLIST.NODOBJ(A4),A0		;list of such verbs
+10$
+	MOVE.W	(A0)+,D0			;get one
+	BEQ.S	80$				;end, fail
+	CMP.W	VERB(A4),D0			;this one?
+	BNE.S	10$				;no try again
+90$
+	PULL_L	D0/A0				;retore
+	RET
+80$
+	SETNE					;fail
+	BRA.S	90$				;quit
+
+*-------------------------------------------------
+  
+
+	END

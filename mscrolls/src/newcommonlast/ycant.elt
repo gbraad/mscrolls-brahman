@@ -1,0 +1,79 @@
+**************************************************************
+*
+*	10/27/87
+*	@(#)ycant.elt	1.2
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+
+
+****************************************************
+*
+* YCANTWSTOP
+* PRINTS : you cant do that to the xyzzy{.}
+*
+****************************************************
+
+	XDEF	YCANTWSTOP
+
+YCANTWSTOP
+
+	CALL_S	YCANTW
+	DOGO	BSFULLSTOP
+
+*--------------------------------
+*
+* YCANTW - PRINTS 'YOU CAN'T DO THAT WI THE NOUN'&
+*
+*--------------------------------
+
+	XDEF	YCANTW
+   
+YCANTW
+ 
+	DO	P.SUB
+	MSG     ICNDTW
+	DOGO	P.TN
+ 
+*-----------------------------------------------------------
+*
+* YCANT - prints 'you cant do that to the xyzzy.'
+*
+*-----------------------------------------------------------
+
+	XDEF	YCANT
+
+YCANT
+	CALL_S	YCANTNFS
+	DOGO	BSFULLSTOP
+
+*
+* YCANTNFS - as above but no fullstop
+*
+
+	XDEF	YCANTNFS
+  
+YCANTNFS
+
+	DO	P.SUB
+	MSG     YCNDTT
+	DOGO	P.TN
+
+*
+* YCANTNOW - as above + at the moment
+*
+	XDEF	YCANTNOW
+
+YCANTNOW
+
+	CALL_S	YCANTNFS
+	MSGGO	ATMOMT
+
+
+
+	END

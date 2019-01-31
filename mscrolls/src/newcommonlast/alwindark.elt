@@ -1,0 +1,51 @@
+**************************************************************
+*
+*	10/27/87
+*	@(#)alwindark.elt	1.2
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+
+
+	
+
+*--------------------------------
+*
+* ALWINDARK - ALLOWED IN THE DARK
+*
+* Tests verb to see if u can do it in a dark room
+*
+*--------------------------------
+
+	XDEF	ALWINDARK
+	XREF	VLT.DARK,VLN.DARK,LIGHT,VERB
+ 
+ 
+ALWINDARK
+ 
+	MOVE.L  A1,-(A7)
+	TEST_W  LIGHT(A4)          ;LIGHT = 0 => dark room
+	BNE.S   90$
+	LEA     VLT.DARK(PC),A1    ;get list of allowed in dark verbs
+	MOVE.W  #VLN.DARK,D3       ;COUNTER  (BLOODY LINKER!)
+	MOVE.W  VERB(A4),D1        ;TARGET
+10$
+	CMP.B   (A1)+,D1           ;GOT IT?
+	DBEQ    D3,10$             ;NEXT.. OR FALL THROUGH (EQ= FOUND)
+	BNE.S   90$                ;OK VERB NOT ON LIST = CAN DO IN DARK
+	MSG	I2DARK             ;NOPE - CANNOT DO IT IN DARK
+	MOVE.L  (A7)+,A1           ;LEVEL STACK
+	MOVE.L  (A7)+,A1           ;LOSE RTN ADDR
+	DOGO	SCREEN             ;BACK TO SCREEN
+90$
+	MOVE.L  (A7)+,A1           ;GET BACK A1
+	RET
+
+
+
+	END

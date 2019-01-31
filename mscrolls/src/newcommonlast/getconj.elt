@@ -1,0 +1,36 @@
+**************************************************************
+*
+*	10/27/87
+*	@(#)getconj.elt	1.2
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+
+	XDEF	GETCONJ
+	XREF	TEMPBUF,NOUNBUF2,NOUNBUF3
+
+GETCONJ
+  
+	DO	MNPH               ;GET NOUNS
+	LEA     TEMPBUF(A4),A0
+	LEA     NOUNBUF2(A4),A1
+	TEST_W  (A1)               ;IS ALREADY FUL?
+	BEQ.S   10$                ;NO
+	LEA     NOUNBUF3(A4),A1
+	TEST_W  (A1)
+	BEQ.S   10$                ;FOR THE 3RD NPH
+	MSG	4BUFS            ;I CANT HANDLE THAT MANY NPS
+	MOVEQ   #2,D7
+	RET
+10$
+	MOVE.W  (A0)+,(A1)+        ;A NOUN
+	BNE.S   10$
+	RET
+
+
+	END

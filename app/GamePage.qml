@@ -288,6 +288,9 @@ Page
                 {
                     id: pic
 
+                    // do not use pixel blending unless new scaling selected
+                    smooth: QControl.prefs.imagepixscaleEnabled
+
                     property int m1: (QControl.lowMargins ? 6 : 16)*Units.dp
                     property int m: scaleMode ? Math.max(4*Units.dp, m1*gamearea.rollHeightShown/sourceSize.height) : m1
                     property real aspect: sourceSize.width ? sourceSize.height/sourceSize.width : 0

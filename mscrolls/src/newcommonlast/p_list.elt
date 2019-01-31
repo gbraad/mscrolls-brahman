@@ -1,0 +1,419 @@
+**************************************************************
+*
+*	%G%
+*	%W%
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"scenequ.i"
+
+*--------------------------------
+*
+*  P.LIST
+*
+* PRINT LIST OF NOUNS POINTED TO
+* BY A0, HIBIT SET = IGNORE
+* ZERO TERMINATES
+* 
+* P.LIST2 ALLOWS LIST TO USE
+* 'THE' RATHER THAN 'A'/'AN'/'SOME'
+* (D5<0 = USE THE) 
+*
+* P.LIST3, prints list wi 'the' using 'and' all the time
+*
+* STOMPS D5, SAVES ALL REST
+*
+*--------------------------------
+ 
+	XDEF	P.LIST,P.LIST2,P.LOR,P.LIST3
+	XREF	NOTRAIL2,SPACE
+	XREF	COUNTLIST
+  
+P.LIST
+  
+	MOVE.L	D5,-(A7)
+	MOVEQ   #0,D5              ;FLAG TO USE QUANTIFIERS
+	BeSure	M.AND
+	MOVE.W  #M.AND,LISWRD(A4)
+	CALL_S	P.LIST2
+	MOVE.L	(A7)+,D5
+	RET
+ 
+P.LIST2
+ 
+	CALL_S  P.LISUB
+	TEST_B	NOTRAIL2(A4)
+	BEQ	SPACE
+	RET
+
+P.LIST3 
+	MOVE.L	D5,-(A7)
+	BeSure	M.AND
+	MOVE.W  #M.AND,LISWRD(A4)
+	ST      D5                 ;WANT 'THE'
+	CALL_S	P.LIST2	
+	MOVE.L	(A7)+,D5
+	RET
+P.LOR
+	
+	ST      D5                 ;WANT 'THE'
+
+	BeSure	M.OR
+
+	MOVE.W  #M.OR,LISWRD(A4)
+  
+	XREF	NOTRAIL,UTIL.DEL,UTIL.SP,LISWRD,P.QN
+  
+P.LISUB
+  
+    IFD	wantMULTIPLES
+	CALL	CONTRACT
+    ENDC	;wantMULTIPLES
+	ST      NOTRAIL(A4)        ;LOSE P.NOUN'S TRAILING SPACES
+ 
+	PUSH_L  D0-D7/A0-A6
+	MOVEQ   #0,D7
+10$
+	MOVE.W  (A0)+,D0           ;HI BIT SET = IGNORE
+	BMI.S   10$
+	BEQ.S   80$                ;NOTHING
+	MOVE.W  D0,D1              ;SAVE
+	MOVE.L  A0,A1              ;SAVE
+11$
+	MOVE.W  (A0)+,D0
+	BMI.S   11$
+ 
+	MOVE.L  A1,A0
+	EXG     D1,D0              ;BACK
+	TEST_W  D1
+	BEQ.S   70$                ;END
+	CALL_S  20$                ;PRINT 'QUANT NOUN' OR 'THE NOUN'
+	MSG	COMMA			;print a comm
+	ADDQ.W  #1,D7   
+	BRA.S   10$
+70$
+	TEST_W  D7                 ;NONE (OR 64K!!)
+	BEQ.S   75$
+	CALL    UTIL.DEL           ;STOMP LAST COMMA AND SPACE
+	CALL    UTIL.DEL           ;BY MOVING LEFT TWICE
+	CALL    UTIL.SP            ;FORCE A SPACE
+	MOVE.W  LISWRD(A4),D1
+	DO	P.MSG
+75$
+	CALL_S  20$                ;DO LAST NOUN
+	BRA.S   99$
+80$
+	MSG     NT
+	TEST_B	NOTRAIL2(A4)
+	BEQ.S	99$
+	DO	UTIL.BS
+99$
+	PULL_L  D0-D7/A0-A6
+	CLR.B   NOTRAIL(A4)        ;INCASE FINISHED WI A 'NOTHING'
+	RET
+20$
+    IFD	wantMULTIPLES
+	XREF	P.PQN
+	BCLR	#14,D0			;multi-many flag?
+	BNE.S	21$
+    ENDC	;wantMULTIPLES
+	TEST_B  D5                 ;SUBROUTINE TO DECIDE WHETHER TO
+	BEQ	P.QN               ;OR 'THE NOUN' (D5<=0)
+	DOGO    P.TN               ;PRINT 'QUANT NOUN' (D5=0)
+    IFD	wantMULTIPLES
+21$
+	BRA	P.PQN		;plural quantity
+    ENDC	;wantMULTIPLES
+
+*---------------------------------------------------
+
+    IFD	wantLONGLOOK
+	XDEF	P.LongList,P.LongList2
+
+	XREF	SORTBUF,LongLookTable,P.SCN
+	XREF	DNOUNBUF,P.LISTIS,P.MSG,M.AND,M.COMMA
+
+*------------------------------------------
+*
+* Long Lists
+* Longlists is a mechanism by which the name of an object can be 
+* modified by an additional piece of descripive text appended to the
+* name.
+*  Because this text may be used within a list, it should have no
+* punctuation at the end, whense messages can be strung together with
+* commas.
+* The text modifier can optionally be included in the main description
+* of the object(s) in question. constructed as an extra sentence on the
+* end of the main description.
+*
+* eg.
+* >look
+* The tea lady is dancing the waltz.		; is constructed by
+*
+* [A tea lady] [isare] "dancing the waltz" [FULLSTOP]
+*
+* by setting, 'isare' mode
+* Note: Full stops are generated automatically.
+*
+* messages are automatically factored if they apply to more than one
+* object being listed.
+* so for example, the following text may be produced;
+
+* >look
+* A unicorn is dancing the waltz, a pelican is pecking the wall and a 
+* ticket and a paddle are bobbing up and down in the water here.
+
+* Note, the two consecutive 'and's produced by nested lists.
+
+
+*------------------------------------------
+
+P.LongList
+
+	MOVE.W	D5,-(A7)
+	MOVEQ	#1,D5
+	CALL	P.LongList.sub
+	MOVE.W	(A7)+,D5
+	RET
+
+P.LongList2
+
+	MOVE.W	D5,-(A7)
+	MOVEQ	#0,D5
+	CALL	P.LongList.sub
+	MOVE.W	(A7)+,D5
+	RET
+
+	
+
+P.LongList.sub
+
+* Entry
+*	a1= pointer to std. list format, ztermiated noun#s
+*	D5.W <=> print 'there isare' before simple list
+
+	PUSH_L	D0-D7/A0-A3
+	CLR.W	D3			;flag.
+	MOVE.L	#-1,-(A7)		;terminate as -1
+10$
+	MOVE.W	(A1)+,D1		;get a noun
+	BEQ.S	20$			;done, next stage
+	BMI.S	10$			;dont bother about these
+	LEA	LongLookTable(A4),A0	;start of table
+15$
+	MOVE.L	(A0)+,D0		;get entry (msg,noun#)
+	BEQ.S	16$			;end, no such entry
+	BCLR	#15,D0			;lose any flag
+	CMP.W	D0,D1			;is d1 in this table?
+	BEQ.S	17$			;yes, stack it
+	BRA.S	15$			;no, try next
+16$
+	MOVE.W	D1,D0			;construct null entry (0,noun#)
+17$
+	MOVE.L	D0,-(A7)		;stack this noun
+	BRA.S	10$			;next in list
+20$
+	MOVE.L	A7,A0			;start of fake buffer
+	CALL	SORTBUF			;arrange by scn#
+30$
+	LEA	DNOUNBUF(A4),A1		;list buffer
+40$
+	MOVE.L	(A0)+,D0		;get one
+	CMP.L	#-1,D0			;end (has tobe -1)
+	BEQ	50$			;yes
+	SWAP	D0			;get scn# low
+	MOVE.W	D0,D1			;save it for compare
+44$
+	SWAP	D0			;get noun#
+	MOVE.W	D0,(A1)+		;onto buffer
+45$
+	MOVE.L	(A0)+,D0		;get another
+	CMP.L	#-1,D0			;end?
+	BEQ	46$			;that's it, print the list
+	SWAP	D0			;get section of this
+	CMP.W	D0,D1			;still the same
+	BNE.S	4501$			;no, print these & continue
+	SWAP	D0			;get noun again
+	MOVE.W	D0,(A1)+		;onto buffer
+	BRA.S	45$			;consider rest in this list
+4501$
+	;look ahead to see if there is 
+	; another section change later
+	MOVE.W	#M.COMMA,D2		;normally print a comma
+	MOVE.L	A0,-(A7)
+4502$
+	CMP.W	(A0),D0			;change again?
+	ADDQ.L	#4,A0			;to next.
+	BEQ.S	4502$			;no change, continue.
+	CMP.W	#-1,-4(A0)		;is the next section, the end?
+	MOVE.L	(A7)+,A0		;restore
+	BNE.S	46$			;go ahead, we have a comma
+	MOVE.W	#M.AND,D2		;else an AND
+46$
+	CLR.W	(A1)			;terminae list buffer
+	MOVE.L	A0,-(A7)		;stack a0
+	TEST_W	D1			;any message?
+	BEQ.S	47$			;no, skip
+	LEA	DNOUNBUF(A4),A0		;start of list
+	BCLR	#15,D1			;hi-bit => no 'isare'
+	BEQ.S	4602$
+	DO	P.LIST
+	BRA.S	4603$
+4602$
+	MOVE.W	D5,-(A7)
+	CLR.W	D5			;use 'a'
+	DO	P.LISTIS		;print these
+	MOVE.W	(A7)+,D5		;restore.
+4603$
+	AND.W	#$3fff,D1		;lose any bit flags
+	DO	P.SCN			;and their message
+4604$
+	CMP.L	#-1,D0			;end next time?
+	BNE.S	4601$
+	TEST_B	D5			;there isare .. here?
+	BEQ.S	4606$
+	TEST_B	D3			;or this flag
+	BEQ.S	4606$
+	MSG	SPACE			;else print a space for the 'here.'
+	BRA	48$			;containue
+4606$
+	DO	FULLSTOP
+	BRA	48$			;quit
+4601$
+	MOVE.W	D2,D1			;get the message
+	CMP.W	#M.AND,D1
+	BNE.S	4605$
+	MSG	SPACE			;need a space here
+4605$
+	CALL	P.MSG
+	BRA	48$			;resume
+47$
+	ST	D3			;flag null description to start.
+	TEST_W	D5			;print 'there isare'?
+	BNE.S	49$			;yes, print it & come back
+4702$
+	LEA	DNOUNBUF(A4),A0		;start of list
+	CMP.L	#-1,D0			;end after this?
+	BEQ.S	4701$			;yes, no space
+	CMP.W	#M.AND,D2		;wil we need an and?
+	SNE	NOTRAIL2(A4)		;no space on list
+4701$
+	DO	P.LIST			;print the simple list
+	CLR.B	NOTRAIL2(A4)		;back to normal
+	BRA.S	4604$
+49$
+	MOVE.L	D0,-(A7)
+	MOVE.W	DNOUNBUF(A4),D0		;start of list
+	GETINFO
+	TST_NPC				;npc?
+	PULL_L	D0
+	BNE.S	43$			;yes
+	MSG	THERE
+
+    IFD	wantMULTIPLES
+	XREF	GetMultiCode
+	PUSH_L	D0-D2
+	ST	D2			;just so d2!=0
+	DO	GetMultiCode		;->d1
+	BEQ.S	4903$			;nul, quit
+	MOVE.W	D1,D2			;save
+	MOVE.W	DNOUNBUF+2(A4),D0	;next
+	DO	GetMultiCode		;->d1 (if d0==0, then d1 != D2)
+4903$
+	CMP.W	D1,D2			;same code => 'are'
+	PULL_L	D0-D2
+	BNE.S	4901$			;no, continue as before.
+	MSG	ARE			;'are'
+	BRA.S	4702$
+4901$
+    ENDC	;wantMULTIPLES
+
+	DO	ISARE
+	BRA.S	4702$			;& continue
+43$
+	LEA	DNOUNBUF(A4),A0		;start of list
+	DO	P.LIST
+	MOVE.L	A0,A1			;for counting
+	DO	COUNTLIST		;->d4
+	CMP.B	#1,D4			;how many
+	BHI.S	42$			;more than 1
+	MOVE.W	(A0),D0			;get the first
+	GETINFO				;data on it
+	TST_PLURAL			;plural?
+	BNE.S	42$			;yes
+	MSG	IS
+	BRA.S	41$			;singular
+42$
+	MSG	ARE
+41$
+	CLR.W	D5			;no more here's
+	MSG	HERE
+48$
+	MOVE.L	(A7)+,A0		;restore a0
+	SUBQ.L	#4,A0			;we have looked ahead, adjust
+	BRA	30$			;consider next section
+50$
+	MOVE.L	(A7)+,D0		;now kill that buffer
+	CMP.L	#-1,D0			;end yet?
+	BNE.S	50$			;no, find terminator
+	TEST_B	D5			;was it an there isare .. here?
+	BEQ.S	90$
+	TEST_B	D3			;was there a msg to start?
+	BEQ.S	90$			;d3=0 => msg to start
+	MSG	HERE
+90$
+	PULL_L	D0-D7/A0-A3
+	RET
+    ENDC	;wantLONGLOOK
+
+*----------------------------------------------------------
+
+    IFD	wantMULTIPLES
+	XDEF	CONTRACT
+
+	XREF	GetMultiCode
+CONTRACT
+
+* Entry	buffer in a0
+
+	
+	PUSH_L	D0-D2/A0-A2
+10$
+	MOVE.W	(A0)+,D0		;get one
+	BEQ.S	90$			;done
+	BMI.S	10$			;ignor
+	DO	GetMultiCode		;->d1
+	BEQ.S	10$			;nosuch code
+	MOVE.W	D1,D4			;set up target
+	MOVE.L	A0,A1			;start at this point
+20$
+	MOVE.W	(A1)+,D0		;get again
+	BEQ.S	10$			;done this lot
+	BMI.S	20$			;no negs
+	DO	GetMultiCode		;->d1
+	CMP.W	D1,D4			;target?
+	BNE.S	20$			;try for another
+	MOVE.L	A1,A2			;point for another
+	SUBQ.L	#2,A2			;-1, since gap wil close
+	BSET	#6,-2(A0)		;set bit 14 as multi-many flag
+30$
+	MOVE.W	(A1),-(A1)		;close gap on duplicate
+	BEQ.S	40$			;done prepare for another
+	ADDQ.L	#4,A1			;+2
+	BRA.S	30$			;keep moving
+40$
+	MOVE.L	A2,A1			;original back again
+	BRA.S	20$			;and look for another
+90$
+	PULL_L	D0-D2/A0-A2
+	RET
+    ENDC	;wantMULTIPLES
+
+*--------------------------------------------
+
+	END

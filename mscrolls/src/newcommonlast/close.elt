@@ -1,0 +1,56 @@
+**************************************************************
+*
+*	%G%
+*	%W%
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"verbequ.i"
+	include	"scenequ.i"
+
+	IfVerb	CLOSE
+
+	XDEF	CLOSE
+	XREF	P.BTNI,YCANT,SP.CLOSE,SEATED,CloseDoor
+  
+CLOSE
+ 
+	BeSure	M.CLSE
+
+	MOVE.W  #M.CLSE,D1
+	TST_CLOSED				;
+	BNE     P.BTNI            	;BUT THE NOUNIS ALEADY CLOSED
+ 
+	CALL    SP.CLOSE
+  
+	TST_OPEN				;HAS TO BE OPEN TO BE CLOSED!
+	BEQ     YCANT             	;YCANT - (UNLESS OPEN)
+	CMP.W	SEATED(A4),D0		;are we sitting on it?
+	BEQ	YCANT			;yes - bad news
+
+
+	MOVE.W  #M.CLSE,D1        	;'THE NOUN IS NOW CLOSED
+	DO	P.TNIN
+	DO	CloseDoor
+
+*** It is here so it fod's the nway's after it has printed the noun is now 
+*** closed... (ajs) and then doesn't refod the nway's with CloseDoor!
+
+    IFD	wantSP.CLOSE_After
+	XREF	SP.CLOSE_After
+	CALL	SP.CLOSE_After
+    ENDC	;wantSP.CLOSE_After
+
+	RET
+
+
+	ENDC
+
+
+
+	END

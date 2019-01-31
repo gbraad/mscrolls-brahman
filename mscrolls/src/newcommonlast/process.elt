@@ -1,0 +1,368 @@
+**************************************************************
+*
+*   %G%
+*   %W%
+*
+**************************************************************
+
+    SECTION "ADV",CODE
+
+    include "equates.i"
+    include "macros.i"
+    include "verbequ.i"
+    include "nounequ1.i"
+    include "scenequ.i"
+
+*--------------------------------
+
+    XDEF    PROCESS,MissVerb
+
+    XREF    REP1,PEND2,VERB,USE,TWOPV,NOUNBUF,NOUN,SINGV,WHOOPS
+    XREF    SEATED,WHENSAT,P.NORCH,VERBOWN,CHK.OWN,STOPBRK
+    XREF    CONJ,ADVERB,ADDNOUN,ALWINDARK,GETPRON
+    XREF    NPCREACTIONS,P.SUBV,SATOBJLOC
+ 
+    
+ 
+PROCESS
+
+    
+    IFNE  GENERIC
+    XREF    MakeUndoDiff
+    CALL    MakeUndoDiff
+    ENDC
+
+ 
+    CLR.W   REP1(A4)           
+    MOVE.B  (A0),D1
+
+    IFD wantMULTIPLES
+    XREF    LASTMULTICODE
+    CLR.B   LASTMULTICODE(A4)   ;initialise
+    ENDC    ;wantMULTIPLES
+
+    MOVE.W  #-1,PEND2(A4)
+    CMP.W   #VNUSE,VERB(A4)
+    BNE.S   11$              ;NOPE
+    CALL    USE              ;FIX THE BUFFERS
+11$
+    CALL    TWOPV            ;FIX VERB
+
+    IFD     VNFIX
+    XREF    ISTIETOG
+    CALL    ISTIETOG
+    ENDC    ;VNFIX
+
+    LEA     NOUNBUF(PC),A0
+    MOVE.L  A0,NOUN(A4)
+    MOVE.W  NOUNBUF(A4),D0
+    BEQ     SINGV
+ 
+
+    XDEF    PROC.LAB
+
+PROC.LAB
+ 
+10$
+    MSG     LINE               ;PUT A LF BETWEEN ATTEMPS AT NOUNS
+    CLR.W   D2
+    MOVE.W  ADDNOUN(A4),D0
+    BEQ.S   20$
+    BMI.S   20$
+    GETINFO        
+    MOVE.W  D0,D2
+    MOVE.L  A0,A5
+20$
+    MOVE.L  NOUN(A4),A0
+    MOVE.W  (A0),D0
+    BEQ     PROC.EX    
+    TEST_W  WHOOPS(A4)          ;VERB ROUTINE FED UP??
+    BNE     PROC.EX             ;YEA
+    ADDQ.L  #2,NOUN(A4)
+    BCLR    #15,D0
+    BNE   60$
+
+    IFD wantMULTIPLES
+    XREF    GetMultiCode,MULTICODE,LASTMULTICODE
+    CLR.B   MULTICODE(A4)       ;code for verb
+    DO  GetMultiCode        ;->d1
+    MOVE.W  D1,-(A7)        ;save multicode
+    BEQ.S   21$         ;no
+    MOVE.W  2(A0),D0        ;get next
+    BNE.S   23$         ;not the end continue
+    CMP.B   LASTMULTICODE(A4),D1    ;if changed?
+    BNE.S   21$         ;then multicode=0
+    BRA.S   22$         ;otherwise fine
+23$
+    BTST    #15,D0          ;void?
+    BNE.S   21$         ;yes, then code=0
+    DO  GetMultiCode        ;->d1
+    CMP.W   (A7),D1         ;the same multiset?     
+    BEQ.S   22$         ;fine
+    MOVE.W  (A7),D1         ;restore 
+    CMP.B   LASTMULTICODE(A4),D1    ;changed from last time?
+    BNE.S   21$         ;yes, then on its own
+22$
+    MOVE.B  D1,MULTICODE(A4)    ;otherwise set to code type
+21$
+    MOVE.W  (A0),D0         ;restore old noun
+    ADDQ.L  #2,A7           ;adjust stack
+    ENDC    ;wantMULTIPLES
+
+    MOVEQ   #0,D5               ;SO WE GET ERROR MSGS
+
+    IFD   wantGLOBALIO
+    XREF    ISIOFRE,NOUNBUF2    
+    CALL    ISIOFRE         ;VERB takes ONLY global INDIRECT
+    BEQ.S   25$         ;obj, not direct obj? (EQ => yes)
+    PUSH_L  D0/A1
+    LEA NOUNBUF2(A4),A1         ;list of indirect objects.
+2400$
+    MOVE.W  (A1)+,D0            ;fetch one of the iobj's
+    BEQ.S   2101$               ;done, ok, continue.
+    DO  VALID               ;is it here, else moan.
+    BEQ.S   2400$               ;fine, continue.
+    PULL_L  D0/A1
+    BRA PROC.EX             ;else exit.
+2101$
+    PULL_L  D0/A1               ;preserve.
+    ENDC ;wantGLOBALIO
+
+    DO  ISDOFRE           
+    BEQ.S   60$         ;must be able to reach em too!
+25$
+    DO  VALID
+    BNE.S   20$
+30$
+
+    IFEQ  THE_PAWN
+    XREF    NoCanReach,NoCanReachD2
+    CALL    NoCanReach      ;returns EQ if D0 may be got at from
+    BNE.S   40$         ;NE => may not reach it 
+                    ;(CanReach over-rides)
+    CALL    NoCanReachD2
+    BNE PROC.EX     ;NE => can't reach it (D5) with this verb
+    ENDC
+
+* are we sitting ?
+
+    TEST_W  SEATED(A4)
+    BEQ.S   60$                 ;NO, CARRY ON..
+
+* does this verb work when sitting?
+
+    CALL    WHENSAT             
+    BEQ.S   60$         ;yes
+    CALL    SATOBJLOC       ;binding
+    BEQ.S   40$
+    DO  P.SUBV
+    MSG TOOCRAMPED      ;far too cramped to do that
+    ST  WHOOPS(A4)      ;dont continue.
+    BRA 20$
+
+40$
+
+    IFNE    YCHEAT
+    XREF    CHEAT
+
+    TEST_W  CHEAT(A4)
+    BNE.S   60$
+    ENDC
+
+    IFEQ  THE_PAWN
+    XREF    CanReach
+    CALL    CanReach        ;returns EQ if D0 may be got at from
+    BEQ.S   60$         ;where we are sitting
+    ENDC
+
+    IFD     wantSP.TranspCont
+    XREF    TranspCont
+    CALL    TranspCont
+    BEQ.S   59$
+    XREF    SP.TranspCont
+    CALL    SP.TranspCont
+    BRA 20$
+59$
+    ENDC    ;wantSP.TranspCont
+
+    CALL    P.NORCH             ;CANT REACH
+    BRA     20$                 ;NEXT
+60$
+    IFD wantAskAboutThemself
+    CMP.W   #VNASK,VERB(A4)
+    BEQ.S   70$
+    CMP.W   #VNTELL,VERB(A4)
+    BEQ.S   70$
+    ENDC    ;wantAskAboutThemself
+
+    CMP.W   D2,D0
+    BNE.S   70$
+
+    MOVE.L  NOUN(A4),A1     ;is there another to consider?
+    MOVE.W  (A1),D0
+    BNE MissVerb        ;NE=> yes, think about it
+
+    DO  DBS         ;no, complain
+    BRA     PROC.EX   
+70$
+    GETINFO        
+    
+    IFNE    YCHEAT
+    TEST_W  CHEAT(A4)          ;CHEATING?
+    BNE.S   80$
+    ENDC
+    
+    CALL    VERBOWN            ;CHKOWN APPLIES TO THIS VERB?
+    BEQ.S   80$
+    CALL    CHK.OWN
+    TEST_B  D7
+    BNE     20$                ;NEXT
+    IFD     wantCovetousNPCs
+    XREF    CHK.NPCOWNER
+    CALL    CHK.NPCOWNER
+    BNE 20$             ;they wont let you.
+    ENDC    ;wantCovetousNPCs
+
+80$
+    CALL    STOPBRK
+    MOVE.B  (A0),D1
+    MOVE.W  D2,D5
+    
+    IFND    wantNONPCPAUSE
+    XREF    SETPAUSE
+    CALL    SETPAUSE
+    ENDC    ;!wantNONPCPAUSE
+    
+    CLR.L   D2
+    MOVE.W  VERB(A4),D2
+    DO  GETVECT
+    
+    IFNE    YCHEATMORE
+    XREF    CHEAT2,PRTHEX
+
+    TEST_W  CHEAT2(A4)         ;THIS CHEAT DOES NOT NOBBLE VALID
+    BEQ     MISSINFO           ;DONT PRINT DEBUG INFO   
+    PUSH_L  D0-D7/A0-A6  ;CAN'T BE TOO SURE..
+    PRINT   <'^NOUN1 :'>
+    MOVE.W  D0,D6
+    MOVE.W  D5,-(A7)            ;PRTHEX KILLS D5 
+    CALL    PRTHEX
+    PRINT   <'^NOUN2 :'>
+    MOVE.W  (A7)+,D6            ;GET SECOND NOUN
+    CALL    PRTHEX
+    PRINT   <'^VERB :'>
+    MOVE.W  VERB(A4),D6
+    CALL    PRTHEX
+    PRINT   <'^CONJ :'>
+    MOVE.W  CONJ(A4),D6
+    CALL    PRTHEX
+    PRINT   <'^ADVERB :'>
+    MOVE.W  ADVERB(A4),D6
+    CALL    PRTHEX
+    PRINT   <'^NOUN3 :'>
+    MOVE.W  ADDNOUN+2(A4),D6
+    CALL    PRTHEX
+    MSG     LINE
+    PULL_L  D0-D7/A0-A6
+    ENDC
+
+MISSINFO
+    
+    
+    CALL    ALWINDARK
+    CALL    GETPRON            ;SET PRONOUNS - BUT LET VERB ALTER THEM
+
+    IFEQ  THE_PAWN
+    XREF    ProcessSpecials     ;to be found in specials
+
+    IFD wantSP.MANIPULATE
+    XREF    Vlist_Manipulate,SP.MANIPULATE
+
+    MOVE.L  A1,-(A7)
+    LEA Vlist_Manipulate(A4),A1 ;list of ones not allowed.
+    DO  VerbInList
+    PULL_L  A1
+    BNE.S   01$         ;no, ok
+    CALL    SP.MANIPULATE
+    BNE.S   10$         ;no-go
+01$
+    ENDC    ;wantSP.MANIPULATE
+
+    CALL    ProcessSpecials     ;check noun interference
+    BNE.S   10$         ;thou shalt not proceed (john)
+    ENDC
+
+    IFD wantSUCCESS
+    XREF    SUCCESS
+    CLR.W   SUCCESS(A4)
+    ENDC
+
+    IFD wantSITUATION
+    PUSH_L    D0-D1/D5/A0/A5
+    ENDC    ;wantSITUATION
+    
+    JSR     (A1)            ;call that verb!
+
+    IFD   wantSITUATION
+    PULL_L  D0-D1/D5/A0/A5
+    XREF    PEND2
+    TEST_W  PEND2(A4)           ;have we completed a command?
+    BPL.S   10$             ;no.
+    CMP.W   #RETCODE_NOTQUITE,SUCCESS(A4)   ;made an attempt?
+    BEQ.S   09$
+    CMP.W   #RETCODE_SUCCESS,SUCCESS(A4)    ;did it work?
+    BNE.S   10$             ;nope.
+09$
+    CALL    NPCREACTIONS            ;incidental npc reactions
+    ENDC
+10$ 
+ 
+MissVerb
+ 
+*--------------------------------
+*
+*  THIS PASSED:
+*              D0=NOUN NUMBER
+*              D1=STATUS
+*              A0=ADDR OF DATA
+*  TO THE VERB ROUTINE
+*
+*--------------------------------
+  
+ 
+    TEST_W  PEND2(A4)
+    BMI.S   85$
+    DO  DECODE 
+    BRA     PROCESS
+85$
+ 
+    MOVE.L  NOUN(A4),A1
+    MOVE.W  -2(A1),D0
+    GETINFO        
+    TST_ISAROOM             ;to avoid 'go room' - no desc hassle
+    BNE.S   90$         ;let screen set explored AFTER desc.
+    DO  VALID.NP        ;only set explored if its local
+    BNE.S   90$
+    BSET    #4,4(A0)        ;SET EXLORED FLAG
+90$
+    BRA     PROC.LAB
+
+*------------------------------------------
+
+    XDEF    PROC.EX
+PROC.EX
+
+    IFNE  GENERIC
+    XREF    ProcessEventFlag
+
+    TEST_B  ProcessEventFlag(A4)    ;NE => came from genericint.asm
+    BEQ.S   10$
+    RET
+10$
+    ENDC
+
+    DOGO    SCREEN
+
+*------------------------------------------
+    
+    END

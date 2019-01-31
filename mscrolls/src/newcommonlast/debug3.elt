@@ -1,0 +1,87 @@
+**************************************************************
+*
+*   12/10/88
+*   @(#)debug3.elt  2.2
+*
+**************************************************************
+
+
+    SECTION "ADV",CODE
+
+    include "equates.i"
+    include "macros.i"
+
+
+   IFNE     AMIGA512&YCHEAT&0
+
+* Set a 'breakpoint'
+
+    XDEF    DBBPON,DBBPOFF
+
+    XREF    BP_ADDRESS,BP_CONTENTS,BP_DISP,DO_MISC
+
+
+DBBPON
+
+    MOVE.L  D0,BP_ADDRESS(A4)          ;save addr of fodded word
+    MOVE.L  0(A4,D0.L),BP_CONTENTS(A4) ;get contents of long word to fod
+    MOVE.L  BP_CODE(PC),0(A4,D0.L)     ;fod code
+    PRINT   'Done!^'
+    DOGO    DBEXIT
+
+DBBPOFF
+
+    MOVE.L  BP_ADDRESS(A4),D0
+    MOVE.L  BP_CONTENTS(A4),0(A4,D0.L)
+    DOGO    DBEXIT
+
+
+BP_CODE
+
+    JSR      BP_DISP(A6)            ;this is inserted as a breakpoint
+
+DBMISC
+
+    CALL     DO_MISC                ;This lives in CONTROL.AMG
+                                 ;since it has the relevent INC files
+    DOGO    DBEXIT
+
+   ENDC
+
+
+    IFNE     Graphics
+
+    IFNE    YCHEAT
+    XDEF    DBPICTURE
+    XREF    LOAD_PIC,GetPictureVersion
+
+DBPICTURE
+
+    CALL    GetPictureVersion   ; of D0 -> D2
+    TEST_B  D2
+    BMI.S   90$                 ; invalid picture
+    MOVEQ   #1,D1                   ;show pic code
+    CALL    LOAD_PIC                ;Get picture as per D0 (starts at 0)
+90$    
+    DOGO    UTEXIT
+    ENDC
+
+    IFD C64Pict
+    XDEF    DBC64Pict
+    XREF    LOAD_PIC
+
+DBC64Pict
+
+    MOVE.W  #0,D0
+    LEA DBC64Pict(PC),A0
+    ADDQ.W  #1,2(A0)        ;self mod
+    AND.L   #$1F,D0
+    CALL    LOAD_PIC                ;Get picture as per D0 (starts at 0)
+    DOGO    UTEXIT
+
+    ENDC                ;end of if picture a/b/c frig
+
+
+    ENDC                ;end of if graphics
+
+    END

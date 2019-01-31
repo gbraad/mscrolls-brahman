@@ -1,0 +1,69 @@
+**************************************************************
+*
+*	%G%
+*	%W%
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"verbequ.i"
+	include	"scenequ.i"
+
+*--------------------------------
+*
+* Set pause - pause an NPC if he's the subject of
+*             a verb, eg if u try to trade/fight/talk with an NPC
+*             they'll hang around a while
+*
+*
+*--------------------------------
+
+    IFND	wantNONPCPAUSE
+
+	XDEF	SETPAUSE
+
+
+SETPAUSE
+  
+    IFD	VNFOLLOW
+	XREF	VERB
+	CMP.W	#VNFOLLOW,VERB(A4)	;is verb follow?
+	BEQ.S	11$			;yes, exit.
+    ENDC	;FOLLOW
+
+	TST_NPC				;
+	BEQ.S   10$
+	CALL_S  90$
+10$
+	TEST_W  D5
+	BEQ.S   11$
+	BTST    #6,4(A5)
+	BNE.S   20$
+11$
+	RET
+20$
+	CALL_S  99$
+	CALL_S  90$
+	BRA.S   99$
+90$
+	DO	GETNPC
+	BTST	#2,3(A3)	;nonpauseable?
+	BNE.S	91$		;yes, then forget it
+	BSET    #0,3(A3)           ;BIT 0=PAUSE
+91$
+	RET
+99$
+	EXG     D0,D5
+	EXG     A0,A5
+	RET
+
+
+    ENDC	;!wantNONPCPAUSE
+
+*------------------------------------------
+
+	END

@@ -1,0 +1,50 @@
+**************************************************************
+*
+*	10/27/87
+*	@(#)hit.elt	1.2
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"verbequ.i"
+
+      IfVerb	HIT
+
+      XDEF	HIT
+      XREF	CONJ,HAMMER,FIGHT,V.BREAK
+  
+HIT
+      IFEQ	THE_PAWN
+	
+	XREF	SP.HIT
+
+	CALL	SP.HIT
+
+      ENDC
+   
+	LEA     CONJ(A4),A1
+	TEST_W  2(A1)
+	BPL     HAMMER
+	CMP.W   #INTO,(A1)
+	BEQ.S   10$
+	CMP.W   #IN,(A1)
+	BEQ.S   10$
+	TST_NPC				;npc?
+	BNE     FIGHT
+	BRA     V.BREAK
+10$
+	CLR.W   D1
+	MOVE.W  #-1,(A1)
+	DO	CHK4PT				;will never come back
+
+
+	ENDC
+
+
+
+	END

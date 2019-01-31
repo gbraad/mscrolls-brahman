@@ -1,0 +1,31 @@
+**************************************************************
+*
+*	10/27/87
+*	@(#)bichk.elt	1.2
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+
+*--------------------------------
+
+	XDEF	BICHK
+	XREF	ISBITRAN,WSYN2
+	
+BICHK
+	
+	TEST_W  D3
+	BEQ.S   90$            ;GO
+	CALL    ISBITRAN       ;ALLOWED?
+	BNE.S   90$            ;OK
+	MOVE.L  (A7)+,D0       ;DUMP
+	BRA     WSYN2
+90$
+	RET
+	
+
+	END

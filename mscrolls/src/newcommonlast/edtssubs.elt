@@ -1,0 +1,122 @@
+**************************************************************
+*
+*	3/8/89
+*	@(#)edtssubs.elt	2.2
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"verbequ.i"
+	include	"scenequ.i"
+
+	IfVerb	TASTE
+
+	XDEF	EDTS.CONSUME,EDTS.OK,EDTS.FNDED,EDTS.DO
+	XREF	V.TASTE,P.FLOO,TIMERA,SCAN,DBS
+
+
+EDTS.CONSUME
+	
+	MOVE.W  D0,-(A7)
+	CALL    V.TASTE
+	MOVE.W  (A7)+,D0
+	TEST_B  D1
+	BEQ.S   30$
+10$
+	CMP.B   #4,D1              ;POISON ETC ?
+	BMI.S   20$                ;BRANCH IF BAD NEWS
+   
+	SUBQ.L  #4,D1              ;VALUE OF FOOD
+;	ADD.W   D1,C.HP(A4)
+ 
+	BRA.S   30$
+ 
+20$
+	TEST_B  TIMERA(A4)         ;ALREADY POISONED ?
+	BNE.S   30$                ;NE= YES, SO NO MORE
+
+      IFD	wantFatalFood
+	XREF	C.STATUS
+
+	MOVE.B  D1,C.STATUS(A4)
+      ENDC	;wantFatalFood
+
+	MOVE.B  #3,TIMERA(A4)
+   
+30$
+					;IN CASE IT WAS IN CONTAINER 
+	DOGO	SETOUT	            	;OUT OF ADVENTURE + ABOVE
+    IFD	wantSUCCESS
+	XREF	SUCCESS
+	MOVE.W	#RETCODE_SUCCESS,SUCCESS(A4)
+    ENDC
+ 
+ 
+EDTS.DO
+ 
+	MOVE.B  11(A0),D2 
+	LSR.B   #5,D2              ;GET EDIBILITY   
+	AND.W   #$000F,D2
+
+      IFD	wantSP.EDTS.DO
+	XREF	SP.EDTS.DO
+	CALL	SP.EDTS.DO
+	BEQ.S	90$			;EQ=> we did message
+      ENDC
+
+	BeSure	M.NEDBL			;if not def XREF if
+
+	MOVE.W  #M.NEDBL,D1        ;EDIBILITY MSGS START AT NOT EDIBLE
+	ADD.W   D2,D1
+	MOVE.W  D2,-(A7)           ;SAVE EDIBILITY
+	DO	P.MSG
+	CALL    SCAN
+	MOVE.W  (A7)+,D1
+90$
+	RET
+
+*
+* a randomly usefull bit that gets the edibility of a noun
+*
+
+ 
+EDTS.FNDED
+ 
+	CLR.L   D1
+	MOVE.B  11(A0),D1          ;GET EDIBILITY BYTE
+	LSR.B   #5,D1              ;GET TOP THREE BITS
+	RET
+
+*--------------------------------
+	
+EDTS.OK
+
+	MOVE.L  (A7)+,D3           ;SAVE RET
+	
+	TST_ISAROOM				;ROOM?
+	BNE     DBS                ;FAIL
+	MOVE.B  2(A0),D1           ;SIZE & WEIGHT
+	AND.B   #$0F,D1            ;WEIGHT
+	BEQ     DBS                ;DOES NOT APLY 
+	TST_NPC				;an NPC?
+	BEQ.S   10$                ;Nope...
+	TST_DEAD				;you can taste a DEAD npc!
+	BNE.S   10$
+	                           ;I am assuming d0 has noun number
+	DO	GETNPC	            ;returns a3 = data d0 = noun number (needed)
+	MOVE.B  2(A3),D1           ;extra NPC data
+	AND.B   #$F0,D1
+	CMP.B   #$50,D1            ;NPC = unconcious? (no funny looks...)
+	BNE     P.FLOO             ;GIVES U A FUNNY LOOK
+10$
+	MOVE.L  D3,-(A7)           ;OK
+	RET
+
+
+	ENDC
+
+	END

@@ -1,0 +1,47 @@
+**************************************************************
+*
+*	10/27/87
+*	@(#)padwithspaces.elt	1.2
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+
+
+	XDEF	PadWithSpaces
+	XREF	SPACE
+
+* Pad with spaces - print (D2-((log10(D0)+log10(D1)+2)) spaces
+
+PadWithSpaces
+
+	LEA	DecTab(PC),A0
+10$
+	CMP.W	(A0)+,D0
+	BPL.S	15$
+	CALL	SPACE
+	BRA.S	10$
+15$
+	LEA	DecTab(PC),A0
+20$
+	CMP.W	(A0)+,D1
+	BPL.S	25$
+	CALL	SPACE
+	BRA.S	20$
+25$
+
+	RET
+
+	
+DecTab
+	DC.W	1000,100,10,0	
+
+	RET
+
+
+
+	END

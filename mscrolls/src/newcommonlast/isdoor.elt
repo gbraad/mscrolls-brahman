@@ -1,0 +1,40 @@
+**************************************************************
+*
+*	10/27/87
+*	@(#)isdoor.elt	1.2
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+
+	XDEF	ISDOOR
+	XREF	PP.OP.CL
+ 
+ 
+*--------------------------------
+*
+* ISDOOR   RETURNS EQ IS YES
+*
+*--------------------------------
+ 
+ 
+ISDOOR
+ 
+	LEA     PP.OP.CL(A4),A1  ;DOORS + CUPBOARD ETC
+10$
+	CMP.W   (A1)+,D0
+	BEQ.S   90$
+	TEST_W  (A1)+
+	BNE.S   10$
+	SETNE                     ;SET NOT EQUAL   
+90$
+	RET
+	
+
+
+
+	END

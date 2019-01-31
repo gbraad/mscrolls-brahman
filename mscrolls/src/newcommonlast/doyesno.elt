@@ -1,0 +1,60 @@
+**************************************************************
+*
+*	%G%
+*	%W%
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"scenequ.i"
+
+
+    IFND	Version2_DOYESNO
+
+*--------------------------------
+	        
+	XDEF	DOYESNO
+	XREF	PR20,YNHANDLR
+	        
+DOYESNO
+	        
+	PEA     PR20(PC)
+  
+	TEST_L  YNHANDLR(A4)       ;REQUEST?
+	BEQ.S   10$                ;NO
+	MOVE.L  YNHANDLR(A4),A0
+	JMP     (A0)               ;GO TO THAT ROUTINE
+10$
+	DO	P.SAY
+	MSGGO	IAGREE
+  
+
+    ENDC	!Version2_DOYESNO
+
+*--------------------------------
+	
+    IFD	Version2_DOYESNO
+	        
+	XDEF	DOYESNO
+	XREF	PR20,YNHANDLR
+	        
+DOYESNO
+	        
+	PEA     PR20(PC)
+	TEST_L  YNHANDLR(A4)       ;REQUEST?
+	BEQ.S   10$                ;NO
+	MOVE.L  YNHANDLR(A4),A0
+	JMP     0(A4,A0.L)         ;GO TO THAT ROUTINE
+10$
+	DO	P.SAY
+	MSGGO	IAGREE
+  
+*--------------------------------
+
+    ENDC	;Version2_DOYESNO
+
+	END

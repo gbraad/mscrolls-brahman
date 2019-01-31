@@ -1,0 +1,56 @@
+**************************************************************
+*
+*	%G%
+*	%W%
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"verbequ.i"
+
+*--------------------------------
+*
+* VERBOWN - SUSSES WHETHER TO
+*           IGNORE OWNERSHIP
+*           OF A NOUN
+*
+* ON EXIT - BEQ = IGNORE
+*         - BNE = DONT IGNORE
+*
+*--------------------------------
+
+	XDEF	VERBOWN
+	XREF	VERB
+ 
+VERBOWN
+ 
+       PUSH_L  D0/D5/A0
+       MOVE.W  VERB(A4),D5
+       LEA     20$(PC),A0         ;START OF VERB LIST
+       MOVEQ   #30$-20$-1,D0      ;NO OF VERBS -1 
+10$
+       CMP.B   (A0)+,D5           ;RIGHT VERB?
+       DBEQ    D0,10$             ;IF YES, FALL THROUGH
+       PULL_L  D0/D5/A0
+       RET
+ 
+20$
+       
+       SVERB	ASK
+       SVERB	BUY
+       SVERB	GIVE
+       SVERB	LISTEN
+       SVERB	STEAL
+       SVERB	WAIT
+       SVERB	FIND
+       SVERB	VOTE
+    	SVERB	SUSS
+30$
+
+*--------------------------------
+
+	END

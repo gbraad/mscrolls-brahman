@@ -1,0 +1,48 @@
+**************************************************************
+*
+*	10/27/87
+*	@(#)again.elt	1.2
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+
+
+	XDEF	AGAIN
+	XREF	POSWRD,INBUFF,DSTAND,NOTOUT,RCLTXT
+  
+
+*--------------------------------
+*
+* AGAIN -  copes with repeat last command line please request
+*          somewhat outmoded by stuff like ESC in ST etc but
+*          only overhead is this code, so here it is...
+*
+*--------------------------------
+
+AGAIN
+
+	MOVE.L  POSWRD(A4),-(A7) 	;so as we can print 'again' eventually
+	LEA     INBUFF(A4),A6    	;must be the first command on line
+	DO	GETWRD
+	CMP.W   #SECT.SPEC,D6
+	BNE.S   10$
+	CMP.W   #7,D5            	;again?
+	BNE.S   10$
+
+	ADDQ.L  #4,A7            	;Loose old POSWRD that's on the stack
+	CALL    RCLTXT           	;get old text
+	LEA     INBUFF(A4),A6
+	BRA     NOTOUT           	;process commands again
+10$
+	MOVE.L  (A7)+,POSWRD(A4) 	;Get pointer to text of 'AGAIN'
+	CALL    DSTAND           	;'I don't understand xyzzy
+	MSG	CTEXT  	        	; in that context'
+	DOGO	DECODE           	; go get new command line from keyboard
+ 
+
+	END

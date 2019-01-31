@@ -1,0 +1,40 @@
+***********************************************************
+*
+*	@(#)run.elt	1.4
+*	10/27/87
+*
+************************************************************
+
+		SECTION	"ADV",CODE
+
+		include	"equates.i"
+		include	"macros.i"
+		include	"scenequ.i"
+		include	"verbequ.i"
+
+		IfVerb	RUN
+		IFD	wantRUN
+
+		XDEF	V.RUN
+
+		XREF	ADVERB,GO.N,P.IDFY,SP.RUN
+		XREF	VALID
+V.RUN
+	MOVE.W	ADVERB(A4),D1			;fetch modifier
+	CMP.W	#AFTER,D1			;run after x
+	BEQ.S	10$
+	CMP.W	#BEHIND,D1
+	BNE	P.IDFY
+10$
+	CALL	SP.RUN
+	BRA	GO.N
+
+
+
+    ENDC	;wantRUN
+    ENDC	;V.RUN
+
+	END
+
+	
+

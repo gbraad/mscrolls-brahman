@@ -1,0 +1,105 @@
+**************************************************************
+*
+*	%G%
+*	%W%
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"scenequ.i"
+
+	XDEF	PCOK
+
+PCOK
+
+* TEST D5,A5
+
+	PUSH_L  D0/A0
+	MOVE.B  1(A5),D1		;get H&S
+	LSR.B   #4,D1			;hardness
+	BNE.S   05$			;applicable?
+	DO	DBS
+	BRA.S   30$			;EXIT W ERROR
+05$
+	CMP.B   #3,D1			;soft?
+	BHI.S   10$			;no
+
+	BeSure	M.TSOFT			;too soft!
+20$
+	MOVE.W	#M.TSOFT,D1		;IS NOT SUITABLE
+25$
+	MOVE.W  D5,D0
+	GETINFO		
+	DO	P.TN
+	DO	ISARE
+	DO	P.MSG
+	DO	FULLSTOP
+30$
+	MOVEQ   #1,D1
+	BRA.S   99$
+10$
+	CMP.B   #12,D1			;flexible?
+	BEQ.S   20$			;yes
+	MOVEQ	#0,D1
+
+	BTST	#2,(A5)			;broken ?
+	BEQ.S	99$
+	
+	BeSure	M.BROKEN
+
+	MOVE.W	#M.BROKEN,D1
+	BRA.S	25$
+
+99$
+	PULL_L  D0/A0
+	RET
+
+*--------------------------------
+
+	IFNE	0
+
+* Routine is no longer used.
+
+	XDEF	MIXD0D5
+MIXD0D5
+
+	SWAP	D0
+	MOVE.W  D5,D0
+	RET
+
+	ENDC	;0
+
+*------------------------------------------
+
+	IFD	Version1_CombineD0D5
+
+	XDEF	CombineD0D5
+
+* A really plebby routine, but comes in handy for specials when 
+* Verb X wi Y is the only trigger for an event
+*
+* eg. put saddle on unicorn,
+* goes to
+*
+*	CALL	CombineD0D5
+*	CMP.L	#NUNICORN<<16+NSADDLE,D0	;hoopy!
+
+CombineD0D5
+	
+	SWAP	D0
+	MOVE.W	D5,D0
+	SWAP	D0
+	RET
+
+	ENDC	;Version1_CombineD0D5
+
+*------------------------------------------
+ 
+
+
+
+	END

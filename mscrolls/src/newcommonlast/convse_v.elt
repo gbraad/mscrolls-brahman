@@ -1,0 +1,56 @@
+**************************************************************
+*
+*	%G%
+*	%W%
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"verbequ.i"
+	include	"scenequ.i"
+	
+*--------------------------------
+
+	XDEF	CONVSE.V
+
+ConverseVerbs.TBL
+
+	SVERB	ASK
+	SVERB	QUESTION
+	SVERB	TELL
+	SVERB	SAY
+	SVERB	SHOUT
+	SVERB	YELL
+	SVERB	CRY
+	
+    IFND	wantCALLisPHONE
+	SVERB	CALL
+    ENDC	;!wantCALLisPHONE
+	
+	DC.B	-1
+	ALIGN
+
+*------------------------------------------
+ 
+CONVSE.V
+	
+	XREF	D0InList,VERB
+ 
+*ZERO FLAG SET IF VERB IS 'SPEECH' TYPE
+
+
+	PUSH_L	D0/A1
+	MOVE.W	VERB(A4),D0
+	LEA	ConverseVerbs.TBL(PC),A1
+	CALL	D0InList
+	PULL_L	D0/A1
+	RET
+
+*------------------------------------------
+
+	END

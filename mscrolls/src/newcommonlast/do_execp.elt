@@ -1,0 +1,57 @@
+**************************************************************
+*
+*	10/27/87
+*	@(#)do_execp.elt	1.2
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+
+	XDEF	DO.EXCEP
+	XREF	WSYN,GNGRP,EXBUFF,TEMPBUF
+
+DO.EXCEP
+ 
+	TEST_B  D3                 ;NOUN FLG
+	BEQ     WSYN               ;AND EXCEPT
+	CALL    GNGRP
+	CMP.W   #1,D7              ;E O S IS ALLOWED
+	BEQ.S   05$
+	TEST_B  D7                 ;ERROR?
+	BNE.S   90$                ;YES
+05$
+	MOVE.W  D5,D2
+	CLR.W   D5
+	DO	INCNOUN2
+	MOVE.W  D2,D5
+  
+* NOW FIX TEMPBUFF CONTENTS
+ 
+	LEA     EXBUFF(A4),A0
+10$
+	MOVE.W  (A0)+,D0           ;GET CHR FROM EXBUFF
+	BEQ.S   90$                ;DT?
+	LEA     TEMPBUF(A4),A1
+11$
+	MOVE.W  (A1)+,D1           ;GET CHR FROM TEMPBUF
+	BEQ.S   25$                ;ERROR
+	AND.W   #$7FFF,D1
+	CMP.W   D0,D1              ;MATCH?
+	BNE.S   11$                ;GET NEXT
+	EOR.W   #$8000,-(A1)       ;INVERT HI BIT
+	BRA.S   10$
+25$   
+	DO	P.BTN
+	MSG	WNHA
+	MSG     LINE
+	BRA.S   10$
+90$
+	RET
+  
+
+
+	END

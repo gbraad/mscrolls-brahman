@@ -1,0 +1,69 @@
+********************************************************
+*
+*	%W%
+*	%G%
+*
+********************************************************
+
+	SECTION	"ADV",CODE
+
+	include "equates.i"
+	include "macros.i"
+	include "nounequ1.i"
+	include "scenequ.i"
+
+
+    IFD	wantABSOLUTEALL
+
+	XDEF	ABSOLUTEALL
+
+	XREF	UntilDisturbedTable
+	XREF	INCNOUN2,TOPNPC,CARRIED
+
+ABSOLUTEALL
+
+	PUSH_L	D0/D5/D4/A0/A1			;save register
+	LEA	UntilDisturbedTable(A4),A1	;table of other items
+10$
+	MOVE.W	(A1),D0				;get one
+	BEQ.S	30$				;done
+	DO	VALID.NP			;around?
+	BNE.S	25$				;tough!
+	DO	CARRIED				;but not if it is on inv
+	BEQ.S	25$				;forget it
+	ADDQ.L	#4,A1				;point to msg#
+	TEST_W	(A1)+				;hi-bit msg?
+	BMI.S	20$				;yes, have it
+	GETINFO					;on it
+	CMP.B	#$1,6(A0)			;must be related only
+	BNE.S	10$				;no, too bad
+	TST_MOVEABLE				;moveable?
+	BEQ.S	10$				;no, forget it
+	TST_PSEUDO				;no pseudos!!
+	BNE.S	10$
+	TST_EXPLORED				;explored?
+	BNE.S	10$				;yes, don't count then
+	MOVE.W	D0,D5				;save
+	CALL	TOPNPC				;holder to d4
+	MOVE.W	D4,D0
+	GETINFO					;on topnpc
+	TST_NPC				;was it an npc
+	BNE.S	10$				;hoho, it was!
+	DO	INCNOUN2			;keep it
+	BRA.S	10$				;anymore
+20$
+	MOVE.W	D0,D5
+	DO	INCNOUN2			;have it.
+	BRA.S	10$				;next
+25$
+	ADDQ.L	#6,A1				;next
+	BRA.S	10$
+
+30$
+	PULL_L	D0/D5/D4/A0/A1
+	RET
+
+
+    ENDC	;wantABSOLUTEALL
+
+	END

@@ -1,0 +1,153 @@
+******************************************************
+*
+*	@(#)palopt.elt	1.2
+*	10/27/87
+*
+******************************************************
+
+		SECTION		"ADV",CODE
+
+******************************************************
+*
+* PALOPT.elt   - Pallet options 
+*
+******************************************************
+
+	include	"equates.i"
+	include	"macros.i"
+
+	    IFNE	(ST520!AMIGA256!AMIGA512)
+
+
+         XDEF     DO_FOREG,DO_BACKG,DO_CONTR,DO_SCROL
+
+         XREF     BACK_PAL,FORE_PAL,GRAF_OPL,PRTTXT,SCRL_PAL,OK
+
+
+
+*
+* Misc pallet changing bits called via DEBUGBITS
+*
+* on arrival D0 = given parameter (in DEC!!!)
+*
+
+
+BAD_EXIT
+
+         PRINT    <'^Invalid colour.'>
+         RET
+
+
+
+******************************************************
+*
+* DO_FOREG - do foreground
+*
+******************************************************
+
+DO_FOREG
+
+      CALL     CONV_TO_BCD
+      BNE      BAD_EXIT
+      CMP.W    BACK_PAL(A4),D0            ;cannot have same fore/back
+      BEQ      BAD_EXIT
+      MOVE.W   D0,FORE_PAL(A4)            ;copy for save/load game
+      MOVE.W   D0,GRAF_OPL+2(A4)          ;copy to use
+      BRA      OK
+
+
+******************************************************
+*
+* DO_BACKG - do background
+*
+******************************************************
+
+DO_BACKG
+
+      CALL     CONV_TO_BCD
+      BNE      BAD_EXIT
+      CMP.W    FORE_PAL(A4),D0            ;cannot have same fore/back
+      BEQ      BAD_EXIT
+      MOVE.W   D0,BACK_PAL(A4)            ;for save/load
+      MOVE.W   D0,GRAF_OPL(A4)            ;for use to update video
+      MOVE.W   D0,GRAF_OPL+4(A4)
+      BRA      OK
+
+******************************************************
+*
+* DO_SCROL - do scroll colour
+*
+******************************************************
+
+DO_SCROL
+
+      CALL     CONV_TO_BCD
+      BNE      BAD_EXIT
+      CMP.W    BACK_PAL(A4),D0            ;cannot have same fore/back
+      BEQ      BAD_EXIT
+      MOVE.W   D0,SCRL_PAL(A4)            ;for save/load
+      MOVE.W   D0,GRAF_OPL+6(A4)          ;for use to update video
+      BRA      OK
+
+******************************************************
+*
+* DO_CONTR - do contrast
+*
+*  this resets pallet to white (777) foreground,scrolls
+*                    and black (000) background
+*
+******************************************************
+
+
+DO_CONTR
+
+      CLR.W    BACK_PAL(A4)
+      CLR.W    GRAF_OPL(A4)
+      MOVE.W   #$777,D0
+      MOVE.W   D0,FORE_PAL(A4)
+      MOVE.W   D0,GRAF_OPL+2(A4)
+      MOVE.W   D0,GRAF_OPL+6(A4)          ;SCROLLS+MOUSE
+      MOVE.W   D0,SCRL_PAL(A4)
+
+      RET
+
+
+
+
+* Convert to bcd - take D0 (dec) return 'bcd' version
+
+
+CONV_TO_BCD
+
+     IFEQ     YCHEAT                  ;if true then it's hex already
+
+
+      CMP.W    #778,D0
+      BPL.S    20$                    ;OUCH!!
+
+      MOVEQ    #2,D1
+10$
+      EXT.L    D0
+      DIVU     #10,D0
+      SWAP     D0
+      MOVE.W   D0,-(A7)
+      SWAP     D0
+      DBRA     D1,10$
+
+      MOVEQ    #0,D0
+      OR.W     (A7)+,D0
+      LSL.W    #4,D0
+      OR.W     (A7)+,D0
+      LSL.W    #4,D0
+      OR.W     (A7)+,D0
+      MOVEQ    #0,D1                ;set equal
+      RET
+20$
+      SETNE
+
+     ENDC
+
+      RET
+
+      ENDC
+      END

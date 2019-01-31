@@ -1,0 +1,50 @@
+**************************************************************
+*
+*	10/27/87
+*	@(#)back_awrd.elt	1.2
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+
+
+*--------------------------------
+
+	XDEF	BACK.AWRD
+	XREF	POSWRD,INBUFF
+
+BACK.AWRD
+
+*  Move back another word in the input stream A6.
+
+	PUSH_L	D0/A1		;save temp vars.
+	LEA	INBUFF(A4),A1	;start of buffer
+03$
+	TEST_B	(A6)
+	BNE.S	02$		;ok.
+	SUBQ.L	#1,A6		;back until e o sentence.
+	BRA.S	03$
+02$
+	MOVE.B	(A6),D0		;get this char.
+	CMP.B	#' ',D0		;space?
+	BNE.S	01$		;no- at the end of a word.
+	SUBQ.L	#1,A6		;backtrack.
+	CMP.L	A1,A6		;start?
+	BNE.S	02$		;no- again.
+	BRA.S	90$		;exit.
+01$
+	CMP.L	A1,A6		;start?
+	BEQ.S	90$		;yes, exit.
+	MOVE.B	-(A6),D0	;previous char.
+	CMP.B	#' ',D0		;space?
+	BNE.S	01$		;no.
+90$
+	PULL_L	D0/A1		;restore old values.
+	RET			;exit.
+
+
+
+	END

@@ -1,0 +1,69 @@
+**************************************************************
+*
+*	%G%
+*	%W%
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"scenequ.i"
+
+*--------------------------------
+*
+* FINNPC - FIND NPC (NOT RELATED)
+*
+* AS ABOVE BUT ALREADY GOT 
+* BUFFER OF NOUNS TO LOOK IN (A1)
+*
+*--------------------------------
+
+	XDEF	FINNPC
+	XREF	SEATED,NPCINRM
+ 
+FINNPC
+	
+	MOVE.L  A1,-(A7)
+    IFD	wantCompleteNPCINRM
+	XREF	GenNpcsInRoom
+	CALL	GenNpcsInRoom			;->a1
+    ENDC	;wantCompleteNPCINRM
+
+01$
+	MOVE.W  (A1)+,D0
+	BEQ.S   90$				;ALL DONE
+	GETINFO					;POINT TO DATA
+
+    IFND	wantCompleteNPCINRM
+	TEST_W  SEATED(A4)
+	BNE.S   20$				;SKIP THIS
+	TEST_B  6(A0)				;HB OF LOC
+	BNE.S   10$
+20$
+	DO	VALID.NP			;INCASE   (NO ERRORS PRINTED)
+	BNE.S   10$				;OK
+	TST_NPC					;NPC?
+	BEQ.S   01$				;YES
+    ENDC	;!wantCompleteNPCINRM
+	TST_DEAD				;
+	BNE.S   01$ 
+	TEST_W  NPCINRM(A4)
+	BPL.S   01$
+	MOVE.W  D0,NPCINRM(A4)			;FOR SPEECH
+	BRA.S   01$
+
+    IFND	wantCompleteNPCINRM
+10$
+	BSET	#7,-2(A1)			;VOID
+	BRA.S   01$
+    ENDC	;!wantCompleteNPCINRM
+90$
+	MOVE.L  (A7)+,A1
+	RET
+
+*------------------------------------------
+
+	END

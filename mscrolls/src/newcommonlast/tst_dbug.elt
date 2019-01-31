@@ -1,0 +1,37 @@
+**************************************************************
+*
+*	10/27/87
+*	@(#)tst_dbug.elt	1.2
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+
+	
+	XDEF	TST.DBUG
+
+TST.DBUG
+ 
+    IFNE     YCHEAT
+
+	XREF	DBUG.ON
+ 
+	TEST_W  DBUG.ON(A4)        ;AUTHORISED USER OF DBUGBITS?
+	BNE.S   90$                ;YES = OK
+ 
+	PRINT   <'NO'>
+	MOVE.L  (A7)+,D0
+	DOGO	DBEXIT
+	  
+90$
+    ENDC
+	
+	RET
+
+
+
+	END

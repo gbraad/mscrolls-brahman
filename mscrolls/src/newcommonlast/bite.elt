@@ -1,0 +1,39 @@
+**************************************************************
+*
+*	3/8/89
+*	@(#)bite.elt	2.2
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include "verbequ.i"
+
+*--------------------------------
+
+	IfVerb	BITE
+   
+	XDEF	V.BITE
+
+	XREF	V.TASTE,P.MHAVSTOP,DBS
+
+V.BITE
+ 
+	MOVE.B  11(A0),D1
+	AND.B   #$E0,D1
+	BNE     V.TASTE
+	MOVE.B  2(A0),D1
+	AND.B   #$0F,D1             ;WEIGHT?
+	BEQ     DBS
+	DO	CARRIED
+	BNE	P.MHAVSTOP
+	MSGGO	CRUNCH
+
+	ENDC
+
+
+
+	END

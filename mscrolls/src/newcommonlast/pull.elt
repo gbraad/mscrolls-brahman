@@ -1,0 +1,148 @@
+**************************************************************
+*
+*	3/16/89
+*	@(#)pull.elt	2.2
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"verbequ.i"
+	include	"scenequ.i"
+
+
+*--------------------------------
+ 
+	IfVerb	PULL
+
+	XDEF	V.PULL
+
+    IFND	Version2_V.PULL
+
+	XREF	ISDOOR,OPEN,SP.PULL,MVE.PNT,P.CNTO,BRKD0
+ 
+V.PULL
+ 
+	CALL	ISDOOR
+	BEQ	OPEN			;EQ = IS A DOOR
+	CALL	SP.PULL
+	TST_INTRINSIC			;Intrinsic?
+	BNE.S   DBS_CLOSE
+	TST_ISAROOM			;Room?
+	BNE.S   DBS_CLOSE
+	MOVE.B  3(A0),D1		;GET TEXTURE
+	AND.B   #$0F,D1
+10$
+	CMP.B   #5,D1			;SLIPPERY?
+	BNE.S   20$			;NOPE
+	DO	P.SUB
+	MSG	CGGO			;CANNOT GET A GRIP ON
+	DOGO	P.TNSTOP
+20$
+	MOVE.W  D0,-(A7)
+	CALL_S  PULL.PNT
+	MOVE.W  (A7)+,D0
+	MSG	LINE
+	CALL	P.CNTO
+	BNE.S   20$
+	RET
+ 
+DBS_CLOSE
+
+	DOGO	DBS
+
+PULL.PNT
+
+	CMP.B   #$11,6(A0)		;insep rel?
+	BEQ.S   DBS_CLOSE
+
+* this line had a bug - 'twas using #1,5(A0) rather than #0,5(A0)
+
+	TST_PSEUDO			;pseudo?
+	BNE.S   DBS_CLOSE
+	MOVE.B  1(A0),D2		;Get hardness & strength  
+	MOVE.B  D2,D1
+	AND.B   #$0F,D1			;Strength
+	BEQ.S   DBS_CLOSE		;applicable?
+	LSR.B   #4,D2			;hardness
+	BEQ.S   DBS_CLOSE		;0=> void
+	CMP.B   #$3,D1			;too strong to break?
+	BHS	MVE.PNT
+	CMP.B   #$0F,D2			;non-breakable? eg colours
+	BEQ.S   DBS_CLOSE
+
+	GETINFO
+	DO	P.TN
+
+	CMP.B   #12,D2			;flexible?   
+	BEQ.S   10$
+	MSG	BRKS
+	BRA.S	20$
+10$
+	MSG	SNPS
+20$
+	DO	FULLSTOP
+	MSG	LINE
+	BSET	#2,(A0)			;break object
+    IFD	wantSUCCESS
+	XREF	SUCCESS
+	MOVE.W	#RETCODE_NOTQUITE,SUCCESS(A4)
+    ENDC
+	DOGO	BRKD0			;deal with containers etc
+
+	ENDC	;!Version2_V.PULL
+
+*------------------------------------------
+
+    IFD	Version2_V.PULL
+	
+	XREF	DBS,MVE.PNT,ISDOOR,SP.PULL,OPEN
+ 
+V.PULL
+ 
+	CALL	ISDOOR
+	BEQ	OPEN			;EQ = IS A DOOR
+	CALL	SP.PULL
+	LIQUID	D1			;is it a liquid.
+	BEQ	DBS			;yes
+	TEST_B	D1			;void?
+	BEQ	DBS
+	DO	IsPermanent		;intins/insep/room/worn/pseudo?
+	BNE.S	01$			;not perm.
+	DO	P.TN
+	MSGGO	WNTMVE			;the x wont move.
+01$
+	MOVE.B  3(A0),D1		;GET TEXTURE
+	AND.B   #$0F,D1
+10$
+	CMP.B   #5,D1			;SLIPPERY?
+	BNE.S   20$			;NOPE
+	DO	P.SUB
+	MSG	CGGO			;CANNOT GET A GRIP ON
+	DOGO	P.TNSTOP
+20$
+
+      IFD	wantPullDoesFIXCHK
+	XREF	DO.FIX
+
+	DO	FIXCHK
+	BEQ	MVE.PNT
+	MOVEQ	#0,D6
+	LEA	MVE.PNT(PC),A6
+	BRA	DO.FIX
+      ENDC	;wantPullDoesFIXCHK
+
+      IFND	wantPullDoesFIXCHK
+	BRA	MVE.PNT			;else try to move it
+      ENDC	;!wantPullDoesFIXCHK
+ 
+    ENDC	;Version2_V.PULL
+
+*------------------------------------------
+
+    ENDC	;V.PULL
+
+	END

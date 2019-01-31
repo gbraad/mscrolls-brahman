@@ -1,0 +1,70 @@
+************************************************
+*
+*	%W%
+*	%G%
+*
+************************************************
+
+	SECTION	"ADV",code
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"scenequ.i"
+
+* a file to try out a switch macro - Ken&Richard 23/10/87
+
+************************************************************************
+*
+* DO_CaseOf - used in the CaseOf macros
+*
+* takes (A7) (long) as a pointer to a table of jump 
+*                    addresses and constants
+* and 4(A7) (word) as a key which the constant should equal
+*
+************************************************************************
+
+* for example:
+	
+	IFNE	0		;cos it's just an example
+
+SP.DRINK
+
+	CaseOf	D0
+	When	NWATER,SP.Drink_Water-*
+	When	NLAGOON,SP.Drink_Water-*
+	EndCase
+
+	RET
+
+SP.Drink_Water
+
+	PRINT	<'Fuck off!'>
+	POPSP
+	RET
+
+	ENDC
+
+* And now...
+*      The Code
+
+	XDEF	DO_CaseOf
+
+DO_CaseOf
+
+	PUSH_L	D0-D1/A0		;==16 bytes on stack
+	MOVE.W	4+12(A7),D1		;no to compare against
+	MOVE.L	0+12(A7),A0		;pointer to table
+10$
+	MOVE.W	(A0)+,D0		;get an entry
+	BEQ.S	90$			;EQ=> end of table
+	CMP.W	(A0)+,D1		;same as the param we were given?
+	BNE.S	10$			;next try...
+	ADD.W	D0,A0			;calculate new pc
+	SUBQ.W	#4,A0			;and frig it cos of pre dec.
+90$
+	MOVE.L	A0,2+12(A7)		;put return addres on stack
+	PULL_L	D0-D1/A0		;get back scratch registers
+	ADDQ.L	#2,A7			;'cos there was a reg (WORD) there
+	RET				;bye bye
+
+	END

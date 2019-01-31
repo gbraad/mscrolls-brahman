@@ -1,0 +1,267 @@
+**************************************************************
+*
+*	5/29/89
+*	@(#)throw.elt	2.11
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"nounequ1.i"
+	include	"verbequ.i"
+	include	"scenequ.i"
+
+	IfVerb	THROW
+
+	XDEF	THROW
+	XREF	DO.FIX,SP.MELT,BBRIT,ROOM,P.MHAVSTOP,SP.THROW
+	XREF	STEADFAST,CONJ,WHOOPS,DBS
+
+* This is the old version of throw.
+* As used in the Pawn & Guild
+* I am about to make some changes to the criterion
+* And as such introducing Version2_THROW
+
+    IFND	Version2_THROW
+
+THROW
+	MOVE.W  #11,D1			;at?
+	DO	CHK4PT
+	TST_MOVEABLE				;MOVEABLE?
+	BEQ	STEADFAST
+	
+	DO	FIXCHK
+	BNE	THR.MANY
+ 
+THR.PNT
+ 
+	CALL	SP.THROW
+	DO	CARRIED
+	BNE	P.MHAVSTOP
+	DO	SETOUT			;FIX TIE& SO ON
+	CLR.W   6(A0)			;HB
+	MOVE.W  ROOM(A4),8(A0)		;IN ROOM
+	BTST	#6,4(A5)		;NPC?
+	BEQ.S   10$
+	BTST	#1,(A5)			;DEAD
+	BEQ.S   60$			;OUCH
+10$
+	CLR.W   D7
+	DO	P.TN
+	MSG	HITS
+	EXG	D5,D0
+	DO	P.TN
+	DO	BBRIT			;BREAK IF BRITTLE
+	EXG	D5,D0
+	DO	BBRIT			;BREAK IF BRITTLE
+	TEST_W  D7			;ANY BROKEN?
+	BNE.S   90$			;YES, EXIT
+	
+	MSG	BUT
+	MSGGO	NHAP 
+60$
+	EXG	D0,D5
+	CALL	SP.MELT			;SNOWMAN
+	DO	P.NOUN
+	MSG	OUCH
+90$
+	RET
+ 
+THR.MANY
+ 
+	LEA	THR.PNT(PC),A6
+	BRA	DO.FIX
+
+    ENDC	;!Version2_THROW
+
+*------------------------------------------
+
+	IFD	Version2_THROW
+
+	XREF	NPC.OK,GETNPC,IsPermanent,NOTPERM,P.SEPA
+	XREF	DBS
+
+InsistCarried	SET	1
+PrintOutList	SET	2
+
+THROW
+    IFD		wantSP.ThrowBefore
+	XREF	SP.ThrowBefore
+	CALL	SP.ThrowBefore
+    ENDC	;wantSP.ThrowBefore
+	MOVE.W	CONJ(A4),D1		;prep?
+	CMP.W	#IN,D1			;throw x in y?
+	BEQ.S	10$
+	CMP.W	#INTO,D1		;throw x into y
+	BEQ.S	10$
+    IFD		wantThrowOver
+	CMP.W	#OVER,D1
+	BEQ.S	10$
+    ENDC	;wantThrowOver
+	MOVE.W  #11,D1			;at?
+10$
+	DO	CHK4PT
+	DO	CARRIED			;must have the object
+	BNE	P.MHAVSTOP		;insist.
+	DO	IsPermanent		;can you move it?
+	BEQ	NOTPERM			;can't because it wont move
+	LIQUID	D1			;is it a liquid?
+	BNE.S	11$			;no
+	
+    IFD		wantSP.ThrowLiquid
+	XREF	SP.ThrowLiquid
+	CALL	SP.ThrowLiquid		;incase you don't miss??
+    ENDC	;wantSP.ThrowLiquid
+
+	MSG	YOUMISS			;you miss_
+	MSG	AND
+	BRA	P.SEPA			;AND X seps away.
+11$
+	
+    IFD		wantNoThrowAtPlayer
+	CMP.W	#NPLAYER,D5			;at oneself?
+	BEQ	DBS
+    ENDC	;wantNoThrowAtPlayer
+	
+
+	DO	FIXCHK
+	BNE	THR.MANY
+	CALL	SP.THROW		;call here if just the one.
+	DO	P.TN			;the item
+	CLR.W	D4			;so msg is printed
+
+THR.PNT
+
+	TEST_W	D4			;n-1 th time
+	BNE.S	01$			;done already
+
+    IFD	wantSP.THR_PNT
+	XREF	SP.THR_PNT
+	CALL	SP.THR_PNT
+    ENDC	;wantSP.THR_PNT
+
+	MSG	HITS			;they hit the X
+	EXG	D5,D0
+	DO	P.TN
+	DO	BSFULLSTOP
+	EXG	D0,D5
+01$
+	CLR.W   6(A0)			;HB
+	MOVE.W  ROOM(A4),8(A0)		;IN ROOM
+	BTST	#6,4(A5)		;NPC?
+	BNE.S   60$			;says ouch!
+10$
+
+      IFND	wantExtraVersion2_THROW
+	CLR.W   D7
+      ENDC	;!wantExtraVersion2_THROW
+
+      IFD	wantExtraVersion2_THROW
+	CALL	PushLOOPBUF
+      ENDC	;wantExtraVersion2_THROW
+
+	DO	BBRIT			;BREAK IF BRITTLE
+	EXG	D5,D0
+	DO	BBRIT			;BREAK IF BRITTLE
+
+      IFD	wantSP.THROWAfter
+	EXG	D0,D5
+      ENDC	;wantSP.THROWAfter
+
+      IFD	wantExtraVersion2_THROW
+	CALL	PullLOOPBUF
+      ENDC	;wantExtraVersion2_THROW
+
+      IFND	wantExtraVersion2_THROW
+	TEST_W  D7			;ANY BROKEN?
+	BNE.S   90$			;YES, EXIT
+59$
+	MSGGO	NHAP 
+      ENDC	;!wantExtraVersion2_THROW
+
+      IFD	wantExtraVersion2_THROW
+59$
+	BRA.S	90$
+      ENDC	;wantExtraVersion2_THROW
+
+60$
+	MOVE.W	D5,D0			
+	MOVE.L	A5,A0			;get iobj
+	DO	NPC.OK			;is this character alive?
+	BNE.S	59$			;not ok => nhapp
+	DO	P.TN
+	DO	ISARE
+	MSG	TXSP1			;none too happy
+	DO	BSFULLSTOP
+90$
+
+      IFD	wantSP.THROWAfter
+	XREF	SP.THROWAfter
+	CALL	SP.THROWAfter
+      ENDC	;wantSP.THROWAfter
+
+	RET
+ 
+THR.MANY
+
+* The player has attempted to throw an item which is a component
+* of a connected system of particles.
+*
+* The assummption with such systems is that the location of each
+* component is the same. However This may not be the case, either
+* due to a BUG or a weird special.
+*
+* Throw.many will dissalow anysuch throwing of components if the whole
+* system is not in the same place.
+
+ 
+	MOVEQ	#InsistCarried|PrintOutList,D6		;set parameters.
+	LEA	THR.PNT(PC),A6
+	BRA	DO.FIX
+
+      IFD	wantExtraVersion2_THROW
+
+* we have to store the nouns in LOOPBUF which are the nouns in the tied
+* system before calling BBRIT because it might do BRKD0QUIET which will do a
+* SETOUT and hence overwrite LOOPBUF
+
+	XREF	RELSTK,LOOPBUF
+
+PushLOOPBUF
+	MOVE.L	(A7)+,RELSTK(A4) ;save the stack
+	LEA	LOOPBUF(A4),A1
+	MOVE.L	A1,A2
+10$
+	TEST_W	(A1)+
+	BNE.S	10$		;go to the end
+20$
+	MOVE.W	-(A1),-(A7)	;push the stuff
+	CMP.L	A2,A1
+	BGT.S	20$
+	MOVE.L	RELSTK(A4),-(A7)
+	RET
+
+
+PullLOOPBUF
+	MOVE.L	(A7)+,RELSTK(A4) ;save the stack
+	LEA	LOOPBUF(A4),A1
+10$
+	MOVE.W	(A7)+,(A1)+
+	BNE.S	10$
+	MOVE.L	RELSTK(A4),-(A7)
+	RET
+
+      ENDC	;wantExtraVersion2_THROW
+
+	ENDC	;Version2_THROW
+
+*------------------------------------------
+
+	ENDC	;THROW
+
+
+
+	END

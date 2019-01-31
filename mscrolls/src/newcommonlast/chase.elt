@@ -1,0 +1,36 @@
+***********************************************************
+*
+*	%W%
+*	%G%
+*
+************************************************************
+
+		SECTION	"ADV",CODE
+
+		include	"equates.i"
+		include	"macros.i"
+		include	"verbequ.i"
+		include	"scenequ.i"
+
+*------------------------------------------
+*
+*	CHASE
+*
+*------------------------------------------
+
+
+		IfVerb	CHASE
+		XDEF	V.CHASE
+
+		XREF	SP.RUN,GO.N
+V.CHASE
+
+		CALL	SP.RUN
+		BRA	GO.N
+
+
+		ENDC	;V.CHASE
+
+*------------------------------------------
+
+		END

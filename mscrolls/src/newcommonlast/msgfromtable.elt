@@ -1,0 +1,73 @@
+**************************************************************
+*
+*	10/27/87
+*	@(#)msgfromtable.elt	1.2
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+
+************************************************************
+* 
+* This routine scans a table (pointed to by A1) for the first
+* match with noun D0. Three different table entries are allowed:
+*
+* a) Print desc. of noun
+*	DC.W	NNOUN+HI
+*
+* b) Print Scenario message
+*	DC.W	NNOUN,SCNMSG
+*
+* c) Print desc. of other noun
+*	DC.W	NNOUN,NOTHERNOUN+HI
+*
+* A word of zero terminates the list.
+*
+* Roddy - Jan,'87
+* 
+*********************************************************
+
+	XDEF	MessageFromTable
+	XREF	P.Description
+
+
+MessageFromTable
+
+	PUSH_L	D0-D1/A1
+10$:
+	MOVE.W	(A1)+,D1	; Get first table word?
+	BEQ.S	90$		; end of table ? - only jump to 90$ with EQ
+	ANDI.W	#$7FFF,D1	; Strip top bit...
+	CMP.W	D1,D0		; does it match the one we want?
+	BEQ.S	20$		
+	TEST_W	-2(A1)		; Nope - do we need to skip another word?
+	BMI.S	10$		; If not, go and try next word.
+	ADDQ.W	#2,A1		; Yes, skip extension word...
+	BRA.S	10$		; ..and try next match
+
+20$:
+	TEST_W	-2(A1)		; We've got a match, so was top bit set?
+	BMI.S	70$		
+	MOVE.W	(A1)+,D1	; No, so get extension wd.
+	BMI.S	30$		; Was ITS top bit set? (i.e. noun desc)
+	DO	P.SCN		; No,so treat it as a scenario message
+	BRA.S	80$		; ... and exit
+30$:
+	AND.W	#$7FFF,D1	; Its a noun number, so clear top bit
+70$:	
+	MOVE.W	D1,D0		; put it in the right place...
+	CALL	P.Description	; and print its description
+80$:
+	SETNE
+90$:
+*	SETEQ			; GUARANTEED EQ when we get here via 90$
+				; ... or else we're in the brown stuff.
+	PULL_L	D0-D1/A1
+	RET
+
+
+	END

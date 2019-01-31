@@ -1,0 +1,66 @@
+**************************************************************
+*
+*   10/27/87
+*   @(#)fixirel.elt 1.2
+*
+**************************************************************
+
+
+    SECTION "ADV",CODE
+
+    include "equates.i"
+    include "macros.i"
+    include "verbequ.i"
+
+*--------------------------------
+
+    XDEF    FIXIREL
+    XREF    VERB,TEMPBUF
+ 
+FIXIREL 
+ 
+    MOVE.L  A0,-(A7)           ;TO BE SAFE..
+    CMP.W   #VNEXAMINE,VERB(A4)
+    BLS.S   90$
+    CLR.W   D5
+    LEA     TEMPBUF(A4),A1
+10$
+    MOVE.W  (A1)+,D0
+    BEQ.S   90$                ;DONE
+    DO  FIXSYS             ;A3
+    MOVE.L  A3,A0
+    ADDQ.L  #2,A3
+    TEST_W  (A3)
+    BEQ.S   10$
+    SUBQ.L  #2,A3
+    MOVE.L  A1,A2              ;SAVE
+70$
+    MOVE.W  (A1)+,D0           ;NEXT #
+    BEQ.S   20$
+40$
+    MOVE.W  (A3)+,D1
+    BEQ.S   30$                ;DONE
+    CMP.W   D0,D1
+    BNE.S   40$                ;REST
+    MOVE.L  A1,A5
+60$
+    MOVE.W  (A1),-(A1)
+    BEQ.S   50$
+    ADDQ.L  #4,A1
+    BRA.S   60$
+50$
+    MOVE.L  A5,A1
+    SUBQ.L  #2,A1
+30$
+    MOVE.L  A0,A3
+    BRA.S   70$
+20$
+    MOVE.L  A2,A1
+    BRA.S   10$
+90$
+    MOVE.L  (A7)+,A0
+    RET
+
+
+
+    END

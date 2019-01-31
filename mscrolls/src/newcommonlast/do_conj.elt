@@ -1,0 +1,160 @@
+**************************************************************
+*
+*   %G%
+*   %W%
+*
+**************************************************************
+
+
+    SECTION "ADV",CODE
+
+    include "equates.i"
+    include "macros.i"
+    include "verbequ.i"
+    include "scenequ.i"
+
+*--------------------------------
+ 
+    XDEF    DO.CONJ,WSYN,NOTWSYN
+    XREF    ERR1
+  
+DO.CONJ
+ 
+    TEST_B  D3
+    BNE.S   NOTWSYN
+ 
+WSYN
+ 
+    TEST_W  ERR1(A4)        ;Error msgs been killed?
+    BNE.S   10$
+    CMP.B   #2,D7           ;Error been printed, already?
+    BEQ.S   10$
+
+    IFEQ  THE_PAWN
+    XREF    DoScenery
+
+    CMP.W   #SECT.SCEN,D6       ;scenery noun?
+    BEQ DoScenery       ;yes (ps this goes to DECODE)
+    ENDC
+
+    MSG WRSYN
+10$
+    DOGO    DECODE
+ 
+NOTWSYN
+ 
+    IFD wantGLOBALIO
+    XREF    DirectOrIndirect
+    ST  DirectOrIndirect(A4)    ;set to indirect object
+    ENDC    ;wantGLOBALIO
+
+    MOVE.L  CONJPNTR(A4),A0
+    MOVE.W  D5,(A0)
+    ADDQ.L  #2,CONJPNTR(A4)
+
+* watch out it falls through...
+
+
+    XDEF    CONJ11
+    XREF    CONJPNTR,GETCONJ,NEWST,VERB,VERB2,ADVERB,POSWRD,SETADN
+    XREF    DO.THEN,DO.THEN2,PEND,PEND2,EXTRA,EXTRAPNT,CONJ
+ 
+CONJ11
+ 
+    CALL    GETCONJ
+    CMP.B   #1,D7
+    BEQ.S   20$
+    BHI     NEWST           ; was DECODE, now NEWST to solve problem with
+*                               ; 'open door with key':Which key?:i
+* NEWST tests BRKWCH to decide whether there is a valid input line already
+* in INBUFF, so as to avoid asking for another
+
+    CMP.B   #SECT.VERB,D6   ;Verb?
+    BNE.S   10$
+    CMP.W   #VNUSE,VERB(A4)    ;use?   
+    BNE.S   10$
+
+    TEST_W  VERB2(A4)   ;but do we have a second verb already?
+    BPL.S   10$     ;PL=> yes
+    
+    MOVE.W  D5,VERB2(A4)    ;Also
+    DO  GETWRD          ;Another conj (eg use x to pick up y)
+
+    TEST_B  D7              ;Test the error return from GETWRD
+    BNE     WSYN
+
+    CMP.B   #SECT.CONJ,D6
+    BEQ.S   12$
+    CMP.B   #SECT.DIR,D6
+    BNE.S   11$             ;Neither
+    OR.W    #$8000,D5       ;HI-BIT flg for directons
+12$
+    MOVE.W  D5,ADVERB(A4)   ;Store
+    BRA.S   CONJ11
+11$
+    MOVE.L  POSWRD(A4),A6
+    SUBQ.L  #1,A6
+    
+    BRA.S   CONJ11
+10$
+    CMP.W   #SECT.CONJ,D6   ;Conj?
+    BEQ.S   NOTWSYN
+    CMP.B   #SECT.DIR,D6    ;Go
+    BEQ.S   15$             ;OK
+    
+    CMP.W   #SECT.VERB,D6   ;Verb??
+    BEQ.S   15$
+    CMP.W   #SECT.SPEC,D6
+    BNE     WSYN            ;No good
+    CMP.W   #8,D5           ;Then?
+    BNE     WSYN            ;Nope
+  
+15$
+    CALL    SETADN
+    BRA     DO.THEN2
+ 
+20$
+    CALL    SETADN
+    TEST_W  PEND(A4)
+    BEQ     DO.THEN
+    MOVE.L  A6,EXTRAPNT(A4)
+    MOVE.W  #1,EXTRA(A4)
+    MOVE.L  CONJPNTR(A4),A0
+    TEST_W  PEND2(A4)
+    BMI.S   30$
+    SUBQ.L  #2,A0
+30$
+    MOVE.W  (A0),CONJ(A4)
+    RET
+
+*--------------------------------------------------------
+
+    XDEF    EXTRAFIX
+ 
+EXTRAFIX
+ 
+    CLR.W   EXTRA(A4)
+    RET
+ 
+*--------------------------------------------------------
+
+    IFNE    0
+
+* As far as i can tell, this routine is completely redundent
+* and can be deleted
+
+    XDEF    DO.BUFFS
+    XREF    EXBUFF,EXNUM,NOUNBUF,NOUN
+
+DO.BUFFS
+ 
+    LEA     EXBUFF(A4),A0
+    ADD.W   EXNUM(A4),A0
+    LEA     NOUNBUF(A4),A1
+    ADD.W   NOUN(A4),A1
+    RET
+ 
+    ENDC    ;0
+
+
+    END

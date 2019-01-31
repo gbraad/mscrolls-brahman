@@ -1,0 +1,100 @@
+**************************************************************
+*
+*	3/10/89
+*	@(#)shine.elt	2.2
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"verbequ.i"
+	include "scenequ.i"
+
+	IfVerb	SHINE
+
+	XDEF	V.SHINE
+	XREF	SP.SHINE,ADVERB,CONJ
+ 
+      IFEQ	THE_PAWN 
+
+V.SHINE
+
+	MOVE.W  ADVERB(A4),D1
+	CMP.W   #THROUGH,D1        ;THROUGH
+	BEQ.S   05$
+	CMP.W	#ON,CONJ(A4)
+	BEQ.S	05$
+	MOVEQ   #AT,D1            ; AT
+	DO	CHK4PT
+05$
+	EXG     A0,A5
+	EXG     D0,D5
+	CALL    SP.SHINE
+	BTST    #7,(A5)            ;ALIGHT?
+	BNE.S   10$
+	EXG	D0,D5		  ;THIS ONE IS NOT ALIGHT!
+	DO	P.BTN
+	DO	ISAREN
+
+      IFND	wantCorrectFullStops
+	MSGGO	LIT
+      ENDC	;!wantCorrectFullStops
+
+      IFD	wantCorrectFullStops
+	MSG	LIT
+	DOGO	BSFULLSTOP
+      ENDC	;wantCorrectFullStops
+
+10$
+	MSGGO	NHAP
+90$
+	RET
+
+      ENDC
+
+      IFNE	THE_PAWN 
+
+V.SHINE
+
+	MOVE.W  ADVERB(A4),D1
+	CMP.W   #THROUGH,D1             ;THTOUGH
+	BEQ.S   SHTHRU
+	MOVEQ   #AT,D1                  ; AT
+	DO	CHK4PT
+	TST_LIT				;ALIGHT?
+	BNE.S   10$
+	DO	P.BTN
+	DO	ISAREN
+	MSGGO	LIT
+10$
+	EXG     A0,A5
+	EXG     D0,D5
+	CALL    SP.SHINE
+	MSGGO	NHAP
+90$
+	RET
+
+
+
+*--------------------------------
+* 
+* let's u split white by 'shine white thru prism
+	        
+SHTHRU
+
+	DO	CHK4PT
+	CLR.W   CONJ(A4)           ;TO 'WITH'
+	BRA     V.SPLIT
+
+      ENDC
+
+*--------------------------------
+
+	ENDC
+
+
+
+	END

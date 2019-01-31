@@ -265,9 +265,11 @@
 #include <stdarg.h>
 #include <assert.h>
 #include <time.h>
+#include <stdint.h>
 #include "defs.h"
 #include "hunks.h"
 #include "cutils.h"
+#include "roomsjinxter.h"
 
 // picture colour profiles
 #include "pccp.h"
@@ -286,7 +288,7 @@ extern FILE far * lfopen(const char far *, const char far *);
 
 #endif
 
-static type32 dreg[8], areg[8], i_count, string_size, rseed = 0, pc, arg1i, mem_size;
+static type32 dreg[8], areg[8], i_count, string_size, pc, arg1i, mem_size;
 static type16 properties, fl_sub, fl_tab, fl_size, fp_tab, fp_size;
 static type8 zflag, nflag, cflag, vflag, byte1, byte2, regnr, admode, opsize;
 static type8 *arg1, *arg2, is_reversible, running = 0, tmparg[4] = {0, 0, 0, 0};
@@ -303,8 +305,14 @@ static type16 snd_hsize = 0;
 static FILE *snd_fp = 0;
 static type8 big = 0, period = 0, epipe = 0, escape = 0;
 static MagHeader ms_head;
+static int sectionCount;
 type8 prog_format = 0;
 static int getCharCount;
+static int ScnMsgCount;
+
+// prog format only
+static int MsgMSGBASE;
+static int MsgSCNBASE; 
 
 Item* items;
 size_t itemCount;
@@ -546,7 +554,47 @@ void out2(char *format,...)
 }
 #endif
 
-static void _ms_showpic(type32 c, type32 picAddr, type8 mode)
+typedef struct
+{
+    int         room;
+    const char* sound;
+} RoomSound;
+
+#if 0
+static const RoomSound jinxterAmbience[] =
+{
+    //{ JRONBUS, "onbus.ogg" },
+    { JRFRONTGARDEN1, "garden.ogg" },
+};
+
+static const RoomSound* findSound(int room, const RoomSound* table, int size)
+{
+    while (size--)
+    {
+        if (table->room == room) return table;
+        ++table;
+    }
+    return 0;
+}
+
+static void _ms_playsound(int room)
+{
+    int g = get_game();
+    const RoomSound* rs = 0;
+    
+    switch (g)
+    {
+    case 3: // jinxter
+        rs = findSound(room, jinxterAmbience, ASIZE(jinxterAmbience));
+        break;
+    }
+
+    ms_playsound(room, rs ? rs->sound : 0);
+
+}
+#endif
+
+static void _ms_showpic(type32 c, type32 picAddr, int mode, int picVer)
 {
     // shader values: Contrast Brightness Saturation Lightness Gamma
     float* profile = 0;
@@ -555,8 +603,11 @@ static void _ms_showpic(type32 c, type32 picAddr, type8 mode)
     if (g > 0)
     {
 #if 1
-        assert(c >= 0 && c <= 0xff);
-        if (mode == 1) profile = pcc[g-1][c];
+        assert(c >= 0 && c < MAX_PICS);
+        if (mode == 1)
+        {
+            profile = pcc[g-1][c];
+        }
 #else
         if (gfx_ver < 2)
         {
@@ -611,7 +662,7 @@ static void _ms_showpic(type32 c, type32 picAddr, type8 mode)
             if (gamma == 0.0) profile = 0;
         }
     }
-    ms_showpic(c, picAddr, mode, gfx_ver, profile);
+    ms_showpic(c, picAddr, mode, gfx_ver, profile, picVer);
 }
 
 static type8 _ms_getchar(type8 trans)
@@ -636,22 +687,29 @@ type8 *effective(type32 ptr)
     return code + ptr;
 }
 
-static inline type32 _read_l(type8 * ptr)
+#ifdef _MSC_VER
+// MSVC does not like "inline" in C programs
+#define INLINE
+#else
+#define INLINE inline
+#endif
+
+static INLINE type32 _read_l(type8 * ptr)
 {
     return (type32) ((type32) ptr[0] << 24 | (type32) ptr[1] << 16 | (type32) ptr[2] << 8 | (type32) ptr[3]);
 }
 
-static inline type16 _read_w(type8 * ptr)
+static INLINE type16 _read_w(type8 * ptr)
 {
     return (type16) (ptr[0] << 8 | ptr[1]);
 }
 
-static inline type8 _read_b(type8* ptr)
+static INLINE type8 _read_b(type8* ptr)
 {
     return *ptr;
 }
 
-static inline void _write_l(type8 * ptr, type32 val)
+static INLINE void _write_l(type8 * ptr, type32 val)
 {
     ptr[3] = (type8) val;
     val >>= 8;
@@ -662,14 +720,14 @@ static inline void _write_l(type8 * ptr, type32 val)
     ptr[0] = (type8) val;
 }
 
-static inline void _write_w(type8 * ptr, type16 val)
+static INLINE void _write_w(type8 * ptr, type16 val)
 {
     ptr[1] = (type8) val;
     val >>= 8;
     ptr[0] = (type8) val;
 }
 
-static inline void _write_b(type8* ptr, type8 val)
+static INLINE void _write_b(type8* ptr, type8 val)
 {
     *ptr = val;
 }
@@ -737,28 +795,62 @@ static void write_b(type8* ptr, type8 val)
 #define write_b _write_b
 #endif
 
-static inline type32 read_l2(type8 * ptr)
+static INLINE type32 read_l2(type8 * ptr)
 {
     return ((type32) ptr[1] << 24 | (type32) ptr[0] << 16 | (type32) ptr[3] << 8 | (type32) ptr[2]);
 }
 
-static inline type16 read_w2(type8 * ptr)
+static INLINE type16 read_w2(type8 * ptr)
 {
     return (type16) (ptr[1] << 8 | ptr[0]);
 }
 
 /* Standard rand - for equal cross-platform behaviour */
 
+
+#if 0
+static type32 rseed;
 void ms_seed(type32 seed)
 {
     rseed = seed;
 }
 
+/* this doesn't work well with subsequent modulo, nor for a sequence
+ * of random numbers. for example when r(4)==0, r(2) is never 0.
+ *
+ * see numerical recipes in C (2nd edition) page 276-277
+ */
 type32 rand_emu(void)
 {
     rseed = 1103515245L * rseed + 12345L;
     return rseed & 0x7fffffffL;
 }
+#else
+
+/* from numerical recipes (3rd edition) page 351 */
+static uint64_t rand_val = 4101842887655102017LL;
+
+void ms_seed(type32 seed)
+{
+    rand_val = seed;
+}
+
+static uint64_t rand_gen64()
+{
+    rand_val ^= rand_val >> 21;
+    rand_val ^= rand_val << 35;
+    rand_val ^= rand_val >> 4;
+    return rand_val*2685821657736338717LL;
+}
+
+type32 rand_emu()
+{
+    uint32_t v = (uint32_t)rand_gen64();
+    return v;
+}
+
+
+#endif
 
 static void _freeWord(Word* word)
 {
@@ -1042,7 +1134,7 @@ static int ms_load_prog_header(const char* name, FILE* fp)
 
        hunk_header L
        0 L
-       1 L (n hunks, 2=>BSS, but none present)
+       1 L (n sections, 2=>BSS, but none present)
        0 L
        0 L
        size/4
@@ -1059,18 +1151,36 @@ static int ms_load_prog_header(const char* name, FILE* fp)
        hunk_end
     */
 
-    get_int(fp); // 0
-    int n_hunks = get_int(fp);
-    get_int(fp); // 0
-    get_int(fp); // 0
+    int n = get_int(fp); // expect 0
+    assert(n == 0);
+    n = get_int(fp); // sections#
 
-    if (n_hunks != 1)
+    if (n == 0)
     {
-        printf("expected 1 hunk\n");
+        printf("No sections!\n");
         return 0;
     }
 
-    ms_head.code_size = get_int(fp)*4;
+    if (n > 3)
+    {
+        printf("too many sections, %d\n", n);
+        return 0;
+    }
+
+    sectionCount = n;
+
+    int t = get_int(fp);
+    assert(t == 0);
+    t = get_int(fp);
+    assert(t == n-1);
+
+    int sizes[3];
+
+    memset(sizes, 0, sizeof(sizes));
+    int i=0;
+    for (i = 0; i < n; ++i) sizes[i] = get_int(fp);
+
+    ms_head.code_size = sizes[0]*4;
 
     int hc = get_int(fp);
     if (hc != hunk_code)
@@ -1088,6 +1198,7 @@ static int ms_load_prog_header(const char* name, FILE* fp)
 
     ms_head.version = 2; // remastered
     ms_head.gameid = 0; // unknown
+    ms_head.dict_size = sizes[1]*4;
 
     // final file name in path (if given)
     const char* p = strrchr(name, '/');
@@ -1098,6 +1209,7 @@ static int ms_load_prog_header(const char* name, FILE* fp)
     // XX not very clever
     if (!strncmp(p, "guild", 5)) ms_head.gameid = 0x20;
     if (!strncmp(p, "pawn", 4)) ms_head.gameid = 0x10;
+    if (!strncmp(p, "jinxter", 7)) ms_head.gameid = 0x30;
 
     //if (!ms_head.gameid) fprintf(stderr, "load_prog, unknown game for file '%s'\n", name);
 
@@ -1106,11 +1218,12 @@ static int ms_load_prog_header(const char* name, FILE* fp)
     return 1; // ok
 }
 
-static inline void fix_long(type32* p)
+static INLINE void fix_long(type32* p)
 {
     // reverse long work in place
     *p = _read_l((type8*)p);
 }
+
 
 /* zero all registers and flags and load the game */
 type8 ms_init(type8s * name, type8s * gfxname, type8s * hntname, type8s * sndname)
@@ -1146,7 +1259,7 @@ type8 ms_init(type8s * name, type8s * gfxname, type8s * hntname, type8s * sndnam
             // restore game state from restart buffer
             memcpy(code, restart, undo_size);
             undo_stat[0] = undo_stat[1] = 0;
-            _ms_showpic(0, 0, 0);
+            _ms_showpic(0, 0, 0, 0);
         }
     }
     else
@@ -1227,20 +1340,78 @@ type8 ms_init(type8s * name, type8s * gfxname, type8s * hntname, type8s * sndnam
         
         ok = (code = malloc(mem_size)) != 0;
         ok = ok && fread(code, 1, ms_head.code_size, fp) == ms_head.code_size;
+
+        sd = (type8)((ms_head.dict_size != 0L) ? 1 : 0); /* if (sd) => separate dict */
         
-        if (ok && prog_format)
+        if (sd)
+            ok = ok && (dict = malloc(ms_head.dict_size)) != 0;
+
+        if (prog_format)
         {
-            // load symbol table if present
-            init_syms(fp);
+            int data_loaded = 0;
+            
+            while (ok)
+            {
+                int v = get_int(fp); // section type
 
-            //int save_start = get_sym_value("SLADDR");
-            int save_end = get_sym_value("SLADDR.E");
+                ok = 0;
+                
+                if (v == hunk_end)
+                {
+                    ok = 1;
+                    if (!--sectionCount) break;
+                }
+                else if (v == hunk_reloc32)
+                {
+                    ok = 1;
+                    
+                    // skip reloc
+                    for (;;)
+                    {
+                        int n = get_int(fp);
+                        if (n <= 0) break;
+                        get_int(fp); // hn
+                        while (n--) get_int(fp);
+                    }
+                }
+                else if (v == hunk_data)
+                {
+                    int n = get_int(fp)*4; // size
+                    ok = n == ms_head.dict_size;
+                    if (ok)
+                    {
+                        ok = fread(dict, 1, ms_head.dict_size, fp) == ms_head.dict_size;
+                        data_loaded = ok;
+                    }
+                    else printf("dictionary size mismatch\n");
+                }
+                else if (v == hunk_symbol)
+                {
+                    // load symbol table if present
+                    init_syms(fp);
 
-            //printf("save_start = 0x%x\n", save_start);
-            //printf("save_end = 0x%x\n", save_end);
-            ms_head.undo_size = save_end;
+                    //int save_start = get_sym_value("SLADDR");
+                    int save_end = get_sym_value("SLADDR.E");
+
+                    //printf("save_start = 0x%x\n", save_start);
+                    //printf("save_end = 0x%x\n", save_end);
+                    ms_head.undo_size = save_end;
+                    
+                    ok = 1;
+                }
+                else
+                {
+                    printf("unknown section in prog 0x%x\n", v);
+                }
+            }
+
+            if (ok && sd && !data_loaded)
+            {
+                printf("Did not load dictionary data from prog\n");
+                ok = 0;
+            }
         }
-
+        
         gameid = ms_head.gameid;
         version = ms_head.version;
         string_size = ms_head.string_size;
@@ -1260,8 +1431,6 @@ type8 ms_init(type8s * name, type8s * gfxname, type8s * hntname, type8s * sndnam
         printf("mem size = 0x%x\n", mem_size);
 #endif
 
-        sd = (type8)((ms_head.dict_size != 0L) ? 1 : 0); /* if (sd) => separate dict */
-        
         if (ms_head.string2_size)
             ok = ok && (string2 = malloc(ms_head.string2_size)) != 0;
 
@@ -1282,10 +1451,6 @@ type8 ms_init(type8s * name, type8s * gfxname, type8s * hntname, type8s * sndnam
             }
         }
         
-        if (sd)
-        {
-            ok = ok && (dict = malloc(ms_head.dict_size)) != 0;
-        }
 
         if (string_size)
         {
@@ -1311,9 +1476,12 @@ type8 ms_init(type8s * name, type8s * gfxname, type8s * hntname, type8s * sndnam
 
         ok = ok && (fread(string2, 1, ms_head.string2_size, fp) == ms_head.string2_size);
 
-        if (sd)
+        if (sd && ok)
         {
-            ok = ok && (fread(dict, 1, ms_head.dict_size, fp) == ms_head.dict_size);
+            if (!prog_format)
+            {
+                ok = fread(dict, 1, ms_head.dict_size, fp) == ms_head.dict_size;
+            }
         }
 
         fclose(fp);
@@ -1991,6 +2159,7 @@ type8 *ms_extract2(type8s * name, type16 * w, type16 * h, type16 * pal, type8 * 
                 // short length;
                 
                 int priority = read_w2(fi);
+                (void)priority; // no warning
                 int length = read_w2(fi + 2);
                 fi += 4;
 
@@ -2015,6 +2184,7 @@ type8 *ms_extract2(type8s * name, type16 * w, type16 * h, type16 * pal, type8 * 
                     pos_table[i][j].number = read_w2(fi + 4) - 1;
 
                     int interval = read_w2(fi + 6);
+                    (void)interval; // no warning
 #ifdef LOGGFX_EXT
                     printf("Position entry: Table: %hu  Entry: %hu  X: %hi Y: %hi Frame: %hi\n",
                          i,j,pos_table[i][j].x,pos_table[i][j].y,pos_table[i][j].number);
@@ -2849,6 +3019,20 @@ type32 pop(void)
     return c;
 }
 
+static int pop16(void)
+{
+    int c = read_w(effective(read_reg(15, 2)));
+    write_reg(15, 2, read_reg(15, 2) + 2);
+    return c;
+}
+
+static int pop32(void)
+{
+    int a = pop16();
+    int b = pop16();
+    return (a << 16) + b;
+}
+
 /* check addressing mode and get argument [2e85] */
 
 void get_arg(void)
@@ -3412,7 +3596,7 @@ Word* find_adjective(int n)
 extern int emu_word_subst(int gameid, int section,
                           Word* w, const char* p, int len);
 
-size_t _make_words(int section,
+size_t _extract_words(int section,
                    type8* sp, type8* ep, size_t recSize, Word** words)
 {
     // extract vocab table words
@@ -3462,7 +3646,6 @@ size_t _make_words(int section,
     return n;
 }
 
-#ifdef STANDALONE
 static void _dump(type8* p, size_t n)
 {
     while (n)
@@ -3470,13 +3653,17 @@ static void _dump(type8* p, size_t n)
         int i;
         for (i = 0; i < 8; ++i)
         {
-            printf("%02x ", *p++);
+            int c = *p++;
+            printf("%02x", c);
+            if (c < 0x20 || c > 0x7f) c = ' ';
+            putchar(c);
             if (!--n) break;
         }
         printf("\n");
     }
 }
 
+#ifdef STANDALONE
 static type8* _find_data(type8* data, size_t n)
 {
     type8* p = code;
@@ -4009,13 +4196,12 @@ static void _scan_dict(int doff)
         atword = 1;
     }
 
-    // make adjectives
-    adjectiveCount = _make_words(5, section[5], section[6]-1,
-                                 sizeof(Word), &adjectives);
+    adjectiveCount = _extract_words(5, section[5], section[6]-1,
+                                 (int)sizeof(Word), &adjectives);
     if (v) printf("%d adjectives\n", (int)adjectiveCount);
             
     // make items
-    itemCount = _make_words(6, section[6], section[7]-1, sizeof(Item),
+    itemCount = _extract_words(6, section[6], section[7]-1, sizeof(Item),
                             (Word**)&items);
     if (v) printf("%d nouns\n", (int)itemCount);
 }
@@ -4524,6 +4710,10 @@ type16 show_hints_text(struct ms_hint* hints, type16 index)
     return 0;
 }
 
+#define InfoAtScreen 1
+#define InfoAtCommand 2
+#define InfoDump 3
+
 void do_line_a(void)
 {
     type8 l1c;
@@ -4540,7 +4730,7 @@ void do_line_a(void)
     */
 #endif
     int vcheck = (version < 4 && byte2 < 0xe4) || (version < 2 && byte2 < 0xed);
-    if ((byte2 < 0xdd) || (!prog_format && vcheck))
+    if ((byte2 < 0xdc) || (!prog_format && vcheck))
     {
         ms_flush();     /* flush output-buffer */
         rand_emu();     /* Increase game randomness */
@@ -4561,6 +4751,38 @@ void do_line_a(void)
     }
     else
     {
+        if (byte2 == 0xDC)
+        {
+            static int lastScnMsgCount;
+
+            // A0DC
+            int op = pop16();
+
+            //printf("##### InfoTrap %d\n", op);
+
+            switch (op)
+            {
+            case InfoAtScreen:
+                // called at the start of the main loop
+                lastScnMsgCount = ScnMsgCount;
+                break;
+            case InfoAtCommand:
+                // called before a command is parsed
+                {
+                    int d = ScnMsgCount - lastScnMsgCount;
+                    ms_event_hook(!d);
+                }
+                break;
+            case InfoDump:
+                {
+                    int a = pop32();
+                    printf("dump address %08X\n", a);
+                    _dump(effective(a), 16);
+                }
+                break;
+            }
+        }
+        
         //printf("LINE-A %d\n", byte2 - 0xdd);
         switch (byte2 - 0xdd)
         {
@@ -4827,12 +5049,19 @@ void do_line_a(void)
 
                 int picNumber = read_reg(0,1); // d0
                 int picAddr = 0; // not known
-                
-                if (gfx_ver > 1)
+                int picOp = read_reg(1, 0); // d1. 1 = show, 0 = hide
+                int picVer = read_reg(2, 0); // d2 = picture version
+                int room = read_reg(3, 1); // d3.w = room
+
+                // Quick fix for missing pic_ver in guild, needs proper fix
+                //if (!picOp || !prog_format) picVer = 0;
+                if (!picOp || !prog_format || (get_game() < 3)) picVer = 0;
+
+                if (gfx_ver > 1 || prog_format)
                     picAddr = read_reg(8,1); // A0
                 
                 /* Do_picture(D0) A0F0 */
-                _ms_showpic(picNumber, picAddr, (type8)read_reg(1, 0));
+                _ms_showpic(picNumber, picAddr, picOp, picVer);
             }
             break;
         case 20: // A0F1 FINDZERO
@@ -4928,8 +5157,12 @@ void do_line_a(void)
 #ifdef LOGDIS
             push_msg(DASM_COM,"D1=Random(0..D1-1)");
 #endif
-            l1c = (type8)read_reg(1, 0);
-            write_reg(1, 1, rand_emu() % (l1c ? l1c : 1));
+            {
+                l1c = (type8)read_reg(1, 0);
+                int v = rand_emu() % (l1c ? l1c : 1);
+                //printf("RANDOM(%d) = %d\n", l1c, v);
+                write_reg(1, 1, v);
+            }
             break;
 
         case 26: /* D0=Random(0..255) [3742] A0F7 */
@@ -5128,6 +5361,12 @@ void do_line_a(void)
 
             if (prog_format)
             {
+
+                MsgMSGBASE = read_reg(6, 1); // D6
+                MsgSCNBASE = read_reg(5, 1); // D5
+
+                //printf("MsgMSGBASE=%d, MsgSCNBASE=%d\n", MsgMSGBASE, MsgSCNBASE);
+                
                 // NB: these might also be valid in non-prog format
                 // A1 = save game start
                 // D0 = save game len
@@ -5219,10 +5458,9 @@ type8 ms_rungame(void)
 
     // Tracking ins only, to be removed later!
     //pc=0x6eb4;
-    if (pc==0x6eb4)
-       printf("");
+    //if (pc==0x6eb4) printf("");
+    //ms_seed(12345);
 
-    ms_seed(12345);
     if (no_branch)
     {
         //stop current sequence at bra, bsr, jmp, jsr, rts
@@ -6597,7 +6835,7 @@ type8 ms_rungame(void)
 #ifdef LOGDIS
             if (!no_branch)
 #endif
-            pc = fl_sub;
+            pc = fl_sub; // MessageCode function
         }
         else
         {
@@ -6621,11 +6859,24 @@ type8 ms_rungame(void)
             }
             else
             {
+
+                // message number
+                int m = ((byte1 << 8) + byte2) & 0x7ff;
+                m += MsgMSGBASE;
+
+                if (m > MsgMSGBASE + MsgSCNBASE)
+                {
+                    ++ScnMsgCount;
+                    
+                    // scenario message
+                    //printf("### SCN Message %d\n", m);
+                }
+                
                 push(pc);
 #ifdef LOGDIS
                 if (!no_branch)
 #endif
-                pc = fl_sub;
+                pc = fl_sub;  // MessageCode function
 #ifdef LOGDIS
                 else
                     pc += 2;

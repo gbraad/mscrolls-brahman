@@ -1,0 +1,414 @@
+**************************************************************
+*
+*   %G%
+*   %W%
+*
+**************************************************************
+
+
+    SECTION "ADV",CODE
+
+    include "equates.i"
+    include "macros.i"
+    include "verbequ.i"
+    include "scenequ.i"
+
+*--------------------------------
+*
+*  GET ROUTINE
+* 
+*--------------------------------
+
+    IfVerb  GET
+
+    XDEF    GET_
+
+    XREF    SP.GET,ADVERB,CONJ,REMOVE,SUBJECT,SUBJECT2,P.ALCARRY,WCARR
+    XREF    CALCWHT,P.NQEN,GETNUM,SP.MOVE.,SCANSV,DBS,V.PUT,P.WITH
+    XREF    GO.N,SEATED,V.STAND
+
+GET_
+ 
+    IfVerb  HIDE
+    XREF    V.HIDE
+
+    MOVE.W  ADVERB(A4),D1
+    CMP.W   #UNDER,D1       ;get under => hide under
+    BEQ V.HIDE
+    CMP.W   #BEHIND,D1      ;get behind => hide behind.
+    BEQ V.HIDE
+    ENDC    ;HIDE
+
+
+    CALL    SP.GET          ;CATCH 'G SNOW'
+
+    MOVE.W  ADVERB(A4),D1
+    CMP.W   #IN,D1          ;IN
+    BEQ     GO.N
+    CMP.W   #INTO,D1        ;or into?
+    BEQ GO.N
+    CMP.W   #VNEXIT,D1      ;get out? (special case)
+    BEQ V.STAND
+    TEST_W  D0                   ;ANY?
+    BPL.S   01$
+    MSGGO   IDFY
+01$
+    CMP.W   #FROM,CONJ(A4)       ;FROM? 
+    BNE.S   02$                  ;DO REMOVE
+    MOVEQ   #0,D1
+    BRA     REMOVE
+02$
+    TST_PSEUDO
+    BNE     GT16
+    TST_ISAROOM         ;A ROOM?
+    BNE     GT16
+    TST_INTRINSIC           ;INTRINSIC?
+    BNE     DBS
+    MOVE.W  8(A0),D1             ;LOC
+    CMP.W   SUBJECT(A4),D1       ;CARRIED?
+    BEQ     P.ALCARRY
+    CMP.W   SEATED(A4),D0       ;not allowed partable seats
+    BEQ DBS
+10$
+    DO  FIXCHK
+
+    IFD Version2_FIX
+    BEQ.S   04$         ;not fixed.
+    MOVE.B  2(A0),D1
+    LSR.B   #4,D1           ;get size
+    CMP.B   #2,D1           ;>2 => can get wo rest.
+    BLS GETMANY         ;<=2 => must get all of them.
+    ENDC    ;Version2_FIX
+
+    IFND    Version2_FIX
+    BNE     GETMANY
+    ENDC    ;!Version2_FIX
+
+04$
+    TST_MOVEABLE            ;MOVEABLE?
+    BEQ.S   05$                  ;NO
+    TST_INSEPARABLE         ;INSEPARABLE?
+    BEQ.S   06$                  ;NO
+    DOGO    DBS
+05$
+    BRA STEADFAST
+06$
+    LIQUID  D1          ;is it a liquid?
+    BEQ     GETWTH               ;GET WITH
+
+    IFEQ  THE_PAWN
+    MOVE.B  2(A0),D1
+    AND.B   #$0F,D1         ;get weight 15=> no can get
+    CMP.B   #15,D1
+    BEQ TOOHVY
+    ENDC
+
+    MOVE.W  D0,D2
+11$
+    MOVE.B  6(A0),D1
+    AND.B   #$21,D1             ; contained + related
+    BEQ.S   12$
+    MOVE.W  8(A0),D0
+    GETINFO
+    BRA.S   11$
+12$
+    MOVE.W  8(A0),D1
+    CMP.W   SUBJECT(A4),D1
+    BNE.S   GT13
+    MOVE.W  D2,D0
+    MOVE.L  A2,A0
+    MOVE.W  WCARR(A4),D2
+    BRA     GT30
+GT13
+    TST_CONTAINED               ;CONTAINED?
+    BEQ.S   GT15
+    MOVE.W  8(A0),D0             ;CONTAINER
+    GETINFO        
+    MOVE.B  (A0),D1
+    MOVE.L  A2,A0                ;BACK
+    AND.B   #$18,D1              ;BITS 3&4 ONLY
+    BNE.S   GT15                 ;OK
+    IFD wantSITUATION
+    TEST_W  D6
+    BPL.S   01$
+    RET
+01$
+    ENDC    ;wantsituation
+    DO  P.BTN
+    DO  ISAREN
+    MSGGO   OPN
+GT15
+    MOVE.W  D2,D0
+    DO  CALCWHT              ;TO D3
+    CMP.B   #MAXWGHT,D3          ;TOO HEAVY?
+    BHI     TOOHVY               ;BRANCH = YES
+    TEST_B  D3                   ;ZERO ?
+    BNE.S   GT20                 ;VOID
+GT16
+    MSG DBR               ;DONT BE SILLY MSG
+    DO  P.SUB                ;FOR ITEMS WI ZERO WEIGHT
+    MSG CNTGT
+    CALL    P.NQEN
+    DOGO    BSFULLSTOP
+GT20
+    MOVE.W  WCARR(A4),D2         ;WEIGHT CARRIED 
+    ADD.B   D3,D2                ;SUM
+    CMP.B   #MAXWGHT,D2              ;LIMIT
+    BLS     GT30
+    DO  P.SUBV
+    MSG CTMA
+    DOGO    P.TNSTOP
+GT30
+    MOVE.W  GETNUM(A4),D1       ;how many things we getting?
+    BEQ.S   GT31            ;EQ => this is first
+    CALL_S  TAKEN                 ;DO MANY
+    BRA.S   LBL32
+GT31
+    BeSure  PRTTXT
+
+    CALL    PRTTXT     
+    DC.W    $8100           ;p.sub has/have
+    MSG NOW
+    MSG GOT
+
+      IFNE  THE_PAWN
+
+    DO  P.TN
+
+      ENDC
+
+      IFEQ  THE_PAWN
+
+    DO  P.TNSTOP
+      
+      ENDC
+
+
+      IFNE  GENERIC
+
+    include "advevent.i"
+
+    XREF    PromptEvent
+    MOVEQ   #ADV_EV_ALL_CARRIED,D1
+    JSR PromptEvent(A4)
+
+    ENDC
+
+
+    IFD wantSP.GET_After
+    XREF    SP.GET_After
+    CALL    SP.GET_After
+    ENDC    ;wantSP.GET_After
+
+    CALL    SP.MOVE.          ;ANYTHING REVIELED  ?
+    CALL    SCANSV
+LBL32
+    MOVE.W  D2,WCARR(A4)         ;SUPERCEEDED BY EVALWHT
+    DO  FIXCONT              ;FIX CONTAINER VOL IF NEC.
+    GETINFO
+    MOVE.W  SUBJECT2(A4),6(A0)   ;ENTIRE LOCATION INFO
+    MOVE.W  SUBJECT(A4),8(A0)
+    BCLR    #0,11(A2)            ;IF WORN
+    ADDQ.W  #1,GETNUM(A4)
+
+
+      IFD   wantSP.GET_After
+    XREF    SP.GET_After
+    CALL    SP.GET_After
+      ENDC
+
+      IFEQ  THE_PAWN
+    XREF    SP.SCORE.NOUN
+    CALL    SP.SCORE.NOUN
+      ENDC
+
+    IFD wantSUCCESS
+    XREF    SUCCESS
+    MOVE.W  #RETCODE_SUCCESS,SUCCESS(A4)
+    ENDC
+    MSGGO     LINE
+TAKEN
+    DO  P.NOUN
+    MSG TAKEN
+    CALL    SP.MOVE.          ;CATCHES 'G MAT' ETC
+
+      IFEQ  THE_PAWN
+    CALL    SP.SCORE.NOUN
+      ENDC
+
+    BRA     SCANSV
+TOOHVY   
+    DO  P.TN
+    GETINFO        
+    DO  ISARE
+ 
+TOOHVY1.5
+ 
+    MSG THEVY
+    MSGGO   LINE
+  
+TOOHVY2
+ 
+    MSG TTR              ;TOGETHER THEY ARE
+    BRA.S   TOOHVY1.5            ;FOR THE SAKE OF 2 BYTES
+  
+*--------------------------------
+ 
+GETMANY
+  
+    MOVEQ   #0,D5                ;FLG=DO NOT PRINT
+  
+    DO  FIXSYS      ;->a3
+    CLR.W   D2
+    MOVE.L  A3,A1
+    MOVE.L  A1,A2
+51$
+    MOVE.W  (A1)+,D0
+    BEQ.S   52$
+    GETINFO        
+    TST_MOVEABLE                ;MOVEABLE?
+    BEQ.S   51$                  ;NOPE, GET NEXT ONE
+    MOVE.B  2(A0),D1  
+    AND.B   #$0F,D1              ;GET WIEGHT  
+    BEQ     DBS                  ;ZERO TUT TUT!  
+      
+      IFEQ  THE_PAWN
+
+    CMP.B   #15,D1
+    BEQ TOOHVY
+    
+      ENDC
+
+    DO  CALCWHT
+    ADD.W   D3,D2
+    BRA.S   51$
+52$
+    CMP.W   #MAXWGHT,D2
+    BHI.S   TOOHVY2
+    ADD.W   WCARR(A4),D2
+    CMP.W   #MAXWGHT,D2
+    BLS.S   53$
+    DO  P.SUB
+    MSG CTMA
+    MSG THEMAL
+    DOGO    BSFULLSTOP
+53$
+    MOVE.W  (A2)+,D0
+    BEQ.S   90$
+    GETINFO        
+    TST_MOVEABLE                ;MOVEABLE?
+    BEQ.S   53$                    ;NO
+    DO  FIXCONT         ;in case it's contained
+    CLR.W   6(A0)
+    MOVE.W  SUBJECT(A4),8(A0)
+    CALL    TAKEN
+    MSG     LINE
+    IFD wantSUCCESS
+    XREF    SUCCESS
+    MOVE.W  #RETCODE_SUCCESS,SUCCESS(A4)    ;it worked!
+    ENDC
+    BRA.S   53$
+90$
+    RET
+
+GETWTH                         
+    
+    DO  CARRIED              ;ALREADY?
+    BEQ     P.ALCARRY
+01$
+    TEST_W  D5                   ;WITH SOMETHING?
+    BEQ.S   10$                  ;NO
+    TEST_W  CONJ(A4)
+    BEQ.S   02$
+    MSGGO   IDFY
+02$
+    MOVE.W  #5,CONJ(A4)          ;CHANG TO 'IN'
+    BRA     V.PUT                ;DO AS PUT X IN Y
+10$
+    PUSH_L  D0/A0
+    MOVE.W  SUBJECT(A4),D2
+    DO  GETRELN              ;REL TO ME
+20$
+    MOVE.W  (A1)+,D0
+    BEQ.S   30$                  ;DONE
+    GETINFO                      ;TO A1
+    TST_PSEUDO
+    BNE.S   20$                  ;NOT PSUDOS
+    MOVE.W  SUBJECT2(A4),D1
+    CMP.W   6(A0),D1             ;MUST BE RELEVENT REALTION
+    BNE.S   20$                  ;NO GOOD
+    MOVE.B  10(A0),D1            ;CONTAINER VOL
+    AND.B   #$7,D1               ;VOL
+    CMP.B   #$2,D1
+    BLT.S   20$                  ;NO-GO
+
+    IFD attribute_IMPERMEABLE
+    XREF    Denotation_IMPERMEABLE
+
+    MOVE.L  A1,-(A7)        ;save me
+    LEA Denotation_IMPERMEABLE(A4),A1
+    DO  ISATTRIBUTE     ;is it suitable?
+    MOVE.L  (A7)+,A1        ;return me
+    BNE.S   20$         ;no, try again
+    ENDC    ;attribute_IMPERMEABLE
+
+    MOVE.W  D0,D2                ;FOR FROM ROUTINE
+    CALL    P.WITH               ;WITH TN
+    MOVE.L  A0,A5
+    PULL_L  D0/A0    
+    MOVE.W  D2,D5
+    BRA.S   02$
+30$
+                              
+    PULL_L  D0/A0
+    DO  P.SUBV
+    MSG NTCAR
+    MSGGO   ASCONT           ;A SUITABLE CONTAINER
+
+
+    ENDC
+
+*------------------------------------------------------
+
+    XDEF    STEADFAST
+
+STEADFAST
+
+
+      IFD   wantNEWSTEADFAST
+    XREF    STEADFAST.TBL
+
+* Entry
+*   D0 = item that steadfastly refuses to be moved
+
+    PUSH_L  A0/D1
+    GETINFO
+    MOVE.B  1(A0),D1        ;get h&S
+    AND.B   #$0F,D1         ;strength only
+    BEQ.S   80$         ;if zero, streadf as b4
+    LEA STEADFAST.TBL(A4),A0    ;start of list of msg
+10$
+    MOVE.L  (A0)+,D1        ;get item
+    BEQ.S   80$         ;end, not found
+    CMP.W   D1,D0           ;this one?
+    BNE.S   10$         ;no, try next
+    SWAP    D1          ;hi word is msg#
+    DO  P.SCN           ;and print it
+    BRA.S   90$         ;and exit
+80$
+    DO  P.TN
+    MSG STEADF
+90$
+    PULL_L  A0/D1
+    RET
+      ENDC  ;wantNEWSTEADFAST
+
+      IFND  wantNEWSTEADFAST
+    DO  P.TN
+    MSGGO   STEADF
+      ENDC  ;!wantNEWSTEADFAST
+
+
+*------------------------------------------------------
+    
+    END

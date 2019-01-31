@@ -1,0 +1,58 @@
+******************************************************
+*
+*	%W%
+*	%G%
+*
+******************************************************
+
+
+************************************************************************
+*
+* Wtable (1-23)
+*
+************************************************************************
+
+*
+*  Due to the odd bytes between link modules all the wtable files must
+*  be in one '.O' file. This way maybe the parser will understand 'north'
+*
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"verbequ.i"
+	include	"scenequ.i"
+
+	IFND	wantBIGPROG
+		SECTION		"ADV",CODE
+	ENDC	
+
+	IFD	wantBIGPROG
+		SECTION		"WTAB",DATA
+	ENDC	
+
+wtablestart
+
+	include	"wtable1.i"	;ignored,specials,conj,adverbs
+	include "wtable4.i"	;verbs
+	include	"wtable5.i"	;adjectives
+	include	"wtable6.i"	;nouns
+	include	"wtable7.i"	;misc, including synonyms & multiples
+
+
+    IFEQ	THE_PAWN
+
+	XDEF	Section24
+
+	DC.B	$81		;end of table to avoid clashes with scenery
+				;nouns and normal nouns
+
+Section24
+
+	include	"wtable24.i"
+
+    ENDC
+
+
+	DC.B	$81		;end of table
+
+            end

@@ -1,0 +1,47 @@
+**************************************************************
+*
+*	10/27/87
+*	@(#)prtworddata.elt	1.3
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	XDEF	WRDTABLE,ST_,YDONT,MU,HAVE,SUCCD
+
+WRDTABLE
+		DC.W	YDONT-ST_
+		DC.W	HAVE-ST_
+		DC.W	SUCCD-ST_
+		DC.W	DOES-ST_
+ 
+ 
+ST_
+YDONT
+	DC.B	'don''t '		;I DON'T
+	DC.B	$00
+	DC.B	'doesn''t '
+	DC.B	$00
+HAVE
+	DC.B	'have '			;YOU HAVE 
+	DC.B	$00
+	DC.B	'has '
+	DC.B	$00
+SUCCD
+	DC.B	'succeed@ '		;YOU SUCCEED	
+	DC.B	$00
+	DC.B	'succeeds '
+	DC.B	$00
+DOES
+	DC.B	'do '
+	DC.B	0
+	DC.B	'does '
+	DC.B	0
+ 
+MU
+ 
+
+
+
+	END

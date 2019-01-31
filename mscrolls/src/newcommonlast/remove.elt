@@ -1,0 +1,212 @@
+**************************************************************
+*
+*	%G%
+*	%W%
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"verbequ.i"
+	include	"scenequ.i"
+
+*--------------------------------
+	
+	
+	
+	IfVerb	REMOVE
+
+	XDEF	REMOVE
+	XREF	SP.GET,CONJ,GET_,VERB,SUBJECT,SP.UNWEA,P.CNTO,UNTIE
+	XREF	STEADFAST,CanMove,CantMove
+  
+REMOVE
+ 
+	CALL    SP.GET                   ;STOP SNOW,G F BALLOT BOX ETC..
+ 
+	TST_MOVEABLE				;MOVEABLE?
+	BEQ	STEADFAST
+	MOVE.W  D0,D2                    ;SAVE
+	MOVE.L  A0,A2                    ;& ADDR
+	MOVE.W  D5,D0
+	MOVE.L  A5,A0
+LB2
+	TEST_W  CONJ(A4)  
+	BMI     50$
+	MOVEQ   #2,D1
+	DO	CHK4PT
+11$
+	TEST_B  6(A2)                    ;AN IS LOC?
+	BNE.S   20$                      ;NO
+	MOVE.W  12(A2),D1                ;SEE IF TIED
+	AND.W   #$3FFF,D1                ;SUPERFLOUS?
+	BNE     GOTO_UNTIE               ;YES ITS TIED - UNTIE
+14$
+	MOVE.W  #-1,CONJ(A4)		;KILL 'FROM' OTHERWISE GET CALLS REMOVE!
+	MOVEQ   #0,D5                    ;NO ADD NOUN
+	MOVE.W  D2,D0                    ;GET BACK PRIMARY NOUN
+	GETINFO                          ;AND DATA
+	BRA     GET_                     ;USE GET
+20$
+	CMP.W   8(A2),D0                 ;ON SPEC NOUN
+	BEQ.S   30$                      ;YES
+	BTST    #0,6(A2)                 ;REL TO ANOTHER
+	BEQ.S   21$
+
+	BeSure	M.ON
+
+	MOVE.W  #M.ON,D3
+22$
+	EXG     D2,D0
+	DO	P.BTN
+	MOVE.L  A2,A0
+	DO	ISAREN
+	MOVE.W  D3,D1
+	DO	P.MSG
+	EXG     D2,D0
+	DOGO	P.TNSTOP
+21$
+	BTST    #5,6(A2)                 ;IN ANOTHER
+	BEQ.S   27$                      ;HUM!
+
+	BeSure	M.IN
+
+	MOVE.W  #M.IN,D3
+	BRA.S   22$
+ 
+27$
+	BeSure	M.CONTO
+
+	MOVE.W  #M.CONTO,D3
+	BRA.S   22$
+30$    
+	CALL    RMFIX1
+32$
+	BTST    #4,6(A2)                 ;INSEP
+	BNE     REM1
+	CALL	CanMove			;sensible to remove it?
+	BNE	CantMove
+
+      IFD	wantRemoveDoesSeep
+	MOVE.B	1(A2),D1
+	LSR.B	#4,D1			;get hardness
+	CMP.B	#1,D1			;liquid?
+	BNE.S	34$
+	DO	P.TN
+	MSG	SEPAWY
+	DO	SETOUT
+	BRA.S	35$
+34$
+      ENDC	;wantRemoveDoesSeep
+
+	MOVE.L  A2,-(A7)
+	DO	FIXCONT
+	MOVE.L  (A7)+,A2
+	DO	TOPLOC
+	MOVE.W  D0,8(A2)
+	CLR.W   6(A2)
+35$
+	CMP.W   #VNGET,VERB(A4)          ;GET FROM..
+	BNE.S   33$
+	MOVE.W  SUBJECT(A4),8(A2)
+33$
+
+      IFD	wantSP.REMOVE
+	XREF	SP.REMOVE
+	MOVE.W	D2,D0
+	MOVE.L	A2,A0
+	CALL	SP.REMOVE
+      ENDC	;wantSP.REMOVE
+
+    IFD	wantSUCCESS
+	XREF	SUCCESS
+	MOVE.W	#RETCODE_SUCCESS,SUCCESS(A4)
+    ENDC
+	RET
+50$
+	MOVE.W  12(A2),D1
+	AND.W   #$3FFF,D1
+	BNE     GOTO_UNTIE
+51$
+	MOVE.W  D2,D0                    ;FOR GET
+	MOVE.B  6(A2),D6
+	BTST    #2,6(A2)                 ;WORN?
+	BNE.S   REMCLTH
+	AND.B   #$3F,D6                  ;NOT ROOMS
+	BEQ     14$  
+	MOVE.W  8(A2),D2
+	DO	P.FROM
+	MOVE.W  D0,D2
+	BRA.S   32$
+
+REM1
+
+	DO	P.TN
+	MOVE.L  A2,A0
+	DO	ISARE
+	MSGGO	FXPERM
+
+REMCLTH
+
+	MOVE.L  A2,A0
+    IFD	wantSP.UNWEA_BEFORE
+	XREF	SP.UNWEA_BEFORE
+	CALL	SP.UNWEA_BEFORE
+    ENDC	;wantSP.UNWEA_BEFORE
+	DO	P.SUB
+	MSG	TAKOF
+	DO	P.TNSTOP
+	CLR.W   6(A2)
+	MOVE.W  SUBJECT(A4),8(A2)
+
+      IFNE	GENERIC
+	
+	XREF	PromptWORN_EVENT
+	JSR	PromptWORN_EVENT(A4)
+
+      ENDC
+
+	BRA     SP.UNWEA
+
+RMFIX
+
+	CMP.W   D0,D1
+	BEQ.S   RMFIX1
+	MOVE.W  D1,D0
+	BRA     P.CNTO
+
+RMFIX1
+
+	CLR.W   12(A2)
+	DO	P.SUB
+	MSG	REMOVE
+	MOVE.W  D2,D0
+	DOGO	P.TNSTOP
+
+
+********************************
+*
+* Put back DO/A0 and D5/A5
+* so untie does work for us
+*
+********************************
+
+
+GOTO_UNTIE
+
+	MOVE.W   D0,D5
+	MOVE.L   A0,A5
+	MOVE.W   D2,D0
+	MOVE.L   A2,A0
+
+	BRA      UNTIE          ;off to verb routine
+
+	ENDC
+
+ 
+*--------------------------------
+
+	END

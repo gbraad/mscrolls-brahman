@@ -1,0 +1,190 @@
+**************************************************************
+*
+*   %G%
+*   %W%
+*
+**************************************************************
+
+
+    SECTION "ADV",CODE
+
+    include "equates.i"
+    include "macros.i"
+    include "verbequ.i"
+    include "scenequ.i"
+
+    XDEF    MOVBUF
+    XREF    NOUNBUF,INTERROR,NOUNBUF2,NOUNBUF3,NOUN,CONJ
+    XREF    VERB2,VERB,ADVERB
+
+    IFD     VNFIX
+    XDEF    TIETOG  
+TIETOG
+    
+*PROCESS FOR TIE TOGETHER
+    
+    CLR.W   D7                  ;ERROR FLAG
+    LEA     NOUNBUF(A4),A1      ;NOUNS
+    CLR.W   D4                  ;NON TIEABLE COUNTER
+    CLR.W   D2                  ;NOUN COUNTER
+    MOVE.W  (A1),D5             ;SET INITALLY
+10$
+    MOVE.W  (A1)+,D0            ;GET A NOUN
+    BEQ.S   50$                 ;ALL DNE
+    ADDQ.W  #1,D2               ;INC
+    GETINFO                     ;TO A0
+    MOVE.B  1(A0),D1            ;HARD&STRENGTH
+    AND.B   #$F0,D1             ;HARDNESS
+    CMP.B   #$C0,D1             ;FLEXI?
+    BEQ.S   10$                 ;YES, NEXT
+    ADDQ.W  #1,D4               ;INC NON-FLEXY
+    MOVE.W  D0,D5               ;SAVE
+    BRA.S   10$                 ;UNTIL ALL
+50$
+    CMP.B   #1,D2               ;HOW MANY?
+    BLT     INTERROR            ;HUH?
+    BNE.S   60$                 ;OK
+    MSG     YCNDTT
+    MSG     JUSONE
+    BRA     80$                 ;FAIL ,EXIT
+60$
+    CMP.B   #1,D4               ;HOW MANY?
+    BLS.S   61$                 ;OK
+    TEST_W  NOUNBUF2(A4)        ;ANOTHER?
+    BNE.S   61$                 ;HUMM, LET TIE SORT IT OUT! 
+    MSG     NOTIE
+    BRA.S   80$                 ;FAIL,EXIT
+61$
+    LEA     NOUNBUF(A4),A1      ;START AGAIN/.
+62$
+    MOVE.W  (A1)+,D0            ;GET A NOUN
+    BEQ     INTERROR            ;BUT I THOUGHT THERE WAS A MATCH???
+    CMP.W   D0,D5               ;FOUND IT YET?
+    BNE.S   62$                 ;NO
+63$
+    MOVE.W  (A1),-(A1)          ;COLLAPSE BUFFER 
+    BEQ.S   64$                 ;DONE?
+    ADDQ.L  #4,A1               ;NXT
+    BRA.S   63$
+64$
+    LEA     NOUNBUF2(A4),A0
+    LEA     NOUNBUF3(A4),A1
+    CALL    MOVBUF              ;INTO 3
+    
+    LEA     NOUNBUF2(A4),A1     ;SECOND BUFFER
+70$
+    EXT.L   D5                  ;ASSUME NO HI BIT.
+    SWAP    D5                  ;ZEROS LOW
+    MOVE.L  D5,(A1)             ;INTO
+    MOVE.L  #$00010000,CONJ(A4) ;FUDGE IN TO
+    SUBQ.W  #2,NOUN(A4)
+90$
+    RET
+80$ 
+    MOVEQ   #1,D7   
+    BRA.S   90$
+  
+*--------------------------------
+    
+    XDEF    ISTIETOG
+    
+ISTIETOG
+    
+    CMP.W   #VNTIE,VERB(A4)
+    BEQ.S   10$                ;OK
+    CMP.W   #VNFIX,VERB(A4)
+    BNE.S   90$                ;NO EXIT
+10$
+    CMP.W   #TOGETHER,ADVERB(A4)    ;TOGETHER?
+    BEQ.S   20$                ;NO EXIT
+    CMP.W   #TOGETHER,CONJ(A4)
+    BNE.S   90$                ;FAIL
+20$
+    IFD     wantSP.TIETOG
+    XREF    SP.TIETOG
+    CALL    SP.TIETOG      ;NE=> exit, no questions asked.
+    BNE.S   80$        ;exit.
+    ENDC    ;wantSP.TIETOG
+
+    CALL    TIETOG             ;SHUFFLE BUFFERS
+    TEST_W  D7                 ;ERROR?
+    BNE.S   80$                ;FAIL  
+    BRA.S   SETADN
+90$
+    RET
+80$
+    MOVE.L  (A7)+,D0  DUMP STACK
+    DOGO    SCREEN
+
+    ENDC    ;VNFIX
+
+*--------------------------------
+
+    XDEF    SETADN
+    XREF    ADDNOUN
+    
+    
+SETADN
+    MOVE.W  NOUNBUF2(A4),ADDNOUN(A4)
+    MOVE.W  NOUNBUF3(A4),ADDNOUN+2(A4) 
+    RET
+    
+*--------------------------------
+
+    XDEF    USE
+    
+USE
+
+    IFD   wantV.USE       ;so we don't get 'No Can do!'
+    TEST_W  VERB2(a4)       ;we had a verb2 => PL
+    BMI.S   40$         ;MI => no, so no messing
+30$
+    ENDC  ;wantV.USE
+
+    CALL_S  BUFSHUF               ;SHUFFLE THEM THERE BUFFERS (DEALER)  
+    MOVE.W  CONJ+2(A4),CONJ(A4)
+    BPL.S   10$                   ;YES
+    CLR.W   CONJ(A4)
+    BRA.S   20$
+10$
+    CLR.W   CONJ+2(A4)
+20$
+    MOVE.W  VERB2(A4),VERB(A4)
+
+    CMP.W   #-1,ADVERB(A4)        ;ANY?
+    BNE.S   40$                   ;YEP
+    MOVE.W  CONJ+2(A4),ADVERB(A4)
+40$
+    
+    BRA.S   SETADN
+      
+*--------------------------------
+    
+    XDEF    BUFSHUF
+    XREF    EXBUFF
+
+BUFSHUF
+    
+    LEA     NOUNBUF(A4),A0     ;SOURCE
+    LEA     EXBUFF(A4),A1      ;DEST
+    CALL_S  MOVBUF             ;MOVEIT
+    LEA     NOUNBUF2(A4),A0
+    CALL_S  MOVBUF             ;MOVE
+    LEA     NOUNBUF3(A4),A0
+    TEST_W  (A0)               ;ANY?
+    BEQ.S   50$                ;ONLY 2 BUFFS
+    CALL_S  MOVBUF             ;MOVE
+50$
+    LEA     EXBUFF(A4),A0      ;SOURCE
+     
+MOVBUF
+    MOVE.L  A0,-(A7)
+91$
+    MOVE.W  (A0)+,(A1)+
+    BNE.S   91$                ;UMOVE IT
+    MOVE.L  (A7)+,A1           ;BAK
+    RET
+ 
+
+
+    END

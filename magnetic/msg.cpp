@@ -78,6 +78,8 @@ void Messages::emitChars(const char* msg, outfn fn)
             int obj = get_stopron();
             if (obj)
             {
+                //bool notrailingspace = (obj & 0x4000);
+                obj &= 0x3fff;
                 IItem ii(find_item(obj));
                 if (ii)
                 {

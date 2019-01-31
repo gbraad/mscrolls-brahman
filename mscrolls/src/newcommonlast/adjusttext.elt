@@ -1,0 +1,44 @@
+**************************************************************
+*
+*	10/27/87
+*	@(#)adjusttext.elt	1.2
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+
+*------------------------------------------
+
+	XDEF	ADJUSTTEXT
+	XREF	WHICHFIX
+
+ADJUSTTEXT
+
+*	fix the whichfix list, since extra text has been inserted
+*	start at CMDPNT and add 'a1'
+*	d0 is the point at which the adjective is to be inserted.
+
+	PUSH_L	D1/D2/A3
+	LEA	WHICHFIX(A4),A3		;start of table (each is 12 bytes)
+	MOVE.L	A1,D2
+10$
+	MOVE.L	(A3),D1			;start adress
+	BEQ.S	90$			;end
+	CMP.L	D0,D1
+	BCS.S	20$			;before, not affected.
+	ADD.L	D2,(A3)+		;adjust
+	ADDQ.L	#4,A3			;to end pointer
+	ADD.L	D2,(A3)+		;next
+	BRA.S	10$			;anymore?
+20$
+	ADD.W	#$0C,A3			;skip to next
+	BRA.S	10$
+90$
+	PULL_L	D1/D2/A3
+	RET
+
+
+	END

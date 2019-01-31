@@ -1,0 +1,117 @@
+**************************************************************
+*
+*	%G%
+*	%W%
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"verbequ.i"
+
+
+
+*--------------------------------
+
+	IfVerb	INVENTORY
+
+	XDEF	INVENT,GetInventCarried,GetInventWorn
+	XREF	WHOOPS,SUBJECT,SUBJECT2
+	
+INVENT
+
+	IFEQ	THE_PAWN
+
+	XREF	SP.INVENT,SPA.INVENT
+
+	CALL	SP.INVENT
+
+	ENDC
+
+	ST	WHOOPS(A4)		;'I ALL'
+	DO	P.SUBV
+	MSG	CAR
+	
+	CALL	GetInventCarried
+
+	DO	P.LISTSTOP
+	MSG	LINE
+	DO	P.SUBV			;you are wearing
+	MSG	WEARNG
+
+	CALL	GetInventWorn2		;cos A2 set by GetInventCarried
+
+	DO	P.LISTSTOP
+
+	IFEQ	THE_PAWN
+
+	CALL	SPA.INVENT
+
+	ENDC
+
+	RET
+
+
+GetInventCarried
+
+	MOVE.W  SUBJECT(A4),D2		;CLR.W  D2   WLOG
+	DO	GETRELN			;TO A1
+	MOVE.L  A1,A2			;SAVE
+10$
+	MOVE.W  (A1)+,D0		;NOUN$
+	BEQ.S   30$			;DONE
+	GETINFO
+	MOVE.B  6(A0),D3
+	CMP.B   SUBJECT2(A4),D3
+	BNE.S   20$			;NO
+	TST_PSEUDO				;PSEUDO
+	BEQ.S   10$
+20$
+	BSET	#7,-2(A1)		;VOID PREVIOUS NOUN
+	BRA.S   10$
+30$
+	MOVE.L  A2,A0			;START
+	RET
+
+GetInventWorn
+
+	MOVE.W  SUBJECT(A4),D2		;CLR.W  D2   WLOG
+	DO	GETRELN			;TO A1
+	MOVE.L  A1,A2			;SAVE
+
+GetInventWorn2				;for use after GetInventCarried
+
+	MOVEQ	#0,D3			;set clothing mask.
+	MOVE.L  A2,A1			;START
+40$
+	MOVE.W  (A1),D0			;NOUN#
+	BEQ.S   70$
+	GETINFO
+	TST_WORNBYPLAYER		;WORN?
+	BEQ.S   50$			;no
+	MOVE.B  D3,D4			;SAVE MASK
+	MOVE.B	10(A0),D2		;clothing & contr_vol
+	AND.B   #$F8,D2			;TOP 4 ONLY
+	BEQ.S	49$			;null=> display always
+	OR.B	D2,D3
+	CMP.B   D4,D3			;DIFFERENT
+	BEQ.S	50$			;no, masked item- fod it.
+49$
+	BCLR	#7,(A1)			;yes, validate entry
+	BRA.S   60$
+50$
+	BSET	#7,(A1)			;VOID
+60$
+	ADDQ.L  #2,A1			;NEXT
+	BRA.S   40$
+70$
+	MOVE.L  A2,A0
+	RET
+
+	ENDC
+
+	END

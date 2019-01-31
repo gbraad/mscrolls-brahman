@@ -1,0 +1,73 @@
+**************************************************************
+*
+*	%G%
+*	%W%
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"scenequ.i"
+
+	XDEF	P.SUBOB
+	XREF	SUBOBJ
+	
+P.SUBOB
+	
+*PRINTS OBJECTIVE PRONOUN
+	
+	ST      SUBOBJ(A4)
+	CALL_S	P.SUB
+	CLR.W   SUBOBJ(A4)
+	RET
+	
+	
+*--------------------------------
+	
+	XDEF	P.SUB
+	XREF	SUBJECT,PLURAL
+  
+P.SUB
+  
+	TEST_W  SUBJECT(A4)        ;ZERO= 'PLAYER'
+	BEQ.S   10$
+	MOVE.L  D0,-(A7)           ;SAVE IT!
+	MOVE.W  SUBJECT(A4),D0
+	GETINFO        
+	TST_NPC			;ALIVE
+
+    IFEQ	PROD
+	XREF	DERR
+	BEQ     DERR               ;if production subtly ignor this
+    ENDC	;!PROD
+
+	TEST_W  SUBOBJ(A4)
+	BEQ.S   20$
+	DO	P.OBJPRN
+	BRA.S   30$
+20$
+	DO	P.PRN              ;HE OR SHE
+30$
+	MOVE.L  (A7)+,D0           ;RET
+	RET
+10$
+	MSG     YOU
+
+    IFND	wantPLURAL_Override	;old way
+	MOVE.W  #1,PLURAL(A4)
+    ENDC	;!wantPLURAL_Override
+
+    IFD		wantPLURAL_Override	;new way
+	XREF	PLURAL_Override
+	MOVE.W	#-1,PLURAL_Override(A4)	;set both bytes to NON_ZERO
+    ENDC	;wantPLURAL_Override
+
+	RET
+   
+
+
+
+	END

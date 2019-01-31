@@ -1,0 +1,30 @@
+******************************************************
+*
+*	@(#)make.elt	1.1
+*	11/11/87
+*
+******************************************************
+
+		SECTION		"ADV",CODE
+
+
+	include	"equates.i"
+	include "macros.i"
+	include "scenequ.i"
+	include	"verbequ.i"
+
+	IfVerb	MAKE
+
+	XDEF	V.MAKE
+	XREF	SP.MAKE
+
+V.MAKE
+
+	CALL	SP.MAKE
+	MSGGO	HOWQMARK		;how?
+
+
+	ENDC
+
+
+	END

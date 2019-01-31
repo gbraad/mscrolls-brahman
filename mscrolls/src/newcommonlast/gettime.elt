@@ -1,0 +1,156 @@
+**************************************************************
+*
+*	%G%
+*	%W%
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"scenequ.i"
+
+    IFD	wantNUMBERS
+
+    IFND	wantNOTIME
+
+*******************************************************************
+*
+* GetTime - get a no. from the 'input line' (shadow NumBuf really)
+*
+* Returns D2=time in Kerovnian Standard Time (KST)
+*
+*******************************************************************
+
+	XDEF	GetTime
+	XREF	WhichNum,NumBuf
+
+GetTime
+
+	MOVE.L	D3,-(A7)	;else will get stomped
+
+	CALL	GetNumber	;returns D2/D3 (before/after ':')
+	CMP.L	#24,D2
+	BGE.S	BadTime
+	CMP.L	#60,D3
+	BGE.S	BadTime
+
+	LSL.L	#2,D2		;*4
+	MOVE.L	D2,-(A7)
+	LSL.L	#4,D2		;and *16 = 64
+	SUB.L	(A7)+,D2	;less 4* the number you first thought of...
+	ADD.L	D3,D2		;give KST !!! (simple eh?)
+
+* THIS IS WHERE KST MODIFICATIONS GO
+
+    IFD	TimeGameStarts
+	SUB.W	#TimeGameStarts,D2	;make initial adjustment
+    ENDC	;TimeGameStarts
+	
+	MOVE.L	(A7)+,D3
+	RET	
+
+BadTime
+
+	MOVEQ	#-1,D2			;ouch bad time!
+	MOVE.L	(A7)+,D3
+	RET
+
+    ENDC	!wantNOTIME
+    
+    ENDC	;wantNUMBERS
+      IFNE	TimeCode
+*
+* GetNumber
+*
+*
+* returns D2 as LHS, D3 as RHS of a xyzzy:plugh format time
+*
+* if no ':' is found D3 will be 0
+*
+
+	XDEF	GetNumber
+
+GetNumber
+
+	PUSH_L	D1/D6/A3
+
+	MOVEQ	#0,D1			;kill D1+D2+D3
+	MOVE.L	D1,D2
+	MOVE.L	D1,D3
+
+	MOVE.W	WhichNum(A4),D6
+	LEA	NumBuf(A4),A3
+	ADD.W	D6,A3			;get addr. of cur. pos in buffer
+	MOVE.B	(A3)+,D1
+	BEQ.S	90$			;no number
+	ADDQ.W	#1,WhichNum(A4)
+10$
+	MOVE.B	(A3)+,D1
+	BLE.S	90$			;end of no.
+	ADDQ.W	#1,WhichNum(A4)
+	CMP.B	#':',D1
+	BEQ.S	20$
+	BGT.S	80$
+	CMP.B	#'0',D1
+	BLT.S	80$
+	AND.W	#$0F,D1
+	ADD.B	D2,D2
+	MOVE.L	D2,-(A7)
+	LSL.L	#2,D2
+	ADD.L	(A7)+,D2
+	ADD.L	D1,D2
+	BRA.S	10$
+20$
+	MOVE.B	(A3)+,D1
+	BLE.S	90$			;end of no.
+	ADDQ.W	#1,WhichNum(A4)
+	CMP.B	#'9',D1
+	BGT.S	80$
+	CMP.B	#'0',D1
+	BLT.S	80$
+	AND.B	#$0F,D1
+	ADD.B	D3,D3			;*2
+	MOVE.L	D3,-(A7)
+	LSL.L	#2,D3			;and *4 == *8
+	ADD.L	(A7)+,D3		;2+8 = 10 so *10
+	ADD.L	D1,D3
+	BRA.S	20$
+80$
+	MOVEQ	#-1,D2			;ouch bad number
+	MOVEQ	#-1,D3
+
+90$
+	PULL_L	D1/D6/A3
+	RET
+
+
+      ENDC
+
+*----------------------------------------------------
+
+	IFD	wantNUMBERS
+	IFEQ	TimeCode		;no timecode
+
+	XDEF	GetNumber
+	XREF	NUMBERBUF,NUMBUF_FMT
+GetNumber
+	TEST_B	NUMBUF_FMT(A4)		;which format?
+	BEQ.S	10$			;singleton
+	MOVE.L	NUMBERBUF+4(A4),D2	;1st number (if two)
+	MOVE.L	NUMBERBUF(A4),D3	;then the second
+	BRA.S	90$			;exit
+10$
+	MOVE.L	NUMBERBUF(A4),D2	;contains the one then
+	MOVEQ	#0,D3			;clear other one
+90$
+	RET
+	ENDC
+	ENDC	;wantNUMBERS
+	
+
+
+
+	END

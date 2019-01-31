@@ -1,0 +1,58 @@
+**************************************************************
+*
+*	10/27/87
+*	@(#)tear.elt	1.5
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"verbequ.i"
+	include	"scenequ.i"
+
+	XREF	CONJ,V.CUT,YCANT,SP.TEAR,BRKD0QUIET
+
+	XDEF	TRC.SUB
+
+	IfVerb	TEAR
+
+	XDEF	V.TEAR
+
+V.TEAR 
+ 
+	TEST_W  CONJ(A4)
+	BPL     V.CUT
+	MOVE.B  1(A0),D1       ;GET PHYS CHAR
+	LSR.B   #4,D1          ;WE WANT THE HIGN NIBBLE
+	CMP.B   #3,D1          ;ONLY IF IT IS SOFT!
+	BNE     YCANT
+
+	ENDC
+
+TRC.SUB
+
+      IFEQ	THE_PAWN
+
+	XREF	SP.TearBefore
+	CALL	SP.TearBefore
+    
+      ENDC
+
+	DO	P.SUB
+	MSG	TEAR
+	DO	P.TN
+	MSG	SHRED
+	DO	BSFULLSTOP
+	CALL    BRKD0QUIET		;break it so as to rlease contents
+	DO	SETOUT			;OUT
+    IFD	wantSUCCESS
+	XREF	SUCCESS
+	MOVE.W	#RETCODE_SUCCESS,SUCCESS(A4)
+    ENDC
+	BRA     SP.TEAR
+
+
+	END

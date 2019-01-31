@@ -1,0 +1,245 @@
+**************************************************************
+*
+*	%G%
+*	%W%
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"verbequ.i"
+	include	"scenequ.i"
+
+	XDEF	SINGV
+	XREF	PVERB,INTEXT,VERB,SCRPNT,RIDPRT,DO.GOIN,SING.EX
+	XREF	SINGV.TB,ADVERB,PADV,P.PARTICLE,PROCESS,EXTRA
+	XREF	VLN.SING,ALWINDARK,DECODE.LAB
+
+*--------------------------------
+  
+SINGV
+  
+    IFD		wantSP.SINGV
+	XREF	SP.SINGV
+	CALL	SP.SINGV
+	BEQ.S	50$				;break out.
+    ENDC	;wantSP.SINGV
+	
+	DO	R.NOUN
+	GETINFO        
+  
+	MOVE.W  VERB(A4),D2
+	BNE.S   10$                ;0= DO A LOOK
+	MOVE.W  #2,SCRPNT(A4)
+	CLR.W   RIDPRT(A4)
+	BRA.S   50$                ;SCREEN
+10$
+	CALL	DO.GOIN		  ;trap go in 
+	CMP.B   #2,D7		  ;fail
+	BEQ	GetSomeNouns_EXIT	;yes, exit.
+	TEST_W  ADVERB(a4)	  ;must have no adverb to be an exception
+	BPL.S   30$		  ;has one, continue.
+	LEA	SING.EX(A4),A1	  ;table of execptions (GET).
+20$
+	MOVE.B  (A1)+,D0	  ;get a verb
+	BEQ.S   30$		  ;end (NB: look tested above)
+	CMP.B   D0,D2		  ;verb in table?
+	BEQ.S	GetSomeNouns	  ;yes, skip
+	BRA.S   20$		  ;next
+30$
+	MOVEQ   #-1,D0             ;NO NOUN
+	LEA     SINGV.TB(PC),A1
+	MOVE.W  #VLN.SING,D3       ;NO OF VERBS -1 (LINKER!!)
+40$
+	CMP.B   (A1)+,D2    
+	DBEQ    D3,40$
+	BNE.S	GetSomeNouns
+	CALL    ALWINDARK
+	DO	GETVECT
+	JSR     (A1)
+50$
+	DOGO	SCREEN
+
+	XDEF	GetSomeNouns
+	XREF	BRKCOMMAND
+ 
+GetSomeNouns
+
+	MOVE.W	VERB(A4),D0		;get the verb (if any)
+	BMI	20$			;no, oh well...
+	CALL	UseWhere		;returns EQ is want verb where?
+	SUBQ.B	#1,D7
+	BPL.S	01$
+	MSG	SWHAT			;<'What'>
+	BRA.S	05$
+01$
+	SUBQ.B	#1,D7
+	BPL.S	02$
+	MSG	SWHERE			;<'Where'>
+	BRA.S	05$
+02$
+	MSG	SWHO			;<'Who'>
+05$
+	MSG	SDOYOUWANT		;<' do you want to '>
+	MOVE.W	D0,PVERB(A4)		;stash it.
+	MOVE.W	D0,D1			;P.VERB wants D1=verb#
+	DO	P.VERB
+	
+    IFND	wantWhichBitsFix
+	MOVE.W	#-1,VERB(A4)		;kill old verb so GO isn't confused
+    ENDC	;!wantWhichBitsFix
+
+
+* REMEMBER 'adverbs' are really particles!
+
+	MOVE.W	ADVERB(A4),D1		;and the adverb.
+	CMP.W	#VNEXIT,D1		;NOW; 'ADVERB' can store a particle
+					;such as 'up' or a direction, if HI.
+					;but it can also store VNEXIT
+					;iff ADVERB==VNEXIT.
+					;this never clashes since, 
+					;VNEXIT >> last direction or particle.
+	BNE.S	09$			;no, ok then it's normal.
+	PRINT	<'out'>
+	BRA.S	11$			;and continue.
+09$
+	MOVE.W	D1,PADV(A4)		;P.ADVERB (P.PARTICLE) wants D1
+	CMP.W	#-1,D1			;null adverb?
+	BEQ.S	10$			;yes
+	CALL	P.PARTICLE		;print 'up/down/on/off' etc
+10$
+	DO	UTIL.BS
+11$
+	PRINT	<'?'>
+	CALL	INTEXT			;get command line
+	PEA	PROCESS(PC)		;point to return to.
+	
+    IFD		wantWhichBitsFix
+	XREF	TEMPBUF,NOTOUT,DEC.Nafter,INBUFF
+	
+	; We Cannot Allow control to pass back to DECODE.LAB
+	; since a compound noun phrase and 'all' or 'both' to WHICH ONE?
+	; will be lost later at DEC.N (since DONEB4 recovers singletons only)
+	; To Remedy this we must try to parse a MNPH here, then break out
+	; back to decode if it turns out not to be a continuation.
+
+
+	BCLR	#0,BRKCOMMAND(A4)	;ignor the singv continuation
+	BNE.S	12$			;begin again.
+	MOVEQ	#-1,D6			;blank to begin.
+	DO	MNPH			;we try for a nounphrase.
+	TEST_W	TEMPBUF(A4)		;do we have a nounphrase?
+	BNE	DEC.Nafter		;yes, continue as if normal.
+	CMP.B	#2,D7			;we printed an error?
+	BEQ	DEC.Nafter		;handle in the same way as DEC.N
+12$
+	LEA	INBUFF(A4),A6		;else begin again.
+	BRA	NOTOUT			;as if a fresh command
+    ENDC	;wantWhichBitsFix
+
+    IFND	wantWhichBitsFix
+	BCLR	#0,BRKCOMMAND(A4)	;ignore continuation?
+	BEQ.S	12$
+	MOVE.W	#-1,PADV(A4)			;clear pending variables
+	MOVE.W	#-1,PVERB(A4)			;and verb.
+12$
+	BRA	DECODE.LAB		;carry on...
+    ENDC	;!wantWhichBitsFix
+
+20$
+	CMP.B   #2,D7			;ERROR been printed?
+	BEQ.S   30$
+	MSG	EH
+	MSG	IDFY
+30$
+
+GetSomeNouns_EXIT
+
+	CLR.W   EXTRA(A4)
+	DOGO	SCREEN
+
+	XDEF	UseWhere
+
+* UseWhere: returns D7:
+*
+* D7==0 => verb thing - eg 'get random object' (what)
+* D7==1 => verb place - eg 'go west'           (where)
+* D7==2 => verb npc   - eg 'kill freddy'       (who)
+
+UseWhere
+
+	PUSH_L	D0-D1/A0
+	MOVE.W	VERB(A4),D0
+
+	MOVEQ	#1,D7
+	LEA	VList_Where(PC),A0
+	CALL_S	LookList
+	BEQ.S	90$
+
+	MOVEQ	#2,D7
+	LEA	VList_Who(PC),A0
+	CALL_S	LookList
+	BEQ.S	90$
+
+	MOVEQ	#0,D7
+90$
+	PULL_L	D0-D1/A0
+	RET
+
+LookList
+
+10$
+	MOVE.B	(A0)+,D1
+	BEQ.S	80$
+	CMP.B	D0,D1
+	BNE.S	10$
+	BRA.S	90$
+80$
+	SETNE
+90$
+	RET
+
+VList_Where
+
+	SVERB	GO
+	SVERB	WALK
+	SVERB	RUN
+	SVERB	LEAN
+	SVERB	LISTEN
+	SVERB	LIE
+	SVERB	SWIM
+	SVERB	PISS
+	SVERB	CRAWL
+ 
+	DC.B	0			;look is a SINGV so isn't relevent
+
+VList_Who
+
+	SVERB	RAPE
+	SVERB	KISS
+
+	DC.B	0
+
+	ALIGN
+*
+* CHK2PART - forces an otherwise SINGV (like TURN in fish) to require
+*            a direct object - if it is missing behaves as though the verb
+*            required a direct object in the first place - assumes it is 
+*            called for verb stack level.
+*
+	XDEF	CHK2PART
+
+CHK2PART
+
+	CMP.W	#-1,D0
+	BNE.S	90$
+	ADDQ.W	#8,A7			;two pops
+	BRA	GetSomeNouns		;in SINGV
+90$
+	RET
+
+
+	END

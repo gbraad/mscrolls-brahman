@@ -1,0 +1,166 @@
+**************************************************************
+*
+*	5/21/88
+*	@(#)quotes.elt	2.5
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include "nounequ1.i"
+	include	"scenequ.i"
+
+	XDEF	QUOTES
+
+	XREF	FLUSHVAR,NOUNBUF,DECODE,CONVNPC,GETNPCNO,DOYESNO
+	XREF	PARSEIT,NPCQUEST,PR.QUESTION,PR.INVQ
+	XREF	POSWRD,BACK.WRD,SCANNER
+	XREF	TYPE,SAY.HELL,NPC.TOBE,NPCMODEL,PR20,DEC.N
+	XREF	P.IDFY,VERB
+
+DONTwantSOMEQUOTES	SET	FALSE
+DOwantQUOTES		SET	TRUE
+    IFD		wantNOQUOTES
+    IFD		wantSOMEQUOTES
+DONTwantSOMEQUOTES	SET	TRUE
+    ENDC	;wantSOMEQUOTES
+    IFND	wantSOMEQUOTES
+DOwantQUOTES		SET	FALSE
+    ENDC	;!wantSOMEQUOTES
+    ENDC	;wantNOQUOTES
+
+	
+
+QUOTES
+
+    IFNE	DOwantQUOTES
+
+    IFEQ	DONTwantSOMEQUOTES
+	CALL    FLUSHVAR
+    ENDC	;!DONTwantSOMEQUOTES
+	LEA     NOUNBUF(A4),A0
+	MOVE.W  (A0)+,D0
+	BEQ     QU30
+	TEST_W  (A0)
+	BNE     QU40
+	GETINFO
+	TST_NPC				;
+	BEQ     QU50
+	MOVEQ   #0,D5              ;LET ERROR'S HAPPEN
+	DO	VALID              ;IS NPC IN ROOM?
+	BNE     DECODE             ;NOPE!
+	PEA     DECODE(PC)
+	MOVE.L  A0,A5   
+	MOVE.W  D0,D5   
+	DO	CHKNPC             ;STACK UP
+	MOVE.L  (A7)+,D1           ;DUMP
+	CLR.W   TYPE(A4)
+	MOVE.W  D5,CONVNPC+4(A4)
+	MOVE.L  A5,CONVNPC(A4)     ;TEMPORY STOARAGE
+	MOVE.W	#-1,VERB(A4)	   ;if adjective as well, we don't want it.
+	DO	GETWRD
+
+* to avoid 'say' in mill saying - 'where do u want to lie?' - Ken 11/3/87
+
+	CMP.B	#1,D7			;we have some text?
+	BEQ	QU60			;EQ => nope - complain
+
+	CMP.W   #SECT.HELLO,D6             ;HELLO?
+	BNE.S   20$                ;NOPE
+	MOVE.W  CONVNPC+4(A4),D0
+	CALL    GETNPCNO           ;TO D4
+	EXG     D4,D0
+	CALL    SAY.HELL          ;GREET BACK
+	DOGO	PR20
+20$
+	CMP.W   #SECT.YESNO,D6
+	BEQ     DOYESNO
+	CMP.W   #SECT.VERB,D6
+	BEQ     45$			;PR.COMMAND
+	CMP.B   #SECT.DIR,D6
+	BEQ     45$			;PR.COMMAND
+	CMP.W	#SECT.SPEC,D6	;suss "shout, lower drawbridge" hassle
+	BNE.S	30$
+	TEST_W	D5			;and?
+	BEQ.S	40$
+30$
+	CMP.W   #SECT.CONJ,D6
+	BNE.S   TRYPNT                ;NO
+	CMP.W   #1,D5              ;TO (DO SOMETHING)
+	BNE.S   TRYPNT                ;NO
+40$
+	DO	GETWRD	            ;TO START OF COMMAND
+45$
+	DOGO     PR.COMMAND
+
+	XDEF	TRYPNT
+
+TRYPNT
+
+    IFEQ	DONTwantSOMEQUOTES
+	CALL    PARSEIT    
+	TEST_W  D7
+	BNE.S   10$
+	TEST_W  NPCQUEST(A4)
+	BPL     PR.QUESTION
+	TEST_W  NPC.TOBE(A4)        ;MAIN VERB
+	BPL     PR.INVQ
+	TEST_W  NPCMODEL(A4)
+	BPL     PR.QUESTION
+10$
+	CMP.W   #2,D7               ;DONE?
+	BEQ     PR20                ;EXIT
+
+      IFNE	ELIZA		 ; pattern matcher required?
+	DO	BACK.WRD	    ;step back a word
+	CALL    SCANNER
+	CMP.B   #3,D7               ;SPECIAL EXIT CONDITION?
+	BEQ.S   TRYPNT              ;TRY
+      ENDC		 ;eliza
+
+    ENDC	;!DONTwantSOMEQUOTES
+
+  IFEQ	ELIZA		 	;otherwise
+      XREF	CLOCK
+      MSG	PLUSE
+      SUBQ.W	#1,CLOCK(A4)		;we dont want it tobe a move.
+  ENDC		;eliza
+
+
+	DOGO	PR20
+QU30
+	MSG     PLUSE		;please use 'say top someone...
+	BRA.S   PR.BACK
+QU40
+	MSG     1ATTIM
+	BRA.S   PR.BACK
+QU50
+	MSG     MAD 
+	DOGO	PR20
+
+QU60
+	MSG	PLUSE
+	DOGO	PR20
+
+    ENDC	;DOwantQUOTES
+     
+     IFEQ	DOwantQUOTES		;otherwise
+	XREF	SCREEN
+
+	MSG	PLUSE			;use ask
+	POPSP
+	BRA	SCREEN
+    ENDC	;!DOwantQUOTES
+*--------------------------------
+
+	XDEF	PR.BACK
+
+PR.BACK
+
+	BRA     DEC.N              ;BACK TO PARSER (DECODE)
+
+
+	END

@@ -1,0 +1,60 @@
+**************************************************************
+*
+*	%G%
+*	%W%
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"verbequ.i"
+
+    IFND	wantNOCONVERSATION
+
+	XDEF	CONVSTART
+	XREF	NPCINRM,VERB,BACK.WRD,INCNOUN,WRDPNT
+
+CONVSTART
+*
+*	checks first word to see if it must be conversation
+*	directly from the command line.
+*	entry:
+*		expects (d5,d6) to be current word
+*	exit:
+*		EQ=> yes
+*		NE=> no
+
+	TEST_W	NPCINRM(A4)		;npc around?
+	BMI.S	80$			;nope, fail
+	CMP.W	#SECT.QUEST,D6		;question type
+	BEQ.S	90$			;yes, ok
+	CMP.W	#SECT.INSULT,D6		
+	BEQ.S	90$
+	CMP.W	#SECT.YOU,D6
+	BEQ.S	90$
+	CMP.W	#SECT.HELLO,D6
+	BEQ.S	90$
+80$
+	SETNE				;fail
+	RET
+90$
+	MOVE.L	D5,-(A7)
+	MOVE.W	NPCINRM(A4),D5
+	CALL 	INCNOUN
+	DO	BACK.WRD		;move back, to adjust for SPEECH
+	MOVE.L	A6,WRDPNT(A4)
+	MOVE.L	(A7),D5
+	MOVE.W	#VNSAY,VERB(A4)		;fake as say 
+	DO	NOERR			;gag parser for later
+	CLR.L   (A7)+			;set eq	
+	RET
+
+
+    ENDC	;!wantNOCONVRSATION
+
+*------------------------------------------
+
+	END

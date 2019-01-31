@@ -1,0 +1,44 @@
+**************************************************************
+*
+*	10/27/87
+*	@(#)stconj.elt	1.2
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+
+*--------------------------------
+
+	XDEF	STCONJ
+	XREF	PEND2,OLDBUF,NOUNBUF,DO.INONLY,PEND,OLDVERB,VERB
+	XREF	OLDADVERB,ADVERB,NOTWSYN
+   
+STCONJ
+ 
+	TEST_W  PEND2(A4)
+	BMI.S   20$
+	PUSH_L  A0/A1
+	LEA     OLDBUF(A4),A0
+	LEA     NOUNBUF(A4),A1
+10$
+	MOVE.W  (A0)+,(A1)+
+	BNE.S   10$
+	PULL_L  A0/A1
+	BRA.S   30$
+20$
+	CALL	DO.INONLY
+	CMP.W   #2,D7			;couldnt go there
+	BNE.S	30$
+	DOGO	SCREEN
+30$
+	MOVE.W  #1,PEND(A4)
+	MOVE.W  OLDVERB(A4),VERB(A4)
+	MOVE.W	OLDADVERB(A4),ADVERB(A4)
+	BRA     NOTWSYN
+ 
+
+	END

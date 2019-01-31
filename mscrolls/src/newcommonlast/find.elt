@@ -1,0 +1,66 @@
+**************************************************************
+*
+*   %G%
+*   %W%
+*
+**************************************************************
+
+
+    SECTION "ADV",CODE
+
+    include "equates.i"
+    include "macros.i"
+    include "verbequ.i"
+    include "scenequ.i"
+
+*--------------------------------
+
+    IfVerb  FIND
+
+    XDEF    V.FIND
+    XREF    P.NQEN,SCAN,ADVERB,VERB
+   
+V.FIND
+
+    IFD     wantSP.FIND
+    XREF    SP.FIND
+    CALL    SP.FIND
+    ENDC    ;wantSP.FIND
+     
+    CMP.W   #VNFIND,VERB(A4)
+    BEQ.S   90$
+    CMP.W   #FOR,ADVERB(A4)     ;search for?
+    BEQ.S   90$
+    CALL    SCAN
+    TEST_B  D7          ;1= SOMETHING FOUND
+    BNE.S   99$
+    DO  P.SUB
+    MSGGO   FNOI
+90$
+    
+    IFD   VNMAKELOCAL
+    XREF    V.MAKELOCAL
+    BRA V.MAKELOCAL
+    ENDC  ;VNMAKELOCAL
+
+    IFND  VNMAKELOCAL
+    DO  VALID.NP
+    BNE.S   91$
+    DO  P.PRN
+    DO  ISARE
+    MSGGO   HERE
+91$
+    DO  P.SUB
+    MSG CNTSEE
+    CALL    P.NQEN
+    DO  BSFULLSTOP
+    ENDC  ;!VNMAKELOCAL
+99$
+    RET
+
+    ENDC    V.FIND
+ 
+*------------------------------------------ 
+
+
+    END

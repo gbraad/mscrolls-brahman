@@ -1,0 +1,342 @@
+***********************************************************
+*
+*	%W%
+*	%G%
+*
+************************************************************
+
+		SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"verbequ.i"
+	include	"nounequ2.i"
+	include	"scenequ.i"
+
+	IfVerb	REVEAL
+	IFNE	YCHEAT
+
+	XDEF	V.REVEAL
+
+	XREF	R.NOUN,SUSS,FMSG,R.NOUN2,LINE,PRTTXT
+	XREF	KILLPSEUDO,PSUDAT
+	XREF	OtherDescTable
+	XREF	FirstGlanceTable
+	XREF	CAPITAL,P.NOUN,P.SCN,GETRELN,COUNTLIST
+	XREF	P.LIST,ROOM,P.DESC
+	XREF	Info24Table,Wtable24,P.TAB
+	XREF	D.NOUNS,CHEAT
+
+
+LONG	MACRO	* routine name
+	IFND	\1
+	XREF	\1
+	ENDC
+	PEA	*+14(PC)		;return address
+	MOVE.L	A4,-(A7)		;base addr
+	ADD.L	#\1,(A7)		;routine's offset
+	RET
+	ENDM
+
+
+V.REVEAL
+
+	TEST_W	D0			;object given?
+	BPL.S	10$			;yes,	LONG	that
+	LONG	R.NOUN			;current room ->D0
+	LONG	GETDATA				;and the data
+10$
+	TST_ISAROOM				;is it a room?
+	BEQ	SUSS			;if object suss it
+
+
+	MOVE.W	ROOM(A4),-(A7)		;save away real room#
+	MOVE.W	8(A0),ROOM(A4)		;make out that we are there
+	MOVE.W	CHEAT(A4),-(A7)	
+	CLR.W	CHEAT(A4)
+	CALL	REVEAL.REALLY		;so loop reveal x to y works
+	MOVE.W	(A7)+,CHEAT(A4)
+	MOVE.W	(A7)+,ROOM(A4)
+	RET
+
+REVEAL.REALLY
+
+	MOVE.W	D0,-(A7)		;save original
+	ST	CAPITAL(A4)		;is a name
+	CALL	BLANKLINE
+	CALL	BLANKLINE
+	LONG	P.NOUN			;text
+	CALL	P.COLON			;colon
+	LONG	FMSG			;main message
+	CALL	BLANKLINE
+	LEA	OtherDescTable(A4),A2	;see if there are any others
+20$
+	MOVE.L	(A2)+,D1		;get entry
+	BEQ	30$			;end,	LONG	ne
+	CMP.W	D1,D0			;a hit
+	BNE.S	21$			;no
+	LONG	PRTTXT
+	DC.B	'current Other Description:^',0
+	ALIGN
+	BRA.S	25$			;print it
+21$
+	BCLR	#15,D1			;incase hi-bit
+	CMP.W	D1,D0			;potential description?
+	BNE.S	20$			;no, try next
+	LONG	PRTTXT
+	DC.B	'Possible description:^',0
+	ALIGN
+25$
+	SWAP	D1			;get scen message
+	BCLR	#15,D1			;incase
+	LONG 	P.SCN			;print it
+	CALL	BLANKLINE
+	BRA	20$			;again
+30$
+	LEA	FirstGlanceTable(A4),A2	;any glances
+31$
+	MOVE.L	(A2)+,D1		;get entry
+	BEQ.S	40$			;	LONG	ne
+	CMP.W	D0,D1			;this item?
+	BNE.S	31$			;no
+	SWAP	D1			;get messgae
+	BCLR	#15,D1			;all the time?
+	BEQ.S	32$			;no
+	LONG	PRTTXT
+	DC.B	'Permanent ',0
+	ALIGN
+32$
+	LONG	PRTTXT
+	DC.B	'First Glance:^',0
+	ALIGN
+	LONG	P.SCN			;print message
+	CALL	BLANKLINE
+40$
+	;Now for the objects (including untildisturbed's)
+	MOVE.W	D0,D2			;target
+	LONG	GETRELN			;create related objects->a1
+	MOVE.W	D0,-(A7)
+	LONG	KILLPSEUDO		;no pseudos, yet
+	MOVE.W	(A7)+,D0		;restore
+	MOVE.B	#1<<4+1,D1		;mask for insep related
+	CALL	SetNounFlags			;zap list
+	LONG	COUNTLIST		;at a1 ->d4
+	BEQ.S	41$			;none.
+	LONG	PRTTXT
+	DC.B	'items inseparably related:^',0
+	ALIGN
+	MOVE.L	A1,A0
+	CALL	P.NounDescriptions			;list descriptions
+	LONG	LINE
+41$
+	CALL	ResetNounFlags			;unzap list
+	MOVE.B	#1,D1			;just related
+	CALL	SetNounFlags			;zap list
+	LONG	COUNTLIST		;at a1 ->d4
+	BEQ.S	42$			;none.
+	LONG	PRTTXT
+	DC.B	'items just related:^',0
+	ALIGN
+	MOVE.L	A1,A0
+	CALL	P.NounDescriptions			;list them
+	LONG	LINE
+42$
+	CALL	ResetNounFlags			;unzap list
+	MOVE.B	#1<<7,D1		;out of game
+	CALL	SetNounFlags			;zap list
+	LONG	COUNTLIST		;at a1 ->d4
+	BEQ.S	43$			;none.
+	LONG	PRTTXT
+	DC.B	'items currently out:^',0
+	ALIGN
+	MOVE.L	A1,A0
+	CALL	P.NounDescriptions			;list them
+	LONG	LINE
+43$
+	LEA	D.NOUNS(A4),A1		;start of noundata
+	MOVEQ	#1,D0			;noun#
+	MOVE.W	#NMAXNOUN-1,D4		;counter
+46$
+	BTST	#0,5(A1)		;psuedo?
+	BEQ	45$			;no, try next
+	MOVE.W	8(A1),D1		;get psuedooffset
+	LEA	PSUDAT(A4),A0		;start of table
+	ADD.W	D1,A0			;adr of this list
+	MOVE.L	A0,A2			;save start
+47$
+	MOVE.B	(A0)+,D1		;get room
+	BEQ	45$			;not here, next
+	CMP.B	ROOM+1(A4),D1		;this one
+	BNE.S	47$			;no
+	LONG	PRTTXT
+	DC.B	'Pseudo: ',0
+	ALIGN
+	LONG	P.TN
+	LONG	LINE
+	SUBQ.L	#1,A0			;backstep
+	CMP.L	A0,A2			;hit first time?
+	BNE.S	44$
+	MOVE.L	A2,-(A7)
+	LONG	P.DESC			;describe it
+	MOVE.L	(A7)+,A2		;restore
+	LONG	PRTTXT
+	DC.B	'[ROOTED HERE.]^',0
+	ALIGN
+	ADDQ.L	#2,A0			;adjust for other location
+44$
+	TEST_B	2(A2)			;two locations only?
+	BNE.S	45$			;no
+	LONG	PRTTXT
+	DC.B	'other location: ',0
+	ALIGN
+	MOVE.W	D0,-(A7)
+	CLR.W	D2
+	MOVE.B	-1(A0),D2
+	LONG	R.NOUN2			;->d0
+	LONG	P.NOUN			;there
+	LONG	LINE
+	MOVE.W	(A7)+,D0		;back
+45$
+	ADD.L	#14,A1			;next data 
+	ADDQ.W	#1,D0			;and noun#
+	DBRA	D4,46$			;next noun
+50$
+	MOVE.W	ROOM(A4),D2
+	LONG	GETRELN			;items in room
+	MOVE.L	A1,-(A7)
+51$
+	MOVE.W	(A1)+,D0		;get item
+	BEQ.S	55$			;	LONG	ne
+	BMI.S	51$			;any negs now forget
+	LONG	GETDATA
+	TST_PSEUDO				;psuedo?
+	BNE.S	52$			;none of these.
+	TEST_W	6(A0)			;simple location?
+	BEQ.S	51$			;these allowed.
+52$
+	BSET	#7,-2(A1)		;otherwise fod it
+	BRA.S	51$
+55$
+	MOVE.L	(A7)+,A1		;restore start
+	LONG	COUNTLIST		;any
+	BEQ.S	58$			;no
+	LONG	PRTTXT
+	DC.B	'items simply in room:^',0
+	ALIGN
+	MOVE.L	A1,A0
+	CALL	P.NounDescriptions
+	LONG	LINE
+58$
+	LONG	PRTTXT
+	DC.B	'scenery nouns: ^',0
+	ALIGN
+	MOVEQ	#0,D4			;clear flag
+	LEA	Info24Table,A0		;table of sceneries
+	ADD.L	A4,A0
+
+      IFND	wantBIGPROG
+	LEA	Wtable24(A4),A1		;text for sceneries
+      ENDC
+
+      IFD	wantBIGPROG
+	LEA	Wtable24,A1		;text for sceneries
+      ENDC
+
+	MOVEQ	#-1,D1			;index scen counter
+	MOVE.W	(A7)+,D3		;restore original
+60$
+	ADDQ.W	#1,D1			;inc scen counter
+	MOVE.W	(A0)+,D0		;item
+	BEQ.S	70$			;hmm??
+	AND.W	#%0000111111111111,D0	;noun#
+	CMP.W	D0,D3			;this room?
+	BNE.S	60$			;no
+	PUSH_L	D1/D3/A0-A1
+	LONG	P.TAB			;a1, d1
+	ST	D4
+	PULL_L	D1/D3/A0-A1
+	LONG	LINE
+	BRA.S	60$			;another
+70$
+	TEST_B	D4			;any?
+	BNE.S	71$
+	LONG	PRTTXT
+	DC.B	'None.^',0
+	ALIGN
+71$
+	LONG	LINE
+	RET
+
+P.COLON
+* print a colon
+
+	LONG	PRTTXT
+	DC.B	':^',0
+	ALIGN
+	RET
+
+ResetNounFlags
+* unset bits in list
+
+	PUSH_L	D0/A0/A1
+0021$
+	MOVE.W	(A1)+,D0	;get one
+	BEQ.S	0022$		;	LONG	ne
+	BCLR	#15,D0		;adjust
+	BEQ.S	0021$		;clear anyway
+	LONG	GETDATA			;on it
+	TST_PSEUDO				;psuedo
+	BNE.S	0021$		;ignor psuedos
+	BCLR	#7,-2(A1)	;else reset flag
+	BRA.S	0021$		;next
+0022$
+	PULL_L	D0/A0/A1
+	RET
+
+SetNounFlags
+* mask entries wi mask(d1) EQ
+	PUSH_L	D0/A1
+0031$
+	MOVE.W	(A1)+,D0	;get one
+	BEQ.S	0032$		;	LONG	ne
+	LONG	GETDATA
+	CMP.B	6(A0),D1	;this mask
+	BEQ.S	0031$		;yes, ok
+	BSET	#7,-2(A1)	;else set void bit
+	BRA.S	0031$		;next
+0032$
+	PULL_L	D0/A1
+	RET
+
+P.NounDescriptions
+* list or describe items
+* buffer at a0
+
+* (this could be LONG P.LIST)
+
+	PUSH_L	D0/A0
+0041$
+	MOVE.W	(A0)+,D0
+	BEQ.S	0042$
+	BMI.S	0041$
+	LONG	P.TN		;prnt name
+	LONG	P.COLON		;colon
+	MOVE.L	A2,-(A7)
+	LONG	P.DESC
+	LONG	LINE
+	MOVE.L	(A7)+,A2	;restore
+	BRA.S	0041$		;next item
+0042$
+	PULL_L	D0/A0
+	RET
+
+
+BLANKLINE
+
+	LONG	PRTTXT
+	DC.B	'~',0			;a blank line!
+	RET
+
+	ENDC	;YCHEAT
+	ENDC	;V.REVEAL
+	END

@@ -1,0 +1,103 @@
+**************************************************************
+*
+*	2/12/89
+*	@(#)vlist2.elt	2.4
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"verbequ.i"
+	include	"scenequ.i"
+
+*--------------------------------
+*
+* VLT.DARK -   VERBS WHICH GO
+*              BUMP IN THE NIGHT
+*
+* CAN'T USE THESE IN A DARK ROOM
+* EVEN IF THEY ARE LIT,ON INV,ETC
+*
+*--------------------------------
+ 
+	XDEF	VLT.DARK,VLN.DARK
+ 
+VLT.DARK
+
+	SVERB	LOOK
+	SVERB	EXITS
+	SVERB	EXIT
+	SVERB	EXAMINE 
+
+VLN.DARK	EQU	*-VLT.DARK-1	;NO OF ALLOWED VERBS (-1)
+  
+*--------------------------------
+	
+	XDEF	MVERB_L
+
+MVERB_L
+ 
+	SVERB	PUT             ;PUT X DOWN
+	SVERB	PICK            ;PICK X UP
+	SVERB	TOUCH           ;TOUCH X UP
+	SVERB	PULL            ;PULL X UP/DOWN
+	SVERB	LIFT
+	SVERB	CLIMB
+	SVERB	SCREW		;screw x up/down.
+	      
+	       DC.B    -1
+	
+*--------------------------------
+
+	XDEF	VLIST.2P,VLST2.P
+	
+VLIST.2P
+VLST2.P
+*VERBS TAKING 2PARTS ONLY
+	
+	SVERB	LOOK
+	SVERB	EXAMINE
+	SVERB	GET
+	SVERB	TAKE
+	SVERB	CARRY
+	SVERB	COUNT
+
+	DC.B    -1
+	 
+	 ALIGN
+*--------------------------------
+
+	IFD	wantRADJUNCTS
+	XDEF	RADJUNCT.TBL
+RADJUNCT.TBL
+	SVERB	PADDLE
+	SVERB	TURN
+
+      IFD	wantPOINTinRADJUNCTS
+	SVERB	POINT
+      ENDC
+
+	DC.B	0
+	ALIGN
+	ENDC	;wantRADJUNCTS
+
+*************************************************
+	XDEF	VLIST.NODOBJ
+
+VLIST.NODOBJ
+
+* List of verbs that MUST not have a direct object to make sence
+* eg INVENTORY, since you cannot
+* INV the rock etc.
+
+	DC.W	VNINVENTORY
+	DC.W	0
+	ALIGN
+
+**************************************************
+	
+
+	END

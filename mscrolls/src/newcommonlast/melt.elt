@@ -1,0 +1,121 @@
+******************************************************
+*
+*	@(#)melt.elt	1.8
+*	10/27/87
+*
+******************************************************
+
+		SECTION		"ADV",CODE
+
+*--------------------------------
+*
+*  SRC.ADV.MELT
+*
+*--------------------------------
+
+	XREF	CHK4PT,YCANT,W.ICNDTW,P.TN,SP.MELT,W.MELTS,W.SEPAWY,SETOUT
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"verbequ.i"
+	include	"scenequ.i"
+
+
+	IfVerb	MELT
+
+	XDEF	V.MELT
+
+	IFND	Version2_V.MELT		;do we use old version
+					; (guild & pawn)?
+ 
+V.MELT
+ 
+	CLR.W   D1
+	DO	CHK4PT
+	MOVE.B  3(A0),D1
+	AND.B   #$0F,D1
+	CMP.B   #$B,D1			;ICE COLD?
+	BNE	YCANT
+	MOVE.B  3(A5),D1
+	AND.B   #$0F,D1
+	EXG	D0,D5
+	CMP.B   #3,D1			;HOT?
+	BEQ.S   10$
+	CMP.B   #$A,D1			;WARM?
+	BEQ.S   10$
+	MSG	ICNDTW
+	DOGO	P.TN
+10$
+	EXG	D0,D5
+	CALL	SP.MELT
+	DO	P.TN			;the X melts
+	MSG	MELTS
+	AND.B   #$F0,3(A0)
+	MOVE.B  1(A0),D1		;get H&S
+	AND.B   #$F,D1			;mask out hardness
+	OR.B	#$10,D1			;set it to liquid
+	MOVE.B  D1,1(A0)		;LIQUID
+	TST_CONTAINED				;CONTAINED?
+	BEQ.S   99$
+	DO	P.TN
+	MSG	SEPAWY
+	DO	SETOUT
+99$
+    IFD	wantSUCCESS
+	XREF	SUCCESS
+	MOVE.W	#RETCODE_SUCCESS,SUCCESS(A4)
+    ENDC
+	RET
+
+	ENDC	;Version2_V.MELT
+
+	IFD	Version2_V.MELT		;new version (Oct1987)
+ 
+V.MELT
+	CLR.W   D1			;with
+	DO	CHK4PT
+	MOVE.B	11(A0),D1		;data4 (for combustablility)
+	AND.B	#%11<<3,D1		;combustablility
+	CMP.B	#2<<3,D1		;melts?
+	BNE	YCANT			;can only melt meltable things
+	BTST	#7,(A5)			;lit?
+	BEQ.S	05$			;no, only ok if hot
+	BTST	#7,4(A5)		;&lighttable => flame
+	BNE.S	10$			;if so, then ok
+05$
+	MOVE.B  3(A5),D1		;texture of indirect
+	AND.B   #$0F,D1			;just texture.
+	CMP.B   #3,D1			;HOT?
+	BEQ.S   10$
+	MOVE.W	D5,D0
+	MSG	ICNDTW			;otherwise you can't
+	DOGO	P.TN
+10$
+	CALL	SP.MELT
+	DO	P.TN			;the X melts
+	MSG	MELTS
+	AND.B   #$F0,3(A0)		;fod texture.
+	MOVE.B  1(A0),D1		;get H&S
+	AND.B   #$F,D1			;mask out hardness
+	OR.B	#$10,D1			;set it to liquid
+	MOVE.B  D1,1(A0)		;LIQUID
+	TST_CONTAINED				;CONTAINED?
+	BNE.S   99$
+	MSG	LINE
+	DO	P.TN
+	MSG	SEPAWY
+	DO	SETOUT
+99$
+    IFD	wantSUCCESS
+	XREF	SUCCESS
+	MOVE.W	#RETCODE_SUCCESS,SUCCESS(A4)
+    ENDC
+	RET
+
+
+	ENDC	;Version2_V.MELT
+
+
+	ENDC	;V.MELT
+
+	END

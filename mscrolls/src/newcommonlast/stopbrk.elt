@@ -1,0 +1,54 @@
+**************************************************************
+*
+*	10/27/87
+*	@(#)stopbrk.elt	1.2
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+
+*--------------------------------
+*
+* STOPBRK - STOPS THE USE OF CERTAIN
+*           VERBS WI A BROKEN NOUN
+*        
+* ON ENTRY D0 - NOUN #
+*          A0 - NOUN DATA
+*
+* VERB IN VERB(A4)
+*
+* IF VERB NOT ALLOWED & OBJ BROKEN
+* THEN DOESN'T RETURN 
+* IE. IT IGNORES THE NOUN
+*
+*--------------------------------
+
+	XDEF	STOPBRK
+	XREF	VERB,BRK.VERB,PROC.LAB
+ 
+STOPBRK
+ 
+	TST_BROKEN				;BROKEN?
+	BEQ.S   20$                ;EQ= NO = FORGET IT
+	MOVE.W  VERB(A4),D1        ;GET THE VERB NO
+	LEA     BRK.VERB(A4),A1    ;LIST OF NON ABLLOWED VERBS
+10$
+	MOVE.B  (A1)+,D3           ;VERB IN LIST?..
+	BEQ.S   20$                ;0= FINISHED, OK (LOOK = V#0)
+	CMP.B   D3,D1              ;MATCH
+	BNE.S   10$                ;NEXT...
+   
+	DO	YCANT              ;'YOU CANNOT DO THAT TO THE....
+	MOVE.L  (A7)+,A1           ;POP  - NO RETURN IF BAD
+	BRA     PROC.LAB           ;CONTINUE IN PROCESS FOR MORE NOUNS
+20$
+	RET
+ 
+
+
+
+	END

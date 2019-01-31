@@ -1,0 +1,63 @@
+**************************************************************
+*
+*	10/27/87
+*	@(#)p_from.elt	1.2
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+
+*--------------------------------
+
+	XDEF	P.FROM
+  
+P.FROM
+	
+	MOVE.L  D3,-(A7)
+	MOVEQ   #2,D3
+	BRA.S   WithFrom
+	
+*--------------------------------
+
+	XDEF	P.WITH
+	
+P.WITH
+	
+	MOVE.L  D3,-(A7)
+	CLR.W   D3
+
+WithFrom
+
+	CALL_S  P.BRAKTS
+	MOVE.L  (A7)+,D3
+	RET
+
+*--------------------------------
+	
+	XDEF	P.BRAKTS
+	XREF	P.CONJ
+	
+P.BRAKTS
+	
+	PUSH_L  D0/A0
+	MOVE.B  #'(',D1
+	DO	CHAROUT
+	MOVE.W  D3,D1
+	DO	P.CONJ
+	MOVE.W  D2,D0
+	DO	P.TN
+	DO	UTIL.BS
+	MOVE.B  #')',D1
+	DO	CHAROUT
+	MSG     LINE
+	PULL_L  D0/A0
+	RET
+
+
+
+
+	END

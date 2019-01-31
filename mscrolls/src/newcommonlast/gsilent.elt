@@ -1,0 +1,49 @@
+**************************************************************
+*
+*	10/27/87
+*	@(#)gsilent.elt	1.2
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i" 
+
+*--------------------------------------
+	
+	XDEF	GSILENT
+	XREF	POSWRD,QUIETWH,WDEPTH,FROMWCH,ERR4
+
+GSILENT
+*
+*	get a word silently, for use in recursive getadjph(s)
+*	if it is not an adj carry on..
+*
+	MOVE.L	A6,-(A7)
+	MOVE.L	POSWRD(A4),-(A7)	; save this lot.
+	MOVE.W	ERR4(A4),-(A7)
+	ST	ERR4(A4)		;non-zero
+	ST  	QUIETWH(A4)
+	ADD.W	#1,WDEPTH(A4)		;keep track of depth
+	DO	GETWRD			;ok go for it
+	SUB.W	#1,WDEPTH(A4)
+	MOVE.W  (A7)+,ERR4(A4)		;restore error condition
+	CLR.W	QUIETWH(A4)
+	CMP.W	#4,D7			;nested which?
+	BEQ.S	10$			;recurse for it.
+	ADD.L	#8,A7			;loose above pushes
+	RET
+10$
+	MOVE.L	(A7)+,POSWRD(A4)
+	MOVE.L	(A7)+,A6		;get these back.
+	ST	FROMWCH(A4)		;since cleared above.
+	ADD.W	#1,WDEPTH(A4)		;keep track of depth
+	DO	GETADJPH		;try the main routine
+	SUB.W	#1,WDEPTH(A4)
+	RET
+
+
+
+	END

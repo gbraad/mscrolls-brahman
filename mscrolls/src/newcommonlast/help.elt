@@ -1,0 +1,52 @@
+**************************************************************
+*
+*	10/27/87
+*	@(#)help.elt	1.3
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"verbequ.i"
+	include "nounequ1.i"
+	include	"scenequ.i"
+
+*--------------------------------
+
+	IfVerb	HELP
+
+	XDEF	V.HELP
+	XREF	P.VAGE,DBS
+	 
+V.HELP
+	
+    IFND	wantNOQUOTES
+	CMP.W   #NPLAYER,D0        ;!!!!!!!!!!!!!!!!!!!!!!!!!!
+	BEQ     P.VAGE
+    ENDC	;wantNOQUOTES
+
+	TEST_W  D0                 ;ANY?
+	BPL.S	10$
+	MSGGO	TAPDCE
+10$
+	TST_NPC				;ALIVE?
+	BEQ     DBS                ;HELP TREE ETC..
+
+      IFEQ	THE_PAWN
+	
+	XREF	SP.HELP
+	CALL	SP.HELP
+
+      ENDC
+
+	MSGGO	NOCHAN
+
+	ENDC
+
+
+
+	END

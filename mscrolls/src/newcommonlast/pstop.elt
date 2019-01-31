@@ -1,0 +1,68 @@
+**************************************************************
+*
+*	10/27/87
+*	@(#)pstop.elt	1.2
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+
+*
+* P.LISTSTOP
+* 
+* does a P.LIST followed by a BSFULLSTOP
+
+	XDEF	P.LISTSTOP
+
+	XREF	NOTRAIL2
+
+P.LISTSTOP
+
+	ST	NOTRAIL2(A4)
+	DO	P.LIST
+	SF	NOTRAIL2(A4)
+	BRA.S	FULLSTOP
+
+*
+* P.TNSTOP - prints 'the xyyyz.'
+*
+* prints D0
+*
+	XDEF	P.TNSTOP
+	XREF	NOTRAIL
+
+P.TNSTOP
+
+	ST	NOTRAIL(A4)
+	DO	P.TN
+	SF	NOTRAIL(A4)
+	BRA.S	FULLSTOP
+
+* BSFULLSTOP
+* 
+* prints a BS then a '.' ! - D1 preserved
+
+	XDEF	BSFULLSTOP
+
+BSFULLSTOP
+
+	DO	UTIL.BS
+
+* FULLSTOP	prints just a '.'
+
+	XDEF	FULLSTOP
+FULLSTOP
+
+	MOVE.L	D1,-(A7)
+	MOVEQ	#'.',D1
+	DO	CHAROUT
+	MOVE.L	(A7)+,D1
+	RET
+
+
+
+	END

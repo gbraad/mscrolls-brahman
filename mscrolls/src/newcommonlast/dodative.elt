@@ -1,0 +1,36 @@
+**************************************************************
+*
+*	10/27/87
+*	@(#)dodative.elt	1.2
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+
+*--------------------------------
+
+	XDEF	DODATIVE
+	XREF	DATIVE,NOUNBUF2,TEMPBUF,NOUNBUF,MOVBUF,CONJ,SETADN
+	
+DODATIVE
+	
+	MOVE.L  DATIVE(A4),A2
+	LEA     NOUNBUF2(A4),A1
+	LEA     TEMPBUF(A4),A0
+10$
+	MOVE.W  (A0)+,(A1)+
+	CMP.L   A0,A2              ;DONE?
+	BNE.S   10$
+	LEA     NOUNBUF(A4),A1
+	CALL    MOVBUF             ;REST
+	MOVE.W  #1,CONJ(A4)
+	CALL    SETADN
+90$
+	RET
+
+
+
+	END

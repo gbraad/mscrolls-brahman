@@ -1,0 +1,28 @@
+**************************************************************
+*
+*	10/27/87
+*	@(#)do_final.elt	1.2
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+
+*--------------------------------
+
+	XREF	DO.QUIT
+
+* well chaps - the player has won - we shall see what he wishes to do now
+
+	XDEF	DO.FINAL
+
+DO.FINAL	
+	
+	PEA	10$(PC)
+10$
+	LEA	DO.FINAL(PC),A0
+	BRA	DO.QUIT
+
+
+	END

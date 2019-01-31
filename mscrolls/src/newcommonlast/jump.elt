@@ -1,0 +1,47 @@
+**************************************************************
+*
+*	10/27/87
+*	@(#)jump.elt	1.2
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"verbequ.i"
+
+	IfVerb	JUMP
+
+	XDEF	V.JUMP
+
+V.JUMP
+ 
+      IFEQ	THE_PAWN
+	
+	XREF	SP.JUMP,GO.N,ADVERB,V.VAULT
+
+	CALL	SP.JUMP
+	CMP.W	#ON,ADVERB(A4)		;jump on = go
+	BEQ.S	10$			;GO.N
+	CMP.W	#ONTO,ADVERB(A4)	;ditto jump onto
+	BEQ.S	10$
+	CMP.W	#TO,ADVERB(A4)
+	BEQ.S	10$
+	CMP.W	#INTO,ADVERB(A4)
+	BEQ.S	10$
+	CMP.W	#OFF,ADVERB(A4)
+	BNE	V.VAULT
+
+10$
+	BRA	GO.N			;which can deal with specials
+					;based on MOVE.TAB etc.
+
+      ENDC
+
+	BRA	V.VAULT
+
+      ENDC
+
+	END

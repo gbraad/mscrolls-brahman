@@ -1,0 +1,82 @@
+**************************************************************
+*
+*	%G%
+*	%W%
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"scenequ.i"
+
+
+*********************************************
+*
+* Bits dealing with the value of objects
+*
+*
+* GetValue - returns the value of D0 in D1.W,
+*            also Z flag set according to D1.W
+*
+* rest of D1 is undefined
+*
+* format of ValueTable is DC.W value,noun# - long word zero terminated
+*
+*********************************************
+
+	XDEF	GetValue
+	XREF	ValueTable
+
+GetValue
+
+
+	MOVE.L	A0,-(A7)
+	LEA	ValueTable(A4),A0
+10$
+	MOVE.L	(A0)+,D1
+	BEQ.S	90$			;EQ => no value
+	CMP.W	D0,D1
+	BNE.S	10$
+	SWAP	D1
+	AND.L	#$FFFF,D1		;zap hiword.
+    IFD	wantSP.GetValue
+	XREF	SP.GetValue
+	CALL	SP.GetValue
+	TEST_W	D1
+    ENDC	;wantSP.GetValue
+90$
+	PULL_L	A0
+	RET
+
+
+*
+* SetValue - sets the value of object D5 to D1.W (sets Z on D1.W on exit)
+*
+
+	XDEF	SetValue
+
+SetValue
+
+    IFD	wantSP.SetValue
+	XREF	SP.SetValue
+	CALL	SP.SetValue
+    ENDC	;wantSP.SetValue
+
+	PUSH_L	A0/D2
+	LEA	ValueTable(A4),A0
+10$
+	MOVE.L	(A0)+,D2
+	BEQ.S	90$		;EQ => no value - cannot set - call it null
+	CMP.W	D5,D2
+	BNE.S	10$
+	MOVE.W	D1,-4(A0)
+90$
+	PULL_L	A0/D2
+	RET
+
+*------------------------------------------
+
+	END

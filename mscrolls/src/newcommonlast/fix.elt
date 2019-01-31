@@ -1,0 +1,423 @@
+**************************************************************
+*
+*	3/1/89
+*	@(#)fix.elt	2.8
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"verbequ.i"
+	include	"scenequ.i"
+
+*--------------------------------
+
+	IfVerb	FIX
+
+    IFND	Version2_FIX
+
+	XDEF	FIX,V.JOIN
+	XREF	ROOM,ADDNOUN,YCANTWSTOP,CONJ,P.FLOO,DBS
+	XREF	YCANTNOW
+
+V.JOIN
+
+	IFEQ	THE_PAWN
+	XREF	SP.JOIN
+	CALL	SP.JOIN
+	ENDC	;!THE_PAWN
+
+
+	; FALL THROUGH TO FIX 
+
+*------------------------------------------
+
+FIX
+
+	IFEQ	THE_PAWN
+	XREF	SP.FIX
+	CALL	SP.FIX
+	ENDC	;!THE_PAWN
+ 
+	MOVEQ	#0,D6			;use as a flag
+
+	TST_NPC				;NO NPCS MAY BE TIED!!
+	BNE	DBS
+	MOVEQ   #AROUND,D1		;AROUND
+	CMP.W   CONJ(A4),D1
+	BEQ.S   04$
+
+    IfVerb	MEND
+	XREF	SP.MEND
+
+	TEST_W	CONJ(A4)		;with?
+	BNE.S	010$
+	CALL	SP.MEND			;fix x with y == mend x wi y
+010$
+    ENDC	;MEND
+
+	MOVEQ   #TO,D1			;TO
+04$
+	DO	CHK4PT
+	BTST	#6,4(A5)		;NPC?
+	BEQ.S   01$			;NOPE
+	BTST	#1,(A5)			;IF DEAD U CAN TIE TO	
+	BNE.S   01$			;OK - SINCE DEAD
+	MOVE.W  D5,D0
+	MOVE.L  A5,A0			;BEWARE OF PLURAL PROBS
+	BRA	P.FLOO			;LIVE NPCS GIVE U A FUNNY LOOK
+01$
+	MOVE.B  1(A0),D1		;H&S
+	LSR.B   #4,D1			;HI 4
+	CMP.B   #12,D1			;FLEX?
+	BNE.S   09$
+
+    IFD	wantSP.FIX_exceptions
+	XREF	SP.FIX_exceptions
+	CALL	SP.FIX_exceptions
+	BEQ	10$			;allow this one
+    ENDC	;SP.FIX_exceptions
+
+	TEST_W  6(A0)
+	BEQ	10$
+	TST_PSEUDO			;pseudo?
+	BNE	10$
+	BRA	YCANTNOW		;you can't at the moment.
+ 
+09$
+	MOVE.W  CONJ+2(A4),D2		;another prep in the pipe?
+	BMI	YCANTWSTOP		;no, so no-go
+	MOVE.W  ADDNOUN+2(A4),D2	;and another noun (ie 3-phrases)
+	EXG	D2,D0
+	MOVE.L  A0,A2			;save current data pointer.
+	GETINFO
+	MOVE.B  1(A0),D3		;check flex of this item.
+	LSR.B   #4,D3
+	CMP.B   #12,D3			;flexible?
+	BNE	YCANTWSTOP
+
+    IFD	wantSP.FIXTOGETHER_exceptions
+	XREF	SP.FIXTOGETHER_exceptions
+	CALL	SP.FIXTOGETHER_exceptions
+	BNE.S	0105$
+	EXG	D0,D2
+	BRA.S	0310$			;they dont have to be together here
+0105$
+    ENDC	;wantSP.FIXTOGETHER_exceptions
+
+	MOVE.W  8(A0),D3
+	CMP.W   8(A2),D3		;X,Y,Z ALL IN SAME LOC?
+	BNE	YCANTNOW		;not at the moment.
+	MOVE.W  12(A0),D3
+	AND.W   #$3FFF,D3
+	BNE.S   07$
+	TST_WORNBYPLAYER		;WORN?
+	BNE	YCANTNOW
+
+	EXG	D0,D2
+	MOVE.W  6(A5),D1
+	CMP.W	#$1400,D1		;INSEPERABLE AND WORN ALLOWED!
+	BEQ.S	0310$
+	AND.W   #$EFFF,D1
+
+	BEQ.S   0310$
+	MOVE.W  6(A5),D1	
+	AND.W   #$3000,D1		;CONTAINED AND INSEP ALLOWED
+	CMP.W   #$3000,D1		;MUST BE BOTH
+	BNE	FX13
+0310$
+	MOVE.W  D5,12(A0)
+	EXG	A2,A0
+	ST	D6
+	BRA	FX50
+10$
+	MOVE.W  12(A0),D1
+	AND.W   #$3FFF,D1
+	BEQ.S   11$
+07$
+	DO	P.BTN
+	DO	ISARE
+	MSG	ALRDF
+	DOGO	FULLSTOP
+11$
+	BTST	#0,5(A5)		;PSEUDO?
+	BEQ.S   FX50			;YES = FALL THROUGH
+	MOVE.B  6(A5),D7
+	AND.B   #$FB,D7			;WORN ALLOWED
+	BEQ.S   FX12
+FX13
+	MOVE.W  D5,D0
+	DOGO	YCANTNOW
+FX12
+	MOVE.W  ROOM(A4),6(A0)		;set up sec. loc.
+	BSET	#0,6(A0)
+	MOVE.W  D5,8(A0)
+FX20
+
+    IFD	wantSP.FIX_After
+	XREF	SP.FIX_After
+	CALL	SP.FIX_After
+    ENDC	;wantSP.FIX_After
+
+	BeSure	M.FXTO
+
+	MOVEQ   #M.FXTO,D1
+	DO	P.TNIN			;THE NOUN IS NOW FIXED TO..
+	MOVE.W  D5,D0
+	DOGO	P.TNSTOP
+	
+FX50
+
+    IFD	wantSP.FIXTO_exceptions
+	XREF	SP.FIXTO_exceptions
+	CALL	SP.FIXTO_exceptions
+	BEQ.S	FX51		;we'l allow these as well
+    ENDC	;wantSP.FIXTO_exceptions
+
+	MOVE.W  6(A5),D1
+	CMP.W	#$1400,D1		;INSEPERABLE AND WORN ALLOWED!
+	BEQ.S	FX52
+	AND.W   #$EFFF,D1
+
+	BEQ.S   FX52
+	MOVE.W  6(A5),D1	
+	AND.W   #$3000,D1		;CONTAINED AND INSEP ALLOWED
+	CMP.W   #$3000,D1		;MUST BE BOTH
+	BEQ.S   FX51
+	BRA	FX13
+FX52
+
+    IFD	wantSP.FIX_exceptions
+	XREF	SP.FIX_exceptions
+	CALL	SP.FIX_exceptions
+	BEQ.S	FX51			;they dont have to be together here
+    ENDC	;SP.FIX_exceptions
+
+	MOVE.W  8(A5),D1		;TEST TO SEE IF THEY ARE
+	CMP.W   8(A0),D1		;TOGETHER (SAME LOC)
+	BEQ.S   FX51
+
+*------------------------------------------
+
+    IFNE	THE_PAWN
+	CMP.W   #NBED,D0
+	BEQ.S   FX51			;!!!!!!!!!!!!!!!!!!!!!!!!!!
+	CMP.W   #NBED,D5
+	BEQ.S   FX51
+    ENDC	;!THE_PAWN
+	
+*------------------------------------------
+	
+	TEST_B	D6
+	BEQ.S	10$
+	CLR.W	12(A2)
+10$
+	DO	P.TN
+	MSG	MSTBE			;must be
+	MOVE.W  D5,D0
+	DOGO	P.TNSTOP
+FX51
+	MOVE.W  D5,12(A2)
+	MOVE.W  D5,12(A0)
+	BRA.S   FX20
+
+    ENDC	;!Version2_FIX
+
+*------------------------------------------
+
+    IFD	Version2_FIX
+
+	XDEF	V.JOIN
+V.JOIN
+
+	; fall through..
+
+	XREF	CONJ,DBS,YCANTWSTOP,P.FLOO
+	XREF	P.MHAVSTOP,ROOM,YCANTNOW,M.FXTO
+	XREF	SP.FIX,CanMove,IsPermanent
+	XREF	YCANT,ADDNOUN
+	XDEF	FIX
+	
+	XREF	YCANTWSTOP
+
+FIX
+
+    IFD	wantSP.FIX_Before
+	XREF	SP.FIX_Before
+	CALL	SP.FIX_Before
+    ENDC	SP.FIX_Before
+
+    IfVerb	MEND
+	XREF	V.MEND,VERB
+	CMP.W	#VNFIX,VERB(A4)		;only consider 'mend' if FIX
+	BNE.S	09$			;then cannot be.
+	TEST_W	CONJ(A4)
+	BMI	V.MEND
+    ENDC	;MEND
+
+09$
+	MOVE.W	CONJ(A4),D1
+	BPL.S	10$
+	MOVE.W	#TO,D1			;default prep.
+10$
+	DO	CHK4PT			;check fix x PREP Y?
+	TST_NPC				;tie npc?
+	BNE	DBS			;no-go.
+	CALL	80$			;sensible hardness etc.
+	BNE	YCANTWSTOP		;no chance.
+	TEST_W	CONJ+2(A4)		;are we on a 3nph cmd?
+	BPL	50$			;yes, so watchit.
+	CMP.B	#12,D1			;flexible
+	BNE	YCANTWSTOP		;else, you can't wi it.
+	TEST_L	6(A0)			;we'l insist they are holding it.
+	BNE	P.MHAVSTOP
+
+	; now we check the feasibility
+	; of tieing x to y.
+
+	MOVE.B	1(A5),D1
+	LSR.B	#4,D1			;how hard?
+	CMP.B	#3,D1
+	BLT	20$			;void/liquid/quantity.=> no.
+	BTST	#6,6(A5)		;room?
+	BNE.S	20$			;no rooms either.
+	BTST	#6,4(A5)		;to an npc?
+	BEQ.S	12$			;no.
+	BTST	#1,(A5)			;dead npc?
+	BNE.S	12$			;ok, then.
+	MOVE.L	A5,A0
+	MOVE.W	D5,D0			;get into main regs.
+	BRA	P.FLOO			;gives you a funny look.
+12$
+	MOVE.B	2(A5),D1		;size & weight.
+	AND.B	#$0f,D1			;weight.
+	BEQ.S	20$			;void => no.
+	MOVE.B	2(A5),D1
+	LSR.B	#4,D1			;size.
+	BEQ.S	20$			;no.
+	MOVE.W	12(A0),D1		;already fixed?
+	AND.W	#$3FFF,D1		;lose top bits.
+	BEQ.S	15$			;no, then ok.
+	CMP.W	D1,D5			;to this object?
+	BNE	YCANTNOW		;not at the moment.
+13$
+	DO	P.BTN
+	DO	ISARE
+	MSG	ALRDF			;the x is already fixed.
+	DOGO	FULLSTOP
+
+	;elsewise let' em
+15$
+	CALL	SP.FIX
+
+	BTST	#0,5(A5)		;to a pseudo.
+	BEQ.S	16$			;no.
+	MOVE.B	ROOM+1(A4),7(A0)	;to the 2nd locator.
+	MOVE.B	#1,6(A0)		;related.
+	MOVE.W	D5,8(A0)		;to it.
+	BRA.S	18$			;done.
+16$
+	MOVE.W	D5,12(A0)		;ok. it's fixed.
+18$
+	MOVE.W	#M.FXTO,D1
+	DO	P.TNIN
+	MOVE.W	D5,D0
+	DOGO	P.TNSTOP		;the x is now fixed to the y.
+20$
+	DO	P.SUB
+	MSG	YCNDTT			;you cant to 
+	MOVE.W	D5,D0
+	DOGO	P.TNSTOP
+50$
+	MOVE.W	ADDNOUN+2(A4),D2	;fetch 3rd noun
+	BNE.S	51$			;it exists?
+	MOVE.B	1(A0),D1
+	LSR.B	#4,D1				;hardness.
+	CMP.B	#12,D1				;flexible?
+	BNE.S	5001$
+	MOVE.W	D0,D2
+	BRA.S	51$				;and continue.
+5001$
+	MOVE.B	1(A5),D1
+	LSR.B	#4,D1				;hardness
+	CMP.B	#12,D1				;flex (last chance!)
+	BNE	YCANTWSTOP			;no-go.
+	MOVE.W	D5,D2				;select this
+51$	
+	EXG	D0,D2
+	MOVE.L	A0,A2
+	GETINFO				;(d0/a0) = flex item
+	MOVE.B	1(A0),D1
+	LSR.B	#4,D1			;hardness?
+	CMP.B	#12,D1			;= flexy?
+	BNE	YCANTWSTOP		;else nocando
+	DO	CARRIED			;insist u've got it.
+	BNE	P.MHAVSTOP		;moan.
+	TST_WORNBYPLAYER		;with u but no worn bits please.
+	BNE	YCANTNOW		;nocando
+	EXG	D0,D2			;suitablilty of 1st item.
+	EXG	A0,A2
+	CALL_S	70$			;check suitablilty of D0
+	BEQ.S	60$			;d0 is ok, fine.
+	EXG	D0,D5			;try the other.
+	EXG	A0,A5			;and the data
+	CALL_S	80$			;check d5 suitability
+	BNE	YCANT			;no.
+	CALL_S	70$			;suitable?
+	BNE	YCANT			;no, go
+55$
+	; d0 is not a pseudo.
+
+	MOVE.W	D0,12(A2)		;fix the flex to the moveable.
+	BTST	#3,6(A5)		;fixed item must NOT be instrinsic.
+	BEQ	15$			;ok
+	MOVE.W	D5,D0
+	BRA	YCANT
+60$
+	EXG	D0,D5
+	EXG	A0,A5
+	CALL_S	80$			;check
+	BNE	YCANT
+	EXG	D0,D5
+	EXG	A0,A5
+	BRA.S	55$
+
+70$
+	; see of d0 is sufficiently free to move
+	CALL	CanMove			;liftable?
+	BNE.S	79$			;no, exit
+	TEST_W	12(A0)			;already tied?
+	BNE.S	79$			;yes, not suitable.
+	CALL	IsPermanent		;shiftable?
+	EOR	#4,CCR			;invert
+79$
+	RET
+
+80$
+	;check sensible parameters.
+	MOVE.B	2(A0),D1		;size & weight.
+	AND.B	#$0f,D1			;weight?
+	BEQ.S	89$			;fail.
+	MOVE.B	2(A0),D1		;size & weight.
+	LSR.B	#4,D1			;size
+	BEQ.S	89$			;fail.
+	MOVE.B	1(A0),D1		;get pc.
+	LSR.B	#4,D1			;hardness.
+	CMP.W	#3,D1			;<3 => no-go.
+	BLT.S	89$			;no, fail
+	SETEQ_RET
+89$
+	SETNE_RET
+
+
+    ENDC	;Version2_FIX
+
+    ENDC	;FIX
+
+
+*------------------------------------------
+
+	END

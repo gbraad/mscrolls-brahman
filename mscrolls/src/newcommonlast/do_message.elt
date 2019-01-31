@@ -1,0 +1,85 @@
+**************************************************************
+*
+*	%G%
+*	%W%
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+
+ 
+*--------------------------------
+*
+* DO.SCN - PRINTS THE SCN MSG IN NEXT WORD
+*          AFTER CALL - USED BY SCN 
+*
+*--------------------------------
+
+	XDEF	DO.SCN
+ 
+DO.SCN
+	
+	MOVE.L  A2,-(A7)           ;SAVE A2
+	MOVE.L  4(A7),A2           ;GET ADDR OF SCN MSG #
+	MOVE.L  D1,-(A7)           ;SAVE D1
+	MOVE.W  (A2)+,D1           ;GET MSG#
+	DO	P.SCN	           ;PRINT MSG
+	MOVE.L  (A7)+,D1           ;RESTORE D1
+	MOVE.L  (A7)+,A2           ;AND A2
+	ADDQ.L  #2,(A7)            ;UPDATE PC
+	RET
+
+*--------------------------------
+*
+* DO.MSG - PRINTS THE PROG MSG IN NEXT WORD
+*          AFTER CALL - USED BY MSG 
+*
+*--------------------------------
+
+	XDEF	DO.MSG
+
+DO.MSG
+	
+	MOVE.L  A2,-(A7)           ;SAVE A2
+	MOVE.L  4(A7),A2           ;GET ADDR OF SCN MSG #
+	MOVE.L  D1,-(A7)           ;SAVE D1
+	MOVE.W  (A2)+,D1           ;GET MSG#
+	DO	P.MSG	           ;PRINT MSG
+	MOVE.L  (A7)+,D1           ;RESTORE D1
+	MOVE.L  (A7)+,A2           ;AND A2
+	ADDQ.L  #2,(A7)            ;UPDATE PC
+	RET
+
+*--------------------------------
+*
+* DO.NPCMSG - PRINTS THE NPC MSG IN NEXT WORD
+*          AFTER CALL - USED BY NPCMSG 
+*
+*--------------------------------
+
+    IFD		wantNPCMSG
+	
+	XDEF	DO.NPCMSG
+	XREF	P.NPCMSG
+ 
+DO.NPCMSG
+	
+	MOVE.L  A2,-(A7)           ;SAVE A2
+	MOVE.L  4(A7),A2           ;GET ADDR OF SCN MSG #
+	MOVE.L  D1,-(A7)           ;SAVE D1
+	MOVE.W  (A2)+,D1           ;GET MSG#
+	CALL    P.NPCMSG           ;PRINT MSG
+	MOVE.L  (A7)+,D1           ;RESTORE D1
+	MOVE.L  (A7)+,A2           ;AND A2
+	ADDQ.L  #2,(A7)            ;UPDATE PC
+	RET
+
+
+    ENDC	;wantNPCMSG
+
+*------------------------------------------ 
+	END

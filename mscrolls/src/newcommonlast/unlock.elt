@@ -1,0 +1,108 @@
+**************************************************************
+*
+*	2/10/89
+*	@(#)unlock.elt	2.4
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"verbequ.i"
+	include	"nounequ1.i"
+	include	"scenequ.i"
+
+	IfVerb	UNLOCK
+
+	XDEF	UNLOCK
+	XREF	P.BTNI,SP.UNLOC,TBL.DOOR,EXGNOUN,VERB
+ 
+UNLOCK
+ 
+      IFD	wantSP.UNLOCK_Before
+
+	XREF	SP.UNLOCK_Before
+
+	CALL	SP.UNLOCK_Before
+
+      ENDC
+      
+
+	MOVEQ   #-1,D6            	;SUCCESS FLG FOR OPEN
+	MOVE.B  (A0),D1
+	AND.B   #$70,D1           	;ONLY ALLOWED IF LOCKED/OPEN/CLOSED
+	BEQ.S   35$               	;DOGO	YCANT
+	CLR.W	D1
+	DO	CHK4PT	 
+	TST_LOCKED				;LOCKED?
+	BNE.S   20$
+
+	BeSure	M.UNLOCK
+
+	MOVE.W  #M.UNLOCK,D1
+	CALL    P.BTNI
+	DOGO	FULLSTOP
+20$
+	CALL    SP.UNLOC
+	LEA     TBL.DOOR(A4),A1
+30$  
+	CMP.W   (A1)+,D0
+	BEQ.S   40$
+	TEST_W  (A1)+              	;FINISHED?
+	BNE.S   30$
+
+      IFD	wantPretendKeyForDoor
+
+	XREF	Denotation_DOORS
+
+;if D0 is a door don't say you can't etc
+
+	LEA	Denotation_DOORS(A4),A1
+	DO	MEMBEROFSET
+	BEQ.S	41$
+
+      ENDC	;wantPretendKeyForDoor
+
+35$                  
+	DOGO	YCANT
+ 
+40$
+	CMP.W   (A1),D5            	;CORRECT KEY?  ONLY ONE PER DOOR!
+	BEQ.S   50$
+41$
+	MOVE.B  2(A5),D1           	;S&W OF KEY
+	AND.B   #$F0,D1            	;SIZE ONL
+	CMP.B   #$10,D1            	;KEYS = 1
+	BEQ.S   45$
+	MSG	IDNTT          	;'I DO NOT THINK THAT
+	CALL    EXGNOUN
+	DO	P.QN
+	DO	ISARE	
+	MSG	QSUIT          	;'IS QUITE SUITABLE
+	DOGO	BSFULLSTOP
+45$
+	CALL    EXGNOUN
+	DO	P.TN
+	MSG	CNTUNL         	;'CANNOT UNLOCK"
+	CALL    EXGNOUN
+	DOGO	P.TNSTOP
+   
+50$
+	BCLR    #6,(A0)            	;UNLOCKED     
+	BSET    #5,(A0)            	;&CLOSED
+	CLR.L   D6                	;SUCCESSFUL
+	CMP.W   #VNUNLOCK,VERB(A4)
+	BNE.S   60$
+	MOVE.W  #M.UNLOCK,D1
+	DO	P.TNIN
+	DOGO	FULLSTOP
+60$
+	RET
+
+	ENDC
+
+
+
+	END

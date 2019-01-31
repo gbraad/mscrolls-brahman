@@ -1,0 +1,33 @@
+************************************************************
+*
+*	%W%
+*	%G%
+*
+*************************************************************
+
+		SECTION	"ADV",CODE
+
+		include	"equates.i"
+		include	"macros.i"
+		include	"nounequ1.i"
+		include	"verbequ.i"
+		include	"scenequ.i"
+
+	IfVerb	FOLLOW
+
+	XDEF	V.FOLLOW
+	XREF	SP.FOLLOW,P.IDFY
+
+V.FOLLOW
+
+	CALL	SP.FOLLOW
+	CMP.W	#NPLAYER,D0		;follow me
+	BEQ	P.IDFY			;a joke!
+	MSGGO	HOWQMARK		;how ?
+
+
+*------------------------------------------
+
+	ENDC	;V.FOLLOW
+
+	END

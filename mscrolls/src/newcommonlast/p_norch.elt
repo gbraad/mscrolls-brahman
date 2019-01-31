@@ -1,0 +1,28 @@
+**************************************************************
+*
+*	10/27/87
+*	@(#)p_norch.elt	1.2
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+
+	XDEF	P.NORCH
+	XREF	SETPRON
+	        
+P.NORCH
+	        
+	DO	P.SUB
+	MSG     NORCH		;CANT REACH FROM HERE
+	DO	P.TN
+	MSG	FHERE
+	MSG	LINE		
+	BRA	SETPRON		;setup pronouns as used in error msg
+
+
+
+	END

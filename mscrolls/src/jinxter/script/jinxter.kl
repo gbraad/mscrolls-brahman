@@ -1,0 +1,722 @@
+;; Guardian Help In Jinxter
+
+;;;; System ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(setq c
+      ;; random choice function, choose randomly from (c 1 2 3 4 .. )
+      (def args
+           (at args (random (size args)))
+           ))
+
+(setq nran
+      ;; non-random number order 2
+      (fn (n s)
+          (nrandom n (+ n 2) s)
+          ))
+
+(setq cn
+      ;; non-random choice function, choose (cn 1 2 3 4 ...)
+      (def args
+           (at args (+ 1 (nran (- (size args) 1) (first args))))
+           ))
+
+(setq co
+      ;; single choice
+      (def (a)
+           (if (random 2) (a))
+           ))
+
+(setq c2
+      ;; choice of 2
+      (def (a b)
+           (if (random 2) (a) (b))
+           ))
+
+
+;; word formation
+
+
+;; flags:
+;; inf = infinitive
+;; ing = ing form
+;; party; 1=i, 2=you, 3=him,her, 4=they
+;; mf = true => male
+;; pl = plural noun
+
+;; verb
+
+(setq inf 0)
+(setq ing 0)
+(setq party 1)
+
+(setq vform
+      ;; verb forms
+      (fn (v)
+          (cat (if inf "to ") v (if ing "ing" (if (= party 3) "s")))
+          ))
+
+(setq infof
+      ;; infinitive
+      (def (v)
+           (local
+            (setq inf 1)
+            (v)
+            )
+           ))
+
+(setq ingof
+      ;; verb-ing
+      (def (v)
+           (local
+            (setq ing 1)
+            (v)
+            )
+           ))
+
+(setq pof
+      ;; party of/male
+      (def (n e)
+           (local
+            (setq party n)
+            (setq mf 1)
+            (e)
+            )
+           ))
+
+(setq poff
+      ;; party of/female
+      (def (n e)
+           (local
+            (setq party n)
+            (setq mf 0)
+            (e)
+            )
+           ))
+
+;; noun
+
+(setq adj
+      ;; form adjective noun
+      (def (a n)
+           (cats (a) (n))
+           ))
+
+(setq nform
+      ;; noun form
+      (fn (n)
+          (cat n (if (> party 3) "s"))
+          ))
+
+;; pronouns
+
+(setq my
+      (fn ()
+          (if (= party 1) "my"
+            (if (= party 2) "your"
+              (if (= party 3)
+                  (if mf "his" "her")
+                "their")))
+          ))
+
+;;; Handlers ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(setq event-hook-handler
+      ;; called every move from game with `quiet`
+      ;; quiet is true if this turn the game has no printed anything specific
+      (fn (quiet)
+          (
+           (inc move-count)
+           ;;(log 3 "KL: event-hook-handler" move-count)
+           (handle-rooms)
+           (handle-sounds)
+           (if quiet
+               (local
+                (setq t (gen))
+                (ife t
+                     (
+                      (set! 'last-event move-count)
+                      (printf "%s\n" t)
+                      )
+                     (handle-specials)
+                     )
+                )
+             )
+           )
+          ))
+
+;;;; Game Generic ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; keep our own move count
+(setq move-count 0)
+
+;; the last room we've seen
+(setq current-room 0)
+
+;; move count of last time we did something
+(setq last-event 0)
+
+;; stuff we change, keep here as might want to add to save game
+(setq state {})
+
+(setq player-room
+      (fn ()
+          (room-of (second (player-location)))
+          ))
+
+;; Some notes for `cat` functions
+;; (cat a b ..) => stringify and concatentate a and b etc.
+;; (cats a b) => same as `cat` but insert spaces between a & b if needed.
+;; (catss a b) => same as `cats` but make sentence by uppercasing start of
+;; a (if needed) and adding full stop on end (if needed).
+;; handles putting full stop inside quotes.
+;; eg he says, "hello" -> He says, "hello."
+
+
+(setq aquote (fn (a) (cat "\"" a "\"")))
+(setq prequote (fn (a b) (cat "\"" (catss a) "\" " b)))
+(setq postquote (fn (a b) (cat a ",\"" (catss b) "\"")))
+
+(setq sound-channel-0 0)
+(setq sound-channel-1 0)
+
+(setq play-sound
+      ;; play name duration on channel
+      (fn (p d c)
+          (ifisend (tree (list 'name (cat "sounds/" p))
+                         (list 'duration d)
+                         (list 'channel c)))
+          ))
+
+(setq stop-sound
+      ;; stop channel c
+      (fn (c)
+          (ifisend (tree '(duration 0) (list 'channel c)))
+          ))
+
+(setq play-sound-0
+      ;; play on channel 0
+      (fn (p d)
+          (if (!= p sound-channel-0)
+              (set! 'sound-channel-0 p)
+              (play-sound p d 0)
+            )
+          ))
+
+(setq stop-sound-0
+      ;; stop channel 0
+      (fn ()
+          (if sound-channel-0 (set! 'sound-channel-0 0) (stop-sound 0))
+          ))
+
+(setq play-sound-1
+      ;; play on channel 1
+      (fn (p d)
+          (if (!= p sound-channel-1)
+              (set! 'sound-channel-1 p)
+              (play-sound p d 1)
+            )
+          ))
+
+(setq stop-sound-1
+      ;; stop channel 1
+      (fn ()
+          (if sound-channel-1 (set! 'sound-channel-1 0) (stop-sound 1))
+          ))
+
+(setq get-state
+      (fn (s)
+          (or (eval-in state s) -100)
+          ))
+
+(setq set-state
+      (fn (s v)
+          (local
+           (setq s1 s)
+           (setq v1 v)
+           (eval-in state '(set s1 v1))
+           )
+          ))
+
+;;;; Game ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+(setq badroom
+      ;; are we in an unsuitable location for guardian
+      (fn ()
+          (find (player-room) '(1 71 76 70 36 28 72 35 73 77 78 96 33 56 66 57 94 85))
+          ))
+
+
+(setq got
+      ;; item is "got" if carried or room location is post depot
+      (fn (it)
+          (or (is-carried it) (== (room-of (location-top it)) 83))
+          ))
+
+(setq got-charms
+      ;; are you carrying all 5 charms
+      ;; dragon charm = thingy, unicorn charm = watchercallit, walrus charm = oojimy pelican charm = doofer
+      (fn ()
+          (and (got (item "dragon charm"))
+               (got (item "unicorn charm"))
+               (got (item "walrus charm"))
+               (got (item "pelican charm"))
+               (got (item "amethyst charm"))
+               )
+          ))
+
+(setq got-lighter
+      ;; have means to burn rope.
+      (fn ()
+          (and (got (item "match box"))
+               (got (item "candle"))
+               )
+          ))
+
+(setq got-tall-container
+     ;; have at least one of "tall containers"
+     ;; top hat, plastic bottle, bottle_of_milk, beer glass.
+     (fn ()
+         (or (got (item "plastic bottle"))
+             (got (item "beer glass"))
+             (got (item "top hat"))
+             (got (item "bottle_of_milk"))
+             )
+         ))
+
+(setq got-ticket-money
+      ;; either two ferg coin
+      ;; OR
+      ;; one ferg coin + hat,harmonica,shoes
+      (fn ()
+          (or (got (item "two coin"))
+              (and (got (item "one coin"))
+                   (got (item "top hat"))
+                   (got (item "harmonica"))
+                   (got (item "shoes"))
+                   )
+              )
+          ))
+       
+
+(setq got-everything
+      ;; have items to go on cloud
+      (fn ()
+          (and (got-charms)
+               (got-lighter)
+               (got-tall-container)
+               (got (item "saddle"))
+               (got-ticket-money)
+               )
+          ))
+
+(setq not-failed-bakery
+      ;; not applied for job => OK
+      ;; got score => ok
+      ;; charm in cake & burnt bread chucked => OK
+      (fn ()
+          (or (not (value-of "AppliedForJob"))
+              (not (value-of "SCVAL.DOBAKERY"))
+              (and (value-of "CharmInCake") (value-of "BurntChucked"))
+              )
+          ))
+
+/*
+(setq reset-value
+      ;; reset a byte value to zero 
+      (fn (sym)
+          (value-of sym 1 0)
+          ))
+
+(setq reset-values
+      ;; reset a list of values to zero
+      (fn (syms)
+          (map reset-value syms)
+          ))
+
+(setq reset-bakery
+      (fn ()
+          (local
+           (setq c4 (item "pelican charm"))
+           (set-location c4 '(in (item "flour sack")))
+           (set-out c4)
+           (reset-values '("AppliedForJob"
+                          "BakerAngry"
+                          "BakerFed"
+                          "BakerFollows"
+                          "GotCharm4"
+                          "CharmInCake"
+                          "BurntChucked"
+                          ))
+           )
+          ))
+*/
+
+(setq failed-bakery-c
+      (fn () (ifnot (not-failed-bakery) '(1))
+          ))
+
+(setq report-failed-bakery
+      (fn (s)
+          (
+           (set-state s 10000)
+           (set-location (item "pelican charm"))
+           (catss (aquote "oh dear! Looks like it all went wrong in the bakery. Hmm. Let me try to fix this mess.") "The Guardian mumbles some mumbo jumbo, then reaching into his pocket fishes out the pelican charm. Handing it to you he says," (aquote "Shh. Don't tell anyone.") "And with that he vanishes.")
+           )
+          ))
+
+(setq failed-cloud-c
+      (fn ()
+          (ifnot (got-everything) '(1))
+          ))
+          
+(setq wears-shoes
+      ;; are you wearing the shoes?
+      (fn ()
+          (is-worn (item "shoes"))
+        ))
+        
+(setq postoffice-req
+      (fn ()
+          (and (not (value-of "CanoeFilled"))
+               (not (got (item "wolly sock")))
+               (not (got (item "dead mouse")))
+         )
+        ))
+
+(setq got-castle-req
+      ;; have items to go to the castle
+      (fn ()
+          (and (got-charms)
+               (got-lighter)
+               (got-tall-container)
+               (got (item "saddle"))
+               (got (item "train ticket"))
+               )
+          ))
+         
+(setq failed-train
+      (fn ()
+          (ifnot (got-castle-req) '(1))
+          ))                             
+
+(setq helpers
+      {
+      ;; (symbol string-name explored-rooms active-rooms action)
+      
+      ;; this is a table of extra guardian helpers
+      ;; the basic idea is:
+      ;; if the player is currently in any of `active-rooms` AND
+      ;; at least one of `explored-rooms` has been visited AND
+      ;; the item `string-name` is not-reachable THEN
+      ;; perform `action`.
+      ;;
+      ;; Also,
+      ;; if `string-name` is not a string, then ignore this test.
+      ;; `explored-rooms` may also be a function that returns a room list.
+      ;;
+      ;; `symbol` is just a unique label to keep track of state.
+      ;;
+      ;; helpers are not invoked in any (badroom) nor within `min-gap` of
+      ;; a previous helper.
+
+      ;; sock needed for bung or postmistress
+      ;;(thesock "woolly sock" (4) (9 12 13 14 15 17 18 19 20 21 22 24 26)
+      ;;         (aquote "there's something from your house you've forgotten")
+      ;;         )
+      
+      ;; postmistress and canoe
+      (prepost 0 postoffice-req (27)
+              (aquote "there's something from the houses you've forgotten")
+              )      
+      
+               
+      (thesock "amethyst charm" (27) (26 27 28 29 38)
+               (aquote "the mad gardener had something you really need")
+               )               
+
+      (candle "candle" (20 21 22)
+              (13 14 15 17 18 19 20 21 22 24 26 27 38 39 40 16 43 45 46)
+              (aquote "I think you'll need the candle from Xam's house later")
+              )
+
+      (matchbox "match box" (20 21 22)
+              (13 14 15 17 18 19 20 21 22 24 26 27 38 39 40 16 43 45 46)
+              (aquote "you're going to need those matches later")
+              )
+
+      ;; if you've failed the bakery, he gives you the charm
+      (doofer "pelican charm" failed-bakery-c (38 39 40 16 43 45 46)
+              (report-failed-bakery 'doofer)
+              )
+
+      ;; doofer cloud
+      (cloud 0 failed-cloud-c (46)
+              (aquote "Looks like there's still something you need before continuing")
+              )
+           
+      ;; wearing shoes in castle
+      (castle 0 wears-shoes (54 58 59 60)
+              (aquote "Honestly, you shouldn't steal into the castle in that clothing")
+              )
+              
+      ;; before taking the train
+      (traindep 0 failed-train (52 80 81 82 83 84 89 90)
+              (aquote "Looks like you are not ready for the travel. There is still something you need before continuing")
+              )        
+      }
+      )
+
+;; these are phrase builders, just add more variety
+
+(setq preq
+      ;; text introduction of helper
+      (fn ()
+          (cn 1
+           "suddenly,"
+           "out of the blue,"
+           "without warning,"
+           "at that moment,"
+           "without you really noticing,"
+           )
+          ))
+
+(setq guardian
+      ;; names for the guardian
+      (fn ()
+          ("the Guardian")
+          ))
+
+(setq appears
+      ;; how he appears
+      (fn ()
+          (cn 2
+           "appears"
+           "fades into view"
+           )
+          ))
+
+(setq gappear
+      ;; build guardian appearance text
+      (fn ()
+          (catss
+           (preq)
+           (guardian)
+           (appears)
+           )))
+
+(setq gevent
+      ;; what he says to introduce help.
+      ;; eg add more variants here.
+      (fn ()
+          (catss
+           (c (aquote "just wondering how you're getting on,"))
+           (he-says)
+           )
+          ))
+
+
+(setq he-says
+      (fn ()
+          ("he says")
+          ))
+
+(setq check-explored
+      ;; checks `rs` list of room#
+      ;; true if ANY are explored
+      (fn (rs)
+          (forall 'j rs
+                  (returnif (is-explored (room-to-item j))))
+          ))
+
+(setq check-cond
+      ;; either a list of rooms, one of which we must have visited
+      ;; or a function which returns list of rooms
+      (fn (c)
+          (ife (symbol? c) (check-explored (eval (eval c))) (check-explored c))
+          ))
+
+(setq check-item
+      ;; if a string, then a non-reachable item, else valid
+      (fn (s)
+          (or (not (string? s)) (not (reachable (item s))))
+          ))
+
+(setq gen-active-items
+      ;; return list of valid helper elements
+      (fn ()
+          (local
+           (setq things (list))
+           (forall 'i helpers
+                   (if (and
+                        (find (player-room) (forth i))
+                        (check-cond (third i))
+                        (check-item (second i))
+                        )
+                       (insert things i)
+                     )
+           )
+           things
+         )
+          ))
+
+(setq moves-ago
+      ;; how many moves ago 
+      (fn (s)
+          (- move-count (get-state s))
+          ))
+
+(setq item-rank
+      ;; rank is how many moves ago we last chose this helper element
+      ;; so that helpers take turns in appearing
+      (fn (ti)
+          (moves-ago (first ti))
+          ))
+
+(setq update-state
+      (fn (s)
+          (set-state s move-count)
+          ))
+
+(setq best-item
+      ;; find item with higest rank
+     (fn (ts)
+         (local
+          (setq best (first ts))
+          (forall 'i ts
+                  (if (> (item-rank i) (item-rank best)) (setq best i)))
+          best
+          )
+         ))
+
+
+;; min turns before we can help again
+(setq min-gap 20)
+
+(setq can-appear
+      ;; can the guardian appear?
+      (fn ()
+          (and (>= (- move-count last-event) min-gap)
+               (not (badroom)))
+          ))
+
+(setq compose-appear
+      ;; construct appearance text
+      (fn (m)
+          (cat (gappear) (gevent) (catss m))
+          ))
+
+(setq gen
+      ;; generate helper
+      ;; return valid string if we can help this turn
+      (fn ()
+          (local
+           (if (can-appear)
+               ;;(log 3 "quiet-handler gen" move-count)
+               (setq ti (best-item (gen-active-items)))
+
+               (if (and ti (>= (item-rank ti) min-gap))
+                   (update-state (first ti))
+                   (compose-appear (eval (fifth ti)))
+               )
+             )
+          )
+          ))
+
+(setq get-room-no
+      (fn (s)
+          (eval s rooms)
+          ))
+
+(setq room-ambiences
+      {
+      (2 "garden.ogg")  ;; front garden
+      (19 "garden.ogg")  ;; xams front garden
+      (8 "garden.ogg")  ;; back garden
+      (24 "garden.ogg")  ;; herb garden
+      (3 "kitchen.ogg")
+      (17 "spring.ogg")
+      (32 "eerie1.ogg") ;; sacrisrty
+      (37 "eerie1.ogg") ;; lodge
+      (64 "eerie2.ogg") ;; vestibule
+      (63 "eerie2.ogg") ;; spiral stair
+      (56 "synth2.ogg") ;; sactum
+      (66 "eerie2.ogg") ;; balcony
+      (9 "hedgerow.ogg") ;; holly lane
+      (47 "pub.ogg")
+      (49 "pubgarden.ogg")
+      (18 "rope.ogg") ;; on bridge
+      (12 "larks.ogg") ; grassy field
+      (48 "synth3.ogg")  ;; tetragam
+      (95 "synth4.ogg")  ;; jewel room
+      (20 "taps.ogg") ; messy kitchen
+      (5 "bathroom.ogg")
+      (76 "uwater1.ogg")
+      (71 "uwater2.ogg")
+      (36 "uwater3.ogg")
+      (70 "uwater3.ogg")
+      (77 "uwater3.ogg")
+      (28 "waterlap.ogg") ; lagoon
+      (27 "waterlap.ogg") ;; canoe mooring
+      (15 "woodland.ogg") ; orchard
+      (39 "park.ogg") ; village green
+      (38 "forest.ogg") ; conifer wood
+      (85 "beepmon.ogg") ; operating theatre
+      (16 "clock.ogg") ; clockmakers
+
+      
+      })
+      
+(setq room-sound
+      ;; return the filename of room sound of `r`, if any
+      (fn (r)
+          (local
+           (setq r1 r)
+           (first (map (fn (x) (if (= r1 (first x)) (second x))) room-ambiences))
+           )
+          ))
+
+(setq play-room-sound
+      (fn (r)
+          (local
+           (setq s (room-sound r))
+           (ife s
+                (
+                 ;;(log 3 "play room sound" s)
+                 (play-sound-0 s -1)
+                 )
+               (stop-sound-0))
+           )
+          ))
+
+(setq handle-rooms
+      (fn ()
+          (if (!= (player-room) current-room)
+              (set! 'current-room (player-room))
+            ;;(log 3 "KL new room " current-room)
+            (play-room-sound current-room)
+            )
+          ))
+
+(setq handle-sound-v
+      (fn (v s)
+          (if (value-of v) (play-sound-1 s -1) 1)
+          ))
+
+(setq handle-sounds
+      ;; special sounds not amblence
+      (fn ()
+          (ifnot
+           (or
+            (handle-sound-v "RingCount" "phone.ogg")
+            (handle-sound-v "AquaLive" "scuba.ogg")
+            )
+           (stop-sound-1)
+           )
+          ))
+
+(setq handle-specials
+      ;; generic
+      (fn ()
+          ))
+

@@ -1,0 +1,191 @@
+**************************************************************
+*
+*	%G%
+*	%W%
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include "verbequ.i"
+	include	"macros.i"
+	include	"scenequ.i"
+
+*--------------------------------
+	
+WantDrop	SET	FALSE
+	
+	IfVerb	LEAVE
+WantDrop	SET	TRUE
+	ENDC
+
+	IfVerb	DROP
+WantDrop	SET	TRUE
+	ENDC
+
+	IFNE	WantDrop
+
+	XDEF	DROP,DRP.PNT2
+	XREF	V.PUT,CONJ,DO.FIX,BRKD0,P.SEPA,IGNORAJ,VERB,SP.DROP,ROOM
+	XREF	SUBJECT,SEATED,DBS,NMOVEFLG
+	XREF	STEADFAST,GenSeatMask,P.SEPA
+        XREF    REMASTER
+   
+DROP
+      
+      IFD	wantSP.DROP_Before
+	XREF	SP.DROP_Before
+	CALL	SP.DROP_Before
+      ENDC
+
+	TEST_W  CONJ(A4)		;DROP IN/into/on ?
+	 
+    IFD		wantItAllToWorkAgain
+	XREF	V.PUT
+	BPL	V.PUT			;same as put, so go there
+    ENDC	;wantItAllToWorkAgain
+
+	DO	CARRIED			;CARRIED?
+	BEQ.S   10$			;YES
+	MSG	BUT
+	DO	P.SUBV
+	MSG	NTCAR
+	DOGO	P.TNSTOP
+10$
+	TST_INSEPARABLE			;inseperable?
+	BNE	STEADFAST
+	TST_MOVEABLE			;MOVEABLE?
+	BEQ	STEADFAST
+
+	DO	FIXCHK
+	BNE	DRP.MANY   
+	CLR.W   NMOVEFLG(A4)		;JUST IN CASE...
+ 
+DRP.PNT
+
+    IFD	Version2_FIX
+	DO	CARRIED			;are you (stil) carring it?
+	BEQ.S	DROP.DO			;yes.
+	RET
+		;DRP.Many is called from DO_FIX, but
+		;a system of particles no longer has to be
+		;all carried, this additional check makes sure
+		;you dont drop things you are not carring.
+    ENDC	;Version2_FIX
+
+DROP.DO
+
+	XREF	SP.UNWEA
+
+	TST_WORNBYPLAYER		;?
+	BEQ.S	10$			;no
+
+    IFD	wantSP.UNWEA_BEFORE
+	XREF	SP.UNWEA_BEFORE
+	CALL	SP.UNWEA_BEFORE
+    ENDC	;wantSP.UNWEA_BEFORE
+
+	CALL	SP.UNWEA
+10$
+	TST_INTRINSIC			;INTRINSIC?	
+	BNE	DBS
+
+      IFNE	GENERIC
+	XREF	PromptEvent
+	include	"advevent.i"
+	MOVEQ	#ADV_EV_ALL_WORN,D1
+	JSR	PromptEvent(A4)
+      ENDC
+
+	DO	P.NOUN
+	MSG	DROPD
+	MSG	LINE
+  
+DRP.PNT2
+  
+	LIQUID	D1			;is d0 a liquid?
+	BNE.S	05$			;no
+	BRA	P.SEPA			;it seeps away.
+05$
+	DO	FIXCONT
+	MOVE.W  SEATED(A4),8(A0)	;INCASE
+	BEQ.S   10$			;NOT REALLY
+	TEST_W  SUBJECT(A4)
+	BNE.S   10$
+	MOVE.W	D1,-(A7)
+	PUSH_L	D0/A0-A1
+	MOVE.L	A0,A1
+	MOVE.W	8(A0),D0
+	GETINFO
+	TST_PSEUDO			;sitting on a pseudo???
+	BEQ.S	06$
+	MOVE.B	ROOM+1(A4),7(A1)	;secondary locator.
+06$
+	PULL_L	D0/A0-A1
+	DO	GenSeatMask		;->d1
+	MOVE.B  D1,6(A0)		;SET relation
+	MOVE.W	(A7)+,D1
+	BRA.S   12$			;OK
+10$
+	CLR.W   6(A0)			;NO HB
+	MOVE.W  ROOM(A4),8(A0)		;ON FLOOR
+    IFD	wantWETROOMS
+	CALL	WETTEN			;does it get wet (float??)
+    ENDC	;wantWETROOMS
+12$
+	CALL	SP.DROP
+
+	IFNE	THE_PAWN
+        TEST_B  REMASTER(A4)
+        BNE.S   14$            	        ;lose "drop carefully" 
+
+	CMP.W   #VNDROP,VERB(A4)	;MUST ME DROP TO BREAK
+	BNE.S   14$	
+	CMP.W   #1,IGNORAJ(A4)		;DROP CAREFULLY?
+	BEQ.S   14$ 
+	MOVE.B  1(A0),D1		;H&S
+	LSR.B   #4,D1			;H
+	CMP.B   #1,D1			;IS A LIQUID?
+	BNE.S   13$
+	BRA	P.SEPA			;AND DO IT
+13$
+	CMP.B   #10,D1			;BRITTLE?
+	BEQ	BRKD0			;BREAK D0
+
+	ENDC
+14$
+    IFD	wantSUCCESS
+	XREF	SUCCESS
+	MOVE.W	#RETCODE_SUCCESS,SUCCESS(A4)
+    ENDC
+	RET
+ 
+DRP.MANY
+  
+	LEA	DRP.PNT(PC),A6
+	MOVEQ	#0,D6
+	BRA	DO.FIX
+
+
+	ENDC
+
+*-------------------------------------------------
+
+    IFD	wantWETROOMS
+	XREF	R.NOUN,ISATTRIBUTE,SETOUT
+
+WETTEN
+
+	PUSH_L	D0/A0		;save dataon current item
+	DO	R.NOUN		;find current room as noun` -> d0
+	GETINFO			;data on current room
+	TST_WET				;is the room wet?
+	PULL_L	D0/A0		;restore
+	BEQ.S	90$		;no, ok quit
+	BSET	#5,3(A0)	;object becomes wet
+90$
+	RET
+    ENDC	;wantWETROOMS
+	END

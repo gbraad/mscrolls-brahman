@@ -1,0 +1,63 @@
+***********************************************************
+*
+*	%W%
+*	%G%
+*
+************************************************************
+
+		SECTION	"ADV",CODE
+
+		include	"equates.i"
+		include	"macros.i"
+		include	"verbequ.i"
+		include	"scenequ.i"
+
+		IfVerb	COUNT
+		XDEF	V.COUNT
+
+
+		XREF	NOUNBUF,WHOOPS,SP.COUNT,P.SMALLNUM
+V.COUNT
+
+	CALL	SP.COUNT
+	TST_PLURAL			;plural?
+	BNE.S	01$			;yes
+	BTST	#5,5(A0)		;force plural?
+	BEQ.S	02$			;no
+01$
+	MSG	IDNK			;i dont know
+	MSG	HOWMANY			;how many there are
+	BRA.S	80$			;and exit
+02$
+	MSG	TTHERE			;There
+	CLR.W	D4			;clear counter
+	LEA	NOUNBUF(A4),A0
+10$
+	TEST_W	(A0)+			;is there an entry?
+	BEQ.S	20$			;end?
+	ADDQ.W	#1,D4			;inc counter
+	BRA.S	10$			;next
+20$
+	CMP.W	#20,D4			;count up to twenty
+	BLS.S	30$			;fine
+	MSG	QUITEAFEW		;are quite a few.
+	BRA.S	80$			;exit
+30$
+	CMP.W	#1,D4			;singleton?
+	BNE.S	40$
+	MSG	ISJUSTONE		;is just the one.
+	BRA.S	80$
+40$
+	MSG	ARE
+	MOVE.W	D4,D1			;argument for smallnum
+	CALL	P.SMALLNUM
+	MSG	OFTHEM			;of them.
+80$
+	ST	WHOOPS(A4)
+	RET
+
+	ENDC	;V.COUNT
+
+*------------------------------------------
+
+	END

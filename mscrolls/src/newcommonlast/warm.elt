@@ -1,0 +1,55 @@
+************************************************************
+*
+*	@(#)warm.elt	2.2
+*	4/28/89
+*
+*************************************************************
+
+		SECTION	"ADV",CODE
+
+		include	"equates.i"
+		include	"macros.i"
+		include	"verbequ.i"
+		include	"scenequ.i"
+
+
+      IfVerb	WARM
+
+	XDEF	V.WARM
+
+	XREF	SP.WARM,P.TN,P.BTN,W.LIT,CHK4PT,ISAREN,PRTTXT
+	
+V.WARM
+
+	MOVE.W	#WITH,D1		; Warm x with y
+	DO	CHK4PT
+	BTST	#7,(A5)			; 'alight'?
+	BEQ.S	90$
+	BTST	#7,4(A5)		; and 'lightable'?
+	BEQ.S	90$
+
+	CALL	SP.WARM			; check specials.
+
+	AND.B	#$F0,3(A0)		; Lose texture
+	OR.B	#10,3(A0)		; make it 'warm'!
+	DO	P.TN
+	DO	ISARE
+	MSGGO	NOWWARM			;now warm.
+90$:
+	EXG	D0,D5
+	EXG	A0,A5
+	DO	P.BTN
+	DO	ISAREN
+
+      IFND	wantCorrectFullStops
+	MSGGO	LIT
+      ENDC	;!wantCorrectFullStops
+
+      IFND	wantCorrectFullStops
+	MSG	LIT
+	DOGO	BSFULLSTOP
+      ENDC	;wantCorrectFullStops
+
+      ENDC
+
+	END

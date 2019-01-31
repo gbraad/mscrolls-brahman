@@ -1,0 +1,130 @@
+**************************************************************
+*
+*	2/6/89
+*	@(#)buffers.elt	2.6
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"scenequ.i"
+
+
+	XDEF	FoundTO,QuoteFlag,NOUNBUF,NOUNBUF2,NOUNBUF3
+	XDEF	EXBUFF
+
+FoundTO		DC.B	0
+QuoteFlag	DC.B	0		;bit 0 NE => need to print an end quote
+
+      IFND	Alice
+
+BUFSIZE		EQU  100
+
+      ENDC	;!Alice
+
+      IFD	Alice
+
+BUFSIZE		EQU  116		;to cope with all the doors
+
+      ENDC	;Alice
+
+NOUNBUF		DS.B  BUFSIZE
+NOUNBUF2	DS.B  BUFSIZE/2 
+NOUNBUF3	DS.B  BUFSIZE/2  
+EXBUFF		DS.B  BUFSIZE/2   
+
+	IFND	wantNUMBERS
+	IFD	wantAutomaticWait
+
+	XDEF	Waiting
+
+Waiting		DC.W	0		;how long to wait
+
+	ENDC	;wantAutomaticWait
+	ENDC	;!wantNUMBERS
+
+	IFD	wantNUMBERS
+
+	XDEF	NumIndex,NumBuf,NumBUFSIZE,NumFlag,WhichNum
+	XDEF	Waiting
+
+NumBUFSIZE	EQU	40		;size of numbers buffer
+Waiting		DC.W	0		;how long to wait
+NumIndex	DC.W	0		;INPUTFRM's position in it
+WhichNum	DC.W	0		;pos in buffer of next to use
+NumFlag		DC.W	0		;Flag used creating said buffer
+NumBuf		DS.B	NumBUFSIZE	;the buffer
+
+	ENDC
+
+	
+	XDEF	RelBuf,RelPnt,RelPnt2
+   
+		DC.W  -1		;fake terminator, so as stuff searching
+					;back up this stack has something to hit
+RelBuf		DS.B  256		;going to stick all nouns considered by
+					;relphrase handlers here, so as we can
+					;look back to resolve which xyzzy
+RelPnt		DC.W  0			;Pointer into above
+RelPnt2		DC.W  0			;temp version of the pointer
+
+	IFNE	SpoolLen
+
+
+	XDEF	SpoolPos,SpoolOff,PrtThere
+
+SpoolPos	DC.L  0			;current pos in printer buffer of stuff
+					;going into it
+SpoolOff	DC.L  0			; .. and of stuff going out
+PrtThere	DC.W  0			;have we found a printer
+
+	ENDC
+
+	XDEF	TEMPBUF,MATCHBUF,OLDBUF,ADJBUF,ADDBUF,CONJBUF,LOOPBUF,STOWRD
+	XDEF	DNOUNBUF,OLDTEXT,INBUFF
+  
+TEMPBUF		DS.B  BUFSIZE
+MATCHBUF	DS.B  BUFSIZE		;WORST CASE - DOOR = 8 CASES
+OLDBUF		DS.B  BUFSIZE
+ADJBUF		DS.B  50
+ADDBUF		DS.B  20
+CONJBUF		DS.B  20
+LOOPBUF		DS.B  26
+STOWRD		DS.B  BIGWRD
+DNOUNBUF	DS.B  BUFSIZE
+	IFD	wantSTATES
+	XDEF	STATEBUF
+STATEBUF	DS.B 20
+	ENDC
+  
+
+ 
+OLDTEXT		DS.B  BUFFLEN
+INBUFF		DS.B  BUFFLEN+4		;extra long word for zero terminator
+
+
+    IFNE	0
+    IFD		wantMOBILES
+   	XDEF	PeopleBuffer
+
+* people buffer is used to store those npc's NOT mentioned by
+* P.refresh as their scripts are active.
+* Later,
+* They can be mentioned by the npcdriver code, if they are not
+* otherwise active.
+	
+PeopleBuffer	DS.B	10			;space for five people.
+    ENDC	;wantMOBILES
+    ENDC	;0
+	
+
+*------------------------------------------ 
+
+	END
+
+
+
+

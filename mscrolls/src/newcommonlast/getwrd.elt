@@ -1,0 +1,845 @@
+**************************************************************
+*
+*   %W%
+*   %G%
+*
+**************************************************************
+
+
+    SECTION "ADV",CODE
+
+    include "equates.i"
+    include "macros.i"
+    include "nounequ1.i"
+    include "scenequ.i"
+    include "verbequ.i"
+
+*--------------------------------
+*
+* GETWRD
+*
+* SCANS INBUFF FOR NEXT WORD
+* SKIPS WORDS CONTAINED IN WORD
+* SECTIONS 0 TO 1 (QUANTIFIERS.)
+*
+* ON EXIT:
+*   D7=1 END OF FINDWORD
+*   D7=2 DOSN'T UNDERSTAND
+*   D7=4 NOT ENOUGH ADJECTIVES
+*       SETS UP FOR A WHICH ?
+*
+*--------------------------------
+
+    XDEF    GETWRD,D72,OWNORHAVE
+
+    XREF    FNDWRD,SEARCHER,MATCHBUF,FNOUN,WORD_,SECTION_
+    XREF    VERB,VERB2,DO.ONE,RELPH,TYPE,POSSESS,HOLDE,UNHOLDE
+    XREF    P.IDFY,DO.ADJ,TOPNPC,IGNORQ,IGNORAJ,ERR1,ERR2,ERR4
+    XREF    ADJFLG,PEND2,ADJNOUN,DSTAND,RESREL,CONTEXT,ISTN,NOTRAIL
+    XREF    DNOUNBUF,POSWRD,P.NONLY,LB3,NEG_,NOADJ,P.NFND,ERR3,P.LOR
+    XREF    WSYN2,EOL,NOTVERB,TMPPNTR,BRKADJ
+    XREF    HADANOUN,SORTMATCHBUF,ADJBUF,POSWRD2
+    XREF    POSSESSFLG,PICKONE
+
+    IFD wantPOSSESSIVE_PRONOUNS
+    XREF    DOPPRN,POSSRES,BACK.WRD,HERFLAG
+    ENDC
+    XREF    ISATTRIBUTE
+
+    IFD wanted_OWNERSHIP
+    XREF    OWNERSHIP
+    ENDC
+
+ 
+GETWRD
+    DO  FNDWRD          ;POP IF NO WORD
+    TEST_B  D7
+    BNE GWEXIT
+    CALL    SEARCHER
+    MOVE.W  #-1,(A2)        ;TERMINATE MATCH LIST
+    CALL    SORTMATCHBUF        ;ha!, get those synonyms
+    LEA MATCHBUF(A4),A2
+    TEST_B  NOTVERB(A4)     ;do we miss verb if it exists
+    BEQ.S   10$
+    CMP.W   #SECT.VERB,(A2)     ;is it a verb?
+    BNE.S   09$         ;no, ok
+    TEST_L  4(A2)           ;is there more than just a verb?
+    BMI.S   09$         ;no, then it wil stay
+    ADDQ.L  #4,A2           ;if so skip it
+09$
+    CLR.B   NOTVERB(A4)     ;only works once
+10$
+    TEST_W  FNOUN(A4)       ;force noun?
+    BEQ.S   01$
+02$
+    TEST_W  (A2)            ;incase there is none
+    BPL.S   03$         ;no.
+    LEA MATCHBUF(A4),A2     ;start again
+    BRA.S   04$
+03$
+    CMP.W   #SECT.NOUN,(A2)     ;noun?
+    BEQ.S   04$         ;ok
+    ADDQ.L  #4,A2           ;next entry
+    BRA.S   02$         ;continue
+04$
+    CALL    DeleteWord      ;remove all in buffer before a2
+    CLR.W   FNOUN(A4)       ;clear:- only work once.
+01$
+    MOVEQ   #0,D4           ;COUNT NO. MATCHES
+    TEST_W  (A2)            ;NONE?
+    BMI GW51            ;ERROR
+    CLR.B   HADANOUN(A4)        ;prepare flag
+GW05
+    MOVE.W  (A2)+,D1        ;GET SECTION #
+    BMI GW50            ;-1 TERMINATES LIST
+    MOVE.W  (A2)+,D0        ;GET WORD
+    CMP.W   #SECT.NOUN,D1
+    BNE.S   GW07 
+    ST  HADANOUN(A4)        ;flag noun processing only
+    DO  ISDOFRE
+    BEQ.S   09$         ;yes, no need for valid.
+    TEST_W  ERR1(A4)
+    BNE.S   09$         ;no error
+    CMP.B   #2,TYPE(A4)     ;go david's office (david not here).
+    BEQ.S   09$         ;BE-Careful!
+    TEST_B  POSSESSFLG(A4)      ;likewise, 'office' needs to be local.
+    BNE.S   09$         ;make sure stoped in process.
+    DO  VALID.WO        ;CALL DOES ADD,ERROR SUP. & SUB
+    BRA.S   10$
+09$
+    CLR.W   D7
+10$ 
+    TEST_B  D7
+    BNE.S   GW05
+20$
+    ADDQ.W  #1,D4           ;COUNT
+    MOVE.W  D0,WORD_(A4)
+    MOVE.W  D1,SECTION_(A4)
+    BRA.S   GW05
+  
+GW07
+
+    IFD   wantMULTSpreferedtoNOUNS
+    CMP.B   #SECT.MULT,D1
+    BEQ VerbORNoun
+    ENDC
+
+    TEST_B  HADANOUN(A4)        ;have we had a noun so far?
+    BNE GW50            ;if so force and exit
+
+VerbORNoun
+    IFD wantSTATES
+    CMP.B   #SECT.STATE,D1      ;a special state word?
+    BEQ STATEWRD        ;hoho, devious work afoot
+    CMP.B   #SECT.VERB,D1       ;'open' is a special case
+    BNE.S   11$
+    CMP.W   #VNOPEN,D0      ;must be the word 'open'
+    BNE.S   11$         ;no, ok
+    TEST_W  VERB(A4)        ;and only if a verb is present
+    BMI.S   11$         ;is a verb is none present
+    CMP.W   #VNUSE,VERB(A4)     ;in the case of 'use' must be a verb
+    BEQ.S   11$
+    TEST_W  ADJBUF(A4)      ;do we have any adjectives so far?
+    BNE.S   11$         ;if so treat as a verb
+    MOVE.L  TMPPNTR(A4),A0      ;fetch buffer address
+    TEST_W  (A0)            ;we'l not allow statewrds in 
+                    ;a multi-noun phrase
+    BEQ STATEWRD        ;otherwise interpret as a statewrd
+11$
+    ENDC    ;wantSTATES
+
+
+    IFD wantPOSSESSIVE_PRONOUNS
+    CALL    DOPPRN
+    BEQ GW53            ;success?
+    ENDC
+
+    CMP.W   #SECT.ADJ,D1        ;adjective?
+    BNE.S   01$         ;no
+    CMP.B   #2,TYPE(A4)     ;did it end as if possessive?
+    BNE.S   01$         ;no, ok, just forget it
+    CMP.B   #'T'+32,TYPE+1(A4)  ;not negation?
+    BEQ.S   01$         ;if so just ignor this
+                    ;ok look for a possible noun
+    MOVE.L  A2,-(A7)        ;save
+02$
+    MOVE.L  (A2)+,D0        ;get next in matchbuf.
+    BMI.S   03$         ;end, was not the case
+    SWAP    D0          ;section in lo 16 bits
+    CMP.W   #SECT.NOUN,D0       ;a noun as well?
+    BNE.S   02$         ;no, try for another.
+    SWAP    D0          ;ahah!, a sneaky noun hiding!
+    ADDQ.W  #1,D0           ;adjust
+    MOVE.L  (A7)+,A2        ;back
+    BRA GW53            ;hit that possession
+03$
+    MOVE.L  (A7)+,A2        ;back
+01$
+
+    IFEQ    THE_PAWN
+*
+* Attempt to allow 'use cue to cue cue ball' to work (see 'use lift' below)
+*
+*
+* set a flag when we see 'TO' after a 'USE'
+
+    XREF    FoundTO
+    CMP.W   #SECT.CONJ,D1       ;look for 'TO'
+    BNE.S   05$
+    CMP.W   #TO,D0          ;as in 'use x TO verb y'
+    BNE.S   05$
+    CMP.W   #VNUSE,VERB(A4)
+    BNE.S   05$
+    ST  FoundTO(A4)
+05$
+
+    ENDC ;!THE_PAWN
+
+    CMP.W   #SECT.VERB,D1       ;SUSS PLANT THE PLANT....
+    BNE.S   GW08
+    TEST_W  (A2)            ;MORE MATCHES?
+    BMI.S   GW08            ;NOPE = USE THIS!
+
+    IFNE    0
+    CMP.W   #VNUSE,VERB(A4)     ;IF USE THEN WE STILL NEED A VERB
+    BNE.S   10$         ;THIS FUCKS 'USE LIFT TO GO DOWN'
+*                   ;BUT MAKES 'USE TROWEL TO PLANT...' OK
+
+    IFEQ    THE_PAWN
+    TEST_B  FoundTO(A4)     ;got to stage where may be a verb?
+    BEQ.S   10$         ;EQ => nope, should be a noun/adj
+    ENDC    ;!THE_PAWN
+
+    TEST_W  VERB2(A4)       ;Have we found a second verb yet?
+    BMI.S   GW08            ;PL => yes, use this word as a NOUN
+    ENDC    ;0
+    
+10$
+    TEST_W  VERB(A4)        ;Do we already have a verb?
+    BMI.S   GW08            ;no verb so must be a verb
+    CMP.W   #SECT.ADJ,(A2)      ;adjective as well?
+    BEQ GW05            ;yes, let it be adj then
+
+GW08
+    CMP.B   #SECT.ONE,D1        ;SPECIAL PRONOUN TYPE
+    BNE.S   10$
+    CALL    DO.ONE          ;GRAB EFFECTIVE MATCHBUF
+
+    IFD     wantONEAsDigit
+    BEQ.S   10$         ;was a number instead.
+    ENDC    ;wantONEAsDigit
+
+    CMP.B   #2,D7           ;ERROR HAPPENED?
+    BEQ D72         ;YES = BYE BYE
+    BRA.S   GW50            ;AND PROC AS A NOUN
+10$
+    MOVE.W  D1,SECTION_(A4)
+    MOVE.W  D0,WORD_(A4)
+    BRA GW55
+GW50
+    MOVE.W  D4,-(A7)        ;SAVE MATCHES
+    CALL    RELPH
+    BEQ.S   10$
+    MOVE.W  (A7)+,D0        ;DUMP OLD
+    BRA.S   20$
+10$
+    MOVE.W  (A7)+,D4        ;OLD BAK
+20$
+    CMP.B   #2,D7           ;ERROR?
+    BEQ D72         ;EXIT
+    CMP.B   #1,D4
+    BLT GW51  
+    
+    IFD wantSTATES
+    XREF    STATERES
+    CALL    STATERES        ;ok pop them states
+    CMP.B   #1,D4           ;what about now
+    BHI LB4
+    BLT NONELEFT        ;resolved them all away.
+    ENDC    ;wantSTATES
+
+    IFND    wantSTATES
+    BHI LB4
+    ENDC    ;!wantSTATES
+
+GW52
+    CMP.B   #2,TYPE(A4)     ;PSIVE
+    BNE GW51
+    TEST_B  POSSESSFLG(A4)      ;are we to forget possession?
+    BNE GW51            ;yes, then pretend to ignor it.
+    CMP.B   #'T'+32,TYPE+1(A4)
+    BNE.S   10$
+    NOT.W   NEG_(A4)
+    BRA GW51
+10$
+    MOVE.W  WORD_(A4),D0
+    ADDQ.W  #1,D0
+GW53
+    MOVE.W  D0,POSSESS(A4)
+  
+    DO  CLRADJ
+    ST  NOTVERB(A4)     ;not a verb
+56$
+    CALL    HOLDE           ;HOLD ERRORS
+    CLR.B   TYPE(A4)        ;zap any quote flag.
+    ST  POSSESSFLG(A4)      ;we are not to recurse for possession.
+    CALL    GETWRD          ;'cos its internal
+    CLR.B   POSSESSFLG(A4)      ;ok from now.
+    CALL    UNHOLDE         ;RELEASE
+    CMP.B   #2,D7
+    BEQ D72
+    CMP.B   #4,D7
+    BEQ 30$         ;non-unique, resolve
+    TEST_W  D7          ;end of line
+    BNE GW55            ;yes, forget the possesion.
+    CMP.B   #SECT.NOUN,D6
+    BEQ.S   53$         ;a straight noun, check possesion & ret
+    CMP.B   #SECT.MULT,D6       ;a whole set
+    BEQ POSET
+    CMP.B   #SECT.ADJ,D6        ;ADJ?
+    BNE P.IDFY
+    CALL    HOLDE           ;HOLD AGAIN
+    ST  POSSESSFLG(A4)      ;we are not to recurse for possession.
+    CALL    DO.ADJ
+    CLR.B   POSSESSFLG(A4)      ;ok from now.
+    CALL    UNHOLDE         ;free errors again.
+    CMP.W   #4,D7           ;was actually a noun but unresolved?
+    BEQ.S   30$         ;see if we can find it.
+    TEST_W  D5          ;was do.adj successful?
+    BEQ.S   52$         ;no
+    CMP.B   #SECT.MULT,D6       ;last chance
+    BEQ POSET
+    CMP.B   #SECT.NOUN,D6       ;ok?
+    BEQ.S   53$         ;yes
+    BRA WSYN2           ;otherwise i dont know..
+
+52$
+    CMP.B   #4,D7           ;try to suss l small sphere bugs
+    BEQ RTSBACK2
+    TEST_W  ERR1(A4)        ;errors off?
+    BNE D72         ;yes, set d7 and return.
+    BRA NOADJ
+53$
+
+    MOVE.W  D5,D0           ;check possesion is correct.
+    ADDQ.W  #1,D0
+
+    IFD wantPOSSESSIVE_PRONOUNS
+    TEST_B  HERFLAG(A4)     ;only necessary for pron usage
+    BEQ.S   57$         ;if not, can only mean a possessive
+    CALL    POSSRES         ;is it really possessive?
+    BEQ.S   57$         ;yes, continue
+    DO  BACK.WRD        ;whoops, was bitransitive.
+    MOVEQ   #0,D7           ;clear any error
+    MOVE.W  #SECT.NOUN,D6
+    MOVE.W  POSSESS(A4),D5      ;extract old noun for bitrans
+    SUBQ.W  #1,D5           ;de-adjust to raw number
+    BRA LBL8            ;exit from getwrd
+57$
+    ENDC    ;wantPOSSESSIVE_PRONOUNS
+
+    GETINFO
+    CALL    TOPNPC
+    CMP.W   POSSESS(A4),D4      ;yes?
+    BEQ.S   54$         ;ok, just return
+
+    IFD wanted_OWNERSHIP
+    CALL    OWNERSHIP       ;check the data?
+    BNE NHAVE           ;no, but %tn does not have %tn.
+    ENDC    ;wanted_ownership
+
+    IFND    wanted_OWNERSHIP
+    BRA NHAVE
+    ENDC    ;!wanted_ownership
+
+54$
+    CMP.B   #2,TYPE(A4)     ;posses continue?
+    BEQ GW53            ;yes, continue.
+    RET             ;ok, d6/d5 are ok.
+    
+30$
+    LEA MATCHBUF(A4),A1     ;try to find one from matchbuf
+
+    IFD   wantOwnMany
+    MOVE.L  A1,A2           ;matchbuf pointer
+    MOVEQ   #0,D4           ;prepare to count nouns
+    ENDC  ;wantOwnMany
+
+    IFD   wantNPCDoesNotHaveFirst
+    XREF    TEMP_NOUN
+    CLR.W   TEMP_NOUN(A4)
+    ENDC  ;wantNPCDoesNotHaveFirst
+
+20$
+    MOVE.L  (A1)+,D0        ;GET SECT& NUM  
+    BMI.S   31$         ;NOPE, NOT THERE
+    SWAP    D0
+    CMP.B   #SECT.NOUN,D0       ;NOUN?
+    BNE.S   20$         ;IGNOR
+    SWAP    D0          ;BACK
+
+    IFD   wantNPCDoesNotHaveFirst
+    TEST_W  TEMP_NOUN(A4)       ;store the first noun
+    BNE.S   21$
+    MOVE.W  D0,TEMP_NOUN(A4)
+21$
+    ENDC  ;wantNPCDoesNotHaveFirst
+
+    ADDQ.W  #1,D0           ;ADJUST
+    CALL    OWNORHAVE       ;check owner==POSSESS
+    BNE.S   20$         ;NEXT
+
+    IFND  wantOwnMany
+    MOVE.W  D0,D5           ;yes, fake it was straight
+    SUBQ.W  #1,D5
+    MOVEQ   #SECT.NOUN,D6
+    CMP.B   #2,TYPE(A4)     ;we have a posses continuation?
+    BEQ GW53            ;then carry on
+    BRA LBL8            ;EXIT
+31$
+    ENDC  ;!wantOwnMany
+    
+    IFD   wantOwnMany
+    ADDQ.L  #1,D4           ;one more noun
+    SUBQ.L  #1,D0
+    MOVE.L  D0,(A2)+        ;put the owned item in matchbuf
+    BRA.S   20$         ;get the next matchbuf entry
+31$
+    MOVE.L  #-1,(A2)        ;end marker
+    TEST_L  MATCHBUF(A4)
+    BPL.S   LB4         ;no if any entries resolve them
+32$
+    ENDC  ;wantOwnMany
+
+    IFND  wantNPCDoesNotHaveFirst
+    MOVE.L  -8(A1),D5       ;NB: Matchbuf is non-empty, so ok.
+    ENDC  ;!wantNPCDoesNotHaveFirst
+
+    IFD   wantNPCDoesNotHaveFirst
+    MOVE.W  TEMP_NOUN(A4),D5    ;get back the first noun
+    ENDC  ;wantNPCDoesNotHaveFirst
+
+    BRA NHAVE           ;pick any one, and print error.
+GW51
+    TEST_B  D4
+    BNE.S   GW55
+ 
+    LEA MATCHBUF(A4),A2     ;FIND FIRST NOUN IN MATCHBUF
+10$
+    MOVE.W  (A2)+,D6        ;GET SECTION
+    BMI.S   LBL7            ;NO NOUNS!!
+    MOVE.W  (A2)+,D0        ;AND WORD 
+    CMP.W   #SECT.NOUN,D6
+    BNE.S   10$         ;FIND A *NOUN*
+ 
+    ADDQ.W  #1,D0           ;ADJUST NOUN #
+    CALL    P.NFND
+    BRA D72
+GW55
+    MOVE.W  SECTION_(A4),D6
+    MOVE.W  WORD_(A4),D5
+    CMP.W   #SECT.QUANT,D6      ;SECTION TO IGNORE?  
+    BNE.S   10$
+    MOVE.W  D5,IGNORQ(A4)
+    ST  BRKADJ(A4)      ;flag as break in adjective stream
+    BRA.S   18$
+10$
+    CMP.W   #SECT.ADV,D6        ;SECTION TO IGNORE?
+    BNE.S   20$         ;NOPE, CARRY ON
+    MOVE.W  D5,IGNORAJ(A4)      ;YES - SAVE IT FOR LATER (PERHAPS)
+18$
+    BRA GETWRD          ;loop back
+20$
+LBL8
+    CLR.L   D7
+    RET
+LBL7
+    TEST_W  ERR2(A4)
+    BNE.S   LBL72 
+    TEST_W  ADJFLG(A4)      ;ERROR DUE TO ADJ
+    BEQ.S   LBL6
+    MOVE.W  ERR3(A4),D7
+LBL72
+*   MOVE.W  #-1,ADJNOUN(A4)
+    RET
+LBL6
+ 
+    MOVE.W  #-1,PEND2(A4)       ;KILL PENDING CONJ
+    BRA DSTAND
+ 
+LB4
+    CMP.B   #2,TYPE(A4)     ;possessive?
+    BNE.S   01$         ;no, continue.
+    PUSH_L  D0/D7/A0
+    CALL    PICKONE         ;any local will do ->d5,d6
+    PULL_L  D0/D7/A0
+    MOVE.W  D6,SECTION_(A4)
+    MOVE.W  D5,WORD_(A4)
+    BRA GW52
+01$
+    CALL    RESREL          ;TRY to resolve adj using previous rels
+    TEST_B  POSSESSFLG(A4)      ;no context for possessive resolve.
+    BNE.S   0101$           ;just skip it.
+    CALL    CONTEXT
+0101$
+    CMP.B   #1,D4
+    BNE.S   10$         ;still too many nouns
+05$
+    MOVE.W  MATCHBUF(A4),SECTION_(A4)
+    MOVE.W  MATCHBUF+2(A4),WORD_(A4)
+    BRA GW52
+10$
+    IFD wantATHING
+    CALL    ANYMODE         ;quantifier='a' or 'an'?
+    BEQ.S   05$         ;yes, quit
+    ENDC    ;wantATHING
+
+    TEST_W  ERR4(A4)        ;NOERR ON?
+    BNE.S   RTSBACK2        ;YUP = DON'T DO 'WHICH XYZ?'
+    CALL    ISTN            ;1ST NOU IN MB
+
+    IFD wantSP.WHICHONE
+    XREF    SP.WHICHONE,WhichOneFlag
+    CLR.B   WhichOneFlag(A4)    ;initially false
+    CALL    SP.WHICHONE
+    BEQ.S   RTSBACK.1
+    ENDC    ;wantSP.WHICHONE
+
+    MSG WHICH
+    ST  NOTRAIL(A4)     ;INHIBIT SPACE
+
+    XDEF    RTSBACK
+RTSBACK
+ 
+    CLR.B   NOTRAIL(A4)     ;RESET 
+    MSG COMMA           ;print a comma
+
+RTSBACK.1
+
+    LEA DNOUNBUF(A4),A2
+    LEA MATCHBUF(A4),A1
+    DO  ISDOFRE
+    SEQ D2          ;so D2 ne => DON'T call valid
+10$
+    MOVE.L  (A1)+,D0
+    BMI.S   20$
+    SWAP    D0
+    CMP.B   #SECT.NOUN,D0
+    BNE.S   10$
+    SWAP    D0
+    ADDQ.W  #1,D0
+    TEST_B  D2
+    BNE.S   15$
+    DO  VALID.NP            ;LOCAL?
+    BNE.S   10$             ;NO, TOO BAD
+15$
+    MOVE.W  D0,(A2)+
+    BRA.S   10$
+20$
+    CLR.W   (A2)
+    LEA DNOUNBUF(A4),A0
+
+    IFD wantSP.WHICHONE
+    TEST_B  WhichOneFlag(A4)
+    BNE.S   RTSBACK2
+    ENDC    ;wantSP.WHICHONE
+
+    MOVE.L  POSWRD(A4),-(A7)
+    CALL    P.LOR               ;X,Y OR Z - LIST
+    MOVE.L  (A7)+,POSWRD(A4)
+    MOVEQ   #'?',D1 
+    DO  CHAROUT
+    XDEF    RTSBACK2
+ 
+RTSBACK2
+ 
+    MOVEQ   #4,D7
+    RET
+
+    XDEF    NHAVE
+    XREF    SUBJECT
+ 
+NHAVE
+    
+    TEST_W  ERR1(A4)        ;ERRORS?
+    BNE.S   D70
+    MOVE.W  D5,D0
+    ADDQ.W  #1,D0
+    GETINFO
+    TST_INTRINSIC               ;IMPLIED POSSESION
+    BEQ.S   10$ 
+    MSG NOTIMP
+    BRA.S   D72         ;ERROR
+10$
+    MOVE.W  D0,D5
+    MOVE.W  POSSESS(A4),D0
+    CMP.W   #NPLAYER,D0     ;you?
+    BNE.S   11$
+    MSG BUTUDONOTHAVE       ;but you do not have
+    BRA.S   12$
+11$
+    DO  P.BTN
+    TST_PLURAL
+    BEQ.S   111$
+    MSG DO
+    BRA.S   112$
+111$
+    MSG DOES
+112$
+    PRINT   'not have '
+12$
+    MOVE.W  D5,D0
+    CALL    P.NONLY
+    DO  BSFULLSTOP
+D72
+ 
+    MOVEQ   #2,D7
+D70
+    RET
+
+*-----------------------------------------------------
+    
+POSET
+
+* Posessive sets
+
+
+    XREF    P.NOTANY,MULT.TAB
+    XREF    INCNOUN2,NOUN,MATCHBUF
+    XREF    RESADJ
+   
+  
+    MOVE.W  D7,-(A7)        ;stack the error code
+    MOVEQ   #0,D4
+    LEA     MULT.TAB(A4),A0
+    LEA MATCHBUF(A4),A1     ;need to use matchbuf for resolution
+    TEST_W  D5
+    BEQ.S   08$
+05$
+    MOVE.W  (A0)+,D0
+    BNE.S   05$
+    SUBQ.W  #1,D5
+    BNE.S   05$
+08$
+    DO  ISDOFRE         ;does verb allow completely anything?
+    SNE D1          ;flag EQ => don't call valid
+    MOVE.W  #SECT.NOUN,D5       ;we'l need to construct a matchbuf
+    SWAP    D5          ;hi word is noun code
+10$
+    MOVE.W  (A0)+,D5
+
+    IFD   wantProperPOSET     ;THIS IS A BUG FIX Bob 13/2/89
+    AND.W   #$3FFF,D5       ;lose top two bits to get noun no.
+    ENDC  ;wantProperPOSET
+
+    BEQ.S   20$
+    MOVE.W  D5,D0
+
+    IFD   wantPossessIntrinsicSets
+    MOVE.L  A0,-(A7)
+    GETINFO
+    TST_INTRINSIC
+    BEQ.S   11$
+    SWAP    D4
+    MOVE.W  D0,D4           ;store an intrinsic in case none
+    SWAP    D4          ;really possessed
+11$
+    MOVE.L  (A7)+,A0
+    ENDC  ;wantPossessIntrinsicSets
+
+    TEST_B  D1          ;is D0 free?
+    BEQ.S   15$         ;eq => yes, don't use valid
+    DO  VALID
+    BNE.S   10$
+15$
+    CALL    OWNORHAVE       ;owned by POSSESS?
+    BNE.S   10$
+    SUBQ.W  #1,D5           ;adjust to raw wordcode
+    MOVE.L  D5,(A1)+        ;stack a noun onto matchuf
+    ADDQ.B  #1,D4
+    BRA.S   10$
+20$
+    MOVE.W  (A7)+,D7
+    MOVE.L  #-1,(A1)        ;and terminate buffer
+    TEST_B  D4          ;any proper possessives?
+
+    IFD   wantPossessIntrinsicSets
+    SWAP    D4
+    BNE.S   25$
+    TEST_W  D4          ;any intrinsics?
+    BEQ P.NOTANY
+    MOVE.W  D4,D5
+    SUBQ.W  #1,D5           ;for nhave
+    BRA NHAVE
+25$
+    CLR.W   D4          ;kill the intrinsic
+    SWAP    D4          ;now true count of matches
+    ENDC  ;wantPossessIntrinsicSets
+
+    IFND  wantPossessIntrinsicSets
+    BEQ     P.NOTANY
+    ENDC  ;!wantPossessIntrinsicSets
+
+    CALL    RESADJ          ;resolve any adjectives
+    TEST_W  D7
+    BNE.S   90$         ;exit if any problems
+    CALL    RELPH           ;go for a relphrase as well
+    CMP.B   #1,D7           ;what error type.
+    BHI.S   90$         ;bad news
+    LEA MATCHBUF(A4),A0     ;get start of buffer again
+30$
+    MOVE.L  (A0)+,D5        ;get entry
+    BMI.S   40$         ;done
+    ADDQ.W  #1,D5           ;ajust to game number
+    DO  INCNOUN2        ;and include it
+    BRA.S   30$         ;repeat
+40$
+    MOVE.W  -(A3),D5        ;get last
+    CLR.W   (A3)            ;fod last
+    SUBQ.W  #2,NOUN(A4)     ;and the index.
+    SUBQ.W  #1,D5           ;correct the last
+    MOVEQ   #SECT.NOUN,D6       ;and the section
+    MOVEQ   #0,D3           ;fod that
+    MOVEQ   #0,D7           ;and that
+90$
+    RET
+
+*---------------------------------------------------
+
+    IFD wantSTATES
+    XDEF    STATEWRD
+    XREF    LOOKUPCODE,DOSTATES,STATEBUF,STATEPTR
+STATEWRD
+    CALL    LOOKUPCODE      ;code into d0
+    LEA STATEBUF(A4),A1     ;get start of buffer
+    ADD.L   STATEPTR(A4),A1     ;and its offset
+    MOVE.W  D0,(A1)+        ;onto stack
+    CLR.W   (A1)            ;and terminate it
+    ADDQ.L  #2,STATEPTR(A4)     ;inc index.
+    DOGO    GETWRD          ;jump to itself
+
+    ;effectivly all state words are stacked for later
+    ;at this level they are effectively ignored
+    ;this is so adjectectives can work without interuption.
+
+    ENDC    ;wantSTATES
+
+*--------------------------------------------------------
+
+    IFD wantATHING
+
+    XDEF    ANYMODE
+ANYMODE
+
+* find mode of article
+* Exit
+*   EQ<=> 'a' or 'an'
+    
+    PUSH_L  D0/A0
+    TEST_W  IGNORQ(A4)      ;!= 'the' ?
+    BEQ.S   10$         ;was 'the', continue.
+    BMI.S   10$         ;or empty
+    CMP.W   #2,IGNORQ(A4)       ;='an' or 'a'
+    BHI.S   80$         ;nope.
+09$
+    SETEQ
+    BRA.S   90$         ;yes, and exit
+10$
+    IFD wantMULTIPLES
+    XREF    GetMultiCode
+    LEA MATCHBUF(A4),A0     ;start
+11$
+    MOVE.L  (A0)+,D0        ;get entry
+    BMI.S   80$         ;end, shouldn't happen!
+    SWAP    D0
+    CMP.W   #SECT.NOUN,D0       ;noun yet?
+    BNE.S   11$         ;no
+    SWAP    D0
+    ADDQ.W  #1,D0           ;adjust
+    DO  GetMultiCode        ;is it a multiple?-> d1
+    BNE.S   09$         ;yes
+    ENDC    ;wantMULTIPLES
+80$
+    SETNE
+90$
+    PULL_L  D0/A0
+    RET
+
+    ENDC    ;wantATHING
+
+*-------------------------------------------------------------
+
+OWNORHAVE
+
+* get owner or possessor of D0 
+
+* Entry
+*       d0 = noun# of item (may be owned)
+*       POSSESS.W = noun# of owner (possibly)
+* Exit:
+*       EQ <=> POSSESS.W ownes d0
+
+    PUSH_L  D4/A0
+    GETINFO
+    CALL    TOPNPC
+    CMP.W   POSSESS(A4),D4      ;yes?
+    BEQ.S   90$         ;ok, just return
+    IFD wanted_OWNERSHIP
+    XREF    OWNERSHIP
+    CALL    OWNERSHIP       ;check the data?
+    ENDC    ;wanted_ownership
+    IFND    wanted_OWNERSHIP
+    SETNE
+    ENDC    ;!wanted_ownership
+90$
+    PULL_L  D4/A0
+    RET
+
+*----------------------------------------------------------
+
+    IFD wantSTATES
+
+    XDEF    NONELEFT
+
+NONELEFT
+
+    MSG BUTTHEREISNTONE     ;but there isn't one
+    DOGO    D72
+
+    ENDC    ;wantSTATES
+
+*------------------------------------------
+    
+    XDEF    DeleteWord
+
+DeleteWord
+
+* A2 points to the matchbuf entry that we want to be at the beginning
+* deletes all previous entries and adjust the buffer 
+* sets a2 to the begining.
+
+    MOVE.L  A1,-(A7)        ;save temp register
+    LEA MATCHBUF(A4),A1     ;start of buffer
+    CMP.L   A1,A2           ;incase null movement
+    BEQ.S   90$         ;yes, exit
+10$
+    MOVE.L  (A2)+,(A1)+     ;move buffer back
+    BPL.S   10$         ;until end
+    LEA MATCHBUF(A4),A2     ;set to start
+90$
+    MOVE.L  (A7)+,A1        ;restore onld register
+    RET
+
+*------------------------------------------
+
+GWEXIT
+
+* quit getwrd
+* but make sure, the getwrd flags; ie NOTVERB & FNOUN are reset.
+
+    CLR.B   NOTVERB(A4)
+    CLR.B   FNOUN(A4)
+    RET
+
+
+    END

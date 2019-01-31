@@ -1,0 +1,62 @@
+**************************************************************
+*
+*	%G%
+*	%W%
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+
+	XDEF	CALCWHT
+
+*--------------------------------
+*
+* CALCWHT - CALCULATES THE WEIGHT
+*		OF A NOUN (D0) INCLUDING
+*		JUNK LIKE CONTENTS ETC..
+*
+* ON ENTRY - D0 = NOUN#
+* 
+* ON EXIT D3 = WEIGHT
+*
+*--------------------------------
+ 
+CALCWHT
+ 
+	PUSH_L  D0-D2/D5/A0-A1
+	CLR.L   D3
+	GETINFO
+	CALL_S  80$
+	MOVE.W  D0,D2
+	DO	GETRELN2		;included items in closed as wel
+10$
+	MOVE.W  (A1)+,D0
+	BEQ.S   90$
+	GETINFO
+	MOVE.W  6(A0),D1
+	AND.W   #$3300,D1		;REL,INSEP,CONT,HIDDEN ALLOWED
+	BEQ.S   10$
+	TST_PSEUDO			;NOT PSEUD
+	BNE.S   10$
+	TST_OUT				;NOR OUT
+	BNE.S   10$
+	CALL_S  80$
+	BRA.S   10$
+80$   
+	MOVE.B  2(A0),D1
+	AND.W   #$0F,D1
+	ADD.W   D1,D3
+	RET
+90$
+	PULL_L  D0-D2/D5/A0-A1 
+	RET
+
+*------------------------------------------
+ 
+
+
+	END

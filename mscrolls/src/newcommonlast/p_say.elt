@@ -1,0 +1,112 @@
+**************************************************************
+*
+*	%G%
+*	%W%
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+	include	"scenequ.i"
+
+*--------------------------------
+*
+*  P.SAY2 - PRINTS 'XYZ SAYS'
+*             OR 'ONE OF THE
+*             XYZS SAYS'
+*
+* (IF XYZ IS PLURAL)
+*
+* HANDLES STUFF LIKE
+* THE GURU, BETWEEN FITS OF...
+* VIA SP.SAY
+*
+*--------------------------------
+
+	XDEF	P.SAY2,P.SAY,P.ENDQUOTE
+	XREF	CONVNPC,SP.SAY
+ 
+ 
+P.SAY2
+ 
+	PUSH_L  D0/D1/A0		;COS P.SAY HAS TO
+	BRA.S   P.SAY.SUB
+ 
+P.SAY
+ 
+	PUSH_L   D0/D1/A0
+	MOVE.W   CONVNPC+4(A4),D0
+ 
+P.SAY.SUB
+  
+	GETINFO
+
+    IFD		wantHeSheSays
+	XREF	CONVNPC
+
+	TST_PLURAL
+	BEQ.S	10$
+	MSG	ONEOF
+	BRA.S	11$
+10$
+	CMP.W	CONVNPC+4(A4),D0		;the one you're talking to?
+	BNE.S	11$
+	DO	P.PRN				;he/she
+	BRA.S	15$				;says....
+11$	
+	DO	P.TN
+15$
+    ENDC	;wantHeSheSays
+
+    IFND	wantHeSheSays
+	TST_PLURAL				;PLURAL?
+	BEQ.S   10$			;NO
+	MSG	ONEOF
+10$
+	DO	P.TN
+    ENDC	;!wantHeSheSays
+
+	CALL    SP.SAY			;SPEECH MODIFIER 
+*			(ie: The guru, between fits of laughter, says... )
+	MSG	SAYS
+	
+    IFD		wantSP.SAY2
+	XREF	SP.SAY2
+	CALL	SP.SAY2				;says, between fits of...
+    ENDC	;wantSP.SAY2
+      
+      IFEQ	THE_PAWN
+
+	XREF	QuoteFlag,UTIL.BS
+
+	BCHG	#0,QuoteFlag(A4)	;use test and set to allow
+	BNE.S	20$			;'the xyzzy says nothing.'
+	DO	UTIL.BS			; to print the xyzzy says{, "}willies"
+	MSG	COMMA
+	MSG     QUOTE
+	MOVEQ	#-1,D1			;to tell CHAROUT about capitals
+	DO	CHAROUT
+20$
+      
+      ENDC
+
+	PULL_L	D0/D1/A0
+	RET
+*--------------------------------
+
+P.ENDQUOTE
+	
+	BCLR	#0,QuoteFlag(A4)		;finish the string
+	BEQ.S	10$				;none such
+	MSG	QUOTE				;and print it
+10$
+	RET
+ 
+*--------------------------------
+
+
+
+	END

@@ -1,0 +1,51 @@
+**************************************************************
+*
+*	%G%
+*	%W%
+*
+**************************************************************
+
+
+	SECTION	"ADV",CODE
+
+	include	"equates.i"
+	include	"macros.i"
+
+*--------------------------------
+*
+* SYNONYM - CONVERTS IF A SYN.
+*
+* D5 = WORD,  D6 = SECTION
+*
+* this is not really required now NEWSEARCH does its own syn stuff...
+*
+*--------------------------------
+
+    IFNE	THE_PAWN!M68000
+
+	XDEF	SYNONYM
+	XREF	SYN_L
+  
+  
+SYNONYM
+  
+	CMP.B   #SECT.SYN,D6 		;IN SYN LIST
+	BNE.S   90$
+	MOVE.L  A0,-(A7)
+	LSL.W   #1,D5        		;*4
+	LEA     SYN_L(A4),A0 		;START
+	MOVE.W  0(A0,D5),D5  		;GET WORD & SECTION
+	MOVE.W  D5,D6
+	AND.W   #$1F,D6      		;SECT NUMBER
+	LSR.W   #5,D5        		;GET WORDNUMLOW
+     
+	MOVE.L  (A7)+,A0 
+90$
+	RET
+ 
+
+    ENDC	;THE_PAWN
+
+*------------------------------------------
+
+	END
