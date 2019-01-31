@@ -1089,6 +1089,32 @@ struct Control::Imp :
         return true;
     }
 
+    string findLatestSave() const
+    {
+        string res;
+        time_t best = 0;
+        std::vector<string> files;
+        if (FD::getDirectory(_host->_dataPath.c_str(), files))
+        {
+            for (size_t i = 0; i < files.size(); ++i)
+            {
+                if (equalsIgnoreCase(suffixOf(files[i]), ".sav"))
+                {
+                    string fpath = makeDataPath(files[i]);
+                    time_t t = FD::mtime(fpath.c_str());
+                    if (t > best)
+                    {
+                        best = t;
+                        res = fpath;
+                    }
+                }
+            }
+        }
+        
+        //LOG3("API, findLatestSave best ", res);
+        return res;
+    }
+
     bool ifiLoadData(const string& s) override
     {
         // expect this to be a response from the engine,
@@ -1096,6 +1122,8 @@ struct Control::Imp :
 
         string f = s.empty() ? _lastSaveFilename :
             makeDataPath(changeSuffix(s, ".sav"));
+
+        if (f.empty()) f = findLatestSave();
 
         LOG3("API ifiLoadData ", f);
 

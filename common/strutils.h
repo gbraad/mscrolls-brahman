@@ -139,6 +139,7 @@ inline bool endsWith(const std::string& s, char c)
 
 inline std::string suffixOf(const char* s)
 {
+    // eg ".dat"
     // find any end of path
     const char* sep = strrchr(s, '/');
     if (!sep) sep = strrchr(s, '\\');

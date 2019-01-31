@@ -185,6 +185,8 @@ struct IFIHandler
     {
         if (!json || !*json) return;
 
+        LOG4("IFIHandler, handle '", json << "'");
+
         ifiBegin();
         handleAux(json, string());
         ifiEnd();

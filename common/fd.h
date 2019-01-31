@@ -189,6 +189,17 @@ struct FD: public FDBase
         return fd >= 0;
     }
 
+    static time_t mtime(const char* path)
+    {
+        time_t t = 0; 
+        struct stat sbuf;
+        if (stat(path, &sbuf) == 0)
+        {
+            t = sbuf.st_mtime;
+        }
+        return t;
+    }
+
     static bool mkdir(const char* path)
     {
 #ifdef _WIN32
