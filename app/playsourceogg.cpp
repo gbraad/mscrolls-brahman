@@ -313,14 +313,6 @@ public:
                 {
                     int a = _pushOut->write((const char*)_buffer, pz);
 
-                    if (a != pz)
-                    {
-                        LOG3("Playersource push full ", a);
-                        
-                        // do not fail, but fall out and wait
-                        return true;
-                    }
-
                     if (a < 0)
                     {
                         LOG2("PlayerSource push write error ", a);
@@ -339,6 +331,14 @@ public:
                             len -= a;
 
                             if (len <= 0) break;
+                        }
+
+                        if (a != pz)
+                        {
+                            //LOG3("Playersource push full ", a << " from " << pz);
+                            
+                            // do not fail, but fall out and wait
+                            return true;
                         }
                     }
                 }

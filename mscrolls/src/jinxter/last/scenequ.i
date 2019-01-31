@@ -102,7 +102,7 @@ wantNONPCPAUSE		EQU	TRUE
 wantNOCONVERSATION	EQU	TRUE
 wantNOTIME		EQU	TRUE
 wantSCENDOES		EQU	TRUE	;like SETIN
-
+wantFINDnotGLOBAL   EQU TRUE
 
 *------------------------------------------
 *

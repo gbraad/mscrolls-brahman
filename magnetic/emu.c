@@ -5053,7 +5053,9 @@ void do_line_a(void)
                 int picVer = read_reg(2, 0); // d2 = picture version
                 int room = read_reg(3, 1); // d3.w = room
 
-                if (!picOp || !prog_format) picVer = 0;
+                // Quick fix for missing pic_ver in guild, needs proper fix
+                //if (!picOp || !prog_format) picVer = 0;
+                if (!picOp || !prog_format || (get_game() < 3)) picVer = 0;
 
                 if (gfx_ver > 1 || prog_format)
                     picAddr = read_reg(8,1); // A0

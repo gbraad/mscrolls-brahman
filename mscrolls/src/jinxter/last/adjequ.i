@@ -210,7 +210,6 @@ current_adj_number SET   4         ;Adjectives start at 4
 	ADJDEF	twisting
 	ADJDEF	gold
 	ADJDEF	thermo_nuclear
-	ADJDEF	atomic
 	ADJDEF	thermo
 	ADJDEF	nuclear
 	ADJDEF	oaken

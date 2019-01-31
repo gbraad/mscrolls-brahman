@@ -95,7 +95,7 @@ public:
             r = _source.open(QIODevice::ReadOnly); 
             if (!r)
             {
-                LOG1("PlayerSource, can't open ", _sourceFile);
+                LOG1("PlayerSource, can't open '", _sourceFile << "'");
             }
             else
             {

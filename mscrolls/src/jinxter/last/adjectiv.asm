@@ -1073,7 +1073,7 @@ ADJ.INFINITE2
 * nuke_device
 	XDEF	ADJ.NUKE_DEVICE
 ADJ.NUKE_DEVICE
-	ADJ	thermo_nuclear,atomic,thermo,nuclear
+	ADJ	thermo_nuclear,thermo,nuclear
 * vat
 	XDEF	ADJ.VAT
 ADJ.VAT

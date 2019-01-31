@@ -55,7 +55,7 @@
 
 // 1.1.X pre ifi
 // 1.2.X post ifi
-#define VERSION_STRING  "1.2.10"
+#define VERSION_STRING  "1.2.12"
 
 struct ControlImpBase
 {
@@ -2010,12 +2010,11 @@ struct Control::Imp :
     {
         bool r = false;
 
-        //string fn = makeDataPath(changeSuffix(name, ".sav"));
-        string fn = changeSuffix(name, ".sav");
-        LOG3("loadGame, ", fn);
-        
         if (_be)
         {
+            string fn = changeSuffix(name, ".sav");
+            LOG3("loadGame, ", fn);
+            
             r = _be->loadGame(fn.c_str());
 
             // refresh after loading game
@@ -2023,6 +2022,9 @@ struct Control::Imp :
         }
         else if (_ifi)
         {
+            string fn = makeDataPath(changeSuffix(name, ".sav"));
+            LOG3("loadGame, ", fn);
+            
             r = ImpIFI::loadGame(fn);
         }
         

@@ -210,7 +210,6 @@ ADJECTIV
 	DC.B	'twistin',$67+$80
 	DC.B	'gol',$64+$80
 	DC.B	'thermo-nuclea',$72+$80
-	DC.B	'atomi',$63+$80
 	DC.B	'therm',$6F+$80
 	DC.B	'nuclea',$72+$80
 	DC.B	'oake',$6E+$80

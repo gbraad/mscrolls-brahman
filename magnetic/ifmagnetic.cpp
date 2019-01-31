@@ -1919,15 +1919,23 @@ bool IFMagnetic::loadGame(const char* name,
                 uchar* data = new uchar[sctx._size];
                 
                 res = data != 0 && file.read(data, sctx._size);
-
-                if (res && shead.versionOver(1,2))
-                {
-                    //LOG3("MS checking crc", "");
                 
-                    // header has crc, check it
-                    res = shead.checkCrc(data, sctx._size);
-
-                    if (!res) LOG("MS, ", "file crc error");
+                // support game_id
+                if (res && shead.versionOver(1,5))
+                {
+                    if (shead._gameid != get_game())
+                    {
+                        LOG1("MS, load game, wrong game ", shead._gameid);
+                        res = false;
+                    }
+                    else
+                    {
+                        LOG3("MS, load game gameid OK ", shead._gameid);
+                    }
+                }
+                else
+                {
+                    shead._gameid = 0; // unknown
                 }
 
                 if (res && shead.versionOver(1,3))
@@ -1950,6 +1958,16 @@ bool IFMagnetic::loadGame(const char* name,
                     // not supported
                     shead._dataSize = 0;
                     shead._dataAddr = 0;
+                }
+
+                if (res && shead.versionOver(1,2))
+                {
+                    //LOG3("MS checking crc", "");
+                
+                    // header has crc, check it
+                    res = shead.checkCrc(data, sctx._size);
+
+                    if (!res) LOG("MS, file crc error, expected ", std::hex << shead._crc32 << " got " << crc32(data, sctx._size) << " from " << std::dec << sctx._size << " bytes");
                 }
 
                 // support extra data?
@@ -1994,20 +2012,6 @@ bool IFMagnetic::loadGame(const char* name,
                     }
                 }
                 else shead._extraDataSize = 0;
-
-                // support game_id
-                if (res && shead.versionOver(1,5))
-                {
-                    if (shead._gameid != get_game())
-                    {
-                        LOG1("MS, load game, wrong game ", shead._gameid);
-                        res = false;
-                    }
-                }
-                else
-                {
-                    shead._gameid = 0; // unknown
-                }
 
                 if (res)
                 {

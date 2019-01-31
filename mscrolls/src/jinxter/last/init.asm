@@ -168,9 +168,9 @@ INIT2
 
     SCN 1           ; a bit of waffle...
 
-    MOVE.W  #NNUKE_DEVICE,D0    ; Hmmm.
-    GETINFO
-    MOVE.L  #$C100C000,6(A0)
+*    MOVE.W  #NNUKE_DEVICE,D0    ; Hmmm.
+*    GETINFO
+*    MOVE.L  #$C100C000,6(A0)    ; OUT + inseparable 
 
     MOVE.B  #3,TIMERC(A4)       ;Init Bus timer
     

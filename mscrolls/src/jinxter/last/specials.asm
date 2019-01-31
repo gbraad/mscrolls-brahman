@@ -552,6 +552,7 @@ SP.OtherOil
     SETNE
 90$
     RET
+    
 SP.NUKE
 
     XREF    IsVerbLookOrExamine
@@ -561,14 +562,12 @@ SP.NUKE
     CMP.W   #VNLISTEN,VERB(A4)  ;hoho
     BEQ.S   90$
 
-      IFD   VNMAKELOCAL
-
+    IFD   VNMAKELOCAL
     CMP.W   #VNMAKELOCAL,VERB(A4)
     BEQ.S   90$
     CMP.W   #VNFIND,VERB(A4)
     BEQ.S   90$
-      
-      ENDC
+    ENDC
 
     SCN 292         ;leave it alone!
     SETNE               ;don't do verb
