@@ -327,6 +327,9 @@ int32_t NL_CheckSyntax(line_buf, id, nr_of_types, types, type_index,
         case 8:
           state = 55;
           break;
+        case 21:
+          state = 38;  /* 10feb19: for 'waarom ben ik hier' */
+          break;
         default:
           /* wrong syntax; try again with next type */
           return(NL_CheckSyntax(line_buf, id, nr_of_types, types,

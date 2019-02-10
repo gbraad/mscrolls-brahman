@@ -292,6 +292,9 @@ int32_t ENG_CheckSyntax(line_buf, id, nr_of_types, types, type_index,
         case 50:
           state = 6;
           break;
+        case 21:
+          state = 38;  /* 10feb19: for 'why am I here' */
+          break;
         default:
           /* wrong syntax; try again with next type */
           return(ENG_CheckSyntax(line_buf, id, nr_of_types, types,
