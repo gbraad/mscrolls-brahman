@@ -66,9 +66,7 @@ int32_t Power(int32_t, int32_t);
 /* exit when muted == 1                       */
 
 
-void Output(line, use_json)
- char *line;
- int  use_json;
+void Output(char *line, int use_json)
 {
   char *json_text = _alloca((strlen(line)+JSON_TEXT_OVERHEAD + 1)*sizeof(char));
 
@@ -107,9 +105,7 @@ void Output(line, use_json)
 }
 
 
-void BuildOutputJson(line, json_line)
- char *line;
- char *json_line;
+void BuildOutputJson(char *line, char *json_line)
 {
   /* this function wraps the text in a json string               */
   /* example: "drop lamp" will wrapped to {"text" : "drop lamp"} */
@@ -123,9 +119,7 @@ void BuildOutputJson(line, json_line)
 }
 
 
-void PrintString(str, use_json)
- char *str;
- int  use_json;
+void PrintString(char *str, int use_json)
 {
   /* Syntax: <string> or                     */
   /*         [string]<-1><parameter>[string] */
@@ -346,9 +340,7 @@ void PrintString(str, use_json)
 }
 
 
-void PrintWord(id, use_json)
- int32_t id;
- int     use_json;
+void PrintWord(int32_t id, int use_json)
 {
   wordTable *wt = word_table;
   int32_t i = 0;
@@ -369,9 +361,7 @@ void PrintWord(id, use_json)
 }
 
 
-void PrintExtendedSysDescr(extended_sys_descr, use_json)
- extendedSysDescr *extended_sys_descr;
- int              use_json;
+void PrintExtendedSysDescr(extendedSysDescr *extended_sys_descr, int use_json)
 {
   PrintSysDescr(&(extended_sys_descr->part1), use_json);
 
@@ -393,9 +383,7 @@ void PrintExtendedSysDescr(extended_sys_descr, use_json)
 }
 
 
-void PrintSysDescr(descr, use_json)
- sysDescr *descr;
- int      use_json;
+void PrintSysDescr(sysDescr *descr, int use_json)
 {
   int32_t i = 0;
 
@@ -421,10 +409,7 @@ void PrintSysDescr(descr, use_json)
 }
 
 
-void PrintArticle(descr, type, use_json)
- sysDescr *descr;
- int32_t  type;
- int      use_json;
+void PrintArticle(sysDescr *descr, int32_t type, int use_json)
 {
   switch (story_info.story_language) {
     case NL:
@@ -441,9 +426,7 @@ void PrintArticle(descr, type, use_json)
 }
 
 
-void PrintId(id, use_json)
- int32_t id;
- int   use_json;
+void PrintId(int32_t id, int use_json)
 {
   int32_t offset;
   int32_t type             = NO_TYPE;
@@ -508,16 +491,14 @@ void PrintId(id, use_json)
 }
 
 
-void PrintNumber(number, use_json)
- int32_t number;
- int     use_json;
+void PrintNumber(int32_t number, int use_json)
 {
   sprintf(outputline, "%d", number);
   Output(outputline, use_json);
 }
 
-int32_t IsSpecialChar(ch)
- char ch;
+
+int32_t IsSpecialChar(char ch)
 {
   if ( (((int32_t) ch>=97) && ((int32_t) ch<=122)) ||   /* a..z */
        (((int32_t) ch>=65) && ((int32_t) ch<=90))  ||   /* A..Z */
@@ -529,8 +510,7 @@ int32_t IsSpecialChar(ch)
 }
 
 
-int32_t IsVowel(ch)
- char ch;
+int32_t IsVowel(char ch)
 {
   switch (ch) {
     case 'a':
@@ -553,9 +533,7 @@ int32_t IsVowel(ch)
 }
 
 
-int32_t Power(i, j)
- int32_t i;
- int32_t j;
+int32_t Power(int32_t i, int32_t j)
 {
   /* Calculates i raised to the power of j. */
   /* Works only for j>0.                    */

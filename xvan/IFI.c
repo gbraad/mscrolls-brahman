@@ -55,7 +55,7 @@ void    SendIFIerror(char*, char*);
 /* Function definitions */
 /************************/
 
-char *CreateJsonObjectMap()
+char *CreateJsonObjectMap(void)
 {
   int       i             = 0;
   int       j             = 0;
@@ -168,8 +168,7 @@ char *CreateJsonObjectMap()
 }
 
 
-int32_t CheckIFI(request)
- char *request;
+int32_t CheckIFI(char *request)
 {
   /* request labels must be in lowercase */
 
@@ -209,9 +208,7 @@ int32_t CheckIFI(request)
 }
 
 
-int32_t XeqIFIrequest(request, value)
- int32_t   request;
- jsonValue *value;
+int32_t XeqIFIrequest(int32_t request, jsonValue *value)
 {
   int32_t   result        = 1;
   jsonValue val;
@@ -530,9 +527,7 @@ int32_t XeqIFIrequest(request, value)
 }
 
 
-int32_t ProcessJson(json_string, line_buf)
- char      *json_string;
- char      *line_buf;
+int32_t ProcessJson(char *json_string, char *line_buf)
 {
   kvPair    kv;
   int       index         = 0;
@@ -588,9 +583,7 @@ int32_t ProcessJson(json_string, line_buf)
 }
 
 
-void SendIFIerror(key, error_text)
- char *key;
- char *error_text;
+void SendIFIerror(char *key, char *error_text)
 {
   /* send the error as a json object */
   printf("{\"%s\" : \"%s\"}", key, error_text);

@@ -40,15 +40,13 @@
 /* Function declarations */
 /*************************/
 
-void    PrintNotFound(extendedSysDescr*);
 int32_t Play(char*);
 
 /************************/
 /* Function definitions */
 /************************/
 
-int32_t Play(user_input)
- char *user_input;
+int32_t Play(char *user_input)
 {
   static parsedInput  parsed_input;
   static usrActionRec action_rec;

@@ -50,8 +50,7 @@ resultStruct XeqSetTimer(int32_t**);
 /* Testfunction definitions */
 /****************************/
 
-int32_t XeqEqual(trigger)
- int32_t **trigger;
+int32_t XeqEqual(int32_t **trigger)
 {
   /* This function compares two numerical values. Timer ids are  */
   /* converted to the timer value. In case of an attribute, the  */
@@ -113,9 +112,7 @@ int32_t XeqEqual(trigger)
 }
 
 
-int32_t XeqLtGt(operation, trigger)
- int32_t operation;
- int32_t **trigger;
+int32_t XeqLtGt(int32_t operation, int32_t **trigger)
 {
   /* This function compares two numerical values. Timer ids are  */
   /* converted to the timer value.                               */
@@ -189,9 +186,8 @@ int32_t XeqLtGt(operation, trigger)
 /* <value> : integer value.                                 */
 /************************************************************/
 
-resultStruct XeqBasicOperator(opr, trigger)
-  int32_t opr;                /* +, -, *, div, rem */
-  int32_t **trigger;
+resultStruct XeqBasicOperator(int32_t opr, int32_t **trigger)
+ /* opr is +, -, *, div or rem */
 {
   int32_t  par1;              /* attribute id          */
   int32_t  owner1;            /* par1 owner            */
@@ -347,8 +343,7 @@ resultStruct XeqBasicOperator(opr, trigger)
 }
 
 
-resultStruct XeqRnd(trigger)
- int32_t **trigger;
+resultStruct XeqRnd(int32_t **trigger)
 {
   int32_t  owner;
   char    *str;  /* dummy */
@@ -415,8 +410,7 @@ resultStruct XeqRnd(trigger)
 }
 
 
-resultStruct XeqSetTimer(trigger)
- int32_t **trigger;
+resultStruct XeqSetTimer(int32_t **trigger)
 {
   /* Always has two parameters. */
   /* settimer(ctr_id, value/ctr_id). */

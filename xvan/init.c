@@ -69,7 +69,7 @@ int32_t main(int, char**);
 /* Function definitions */
 /************************/
 
-int32_t CompilerVersionOK()
+int32_t CompilerVersionOK(void)
 {
   if (!ReadStoryInfo(&story_info))
     return(ERROR);
@@ -85,7 +85,7 @@ int32_t CompilerVersionOK()
 }
 
 
-int32_t ExitProgram()
+int32_t ExitProgram(void)
 {
   /* we need to exit, but don't close the console window immediately */
 
@@ -102,9 +102,7 @@ int32_t ExitProgram()
 }
 
 
-void FilenameFromJSON(json_string, filename)
- char *json_string;
- char *filename;
+void FilenameFromJSON(char *json_string, char *filename)
 {
   int       index = 0;
   kvPair    kv;
@@ -218,11 +216,7 @@ void FilenameFromJSON(json_string, filename)
 }
 
 
-void GetFileName(nr_args, args, filename, json)
- int  nr_args;
- char **args;
- char *filename;
- int* json;
+void GetFileName(int nr_args, char **args, char *filename, int *json)
 {
   int   i           = 1;
   char *initialJSON = NULL;
@@ -283,9 +277,7 @@ void GetFileName(nr_args, args, filename, json)
 /*         main()       */
 /************************/
 
-int32_t main(argc, argv)
- int  argc;
- char **argv;
+int32_t main(int argc, char **argv)
 {
   char inputfile[MAXIMUM_PATH];
   int json = 0;

@@ -46,9 +46,8 @@ int32_t LetsTry(int32_t, usrActionRec);
 /* Function definitions */
 /************************/
 
-int32_t LetsTry(target, action_rec)
- int32_t      target;     /* to execute action_rec for */
- usrActionRec action_rec;
+int32_t LetsTry(int32_t target, usrActionRec action_rec)
+ /* action_rec must be executed for target */
 {
   int32_t      subject_index = 0; /* We have only 1 subject */
   int32_t*     cont_list     = _alloca((nr_of_locs+nr_of_objs)*sizeof(int32_t));

@@ -41,8 +41,7 @@ locationInfo *ReadLocation(int64_t);
 /* Function definitions */
 /************************/
 
-void InitLoc(loc)
- locationInfo *loc;
+void InitLoc(locationInfo *loc)
 {
   loc->descriptions = NULL;
   loc->action_recs  = NULL;
@@ -50,8 +49,7 @@ void InitLoc(loc)
 }
 
 
-locationInfo *ReadLocation(offset)
- int64_t offset;
+locationInfo *ReadLocation(int64_t offset)
 {
   locationInfo  *loc;
   descrInfo     *last_descr      = NULL;

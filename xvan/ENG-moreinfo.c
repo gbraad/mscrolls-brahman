@@ -42,10 +42,7 @@ void ENG_PrintNotFound(extendedSysDescr*);
 /* Function definitions */
 /************************/
 
-void ENG_MoreInfo(descr, hits, line_buf)
- extendedSysDescr *descr;
- match            *hits;
- char             *line_buf;
+void ENG_MoreInfo(extendedSysDescr *descr, match *hits, char *line_buf)
 {
   extendedSysDescr *sd;
   int32_t      i =0;
@@ -89,8 +86,7 @@ void ENG_MoreInfo(descr, hits, line_buf)
 }
 
 
-void ENG_PrintNotFound(descr)
- extendedSysDescr *descr;
+void ENG_PrintNotFound(extendedSysDescr *descr)
 {
   if (actor == PLAYER) {
     PrintString("You don't ", 0);

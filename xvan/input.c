@@ -45,9 +45,8 @@ int32_t ProcessInput(char*);
 /* Function definitions */
 /************************/
 
-void GetAddtlInput(addtl_input, prompt)
- char *addtl_input;  /* must have size INPUT_LINE_LEN */
- char *prompt;
+void GetAddtlInput(char *addtl_input, char *prompt)
+ /* addtl_input must have size INPUT_LINE_LEN */
 {
   /* this function is used when we need extra  */
   /* input from the user to complete a command */
@@ -130,8 +129,7 @@ void GetAddtlInput(addtl_input, prompt)
 }
 
 
-int32_t ProcessInput(prompt)
- char *prompt;
+int32_t ProcessInput(char *prompt)
 {
   char *ifi_get_result = NULL;
   char  *json_string   = NULL;

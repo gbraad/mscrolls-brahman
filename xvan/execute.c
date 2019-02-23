@@ -70,17 +70,15 @@ int32_t      IsLAttrId(int32_t);
 /* Function definitions */
 /************************/
 
-int32_t NextOpcode(trigger)
- int32_t **trigger;  /* Caller expects the remainder of the trigger */
-                     /* to be returned in this parameter.           */
+int32_t NextOpcode(int **trigger)
+ /* Caller expects the remainder of the trigger */
+ /* to be returned in this parameter.           */
 {
   return(*((*trigger)++));
 }
 
 
-char *GetDescr(owner, id)
- int32_t owner;
- int32_t id;
+char *GetDescr(int32_t owner, int32_t id)
 {
   descrInfo   *dp;
 
@@ -120,10 +118,7 @@ char *GetDescr(owner, id)
 }
 
 
-int32_t GetTrigger(owner, id, triggers)
- int32_t owner;
- int32_t id;
- int32_t *triggers[];
+int32_t GetTrigger(int32_t owner, int32_t id, int32_t *triggers[])
 {
   triggerInfo *tp;
   int32_t     index;
@@ -181,12 +176,7 @@ int32_t GetTrigger(owner, id, triggers)
 }
 
 
-int32_t EvalCond(trigger, opcode, action_rec, subject_index, com_trig)
- int32_t      **trigger;
- int32_t      *opcode;
- usrActionRec *action_rec;
- int32_t      subject_index;
- int32_t      *com_trig;
+int32_t EvalCond(int32_t **trigger, int32_t *opcode, usrActionRec *action_rec, int32_t subject_index, int32_t *com_trig)
 {
   int32_t eval_arr[EVAL_ARR_SIZE];
   int32_t eval_ptr = 0;         /* Needed to evaluate condition in */
@@ -259,8 +249,7 @@ int32_t EvalCond(trigger, opcode, action_rec, subject_index, com_trig)
 }
 
 
-int32_t SkipCond(trigger)
-  int32_t **trigger;
+int32_t SkipCond(int32_t **trigger)
 {
   int32_t opcode;
 
@@ -290,13 +279,8 @@ int32_t SkipCond(trigger)
 }
 
 
-resultStruct Ite(trigger, state, opcode, action_rec, subject_index, com_trig)
- int32_t      **trigger;
- int32_t      state;
- int32_t      *opcode;
- usrActionRec *action_rec;
- int32_t      subject_index;
- int32_t      *com_trig;
+resultStruct Ite(int32_t **trigger, int32_t state, int32_t *opcode, usrActionRec *action_rec, 
+                 int32_t subject_index, int32_t *com_trig)
 {
   int32_t      new_state  = XEQ;
   resultStruct result     = {CONTINUE, 0};
@@ -420,11 +404,10 @@ resultStruct Ite(trigger, state, opcode, action_rec, subject_index, com_trig)
 }
 
 
-int32_t MatchActionRec(source, target, index)
- compActionRec *source;  /* Object or location action_rec.      */
- usrActionRec  *target;  /* User input.                         */
- int32_t       index;    /* Tells which subject to compare from */
-                         /* user input.                         */
+int32_t MatchActionRec(compActionRec *source, usrActionRec *target, int32_t index)
+ /* source is object or location action_rec.              */
+ /* target is user input.                                 */
+ /* index tells which subject to compare from user input. */
 {
   int32_t i     = 0;
   int32_t j     = 0;
@@ -535,8 +518,7 @@ int32_t MatchActionRec(source, target, index)
 }
 
 
-int32_t ReplaceItObjects(action_rec)
- usrActionRec *action_rec;
+int32_t ReplaceItObjects(usrActionRec *action_rec)
 {
   int32_t  it_value;
   int32_t  index;
@@ -582,11 +564,7 @@ int32_t ReplaceItObjects(action_rec)
 }
 
 
-resultStruct XeqActionRec(action_rec, xeq_list, subject_index)
- usrActionRec *action_rec;
- int32_t      *xeq_list;
- int32_t      subject_index; /* Tells which subject to use from */
-                             /* action_rec.                     */
+resultStruct XeqActionRec(usrActionRec *action_rec, int32_t *xeq_list, int32_t subject_index)
 {
   int32_t       id;
   compActionRec *arec       = NULL;
@@ -664,8 +642,7 @@ resultStruct XeqActionRec(action_rec, xeq_list, subject_index)
 }
 
 
-resultStruct XeqPrologue(verb_id)
- int32_t verb_id;
+resultStruct XeqPrologue(int32_t verb_id)
 {
   /* This routine executes the verb's prologue.             */
   /* It must be called prior to the XeqActionRec() routine. */
@@ -706,8 +683,7 @@ resultStruct XeqPrologue(verb_id)
 }
 
 
-resultStruct XeqEpilogue(verb_id)
- int32_t verb_id;
+resultStruct XeqEpilogue(int32_t verb_id)
 {
   /* This routine executes the verb's epilogue.           */
   /* It must be called after the XeqActionRec() routine.  */
@@ -756,9 +732,7 @@ resultStruct XeqEpilogue(verb_id)
 }
 
 
-resultStruct XeqVerbDefault(action_rec, subject_index)
- usrActionRec *action_rec;
- int32_t      subject_index;
+resultStruct XeqVerbDefault(usrActionRec *action_rec, int32_t subject_index)
 {
   /* This routine executes the verb default code for the        */
   /* action_rec's action. This routine should be called in      */
@@ -822,11 +796,7 @@ resultStruct XeqVerbDefault(action_rec, subject_index)
 }
 
 
-resultStruct Execute(trigger, action_rec, subject_index, com_trig)
- int32_t      *trigger;
- usrActionRec *action_rec;
- int32_t      subject_index;
- int32_t      *com_trig;
+resultStruct Execute(int32_t *trigger, usrActionRec *action_rec, int32_t subject_index, int32_t *com_trig)
 {
   /* This function assumes owner is in memory. */
 
@@ -929,11 +899,7 @@ resultStruct Execute(trigger, action_rec, subject_index, com_trig)
 }
 
 
-resultStruct XeqTrigger(owner, id, action_rec, subject_index)
- int32_t      owner;
- int32_t      id;
- usrActionRec *action_rec;
- int32_t      subject_index;
+resultStruct XeqTrigger(int32_t owner, int32_t id, usrActionRec *action_rec, int32_t subject_index)
 {
   int32_t      *triggers[2];                        /* Pointers to start of trigger code. */
   resultStruct result            = {NO_MATCH, 0};
@@ -987,8 +953,7 @@ resultStruct XeqTrigger(owner, id, action_rec, subject_index)
 }
 
 
-int32_t IsWordId(id)
- int32_t id;
+int32_t IsWordId(int32_t id)
 {
   if ((id>=FIRST_VERB_ID) && (id<=LAST_WORD_ID))
     return(OK);
@@ -997,8 +962,7 @@ int32_t IsWordId(id)
 }
 
 
-int32_t IsVerbId(id)
- int32_t id;
+int32_t IsVerbId(int32_t id)
 {
   if ((id>=FIRST_VERB_ID) && (id<=LAST_VERB_ID))
     return(OK);
@@ -1006,8 +970,7 @@ int32_t IsVerbId(id)
   return(ERROR);
 }
 
-int32_t IsLocId(id)
- int32_t id;
+int32_t IsLocId(int32_t id)
 {
   switch (id) {
   /* test for special location ids */
@@ -1023,8 +986,7 @@ int32_t IsLocId(id)
 }
 
 
-int32_t IsObjId(id)
- int32_t id;
+int32_t IsObjId(int32_t id)
 {
   switch (id) {
     /* test for special object ids */
@@ -1041,8 +1003,7 @@ int32_t IsObjId(id)
 }
 
 
-int32_t IsCDescrId(id)
- int32_t id;
+int32_t IsCDescrId(int32_t id)
 {
   if ((id>=FIRST_COMMON_DESCR_ID) && (id<=LAST_COMMON_DESCR_ID))
     return(OK);
@@ -1050,8 +1011,7 @@ int32_t IsCDescrId(id)
 }
 
 
-int32_t IsLDescrId(id)
- int32_t id;
+int32_t IsLDescrId(int32_t id)
 {
   if ((id>=FIRST_LOCAL_DESCR_ID) && (id<=LAST_LOCAL_DESCR_ID))
     return(OK);
@@ -1059,15 +1019,13 @@ int32_t IsLDescrId(id)
 }
 
 
-int32_t IsDescrId(id)
- int32_t id;
+int32_t IsDescrId(int32_t id)
 {
   return(IsCDescrId(id) || IsLDescrId(id));
 }
 
 
-int32_t IsCFlagId(id)
- int32_t id;
+int32_t IsCFlagId(int32_t id)
 {
   if ((id>=FIRST_COMMON_FLAG_ID) && (id<=LAST_COMMON_FLAG_ID))
     return(OK);
@@ -1075,8 +1033,7 @@ int32_t IsCFlagId(id)
 }
 
 
-int32_t IsLFlagId(id)
- int32_t id;
+int32_t IsLFlagId(int32_t id)
 {
   if ((id>=FIRST_LOCAL_FLAG_ID) && (id<=LAST_LOCAL_FLAG_ID))
     return(OK);
@@ -1084,8 +1041,7 @@ int32_t IsLFlagId(id)
 }
 
 
-int32_t IsCTriggId(id)
- int32_t id;
+int32_t IsCTriggId(int32_t id)
 {
   if ((id>=FIRST_COMMON_TRIGGER_ID) && (id<=LAST_COMMON_TRIGGER_ID))
     return(OK);
@@ -1093,8 +1049,7 @@ int32_t IsCTriggId(id)
 }
 
 
-int32_t IsLTriggId(id)
- int32_t id;
+int32_t IsLTriggId(int32_t id)
 {
   if ((id>=FIRST_LOCAL_TRIGGER_ID) && (id<=LAST_LOCAL_TRIGGER_ID))
     return(OK);
@@ -1102,15 +1057,13 @@ int32_t IsLTriggId(id)
 }
 
 
-int32_t IsTriggId(id)
- int32_t id;
+int32_t IsTriggId(int32_t id)
 {
   return(IsCTriggId(id) || IsLTriggId(id));
 }
 
 
-int32_t IsCAttrId(code)
- int32_t code;
+int32_t IsCAttrId(int32_t code)
 {
   if ((code >= FIRST_COMMON_ATTR_ID) && (code <= LAST_COMMON_ATTR_ID))
     return (OK);
@@ -1119,8 +1072,7 @@ int32_t IsCAttrId(code)
 }
 
 
-int32_t IsLAttrId(code)
- int32_t code;
+int32_t IsLAttrId(int32_t code)
 {
   if ((code >= FIRST_LOCAL_ATTR_ID) && (code <= LAST_LOCAL_ATTR_ID))
     return (OK);
@@ -1129,8 +1081,7 @@ int32_t IsLAttrId(code)
 }
 
 
-int32_t IsTimerId(id)
- int32_t id;
+int32_t IsTimerId(int32_t id)
 {
   if ((id>=FIRST_TIMER_ID) && (id<=LAST_TIMER_ID))
     return(OK);
@@ -1138,8 +1089,7 @@ int32_t IsTimerId(id)
 }
 
 
-int32_t IsTestFun(code)
- int32_t code;
+int32_t IsTestFun(int32_t code)
 {
   if ((code > LOWER_BOUND_TESTFUN) && (code < UPPER_BOUND_TESTFUN))
     return (OK);
@@ -1148,8 +1098,7 @@ int32_t IsTestFun(code)
 }
 
 
-int32_t IsIntAct(code)
- int32_t code;
+int32_t IsIntAct(int32_t code)
 {
   if ((code > LOWER_BOUND_INT_ACT) && (code < UPPER_BOUND_INT_ACT))
     return (OK);

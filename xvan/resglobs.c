@@ -40,7 +40,7 @@ void    ResetGlobals(void);  /* oct 18 18 */
 /* Function definitions */
 /************************/
 
-void ResetGlobals()
+void ResetGlobals(void)
 {
   /* this function is used to reset the */
   /* globals in case of a restart       */

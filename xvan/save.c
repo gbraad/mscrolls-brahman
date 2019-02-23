@@ -61,11 +61,7 @@ char *Base64Save(char*);
 /* function definitions */
 /************************/
 
-char *StoreInt8(n, json_save, trailer_len, trailer)
- int8_t n;
- char   *json_save;
- int    *trailer_len;
- int8_t *trailer;
+char *StoreInt8(int8_t n, char *json_save, int *trailer_len, int8_t *trailer)
 {
   int8_t result[3]  = {0,0,0}; /* need a null char for AddToString() */
 
@@ -86,11 +82,7 @@ char *StoreInt8(n, json_save, trailer_len, trailer)
 }
 
 
-char *StoreInt16(n, json_save, trailer_len, trailer)
- int16_t n;
- char    *json_save;
- int     *trailer_len;
- int8_t  *trailer;
+char *StoreInt16(int16_t n, char *json_save, int *trailer_len, int8_t *trailer)
 {
   int    i          = 0;
   int8_t result[3]  = {0,0,0}; /* need a null char for AddToString()*/
@@ -116,11 +108,7 @@ char *StoreInt16(n, json_save, trailer_len, trailer)
 }
 
 
-char *StoreInt32(n, json_save, trailer_len, trailer)
- int32_t n;
- char    *json_save;
- int     *trailer_len;
- int8_t  *trailer;
+char *StoreInt32(int32_t n, char *json_save, int *trailer_len, int8_t *trailer)
 {
   int    i          = 0;
   int8_t result[3]  = {0,0,0}; /* need a null char for AddToString() */
@@ -145,11 +133,7 @@ char *StoreInt32(n, json_save, trailer_len, trailer)
 }
 
 
-char *StoreInt64(n, json_save, trailer_len, trailer)
- int64_t n;
- char    *json_save;
- int     *trailer_len;
- int8_t  *trailer;
+char *StoreInt64(int64_t n, char *json_save, int *trailer_len, int8_t *trailer)
 {
   int    i          = 0;
   int8_t result[3]  = {0,0,0}; /* need a null char for AddToString() */
@@ -174,11 +158,7 @@ char *StoreInt64(n, json_save, trailer_len, trailer)
 }
 
 
-char *StoreString(str, json_save, trailer_len, trailer)
- char   *str;
- char   *json_save;
- int    *trailer_len;
- int8_t *trailer;
+char *StoreString(char *str, char *json_save, int *trailer_len, int8_t *trailer)
 {
   int     i   = 0;
   int32_t len = 0;
@@ -204,11 +184,7 @@ char *StoreString(str, json_save, trailer_len, trailer)
 }
 
 
-char *StoreId(id, json_save, trailer_len, trailer)
- int32_t id;
- char    *json_save;
- int     *trailer_len;
- int8_t  *trailer;
+char *StoreId(int32_t id, char *json_save, int *trailer_len, int8_t *trailer)
 {
   if ( (json_save = StoreInt32(id, json_save, trailer_len, trailer)) == NULL) {
     PrintError(56, NULL, "StoreId()");
@@ -219,10 +195,7 @@ char *StoreId(id, json_save, trailer_len, trailer)
 }
 
 
-char *SaveSpecialIds(json_save, trailer_len, trailer)
-  char   *json_save;
-  int    *trailer_len;
-  int8_t *trailer;
+char *SaveSpecialIds(char *json_save, int *trailer_len, int8_t *trailer)
 {
   int32_t special_id_array[NR_OF_SPECIAL_IDS];
   int     i = 0;
@@ -252,10 +225,7 @@ char *SaveSpecialIds(json_save, trailer_len, trailer)
 }
 
 
-char *SaveStoryInfo(json_save, trailer_len, trailer)
- char   *json_save;
- int    *trailer_len;
- int8_t *trailer;
+char *SaveStoryInfo(char *json_save, int *trailer_len, int8_t *trailer)
 {
 
   /* Store the storyInfo struct. */
@@ -353,11 +323,7 @@ char *SaveStoryInfo(json_save, trailer_len, trailer)
 }
 
 
-char *SaveExtendedSysDescr(extended_system_description, json_save, trailer_len, trailer)
- extendedSysDescr *extended_system_description;
- char             *json_save;
- int              *trailer_len;
- int8_t           *trailer;
+char *SaveExtendedSysDescr(extendedSysDescr *extended_system_description, char *json_save, int *trailer_len, int8_t *trailer)
 {
   if ( (json_save = SaveSysDescr(&(extended_system_description->part1), json_save, trailer_len, trailer)) == NULL)
     return(NULL);
@@ -374,11 +340,7 @@ char *SaveExtendedSysDescr(extended_system_description, json_save, trailer_len, 
 }
 
 
-char *SaveSysDescr(system_description, json_save, trailer_len, trailer)
- sysDescr *system_description;
- char             *json_save;
- int              *trailer_len;
- int8_t           *trailer;
+char *SaveSysDescr(sysDescr *system_description, char *json_save, int *trailer_len, int8_t *trailer)
 {
   int32_t i = 0;
 
@@ -406,11 +368,7 @@ char *SaveSysDescr(system_description, json_save, trailer_len, trailer)
 }
 
 
-char *SaveContData(cont_data, json_save, trailer_len, trailer)
- contData *cont_data;
- char             *json_save;
- int              *trailer_len;
- int8_t           *trailer;
+char *SaveContData(contData *cont_data, char *json_save, int *trailer_len, int8_t *trailer)
 {
   int32_t i = 0;
 
@@ -428,11 +386,7 @@ char *SaveContData(cont_data, json_save, trailer_len, trailer)
 }
 
 
-char *SaveDirInfo(dir_info, json_save, trailer_len, trailer)
- dirInfo *dir_info;
- char             *json_save;
- int              *trailer_len;
- int8_t           *trailer;
+char *SaveDirInfo(dirInfo *dir_info, char *json_save, int *trailer_len, int8_t *trailer)
 {
   int i = 0;
 
@@ -468,10 +422,7 @@ char *SaveDirInfo(dir_info, json_save, trailer_len, trailer)
 }
 
 
-char *SaveLocationDirectory(json_save, trailer_len, trailer)
- char             *json_save;
- int              *trailer_len;
- int8_t           *trailer;
+char *SaveLocationDirectory(char *json_save, int *trailer_len, int8_t *trailer)
 {
   int32_t i = 0;
 
@@ -484,10 +435,7 @@ char *SaveLocationDirectory(json_save, trailer_len, trailer)
 }
 
 
-char *SaveObjectDirectory(json_save, trailer_len, trailer)
- char             *json_save;
- int              *trailer_len;
- int8_t           *trailer;
+char *SaveObjectDirectory(char *json_save, int *trailer_len, int8_t *trailer)
 {
   int32_t i=0;
 
@@ -499,10 +447,7 @@ char *SaveObjectDirectory(json_save, trailer_len, trailer)
 }
 
 
-char *SaveExits(json_save, trailer_len, trailer)
- char             *json_save;
- int              *trailer_len;
- int8_t           *trailer;
+char *SaveExits(char *json_save, int *trailer_len, int8_t *trailer)
 {
   int32_t size; /* size of the exit_data array */
   int     i = 0;
@@ -520,11 +465,7 @@ char *SaveExits(json_save, trailer_len, trailer)
 }
 
 
-char *SaveAttribute(attribute, json_save, trailer_len, trailer)
- attrInfo *attribute;
- char             *json_save;
- int              *trailer_len;
- int8_t           *trailer;
+char *SaveAttribute(attrInfo *attribute, char *json_save, int *trailer_len, int8_t *trailer)
 {
   if ( (json_save = StoreInt32(attribute->type, json_save, trailer_len, trailer)) == NULL) {
     PrintError(56, NULL, "SaveAttribute()");
@@ -545,10 +486,7 @@ char *SaveAttribute(attribute, json_save, trailer_len, trailer)
 }
 
 
-char *SaveCommonAttributes(json_save, trailer_len, trailer)
- char             *json_save;
- int              *trailer_len;
- int8_t           *trailer;
+char *SaveCommonAttributes(char *json_save, int *trailer_len, int8_t *trailer)
 {
   int32_t total_attrs; /* Total number of common attributes for all locations */
   int     i = 0;
@@ -573,10 +511,7 @@ char *SaveCommonAttributes(json_save, trailer_len, trailer)
 }
 
 
-char *SaveLocalAttributes(json_save, trailer_len, trailer)
- char             *json_save;
- int              *trailer_len;
- int8_t           *trailer;
+char *SaveLocalAttributes(char *json_save, int *trailer_len, int8_t *trailer)
 {
   int i = 0;
   /* Total number of local attributes is stored in global variable nr_of_lattrs */
@@ -590,10 +525,7 @@ char *SaveLocalAttributes(json_save, trailer_len, trailer)
 }
 
 
-char *SaveCommonFlags(json_save, trailer_len, trailer)
- char             *json_save;
- int              *trailer_len;
- int8_t           *trailer;
+char *SaveCommonFlags(char *json_save, int *trailer_len, int8_t *trailer)
 {
   int32_t com_loc_flags_string_len = 0;
   int32_t com_obj_flags_string_len = 0;
@@ -621,10 +553,7 @@ char *SaveCommonFlags(json_save, trailer_len, trailer)
 }
 
 
-char *SaveLocalFlags(json_save, trailer_len, trailer)
- char             *json_save;
- int              *trailer_len;
- int8_t           *trailer;
+char *SaveLocalFlags(char *json_save, int *trailer_len, int8_t *trailer)
 {
   int i = 0;
 
@@ -640,11 +569,7 @@ char *SaveLocalFlags(json_save, trailer_len, trailer)
 }
 
 
-char *SaveTimer(timer, json_save, trailer_len, trailer)
- timerInfo *timer;
- char             *json_save;
- int              *trailer_len;
- int8_t           *trailer;
+char *SaveTimer(timerInfo *timer, char *json_save, int *trailer_len, int8_t *trailer)
 {
   if ( (json_save = StoreInt32(timer->value, json_save, trailer_len, trailer)) == NULL) {
     PrintError(56, NULL, "SaveTimer()");
@@ -691,10 +616,7 @@ char *SaveTimer(timer, json_save, trailer_len, trailer)
 }
 
 
-char *SaveAllTimers(json_save, trailer_len, trailer)
- char   *json_save;
- int    *trailer_len;
- int8_t *trailer;
+char *SaveAllTimers(char *json_save, int *trailer_len, int8_t *trailer)
 {
   int i = 0;
  /* global vars timerInfo *timers and int nr_of_timers are used here */
@@ -709,8 +631,7 @@ char *SaveAllTimers(json_save, trailer_len, trailer)
 }
 
 
-char *Base64Save(base64_save)
- char* base64_save;
+char *Base64Save(char *base64_save)
 {
   int8_t trailer     = 0;
   int    trailer_len = 0;

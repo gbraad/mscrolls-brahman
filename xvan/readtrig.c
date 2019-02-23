@@ -46,8 +46,8 @@ triggerInfo   *ReadTrigger(int32_t*);
 /* function definitions */
 /************************/
 
-descrInfo *ReadDescr(code)
- int32_t  *code;  /* Contains the description id. */
+descrInfo *ReadDescr(int32_t *code)
+ /* Code contains the description id. */
 {
   int32_t       len = 0;
   descrInfo *descr;
@@ -88,8 +88,7 @@ descrInfo *ReadDescr(code)
 }
 
 
-int32_t ReadAdverbInfo(adverbs)
- adverbInfo *adverbs;
+int32_t ReadAdverbInfo(adverbInfo *adverbs)
 {
   int i=0;
 
@@ -108,8 +107,7 @@ int32_t ReadAdverbInfo(adverbs)
 }
 
 
-int32_t ReadPreposInfo(prepositions)
- preposInfo *prepositions;
+int32_t ReadPreposInfo(preposInfo *prepositions)
 {
   int i=0;
 
@@ -128,8 +126,7 @@ int32_t ReadPreposInfo(prepositions)
 }
 
 
-compActionRec *ReadActionRec(code)
- int32_t *code;
+compActionRec *ReadActionRec(int32_t *code)
 {
   compActionRec *action_rec;
 
@@ -205,10 +202,7 @@ compActionRec *ReadActionRec(code)
 }
 
 
-int32_t ProcCode(triggercode, pos, code)
- int32_t *triggercode;
- int32_t pos;
- int32_t code;
+int32_t ProcCode(int32_t *triggercode, int32_t pos, int32_t code)
 {
   /* Stores code in array and tests for exceeding array bound. */
   if (pos<MAX_TRIGG_LEN)
@@ -221,8 +215,7 @@ int32_t ProcCode(triggercode, pos, code)
 }
 
 
-int32_t *RdTrCode(code)
- int32_t *code;
+int32_t *RdTrCode(int32_t *code)
 {
   /* Create temporary space for trigger code.                  */
   /* As soon as we know the exact size, we will malloc space.  */
@@ -313,11 +306,12 @@ int32_t *RdTrCode(code)
 }
 
 
-triggerInfo *ReadTrigger(code)
- int32_t  *code;  /* Contains the trigger id. */
- /* This function reads a trigger that belongs to a location   */
- /* or an object.                                              */
+triggerInfo *ReadTrigger(int32_t *code)
+ /* Code contains the trigger id. */
 {
+  /* This function reads a trigger that belongs to a location   */
+  /* or an object.                                              */
+
   triggerInfo *trigger;
 
   /* Malloc space for trigger */

@@ -44,6 +44,7 @@ extern timerInfo    *timers;                     /* fileio.c */
 
 extern int32_t      curr_loc;                    /* letsplay.c */
 
+extern void     ifi_emitResponse(const char*);
 extern void     ResetGlobals(void);              /* resglobs.c */
 extern void     FreeAllLocations(void);          /* cleanup.c  */
 extern void     FreeAllObjects(void);            /* cleanup.c  */

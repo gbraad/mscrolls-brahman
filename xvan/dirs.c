@@ -31,7 +31,7 @@
 /* globals */
 /***********/
 
-dirData   dirs;
+dirData dirs;
 
 /*************************/
 /* function declarations */

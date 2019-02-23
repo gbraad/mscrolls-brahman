@@ -41,10 +41,7 @@ void NL_PrintNotFound(extendedSysDescr*);
 /* Function definitions */
 /************************/
 
-void NL_MoreInfo(descr, hits, line_buf)
- extendedSysDescr *descr;
- match            *hits;
- char             *line_buf;
+void NL_MoreInfo(extendedSysDescr *descr, match *hits, char *line_buf)
 {
   extendedSysDescr *sd;
   int32_t          i =0;
@@ -87,8 +84,7 @@ void NL_MoreInfo(descr, hits, line_buf)
 }
 
 
-void NL_PrintNotFound(descr)
- extendedSysDescr *descr;
+void NL_PrintNotFound(extendedSysDescr *descr)
 {
   if (actor == PLAYER) {
     PrintString("Je", 0);

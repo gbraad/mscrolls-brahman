@@ -84,8 +84,7 @@ void    Not(void);
 /* Function definitions */
 /************************/
 
-int32_t IsDirection(id)
- int32_t  id;
+int32_t IsDirection(int32_t id)
 {
   wordTable *wt = word_table;
   int32_t i = 0;
@@ -112,8 +111,7 @@ int32_t IsDirection(id)
 }
 
 
-void ConvSpecId(id, type)
- int32_t *id, *type;
+void ConvSpecId(int32_t *id, int32_t *type)
 {
   /* If type is NUMBER, id can have one of the   */
   /* wildcard values but must not be converted.  */
@@ -179,12 +177,8 @@ void ConvSpecId(id, type)
 }
 
 
-int32_t GetPar(owner, par, type, str, trigger)
- int32_t  *owner;
- int32_t  *par;
- int32_t  *type;
- char     **str;      /* Needed to return address of string par. */
- int32_t  **trigger;
+int32_t GetPar(int32_t *owner, int32_t *par, int32_t *type, char **str, int32_t **trigger)
+ /* str is needed to return address of string par. */
 {
   /* This routine expects a parameter at the start of *trigger.   */
   /* It fills out the parameter plus it's owner (if any). In case */
@@ -450,12 +444,8 @@ int32_t GetPar(owner, par, type, str, trigger)
 }
 
 
-int32_t GetLvaluePar(owner, par, type, str, trigger)
- int32_t *owner;
- int32_t *par;
- int32_t *type;
- char    **str;      /* Needed to return address of string par. */
- int32_t **trigger;
+int32_t GetLvaluePar(int32_t *owner, int32_t *par, int32_t *type, char **str, int32_t **trigger)
+ /* str is needed to return address of string par. */
 {
   /* This routine expects an attribute parameter at the start of *trigger. */
   /* It returns the attribute id plus its owner (if any). If the actual    */
@@ -526,9 +516,7 @@ int32_t GetLvaluePar(owner, par, type, str, trigger)
 }
 
 
-int32_t GetActionRecPar(action_rec, trigger)
- usrActionRec *action_rec;
- int32_t      **trigger;
+int32_t GetActionRecPar(usrActionRec *action_rec, int32_t **trigger)
 {
   int i = 0;
 
@@ -586,11 +574,7 @@ int32_t GetActionRecPar(action_rec, trigger)
 }
 
 
-int32_t GetAttributeInfo(id, owner, attributes, attribute_index)
- int32_t  id;
- int32_t  owner;
- attrInfo **attributes;
- int32_t  *attribute_index;
+int32_t GetAttributeInfo(int32_t id, int32_t owner, attrInfo **attributes, int32_t *attribute_index)
 {
   /* This function searches the attrInfo for the attribute identified by */
   /* id and owner parameters. It returna a pointer to the right attrInfo */
@@ -623,8 +607,7 @@ int32_t GetAttributeInfo(id, owner, attributes, attribute_index)
 }
 
 
-void SkipPar(trigger)
- int32_t **trigger;
+void SkipPar(int32_t **trigger)
 {
   /* This routine expects a parameter at the start of *trigger. */
   do {
@@ -644,8 +627,7 @@ void SkipPar(trigger)
 }
 
 
-void SkipFun(trigger)
- int32_t **trigger;
+void SkipFun(int32_t **trigger)
 {
   /* Opcode has already been read by the caller. */
 
@@ -662,18 +644,14 @@ void SkipFun(trigger)
 }
 
 
-int32_t TestBitVal(word, bit_pos)
- int32_t word;
- int32_t bit_pos;
+int32_t TestBitVal(int32_t word, int32_t bit_pos)
 {
   /* Mind the parenthesis. Operator priority is tricky here. */
   return( ( (word & (1 << bit_pos)) == 0 ? 0 : 1));
 }
 
-int32_t ContList(id, list, scope)
- int32_t id;
- int32_t list[];
- int32_t scope;
+
+int32_t ContList(int32_t id, int32_t list[], int32_t scope)
 {
   /* Fills list id and with all object ids that are contained */
   /* in id. In case list is not completely filled, a NO_ID    */
@@ -706,10 +684,8 @@ int32_t ContList(id, list, scope)
 }
 
 
-int32_t BuildCList(id, list, index)
- int32_t id;
- int32_t list[];  /* Must have length nr_of_locs+nr_of_objs. */
- int32_t *index;
+int32_t BuildCList(int32_t id, int32_t list[], int32_t *index)
+ /* list must have length nr_of_locs+nr_of_objs. */
 {
   /* Fills list with all objects that are (either directly or */
   /* indirectly) contained in id.                             */
@@ -741,10 +717,7 @@ int32_t BuildCList(id, list, index)
 }
 
 
-void SetBitVal(word, bit_pos, value)
- int32_t *word;
- int32_t bit_pos;
- int32_t value;
+void SetBitVal(int32_t *word, int32_t bit_pos, int32_t value)
 {
   switch (value) {
     case 0:
@@ -760,10 +733,7 @@ void SetBitVal(word, bit_pos, value)
 }
 
 
-void ProcCFlagVal(owner, id, value)
- int32_t owner;
- int32_t id;
- int32_t value;
+void ProcCFlagVal(int32_t owner, int32_t id, int32_t value)
 {
   int32_t word_offset = 0;
   int32_t bit_offset  = 0;
@@ -790,9 +760,7 @@ void ProcCFlagVal(owner, id, value)
 }
 
 
-void ProcLFlagVal(id, value)
- int32_t id;
- int32_t value;
+void ProcLFlagVal(int32_t id, int32_t value)
 {
   /* Id is used as an offset to address within flags. */
   int32_t word_offset = (id - FIRST_LOCAL_FLAG_ID) / WORD_LEN;
@@ -802,9 +770,7 @@ void ProcLFlagVal(id, value)
 }
 
 
-int32_t TestCFlag(owner, id)
- int32_t owner;
- int32_t id;
+int32_t TestCFlag(int32_t owner, int32_t id)
 {
   int32_t word_offset = 0;
   int32_t bit_offset  = 0;
@@ -832,8 +798,7 @@ int32_t TestCFlag(owner, id)
 }
 
 
-int32_t TestLFlag(id)
- int32_t id;
+int32_t TestLFlag(int32_t id)
 {
   /* Id is used as an offset to address within flags. */
   int32_t word_offset = (id - FIRST_LOCAL_FLAG_ID) / WORD_LEN;
@@ -843,9 +808,7 @@ int32_t TestLFlag(id)
 }
 
 
-void SetAll(id, flag_id)
- int32_t id;
- int32_t flag_id;
+void SetAll(int32_t id, int32_t flag_id)
 {
   /* This function sets flag <flag_id> for all */
   /* objects that are contained in id. Flag is */
@@ -871,9 +834,7 @@ void SetAll(id, flag_id)
 }
 
 
-int32_t TestAll(id, flag_id)
- int32_t id;
- int32_t flag_id;
+int32_t TestAll(int32_t id, int32_t flag_id)
 {
   /* This function returns OK if flag <flag_id> is  */
   /* set for all objects that are contained in id.  */
@@ -901,9 +862,7 @@ int32_t TestAll(id, flag_id)
 }
 
 
-int32_t TestOne(id, flag_id)
- int32_t id;
- int32_t flag_id;
+int32_t TestOne(int32_t id, int32_t flag_id)
 {
   /* This function returns OK if flag <flag_id> is  */
   /* set for at least one of the objects that are   */
@@ -932,10 +891,7 @@ int32_t TestOne(id, flag_id)
 }
 
 
-int32_t Exit(par, action_rec, subject_index)
- int32_t      par;
- usrActionRec *action_rec;
- int32_t      subject_index;
+int32_t Exit(int32_t par, usrActionRec *action_rec, int32_t subject_index)
 {
   /* Executes the t_exit triggers for par and all its */
   /* contained objects.                               */
@@ -964,10 +920,7 @@ int32_t Exit(par, action_rec, subject_index)
 }
 
 
-int32_t Entrance(par, action_rec, subject_index)
- int32_t      par;
- usrActionRec *action_rec;
- int32_t      subject_index;
+int32_t Entrance(int32_t par, usrActionRec *action_rec, int32_t subject_index)
 {
   /* Executes the t_entrance triggers for par and all its */
   /* contained objects.                                   */
@@ -996,10 +949,7 @@ int32_t Entrance(par, action_rec, subject_index)
 }
 
 
-int32_t Contents(par, action_rec, subject_index)
- int32_t      par;
- usrActionRec *action_rec;
- int32_t      subject_index;
+int32_t Contents(int32_t par, usrActionRec *action_rec, int32_t subject_index)
 {
   /* Same as Entrance(), except that this routine doesn't */
   /* execute t_entrance for par itself                    */
@@ -1028,9 +978,7 @@ int32_t Contents(par, action_rec, subject_index)
 }
 
 
-int32_t Move(src, dest)
- int32_t src;
- int32_t dest;
+int32_t Move(int32_t src, int32_t dest)
 {
   /* src must be moved into dest.                                */
   /* src always is an object. Dest can either be an object or    */
@@ -1095,10 +1043,7 @@ int32_t Move(src, dest)
 }
 
 
-int32_t Owns(owner, obj, depth)
- int32_t owner;
- int32_t obj;
- int32_t depth;
+int32_t Owns(int32_t owner, int32_t obj, int32_t depth)
 {
   /* It is easier to test if obj is held by owner, since */
   /* an object can only be held by one other obj/loc.    */
@@ -1133,8 +1078,7 @@ int32_t Owns(owner, obj, depth)
 }
 
 
-int32_t Shuffle(id)
- int32_t id;
+int32_t Shuffle(int32_t id)
 {
   contData *contained_objs;                      /* pointer to objects to be reshuffled */
   int32_t  displacements[MAX_CONTAINED_OBJECTS]; /* array with random displacements     */
@@ -1187,8 +1131,7 @@ int32_t Shuffle(id)
 }
 
 
-int32_t HasLight(id)
- int32_t id;
+int32_t HasLight(int32_t id)
 {
   /* returns OK if one of ids contained    */
   /* objects has the flag f_lit set.       */
@@ -1233,11 +1176,8 @@ int32_t HasLight(id)
 }
 
 
-int32_t SpanTree(from_loc, to_loc, nr_processed, tree)
- int32_t  from_loc;
- int32_t  to_loc;
- int32_t  nr_processed; /* Number of processed locations. */
- spanTree *tree;
+int32_t SpanTree(int32_t from_loc, int32_t to_loc, int32_t nr_processed, spanTree *tree)
+ /* nr_processed is number of processed locations. */
 {
   int32_t i;
   int32_t tree_index;
@@ -1288,8 +1228,7 @@ int32_t SpanTree(from_loc, to_loc, nr_processed, tree)
 }
 
 
-int32_t IsLit(id)
- int32_t id;
+int32_t IsLit(int32_t id)
 {
   /* Returns OK if id or one of its containing objects (or the */
   /* current location) is within reach of a light source.      */
@@ -1313,11 +1252,7 @@ int32_t IsLit(id)
 }
 
 
-int32_t CountObjects(id, flag, flag_val, level)
- int32_t id;
- int32_t flag;
- int32_t flag_val;
- int32_t level;
+int32_t CountObjects(int32_t id, int32_t flag, int32_t flag_val, int32_t level)
 {
   contData *source  = NULL;;
   int      i        = 0;
@@ -1346,14 +1281,8 @@ int32_t CountObjects(id, flag, flag_val, level)
 }
 
 
-int32_t Synchronize(id, trigger_id, flag, flag_val, level, action_rec, subject_index)
- int32_t      id;
- int32_t      trigger_id;
- int32_t      flag;
- int32_t      flag_val;
- int32_t      level;
- usrActionRec *action_rec;
- int32_t      subject_index;
+int32_t Synchronize(int32_t id, int32_t trigger_id, int32_t flag, int32_t flag_val, int32_t level, 
+                    usrActionRec *action_rec, int32_t subject_index)
 {
   int          i        = 0;
   int32_t      count    = 0;
@@ -1409,11 +1338,8 @@ int32_t Synchronize(id, trigger_id, flag, flag_val, level, action_rec, subject_i
 }
 
 
-void BuildSyncList(id, list, index, level)
- int32_t id;
- int32_t list[];  /* Must have length nr_of_objs+1. */
- int32_t *index;
- int32_t level;
+void BuildSyncList(int32_t id, int32_t list[], int32_t *index, int32_t level)
+ /* list must have length nr_of_objs+1. */
 {
   contData *source  = NULL;;
   int      i        = 0;
@@ -1433,8 +1359,7 @@ void BuildSyncList(id, list, index, level)
 }
 
 
-int32_t UpTree(id)
- int32_t id;
+int32_t UpTree(int32_t id)
 {
   /* This routines travels the containment tree upwards, until */
   /* either curr_loc or an opaque object has been encountered. */
@@ -1457,9 +1382,7 @@ int32_t UpTree(id)
 }
 
 
-int32_t CanSee(viewer, target)
- int32_t viewer;
- int32_t target;
+int32_t CanSee(int32_t viewer, int32_t target)
 {
   /* This function checks if both viewer and target are lit.    */
   /* If so, it uses both as a starting point to travel up the   */
@@ -1484,8 +1407,7 @@ int32_t CanSee(viewer, target)
 }
 
 
-void Push(value)
- int32_t value;
+void Push(int32_t value)
 {
   if (sp == STACK_SIZE) {
     /* Stack is full. */
@@ -1498,7 +1420,7 @@ void Push(value)
 }
 
 
-int32_t Pop()
+int32_t Pop(void)
 {
   if (sp == 0) {
     /* Stack is empty. */
@@ -1512,7 +1434,7 @@ int32_t Pop()
 }
 
 
-void And()
+void And(void)
 {
   /* This is a boolean AND. */
 
@@ -1520,14 +1442,14 @@ void And()
 }
 
 
-void Or()
+void Or(void)
 {
   /* This is a boolean OR. */
   Push(Pop() | Pop());
 }
 
 
-void Not()
+void Not(void)
 {
   Push(!Pop());
 }

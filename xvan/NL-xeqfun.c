@@ -39,7 +39,7 @@ int32_t NL_XeqYesNo(void);
 /* Testfunction definitions */
 /****************************/
 
-int32_t NL_XeqYesNo()
+int32_t NL_XeqYesNo(void)
 {
   char yes_or_no[INPUT_LINE_LEN];
 

@@ -40,7 +40,7 @@ verbInfo *RdVerb(int64_t);
 /* Function definitions */
 /************************/
 
-verbInfo *NewVerbInfo()
+verbInfo *NewVerbInfo(void)
 {
   verbInfo *verb_info = NULL;
 
@@ -60,8 +60,7 @@ verbInfo *NewVerbInfo()
 }
 
 
-verbInfo *RdVerb(offset)
- int64_t offset;
+verbInfo *RdVerb(int64_t offset)
 {
   /* This function assumes that there is default code. It will   */
   /* always deliver at least one verbInfo struct.                */

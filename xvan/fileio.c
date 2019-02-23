@@ -102,7 +102,7 @@ int32_t  Load(int32_t);
 /* file input routines */
 /***********************/
 
-char *ReadString()
+char *ReadString(void)
 {
   int32_t len;   /* length of the string */
   char    *str;
@@ -133,8 +133,7 @@ char *ReadString()
 }
 
 
-int32_t GetNextCode16(code)
- int16_t *code;
+int32_t GetNextCode16(int16_t *code)
 {
   if (fread((void *) code, sizeof(int16_t), 1, datafile) != 1) {
     PrintError(15, NULL, "GetNextCode16()");
@@ -150,8 +149,7 @@ int32_t GetNextCode16(code)
 }
 
 
-int32_t GetNextCode32(code)
- int32_t *code;
+int32_t GetNextCode32(int32_t *code)
 {
   if (fread((void *) code, sizeof(int32_t), 1, datafile) != 1) {
     PrintError(15, NULL, "GetNextCode32()");
@@ -167,8 +165,7 @@ int32_t GetNextCode32(code)
 }
 
 
-int32_t GetNextCode64(code)
- int64_t *code;
+int32_t GetNextCode64(int64_t *code)
 {
   if (fread((void *) code, sizeof(int64_t), 1, datafile) != 1) {
     PrintError(15, NULL, "GetNextCode64()");
@@ -184,8 +181,7 @@ int32_t GetNextCode64(code)
 }
 
 
-int32_t ReadDirOffsets(dirs)
- dirData *dirs;
+int32_t ReadDirOffsets(dirData *dirs)
 {
   int64_t offset; /* remember position in file */
 
@@ -258,8 +254,7 @@ int32_t ReadDirOffsets(dirs)
 }
 
 
-int32_t ReadTimers(offset)
- int64_t     offset;
+int32_t ReadTimers(int64_t offset)
 {
   int32_t code;
   int32_t id;
@@ -356,8 +351,7 @@ int32_t ReadTimers(offset)
 }
 
 
-int32_t ReadMapData(offset)
- int64_t offset;
+int32_t ReadMapData(int64_t offset)
 {
   int32_t i;
   int32_t code;
@@ -415,8 +409,7 @@ int32_t ReadMapData(offset)
 }
 
 
-int32_t ReadFlags(offset)
- int64_t offset;
+int32_t ReadFlags(int64_t offset)
 {
   int32_t code;
   size_t  com_loc_len = 0; /* Length of common location flags string.                            */
@@ -498,8 +491,7 @@ int32_t ReadFlags(offset)
 }
 
 
-int32_t ReadStoryInfo(info)
- storyInfo *info;
+int32_t ReadStoryInfo(storyInfo *info)
 {
   dirData dirs;
   int32_t len;
@@ -680,8 +672,7 @@ int32_t ReadStoryInfo(info)
 }
 
 
-int32_t ReadWordTable(offset)
- int64_t offset;
+int32_t ReadWordTable(int64_t offset)
 {
   int32_t code;
   int   i=0;
@@ -743,8 +734,7 @@ int32_t ReadWordTable(offset)
 }
 
 
-int32_t ReadVerbDir(offset)
- int64_t offset;
+int32_t ReadVerbDir(int64_t offset)
 {
   int32_t code;
   int32_t i;
@@ -791,8 +781,7 @@ int32_t ReadVerbDir(offset)
 }
 
 
-int32_t ReadVoc(offset)
- int64_t offset;
+int32_t ReadVoc(int64_t offset)
 {
   /* read the word_table */
   if (!ReadWordTable(offset))
@@ -807,8 +796,7 @@ int32_t ReadVoc(offset)
 }
 
 
-int32_t ReadLocDir(offset)
- int64_t offset;
+int32_t ReadLocDir(int64_t offset)
 {
   int32_t code;
   int32_t i, j;
@@ -872,8 +860,7 @@ int32_t ReadLocDir(offset)
 }
 
 
-int32_t ReadObjDir(offset)
- int64_t offset;
+int32_t ReadObjDir(int64_t offset)
 {
   int32_t code;
   int32_t i, j;
@@ -937,8 +924,7 @@ int32_t ReadObjDir(offset)
 }
 
 
-int32_t RdCTriggs(offset)
- int64_t offset;
+int32_t RdCTriggs(int64_t offset)
 {
   int32_t size = LAST_COMMON_TRIGGER_ID-FIRST_COMMON_TRIGGER_ID+1;
   int32_t code;
@@ -996,7 +982,7 @@ int32_t RdCTriggs(offset)
 }
 
 
-int32_t InitVerbs()
+int32_t InitVerbs(void)
 {
   int32_t  i        = 0;
   int32_t  read_nr  = 0;
@@ -1039,7 +1025,7 @@ int32_t InitVerbs()
 }
 
 
-int32_t InitLocations()
+int32_t InitLocations(void)
 {
   int32_t  i        = 0;
   int32_t  read_nr  = 0;
@@ -1077,7 +1063,7 @@ int32_t InitLocations()
 }
 
 
-int32_t InitObjects()
+int32_t InitObjects(void)
 {
   int32_t    i       = 0;
   int32_t    read_nr = 0;
@@ -1114,7 +1100,7 @@ int32_t InitObjects()
 }
 
 
-int32_t InitAttributes()
+int32_t InitAttributes(void)
 {
   /* Make sure that nr_of_locs and nr_of_objs have been set. */
 
@@ -1221,8 +1207,7 @@ int32_t InitAttributes()
 }
 
 
-int32_t RdTrigOwners(offset)
- int64_t offset;
+int32_t RdTrigOwners(int64_t offset)
 {
   int32_t code;
   int32_t nr_of_triggers;
@@ -1266,8 +1251,7 @@ int32_t RdTrigOwners(offset)
 }
 
 
-int32_t RdDescOwners(offset)
- int64_t offset;
+int32_t RdDescOwners(int64_t offset)
 {
   int32_t code;
   int32_t nr_of_descrs;
@@ -1308,8 +1292,7 @@ int32_t RdDescOwners(offset)
 }
 
 
-int32_t ReadExtendedSysDescr(extended_sys_descr)
- extendedSysDescr *extended_sys_descr;
+int32_t ReadExtendedSysDescr(extendedSysDescr *extended_sys_descr)
 {
   if (!ReadSysDescr(&(extended_sys_descr->part1)))
     return(ERROR);
@@ -1326,8 +1309,7 @@ int32_t ReadExtendedSysDescr(extended_sys_descr)
 }
 
 
-int32_t ReadSysDescr(sys_descr)
- sysDescr *sys_descr;
+int32_t ReadSysDescr(sysDescr *sys_descr)
 {
   int i=0;
 
@@ -1354,8 +1336,7 @@ int32_t ReadSysDescr(sys_descr)
 }
 
 
-int32_t ReadContData(cont_data)
- contData *cont_data;
+int32_t ReadContData(contData *cont_data)
 {
   int i=0;
 
@@ -1373,8 +1354,7 @@ return(OK);
 }
 
 
-int32_t InMem(id)
- int32_t id;
+int32_t InMem(int32_t id)
 {
   /* Id must either be a location or an object id. */
   /* This must have been checked by caller.        */
@@ -1397,8 +1377,7 @@ int32_t InMem(id)
 }
 
 
-int32_t Load(id)
- int32_t id;
+int32_t Load(int32_t id)
 {
   /* Check for valid id (verb, location or object) must */
   /* have been done by caller.                          */

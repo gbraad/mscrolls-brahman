@@ -43,10 +43,7 @@ void NL_PrintArticle(sysDescr*, int32_t, int);
 /* Function definitions */
 /************************/
 
-void NL_PrintArticle(descr, type, use_json)
- sysDescr *descr;
- int32_t  type;
- int use_json;
+void NL_PrintArticle(sysDescr *descr, int32_t type, int use_json)
 {
   if (descr->article != NO_ID) {
     switch (type) {

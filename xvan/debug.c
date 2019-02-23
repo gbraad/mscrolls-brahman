@@ -65,8 +65,7 @@ void    PrintRoute(int32_t*);
 /* Function definitions */
 /************************/
 
-void PrintStoryInfo(info)
- storyInfo *info;
+void PrintStoryInfo(storyInfo *info)
 {
   printf("\n\n******** Meta data ********\n\n");
   printf("Title: %s\n", info->title);
@@ -91,7 +90,7 @@ void PrintStoryInfo(info)
 }
 
 
-void Debug()
+void Debug(void)
 {
   PrintSpecialIds();
   PrintLocationDirectory();
@@ -101,7 +100,7 @@ void Debug()
 }
 
 
-void PrintLocationDirectory()
+void PrintLocationDirectory(void)
 {
   /* Uses the following Global vars: */
   /*   - loc_dir (type dirInfo*)     */
@@ -143,7 +142,7 @@ void PrintLocationDirectory()
 }
 
 
-void PrintObjectDirectory()
+void PrintObjectDirectory(void)
 {
   /* Uses the following Global vars: */
   /*   - loc_dir (type dirInfo*)     */
@@ -205,7 +204,7 @@ void PrintObjectDirectory()
 }
 
 
-void PrintExits()
+void PrintExits(void)
 {
   /* Uses the following Global vars: */
   /*   - exit_data (type *int)       */
@@ -360,8 +359,7 @@ void PrintLocalFlags(void)
 }
 
 
-void PrintLocation(loc)
- locationInfo *loc;
+void PrintLocation(locationInfo *loc)
 {
   descrInfo   *descr;
   triggerInfo *trigger;
@@ -407,8 +405,7 @@ void PrintLocation(loc)
 }
 
 
-void PrintVerb(verb)
- verbInfo *verb;
+void PrintVerb(verbInfo *verb)
 {
   compActionRec *arec;
   int32_t           *code;
@@ -441,8 +438,7 @@ void PrintVerb(verb)
 }
 
 
-void PrintObject(obj)
- objectInfo *obj;
+void PrintObject(objectInfo *obj)
 {
   descrInfo   *descr;
   triggerInfo *trigger;
@@ -488,7 +484,7 @@ void PrintObject(obj)
 }
 
 
-void PrintSpecialIds()
+void PrintSpecialIds(void)
 {
   sprintf(outputline, "*** Special Ids ***\n");
   Output(outputline, 0);
@@ -573,7 +569,7 @@ void PrintVerbDir(void)
 }
 
 
-void PrintWTable()
+void PrintWTable(void)
 {
   int32_t i = 0;
 
@@ -592,8 +588,7 @@ void PrintWTable()
 }
 
 
-void PrintParsedInput(parsed_input)
- parsedInput *parsed_input;
+void PrintParsedInput(parsedInput *parsed_input)
 {
   int32_t i = 0;
   int32_t j = 0;
@@ -733,8 +728,7 @@ void PrintParsedInput(parsed_input)
 }
 
 
-int32_t Test4SpecId(id)
- int32_t id;
+int32_t Test4SpecId(int32_t id)
 {
   /* This functin test whether id has one of the following values: */
   /* NO_ID, CURR_LOC, SUBJECT, ACTOR, SPECIFIER, and prints a      */
@@ -769,8 +763,7 @@ int32_t Test4SpecId(id)
 }
 
 
-void PrintCompActionRec(action_rec)
- compActionRec *action_rec;
+void PrintCompActionRec(compActionRec *action_rec)
 {
   int32_t      i = 0;
 
@@ -895,8 +888,7 @@ void PrintCompActionRec(action_rec)
 }
 
 
-void PrintUsrActionRec(action_rec)
- usrActionRec *action_rec;
+void PrintUsrActionRec(usrActionRec *action_rec)
 {
   int32_t      i = 0;
 
@@ -1018,8 +1010,7 @@ void PrintUsrActionRec(action_rec)
 }
 
 
-void PrintParserActionRec(action_rec)
- parserActionRec *action_rec;
+void PrintParserActionRec(parserActionRec *action_rec)
 {
   int32_t      i = 0;
 
@@ -1148,10 +1139,7 @@ void PrintParserActionRec(action_rec)
 }
 
 
-void    PrintHits(hits, scope, target)
- match   *hits;
- int32_t scope;
- int32_t target;
+void    PrintHits(match *hits, int32_t scope, int32_t target)
 {
   int i = 0;
 
@@ -1208,8 +1196,7 @@ void PrintAllTimers(void)
 }
 
 
-void PrintTimer(t)
- timerInfo *t;
+void PrintTimer(timerInfo *t)
 {
   sprintf(outputline, "**********Timer info**********\n\n");
   Output(outputline, 0);
@@ -1240,8 +1227,7 @@ void PrintTimer(t)
 }
 
 
-void PrintSpanTree(tree)
- spanTree *tree;
+void PrintSpanTree(spanTree *tree)
 {
   int i = 0;
 
@@ -1262,8 +1248,7 @@ void PrintSpanTree(tree)
 }
 
 
-void PrintRoute(route)
- int32_t *route;
+void PrintRoute(int32_t *route)
 {
   int nr_of_hops = 0;
   int i = 0;

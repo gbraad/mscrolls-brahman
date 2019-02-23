@@ -65,18 +65,13 @@ int32_t GetNextKVpair(char*, int*, kvPair*);
 /* Helper functions */
 /********************/
 
-int32_t IsDigit(digit)
- char digit;
+int32_t IsDigit(char digit)
 {
   return (digit >= '0' && digit <= '9');
 }
 
 
-void GetDigitString(source, dest, index, max_len)
- char *source;
- char *dest;
- int  *index;
- int  max_len;
+void GetDigitString(char *source, char *dest, int *index, int max_len)
 {
   int start = *index;
   int len;
@@ -97,10 +92,7 @@ void GetDigitString(source, dest, index, max_len)
 }
 
 
-void ConvertIntegral(integral, sign, int_value)
- char    *integral;
- int     sign;
- int32_t *int_value;
+void ConvertIntegral(char *integral, int sign, int32_t *int_value)
 {
   int len = strlen(integral);
   int i   = 0;
@@ -119,9 +111,7 @@ void ConvertIntegral(integral, sign, int_value)
 }
 
 
-void ConvertFraction(fraction, fract_value)
- char  *fraction;
- float *fract_value;
+void ConvertFraction(char *fraction, float *fract_value)
 {
   int len = strlen(fraction);
   int i   = 0;
@@ -137,10 +127,7 @@ void ConvertFraction(fraction, fract_value)
 }
 
 
-void ConvertExponent(exponent, sign, exp_value)
- char  *exponent;
- int   sign;
- float *exp_value;
+void ConvertExponent(char *exponent, int sign, float *exp_value)
 {
   int32_t exp;
   int     i = 0;
@@ -171,9 +158,7 @@ void ConvertExponent(exponent, sign, exp_value)
 /* Validation functions */
 /************************/
 
-int32_t ValidateJsonString(string, index)
- char *string;
- int  *index;
+int32_t ValidateJsonString(char *string, int *index)
 {
   int state  = 0;
 
@@ -310,9 +295,7 @@ int32_t ValidateJsonString(string, index)
 }
 
 
-int32_t ValidateJsonNumber(json_number, index)
- char *json_number;
- int  *index;
+int32_t ValidateJsonNumber(char *json_number, int *index)
 {
   int state = 0;
 
@@ -431,9 +414,7 @@ int32_t ValidateJsonNumber(json_number, index)
 }
 
 
-int32_t ValidateJsonArray(json_array, index)
- char *json_array;
- int  *index;
+int32_t ValidateJsonArray(char *json_array, int *index)
 {
   int state = 1;
 
@@ -587,9 +568,7 @@ int32_t ValidateJsonArray(json_array, index)
 }
 
 
-int32_t ValidateJsonObject(json_string, index)
- char *json_string;
- int  *index;
+int32_t ValidateJsonObject(char *json_string, int *index)
 {
   int state = 1;
 
@@ -750,8 +729,7 @@ int32_t ValidateJsonObject(json_string, index)
 }
 
 
-int32_t ValidateJson(json_string)
- char *json_string;
+int32_t ValidateJson(char *json_string)
 {
   /* a json string always starts with */
   /* '{' (object) or '[' (array).     */
@@ -801,12 +779,7 @@ int32_t ValidateJson(json_string)
 /* Processing functions */
 /************************/
 
-void ReadJsonNumber(json_string, number_type, int_value, float_value, index)
- char    *json_string;
- int     *number_type;
- int32_t *int_value;
- float   *float_value;
- int     *index;
+void ReadJsonNumber(char *json_string, int *number_type, int32_t *int_value, float *float_value, int *index)
 {
   int integral_sign = 1;
   int exponent_sign = 1;
@@ -887,9 +860,8 @@ void ReadJsonNumber(json_string, number_type, int_value, float_value, index)
 }
 
 
-char* ReadJsonString(json_string, index)
- char *json_string;  /* string to read from, input par   */
- int  *index;
+char* ReadJsonString(char *json_string, int *index)
+ /* json_string is string to read from, input par   */
 {
   char *string_var = NULL;
   int  start       = (*index)++;
@@ -931,9 +903,8 @@ char* ReadJsonString(json_string, index)
 }
 
 
-char *ReadJsonObject(json_string, index)
- char *json_string;  /* input par */
- int  *index;
+char *ReadJsonObject(char *json_string, int *index)
+ /* json_string is input par */
 {
   char *object_var = NULL;
   int  start       = *index;
@@ -977,9 +948,8 @@ char *ReadJsonObject(json_string, index)
 }
 
 
-char *ReadJsonArray(json_string, index)
- char *json_string; /* input par */
- int  *index;
+char *ReadJsonArray(char *json_string, int *index)
+ /* json_string is input par */
 {
   char *array_var = NULL;
   int start       = *index;
@@ -1023,10 +993,10 @@ char *ReadJsonArray(json_string, index)
 }
 
 
-void ReadJsonValue(json_string, value_var, index)
- char      *json_string; /* input var */
- jsonValue *value_var;   /* output par, must be maloc-ed */
- int       *index;
+void ReadJsonValue(char *json_string, jsonValue *value_var, int *index)
+ /* json_string is input var                  */
+ /* value_var is output par, must be maloc-ed */
+
 {
   int     number_type;
   int32_t int_value;
@@ -1084,10 +1054,7 @@ void ReadJsonValue(json_string, value_var, index)
 }
 
 
-int32_t GetNextKVpair(json_string, index, kv)
- char      *json_string;
- int       *index;
- kvPair    *kv;
+int32_t GetNextKVpair(char *json_string, int *index, kvPair *kv)
 {
   /* json syntax has been checked, so we expect no errors */
 

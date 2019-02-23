@@ -41,16 +41,8 @@ int32_t  ENG_CheckSyntax(char*, int32_t, int32_t, int32_t*, int32_t, int32_t, in
 /* Function definitions */
 /************************/
 
-int32_t ENG_CheckSyntax(line_buf, id, nr_of_types, types, type_index,
-                                  subject_index, state, parsed_input)
- char        *line_buf;
- int32_t     id;
- int32_t     nr_of_types;
- int32_t     *types;
- int32_t     type_index;
- int32_t     subject_index; /* More than one subject allowed. */
- int32_t     state;
- parsedInput *parsed_input;
+int32_t ENG_CheckSyntax(char *line_buf, int32_t id, int32_t nr_of_types, int32_t *types, int32_t type_index,
+                                  int32_t subject_index, int32_t state, parsedInput *parsed_input)
 
  /* id, nr_of_types, type_index and state cannot be changed by      */
  /* recursive calls. The rest of the parameters can and therefore   */

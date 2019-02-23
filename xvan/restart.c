@@ -41,7 +41,7 @@ int32_t Restart(void);
 /* Function definitions */
 /************************/
 
-int32_t Restart()
+int32_t Restart(void)
 {
   char json_string[] = "{\"restart\":true}";
 

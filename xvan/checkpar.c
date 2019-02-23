@@ -47,13 +47,7 @@ int32_t CheckPars(int32_t, int32_t, int32_t, int32_t, int32_t, int32_t);
 /* Function definitions  */
 /*************************/
 
-int32_t CheckPars(fun_code, type1, type2, type3, type4, type5)
- int32_t fun_code;
- int32_t type1;
- int32_t type2;
- int32_t type3;
- int32_t type4;
- int32_t type5;
+int32_t CheckPars(int32_t fun_code, int32_t type1, int32_t type2, int32_t type3, int32_t type4, int32_t type5)
 {
   switch (fun_code) {
     /**************************************************/

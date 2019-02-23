@@ -41,8 +41,7 @@ objectInfo *ReadObject(int64_t);
 /* Function definitions */
 /************************/
 
-void InitObj(obj)
- objectInfo *obj;
+void InitObj(objectInfo *obj)
 {
   obj->descriptions = NULL;
   obj->action_recs  = NULL;
@@ -50,8 +49,7 @@ void InitObj(obj)
 }
 
 
-objectInfo *ReadObject(offset)
- int64_t offset;
+objectInfo *ReadObject(int64_t offset)
 {
   objectInfo    *obj;
   descrInfo     *last_descr      = NULL;

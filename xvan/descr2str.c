@@ -44,9 +44,7 @@ char *GetId(int32_t, int);
 /* function definitions */
 /************************/
 
-char *AddToString(dest, to_add)
- char *dest;
- char *to_add;
+char *AddToString(char *dest, char *to_add)
 {
   /* dest must be malloced */
 
@@ -78,8 +76,7 @@ char *AddToString(dest, to_add)
 }
 
 
-char *GetArticle(sys_descr)
- sysDescr *sys_descr;
+char *GetArticle(sysDescr *sys_descr)
 {
   char *article = NULL;
 
@@ -102,8 +99,7 @@ char *GetArticle(sys_descr)
 }
 
 
-char *GetWord(id)
- int32_t id;
+char *GetWord(int32_t id)
 {
   char      *word = NULL;
   wordTable *wt   = word_table;
@@ -131,9 +127,7 @@ char *GetWord(id)
 }
 
 
-char *GetSysDescr(descr, with_article)
- sysDescr *descr;
- int      with_article;
+char *GetSysDescr(sysDescr *descr, int with_article)
 {
   char    *description = NULL;
   char    *temp        = NULL;
@@ -184,9 +178,7 @@ char *GetSysDescr(descr, with_article)
 }
 
 
-char *GetExtendedSysDescr(extended_sys_descr, with_article)
- extendedSysDescr *extended_sys_descr;
- int with_article;
+char *GetExtendedSysDescr(extendedSysDescr *extended_sys_descr, int with_article)
 {
   char *description = NULL;
   char *temp        = NULL;
@@ -226,9 +218,7 @@ char *GetExtendedSysDescr(extended_sys_descr, with_article)
 }
 
 
-char *GetId(id, with_article)
- int32_t id;
- int     with_article;
+char *GetId(int32_t id, int with_article)
 {
   int32_t  offset      = 0;
   int32_t  type        = NO_TYPE;

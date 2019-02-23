@@ -55,9 +55,7 @@ int32_t         ApplyParserRules(parsedInput*, match*, match*, match*);
 /* Function definitions */
 /************************/
 
-void FillDefaultValues(source, target)
- parsedInput     *source;
- parserActionRec *target;
+void FillDefaultValues(parsedInput *source, parserActionRec *target)
 {
   int i = 0;
 
@@ -93,8 +91,7 @@ void FillDefaultValues(source, target)
 }
 
 
-void FreeParserRecs(start)
- parserActionRec *start;
+void FreeParserRecs(parserActionRec *start)
 {
   if (!start) {
     FreeParserRecs(start->next);
@@ -103,11 +100,7 @@ void FreeParserRecs(start)
 }
 
 
-parserActionRec *CreateParserRecs(p_i, actor_hits, subject_hits, specifier_hits)
- parsedInput *p_i;
- match       *actor_hits;
- match       *subject_hits;
- match       *specifier_hits;
+parserActionRec *CreateParserRecs(parsedInput *p_i, match *actor_hits, match *subject_hits, match *specifier_hits)
 {
   int i = 0;
   int j = 0;
@@ -227,9 +220,7 @@ parserActionRec *CreateParserRecs(p_i, actor_hits, subject_hits, specifier_hits)
 }
 
 
-int32_t CompareActorSubjectSpecifier(verb, parser)
- int32_t verb;
- int32_t parser;
+int32_t CompareActorSubjectSpecifier(int32_t verb, int32_t parser)
 {
   /* Note: here can be wildcards (ACTOR, SUBJECT, */
   /* SPECIFIER) in verb, but not in parser.       */
@@ -252,9 +243,8 @@ int32_t CompareActorSubjectSpecifier(verb, parser)
 }
 
 
-int32_t MatchParserRec(verb, parser)
- compActionRec   *verb;
- parserActionRec *parser; /* looking for this one */
+int32_t MatchParserRec(compActionRec *verb, parserActionRec *parser)
+ /* we are looking for parser */
 {
   int32_t i     = 0;
   int32_t j     = 0;
@@ -356,9 +346,7 @@ int32_t MatchParserRec(verb, parser)
 }
 
 
-int32_t AlreadyHas(hits, item)
- match   *hits;
- int32_t item;
+int32_t AlreadyHas(match *hits, int32_t item)
 {
   int i = 0;
 
@@ -397,10 +385,7 @@ void RebuildActorHits(parser_recs, actor_hits, max_score)
 }
 
 
-void RebuildSubjectHits(parser_recs, subject_hits, max_score)
- parserActionRec *parser_recs;
- match           *subject_hits;
- int32_t         max_score;
+void RebuildSubjectHits(parserActionRec *parser_recs, match *subject_hits, int32_t max_score)
 {
   parserActionRec *current = parser_recs;
 
@@ -424,10 +409,7 @@ void RebuildSubjectHits(parser_recs, subject_hits, max_score)
 }
 
 
-void RebuildSpecifierHits(parser_recs, specifier_hits, max_score)
- parserActionRec *parser_recs;
- match           *specifier_hits;
- int32_t         max_score;
+void RebuildSpecifierHits(parserActionRec *parser_recs, match *specifier_hits, int32_t max_score)
 {
   parserActionRec *current = parser_recs;
 
@@ -451,8 +433,7 @@ void RebuildSpecifierHits(parser_recs, specifier_hits, max_score)
 }
 
 
-int32_t *FindParserRules(parser_recs)
- parserActionRec *parser_recs;
+int32_t *FindParserRules(parserActionRec *parser_recs)
 {
   verbInfo      *verb  = NULL;
   int32_t       cont   = 1;
@@ -507,10 +488,7 @@ int32_t *FindParserRules(parser_recs)
 }
 
 
-int32_t XeqParserRules(parser_recs, rules, max_score)
- parserActionRec *parser_recs;
- int32_t         *rules;
- int32_t         *max_score;
+int32_t XeqParserRules(parserActionRec *parser_recs, int32_t *rules, int32_t *max_score)
 {
   int32_t winners   = 1;
 
@@ -567,11 +545,7 @@ int32_t XeqParserRules(parser_recs, rules, max_score)
 }
 
 
-int32_t ApplyParserRules(p_i, actor_hits, subject_hits, specifier_hits)
- parsedInput *p_i;
- match       *actor_hits;
- match       *subject_hits;
- match       *specifier_hits;
+int32_t ApplyParserRules(parsedInput *p_i, match *actor_hits, match *subject_hits, match *specifier_hits)
 {
   parserActionRec *parser_recs  = NULL;
   int32_t         *parser_rules = NULL; /* is actually a trigger */

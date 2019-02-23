@@ -41,11 +41,7 @@ int32_t ReadFun(int32_t*, int32_t*, int32_t);
 /* function definitions */
 /************************/
 
-int32_t CheckedStore(array, upper_limit, index, value)
- int32_t *array;
- int32_t upper_limit;
- int32_t *index;
- int32_t value;
+int32_t CheckedStore(int32_t *array, int32_t upper_limit, int32_t *index, int32_t value)
 {
   /* Stores value in array at position index. */
   /* Checks for array bound overflow.         */
@@ -61,10 +57,7 @@ int32_t CheckedStore(array, upper_limit, index, value)
 }
 
 
-int32_t ReadFun(trigger_code, index, fun_code)
- int32_t *trigger_code;
- int32_t *index;
- int32_t fun_code;
+int32_t ReadFun(int32_t *trigger_code, int32_t *index, int32_t fun_code)
 {
   int32_t  nr_of_pars  = 0;
   int32_t  par         = NO_ID;

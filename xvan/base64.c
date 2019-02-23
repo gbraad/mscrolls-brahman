@@ -46,8 +46,8 @@ int32_t ByteToBase64(int8_t, int8_t*, int*, int8_t*);
 /*  Decoding functions  */
 /************************/
 
-char   *GetBytesFromBase64String(char*, int*, int);
-int8_t ConvertBase64Value(char);
+char    *GetBytesFromBase64String(char*, int*, int);
+int8_t  ConvertBase64Value(char);
 int32_t Base64ToBytes(char*, int*, int, int8_t*, int*, int8_t*);
 
 
@@ -59,8 +59,7 @@ int32_t Base64ToBytes(char*, int*, int, int8_t*, int*, int8_t*);
 /* Encoding function definitions */
 /*********************************/
 
-char GetBase64Value(n)
- int8_t n;
+char GetBase64Value(int8_t n)
 {
   char base64[] = {'A','B','C','D','E','F','G','H','I','J','K','L','M',
                    'N','O','P','Q','R','S','T','U','V','W','X','Y','Z',
@@ -72,10 +71,7 @@ char GetBase64Value(n)
 }
 
 
-char *FinalizeBase64(source, trailer_len, trailer)
- char   *source;
- int    trailer_len;
- int8_t trailer;
+char *FinalizeBase64(char *source, int trailer_len, int8_t trailer)
 {
   int8_t add_value[4] = {0,0,0,0};  /* we need space for        */
                                     /* 2 '=' and a '\0' as well */
@@ -122,11 +118,7 @@ char *FinalizeBase64(source, trailer_len, trailer)
 }
 
 
-int32_t ByteToBase64(source, result, trailer_len, trailer)
- int8_t source;
- int8_t *result;
- int    *trailer_len;
- int8_t *trailer;
+int32_t ByteToBase64(int8_t source, int8_t *result, int *trailer_len, int8_t *trailer)
 {
   /* This function converts a byte to base64. The result is  */
   /* 1 or 2 byte(s) with bit 0 to 6 filled, with bit 0 the   */
@@ -224,10 +216,7 @@ int32_t ByteToBase64(source, result, trailer_len, trailer)
 /* Decoding function definitions */
 /*********************************/
 
-char *GetBytesFromBase64String(base64_string, byte_index, nr_of_bytes)
- char *base64_string;
- int  *byte_index;
- int  nr_of_bytes;
+char *GetBytesFromBase64String(char *base64_string, int *byte_index, int nr_of_bytes)
 {
   char *byte_string = NULL;
 
@@ -249,8 +238,7 @@ char *GetBytesFromBase64String(base64_string, byte_index, nr_of_bytes)
 }
 
 
-int8_t ConvertBase64Value(value)
- char value;
+int8_t ConvertBase64Value(char value)
 {
   /* we have following sequences in base64 */
 
@@ -280,13 +268,8 @@ int8_t ConvertBase64Value(value)
 }
 
 
-int32_t Base64ToBytes(base64_string, byte_index, nr_of_bytes, result, leader_len, leader)
- char   *base64_string;
- int    *byte_index;
- int    nr_of_bytes;
- int8_t *result;
- int    *leader_len;
- int8_t *leader;
+int32_t Base64ToBytes(char *base64_string, int *byte_index, int nr_of_bytes, 
+                      int8_t *result, int *leader_len, int8_t *leader)
 {
   /* some explanation about the parameter list */
   /* nr_of_bytes:  is the number of bytes wanted in the result, not */

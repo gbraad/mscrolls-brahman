@@ -63,11 +63,9 @@ char *xv_strlwr(char* str)
 }
 
 
-int32_t    ScanWordTable(word, wt_rec, lower, upper)
- char      *word;    /* word to look for in word_table */
- wordTable *wt_rec;  /* struct to copy info into       */
- int32_t   lower;    /* elements of array between      */
- int32_t   upper;    /* which to search                */
+int32_t    ScanWordTable(char *word, wordTable *wt_rec, int32_t lower, int32_t upper)
+ /* word is word to look for in word_table */
+ /* wt_rec is struct to copy info into       */
 {
   int32_t  value;
   int32_t  i;
@@ -116,8 +114,7 @@ int32_t    ScanWordTable(word, wt_rec, lower, upper)
 }
 
 
-int32_t LookUpId(word)
- char *word;
+int32_t LookUpId(char *word)
 {
   /* This function is used to quickly find a word's id, without     */
   /* bothering about types etc. All it does is call ScanWordTable() */
@@ -129,10 +126,7 @@ int32_t LookUpId(word)
 }
 
 
-int32_t NextWordId(line_buf, nr_of_types, types)
- char     **line_buf;
- int32_t  *nr_of_types;
- int32_t  *types;
+int32_t NextWordId(char **line_buf, int32_t *nr_of_types, int32_t *types)
 {
   char      *start = *line_buf;   /* remember start of line_buf     */
   int32_t   i      = 0;           /* counter to go through line_buf */
@@ -225,8 +219,7 @@ int32_t NextWordId(line_buf, nr_of_types, types)
 }
 
 
-void InitParsedInput(parsed_input)
- parsedInput *parsed_input;
+void InitParsedInput(parsedInput *parsed_input)
 {
   int32_t i = 0;
 
@@ -269,10 +262,7 @@ void InitParsedInput(parsed_input)
 }
 
 
-int32_t ParseInput(line_buf, parsed_input, syntax)
- char        *line_buf;
- parsedInput *parsed_input;
- int32_t     syntax;
+int32_t ParseInput(char *line_buf, parsedInput *parsed_input, int32_t syntax)
 {
   int32_t state       = 1;
   int32_t nr_of_types = 0;
@@ -316,17 +306,8 @@ int32_t ParseInput(line_buf, parsed_input, syntax)
 }
 
 
-int32_t CheckSyntax(line_buf, id, nr_of_types, types, type_index,
-                                  subject_index, state, parsed_input)
- char        *line_buf;
- int32_t     id;
- int32_t     nr_of_types;
- int32_t     *types;
- int32_t     type_index;
- int32_t     subject_index; /* More than one subject allowed. */
- int32_t     state;
- parsedInput *parsed_input;
-
+int32_t CheckSyntax(char *line_buf, int32_t id, int32_t nr_of_types, int32_t *types, int32_t type_index,
+                    int32_t subject_index, int32_t state, parsedInput *parsed_input)
 {
   /* select the right function, depending on the story language */
 
@@ -349,18 +330,10 @@ int32_t CheckSyntax(line_buf, id, nr_of_types, types, type_index,
 }
 
 
-resultStruct MakeSysDescr(line_buf, rest_of_line_buf, id, nr_of_types,
-                          types, type_index, state, descr)
- char     *line_buf;
- char     **rest_of_line_buf;
- int32_t  id;
- int32_t  nr_of_types;
- int32_t  *types;
- int32_t  type_index;
- int32_t  state;
- sysDescr *descr;
+resultStruct MakeSysDescr(char *line_buf, char **rest_of_line_buf, int32_t id, int32_t nr_of_types,
+                          int32_t *types, int32_t type_index, int32_t state, sysDescr *descr)
 {
-  /* descr must be set to default values by caller.               */
+  /* descr must be set to default values by caller. */
 
   int32_t      i      = 0;
   resultStruct result = {OK, OK};
@@ -596,9 +569,7 @@ resultStruct MakeSysDescr(line_buf, rest_of_line_buf, id, nr_of_types,
 }
 
 
-int32_t ParseDSys(description, descr)
- char             *description;
- extendedSysDescr *descr;
+int32_t ParseDSys(char *description, extendedSysDescr *descr)
 {
   int32_t      nr_of_types    = 0;
   int32_t      types[MAX_TYPES];

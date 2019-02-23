@@ -68,8 +68,7 @@ void FreeCommonTriggers(void)
 }
 
 
-void FreeDescrs(start_descr)
- descrInfo *start_descr;
+void FreeDescrs(descrInfo *start_descr)
 {
   if (start_descr->next == NULL)
     return;
@@ -80,8 +79,7 @@ void FreeDescrs(start_descr)
 }
 
 
-void FreeCompActionRecs(start_actionrec)
- compActionRec *start_actionrec;
+void FreeCompActionRecs(compActionRec *start_actionrec)
 {
   if (start_actionrec == NULL)
     return;
@@ -92,8 +90,7 @@ void FreeCompActionRecs(start_actionrec)
 }
 
 
-void FreeTriggers(start_trigger)
- triggerInfo *start_trigger;
+void FreeTriggers(triggerInfo *start_trigger)
 {
   if (start_trigger == NULL)
     return;
@@ -106,8 +103,7 @@ void FreeTriggers(start_trigger)
 }
 
 
-void FreeVerb(verb)
- verbInfo *verb;
+void FreeVerb(verbInfo *verb)
 {
   if (verb->next != NULL)
     FreeVerb(verb->next);
@@ -123,8 +119,7 @@ void FreeVerb(verb)
 }
 
 
-void FreeObject(obj)
- objectInfo *obj;
+void FreeObject(objectInfo *obj)
 {
   /* free descriptions */
   FreeDescrs(obj->descriptions);
@@ -140,7 +135,7 @@ void FreeObject(obj)
 }
 
 
-void FreeAllLocations()
+void FreeAllLocations(void)
 {
   int i = 0;
 
@@ -153,7 +148,7 @@ void FreeAllLocations()
 }
 
 
-void FreeAllObjects()
+void FreeAllObjects(void)
 {
   int i = 0;
 
@@ -166,8 +161,7 @@ void FreeAllObjects()
 }
 
 
-void FreeLocation(loc)
- locationInfo *loc;
+void FreeLocation(locationInfo *loc)
 {
   /* free descriptions */
   FreeDescrs(loc->descriptions);
@@ -182,7 +176,8 @@ void FreeLocation(loc)
   free(loc);
 }
 
-void CleanUp()
+
+void CleanUp(void)
 {
   int32_t i=0;
 

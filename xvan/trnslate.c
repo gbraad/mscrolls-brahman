@@ -58,9 +58,7 @@ resultStruct Translate(parsedInput*, int32_t, usrActionRec*, char*);
 /* Function definitions */
 /************************/
 
-int32_t StringToNum(source, num)
- char *source;
- int32_t  *num;
+int32_t StringToNum(char *source, int32_t *num)
 {
   int32_t i     = 0;
   int32_t start = 0;  /* start value for index. */
@@ -95,8 +93,7 @@ int32_t StringToNum(source, num)
 }
 
 
-void InitUsrActionRec(usr_action_rec)
- usrActionRec *usr_action_rec;
+void InitUsrActionRec(usrActionRec *usr_action_rec)
 {
   int32_t i = 0;
 
@@ -120,8 +117,7 @@ void InitUsrActionRec(usr_action_rec)
 }
 
 
-int32_t CountSubjectsInParsedInput(parsed_input)
- parsedInput *parsed_input;
+int32_t CountSubjectsInParsedInput(parsedInput *parsed_input)
 {
   int count = 0;
 
@@ -133,8 +129,7 @@ int32_t CountSubjectsInParsedInput(parsed_input)
 }
 
 
-int32_t FilledOut(descr)
- extendedSysDescr *descr;
+int32_t FilledOut(extendedSysDescr *descr)
 {
   /* This routine checks for noun value NO_ID and zero */
   /* adjectives in descr->part1. If so, then descr is  */
@@ -148,9 +143,7 @@ int32_t FilledOut(descr)
 }
 
 
-int32_t HasType(word_id, type)
- int32_t word_id;
- int32_t type;
+int32_t HasType(int32_t word_id, int32_t type)
 {
   int i     = 0;
   int j     = 0;
@@ -178,8 +171,7 @@ int32_t HasType(word_id, type)
 }
 
 
-int32_t FlipNoun(descr)
-  sysDescr *descr;
+int32_t FlipNoun(sysDescr *descr)
 {
   int i = 0;
 
@@ -211,9 +203,7 @@ int32_t FlipNoun(descr)
 }
 
 
-int32_t SplitSubject(p_i, index)
- parsedInput *p_i;
- int32_t     index;
+int32_t SplitSubject(parsedInput *p_i, int32_t index)
 {
   int32_t i = 0;
 
@@ -257,9 +247,7 @@ int32_t SplitSubject(p_i, index)
 }
 
 
-int32_t SplitSubjectAndSpecifier(p_i, index)
- parsedInput *p_i;
- int32_t     index;
+int32_t SplitSubjectAndSpecifier(parsedInput *p_i, int32_t index)
 {
   int32_t i                      = 0;
   int32_t old_prepos_from_struct = NO_ID;
@@ -339,9 +327,7 @@ int32_t SplitSubjectAndSpecifier(p_i, index)
 }
 
 
-int32_t CompareNounsAndAdjectives(source, target)
-  sysDescr source;
-  sysDescr target;
+int32_t CompareNounsAndAdjectives(sysDescr source, sysDescr target)
 {
   int32_t i     = 0;
   int32_t j     = 0;
@@ -384,9 +370,9 @@ int32_t CompareNounsAndAdjectives(source, target)
 }
 
 
-int32_t MatchSysDescr(source, target)
- extendedSysDescr source; /* grabbed from user input */
- extendedSysDescr target; /* in compiled story       */
+int32_t MatchSysDescr(extendedSysDescr source, extendedSysDescr target)
+ /* source is grabbed from user input */
+ /* target is from compiled story     */
 {
   /* This function matches two sysdescr structs. The match succeeds */
   /* if source is a `subset' of target. For example, the sources    */
@@ -447,9 +433,7 @@ int32_t MatchSysDescr(source, target)
 }
 
 
-void SwapSysDescr(sd1, sd2)
- extendedSysDescr *sd1;
- extendedSysDescr *sd2;
+void SwapSysDescr(extendedSysDescr *sd1, extendedSysDescr *sd2)
 {
   extendedSysDescr sd_temp;
   int32_t          i = 0;
@@ -505,9 +489,7 @@ void SwapSysDescr(sd1, sd2)
 }
 
 
-int32_t HasMatchingSysDescr(id, descr)
- int32_t          id;
- extendedSysDescr descr;
+int32_t HasMatchingSysDescr(int32_t id, extendedSysDescr descr)
 {
   /* A location or object can have more than one System Description. */
   /* In this function we determine of any one of these matches with  */
@@ -559,13 +541,12 @@ int32_t HasMatchingSysDescr(id, descr)
 }
 
 
-int32_t Search(id, descr, visible, depth, hits)
- int32_t          id;      /* Tells which loc/obj to search through.     */
- extendedSysDescr *descr;
- int32_t          visible; /* 0 means scope is ALL_LOCS.                 */
- int32_t          depth;   /* Tells the containment level of the search. */
-                           /* Value -1 means unlimited depth.            */
- match            *hits;   /* Object ids that match descr.               */
+int32_t Search(int32_t id, extendedSysDescr *descr, int32_t visible, int32_t depth, match *hits)
+ /* is tells which loc/obj to search through.        */
+ /* visible 0 means scope is ALL_LOCS.               */
+ /* depth tells the containment level of the search. */
+ /* Value -1 means unlimited depth.                  */
+ /* hits are bject ids that match descr.             */
 {
   /* This function first determines whether the `id' matches     */
   /* with descr. Next it searches objects that are contained in  */
@@ -641,8 +622,7 @@ int32_t Search(id, descr, visible, depth, hits)
 }
 
 
-int32_t ArrangeVisible(hits)
- match *hits;
+int32_t ArrangeVisible(match *hits)
 {
   int i       = 0;
   int j       = 0;
@@ -685,10 +665,7 @@ int32_t ArrangeVisible(hits)
 }
 
 
-void MoreInfo(descr, hits, line_buf)
- extendedSysDescr *descr;
- match            *hits;
- char             *line_buf;
+void MoreInfo(extendedSysDescr *descr, match *hits, char *line_buf)
 {
   switch(story_info.story_language) {
     case NL:
@@ -705,12 +682,11 @@ void MoreInfo(descr, hits, line_buf)
 }
 
 
-int32_t SearchHits(descr, scope, id, search_set, line_buf)
- extendedSysDescr *descr;      /* Description that must be matched.       */
- int32_t          scope;       /* In case we need to refresh search set   */
- int32_t          *id;         /* Id of matching loc/obj (if only one).   */
- match            *search_set; /* Set of objs locs to compare with descr. */
- char             *line_buf;
+int32_t SearchHits(extendedSysDescr *descr, int32_t scope, int32_t *id, match *search_set, char *line_buf)
+ /* descr is description that must be matched.             */
+ /* scope is needed in case we need to refresh search set. */
+ /* id is id of matching loc/obj (if only one).            */
+ /* search_set is set of objs locs to compare with descr.  */
 {
   /* This function is similar to Find(), in the way that it tries   */
   /* to find an object or location whose description matches descr. */
@@ -724,7 +700,7 @@ int32_t SearchHits(descr, scope, id, search_set, line_buf)
   /* Malloc space for hits->matched_objs. Will never need more than */
   /* than there are in the search_set variable.                     */
   if ((hits.matched_objs = (int32_t *) malloc((search_set->nr_of_hits)*sizeof(int32_t))) == NULL) {
-    PrintError(15, NULL, "SearchHits()");
+    PrintError(15, NULL, "8()");
     return(ERROR);
   }
   /* added 19dec07 - start */
@@ -794,18 +770,13 @@ int32_t SearchHits(descr, scope, id, search_set, line_buf)
 }
 
 
-int32_t Find(descr, scope, line_buf, hits)
- extendedSysDescr *descr;
- int32_t          scope;
- char             *line_buf;
- match            *hits;
-
- /* IN CASE OF A SUSPECTED MEMORY LEAK: CHECK THE */
- /* MALLOCs AND FREEs FOR hits->matched_objs      */
-
+int32_t Find(extendedSysDescr *descr, int32_t scope, char *line_buf, match *hits)
 {
   int32_t i     = 0;
   int32_t ready = 0;
+
+  /* IN CASE OF A SUSPECTED MEMORY LEAK: CHECK THE */
+  /* MALLOCs AND FREEs FOR hits->matched_objs      */
 
   /* malloc space for hits. Theoretically - with scope ALL_LOCS - */
   /* each object and location may be a hit, therefore malloc      */
@@ -868,8 +839,7 @@ int32_t Find(descr, scope, line_buf, hits)
 }
 
 
-void PrintNotFound(descr)
- extendedSysDescr *descr;
+void PrintNotFound(extendedSysDescr *descr)
 {
   switch(story_info.story_language) {
     case NL:
@@ -886,11 +856,8 @@ void PrintNotFound(descr)
 }
 
 
-resultStruct Translate(parsed_input, index, usr_action_rec, line_buf)
- parsedInput  *parsed_input;
- int32_t      index;             /* tells which subject to use from parsed_input */
- usrActionRec *usr_action_rec;
- char         *line_buf;
+resultStruct Translate(parsedInput *parsed_input, int32_t index, usrActionRec *usr_action_rec, char *line_buf)
+ /* index tells which subject to use from parsed_input */
 {
   int32_t      try_to_find = 0;
   int32_t      tries       = 3;  /* actor, subject and specifier */
