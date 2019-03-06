@@ -92,6 +92,12 @@ struct Stream
 
     virtual const char* name() const = 0;
 
+    int get()
+    {
+        _bump();
+        return _at;
+    }
+
 protected:
 
     virtual int __get() = 0;
@@ -165,9 +171,6 @@ protected:
                 if (!_inQuote && _inLineComment)
                 {
                     _inLineComment = false;
-
-                    // ignore this newline when it terminates a comment
-                    continue;
                 }
             }
             else if (!_inQuote)
@@ -278,6 +281,21 @@ struct StreamFile: public Stream
     bool open(const std::string& name) { return open(name.c_str()); }
 
     const char* name() const override { return _name.c_str(); }
+
+    char* loadImage()
+    {
+        // load the file content without comments etc.
+
+        SBuf buf;
+        
+        while (_at)
+        {
+            buf.add((char)_at);
+            _bump();
+        }
+
+        return buf.donate();
+    }
 
 protected:
 

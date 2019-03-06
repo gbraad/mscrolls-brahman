@@ -5125,8 +5125,8 @@ void do_line_a(void)
                 type32 pos;
                         
                 str = (version < 4) ? (type8s*)effective(read_reg(8 + 0, 1)) : 0;
-                pos = read_reg(8 + 1, 1);
-                size = (type16)read_reg(1, 1);
+                pos = read_reg(8 + 1, 1); // A1.L
+                size = (type16)read_reg(1, 1); // D1.W
 
                 //printf("save at %x, size %d (%x)\n", pos, (int)size, (int)size);
                 write_reg(7, 0,

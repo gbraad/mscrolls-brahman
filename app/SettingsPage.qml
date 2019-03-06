@@ -49,9 +49,6 @@ Page
     
     title: "Settings"
 
-    readonly property int dialogWidth: width*3/4
-    readonly property int dialogHeight: height*8/10
-    
     readonly property string marketAndroid: QControl.gameMarketAndroid()
     readonly property string marketIOS: QControl.gameMarketIOS()
     
@@ -395,7 +392,7 @@ Page
         id: modernEnableDialog
         title: "Classic Mode"
         negativeButtonText: ""
-        width: settingspage.dialogWidth
+        width: app.dialogWidth
         backgroundColor: app.theme.dialogColor
         
         text: "By disabling Modern Mode, you have selected Classic mode, where some of the new helpful features are disabled, and you're on your own!"
@@ -405,8 +402,8 @@ Page
     {
         id: creditsDialog
         negativeButtonText: ""
-        width: dialogWidth
-        height: dialogHeight
+        width: app.dialogWidth
+        height: app.dialogHeight
         backgroundColor: app.theme.dialogColor
 
         onOpened: app.playTitleMusic()
@@ -457,7 +454,7 @@ Page
 
         sourceComponent: ThemeSelector
         {
-            height: dialogHeight
+            height: app.dialogHeight
         }
     }
 
@@ -468,8 +465,8 @@ Page
 
         sourceComponent: SaveLoadSelector 
         {
-            maxWidth: dialogWidth
-            maxHeight: dialogHeight
+            maxWidth: app.dialogWidth
+            maxHeight: app.dialogHeight
             onAccepted: settingsSnackbar.open(QControl.saveGame(filename) ? "OK" : "Save FAILED!")
         }
     }
@@ -481,8 +478,8 @@ Page
 
         sourceComponent: SaveLoadSelector
         {
-            maxWidth: dialogWidth
-            maxHeight: dialogHeight
+            maxWidth: app.dialogWidth
+            maxHeight: app.dialogHeight
             saveMode: false
             onAccepted: settingsSnackbar.open(QControl.loadGame(filename) ? "OK" : "Load Failed")
         }
@@ -496,8 +493,8 @@ Page
         // our version
         sourceComponent: FontSelector
         {
-            maxWidth: dialogWidth
-            maxHeight: dialogHeight
+            maxWidth: app.dialogWidth
+            maxHeight: app.dialogHeight
             currentFont: QControl.prefs.gameFont            
             onAccepted: QControl.prefs.gameFont = font
         }
@@ -510,8 +507,8 @@ Page
 
         sourceComponent: ScaleSelector
         {
-            maxWidth: dialogWidth
-            maxHeight: 0.2*dialogHeight
+            maxWidth: app.dialogWidth
+            maxHeight: 0.2*app.dialogHeight
             currentScale: QControl.prefs.dpScale*100
             onAccepted: QControl.prefs.dpScale = currentScale/100
         }

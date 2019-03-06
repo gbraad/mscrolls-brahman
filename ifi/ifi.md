@@ -125,7 +125,7 @@ These are the json tags that may appear in a _request_. See the _Replies_ sectio
    Request back-end to emit `savedata` with current game state.
 
 * `loaddata: "game-state"`  
-    The entire game state is sent to restore a game position. The string "game-state" is _entirely_ back-end specific, for example base64 encoded binary data, whose content and meaning is only known to the back-end. This will include any internal headers, formatting, version numbers etc.
+    The entire game state is sent to restore a game position. The string "game-state" is _entirely_ back-end specific, for example base85 (see base85.h) encoded binary data, whose content and meaning is only known to the back-end. This will include any internal headers, formatting, version numbers etc.
 
     The "game-state" string will correspond _exactly_ to one previously sent through `savedata` earlier.
 
@@ -366,7 +366,7 @@ Same meanings as `item`.
 ### saveobj
 
 * `data: "game-state"`  
-   The entire game state encoded as a string (eg base64) that can later be accommodated by a `loaddata` request to completely restore a position (see also request `loaddata`).
+   The entire game state encoded as a string (eg base85) that can later be accommodated by a `loaddata` request to completely restore a position (see also request `loaddata`).
 
 * `name: "filepath"`  
    _Optional_. path relative to datadir.

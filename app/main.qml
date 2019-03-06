@@ -73,6 +73,9 @@ ApplicationWindow
 
     property string soundJSON: QControl.soundJSON
     property int force: QControl.force
+
+    readonly property int dialogWidth: width*3/4
+    readonly property int dialogHeight: height*8/10
     
     function setThemeCols(matname)
     {

@@ -1799,7 +1799,7 @@ void IFMagnetic::updateGameSaveArea(uchar* ptr, size_t size, uint addr)
             _gameSaveMemorySize != size ||
             _gameSaveAddr != addr)
         {
-            LOG1("MS WARNING: ", "save game memory area changed!");
+            LOG1("MS WARNING: save game memory area changed! Old area ", std::hex << _gameSaveAddr << " size: 0x" << _gameSaveMemorySize << ", New area " << addr << " size 0x" << size << std::dec);
         }
     }
     
@@ -1902,7 +1902,7 @@ bool IFMagnetic::loadGame(const char* name,
             {
                 // check header compat
                 // if type specified, it must match
-                LOG("loadGame, header type mismatch ", shead._type);
+                LOG3("loadGame, header type mismatch ", shead._type);
 
                 // allow mismatch for prog format, as they should be compatible
                 if (!prog_format) res = false;
@@ -1914,12 +1914,21 @@ bool IFMagnetic::loadGame(const char* name,
                 {
                     LOG1("MS loading old save game version ", shead._versionMajor << "." << shead._versionMinor);
                 }
+
+                if (shead._gameid == 3 && shead._dataSize == sctx._size + 511)
+                {
+                    // XXX horrible HACK!!
+                    // this is a workaround for loading Jinxter saves already made by the
+                    // game where it erroneously added 512 bytes to the size
+                    LOG3(">>>> MS, ", "load game  HORRIBLE HACK");
+                    sctx._size = shead._dataSize;
+                }
                 
                 // read into temp memory, in case fail check
                 uchar* data = new uchar[sctx._size];
                 
-                res = data != 0 && file.read(data, sctx._size);
-                
+                res = file.read(data, sctx._size);
+
                 // support game_id
                 if (res && shead.versionOver(1,5))
                 {
@@ -1942,6 +1951,7 @@ bool IFMagnetic::loadGame(const char* name,
                 {
                     //LOG3("MS checking save size ", sctx._size);
                     res = shead._dataSize == sctx._size;
+                    
                     if (!res)
                     {
                         LOG1("MS, Save Game Size Mismatch; expected ", sctx._size << " got " << shead._dataSize);                        

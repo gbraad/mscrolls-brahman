@@ -185,8 +185,13 @@ inline char* u_strdup(const char* s)
 
 inline char* u_strndup(const char* s, size_t n)
 {
-    char* p = (char*)memcpy(new char[n+1], s, n);
-    p[n] = 0;
+    char* p;
+    size_t sz = strlen(s);
+    if (n < sz) sz = n;
+    p = new char[sz+1];
+    //p = (char*)malloc(sz);
+    memcpy(p, s, sz);
+    p[sz] = 0;
     return p;
 }
 

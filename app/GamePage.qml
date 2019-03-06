@@ -68,6 +68,31 @@ Page
     actions: [
     Action
     {
+        iconName: "other/download"
+        name: "Save"
+        hoverAnimation: true
+        visible: !Device.isMobile && app.enableSaveLoad
+        onTriggered:
+        {
+            saveselectorLoader.asynchronous = false
+            saveselectorLoader.item.open()
+        }
+
+    },
+    Action
+    {
+        iconName: "other/upload"
+        name: "Restore"
+        hoverAnimation: true
+        visible: !Device.isMobile && app.enableSaveLoad
+        onTriggered:
+        {
+            loadselectorLoader.asynchronous = false
+            loadselectorLoader.item.open()
+        }
+    },
+    Action
+    {
         iconName: "navigation/refresh"
         name: "Refresh"
         hoverAnimation: true
@@ -357,6 +382,33 @@ Page
                     }
                 }
             }
+        }
+    }
+
+    Loader
+    {
+        id: saveselectorLoader
+        asynchronous: true
+
+        sourceComponent: SaveLoadSelector 
+        {
+            maxWidth: app.dialogWidth
+            maxHeight: app.dialogHeight
+            onAccepted: snackbar.open(QControl.saveGame(filename) ? "OK" : "Save FAILED!")
+        }
+    }
+
+    Loader
+    {
+        id: loadselectorLoader
+        asynchronous: true
+
+        sourceComponent: SaveLoadSelector
+        {
+            maxWidth: app.dialogWidth
+            maxHeight: app.dialogHeight
+            saveMode: false
+            onAccepted: snackbar.open(QControl.loadGame(filename) ? "OK" : "Load Failed")
         }
     }
 

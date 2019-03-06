@@ -66,7 +66,9 @@
 </qresource>
 
 <qresource prefix="/icons/other">
-	<file>handtap.svg</file>
+  <file>handtap.svg</file>
+  <file>upload.svg</file>
+  <file>download.svg</file>
 </qresource>
 
 </RCC>
