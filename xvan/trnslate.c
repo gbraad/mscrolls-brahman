@@ -372,7 +372,7 @@ int32_t CompareNounsAndAdjectives(sysDescr source, sysDescr target)
 
 int32_t MatchSysDescr(extendedSysDescr source, extendedSysDescr target)
  /* source is grabbed from user input */
- /* target is from compiled story     */
+ /* target is in compiled story       */
 {
   /* This function matches two sysdescr structs. The match succeeds */
   /* if source is a `subset' of target. For example, the sources    */
@@ -407,6 +407,13 @@ int32_t MatchSysDescr(extendedSysDescr source, extendedSysDescr target)
 
   /* 29nov2016: moved part of code to CompareNounsAndAdjectives()   */
 
+  /* 19mar2019: added the flipnoun() function. In some cases where  */
+  /* additional info was asked and an entered single adjective was  */
+  /* initially parsed as a noun, there would not be a match which   */
+  /* would result in redefining the search set. With scope all_locs */
+  /* this could lead to strange situations (new things in scope,    */
+  /* based on only the adjective).                                  */
+
   /* Check for empty target. */
   if (target.part1.noun == NO_ID)
     return(ERROR);
@@ -420,12 +427,28 @@ int32_t MatchSysDescr(extendedSysDescr source, extendedSysDescr target)
     return(ERROR);
 
   /* Compare part 1 nouns and adjectives */
-  if (!CompareNounsAndAdjectives(source.part1, target.part1))
-    return(ERROR);
+  if (!CompareNounsAndAdjectives(source.part1, target.part1)) {
+    if (!FlipNoun(&source.part1)) {
+      return(ERROR);
+    }
+    else {
+      if (!CompareNounsAndAdjectives(source.part1, target.part1)) {
+        return(ERROR);
+      }
+    }
+  }
 
   /* Compare part 2 nouns and adjectives */
-  if (!CompareNounsAndAdjectives(source.part2, target.part2))
-    return(ERROR);
+  if (!CompareNounsAndAdjectives(source.part2, target.part2)) {
+    if (!FlipNoun(&source.part2)) {
+      return(ERROR);
+    }
+    else {
+      if (!CompareNounsAndAdjectives(source.part2, target.part2)) {
+        return(ERROR);
+      }
+    }
+  }
 
   /* We made it to here; this definitely is a match!          */
 
