@@ -758,7 +758,7 @@ int32_t SearchHits(extendedSysDescr *descr, int32_t scope, int32_t *id, match *s
 
       switch (ParseDSys(line_buf, descr)) {
         case OK:
-          line_buf[0] = '\0';
+          /* line_buf[0] = '\0'; */ /* moved down below */
           /* Try again with new descr. */
           result = SearchHits(descr, scope, id, &hits, line_buf);
           if (result == NO_MATCH) {
@@ -769,6 +769,15 @@ int32_t SearchHits(extendedSysDescr *descr, int32_t scope, int32_t *id, match *s
             result = SearchHits(descr, scope, id, &hits, line_buf);
           }
           free(hits.matched_objs);
+          /* next if-clause added on 23mar19. If the player types a new */
+          /* command that also has valid object syntax, it will result  */
+          /* in a 'you don't see that here' error. E.g 'open chest' is  */
+          /* new command, but also can be an open chest. So, now we     */
+          /* catch NO_MATCH and return NEXT_SENTENCE.                   */
+          if (result == NO_MATCH) {
+            return(NEXT_SENTENCE);
+          }
+          line_buf[0] = '\0';
           return(result);
         case UNKNOWN_WORD:
           /* User entered an unknown word.                     */
