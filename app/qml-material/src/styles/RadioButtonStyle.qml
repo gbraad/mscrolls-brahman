@@ -9,10 +9,11 @@
  */
 
 import QtQuick 2.4
-import QtQuick.Controls.Styles 1.3
+import QtQuick.Controls.Styles 1.4
 import Material 0.3
 
-RadioButtonStyle {
+RadioButtonStyle
+{
     id: style
 
     spacing: 0
@@ -22,8 +23,11 @@ RadioButtonStyle {
 
     property bool darkBackground: Theme.isDark
 
-    label: Label {
+    label: Label
+    {
         text: control.text
+        verticalAlignment:  Text.AlignVCenter
+        height: control.height
         style: "button"
 
         /*
@@ -38,7 +42,8 @@ RadioButtonStyle {
         color: "transparent"
     }
 
-    indicator: Rectangle {
+    indicator: Rectangle 
+    {
         implicitWidth: 48 * Units.dp
         implicitHeight: 48 * Units.dp
         radius: implicitHeight / 2

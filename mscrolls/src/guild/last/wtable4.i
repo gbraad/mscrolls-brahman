@@ -155,6 +155,6 @@ WTAB_VERBS
 
             DC.B     $82                  ;End of section
 
-* produced on Mon Jun 11 21:57:50 2018
+* produced on Tue Jun 12 09:38:16 2018
 
-* checksum = e1d843b6
+* checksum = 7bb45755

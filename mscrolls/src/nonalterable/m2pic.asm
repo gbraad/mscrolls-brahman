@@ -54,6 +54,7 @@
 	include  "macros.asm"
 
         XDEF    LOAD_PIC
+		XREF    ROOM
 
         IFEQ    NAMEDPICS
 LOAD_PIC
@@ -71,22 +72,26 @@ LOAD_PIC
         
 LOAD_PIC
 
-        ;; A0 = code address of name of picture
-        ;; D0 = picture number
-        ;; D1 = operation
+    ;; D0 = picture number
+    ;; D1 = operation (1 = show, 0 = hide)
+    ;; D2.B = picture version
+    ;; sets D3.W = current room
 
-        PUSH_L  D2/A0
-        LEA     NAMETAB(PC),A0
-        MOVE.W  D0,D2
-        ADD.W   D2,D2
-        MOVE.W  0(A0,D2.W),D2           ; name offset
-        EXT.L   D2
-        ADD.L   D2,A0
-        SUB.L   A4,A0
-        DC.W    $A0F0
-        PULL_L  D2/A0
-        RET
-        ENDC
+    ;; set up A0 to point to picture name
+
+    PUSH_L  D3/A0
+    LEA     NAMETAB(PC),A0
+    MOVE.W  D0,D3
+    ADD.W   D3,D3
+    MOVE.W  0(A0,D3.W),D3           ; name offset
+    EXT.L   D3
+    ADD.L   D3,A0
+    SUB.L   A4,A0
+    MOVE.W  ROOM(A4),D3
+    DC.W    $A0F0                   ; graphic trap
+    PULL_L  D3/A0
+    RET
+    ENDC
 
 *--------------------------------
         END

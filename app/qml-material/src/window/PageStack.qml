@@ -9,7 +9,8 @@
  */
 
 import QtQuick 2.4
-import QtQuick.Controls 1.3 as Controls
+//import QtQuick.Controls 1.4
+import QtQuick.Controls 2.5
 import Material 0.3
 
 /*!
@@ -18,7 +19,7 @@ import Material 0.3
 
    \brief Manages the page stack used for navigation.
 */
-Controls.StackView {
+StackView {
     id: stackView
 
     signal pushed(Item page)
@@ -27,8 +28,43 @@ Controls.StackView {
 
     property int __lastDepth: 0
     property Item __oldItem: null
+    property int changetime: 300
 
-    onCurrentItemChanged: {
+    pushEnter: Transition {
+        PropertyAnimation {
+            property: "opacity"
+            from: 0
+            to:1
+            duration: changetime
+        }
+    }
+    pushExit: Transition {
+        PropertyAnimation {
+            property: "opacity"
+            from: 1
+            to:0
+            duration: changetime
+        }
+    }
+    popEnter: Transition {
+        PropertyAnimation {
+            property: "opacity"
+            from: 0
+            to:1
+            duration: changetime
+        }
+    }
+    popExit: Transition {
+        PropertyAnimation {
+            property: "opacity"
+            from: 1
+            to:0
+            duration: changetime
+        }
+    }
+
+    onCurrentItemChanged: 
+    {
         if (stackView.currentItem) {
             stackView.currentItem.canGoBack = stackView.depth > 1;
             stackView.currentItem.forceActiveFocus()

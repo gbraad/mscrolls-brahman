@@ -55,7 +55,8 @@
 
 // 1.1.X pre ifi
 // 1.2.X post ifi
-#define VERSION_STRING  "1.2.13"
+// 1.3.X move to Qt5.12.X
+#define VERSION_STRING  "1.3.1"
 
 struct ControlImpBase
 {
@@ -1326,33 +1327,6 @@ struct Control::Imp :
     }
     
     /////////////////////////////////
-
-    static string makePath(const string& prefix, const string& name) 
-    {
-        string path;
-        if (!name.empty())
-        {
-            // windows style or linux style absolute path given
-            // then do not apply prefix
-            if (name.find(':') != std::string::npos || name.at(0) == '/')
-            {
-                // if we have a prefix like C: or https:// then
-                // assume `name` is an absolute path.
-                path = name;
-            }
-            else
-            {
-                path = prefix;
-                if (!path.empty()) path += '/';
-                path += name;
-            }
-
-            // enough backslashes! windows files work forwards too!
-            replaceCharsInplace(path, '\\', '/');
-        }
-
-        return path;
-    }
 
     string makeConfigPath(const string& name) const
     {

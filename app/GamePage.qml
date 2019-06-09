@@ -52,6 +52,9 @@ Page
     property string currentImage
     property bool picValid
 
+    // does the text move with the image or go behind it
+    property bool textFollowScrollMode: QControl.prefs.textmoveEnabled
+
     onCurrentImageChanged:
     {
         pic.play(currentImage)
@@ -237,9 +240,12 @@ Page
             
             content: Game
             {
+                // where the game text lives
                 id: game 
                 anchors.fill: parent
                 drawerypos: QControl.prefs.compassmoveEnabled ? gamearea.rollHeightShown + Units.dp*16 : 0
+
+                texttopmargin: textFollowScrollMode ? gamearea.rollHeightShown : 0
             }
             
             thumbcontent: RowLayout

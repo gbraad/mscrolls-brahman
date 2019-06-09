@@ -21,10 +21,18 @@ import Material 0.3
  */
 View {
     id: listItem
+    
+    
+    /*
     anchors {
         left: parent ? parent.left : undefined
         right: parent ? parent.right : undefined
     }
+    */
+    
+    
+    width: parent.width
+    //height: parent.height;
 
     property int margins: 16 * Units.dp
 

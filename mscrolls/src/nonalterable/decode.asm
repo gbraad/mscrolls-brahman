@@ -251,12 +251,10 @@ BadContext
 	TEST_W  D7                 ;E O S
 	BNE     EXTRAFIX
 
-     IFEQ	THE_PAWN
-
+    IFEQ	THE_PAWN
 	CMP.W	#SECT.SCEN,D6		;scenary noun?
 	BEQ	DoScenery
-
-     ENDC
+    ENDC
 
 	CALL    DSTAND
 	MSG	CTEXT

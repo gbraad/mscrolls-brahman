@@ -37,7 +37,7 @@ import QtQuick.Controls.Material 2.0
 import QtQuick.Controls 1.4 as C1
 import QtQuick.Controls.Styles 1.4 as C1
 
-import QtQuick.Layouts 1.0
+import QtQuick.Layouts 1.3
 import Material 0.3 as M
 
 import com.voidware.brahman 1.0
@@ -51,6 +51,7 @@ C1.SplitView
     property alias textarea: area
     property alias contenty: textflick.contentY
     property alias drawerypos: rdrawer.dypos
+    property int texttopmargin: 0
 
     readonly property int compassSize: 200*M.Units.dp
 
@@ -74,10 +75,12 @@ C1.SplitView
         
         content: Rectangle 
         {
+            // game text lives here
             id: transcript
             anchors.fill: parent
             onWidthChanged: qtranscript.setWidth(width);
             color: theme.backgroundColor
+            anchors.topMargin: texttopmargin
 
             Flickable 
             {
@@ -96,9 +99,13 @@ C1.SplitView
 
                 function ensureVisible(r)
                 {
+                    /*
                     if (contentY >= r.y) contentY = r.y;
                     else if (contentY+height < r.y+r.height)
                     contentY = r.y+r.height-height;
+                    */
+                    // snap!
+                    contentY = Math.max(area.implicitHeight - height,0)
                 }
 
                 onContentHeightChanged: 

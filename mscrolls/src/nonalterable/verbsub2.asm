@@ -726,17 +726,15 @@ CONNECT
 CONNECT2
 	
 	AND.L   #$FF,D1
-	AND.W   #$FF,D0            ;ROOM # LESS THAN $7F
+	AND.L   #$FF,D0            ;ROOM # LESS THAN $7F
 	SUBQ.W  #1,D0
 
-
-      IFNE     M68000
-
+    
+    IFNE     M68000
 	MULU    #Sizeof_NET,D0
+    ENDC
 
-      ENDC
-
-      IFEQ     M68000
+    IFEQ     M68000
 
 	MOVE.W  D0,-(A7)
 	LSL.W   #3,D0
@@ -744,16 +742,13 @@ CONNECT2
 
 * Deal with bigger than original network
 
-       IFNE	Sizeof_NET-10
-
+    IFNE	Sizeof_NET-10
 	ADD.W	(A7),D0
 	ADD.W	(A7),D0
-	
-       ENDC
+    ENDC
 
 	ADD.W   (A7)+,D0
-
-      ENDC
+    ENDC
 
 	ADD.L   D1,D0
 	LEA     NETWORK(A4),A0

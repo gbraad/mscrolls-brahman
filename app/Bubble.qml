@@ -31,7 +31,7 @@
  */
 
 
-import QtQuick 2.7
+import QtQuick 2.12
 import QtGraphicalEffects 1.0
 import Material 0.3
 
@@ -225,10 +225,9 @@ PopupBase
             ctx.restore()
         }
 
-        MouseArea
+        TapHandler
         {
-            anchors.fill: parent
-            onPressed: if (showing) close();
+            onTapped: if (showing) close();
         }
     }
 

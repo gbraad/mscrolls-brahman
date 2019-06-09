@@ -2810,6 +2810,7 @@ The notecase, of lizard-skin with gold corners, is a vulgar status symbol
     related
     location plastic_desk
     attribute floats
+    m2icon "notecase.svg"
 }
 
 item Aquitanian_ferg "one-ferg one ferg coin"
@@ -3496,6 +3497,7 @@ Squidgy, doughy and ready to bake
     texture soft
     force_plural
     location cake_tin
+    m2icon "dough.svg"
 }
 
 item pudding "loaf_of bread"
@@ -3640,6 +3642,7 @@ much the same as that of birds to [flies]
     location backgarden2
     set baths
     attribute impermeable
+    m2icon "flybath.svg"
 }
 
 room on_platform "on.the.platform"
@@ -5232,6 +5235,7 @@ looks nothing like the key it once was
     out
     location inventory
     attribute floats
+    m2icon "blob.svg"
 }
 
 
@@ -5626,6 +5630,7 @@ has the plum role in the entire game, but otherwise is just a red herring
     hardness 10
     moveable
     edible 5
+    m2icon "plumroll.svg"
 }
 
 item pubdoor "pub door"

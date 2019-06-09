@@ -17,6 +17,7 @@
 	include	"macros.asm"
 	include	"roomequ.i"
 	include	"nounequ1.i"
+	include	"nounequ2.i"
 
 
 	XDEF    INIT
@@ -71,7 +72,7 @@ INIT
 	LEA     D.NOUNS-14(A4),A0	;noun data
 
 	XREF	MessageCode,SpaceTable,MinSpaceEntry
-	XREF	SLADDR,SLADDR.E
+        XREF    SLADDR,SLADDR.E,MsgMSGBASE,MsgSCNBASE
 
 	LEA	SLADDR(A4),A1		;start of restart/save area
 	LEA	SLADDR.E(A4),A2		;end of same
@@ -82,6 +83,20 @@ INIT
 	LEA	SpaceTable,A5		;for clever F-lines
 	ADD.L	A4,A5
 	MOVE.L	#MinSpaceEntry,D7	;F-lines =< this are messages
+    MOVE.L  #MsgMSGBASE,D6
+    MOVE.L  #MsgSCNBASE,D5
+
+    ;; These are now used to pass clonedata and maxnoun
+    ;;  used to be A6 and D5.
+    SUB.L   A2,A2               ;clear
+
+    ;; pass anyway!
+  	MOVE.W	#NMAXNOUN,D4
+    
+	IFD	wanted_CLONES
+	XREF	CLONEDATA
+    LEA	CLONEDATA(A4),A2
+	ENDC
 
 	DC.W    $A0FD               ;Set base address of noun data - SETNOUNS
 

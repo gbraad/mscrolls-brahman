@@ -312,7 +312,9 @@ static int ScnMsgCount;
 
 // prog format only
 static int MsgMSGBASE;
-static int MsgSCNBASE; 
+static int MsgSCNBASE;
+static int CloneData;
+static int MaxNoun;
 
 Item* items;
 size_t itemCount;
@@ -680,7 +682,10 @@ type8 *effective(type32 ptr)
     if (ptr >= mem_size)
     {
         char buf[256];
-        sprintf(buf, "outside memory experience %08X", (int)ptr);
+        sprintf(buf, "outside memory experience %08X\nlimit is %08X",
+                (int)ptr,
+                (int)mem_size);
+
         ms_fatal(buf);
         return code;
     }
@@ -1210,6 +1215,7 @@ static int ms_load_prog_header(const char* name, FILE* fp)
     if (!strncmp(p, "guild", 5)) ms_head.gameid = 0x20;
     if (!strncmp(p, "pawn", 4)) ms_head.gameid = 0x10;
     if (!strncmp(p, "jinxter", 7)) ms_head.gameid = 0x30;
+    if (!strncmp(p, "fish", 4)) ms_head.gameid = 0x50;
 
     //if (!ms_head.gameid) fprintf(stderr, "load_prog, unknown game for file '%s'\n", name);
 
@@ -1757,11 +1763,22 @@ type8 *ms_extract1(type8 pic, type16 * w, type16 * h, type16 * pal)
 
 //#define DEBUG_NAMES
 
-type16s find_name_in_header(type8s * name, type8 upper)
+type16s find_name_in_header(type8s * name, type8 upper, char keyletter)
 {
     type16s header_pos = 0;
     type8s pic_name[8];
     type8 i, j;
+
+    if (!keyletter)
+    {
+        keyletter = 'G';
+
+        // actually the hack is worse!
+        if (get_game() == 5) // Fish!
+        {
+            keyletter = 'F';
+        }
+    }
 
 #ifdef DEBUG_NAMES
     int cc = 0;
@@ -1772,10 +1789,9 @@ type16s find_name_in_header(type8s * name, type8 upper)
     // XX HACK
     // the image names all start with a G inside the gfx file
     if (upper)
-        pic_name[j++] = 'G';
+        pic_name[j++] = keyletter;
     else
-        pic_name[j++] = 'g';
-
+        pic_name[j++] = keyletter + 'a' - 'A';
 
     
     for (i = 0; i < 6; ++i)
@@ -1941,12 +1957,14 @@ type8 *ms_extract2(type8s * name, type16 * w, type16 * h, type16 * pal, type8 * 
     pos_table_size = 0;
 #endif
 
+    char keyletter = 0;
+
 #ifdef NO_ANIMATION
     /* Find the uppercase (no animation) version of the picture first. */
-    header_pos = find_name_in_header(name,1);
+    header_pos = find_name_in_header(name,1, keyletter);
 #endif
     if (header_pos < 0)
-        header_pos = find_name_in_header(name,0);
+        header_pos = find_name_in_header(name,0,keyletter);
     if (header_pos < 0)
         return 0;
 
@@ -2250,6 +2268,40 @@ type8 *ms_extract(type32 pic, type16 * w, type16 * h, type16 * pal, type8 * is_a
 #define         AN_OP_RANDOM_WAIT               4
 #define         AN_OP_GOTO_IF_RANDOM            5
 #define         AN_OP_GOTO_IF_RUNNING           6
+
+/*
+
+Each instruction is stored as a byte and has a fixed number of arguments,
+each of which is a byte. Instructions like goto which need more than a byte
+address, have two bytes stored LSB,MSB. All addresses are absolute to make it
+simpler. Here's the current instruction set;
+
+run_sequence sequence_index,start_frame,duration
+
+Initiate the referenced sequence asynchronously. This instruction takes no
+ticks, and the following instruction is executed before any animation tick is
+processed.
+
+wait_for time
+
+Allow time ticks to pass before executing another instruction in this script.
+
+goto address_LSB,address_MSB
+
+Transfer control to the given address offset from the beginning of the script.
+
+random_wait maxDelay_LSB, maxDelay_MSB
+
+Choose a random integer between 1 and maxDelay_msb *256+ maxDelay_lsb and execute a wait_for instruction for that duration.
+
+goto_if_random chance, address_LSB,address_msb
+
+On a 1 in chance probability execute a goto to the given absolute address.
+
+goto_if_running sequence, address_LSB,address_MSB
+
+If the given sequence is currently running (in progress) execute a goto instruction to the given absolute address
+*/
 
 type8 ms_animate(struct ms_position ** positions, type16 * count)
 {
@@ -4201,8 +4253,12 @@ static void _scan_dict(int doff)
     if (v) printf("%d adjectives\n", (int)adjectiveCount);
             
     // make items
-    itemCount = _extract_words(6, section[6], section[7]-1, sizeof(Item),
+    size_t ic = _extract_words(6, section[6], section[7]-1, sizeof(Item),
                             (Word**)&items);
+
+    // if item count is not already set, initialise from dictionary
+    if (!itemCount) itemCount = ic;
+    
     if (v) printf("%d nouns\n", (int)itemCount);
 }
 
@@ -4428,13 +4484,16 @@ void dict_lookup(void)
 
 void do_findprop(void)
 {
-    type16 tmp;
+    int d0 = read_reg(0, 1) & 0x3fff;
+    int oldclones = (version > 2) && (d0 > fp_size);
+    int newclones = prog_format && MaxNoun && (d0 > MaxNoun);
 
-    if ((version > 2) && ((read_reg(0, 1) & 0x3fff) > fp_size))
+    if (oldclones || newclones)
     {
-        tmp = (type16)(((fp_size - (read_reg(0, 1) & 0x3fff)) ^ 0xffff) << 1);
-        tmp += fp_tab;
-        tmp = read_w(effective(tmp));
+        // Clones!!
+        d0 = (type16)(((fp_size - d0) ^ 0xffff) << 1);
+        d0 += fp_tab;
+        d0 = read_w(effective(d0));
     }
     else
     {
@@ -4442,10 +4501,9 @@ void do_findprop(void)
             write_reg(0, 2, read_reg(0, 2) & 0x7fff);
         else
             write_reg(0, 1, read_reg(0, 1) & 0x7fff);
-        tmp = (type16)read_reg(0, 1);
+        
     }
-    tmp &= 0x3fff;
-    write_reg(8 + 0, 2, tmp * 14 + properties);
+    write_reg(8 + 0, 2, d0*14 + properties);
 }
 
 static int _write_string(type16 ptr, type8* more, outfn fn)
@@ -5051,11 +5109,11 @@ void do_line_a(void)
                 int picAddr = 0; // not known
                 int picOp = read_reg(1, 0); // d1. 1 = show, 0 = hide
                 int picVer = read_reg(2, 0); // d2 = picture version
-                int room = read_reg(3, 1); // d3.w = room
+                //int room = read_reg(3, 1); // d3.w = room
 
                 // Quick fix for missing pic_ver in guild, needs proper fix
-                //if (!picOp || !prog_format) picVer = 0;
-                if (!picOp || !prog_format || (get_game() < 3)) picVer = 0;
+                if (!picOp || !prog_format) picVer = 0;
+                //if (!picOp || !prog_format || (get_game() < 3)) picVer = 0;
 
                 if (gfx_ver > 1 || prog_format)
                     picAddr = read_reg(8,1); // A0
@@ -5330,6 +5388,20 @@ void do_line_a(void)
 
         case 32:  // SETNOUNS
             /* Set properties pointer from A0 [2b7b] A0FD */
+
+            // D0 = size size
+            // D1 =table size
+            // D4 = maxnoun 
+            // D5 & D6 message bases
+            // D7 = minspaceentry
+            
+            // A0 = object props
+            // A1 = save area
+            // A2 = clonedata  (if defined)
+            // A3 = MessageCode
+            // A5 = spaceTable
+            // A6 = table
+            
 #ifdef LOGDIS
             push_msg(DASM_COM,"Set properties pointer from A0");
 #endif
@@ -5361,7 +5433,6 @@ void do_line_a(void)
 
             if (prog_format)
             {
-
                 MsgMSGBASE = read_reg(6, 1); // D6
                 MsgSCNBASE = read_reg(5, 1); // D5
 
@@ -5378,6 +5449,24 @@ void do_line_a(void)
                 //printf("save size = %04X\n", savesize);
 
                 update_game_save_area(effective(savearea), savesize, savearea);
+
+                // only defined when game has  `wanted_CLONES`
+                CloneData = read_reg(8 + 2, 1);
+
+                // maxnoun itself is a valid item. real items <= maxnoun
+                MaxNoun = read_reg(4, 1);
+
+                if (CloneData && MaxNoun && !itemCount)
+                {
+                    printf("Game has clones; MaxNoun=%d\n", MaxNoun);
+
+                    //assert(!itemCount);
+                    itemCount = MaxNoun;
+                }
+
+                fp_tab = CloneData;
+                fp_size = MaxNoun;
+                
             }
             break;
 

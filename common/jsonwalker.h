@@ -439,6 +439,8 @@ struct JSONWalker
 
         assert(_json != _pos);
 
+        skipSpace();
+
         // char that ended term
         char c = *_pos;
 

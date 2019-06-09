@@ -132,7 +132,8 @@ PSUDAT
               DC.B    RNCAVERN6,RNCHAMBER
               DC.B    RNROOM4,RNLEDGE2
               DC.B    RNCHAMBER2,RNWORKSHOP
-              DC.B    RNTUNNEL,RNROOM5
+              DC.B    RNTUNNEL
+*             DC.B    RNROOM5  ; "wall" not in room with paper wall
               DC.B    RNLEDGE3,RNPASSAGE2
               DC.B    RNLEDGE4,RNTREETRUNK
               DC.B    RNSTAIRCASE,RNLOWCEILING
@@ -140,7 +141,7 @@ PSUDAT
               DC.B    RNLOUNGE,RNKITCHEN
               DC.B    RNPASSAGE4,RNLIFT  
               DC.B    RNROCKFACE,RNWHITEROOM
-              DC.B    RNOFFICE,RNBOOTH
+              DC.B    RNOFFICE,RNBOOTH,RNWALL
               DC.B    RNCHAMBER4,0
  
 22$

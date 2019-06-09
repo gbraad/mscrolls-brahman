@@ -237,7 +237,7 @@ void add_reloc(int section, int addr, int symnum, int pcrel, int length, int ext
         if (np->n_type == (N_UNDF|N_EXT))
         {
             rp->next = (struct reloc_item *)np->n_value;
-            np->n_value = (int)rp;
+            np->n_value = (unsigned long)rp;
         }
     }
     n_reloc++;

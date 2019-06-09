@@ -58,7 +58,7 @@ FocusScope {
     function close() {
         showing = false
 
-        if (parent.hasOwnProperty("currentOverlay")) {
+        if (parent && parent.hasOwnProperty("currentOverlay")) {
             parent.currentOverlay = null
         }
 

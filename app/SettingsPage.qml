@@ -231,6 +231,20 @@ Page
 
             ListItem.Subtitled
             {
+                text: "Text Moves"
+                subText: "Does the text move with the picture or go behind it"
+                secondaryItem: Switch
+                {
+                    id: textmoveSwitch
+                    anchors.verticalCenter: parent.verticalCenter
+                    checked: QControl.prefs.textmoveEnabled
+                    onCheckedChanged: QControl.prefs.textmoveEnabled = checked
+                }
+                onClicked: textmoveSwitch.checked = !textmoveSwitch.checked
+            }
+
+            ListItem.Subtitled
+            {
                 text: "Change Theme"
                 subText: "Select color theme for App"
                 interactive: false

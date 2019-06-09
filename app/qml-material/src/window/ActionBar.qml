@@ -35,10 +35,12 @@ Item {
 
     readonly property int stdMargin: 16*Units.dp
 
+    /*
     anchors {
         left: parent.left
         right: parent.right
     }
+    */
 
     /*!
        A list of actions to show in the action bar. These actions will be shown

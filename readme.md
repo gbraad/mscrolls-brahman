@@ -4,38 +4,37 @@
 
 install Qt
 
-Download 5.9.X branch from;
+Download 5.12.X branch from;
 https://www1.qt.io/offline-installers/
 
 ### Windows
 
-Get Qt 5.9.X for Windows
-run the exe. install to eg `c:\qt\qt5.9.6`
+Get Qt 5.12.X for Windows
+run the exe. install to eg `c:\qt\qt5.12.3`
 
-* select: MinGW 5.3.0 32 bit
-* Also select tools/mingGW 5.3.0 if you do not already have a mingw environment.
+* select: MinGW 32 bit & 64 bit
+* Also select tools/mingGW if you do not already have a mingw environment.
 
 add to `PATH` (adjust according to location)
 
 eg.
 ```
-C:\Qt\Qt5.9.6\5.9.6\mingw53_32\bin;c:\Qt\Qt5.9.6\Tools\mingw530_32\bin;C:\Qt\Qt5.9.6\Tools\QtCreator\bin
+PATH=c:\Qt\Qt5.12.3\5.12.3\mingw73_64\bin;c:\Qt\Qt5.12.3\Tools\mingw730_64\bin;c:\Qt\Qt5.12.3\Tools\QtCreator\bin;%PATH%
 ```
 
 ### Linux
 
-Get Qt 5.9.X for Linux 64 bit.
+Get Qt 5.12.X for Linux 64 bit.
 
 File is a ".run" file.
-eg `sudo ./qt-opensource-linux-x64-5.9.6.run`
 
-install to `/opt/Qt5.9.6`
+install to (eg) `/opt/Qt5.12.3`
 select "desktop gcc 64bit"
 
 add to `~/.bashrc`
 
 ```
-export PATH=/opt/Qt5.9.6/5.9.6/gcc_64/bin:/opt/Qt5.9.6/Tools/QtCreator/bin:$PATH
+export PATH=/opt/Qt5.12.3/5.12.3/gcc_64/bin:/opt/Qt5.12.3/Tools/QtCreator/bin:$PATH
 ```
 
 ### MAC OSX
@@ -43,15 +42,15 @@ export PATH=/opt/Qt5.9.6/5.9.6/gcc_64/bin:/opt/Qt5.9.6/Tools/QtCreator/bin:$PATH
 Download Qt 5.9.X 
 
 eg.
-`open qt-opensource-mac-x64-5.9.6.dmg`
+`open qt-opensource-mac-x64-5.12.3.dmg`
 
-install to `/Developer/Qt5.9.6`
+install to `/Developer/Qt5.12.3`
 Select "mac os"
 
 Change `PATH` in `~/.bash_profile` to;
 
 ```
-export PATH=/Developer/Qt5.9.6/5.9.6/clang_64/bin:/Developer/Qt5.9.6:$PATH
+export PATH=/Developer/Qt5.12.3/5.12.3/clang_64/bin:/Developer/Qt5.12.3:$PATH
 ```
  
 ## Build Instructions (all platforms)

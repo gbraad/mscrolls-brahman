@@ -82,6 +82,11 @@
 #define PREFS_CONSOLEECHO_ENABLED "consoleecho_enabled"
 #define DEFAULT_CONSOLEECHO_ENABLE 1
 
+// does the text move with the picture or go behind it?
+#define PREFS_TEXTMOVE_ENABLED  "text_move_enabled"
+#define DEFAULT_TEXTMOVE_ENABLE 0
+
+
 #ifdef _WIN32
 #define DLLX   __declspec( dllexport )
 #else

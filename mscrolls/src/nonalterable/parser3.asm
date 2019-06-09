@@ -257,15 +257,12 @@ INITCOM
 	MOVE.W  D1,PADV(A4)		;clear pending adverb
 	MOVE.W  D1,PVERB(A4)		;clear pending verb
 
-      IFEQ	THE_PAWN
-
+    IFEQ	THE_PAWN
 	XREF	NearNPC,FoundTO
-
 	MOVE.W	D1,NearNPC(A4)		;fod semi-local NPC
 	SF	FoundTO(A4)		;kill flag for 'use x TO verb y'
 					;as used in GW07/VerbOrNoun (same code)
-
-      ENDC
+    ENDC
 
 
 	BRA     UNPAUSE 
@@ -274,7 +271,7 @@ INITCOM
   
 INTEXT
 
-        XREF	MakeUndoDiff
+    XREF	MakeUndoDiff
 	CALL	MakeUndoDiff
 
 	MSG    LINE
@@ -296,14 +293,13 @@ INTEXT
 03$
 	ENDC
 
-      IFNE	THE_PAWN
- 
+    IFNE	THE_PAWN
 	TEST_B  USER.DB(A4) 	;IN 'USER' DEBUG MODE?   
 	BEQ.S   06$         	;EQ=NOPE
 	PRINT   <'] '>        	;YES - CHANGE PROMPT
 	BRA.S   04$
 06$
-      ENDC
+    ENDC
 
 	CALL    PRTTXT
 	DC.B    '> ',0

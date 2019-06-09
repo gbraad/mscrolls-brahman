@@ -58,15 +58,11 @@
 	XDEF    INFORMAT
 
       IFNE	THE_PAWN
-
 KillSpaces	EQU	FALSE
-
       ENDC
 
       IFEQ	THE_PAWN
-
 KillSpaces	EQU	TRUE
-
       ENDC
 
 ************************************************************
@@ -98,13 +94,11 @@ KillSpaces	EQU	TRUE
 
 INFORMAT
 
-      IFNE	TimeCode
-
+    IFNE	TimeCode
 	SF	NumFlag(A4)		;set up time trapping bits
 	CLR.W	NumIndex(A4)
 	CLR.W	WhichNum(A4)		;as used by GetNumber
-
-      ENDC
+    ENDC
  
 	LEA	BUFFLEN(A6),A5     ;A6=START OF BUFFER+MAX BUFFER SIZE
 	MOVE.L  A6,A0
@@ -112,8 +106,7 @@ INFORMAT
 	BEQ	DoSay
 Loop
 
-      IFNE	TimeCode
-
+    IFNE	TimeCode
 	CMP.B	#'0',(A0)
 	BLT.S	10$
 	CMP.B	#':',(A0)	;valid time chars are 0-: (: follows 9)
@@ -123,15 +116,12 @@ Loop
 	SF	NumFlag(A4)
 	CMP.B	#'''',(A0)		;o'clock?
 	BEQ	FodApostrophe
+    ENDC
 
-      ENDC
-
-      IFEQ	THE_PAWN
-
+    IFEQ	THE_PAWN
 	CMP.B   #'~',(A0)		;force blank line char
 	BEQ.S   FodSpace                ;MAKE IT A SPACE
-
-      ENDC
+    ENDC
 
 	CMP.B   #'&',(A0)          ;EQUIVILENT TO 'AND'
 	BEQ.S   FodAnd
@@ -163,19 +153,15 @@ Next
 	CLR.B   2(A1)
 	CLR.B   3(A1)
 
-      IFNE	TimeCode
-
+    IFNE	TimeCode
 	MOVE.W	NumIndex(A4),D6		;terminate numbers list
 	LEA	NumBuf(A4),A3
 	CLR.B	0(A3,D6.W)
+    ENDC
 
-      ENDC
-
-      IFNE	KillSpaces
-
+    IFNE	KillSpaces
 	CALL	RemoveMultSpaces	;replace '   ' with ' ' 
-
-      ENDC
+    ENDC
 
 	RET                        ;BACK TO SCREEN ETC
  
@@ -218,7 +204,7 @@ FodSay
 	BRA     Next  
 
 
-      IFNE	TimeCode
+    IFNE	TimeCode
 
 	XREF	NumFlag,NumIndex,NumBuf,NumBUFSIZE,WhichNum
 
@@ -259,14 +245,14 @@ DoNumeral
 
 	BRA     Next  
  
-      ENDC
+    ENDC
  
 Hassled
 
 	MOVEQ   #-1,D7
 	MSGGO	HASSLE
 
-      IFNE	TimeCode		;o'clock etc
+    IFNE	TimeCode		;o'clock etc
 
 FodApostrophe
 
@@ -285,7 +271,7 @@ FodApostrophe
 	BRA	Next
 
       ENDC
-
+    
       IFNE	KillSpaces
 
 * kill '  ' to ' ' so as search has an easier time of Guild_Of_Thieves

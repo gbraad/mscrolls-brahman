@@ -293,9 +293,13 @@ DO.ADJ
 	BRA.S   70$
 80$
 	CLR.W   -(A0)			;was not an adj, clear last adj
+
+    IFEQ    THE_PAWN
 	CALL	BACK.AWRD		;backtrack another word.
 	ST	FNOUN(A4)		;force noun.
 	BRA.S	40$			;get noun & exit.
+    ENDC
+    
 90$
 	CLR.W   D7
 70$

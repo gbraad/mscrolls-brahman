@@ -1728,6 +1728,24 @@ GoOffice
 90$        
 	RET
 
+	IFNE	Graphics
+	XDEF	Do_PictureD0
+	XREF	GRAPHICS,DRAWPIC
+
+Do_PictureD0
+	ADDQ.L	#2,(A7)		;skip data at old PC
+	TEST_B	GRAPHICS(A4)	;are they on right now?
+	BEQ	10$
+	PUSH_L	D0-D7/A0-A6
+	MOVE.L	60(A7),A0	;ret address
+	MOVE.W	-2(A0),D0	;picture number
+	CALL	DRAWPIC
+	PULL_L	D0-D7/A0-A6
+10$
+	RET
+
+	ENDC	;Graphics
+
 SP.Disappear
 * this will cope with any rooms where if an object gets left lying
 * around it will disappear from view.

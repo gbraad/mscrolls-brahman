@@ -390,7 +390,7 @@ SP.PORTE
 	BEQ.S   99$
 	CLR.W   F_PORT2(A4)    ;ONLY WARNED ONCE
 	CALL    LINE
-	SCN     218
+	SCN     218                 ;remember the porter
 	CALL    LINE
 	MOVE.W  #NDDOORS,D0
 	GETINFO        

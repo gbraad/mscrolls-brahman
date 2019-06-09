@@ -123,6 +123,9 @@ public:
 
     Q_PROPERTY(bool consoleechoEnabled READ consoleechoEnabled WRITE setConsoleechoEnabled NOTIFY consoleechoEnabledChanged);
 
+    Q_PROPERTY(bool textmoveEnabled READ textmoveEnabled WRITE setTextmoveEnabled NOTIFY textmoveEnabledChanged);
+
+
     
 public:
 
@@ -143,6 +146,7 @@ public:
     DPREF_BOOL(imagescale, Imagescale, IMAGESCALE);
     DPREF_BOOL(compassmove, Compassmove, COMPASSMOVE);
     DPREF_BOOL(consoleecho, Consoleecho, CONSOLEECHO);
+    DPREF_BOOL(textmove, Textmove, TEXTMOVE);
 
     bool modernEnabled() const
     { return _prefs->getInt(PREFS_MODERN_ENABLED, DEFAULT_MODERN_ENABLE) != 0; }
@@ -397,6 +401,7 @@ signals:
     void gamePrimaryColorChanged();
     void gameContrastColorChanged();
     void consoleechoEnabledChanged();
+    void textmoveEnabledChanged();
 };
 
 #undef DPREF_BOOL

@@ -53,7 +53,7 @@ Item
     property int yPos: height - thumbHeight
 
     // height of drawer open 
-    property int rollHeightShown: yPos - flick.contentY
+    property int rollHeightShown: Math.max(yPos - flick.contentY, 0)
 
     Timer
     {

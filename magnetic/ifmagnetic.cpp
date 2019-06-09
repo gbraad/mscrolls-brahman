@@ -32,7 +32,6 @@
 
 #include <sstream>
 #include "ifmagnetic.h"
-#include "strutils.h"
 #include "qdefs.h"
 #include "map.h"
 #include "markup.h"
@@ -1556,7 +1555,10 @@ bool IFMagnetic::getProductInfo(ProductInfo& pi)
     CommandResult cr;
     cr._op = CommandResultI::op_capture;
     if (_evalCommand("credits", &cr))
+    {
         _originalCredits = trim(cr._result);
+        LOG4("original credits: '", _originalCredits << '\'');
+    }
 
     // product info is sources from PuzzleManager
     // so to keep all the game specific dependencies there.

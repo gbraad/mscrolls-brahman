@@ -31,6 +31,7 @@
 
 #pragma once
 
+#include <stdint.h>
 #include <string>
 #include <math.h>
 #include "colour.h"
@@ -38,7 +39,7 @@
 
 struct MatCol
 {
-    typedef long iterator;
+    typedef uintptr_t iterator;
     typedef std::string string;
 
     static Colour get(const char* name, int shade = 0)

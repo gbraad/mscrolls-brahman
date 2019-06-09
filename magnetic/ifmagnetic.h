@@ -51,6 +51,7 @@
 #include "save.h"
 #include "timer.h"
 #include "growbuf.h"
+#include "strutils.h"
 
 DECLARE_IFENGINE
 
@@ -588,26 +589,17 @@ public:
 
     string makeConfigPath(const char* name) const
     {
-        string path = _configDir;
-        if (!path.empty()) path += '/';
-        path += name;
-        return path;
+        return makePath(_configDir, name);
     }
 
     string makeDataPath(const char* name) const
     {
-        string path = _dataDir;
-        if (!path.empty()) path += '/';
-        path += name;
-        return path;
+        return makePath(_dataDir, name);
     }
 
     string makeImagePath(const char* name) const
     {
-        string path = _imageDir;
-        if (!path.empty()) path += '/';
-        path += name;
-        return path;
+        return makePath(_imageDir, name);
     }
 
     bool undo(int delta);

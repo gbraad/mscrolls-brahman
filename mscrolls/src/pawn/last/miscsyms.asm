@@ -160,7 +160,8 @@
               SYNMACRO    VNSAY,SECT.VERB
 *	      SYNMACRO	  NDOOR-1,SECT.NOUN to stop can see doorS here
               SYNMACRO    NFLOORBOARD-1,SECT.NOUN  ;board
-	      SYNMACRO	  NNOTE-1,SECT.NOUN
+	SYNMACRO	  NNOTE-1,SECT.NOUN
+    	      SYNMACRO	  VNWAIT,SECT.VERB
 
 
 * no END statement - this file is INCLUDE'd by COMMON.ASM

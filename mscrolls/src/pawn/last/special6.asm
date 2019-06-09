@@ -512,12 +512,12 @@ SP.UNLOC
 	CMP.W   #NKEY,D5           ;WITH BLUE KEY??
 	BNE.S   90$                ;NO - FORGET IT!
         
-        TEST_B  REMASTER(A4)
-        BEQ.S   10$
+    TEST_B  REMASTER(A4)
+    BEQ.S   10$
 
-        ;; remaster version
+    ;; remaster version
 	SCN     395             ; the key worked!
-        BRA.S   20$
+    BRA.S   20$
 10$
 
 	EXG     D0,D5              ;SAVE D0

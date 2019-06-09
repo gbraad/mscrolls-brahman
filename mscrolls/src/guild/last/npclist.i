@@ -30,6 +30,6 @@
 	DC.W NMANAGER
 	DC.W	0	;terminator
 * the end...
-* produced on Mon Jun 11 21:57:50 2018
+* produced on Tue Jun 12 09:38:16 2018
 
-* checksum = a076131e
+* checksum = 65261dfa

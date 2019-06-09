@@ -52,13 +52,39 @@
 
 	include  "equates.asm"
 	include  "macros.asm"
+    include  "roomequ.asm"
 
-        XDEF    P.TSNOUN
+    XDEF    P.TSNOUN
+    XDEF    M2ROCKS,SP.NEWROOM
+
+    XREF    REMASTER,CONNECT2
 
 P.TSNOUN
         ; occurs in space table
-        RET
-        
+    RET
 
+SP.NEWROOM
+
+    TEST_B  REMASTER(A4)
+    BEQ.S   90$
+    CMP.B   #RNTRACK2,D1
+    BNE.S   90$
+    CALL    M2ROCKS
+90$
+    RET
+    
+    
+M2ROCKS
+
+    ;;  connect track to narrow track (climb rocks)
+
+    PUSH_L  D0-D2
+    MOVEQ   #RNTRACK2,D2
+    MOVEQ   #DIR_N,D1
+    MOVEQ   #RNTRACK,D0
+    CALL    CONNECT2
+    PULL_L  D0-D2
+    RET
+    
 *--------------------------------
         END
