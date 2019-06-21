@@ -1,6 +1,6 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018 Marnix van den Bos.                   */
+/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
 /*                                                                      */
 /* <marnix.home@gmail.com>                                              */
 /*                                                                      */
@@ -54,7 +54,6 @@ int32_t ParseStory(source, file_list)
  FILE     *source;
  fileList **file_list;
 {
-
   /* Verbs have special id's because we will build a verb_dir    */
   /* which is indexed by verb_id. Because words may have         */
   /* multiple types it is important that verb names are parsed   */
@@ -67,12 +66,9 @@ int32_t ParseStory(source, file_list)
   if (!ParseVerbNames(source, file_list))
     return(ERROR);
 
-/* PrintWList(); */
   /* clean up the file list for the next */
   /* pass to prevent loop errors (remove */
   /* all but the first struct            */
-
-  /* CleanUpFileList(file_list);*/
 
   /* parse directions */
   /* ParseDirections() is a separate function because */
@@ -80,8 +76,6 @@ int32_t ParseStory(source, file_list)
   /* parse dictionary words */
   if (!ParseDirections(source, file_list))
     return(ERROR);
-
-  /* CleanUpFileList(file_list); */
 
   /* parse dictionary words */
   if (!ParseDictionary(source, file_list))
@@ -95,44 +89,35 @@ int32_t ParseStory(source, file_list)
   if (!InitExits())  /* needs nr of directions; known */
     return(ERROR);   /* after ParseDirections()       */
 
-  /* CleanUpFileList(file_list); */
-
   /* parse common descriptions, flags and attributes */
   if (!ParseCommons(source, file_list))
     return(ERROR);
-
-  /* CleanUpFileList(file_list);*/
 
   /* find common trigger ids */
   if (!FindCommonTriggerIds(source, file_list))
     return(ERROR);
 
-  /* CleanUpFileList(file_list); */
-
   /* parse common triggers */
   if (!ParseCommonTriggers(source, file_list))
     return(ERROR);
 
-  /* CleanUpFileList(file_list); */
-
   /* parse verb default code */
   if (!ParseVerbs(source, file_list))
     return(ERROR);
-/*PrintVerbDir();*/
-  /* CleanUpFileList(file_list); */
 
   /* parse locations and objects */
   if (!ParseLocsObjs(source, file_list))
     return(ERROR);
 
-  /* CleanUpFileList(file_list); */
-total_lines = 0;
+  total_lines = 0;
+
   /* parse timers */
   if (!ParseTims(source, file_list))
     return(ERROR);
 
   return(OK);
 }
+
 
  /* The following functions replace the former Pass1Voc() function. */
  /* Therefore, in the GetNextWord() and ChangeInputFile() functions */
@@ -307,6 +292,7 @@ total_lines = 0;
   redefine = 0;
   return(OK);
 }
+
 
 int32_t ParseDictionary(source, file_list)
  FILE     *source;
@@ -599,7 +585,6 @@ int32_t ParseCommonTriggers(source, file_list)
 
   return(OK);
 }
-
 
 
 int32_t ParseLocsObjs(source, file_list)

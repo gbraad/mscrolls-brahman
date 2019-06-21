@@ -1,6 +1,6 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018 Marnix van den Bos.                   */
+/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
 /*                                                                      */
 /* <marnix.home@gmail.com>                                              */
 /*                                                                      */
@@ -23,7 +23,6 @@
 #if !defined(__tables)
 #define __tables
 
-
 #define TERMINATOR   "******"
 #define UNKNOWN      -1
 
@@ -31,26 +30,34 @@
 /* externals */
 /*************/
 
-extern FILE     *source_file;
-extern char     current_filename[];
-extern int16_t  xvan_language;
-extern int32_t  line_num;
-extern int32_t  total_lines;                                /* init.c     */
-extern int32_t  first_direction_id;
-extern dirData  dir_data;                                   /* fileio.c   */
+extern FILE      *source_file;
+extern char      current_filename[];
+extern int16_t   xvan_language;
+extern int32_t   line_num;
+extern int32_t   total_lines;                                /* init.c     */
+extern int32_t   first_direction_id;
+extern dirData   dir_data;                                   /* fileio.c   */
 
-extern char     entrance_trigger[];  /* predefs.c */
-extern char     exit_trigger[];      /* predefs.c */
-extern char     default_trigger[];   /* predefs.c */
+extern char      entrance_trigger[];  /* predefs.c */
+extern char      exit_trigger[];      /* predefs.c */
+extern char      default_trigger[];   /* predefs.c */
 
-extern void     ENG_CheckLocWildCard(char*, resultStruct*);
-extern void     ENG_CheckObjWildCard(char*, resultStruct*);
-extern void     NL_CheckLocWildCard(char*, resultStruct*);
-extern void     NL_CheckObjWildCard(char*, resultStruct*);
-extern char     *strlwr(char*);                             /* keyword.c  */
-extern char     *TranslateKeyword(char*);                   /* errors.c   */
-extern int32_t  ParseDSys(char*, extendedSysDescr*);        /* prsedsys.c */
-extern void     ErrHdr(void);                               /* errors.c   */
-extern void     PrintError(int16_t, resultStruct*, char*);  /* errors.c   */
+extern void      ENG_CheckLocWildCard(char*, resultStruct*);
+extern void      ENG_CheckObjWildCard(char*, resultStruct*);
+extern void      NL_CheckLocWildCard(char*, resultStruct*);
+extern void      NL_CheckObjWildCard(char*, resultStruct*);
+extern char      *strlwr(char*);                             /* keyword.c  */
+extern char      *TranslateKeyword(char*);                   /* errors.c   */
+extern int32_t   ParseDSys(char*, extendedSysDescr*);        /* prsedsys.c */
+extern void      ErrHdr(void);                               /* errors.c   */
+extern void      PrintError(int16_t, resultStruct*, char*);  /* errors.c   */
+
+extern debugInfo *com_attr_dbug;
+extern debugInfo *loc_attr_dbug;
+extern debugInfo *com_flag_dbug;
+extern debugInfo *loc_flag_dbug;
+extern debugInfo *com_trigg_dbug;
+extern debugInfo *loc_trigg_dbug;
+extern debugInfo *timer_dbug;
 
 #endif

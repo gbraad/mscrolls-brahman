@@ -1,6 +1,6 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018 Marnix van den Bos.                   */
+/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
 /*                                                                      */
 /* <marnix.home@gmail.com>                                              */
 /*                                                                      */
@@ -34,18 +34,19 @@
 
 #include "ifiglue.h"
 
-
 /*************************/
 /* Function declarations */
 /*************************/
 
-void  GetAddtlInput(char*, char*);
+void    GetAddtlInput(char*, char*);
 int32_t ProcessInput(char*);
 
+/************************/
+/* Function definitions */
+/************************/
 
-void GetAddtlInput(addtl_input, prompt)
- char *addtl_input;  /* must have size INPUT_LINE_LEN */
- char *prompt;
+void GetAddtlInput(char *addtl_input, char *prompt)
+ /* addtl_input must have size INPUT_LINE_LEN */
 {
   /* this function is used when we need extra  */
   /* input from the user to complete a command */
@@ -64,6 +65,10 @@ void GetAddtlInput(addtl_input, prompt)
   int       index           = 0;
   int32_t   IFI_request  = IFI_NO_IFI;
   kvPair    kv;
+
+  PrintString("\n", 0);
+  PrintString(prompt, 0);
+  Output();
 
   /* init the kvPair struct */
   kv.key                 = NULL;
@@ -128,15 +133,13 @@ void GetAddtlInput(addtl_input, prompt)
 }
 
 
-int32_t ProcessInput(prompt)
- char *prompt;
+int32_t ProcessInput(char *prompt)
 {
   char *ifi_get_result = NULL;
   char  *json_string   = NULL;
   int32_t result       = OK;
 
   char line_buf[INPUT_LINE_LEN];
-
 
   /* Input is either read from the */
   /* IFI interface or from a file  */
@@ -154,8 +157,10 @@ int32_t ProcessInput(prompt)
       /* line_buf must be terminated with */
       /* a '\0' for this to work.         */
       line_buf[strlen(line_buf)-1] = '\0';
-      Output(line_buf, 0);
-      Output("\n", 0);
+
+      PrintString(line_buf, 0);
+      PrintString("\n", 0);
+      Output();
 
       /* now, wrap the line in a json string  */
       /* will always fit, because line_buf is */
@@ -184,7 +189,6 @@ int32_t ProcessInput(prompt)
 
   if (!testmode) {
     ifi_get_result = (char*) ifi_getRequest();
-
     if (ifi_get_result == NULL) {
       /* front-end wants to quit */
       return(QUIT);
@@ -227,6 +231,7 @@ int32_t ProcessInput(prompt)
     /* DO NOTHING OR SEND AN ERROR JSON BACKT TO FE? */
     /* stay in the loop, we need a user command */
   }
+
   free(json_string);
   return(result);
 }

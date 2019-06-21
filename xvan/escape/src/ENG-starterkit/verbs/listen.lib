@@ -17,4 +17,3 @@ $VERB listen
    printcr("I only understood you as far as wanting to listen.")
 
 ENDVERB
-

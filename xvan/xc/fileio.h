@@ -1,6 +1,6 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018 Marnix van den Bos.                   */
+/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
 /*                                                                      */
 /* <marnix.home@gmail.com>                                              */
 /*                                                                      */
@@ -29,7 +29,6 @@
 #define STRING_MARKER   '"'
 #define COMMENT_MARKER  '#'
 
-
 /*************/
 /* externals */
 /*************/
@@ -37,24 +36,27 @@
 extern FILE *source_file;
 extern FILE *datafile;
 
+extern char file_path[];  /* holds absolute path to working directory */
 extern char current_filename[];
 
 extern int32_t line_num;
 extern int32_t nr_of_directions;
 extern int32_t first_direction_id;
+extern int16_t  debug;            /* init.c   */
 
-extern int32_t nr_of_verbs;        /* tables.c */
-extern int32_t nr_of_syn_verbs;    /* tables.c */
-extern int32_t nr_of_words;        /* tables.c */
-extern int32_t nr_of_locations;    /* tables.c */
-extern int32_t nr_of_objects;      /* tables.c */
-extern int32_t nr_of_cflags;       /* tables.c */
-extern int32_t nr_of_lflags;       /* tables.c */
-extern int32_t nr_of_cattrs;       /* tables.c */
-extern int32_t nr_of_lattrs;       /* tables.c */
-extern int32_t nr_of_ltrigs;       /* tables.c */
-extern int32_t nr_of_ldescrs;      /* tables.c */
-extern int32_t nr_of_timers;       /* tables.c */
+extern int32_t nr_of_verbs;       /* tables.c */
+extern int32_t nr_of_syn_verbs;   /* tables.c */
+extern int32_t nr_of_words;       /* tables.c */
+extern int32_t nr_of_locations;   /* tables.c */
+extern int32_t nr_of_objects;     /* tables.c */
+extern int32_t nr_of_cflags;      /* tables.c */
+extern int32_t nr_of_lflags;      /* tables.c */
+extern int32_t nr_of_cattrs;      /* tables.c */
+extern int32_t nr_of_lattrs;      /* tables.c */
+extern int32_t nr_of_ctrigs;      /* tables.c */
+extern int32_t nr_of_ltrigs;      /* tables.c */
+extern int32_t nr_of_ldescrs;     /* tables.c */
+extern int32_t nr_of_timers;      /* tables.c */
 
 extern wordInfo     *word_list;
 extern wordTable    *word_table;
@@ -83,14 +85,19 @@ extern int32_t  IsSpecId(int32_t);                              /* tables.c   */
 extern int32_t  IsTestFun(int32_t);                             /* tables.c   */
 extern int32_t  IsIntAct(int32_t);                              /* tables.c   */
 
-extern int32_t  LookUpId(char*);                            /* prsesntc.c */
+extern int32_t  LookUpId(char*);                                       /* prsesntc.c */
 extern int32_t  GetLocationId(char*, int32_t*, int32_t, int64_t);      /* tables.c   */
 extern int32_t  GetObjectId(char*, int32_t*, int32_t, int64_t);        /* tables.c   */
-extern int32_t  GetDescrId(char*, int32_t*, int32_t, int32_t);          /* tables.c   */
-extern int32_t  GetTimerId(char*, int32_t*, int32_t);               /* tables.c   */
+extern int32_t  GetDescrId(char*, int32_t*, int32_t, int32_t);         /* tables.c   */
+extern int32_t  GetTimerId(char*, int32_t*, int32_t);                  /* tables.c   */
 extern int32_t  GetAttrId(char*, int32_t, int32_t, int32_t*, int32_t, int32_t, int32_t, int32_t); /* tables.c  */ /* 10march2017 */
 extern void     ErrHdr(void);                               /* output.c   */
 
+extern int32_t CreateLocDebugInfo(debugInfo**);
+extern int32_t CreateObjDebugInfo(debugInfo**);
+extern int32_t CreateAttrDebugInfo(debugInfo**, debugInfo**);
+extern int32_t CreateFlagDebugInfo(debugInfo**, debugInfo**);
+extern int32_t CreateTimerDebugInfo(debugInfo**);
+extern int32_t CreateTriggerDebugInfo(debugInfo**, debugInfo**);
+
 #endif
-
-

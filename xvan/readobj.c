@@ -1,6 +1,6 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018 Marnix van den Bos.                   */
+/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
 /*                                                                      */
 /* <marnix.home@gmail.com>                                              */
 /*                                                                      */
@@ -30,7 +30,6 @@
 #include "typedefs.h"
 #include "readobj.h"
 
-
 /*************************/
 /* function declarations */
 /*************************/
@@ -38,13 +37,11 @@
 void       InitObj(objectInfo*);
 objectInfo *ReadObject(int64_t);
 
-
 /************************/
 /* Function definitions */
 /************************/
 
-void InitObj(obj)
- objectInfo *obj;
+void InitObj(objectInfo *obj)
 {
   obj->descriptions = NULL;
   obj->action_recs  = NULL;
@@ -52,8 +49,7 @@ void InitObj(obj)
 }
 
 
-objectInfo *ReadObject(offset)
- int64_t offset;
+objectInfo *ReadObject(int64_t offset)
 {
   objectInfo    *obj;
   descrInfo     *last_descr      = NULL;
@@ -86,7 +82,6 @@ objectInfo *ReadObject(offset)
     switch (code) {
       case ERROR:
         return(NULL);
-
       case ACTION_REC:
         /* Read the action_rec and trigger to execute.     */
         /* action_rec will be malloced by ReadActionRec(). */
@@ -102,10 +97,8 @@ objectInfo *ReadObject(offset)
 
         /* Next code is returned by ReadActionRec(). */
         break;
-
      case END_OBJ:
         return(obj);
-
       default:
         /* Check for description/trigger id. */
         if (IsDescrId(code)) {
@@ -137,7 +130,7 @@ objectInfo *ReadObject(offset)
           /* will either be an END_OBJ or TRIGG_ID code.   */
         }
         else {
-          PrintError(53, &((resultStruct) {VALUE,code}), "PrintObject()");
+          PrintError(53, &((resultStruct) {VALUE, NONE, code}), "PrintObject()");
           return(ERROR);
         }
 

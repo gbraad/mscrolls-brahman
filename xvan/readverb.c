@@ -1,6 +1,6 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018 Marnix van den Bos.                   */
+/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
 /*                                                                      */
 /* <marnix.home@gmail.com>                                              */
 /*                                                                      */
@@ -29,7 +29,6 @@
 #include "typedefs.h"
 #include "readverb.h"
 
-
 /*************************/
 /* Function declarations */
 /*************************/
@@ -37,12 +36,11 @@
 verbInfo *NewVerbInfo(void);
 verbInfo *RdVerb(int64_t);
 
-
 /************************/
 /* Function definitions */
 /************************/
 
-verbInfo *NewVerbInfo()
+verbInfo *NewVerbInfo(void)
 {
   verbInfo *verb_info = NULL;
 
@@ -62,8 +60,7 @@ verbInfo *NewVerbInfo()
 }
 
 
-verbInfo *RdVerb(offset)
- int64_t offset;
+verbInfo *RdVerb(int64_t offset)
 {
   /* This function assumes that there is default code. It will   */
   /* always deliver at least one verbInfo struct.                */
@@ -97,7 +94,6 @@ verbInfo *RdVerb(offset)
     switch (code) {
       case ERROR:
         return(NULL);
-
       case ACTION_REC:
         if (new_verb_info) {
           /* Create and init a new struct.   */
@@ -127,11 +123,9 @@ verbInfo *RdVerb(offset)
 
         /* Next code is returned by ReadActionRec(). */
         break;
-
       case ENDVERB:
         return(verb);
         break;
-
       default:
         /* This is the start of the default code.     */
 

@@ -1,6 +1,6 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018 Marnix van den Bos.                   */
+/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
 /*                                                                      */
 /* <marnix.home@gmail.com>                                              */
 /*                                                                      */
@@ -28,7 +28,6 @@
 /* the keyword table is used to translate English #defines into Dutch   */
 /* for displaying in error messages.                                    */
 /* The keyword table must be sorted A->Z because we use a binary search */
-
 
 kwTable kw_table[] =  {
   {.keyword_eng = "ACTOR_ONLY", .keyword_nl = "ALLEEN_ACTEUR"},

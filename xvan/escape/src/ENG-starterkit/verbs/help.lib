@@ -3,14 +3,15 @@ $VERB help
  EPILOGUE
   notimers()
 
- "[o_player], help"
+ "[o_player], help 1"
    if testflag(o_player.f_verb_help) then
      clearflag(o_player.f_verb_help)
+     printcr("Action samples turned off.")
    else
      setflag(o_player.f_verb_help)
+     printcr("Action samples turned on.")
 
  DEFAULT
    printcr("I don't understand that sentence.")
 
 ENDVERB
-

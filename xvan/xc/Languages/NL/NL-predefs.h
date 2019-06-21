@@ -1,6 +1,6 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018 Marnix van den Bos.                   */
+/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
 /*                                                                      */
 /* <marnix.home@gmail.com>                                              */
 /*                                                                      */
@@ -32,10 +32,10 @@ extern char          entrance_trigger[];  /* predefs.c */
 extern char          exit_trigger[];      /* predefs.c */
 extern char          default_trigger[];   /* predefs.c */
 
-extern int32_t       GetObjectId(char*, int32_t*, int32_t, int64_t);                           /* tables.c */
+extern int32_t       GetObjectId(char*, int32_t*, int32_t, int64_t);                                    /* tables.c */
 extern int32_t       GetAttrId(char*, int32_t, int32_t, int32_t*, int32_t, int32_t, int32_t, int32_t);  /* tables.c */
-extern resultStruct  GetFlagId(char*, int32_t, int32_t*, int32_t, int32_t, int32_t);           /* tables.c */
-extern int32_t       GetDescrId(char*, int32_t*, int32_t, int32_t);                            /* tables.c */
-extern resultStruct  GetTriggerId(char*, int32_t, int32_t*, int32_t, int32_t);                 /* tables.c */
+extern resultStruct  GetFlagId(char*, int32_t, int32_t*, int32_t, int32_t, int32_t);                    /* tables.c */
+extern int32_t       GetDescrId(char*, int32_t*, int32_t, int32_t);                                     /* tables.c */
+extern resultStruct  GetTriggerId(char*, int32_t, int32_t*, int32_t, int32_t);                          /* tables.c */
 
 #endif

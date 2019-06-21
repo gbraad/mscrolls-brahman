@@ -1,6 +1,6 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018 Marnix van den Bos.                   */
+/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
 /*                                                                      */
 /* <marnix.home@gmail.com>                                              */
 /*                                                                      */
@@ -23,8 +23,7 @@
 #if !defined(__prsetrig)
 #define __prsetrig
 
-#define MAX_COND_LEN		100 /* also defined in prsefun.h and prsassgn.h */
-
+#define MAX_COND_LEN		100 /* also defined in fndctrig.h, prsefun.h and prsassgn.h */
 
 /*************/
 /* Externals */

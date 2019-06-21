@@ -1,6 +1,6 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018 Marnix van den Bos.                   */
+/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
 /*                                                                      */
 /* <marnix.home@gmail.com>                                              */
 /*                                                                      */
@@ -35,7 +35,6 @@
 
 int32_t endian = 0;
 
-
 /*************************/
 /* Function declarations */
 /*************************/
@@ -51,39 +50,35 @@ uint64_t xv_htonll(uint64_t);
 /* Function definitions */
 /************************/
 
-
-uint16_t xv_ntohs(val)
- uint16_t val;
+uint16_t xv_ntohs(uint16_t val)
 {
   uint8_t  *v = (uint8_t *)&val;
   uint16_t result = 0;
   int      i;
 
   for (i=0; i<2; i++) {
-    result |= (uint16_t)v[i] << ((1-i) * 2);
+    result |= (uint16_t)v[i] << ((1-i) * 8);
   }
 
   return result;
 }
 
 
-uint16_t xv_htons(val)
- uint16_t val;
+uint16_t xv_htons(uint16_t val)
 {
-  uint8_t  v[8]; /* SHOULD THIS BE A 2 ??? */
+  uint8_t  v[8];
   uint16_t *result = (uint16_t *)v;
   int      i;
 
   for (i=0; i<2; i++) {
-    v[i] = (uint8_t)(val >> ((1-i) * 2));
+    v[i] = (uint8_t)(val >> ((1-i) * 8));
   }
 
    return *result;
 }
 
 
-uint32_t xv_ntohl(val)
- uint32_t val;
+uint32_t xv_ntohl(uint32_t val)
 {
   uint8_t  *v = (uint8_t *)&val;
   uint32_t result = 0;
@@ -97,8 +92,7 @@ uint32_t xv_ntohl(val)
 }
 
 
-uint32_t xv_htonl(val)
- uint32_t val;
+uint32_t xv_htonl(uint32_t val)
 {
   uint8_t  v[4];
   uint32_t *result = (uint32_t *)v;
@@ -112,8 +106,7 @@ uint32_t xv_htonl(val)
 }
 
 
-uint64_t xv_ntohll(val)
- uint64_t val;
+uint64_t xv_ntohll(uint64_t val)
 {
   uint8_t  *v = (uint8_t *)&val;
   uint64_t result = 0;
@@ -127,8 +120,7 @@ uint64_t xv_ntohll(val)
 }
 
 
-uint64_t xv_htonll(val)
- uint64_t val;
+uint64_t xv_htonll(uint64_t val)
 {
   uint8_t  v[8];
   uint64_t *result = (uint64_t *)v;

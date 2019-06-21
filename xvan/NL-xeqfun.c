@@ -1,6 +1,6 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018 Marnix van den Bos.                   */
+/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
 /*                                                                      */
 /* <marnix.home@gmail.com>                                              */
 /*                                                                      */
@@ -29,24 +29,22 @@
 #include "typedefs.h"
 #include "NL-xeqfun.h"
 
-
 /*************************/
 /* Function declarations */
 /*************************/
 
 int32_t NL_XeqYesNo(void);
 
-
 /****************************/
 /* Testfunction definitions */
 /****************************/
 
-int32_t NL_XeqYesNo()
+int32_t NL_XeqYesNo(void)
 {
   char yes_or_no[INPUT_LINE_LEN];
 
   while (1) {
-    GetAddtlInput(yes_or_no, "j/n");
+    GetAddtlInput(yes_or_no, "j/n: ");
     xv_strlwr(yes_or_no);
 
     if ((strcmp(yes_or_no, "ja") == 0) || (strcmp(yes_or_no, "j") == 0))

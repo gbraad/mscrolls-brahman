@@ -1,6 +1,6 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018 Marnix van den Bos.                   */
+/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
 /*                                                                      */
 /* <marnix.home@gmail.com>                                              */
 /*                                                                      */
@@ -34,9 +34,15 @@ extern int32_t nr_of_words;
 extern int32_t line_num;
 
 extern wordTable *word_table;
-extern void      ErrHdr(void);                               /* errors.c */
-extern void      PrintError(int16_t, resultStruct*, char*);  /* errors.c */
+extern int32_t   IsLocId(int32_t);                           /* tables.c  */
+extern int32_t   IsWordId(int32_t);                          /* tables.c  */
+extern int32_t   IsObjId(int32_t);                           /* tables.c  */
+extern int32_t   IsCAttrId(int32_t);                         /* tables.c  */
+extern int32_t   IsLAttrId(int32_t);                         /* tables.c  */
+extern void      ErrHdr(void);                               /* errors.c  */
+extern void      PrintError(int16_t, resultStruct*, char*);  /* errors.c  */
 
+extern int32_t   GiveNextId(char**, int32_t*, int32_t*, int32_t*, int32_t*);     /*prsesntc.c */
 extern int32_t   StringToNum(char*, int32_t*);
 extern char*     strlwr(char*);                              /* keyword.c */
 

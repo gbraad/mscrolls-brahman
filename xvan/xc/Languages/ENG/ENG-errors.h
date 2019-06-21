@@ -1,6 +1,6 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018 Marnix van den Bos.                   */
+/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
 /*                                                                      */
 /* <marnix.home@gmail.com>                                              */
 /*                                                                      */
@@ -22,7 +22,6 @@
 
 #if !defined(__ENG_errors)
 #define __ENG_errors
-
 
 const char *ENG_errors[] = {
   "\n(000) Error opening file:",
@@ -174,7 +173,8 @@ const char *ENG_errors[] = {
   "\n(144) Double definition of:",
   "\n(145) Owner missing for flag:",
   "\n(146) Multiple redefinition of flag:",
-  "\n(147) Multiple redefinition of attribute:"
+  "\n(147) Multiple redefinition of attribute:",
+  "\n(148) Dynamic system descriptions may only have attribute parameters"
 };
 
 #endif

@@ -1,6 +1,6 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018 Marnix van den Bos.                   */
+/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
 /*                                                                      */
 /* <marnix.home@gmail.com>                                              */
 /*                                                                      */
@@ -31,7 +31,13 @@
 /*************************/
 /* Function declarations */
 /*************************/
+
 int32_t ParseTimers(char**, int32_t*, FILE**, fileList**);
+
+
+/************************/
+/* Function definitions */
+/************************/
 
 int32_t ParseTimers(word, keyword, source, file_list)
  char     **word;
@@ -98,7 +104,7 @@ int32_t ParseTimers(word, keyword, source, file_list)
           return(ERROR);
         }
 
-        /* init the info struct */
+        /* initialize the info struct */
         info->id           = id;
         info->value        = 0;
         info->step         = 0;

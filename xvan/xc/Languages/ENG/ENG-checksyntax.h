@@ -1,6 +1,6 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018 Marnix van den Bos.                   */
+/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
 /*                                                                      */
 /* <marnix.home@gmail.com>                                              */
 /*                                                                      */
@@ -25,16 +25,17 @@
 
 #define SPACE  ' '
 
-
 /*************************/
 /* External declarations */
 /*************************/
+
+extern int32_t  line_num;
 
 extern int32_t  IsLocId(int32_t);
 extern int32_t  IsObjId(int32_t);
 extern void     ErrHdr(void);                               /* errors.c */
 extern void     PrintError(int16_t, resultStruct*, char*);  /* errors.c */
-extern int32_t  GiveNextId(char**, int32_t*, int32_t*);
+extern int32_t  GiveNextId(char**, int32_t*, int32_t*, int32_t*, int32_t*);
 extern int32_t  LookUpId(char*);
 
 #endif

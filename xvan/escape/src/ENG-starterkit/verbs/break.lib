@@ -1,5 +1,5 @@
 
-$VERB break SYNONYM smash
+$VERB break SYNONYM smash SYNONYM attack SYNONYM hit
  PROLOGUE
    if not(testflag(o_actor.f_alive)) then
      if trigger(o_actor.t_talk_to_dead) then
@@ -26,7 +26,7 @@ $VERB break SYNONYM smash
 
  "break [o_subject]",
  "break [o_subject] with [o_spec]"
-   printcr("Breaking [the] [o_subject] isn't particularly helpful.")
+   printcr("That does not work.")
     
   DEFAULT
     printcr("I only understood you as far as wanting to break something.")
@@ -36,7 +36,7 @@ $VERB break SYNONYM smash
       printcr("  'break'")
       printcr("  'break the window'")
       printcr("  'break the window with the brick'")
-      printcr("(to turn off these help messages, type 'help')")
+      printcr("(to turn off these help messages, type 'help 1')")
 
 ENDVERB
 

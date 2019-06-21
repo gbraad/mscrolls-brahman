@@ -1,6 +1,6 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018 Marnix van den Bos.                   */
+/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
 /*                                                                      */
 /* <marnix.home@gmail.com>                                              */
 /*                                                                      */
@@ -27,13 +27,11 @@
 #include "typedefs.h"
 #include "timers.h"
 
-
 /***********/
 /* Globals */
 /***********/
 
 short fire_timers = OK;
-
 
 /*************************/
 /* Function declarations */
@@ -42,12 +40,11 @@ short fire_timers = OK;
 int32_t CheckDoTimers();
 int32_t HandleTimers(usrActionRec*, int32_t);
 
-
 /************************/
 /* Function definitions */
 /************************/
 
-int32_t CheckDoTimers()
+int32_t CheckDoTimers(void)
 {
   int32_t result = OK;
 
@@ -75,11 +72,10 @@ int32_t CheckDoTimers()
 }
 
 
-int32_t HandleTimers(action_rec, subject_index)
- usrActionRec *action_rec;
- int32_t      subject_index;
+int32_t HandleTimers(usrActionRec *action_rec, int32_t subject_index)
 {
-  int32_t i = 0;
+  int32_t      i = 0;
+  resultStruct result;
 
   /* HandleTimers() returns either OK or QUIT. */
   for (i=0; i<nr_of_timers; i++) {
@@ -98,31 +94,36 @@ int32_t HandleTimers(action_rec, subject_index)
       /* Check if trigger must be executed. */
       switch (timers[i].trigger_spec) {
         case EXACT:
-          if (timers[i].value == timers[i].trigger_at)
+          if (timers[i].value == timers[i].trigger_at) {
             /* Trigger has fired. Trigger will be executed each   */
             /* turn if condition is fulfilled. If we want trigger */
             /* to be executed only once, set timer to STOP after  */
             /* first time executing the trigger.                  */
 
-            if (XeqTrigger(timers[i].execute[0],
-                           timers[i].execute[1], action_rec, subject_index ) == QUIT)
+            result = XeqTrigger(timers[i].execute[0], timers[i].execute[1], action_rec, subject_index);
+            if (result.tag == QUIT)
               return(QUIT);
+          }
           break;
         case OR_MORE:
-          if (timers[i].value >= timers[i].trigger_at)
+          if (timers[i].value >= timers[i].trigger_at) {
             /* Trigger has fired. */
             /* If trigger returns QUIT, we must exit immediately. */
-            if (XeqTrigger(timers[i].execute[0],
-                           timers[i].execute[1], action_rec, subject_index) == QUIT)
+
+            result = XeqTrigger(timers[i].execute[0], timers[i].execute[1], action_rec, subject_index);
+            if (result.tag == QUIT)
               return(QUIT);
+          }
           break;
         case OR_LESS:
-          if (timers[i].value <= timers[i].trigger_at)
+          if (timers[i].value <= timers[i].trigger_at) {
             /* Trigger has fired. */
             /* If trigger returns QUIT, we must exit immediately. */
-            if (XeqTrigger(timers[i].execute[0],
-                           timers[i].execute[1], action_rec, subject_index) == QUIT)
+
+            result = XeqTrigger(timers[i].execute[0], timers[i].execute[1], action_rec, subject_index);
+            if ( result.tag == QUIT)
               return(QUIT);
+          }
           break;
         default:
           PrintError(74, NULL, NULL);
@@ -131,5 +132,8 @@ int32_t HandleTimers(action_rec, subject_index)
     } /* Not an active timer. */
   } /* for */
   /* Ready.*/
+
+  /* flush outputline */
+  Output();
   return(OK);
 }

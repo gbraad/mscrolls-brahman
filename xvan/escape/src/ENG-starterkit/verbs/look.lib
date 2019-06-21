@@ -32,4 +32,3 @@ $VERB look SYNONYM l
    printcr("I only understood you as far as willing to look.")
 
 ENDVERB
-

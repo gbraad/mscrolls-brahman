@@ -1,6 +1,6 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018 Marnix van den Bos.                   */
+/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
 /*                                                                      */
 /* <marnix.home@gmail.com>                                              */
 /*                                                                      */
@@ -51,6 +51,7 @@ extern int32_t   capital;                                                  /* le
 
 extern void      PrintError(int16_t, resultStruct*, char*);                /* errors.c      */
 extern void      ConvSpecId(int32_t*, int32_t*);                           /* sysfunc.c     */
+extern int32_t   ConvertDynamicDSys(char*, extendedSysDescr*);             /* trnslate.c    */
 extern void      NL_PrintArticle(sysDescr*, int32_t, int);                 /* nl-article.c  */
 extern void      ENG_PrintArticle(sysDescr*, int32_t, int);                /* eng-article.c */
 extern int32_t   IsLocId(int32_t);                                         /* execute.c     */
@@ -65,5 +66,6 @@ extern char      *GetDescr(int32_t, int32_t);                              /* ex
 extern int32_t   GetAttributeInfo(int32_t, int32_t, attrInfo**, int32_t*); /* sysfunc.c     */
 extern void      ifi_emitResponse(const char*);
 extern char      *AddToString(char*, char*);                               /* descr2str.c   */
+extern char      *ResetString(char*);                                      /* jsonbld.c     */
 
 #endif

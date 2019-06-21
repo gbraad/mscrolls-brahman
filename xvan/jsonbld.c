@@ -1,6 +1,6 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018 Marnix van den Bos.                   */
+/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
 /*                                                                      */
 /* <marnix.home@gmail.com>                                              */
 /*                                                                      */
@@ -30,7 +30,6 @@
 
 /* DO NOT INCLUDE keyword.h */
 
-
 /*************************/
 /* Function declarations */
 /*************************/
@@ -47,7 +46,6 @@ char *CloseArray(char*);
 char *CloseObject(char*);
 char *AddKV(char*, char*, jsonValue*);
 
-
 /************************/
 /* Function definitions */
 /************************/
@@ -56,8 +54,8 @@ char *AddKV(char*, char*, jsonValue*);
 /* Helper functions */
 /********************/
 
-char *AddCommaOrNot(source)
- char *source;  /* must be malloc-ed */
+char *AddCommaOrNot(char *source)
+ /* source must be malloc-ed */
 {
   int len = 0;
 
@@ -83,9 +81,7 @@ char *AddCommaOrNot(source)
 }
 
 
-char *ExpandString(source, amount)
- char *source;
- int  amount;
+char *ExpandString(char *source, int amount)
 {
   int  len = 0;
   char *temp;
@@ -98,7 +94,6 @@ char *ExpandString(source, amount)
     source[0] = '\0';
   }
   else {
-
     /* don't know why the F#$K realloc() crashes the debugger        */
     /* got the infamous "cannot find the bounds of current function" */
 
@@ -106,8 +101,10 @@ char *ExpandString(source, amount)
     len = strlen(source);
     if ( !(temp = (char *) malloc((len+1)*sizeof(char))) )
       return(NULL);
+
     strcpy(temp, source);
     free(source);
+
     if ( !(source = (char *) malloc((len+amount+1)*sizeof(char))) )  /* +1 for the '\0\ */
       return(NULL);
     strcpy(source, temp);
@@ -117,9 +114,10 @@ char *ExpandString(source, amount)
 }
 
 
-char *ResetString(string)
- char *string;  /* must be maloc-ed */
+char *ResetString(char *string)
+ /* string must be maloc-ed */
 {
+
   if (string == NULL) {
     return(NULL);
   }
@@ -129,13 +127,12 @@ char *ResetString(string)
   }
 }
 
-
 /*******************/
 /* Build functions */
 /*******************/
 
-char *NewJsonObject(json_string)
- char *json_string;  /* must be malloc-ed */
+char *NewJsonObject(char *json_string)
+ /* json_string must be malloc-ed */
 {
   if (json_string != NULL) {
     /* new object, not within an existing object or array */
@@ -155,8 +152,8 @@ char *NewJsonObject(json_string)
 }
 
 
-char *NewJsonArray(json_string)
- char *json_string;  /* must be malloc-ed */
+char *NewJsonArray(char *json_string)
+ /* json_string must be malloc-ed */
 {
   if (json_string != NULL) {
     /* new object, not within an existing object or array */
@@ -175,8 +172,8 @@ char *NewJsonArray(json_string)
 }
 
 
-char *CloseObject(json_string)
- char *json_string;  /* must be malloc-ed */
+char *CloseObject(char *json_string)
+ /* json_string must be malloc-ed */
 {
   if (!(json_string = ExpandString(json_string, 1))) {
     /* error was printed by ExpandString() */
@@ -189,8 +186,8 @@ char *CloseObject(json_string)
 }
 
 
-char *CloseArray(json_string)
- char *json_string;  /* must be malloc-ed */
+char *CloseArray(char *json_string)
+ /* json_string must be malloc-ed */
 {
   if (!(json_string = ExpandString(json_string, 1))) {
     /* error was printed by ExpandString() */
@@ -203,10 +200,7 @@ char *CloseArray(json_string)
 }
 
 
-char *AddKV(json_string, key, value)
- char      *json_string;
- char      *key;
- jsonValue *value;
+char *AddKV(char *json_string, char *key, jsonValue *value)
  {
   int  key_len;
   int  value_len = 0;

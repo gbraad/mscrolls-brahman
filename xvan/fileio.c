@@ -1,6 +1,6 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018 Marnix van den Bos.                   */
+/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
 /*                                                                      */
 /* <marnix.home@gmail.com>                                              */
 /*                                                                      */
@@ -28,7 +28,6 @@
 #include "keyword.h"
 #include "typedefs.h"
 #include "fileio.h"
-
 
 /***********/
 /* Globals */
@@ -68,7 +67,6 @@ locationInfo **locations;               /* Location pointer array.  */
 objectInfo   **objects;                 /* Object pointer array.    */
 timerInfo    *timers          = NULL;   /* Timer array.             */
 
-
 /*************************/
 /* function declarations */
 /*************************/
@@ -100,12 +98,11 @@ int32_t  ReadContData(contData*);
 int32_t  InMem(int32_t);
 int32_t  Load(int32_t);
 
-
 /***********************/
 /* file input routines */
 /***********************/
 
-char *ReadString()
+char *ReadString(void)
 {
   int32_t len;   /* length of the string */
   char    *str;
@@ -113,21 +110,19 @@ char *ReadString()
   /* First, read the length of the string. */
   if (!GetNextCode32(&len)) {
     PrintError(14, NULL, "ReadString");
-    str = NULL;
-    return(ERROR);
+    return(NULL);
   }
 
   /* create space on heap */
   if ((str = (char *) malloc(len*sizeof(char))) == NULL) {
     PrintError(15, NULL, "ReadString()");
-    return(ERROR);
+    return(NULL);
   }
 
   /* read the string */
   if (fread((void *) str, sizeof(char), len, datafile) != (size_t)len) {
     PrintError(15, NULL, "ReadString()");
-    str = NULL;
-    return(ERROR);
+    return(NULL);
   }
 
   /* all went well */
@@ -136,8 +131,7 @@ char *ReadString()
 }
 
 
-int32_t GetNextCode16(code)
- int16_t *code;
+int32_t GetNextCode16(int16_t *code)
 {
   if (fread((void *) code, sizeof(int16_t), 1, datafile) != 1) {
     PrintError(15, NULL, "GetNextCode16()");
@@ -153,8 +147,7 @@ int32_t GetNextCode16(code)
 }
 
 
-int32_t GetNextCode32(code)
- int32_t *code;
+int32_t GetNextCode32(int32_t *code)
 {
   if (fread((void *) code, sizeof(int32_t), 1, datafile) != 1) {
     PrintError(15, NULL, "GetNextCode32()");
@@ -170,8 +163,7 @@ int32_t GetNextCode32(code)
 }
 
 
-int32_t GetNextCode64(code)
- int64_t *code;
+int32_t GetNextCode64(int64_t *code)
 {
   if (fread((void *) code, sizeof(int64_t), 1, datafile) != 1) {
     PrintError(15, NULL, "GetNextCode64()");
@@ -187,8 +179,7 @@ int32_t GetNextCode64(code)
 }
 
 
-int32_t ReadDirOffsets(dirs)
- dirData *dirs;
+int32_t ReadDirOffsets(dirData *dirs)
 {
   int64_t offset; /* remember position in file */
 
@@ -206,6 +197,7 @@ int32_t ReadDirOffsets(dirs)
     PrintError(17, NULL, "story_info offset");
     return(ERROR);
   }
+
   if (!GetNextCode64(&dirs->word_data_offset)) {
     PrintError(17, NULL, "word data offset");
     return(ERROR);
@@ -261,8 +253,7 @@ int32_t ReadDirOffsets(dirs)
 }
 
 
-int32_t ReadTimers(offset)
- int64_t     offset;
+int32_t ReadTimers(int64_t offset)
 {
   int32_t code;
   int32_t id;
@@ -317,34 +308,42 @@ int32_t ReadTimers(offset)
       PrintError(19, NULL, "timer value");
       return(ERROR);
     }
+
     if (!GetNextCode32(&(timers[index].step))) {
       PrintError(19, NULL, "timer step");
       return(ERROR);
     }
+
     if (!GetNextCode32(&(timers[index].interval))) {
       PrintError(19, NULL, "timer interval");
       return(ERROR);
     }
+
     if (!GetNextCode32(&(timers[index].update))) {
       PrintError(19, NULL, "timer update value");
       return(ERROR);
     }
+
     if (!GetNextCode16(&(timers[index].direction))) {
       PrintError(19, NULL, "timer direction");
       return(ERROR);
     }
+
     if (!GetNextCode16(&(timers[index].state))) {
       PrintError(19, NULL, "timer state");
       return(ERROR);
     }
+
     if (!GetNextCode32(&(timers[index].trigger_at))) {
       PrintError(19, NULL, "timer threshold");
       return(ERROR);
     }
+
     if (!GetNextCode32(&(timers[index].trigger_spec))) {
       PrintError(19, NULL, "trigger_spec");
       return(ERROR);
     }
+
     if (!GetNextCode32(&(timers[index].execute[0]))) {
       PrintError(19, NULL, "timer trigger");
       return(ERROR);
@@ -355,12 +354,35 @@ int32_t ReadTimers(offset)
     }
   } /* for */
 
+  /* Check if we must read debug info */
+  if (debug_info) {
+    /* check for the keyword */
+    if (!GetNextCode32(&code)) {
+      PrintError(23, NULL, "keyword record");
+      return(ERROR);
+    }
+    if (code != DEBUG) {
+      PrintError(21, NULL, "debug");
+      return(ERROR);
+    }
+
+    /* Malloc() space for timer debug info. */
+    if ((timer_dbug = (debugInfo *) malloc(nr_of_timers*sizeof(debugInfo))) == NULL) {
+      PrintError(15, NULL, "timer debug info");
+      return(ERROR);
+    }
+
+    for (i=0; i<nr_of_timers; i++) {
+      if ( ((timer_dbug[i]).name = ReadString()) == NULL)
+        return(ERROR);
+    }
+  }
+
   return(OK);
 }
 
 
-int32_t ReadMapData(offset)
- int64_t offset;
+int32_t ReadMapData(int64_t offset)
 {
   int32_t i;
   int32_t code;
@@ -418,13 +440,16 @@ int32_t ReadMapData(offset)
 }
 
 
-int32_t ReadFlags(offset)
- int64_t offset;
+int32_t ReadFlags(int64_t offset)
 {
   int32_t code;
   size_t  com_loc_len = 0; /* Length of common location flags string.                            */
   size_t  com_obj_len = 0; /* Length of common object flags string.                              */
                        /* Length of local flags string is a global variable for save() function. */
+
+  int32_t nr_of_lflags = 0;
+  int i                = 0;
+
    /* go to offset in datafile */
   if (fseek(datafile, offset, 0) == -1) {
     PrintError(16, NULL, "ReadFlags()");
@@ -497,12 +522,55 @@ int32_t ReadFlags(offset)
     return(ERROR);
   }
 
+  /* Check if we must read debug info */
+  if (debug_info) {
+    /* check for the keyword */
+    if (!GetNextCode32(&code)) {
+      PrintError(23, NULL, "keyword record");
+      return(ERROR);
+    }
+    if (code != DEBUG) {
+      PrintError(21, NULL, "debug");
+      return(ERROR);
+    }
+
+    /* Malloc() space for common flags debug info. */
+    if ((com_flag_dbug = (debugInfo *) malloc(nr_of_cflags*sizeof(debugInfo))) == NULL) {
+      PrintError(15, NULL, "common flags debug info");
+      return(ERROR);
+    }
+
+    for (i=0; i<nr_of_cflags; i++) {
+      if ( ((com_flag_dbug[i]).name = ReadString()) == NULL)
+        return(ERROR);
+    }
+    /* read the number of local flags */
+    /* is is only needed when we have debug info */
+    if (!GetNextCode32(&nr_of_lflags)) {
+      PrintError(23, NULL, "nr_of_lflags");
+      return(ERROR);
+    }
+
+    /* Malloc() space for local flags debug info. */
+    if ((loc_flag_dbug = (debugInfo *) malloc(nr_of_lflags*sizeof(debugInfo))) == NULL) {
+      PrintError(15, NULL, "local flags debug info");
+      return(ERROR);
+    }
+
+    for (i=0; i<nr_of_lflags; i++) {
+      if ( ((loc_flag_dbug[i]).name = ReadString()) == NULL)
+        return(ERROR);
+
+      if (!GetNextCode32(&(loc_flag_dbug[i]).owner))
+        return(ERROR);
+    }
+  }
+
   return(OK);
 }
 
 
-int32_t ReadStoryInfo(info)
- storyInfo *info;
+int32_t ReadStoryInfo(storyInfo *info)
 {
   dirData dirs;
   int32_t len;
@@ -679,12 +747,16 @@ int32_t ReadStoryInfo(info)
     return(ERROR);
   }
 
+  if (!GetNextCode16(&(debug_info))) {
+    PrintError(24, NULL, "debug mode");
+    return(ERROR);
+  }
+
   return(OK);
 }
 
 
-int32_t ReadWordTable(offset)
- int64_t offset;
+int32_t ReadWordTable(int64_t offset)
 {
   int32_t code;
   int   i=0;
@@ -746,8 +818,7 @@ int32_t ReadWordTable(offset)
 }
 
 
-int32_t ReadVerbDir(offset)
- int64_t offset;
+int32_t ReadVerbDir(int64_t offset)
 {
   int32_t code;
   int32_t i;
@@ -793,8 +864,8 @@ int32_t ReadVerbDir(offset)
   return(OK);
 }
 
-int32_t ReadVoc(offset)
- int64_t offset;
+
+int32_t ReadVoc(int64_t offset)
 {
   /* read the word_table */
   if (!ReadWordTable(offset))
@@ -809,8 +880,7 @@ int32_t ReadVoc(offset)
 }
 
 
-int32_t ReadLocDir(offset)
- int64_t offset;
+int32_t ReadLocDir(int64_t offset)
 {
   int32_t code;
   int32_t i, j;
@@ -870,12 +940,35 @@ int32_t ReadLocDir(offset)
     }
   }
 
+    /* Check if we must read debug info */
+  if (debug_info) {
+    /* check for the keyword */
+    if (!GetNextCode32(&code)) {
+      PrintError(23, NULL, "keyword record");
+      return(ERROR);
+    }
+    if (code != DEBUG) {
+      PrintError(21, NULL, "debug");
+      return(ERROR);
+    }
+
+    /* Malloc() space for location debug info. */
+    if ((loc_dbug = (debugInfo *) malloc(nr_of_locs*sizeof(debugInfo))) == NULL) {
+      PrintError(15, NULL, "location debug info");
+      return(ERROR);
+    }
+
+    for (i=0; i<nr_of_locs; i++) {
+      if ( ((loc_dbug[i]).name = ReadString()) == NULL)
+        return(ERROR);
+    }
+  }
+
   return(OK);
 }
 
 
-int32_t ReadObjDir(offset)
- int64_t offset;
+int32_t ReadObjDir(int64_t offset)
 {
   int32_t code;
   int32_t i, j;
@@ -891,6 +984,7 @@ int32_t ReadObjDir(offset)
     PrintError(28, NULL, "keyword record");
     return(ERROR);
   }
+
   if (code != OBJ_DIR) {
     PrintError(21, NULL, "object directory");
     return(ERROR);
@@ -935,12 +1029,35 @@ int32_t ReadObjDir(offset)
     }
   }
 
+   /* Check if we must read debug info */
+  if (debug_info) {
+    /* check for the keyword */
+    if (!GetNextCode32(&code)) {
+      PrintError(23, NULL, "keyword record");
+      return(ERROR);
+    }
+    if (code != DEBUG) {
+      PrintError(21, NULL, "debug");
+      return(ERROR);
+    }
+
+    /* Malloc() space for location debug info. */
+    if ((obj_dbug = (debugInfo *) malloc(nr_of_objs*sizeof(debugInfo))) == NULL) {
+      PrintError(15, NULL, "object debug info");
+      return(ERROR);
+    }
+
+    for (i=0; i<nr_of_objs; i++) {
+      if ( ((obj_dbug[i]).name = ReadString()) == NULL)
+        return(ERROR);
+    }
+  }
+
   return(OK);
 }
 
 
-int32_t RdCTriggs(offset)
- int64_t offset;
+int32_t RdCTriggs(int64_t offset)
 {
   int32_t size = LAST_COMMON_TRIGGER_ID-FIRST_COMMON_TRIGGER_ID+1;
   int32_t code;
@@ -967,6 +1084,7 @@ int32_t RdCTriggs(offset)
     PrintError(29, NULL, "keyword record");
     return(ERROR);
   }
+
   if (code != COMMON_TRIGGERS) {
     PrintError(21, NULL, "common triggers");
     return(ERROR);
@@ -998,7 +1116,7 @@ int32_t RdCTriggs(offset)
 }
 
 
-int32_t InitVerbs()
+int32_t InitVerbs(void)
 {
   int32_t  i        = 0;
   int32_t  read_nr  = 0;
@@ -1041,7 +1159,7 @@ int32_t InitVerbs()
 }
 
 
-int32_t InitLocations()
+int32_t InitLocations(void)
 {
   int32_t  i        = 0;
   int32_t  read_nr  = 0;
@@ -1079,7 +1197,7 @@ int32_t InitLocations()
 }
 
 
-int32_t InitObjects()
+int32_t InitObjects(void)
 {
   int32_t    i       = 0;
   int32_t    read_nr = 0;
@@ -1116,7 +1234,7 @@ int32_t InitObjects()
 }
 
 
-int32_t InitAttributes()
+int32_t InitAttributes(void)
 {
   /* Make sure that nr_of_locs and nr_of_objs have been set. */
 
@@ -1218,17 +1336,54 @@ int32_t InitAttributes()
     }
   }
 
+  /* Check if we must read debug info */
+  if (debug_info) {
+    /* check for the keyword */
+    if (!GetNextCode32(&code)) {
+      PrintError(23, NULL, "keyword record");
+      return(ERROR);
+    }
+    if (code != DEBUG) {
+      PrintError(21, NULL, "debug");
+      return(ERROR);
+    }
+
+    /* Malloc() space for common attribute debug info. */
+    if ((com_attr_dbug = (debugInfo *) malloc(nr_of_cattrs*sizeof(debugInfo))) == NULL) {
+      PrintError(15, NULL, "common attributes debug info");
+      return(ERROR);
+    }
+
+    /* Malloc() space for local flags debug info. */
+    if ((loc_attr_dbug = (debugInfo *) malloc(nr_of_lattrs*sizeof(debugInfo))) == NULL) {
+      PrintError(15, NULL, "local attributes debug info");
+      return(ERROR);
+    }
+
+    for (i=0; i<nr_of_cattrs; i++) {
+      if ( ((com_attr_dbug[i]).name = ReadString()) == NULL)
+        return(ERROR);
+    }
+    for (i=0; i<nr_of_lattrs; i++) {
+      if ( ((loc_attr_dbug[i]).name = ReadString()) == NULL)
+        return(ERROR);
+      if (!GetNextCode32(&(loc_attr_dbug[i]).owner))
+        return(ERROR);
+    }
+  }
+
   /* Ready. */
   return(OK);
 }
 
 
-int32_t RdTrigOwners(offset)
- int64_t offset;
+int32_t RdTrigOwners(int64_t offset)
 {
   int32_t code;
-  int32_t nr_of_triggers;
+  int32_t nr_of_ltrigs;
+  int32_t nr_of_ctrigs;    /* only for debug mode */
   int32_t i;
+
 
   /* set right position in file */
   if (fseek(datafile, offset, 0) == -1) {    /* 0 means ???? */
@@ -1246,21 +1401,63 @@ int32_t RdTrigOwners(offset)
     return(ERROR);
   }
   /* read length */
-  if (!GetNextCode32(&nr_of_triggers))
+  if (!GetNextCode32(&nr_of_ltrigs))
     return(ERROR);
 
   /* initialize the trigger owners array */
-  if ((trigg_owners = (int32_t *) malloc(nr_of_triggers*sizeof(int32_t))) == NULL) {
+  if ((trigg_owners = (int32_t *) malloc(nr_of_ltrigs*sizeof(int32_t))) == NULL) {
     PrintError(15, NULL, "RdTrigOwners()");
 
     return(ERROR);
   }
 
   /* read the trigger owners */
-  for (i=0; i<nr_of_triggers; i++) {
+  for (i=0; i<nr_of_ltrigs; i++) {
     if (!GetNextCode32(&(trigg_owners[i]))) {
       PrintError(31, NULL, "trigger owners");
       return(ERROR);
+    }
+  }
+
+  /* Check if we must read debug info */
+  if (debug_info) {
+    /* check for the keyword */
+    if (!GetNextCode32(&code)) {
+      PrintError(23, NULL, "keyword record");
+      return(ERROR);
+    }
+    if (code != DEBUG) {
+      PrintError(21, NULL, "debug");
+      return(ERROR);
+    }
+
+    /* read the number of common triggers */
+    if (!GetNextCode32(&nr_of_ctrigs)) {
+      PrintError(29, NULL, "nr_of_ctrigs");
+      return(ERROR);
+    }
+
+    /* Malloc() space for common trigger debug info. */
+    if ((com_trig_dbug = (debugInfo *) malloc(nr_of_ctrigs*sizeof(debugInfo))) == NULL) {
+      PrintError(15, NULL, "common triggersdebug info");
+      return(ERROR);
+    }
+
+    /* Malloc() space for local trigger debug info. */
+    if ((loc_trig_dbug = (debugInfo *) malloc(nr_of_ltrigs*sizeof(debugInfo))) == NULL) {
+      PrintError(15, NULL, "local trigger debug info");
+      return(ERROR);
+    }
+
+    for (i=0; i<nr_of_ctrigs; i++) {
+      if ( ((com_trig_dbug[i]).name = ReadString()) == NULL)
+        return(ERROR);
+    }
+    for (i=0; i<nr_of_ltrigs; i++) {
+      if ( ((loc_trig_dbug)[i].name = ReadString()) == NULL)
+        return(ERROR);
+      if (!GetNextCode32(&(loc_trig_dbug[i]).owner))
+        return(ERROR);
     }
   }
 
@@ -1268,8 +1465,7 @@ int32_t RdTrigOwners(offset)
 }
 
 
-int32_t RdDescOwners(offset)
- int64_t offset;
+int32_t RdDescOwners(int64_t offset)
 {
   int32_t code;
   int32_t nr_of_descrs;
@@ -1285,10 +1481,12 @@ int32_t RdDescOwners(offset)
     PrintError(32, NULL, "keyword record");
     return(ERROR);
   }
+
   if (code != DESCRIPTIONS) {
     PrintError(21, NULL, "description owners");
     return(ERROR);
   }
+
   /* read length */
   if (!GetNextCode32(&nr_of_descrs))
     return(ERROR);
@@ -1310,26 +1508,59 @@ int32_t RdDescOwners(offset)
 }
 
 
-int32_t ReadExtendedSysDescr(extended_sys_descr)
- extendedSysDescr *extended_sys_descr;
+void InitSysDescr(sysDescr *descr)
 {
-  if (!ReadSysDescr(&(extended_sys_descr->part1)))
+  int i = 0;
+
+  /* this function initializes a sysDescr struct */
+  descr->article = NO_ID;
+  descr->nr_of_adjectives = 0;
+  for (i=0; i<MAX_PARSE_ADJ; i++) {
+    descr->adjectives[i] = NO_ID;
+  }
+  descr->noun = NO_ID;
+  return;
+}
+
+
+int32_t ReadExtendedSysDescr(extendedSysDescr *descr)
+{
+  int32_t code = NO_ID;
+
+  /* initialize the extended system description */
+  descr->dynamic = NULL;
+  InitSysDescr(&(descr->part1));
+  descr->connect_prepos = NO_ID;
+  InitSysDescr(&(descr->part2));
+
+  if (!GetNextCode32(&code)) {
+    PrintError(33, NULL, "DYN_DSYS or DSYS keyword");
+    return(ERROR);
+  }
+
+  if (code == DYN_DSYS) {
+    descr->dynamic = ReadString();
+    return(OK);
+  }
+
+  /* it is a 'normal'  system description */
+
+  if (!ReadSysDescr(&(descr->part1)))
     return(ERROR);
 
-  if (!GetNextCode32(&(extended_sys_descr->connect_prepos))) {
+  if (!GetNextCode32(&(descr->connect_prepos))) {
     PrintError(33, NULL, "connecting preposition");
     return(ERROR);
   }
 
-  if (!ReadSysDescr(&(extended_sys_descr->part2)))
+  if (!ReadSysDescr(&(descr->part2)))
     return(ERROR);
 
   return(OK);
 }
 
 
-int32_t ReadSysDescr(sys_descr)
- sysDescr *sys_descr;
+int32_t ReadSysDescr(sysDescr *sys_descr)
 {
   int i=0;
 
@@ -1356,8 +1587,7 @@ int32_t ReadSysDescr(sys_descr)
 }
 
 
-int32_t ReadContData(cont_data)
- contData *cont_data;
+int32_t ReadContData(contData *cont_data)
 {
   int i=0;
 
@@ -1375,8 +1605,7 @@ return(OK);
 }
 
 
-int32_t InMem(id)
- int32_t id;
+int32_t InMem(int32_t id)
 {
   /* Id must either be a location or an object id. */
   /* This must have been checked by caller.        */
@@ -1399,8 +1628,7 @@ int32_t InMem(id)
 }
 
 
-int32_t Load(id)
- int32_t id;
+int32_t Load(int32_t id)
 {
   /* Check for valid id (verb, location or object) must */
   /* have been done by caller.                          */

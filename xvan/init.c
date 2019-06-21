@@ -1,6 +1,6 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018 Marnix van den Bos.                   */
+/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
 /*                                                                      */
 /* <marnix.home@gmail.com>                                              */
 /*                                                                      */
@@ -38,7 +38,6 @@
 #include "ifiglue.h"
 #include "ifischema.h"
 
-
 /***********/
 /* Globals */
 /***********/
@@ -46,16 +45,17 @@
 FILE      *datafile       = NULL;  /* storyfile             */
 FILE      *transcriptfile = NULL;  /* to store transcript   */
 FILE      *testfile       = NULL;  /* to read testinput     */
-FILE      *debugfile      = NULL;  /* to store debug dump   */
+
+short     debug_info      = 0;
+short     debug_level     = 0;
 
 ifiStats  ifi_stats;
 storyInfo story_info;
 int32_t   *stack;     /* Needed for executing triggers. */
 int32_t   sp = 0;     /* stackpointer                   */
 
-char      *outputline;
+char      *outputline = NULL;
 char      *json_msg_from_story;
-
 
 /*************************/
 /* function declarations */
@@ -67,19 +67,19 @@ void    FileNameFromJson(char*, char*);
 void    GetFileName(int, char**, char*, int*);
 int32_t main(int, char**);
 
-
 /************************/
 /* Function definitions */
 /************************/
 
-int32_t CompilerVersionOK()
+int32_t CompilerVersionOK(void)
 {
   if (!ReadStoryInfo(&story_info))
     return(ERROR);
 
-  if (strcmp(story_info.compiler_version, "2.3.4") != 0) {
+  if (strcmp(story_info.compiler_version, "2.4") != 0) {
     PrintError(37, NULL, NULL);
     PrintError(38, NULL, story_info.compiler_version);
+    Output();
     return(ERROR);
   }
 
@@ -88,9 +88,12 @@ int32_t CompilerVersionOK()
 }
 
 
-int32_t ExitProgram()
+int32_t ExitProgram(void)
 {
   /* we need to exit, but don't close the console window immediately */
+
+  /* flush the outputline */
+  Output();
 
   /* close transcript file */
   if (transcript) {
@@ -105,9 +108,7 @@ int32_t ExitProgram()
 }
 
 
-void FilenameFromJSON(json_string, filename)
- char *json_string;
- char *filename;
+void FilenameFromJSON(char *json_string, char *filename)
 {
   int       index = 0;
   kvPair    kv;
@@ -180,7 +181,7 @@ void FilenameFromJSON(json_string, filename)
                 strcat(story, ".dat");
             }
         }
-        
+
         kv.key              = ResetString(kv.key);
         kv.value.textstring = ResetString(kv.value.textstring);
         break;
@@ -221,11 +222,7 @@ void FilenameFromJSON(json_string, filename)
 }
 
 
-void GetFileName(nr_args, args, filename, json)
- int  nr_args;
- char **args;
- char *filename;
- int* json;
+void GetFileName(int nr_args, char **args, char *filename, int *json)
 {
   int   i           = 1;
   char *initialJSON = NULL;
@@ -282,29 +279,17 @@ void GetFileName(nr_args, args, filename, json)
   free(initialJSON);
 }
 
-
 /************************/
 /*         main()       */
 /************************/
 
-int32_t main(argc, argv)
- int  argc;
- char **argv;
+int32_t main(int argc, char **argv)
 {
   char inputfile[MAXIMUM_PATH];
   int json = 0;
 
   /* init random number generator */
   srand((unsigned) time(NULL));
-
-  /* malloc space for outputline */
-  /* This must be the firsts malloc() because we need */
-  /* outputline to print messages.                    */
-  if ((outputline = (char *) malloc(OUTPUT_LINE_LEN*sizeof(char))) == NULL) {
-    PrintError(15, NULL, "main()");
-    ExitProgram();
-    return(OK);
-  }
 
   /* initialize ifi_stats struct  */
   ifi_stats.objects  = 0;
@@ -333,7 +318,6 @@ int32_t main(argc, argv)
   story_info.autolink       = 0;
   story_info.xvan_language  = ENG;
   story_info.story_language = ENG;
-
 
   /* malloc space for stack            */
   if ((stack = (int32_t *) malloc(STACK_SIZE*sizeof(int32_t))) == NULL) {

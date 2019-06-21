@@ -1,6 +1,6 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018 Marnix van den Bos.                   */
+/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
 /*                                                                      */
 /* <marnix.home@gmail.com>                                              */
 /*                                                                      */
@@ -27,10 +27,11 @@
 #include <ctype.h>
 #include "keyword.h"
 
-extern int16_t xvan_language;     /* init.c */
+extern int16_t xvan_language;               /* init.c        */
 
 extern int32_t ENG_CheckIfKeyword(char*);   /* ENG-keyword.c */
 extern int32_t NL_CheckIfKeyword(char*);    /* NL-keyword.c  */
+
 
 /*************************/
 /* function declarations */
@@ -44,8 +45,11 @@ int32_t IsValidKeyword(int32_t);
 int32_t CheckIfKeyword(char*);
 
 
-char *strlwr(str)
- char *str;
+/************************/
+/* function definitions */
+/************************/
+
+char *strlwr(char *str)
 {
   unsigned char *p = (unsigned char *)str;
 
@@ -56,8 +60,8 @@ char *strlwr(str)
   return str;
 }
 
-char *strupr(str)
- char *str;
+
+char *strupr(char *str)
 {
   unsigned char *p = (unsigned char *)str;
 
@@ -68,8 +72,8 @@ char *strupr(str)
   return str;
 }
 
-int32_t IsTestFun(code)
- int32_t code;
+
+int32_t IsTestFun(int32_t code)
 {
   if ((code > LOWER_BOUND_TESTFUN) && (code < UPPER_BOUND_TESTFUN))
     return (OK);
@@ -77,8 +81,8 @@ int32_t IsTestFun(code)
     return (ERROR);
 }
 
-int32_t IsIntAct(code)
- int32_t code;
+
+int32_t IsIntAct(int32_t code)
 {
   if ((code > LOWER_BOUND_INT_ACT) && (code < UPPER_BOUND_INT_ACT))
     return (OK);
@@ -87,8 +91,7 @@ int32_t IsIntAct(code)
 }
 
 
-int32_t IsValidKeyword(kw)
- int32_t kw;
+int32_t IsValidKeyword(int32_t kw)
 {
   /* added on sep 4th 2017 */
   /* This function checks whether kw is within 2    */
@@ -108,8 +111,7 @@ int32_t IsValidKeyword(kw)
 }
 
 
-int32_t CheckIfKeyword(word)
- char *word;
+int32_t CheckIfKeyword(char *word)
 {
   char word_lwr[MAX_WORD_LEN+1];
 
@@ -135,5 +137,3 @@ int32_t CheckIfKeyword(word)
       return(ENG_CheckIfKeyword(word_lwr));
   }
 }
-
-

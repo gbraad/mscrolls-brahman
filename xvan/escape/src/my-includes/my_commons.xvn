@@ -1,6 +1,8 @@
 
 # my commons for stairs.xvn
 
+$COMMON_DESCRS
+ d_ask
 
 $COMMON_FLAGS
  f_heavy      = 0  # needed for breaking things
@@ -10,3 +12,4 @@ $COMMON_FLAGS
  f_tieable    = 0
  f_pressable  = 0
  f_needed     = 0 # tells if an object is needed to finish the game
+ f_sk_puzzle  = 0

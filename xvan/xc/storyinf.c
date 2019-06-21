@@ -1,6 +1,6 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018 Marnix van den Bos.                   */
+/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
 /*                                                                      */
 /* <marnix.home@gmail.com>                                              */
 /*                                                                      */
@@ -70,9 +70,18 @@ int32_t ReadStoryInfo(info, filename, file_list)
   info->ui_textinput = 1;   /* true  */
   info->ui_compass   = 1;   /* true  */
   info->autolink     = 0;   /* false */
-  strcpy(info->compiler_version, "2.3.4");
+  strcpy(info->compiler_version, "2.4");
   info->xvan_language  = ENG;
   info->story_language = ENG;
+
+  /* debugging mode was entered from the command */
+  /* line with "-d"                              */
+  if (debug) {
+    info->debug = 1;
+  }
+  else {
+    info->debug =0;
+  }
 
   /* Word hasn't been malloc'ed yet; before all calls to   */
   /* GetNextWord() after this one, word must be free'ed in */
@@ -307,4 +316,3 @@ int32_t ReadStoryInfo(info, filename, file_list)
   } /* while */
   return(OK);
 }
-

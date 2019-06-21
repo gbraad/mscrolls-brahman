@@ -9,7 +9,7 @@ $VERB move
 
    if not(equal(o_subject, %none)) then
      if testflag(o_subject.f_fixed) then
-       printcr("[the] [o_subject] is fixed in place.")
+       printcr("[the] [o_subject] [o_subject.r_is] fixed in place.")
        disagree()
 
  "move"
@@ -31,9 +31,7 @@ $VERB move
  "move [o_subject] to [dir]",
  "move [o_subject] [dir]"
    DISAMBIGUATION_RULES
-     if not(testflag(o_subject.f_fixed)) then
-       score(5)
-   END_RULES
+     if not(testflag(o_subject.f_fixed)) then score(5) END_RULES
 
    print("That doesn't make sense, moving [the] [o_subject] [dir].")
 
@@ -53,7 +51,7 @@ $VERB move
     printcr("  'move the crate'")
     printcr("  'move the crate north'")
     printcr("  'move the crate to the north'")
-    printcr("(to turn off these help messages, type 'help')")
+    printcr("(to turn off these help messages, type 'help 1')")
 
 ENDVERB
 

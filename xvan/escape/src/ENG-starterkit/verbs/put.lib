@@ -1,0 +1,79 @@
+
+$VERB put
+ PROLOGUE
+   if not(testflag(o_actor.f_alive)) then
+     if trigger(o_actor.t_talk_to_dead) then
+       disagree()
+     endif
+   endif
+
+  if equal(o_subject, %none) then
+    agree()
+  endif
+
+ EPILOGUE
+   # check if they put the light source out of sight
+   if not(islit(o_player)) then
+     printcr("It is now pitch black.")
+
+ "put"
+   if equal(o_actor, o_player) then
+     printcr("What do you want to put?")
+   else
+     printcr("What do you want [the] [o_actor] to put?")
+   endif
+   getsubject()
+
+ "put [o_subject]"
+   DISAMBIGUATION_RULES
+    if owns(o_actor, o_subject) then score(10) endif
+    if testflag(o_subject.f_takeable) then score(5) endif  # make o_nst loose
+   END_RULES
+
+   printcr("Where do you want to put [the] [o_subject]?")
+   getspec()
+
+ "put [o_subject] [prepos] [o_spec]"
+   DISAMBIGUATION_RULES
+    if owns(o_actor, o_subject) then score(5) endif
+    if testflag(o_subject.f_takeable) then score(5) endif  # make o_nst loose
+    if not(owns(o_actor, o_spec)) then score(5) endif
+    if equal(o_spec, o_nst) then score(-5) endif
+    if testflag(o_spec.f_container) and equal(%prepos, in) then score(5) endif
+    if testflag(o_spec.f_supporter) and equal(%prepos, on) then score(5) endif
+   END_RULES
+
+   if owns(o_spec, o_subject, %prepos) then
+     printcr("[the] [o_subject] is already [prepos] [the] [o_spec].")
+     disagree()
+   endif
+   if not(owns(o_actor, o_subject)) then
+     printcr("(taking [the] [o_subject] first).\n")
+     if not(try(l_location, 0, 1, "get [o_subject]")) then
+       disagree()
+     endif
+   endif
+   if equal(%prepos, in) and testflag(o_spec.f_container) then
+     if not(testflag(o_spec.f_open)) then
+       printcr("(opening [the] [o_spec] first)>")
+       if not(try(l_location, 0, 1, "open [o_spec]")) then
+         disagree()
+       endif
+     endif
+     clearflag(o_subject.f_bypass)
+     move(o_subject, o_spec, in)
+   else
+     if equal(%prepos, on) and testflag(o_spec.f_supporter) then
+       clearflag(o_subject.f_bypass)
+       move(o_subject, o_spec, on)
+     else
+       printcr("[the] [o_subject] cannot be put [prepos] [the] [o_spec].")
+       disagree()
+     endif
+   endif
+   printcr("[the] [o_subject] is now [prepos] [the] [o_spec].")
+
+ DEFAULT
+   printcr("I only understood you as far as willing to put something.")
+ENDVERB
+

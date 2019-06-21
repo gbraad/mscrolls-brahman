@@ -1,0 +1,7 @@
+
+$VERB xyzzy
+ DEFAULT
+   printcr("This is not Colossal Cave adventure.")
+
+ENDVERB
+

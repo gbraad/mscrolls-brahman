@@ -34,10 +34,12 @@ $VERB lock
         score(5)
    END_RULES
 
-   if owns(o_actor, o_subject.r_key) then
+   if owns(o_actor, o_subject.r_key) or owns(o_subject, o_subject.r_key, 0) then
      if testflag(o_subject.f_open) then
        printcr("(closing [the] [o_subject] first).")
-       clearflag(o_subject.f_open)
+       if not(try(l_location, 0, 1, "close [o_subject]")) then
+         disagree()
+       endif
      endif
      printcr("(with [the] [o_subject.r_key]).")
      setflag(o_subject.f_locked)
@@ -55,13 +57,16 @@ $VERB lock
    END_RULES
 
    if not(owns(o_actor, o_spec)) then
-     printcr("But [the] [o_actor] [o_actor.r_is] not holding [the] [o_spec].")
+     printcr("(taking [the] [o_spec] first).")
+     if not(try(l_location, 0, 1, "take [o_spec]")) then
+       disagree()
+     endif
+   endif
+   if equal(o_spec, o_subject.r_key) then
+     setflag(o_subject.f_locked)
+     printcr("[the] [o_subject] is now locked.")
    else
-     if equal(o_spec, o_subject.r_key) then
-       setflag(o_subject.f_locked)
-       printcr("[the] [o_subject] is now locked.")
-     else
-       printcr("Apparently, [the] [o_spec] is not the key for [the] [o_subject].")
+     printcr("Apparently, [the] [o_spec] is not the key for [the] [o_subject].")
 
 ENDVERB
 

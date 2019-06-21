@@ -1,6 +1,6 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018 Marnix van den Bos.                   */
+/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
 /*                                                                      */
 /* <marnix.home@gmail.com>                                              */
 /*                                                                      */
@@ -30,7 +30,6 @@
 #include "typedefs.h"
 #include "readloc.h"
 
-
 /*************************/
 /* function declarations */
 /*************************/
@@ -38,13 +37,11 @@
 void         InitLoc(locationInfo*);
 locationInfo *ReadLocation(int64_t);
 
-
 /************************/
 /* Function definitions */
 /************************/
 
-void InitLoc(loc)
- locationInfo *loc;
+void InitLoc(locationInfo *loc)
 {
   loc->descriptions = NULL;
   loc->action_recs  = NULL;
@@ -52,8 +49,7 @@ void InitLoc(loc)
 }
 
 
-locationInfo *ReadLocation(offset)
- int64_t offset;
+locationInfo *ReadLocation(int64_t offset)
 {
   locationInfo  *loc;
   descrInfo     *last_descr      = NULL;
@@ -86,7 +82,6 @@ locationInfo *ReadLocation(offset)
     switch (code) {
       case ERROR:
         return(NULL);
-
       case ACTION_REC:
         /* Read the action_rec and trigger to execute.     */
         /* action_rec will be malloced by ReadActionRec(). */
@@ -102,10 +97,8 @@ locationInfo *ReadLocation(offset)
 
         /* Next code is returned by ReadActionRec(). */
         break;
-
       case END_LOC:
         return(loc);
-
       default:
         /* Check for description/trigger id. */
         if (IsDescrId(code)) {
@@ -136,7 +129,7 @@ locationInfo *ReadLocation(offset)
           /* will either be an END_LOC or TRIGG_ID code.   */
         }
         else {
-          PrintError(53, &((resultStruct) {VALUE,code}), "ReadLocation()");
+          PrintError(53, &((resultStruct) {VALUE, NONE, code}), "ReadLocation()");
           return(ERROR);
         }
 

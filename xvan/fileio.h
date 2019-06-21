@@ -1,6 +1,6 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018 Marnix van den Bos.                   */
+/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
 /*                                                                      */
 /* <marnix.home@gmail.com>                                              */
 /*                                                                      */
@@ -24,17 +24,31 @@
 #if !defined(__fileio)
 #define __fileio
 
+/***********/
+/* defines */
+/***********/
+
 #define MAX_VERBS_IN_MEM    10
 #define MAX_LOCS_IN_MEM     10
 #define MAX_OBJS_IN_MEM     10
-
 
 /*************/
 /* externals */
 /*************/
 
-extern FILE    *datafile;
-extern dirData dirs;
+extern FILE         *datafile;
+extern dirData      dirs;
+extern short        debug_info;
+extern short        debug_level;
+extern debugInfo    *loc_dbug;
+extern debugInfo    *obj_dbug;
+extern debugInfo    *timer_dbug;
+extern debugInfo    *com_attr_dbug;
+extern debugInfo    *loc_attr_dbug;
+extern debugInfo    *com_flag_dbug;
+extern debugInfo    *loc_flag_dbug;
+extern debugInfo    *com_trig_dbug;
+extern debugInfo    *loc_trig_dbug;
 
 /********************************/
 /* Extern function declarations */
@@ -57,6 +71,8 @@ extern void         PrintLocation(locationInfo*);               /* debug.c    */
 extern void         PrintObject(objectInfo*);                   /* debug.c    */
 extern void         PrintError(int16_t, resultStruct*, char*);  /* errors.c   */
 
+extern void         Log(char*, char*, char*);                    /* output.c   */
+
 extern int32_t      IsVerbId(int32_t);                           /* execute.c  */
 extern int32_t      IsLocId(int32_t);                            /* execute.c  */
 extern int32_t      IsObjId(int32_t);                            /* execute.c  */
@@ -73,6 +89,5 @@ extern int32_t      subject;                                     /* letsplay.c *
 extern int32_t      specifier;                                   /* letsplay.c */
 extern int32_t      value;                                       /* letsplay.c */
 /* End of special Ids for save() and restore() functiona */
+
 #endif
-
-

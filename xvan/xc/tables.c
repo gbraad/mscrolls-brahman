@@ -1,6 +1,6 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018 Marnix van den Bos.                   */
+/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
 /*                                                                      */
 /* <marnix.home@gmail.com>                                              */
 /*                                                                      */
@@ -142,6 +142,11 @@ int32_t      IsValue(int32_t);
 int32_t      IsVerbId(int32_t);
 int32_t      IsSpecId(int32_t);
 
+
+/************************/
+/* function definitions */
+/************************/
+
 void PrintWordList()
 {
   wordInfo *wp = word_list;
@@ -170,7 +175,6 @@ int32_t SetUpTables()
   /* word_table is created after the number of words is known. */
   /* It is defined with value NULL.                            */
 
-
   if ((loc_table = (locationData *) malloc(sizeof(locationData))) == NULL) {
     ErrHdr();
     PrintError(1, NULL, "loc_table");
@@ -182,13 +186,14 @@ int32_t SetUpTables()
     loc_table->exists = 0;
     loc_table->dir_info.nr_of_dsys = 0;
     for (i=0; i<MAX_DSYS; i++) {
-      loc_table->dir_info.descr[i].part1.article = NO_ID;
+      loc_table->dir_info.descr[i].dynamic                = NULL;
+      loc_table->dir_info.descr[i].part1.article          = NO_ID;
       loc_table->dir_info.descr[i].part1.nr_of_adjectives = 0;
-      loc_table->dir_info.descr[i].part1.noun = NO_ID;
-      loc_table->dir_info.descr[i].connect_prepos = NO_ID;
-      loc_table->dir_info.descr[i].part2.article = NO_ID;
+      loc_table->dir_info.descr[i].part1.noun             = NO_ID;
+      loc_table->dir_info.descr[i].connect_prepos         = NO_ID;
+      loc_table->dir_info.descr[i].part2.article          = NO_ID;
       loc_table->dir_info.descr[i].part2.nr_of_adjectives = 0;
-      loc_table->dir_info.descr[i].part2.noun = NO_ID;
+      loc_table->dir_info.descr[i].part2.noun             = NO_ID;
     }
     loc_table->dir_info.contained_objs.nr_of_objects = 0;
     loc_table->dir_info.held_by = -1;  /* unused for locations */
@@ -206,20 +211,20 @@ int32_t SetUpTables()
     obj_table->exists = 0;
     obj_table->dir_info.nr_of_dsys = 0;
     for (i=0; i<MAX_DSYS; i++) {
-      obj_table->dir_info.descr[i].part1.article = NO_ID;
+      obj_table->dir_info.descr[i].dynamic                = NULL;
+      obj_table->dir_info.descr[i].part1.article          = NO_ID;
       obj_table->dir_info.descr[i].part1.nr_of_adjectives = 0;
-      obj_table->dir_info.descr[i].part1.noun = NO_ID;
-      obj_table->dir_info.descr[i].connect_prepos = NO_ID;
-      obj_table->dir_info.descr[i].part2.article = NO_ID;
+      obj_table->dir_info.descr[i].part1.noun             = NO_ID;
+      obj_table->dir_info.descr[i].connect_prepos         = NO_ID;
+      obj_table->dir_info.descr[i].part2.article          = NO_ID;
       obj_table->dir_info.descr[i].part2.nr_of_adjectives = 0;
-      obj_table->dir_info.descr[i].part2.noun = NO_ID;
+      obj_table->dir_info.descr[i].part2.noun             = NO_ID;
     }
     obj_table->dir_info.contained_objs.nr_of_objects = 0;
     obj_table->dir_info.held_by = NO_ID;
     obj_table->dir_info.offset = -1;
     obj_table->next = NULL;
   }
-
 
   if ((flag_table = (flagData *)malloc(sizeof(flagData))) == NULL) {
     ErrHdr();
@@ -234,7 +239,6 @@ int32_t SetUpTables()
     flag_table->value = -1;
     flag_table->next = NULL;
   }
-
 
   if ((attr_table = (attrData *) malloc(sizeof(attrData))) == NULL) {
     ErrHdr();
@@ -251,7 +255,6 @@ int32_t SetUpTables()
     attr_table->value_owner = NO_ID;   /*10march2017 */
     attr_table->next        = NULL;
   }
-
 
   if ((trigg_table = (triggerData *)malloc(sizeof(triggerData))) == NULL) {
     ErrHdr();
@@ -431,7 +434,6 @@ void FreeTables()
 
   free(verb_dir);                /* free the verb directory */
 
-
   PrintError(94, &((resultStruct){VALUE, nr_of_words}), "words (including verbs)");
   PrintError(94, &((resultStruct){VALUE, nr_of_verbs}), "verbs");
 }
@@ -517,6 +519,7 @@ void InitOffsets()
  dir_data.attribute_data_offset = -1;
 }
 
+
 int32_t InitVerbDir()
 {
   int i =0;
@@ -533,7 +536,6 @@ int32_t InitVerbDir()
   /* in the verb table.                                        */
 
   int32_t size = nr_of_verbs; /* Make code readable. */
-  /*int32_t size = nr_of_verbs - nr_of_syn_verbs;*/ /* Make code readable. */
 
   if ((verb_dir = (verbDir *) malloc(size*sizeof(verbDir))) == NULL) {
     ErrHdr();
@@ -553,6 +555,7 @@ int32_t InitVerbDir()
   }
   return(OK);
 }
+
 
 int32_t GetNewVerbId(verb_id)
  int32_t  *verb_id;
@@ -574,8 +577,10 @@ int32_t GetNewVerbId(verb_id)
     *verb_id = NO_ID;
     return(ERROR);
   }
-  /* no return here, makes TC happy */
+
+  return(OK);
 }
+
 
 int32_t GetNewWordId(word_id)
  int32_t *word_id;
@@ -597,8 +602,10 @@ int32_t GetNewWordId(word_id)
     *word_id = -1;
     return(ERROR);
   }
-  /* no return here, makes TC happy */
+
+   return(OK);
 }
+
 
 void CheckLocWildCard(name, result)
  char         *name;
@@ -638,6 +645,7 @@ void CheckObjWildCard(name, result)
       ENG_CheckObjWildCard(name, result);
   }
 }
+
 
 int32_t GetLocationId(id_string, id, parsed, offset)
  char    *id_string; /* location name                        */
@@ -724,13 +732,14 @@ int32_t GetLocationId(id_string, id, parsed, offset)
       lp->next->exists = 0;
       lp->next->dir_info.nr_of_dsys = 0;
       for (i=1; i<MAX_DSYS; i++) {
-        lp->next->dir_info.descr[i].part1.article = NO_ID;
+        lp->next->dir_info.descr[i].dynamic                = NULL;
+        lp->next->dir_info.descr[i].part1.article          = NO_ID;
         lp->next->dir_info.descr[i].part1.nr_of_adjectives = 0;
-        lp->next->dir_info.descr[i].part1.noun = NO_ID;
-        lp->next->dir_info.descr[i].connect_prepos = NO_ID;
-        lp->next->dir_info.descr[i].part2.article = NO_ID;
+        lp->next->dir_info.descr[i].part1.noun             = NO_ID;
+        lp->next->dir_info.descr[i].connect_prepos         = NO_ID;
+        lp->next->dir_info.descr[i].part2.article          = NO_ID;
         lp->next->dir_info.descr[i].part2.nr_of_adjectives = 0;
-        lp->next->dir_info.descr[i].part2.noun = NO_ID;
+        lp->next->dir_info.descr[i].part2.noun             = NO_ID;
       }
       lp->next->dir_info.contained_objs.nr_of_objects = 0;
       lp->next->dir_info.held_by = -1;  /* unused for locations */
@@ -751,6 +760,7 @@ int32_t GetLocationId(id_string, id, parsed, offset)
   PrintError(99, &((resultStruct){VALUE,LAST_LOCATION_ID-FIRST_LOCATION_ID}), NULL);
   return(ERROR);
 }
+
 
 int32_t GetObjectId(id_string, id, parsed, offset)
  char    *id_string; /* object name */
@@ -833,13 +843,14 @@ int32_t GetObjectId(id_string, id, parsed, offset)
       op->next->exists = 0;
       op->next->dir_info.nr_of_dsys = 0;
       for (i=0; i<MAX_DSYS; i++) {
-        op->next->dir_info.descr[i].part1.article = NO_ID;
+        op->next->dir_info.descr[i].dynamic                = NULL;
+        op->next->dir_info.descr[i].part1.article          = NO_ID;
         op->next->dir_info.descr[i].part1.nr_of_adjectives = 0;
-        op->next->dir_info.descr[i].part1.noun = NO_ID;
-        op->next->dir_info.descr[i].connect_prepos = NO_ID;
-        op->next->dir_info.descr[i].part2.article = NO_ID;
+        op->next->dir_info.descr[i].part1.noun             = NO_ID;
+        op->next->dir_info.descr[i].connect_prepos         = NO_ID;
+        op->next->dir_info.descr[i].part2.article          = NO_ID;
         op->next->dir_info.descr[i].part2.nr_of_adjectives = 0;
-        op->next->dir_info.descr[i].part2.noun = NO_ID;
+        op->next->dir_info.descr[i].part2.noun             = NO_ID;
       }
       op->next->dir_info.contained_objs.nr_of_objects = 0;
       op->next->dir_info.held_by = NO_ID;
@@ -860,6 +871,7 @@ int32_t GetObjectId(id_string, id, parsed, offset)
   PrintError(102, &((resultStruct){VALUE,LAST_OBJECT_ID-FIRST_OBJECT_ID}), NULL);
   return(ERROR);
 }
+
 
 resultStruct GetFlagId(id_string, redefine, id, value, owner_id, parsed)
  char    *id_string; /* flag name (different flags in different  */
@@ -1231,8 +1243,8 @@ resultStruct GetTriggerId(id_string, redefine, id, owner_id, parsed)
 
 int32_t GetTimerId(id_string, id, parsed)
  char *id_string; /* timer name */
- int32_t  *id;        /* timer id */
- int32_t  parsed;     /* 1 means timer definition  */
+ int32_t  *id;    /* timer id */
+ int32_t  parsed; /* 1 means timer definition  */
                   /* 0 means timer reference   */
                   /* This is an INPUT parameter */
 {
@@ -1293,6 +1305,7 @@ int32_t GetTimerId(id_string, id, parsed)
   PrintError(111, &((resultStruct){LAST_TIMER_ID-FIRST_TIMER_ID+1}), NULL);
   return(ERROR);
 }
+
 
 int32_t GetDescrId(id_string, id, owner_id, parsed)
  char     *id_string; /* Description name (different descriptions */
@@ -1754,6 +1767,7 @@ int32_t ProcWordInfo(info)
   return(OK);
 }
 
+
 int32_t CreateWordTable()
 {
   /* During Pass1(), a linked list of wordInfo structs is    */
@@ -1796,6 +1810,7 @@ int32_t CreateWordTable()
   return(OK);
 }
 
+
 int32_t ProcLocDSys(description, owner_id)
  char *description;
  int32_t  owner_id;
@@ -1811,6 +1826,7 @@ int32_t ProcLocDSys(description, owner_id)
   int32_t          dsys;    /* tells which dsys entry in array to fill */
 
   /* Set descr struct to default values */
+  descr.dynamic                = NULL;
   descr.part1.article          = NO_ID;
   descr.part1.nr_of_adjectives = 0;
   descr.part1.noun             = NO_ID;
@@ -1824,7 +1840,7 @@ int32_t ProcLocDSys(description, owner_id)
 
   /* ParseDSys() returned either UNKNOWN_WORD or OK   */
   /* In each case we must copy descr to the loc_table */   /* WHY????? */
-  /* now find this location's struct in loc_table */
+  /* now find this location's struct in loc_table     */
 
   while (lp->l_id != owner_id && (strcmp(lp->l_word, TERMINATOR) != 0))
     lp = lp->next;
@@ -1849,7 +1865,8 @@ int32_t ProcLocDSys(description, owner_id)
 
   /* ok, we have room for another d_sys */
   dsys = lp->dir_info.nr_of_dsys++;
-  lp->dir_info.descr[dsys].part1.article = descr.part1.article;
+  lp->dir_info.descr[dsys].dynamic                = descr.dynamic;
+  lp->dir_info.descr[dsys].part1.article          = descr.part1.article;
   lp->dir_info.descr[dsys].part1.nr_of_adjectives = descr.part1.nr_of_adjectives;
 
   for (i=0; i<descr.part1.nr_of_adjectives; i++)
@@ -1870,6 +1887,7 @@ int32_t ProcLocDSys(description, owner_id)
   return(OK);
 }
 
+
 int32_t ProcObjDSys(description, owner_id)
  char *description;
  int32_t  owner_id;
@@ -1885,6 +1903,7 @@ int32_t ProcObjDSys(description, owner_id)
   int32_t            dsys;    /* tells which dsys entry in array to fill   */
 
   /* Set descr struct to default values */
+  descr.dynamic                = NULL;
   descr.part1.article          = NO_ID;
   descr.part1.nr_of_adjectives = 0;
   descr.part1.noun             = NO_ID;
@@ -1922,7 +1941,8 @@ int32_t ProcObjDSys(description, owner_id)
 
   /* ok, we have room for another d_sys */
   dsys = op->dir_info.nr_of_dsys++;
-  op->dir_info.descr[dsys].part1.article = descr.part1.article;
+  op->dir_info.descr[dsys].dynamic                = descr.dynamic;
+  op->dir_info.descr[dsys].part1.article          = descr.part1.article;
   op->dir_info.descr[dsys].part1.nr_of_adjectives = descr.part1.nr_of_adjectives;
 
   for (i=0; i<descr.part1.nr_of_adjectives; i++)
@@ -1942,6 +1962,7 @@ int32_t ProcObjDSys(description, owner_id)
 
   return(OK);
 }
+
 
 int32_t ProcCData(contains, contained)
  int32_t contains;   /* Containing object or location. */
@@ -1999,6 +2020,7 @@ int32_t ProcCData(contains, contained)
   return(OK);
 }
 
+
 void ProcTimerInfo(info)
  timerInfo *info;
 {
@@ -2015,6 +2037,7 @@ void ProcTimerInfo(info)
     md_end = info;
   }
 }
+
 
 int32_t ProcCIData(id, contained_in, preposition)
  int32_t id;            /* contained object                    */
@@ -2068,6 +2091,7 @@ int32_t ProcExit(from_loc, direction, to_loc)
                                                 +direction] = to_loc;
   return(OK);
 }
+
 
 int32_t CheckTables()
 {
@@ -2195,6 +2219,7 @@ int32_t CheckTables()
   return(status);
 }
 
+
 void PrintLocationNameForId(id)
  int32_t id;
 {
@@ -2258,6 +2283,7 @@ void PrintObjectNameForId(id)
   return;
 }
 
+
 int32_t IsLocId(id)
  int32_t id;
 {
@@ -2276,6 +2302,7 @@ int32_t IsLocId(id)
 
   return(ERROR);
 }
+
 
 int32_t IsObjId(id)
  int32_t id;
@@ -2297,6 +2324,7 @@ int32_t IsObjId(id)
   return(ERROR);
 }
 
+
 int32_t IsCDescrId(id)
  int32_t id;
 {
@@ -2304,6 +2332,7 @@ int32_t IsCDescrId(id)
     return(OK);
   return(ERROR);
 }
+
 
 int32_t IsLDescrId(id)
  int32_t id;
@@ -2313,6 +2342,7 @@ int32_t IsLDescrId(id)
   return(ERROR);
 }
 
+
 int32_t IsCFlagId(id)
  int32_t id;
 {
@@ -2320,6 +2350,7 @@ int32_t IsCFlagId(id)
     return(OK);
   return(ERROR);
 }
+
 
 int32_t IsLFlagId(id)
  int32_t id;
@@ -2329,6 +2360,7 @@ int32_t IsLFlagId(id)
   return(ERROR);
 }
 
+
 int32_t IsCAttrId(id)
  int32_t id;
 {
@@ -2336,6 +2368,7 @@ int32_t IsCAttrId(id)
     return(OK);
   return(ERROR);
 }
+
 
 int32_t IsLAttrId(id)
  int32_t id;
@@ -2345,6 +2378,7 @@ int32_t IsLAttrId(id)
   return(ERROR);
 }
 
+
 int32_t IsCTriggId(id)
  int32_t id;
 {
@@ -2352,6 +2386,7 @@ int32_t IsCTriggId(id)
     return(OK);
   return(ERROR);
 }
+
 
 int32_t IsLTriggId(id)
  int32_t id;
@@ -2361,6 +2396,7 @@ int32_t IsLTriggId(id)
   return(ERROR);
 }
 
+
 int32_t IsTimerId(id)
  int32_t id;
 {
@@ -2368,6 +2404,7 @@ int32_t IsTimerId(id)
     return(OK);
   return(ERROR);
 }
+
 
 int32_t IsVerbId(id)
  int32_t id;
@@ -2380,6 +2417,7 @@ int32_t IsVerbId(id)
     return(OK);
   return(ERROR);
 }
+
 
 int32_t IsWordId(id)
  int32_t id;
@@ -2396,6 +2434,7 @@ int32_t IsWordId(id)
       return(IsVerbId(id));
   } /* switch */
 }
+
 
 int32_t IsSpecId(id)
  int32_t id;

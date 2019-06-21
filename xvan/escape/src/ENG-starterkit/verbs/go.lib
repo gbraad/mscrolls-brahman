@@ -12,7 +12,7 @@ $verb go
     printcr("You can't go that way.")
 
   DEFAULT
-    printcr("I do not understand that sentence.")
+    printcr("I only understood you as far as wanting to go somewhere.")
 
 ENDVERB
 

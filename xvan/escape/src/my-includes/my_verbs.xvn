@@ -4,6 +4,36 @@
 $verb zwoosh endverb
 
 #--------------------------------------------------------------------
+$VERB info SYNONYM about
+ DEFAULT
+   print("\n  This is a story for XVAN 2.3.4.\n\n"
+         "  It has 28 locations and 85 objects, including the player /
+         and one NPC named\n"
+         "  Fred. The story contains several puzzles, and you need /
+          to interact with\n"
+         "  Fred to solve some of them. Your goal is: escape!\n\n")
+   printitalic("  In Escape! you cannot end up in an unwinnable situation.\n")
+         
+ENDVERB
+#--------------------------------------------------------------------
+
+#--------------------------------------------------------------------
+$VERB apply
+ "apply"
+   printcr("What do you want to apply?")
+   getsubject()
+
+ "apply [o_subject]"
+   printcr("What do you want to apply [the] [o_subject] to?")
+   getspec(to)
+
+ DEFAULT
+   printcr("I only understood you as far as wanting to apply something.")
+
+ENDVERB
+#--------------------------------------------------------------------
+
+#--------------------------------------------------------------------
 $VERB burn
  PROLOGUE
   if not(equal(o_subject, %none)) then
@@ -44,7 +74,6 @@ ENDVERB
 
 #--------------------------------------------------------------------
 $VERB climb
-
  "climb [prepos] [o_subject]"
    printcr("Climbing [prepos] [the] [o_subject] is not going to work.")
 
@@ -68,13 +97,25 @@ ENDVERB
 #--------------------------------------------------------------------
 
 #--------------------------------------------------------------------
+$VERB credits
+ DEFAULT
+   printcr("I owe big to Mathbrush, Andrew Schultz, Marco /
+            Innocenti, Nils Fagerburg, Giannis G. Georgiou and /
+            Chris Selmys for thoroughly testing Escape!\nAny errors /
+            that you may (will) find I've no doubt introduced by /
+            changing the story after their testing.")
+
+ENDVERB
+#--------------------------------------------------------------------
+
+#--------------------------------------------------------------------
 $VERB cut SYNONYM saw
-PROLOGUE
+ PROLOGUE
   if equal(o_subject, %none) then
     agree()
   else
     if not(testflag(o_subject.f_cuttable) or testflag(o_subject.f_alive)) then
-      printcr("[the] [o_subject] is not something that can be cut.")
+      printcr("[the] [o_subject] [o_subject.r_is] not something that can be cut.")
       disagree()
     endif
   endif
@@ -95,8 +136,8 @@ PROLOGUE
    getsubject()
 
  "cut [o_subject]"
-   printcr("How do you want to cut [the] [o_subject]?")
-   getspec()
+   printcr("with what?")
+   getspec(with)
 
  "cut [o_subject] with [o_spec]"
    printcr("Cutting [the] [o_subject] with [the] [o_spec] won't help.")
@@ -149,7 +190,18 @@ $VERB extinguish
   DEFAULT
     printcr("I only understood you as far as wanting to extinguish something.")
 ENDVERB
-#-------------------------------------------------------------------------------
+#--------------------------------------------------------------------
+
+#--------------------------------------------------------------------
+$VERB feed
+ DEFAULT
+   printcr("I only understood you as far as wanting to feed something.")
+ENDVERB
+#--------------------------------------------------------------------
+
+#--------------------------------------------------------------------
+$VERB getmeout ENDVERB
+#--------------------------------------------------------------------
 
 #--------------------------------------------------------------------
 $VERB lift
@@ -189,7 +241,10 @@ $VERB press SYNONYM push
     if testflag(o_subject.f_pressable) then
       printcr("Nothing happens.")
     else
-      printcr("[the] [o_subject] is not something that can be pressed,")
+      if equal(o_subject, o_nst) then
+        printcr("There is [o_nst.d_no] that can be pressed here.")
+      else
+        printcr("[the] [o_subject] does not give in.")
 
   DEFAULT
     printcr("I only understood you as far as wanting to press something.")
@@ -214,6 +269,16 @@ ENDVERB
 #--------------------------------------------------------------------
 
 #--------------------------------------------------------------------
+$VERB scroll
+ "scroll"
+   printcr("Please enter \"scroll up\" or \"scroll down\".")
+
+ DEFAULT
+   printcr("You can only scroll up or down.")
+ENDVERB
+#--------------------------------------------------------------------
+
+#--------------------------------------------------------------------
 $VERB set
   "set"
     printcr("What do you want to [action]?")
@@ -224,7 +289,7 @@ $VERB set
     getspec()
 
  DEFAULT
-   printcr("You can't set [the] [o_subject] to [the] [o_spec]!")
+   printcr("I only understood you as far as wanting to set something.")
 ENDVERB
 #--------------------------------------------------------------------
 
@@ -263,6 +328,13 @@ ENDVERB
 #--------------------------------------------------------------------
 
 #--------------------------------------------------------------------
+$VERB stay
+ DEFAULT
+   printcr("I only understood you as far as willing to stay.")
+ENDVERB
+#--------------------------------------------------------------------
+
+#--------------------------------------------------------------------
 $VERB switch
  DEFAULT
    printcr("I only understood you so far as willing to switch something.")
@@ -274,5 +346,32 @@ $VERB talk
  DEFAULT
    printcr("To talk to someone say \"ask someone about something\" or /
             \"someone, tell me about something\".")
+ENDVERB
+#--------------------------------------------------------------------
+
+
+#--------------------------------------------------------------------
+$VERB wrap
+ "wrap"
+   printcr("What do you want to wrap?")
+   getsubject()
+
+ "wrap [o_subject]"
+   printcr("What do you want to wrap [the] [o_subject] around?")
+   getspec(around)
+
+ DEFAULT
+   printcr("I only understood you as far as wanting to wrap something.")
+ENDVERB
+#--------------------------------------------------------------------
+
+#--------------------------------------------------------------------
+$VERB unwrap
+ "unwrap"
+   printcr("What do you want to unwrap?")
+   getsubject()
+
+ DEFAULT
+   printcr("I only understood you as far as wanting to unwrap something.")
 ENDVERB
 #--------------------------------------------------------------------

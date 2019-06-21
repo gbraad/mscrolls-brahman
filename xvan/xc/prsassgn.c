@@ -1,6 +1,6 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018 Marnix van den Bos.                   */
+/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
 /*                                                                      */
 /* <marnix.home@gmail.com>                                              */
 /*                                                                      */
@@ -35,14 +35,9 @@
 
 int32_t  ParseAssignment(char**, int32_t*, int32_t*, int32_t*, int32_t, FILE**, fileList**);
 
-int32_t   ParseAssignment(word, keyword, target, index, owner, source, file_list)
- char     **word;
- int32_t  *keyword;
- int32_t  *target;
- int32_t  *index;     /* First free position in target.         */
- int32_t  owner;      /* Location or object that owns the code. */
- FILE     **source;
- fileList **file_list;
+int32_t   ParseAssignment(char **word, int32_t *keyword, int32_t *target, int32_t *index, int32_t owner, FILE **source, fileList **file_list)
+ /* index is first free position in target.         */
+ /* owner is location or object that owns the code. */
 {
   /* Function ParseAssignment() added on Sep 7th 2015. */
 
@@ -265,7 +260,6 @@ int32_t   ParseAssignment(word, keyword, target, index, owner, source, file_list
           case 22:
           case 23:
             target[fun_pos] = int_act;
-            /*if (state == 11) { */
             if (state == 11 || state == 21 || state == 22 || state == 23) {
               /* we were expecting a DOT but must exit instead   */
               /* Must add EOP and increase number of pars by one */
@@ -333,7 +327,6 @@ int32_t   ParseAssignment(word, keyword, target, index, owner, source, file_list
           case 22:
           case 23:
             target[fun_pos] = int_act;
-            /*if (state == 11) { */
             if (state == 11 || state == 21 || state == 22 || state == 23) {
               /* we were expecting a DOT but must exit instead   */
               /* Must add EOP and increase number of pars by one */
@@ -357,7 +350,6 @@ int32_t   ParseAssignment(word, keyword, target, index, owner, source, file_list
             state = 10;
             break;
           case 4:
-
             /* The function is '+=' or '-=' or '*=' or '/'.             */
             /* '+=', '-=', *= and /=  are stored the same way as '+',   */
             /* '-', '-', '*'and '/' so the interpreter needs only 1     */
@@ -402,7 +394,6 @@ int32_t   ParseAssignment(word, keyword, target, index, owner, source, file_list
           case 22:
           case 23:
             target[fun_pos] = int_act;
-            /*if (state == 11) { */
             if (state == 11 || state == 21 || state == 22 || state == 23) {
               /* we were expecting a DOT but must exit instead   */
               /* Must add EOP and increase number of pars by one */
@@ -528,7 +519,6 @@ int32_t   ParseAssignment(word, keyword, target, index, owner, source, file_list
           case 22:
           case 23:
             target[fun_pos] = int_act;
-            /*if (state == 11) { */
             if (state == 11 || state == 21 || state == 22 || state == 23) {
               /* we were expecting a DOT but must exit instead   */
               /* Must add EOP and increase number of pars by one */
@@ -765,7 +755,6 @@ int32_t   ParseAssignment(word, keyword, target, index, owner, source, file_list
             case 22:
             case 23:
               target[fun_pos] = int_act;
-              /*if (state == 11) { */
               if (state == 11 || state == 21 || state == 22 || state == 23) {
                 /* we were expecting a DOT but must exit instead   */
                 /* Must add EOP and increase number of pars by one */
@@ -819,7 +808,6 @@ int32_t   ParseAssignment(word, keyword, target, index, owner, source, file_list
             case 22:
             case 23:
               target[fun_pos] = int_act;
-              /*if (state == 11) { */
               if (state == 11 || state == 21 || state == 22 || state == 23) {
                 /* we were expecting a DOT but must exit instead   */
                 /* Must add EOP and increase number of pars by one */
@@ -842,15 +830,12 @@ int32_t   ParseAssignment(word, keyword, target, index, owner, source, file_list
               state = 1;   /* syntax: int_act().attribute */
               break;
             case 5:
-              /*state = 6;*/
               state = 23;
               break;
             case 10:
-              /*state = 11;*/
               state = 21;
               break;
             case 15:
-              /*state = 16;*/
               state = 22;
               break;
             default:
@@ -879,7 +864,6 @@ int32_t   ParseAssignment(word, keyword, target, index, owner, source, file_list
               case 22:
               case 23:
                 target[fun_pos] = int_act;
-                /*if (state == 11) { */
                 if (state == 11 || state == 21 || state == 22 || state == 23) {
                   /* we were expecting a DOT but must exit instead   */
                   /* Must add EOP and increase number of pars by one */
@@ -937,7 +921,6 @@ int32_t   ParseAssignment(word, keyword, target, index, owner, source, file_list
             case 22:
             case 23:
               target[fun_pos] = int_act;
-              /*if (state == 11) { */
               if (state == 11 || state == 21 || state == 22 || state == 23) {
                 /* we were expecting a DOT but must exit instead   */
                 /* Must add EOP and increase number of pars by one */
@@ -987,7 +970,6 @@ int32_t   ParseAssignment(word, keyword, target, index, owner, source, file_list
               case 22:
               case 23:
                 target[fun_pos] = int_act;
-                /*if (state == 11) { */
                 if (state == 11 || state == 21 || state == 22 || state == 23) {
                   /* we were expecting a DOT but must exit instead   */
                   /* Must add EOP and increase number of pars by one */
@@ -1020,4 +1002,3 @@ int32_t   ParseAssignment(word, keyword, target, index, owner, source, file_list
     } /* switch */
   } /* while */
 }
-

@@ -1,6 +1,6 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018 Marnix van den Bos.                   */
+/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
 /*                                                                      */
 /* <marnix.home@gmail.com>                                              */
 /*                                                                      */
@@ -34,8 +34,8 @@
 /*************************/
 
 void CleanUp(void);
-void FreeAllLocations(void);  /* @@@@ */
-void FreeAllObjects(void);    /* @@@@ */
+void FreeAllLocations(void);
+void FreeAllObjects(void);
 void FreeLocation(locationInfo*);
 void FreeObject(objectInfo*);
 void FreeVerb(verbInfo*);
@@ -44,7 +44,6 @@ void FreeDescrs(descrInfo*);
 void FreeCompActionRecs(compActionRec*);
 void FreeTriggers(triggerInfo*);
 void FreeCommonTriggers(void);
-
 
 /************************/
 /* Function definitions */
@@ -68,8 +67,8 @@ void FreeCommonTriggers(void)
   }
 }
 
-void FreeDescrs(start_descr)
- descrInfo *start_descr;
+
+void FreeDescrs(descrInfo *start_descr)
 {
   if (start_descr->next == NULL)
     return;
@@ -79,8 +78,8 @@ void FreeDescrs(start_descr)
   }
 }
 
-void FreeCompActionRecs(start_actionrec)
- compActionRec *start_actionrec;
+
+void FreeCompActionRecs(compActionRec *start_actionrec)
 {
   if (start_actionrec == NULL)
     return;
@@ -90,8 +89,8 @@ void FreeCompActionRecs(start_actionrec)
   }
 }
 
-void FreeTriggers(start_trigger)
- triggerInfo *start_trigger;
+
+void FreeTriggers(triggerInfo *start_trigger)
 {
   if (start_trigger == NULL)
     return;
@@ -103,8 +102,8 @@ void FreeTriggers(start_trigger)
   }
 }
 
-void FreeVerb(verb)
- verbInfo *verb;
+
+void FreeVerb(verbInfo *verb)
 {
   if (verb->next != NULL)
     FreeVerb(verb->next);
@@ -119,8 +118,8 @@ void FreeVerb(verb)
   free(verb);
 }
 
-void FreeObject(obj)
- objectInfo *obj;
+
+void FreeObject(objectInfo *obj)
 {
   /* free descriptions */
   FreeDescrs(obj->descriptions);
@@ -135,7 +134,8 @@ void FreeObject(obj)
   free(obj);
 }
 
-void FreeAllLocations()
+
+void FreeAllLocations(void)
 {
   int i = 0;
 
@@ -148,7 +148,7 @@ void FreeAllLocations()
 }
 
 
-void FreeAllObjects()
+void FreeAllObjects(void)
 {
   int i = 0;
 
@@ -161,8 +161,7 @@ void FreeAllObjects()
 }
 
 
-void FreeLocation(loc)
- locationInfo *loc;
+void FreeLocation(locationInfo *loc)
 {
   /* free descriptions */
   FreeDescrs(loc->descriptions);
@@ -177,9 +176,11 @@ void FreeLocation(loc)
   free(loc);
 }
 
-void CleanUp()
+
+void CleanUp(void)
 {
-  int32_t i=0;
+  int32_t i = 0;
+  int32_t j = 0;
 
   /* complicated Free()'s */
 
@@ -196,7 +197,29 @@ void CleanUp()
   /* free common triggers */
   FreeCommonTriggers();
 
+  /* free dynamic sysdescr strings */
+  for (i=0; i<nr_of_locs; i++) {
+    for (j=0; j<loc_dir[i].nr_of_dsys; j++) {
+      ResetString( (loc_dir[i]).descr[j].dynamic);
+    }
+  }
+
+  for (i=0; i<nr_of_objs; i++) {
+    for (j=0; j<obj_dir[i].nr_of_dsys; j++) {
+      ResetString( (obj_dir[i]).descr[j].dynamic);
+    }
+  }
+
   /* simple Free()'s */
+  free(loc_dbug);
+  free(obj_dbug);
+  free(com_attr_dbug);
+  free(loc_attr_dbug);
+  free(com_flag_dbug);
+  free(loc_flag_dbug);
+  free(com_trig_dbug);
+  free(loc_trig_dbug);
+  free(timer_dbug);
   free(timers);
   free(exit_data);
   free(com_loc_flags);
@@ -214,4 +237,3 @@ void CleanUp()
   free(outputline);
   free(stack);
 }
-

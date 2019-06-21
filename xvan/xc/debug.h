@@ -1,6 +1,6 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018 Marnix van den Bos.                   */
+/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
 /*                                                                      */
 /* <marnix.home@gmail.com>                                              */
 /*                                                                      */
@@ -27,15 +27,33 @@
 /* External declarations */
 /*************************/
 
+extern int32_t      IsLocId(int32_t);    /* execute.c */
+extern int32_t      IsObjId(int32_t);    /* execute.c */
+extern int32_t      nr_of_words;         /* tables.c  */
+extern int32_t      nr_of_verbs;
+extern int32_t      nr_of_cattrs;        /* tables.c */
+extern int32_t      nr_of_ctrigs;        /* tables.c */
+extern int32_t      nr_of_ltrigs;        /* tables.c */
+extern int32_t      nr_of_cflags;        /* tables.c */
+extern int32_t      nr_of_lflags;        /* tables.c */
+extern int32_t      nr_of_cattrs;        /* tables.c */
+extern int32_t      nr_of_lattrs;        /* tables.c */
+extern int32_t      nr_of_timers;        /* tables.c */
+extern int32_t      nr_of_locations;
+extern int32_t      nr_of_objects;
+extern int32_t      nr_of_directions;
+extern int32_t      first_direction_id;
+extern verbDir      *verb_dir;           /* tables.c  */
+extern wordTable    *word_table;         /* tables.c  */
+extern wordInfo     *word_list;
+extern locationData *loc_table;
+extern objectData   *obj_table;
+extern timerData    *tim_table;          /* tables.c  */
+extern flagData     *flag_table;         /* tables.c  */
+extern attrData     *attr_table;         /* tables.c  */
 
-extern int32_t   IsLocId(int32_t);    /* execute.c */
-extern int32_t   IsObjId(int32_t);    /* execute.c */
-extern int32_t   nr_of_words;         /* tables.c  */
-extern int32_t   nr_of_verbs;
-extern int32_t   nr_of_directions;
-extern int32_t   first_direction_id;
-extern verbDir   *verb_dir;          /* tables.c  */
-extern wordTable *word_table;        /* tables.c  */
-extern wordInfo  *word_list;
+extern triggerData  *trigg_table; /* tables.c */
+
+extern void PrintError(int16_t, resultStruct*, char*);
 
 #endif

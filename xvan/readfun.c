@@ -1,6 +1,6 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018 Marnix van den Bos.                   */
+/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
 /*                                                                      */
 /* <marnix.home@gmail.com>                                              */
 /*                                                                      */
@@ -30,7 +30,6 @@
 #include "typedefs.h"
 #include "readfun.h"
 
-
 /*************************/
 /* function declarations */
 /*************************/
@@ -38,16 +37,11 @@
 int32_t CheckedStore(int32_t*, int32_t, int32_t*, int32_t);
 int32_t ReadFun(int32_t*, int32_t*, int32_t);
 
-
 /************************/
 /* function definitions */
 /************************/
 
-int32_t CheckedStore(array, upper_limit, index, value)
- int32_t *array;
- int32_t upper_limit;
- int32_t *index;
- int32_t value;
+int32_t CheckedStore(int32_t *array, int32_t upper_limit, int32_t *index, int32_t value)
 {
   /* Stores value in array at position index. */
   /* Checks for array bound overflow.         */
@@ -63,10 +57,7 @@ int32_t CheckedStore(array, upper_limit, index, value)
 }
 
 
-int32_t ReadFun(trigger_code, index, fun_code)
- int32_t *trigger_code;
- int32_t *index;
- int32_t fun_code;
+int32_t ReadFun(int32_t *trigger_code, int32_t *index, int32_t fun_code)
 {
   int32_t  nr_of_pars  = 0;
   int32_t  par         = NO_ID;
@@ -116,7 +107,6 @@ int32_t ReadFun(trigger_code, index, fun_code)
           /* the value of the END_OF_PAR keyword, we have an issue */
           par = NO_ID;
           break;
-
         case STRING:
           /* -1 means a char pointer is coming next. */
           if (!CheckedStore(trigger_code, MAX_TRIGG_LEN, index, -1))
@@ -165,7 +155,6 @@ int32_t ReadFun(trigger_code, index, fun_code)
           } /* for */
 
           break;
-
         case ACTION_REC:
           /* next, the members of an action record are coming. */
           /* They are stored as a row of int32_t values. We    */
@@ -197,7 +186,6 @@ int32_t ReadFun(trigger_code, index, fun_code)
           /* we have an issue                                  */
           par = NO_ID;
           break;
-
         default:
           /* It may be a function. */
           if (IsTestFun(par) || IsIntAct(par)) {

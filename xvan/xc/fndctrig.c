@@ -1,6 +1,6 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018 Marnix van den Bos.                   */
+/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
 /*                                                                      */
 /* <marnix.home@gmail.com>                                              */
 /*                                                                      */
@@ -41,8 +41,7 @@ int32_t FindCTriggerIds(char**, int32_t*, int32_t, FILE**, fileList**);
 /* function definitions */
 /************************/
 
-int32_t IsSectionKeyword(kw)
- int32_t kw;
+int32_t IsSectionKeyword(int32_t kw)
 {
   switch (kw) {
     case VERB:
@@ -72,11 +71,7 @@ int32_t IsSectionKeyword(kw)
 }
 
 
-int32_t SkipCommonTrigger(word, keyword, source, file_list)
- char     **word;
- int32_t  *keyword;
- FILE     **source;
- fileList **file_list;
+int32_t SkipCommonTrigger(char **word, int32_t *keyword, FILE **source, fileList **file_list)
 {
   /* 10jan2018: this function is used to skip a common */
   /* trigger in the source text, when we found that    */
@@ -140,12 +135,7 @@ int32_t SkipCommonTrigger(word, keyword, source, file_list)
 }
 
 
-int32_t FindCTriggerIds(word, keyword, redefine, source, file_list)
- char     **word;
- int32_t  *keyword;
- int32_t  redefine;
- FILE     **source;
- fileList **file_list;
+int32_t FindCTriggerIds(char **word, int32_t *keyword, int32_t redefine, FILE **source, fileList **file_list)
 {
   /* 15oct2017 When a common trigger executes another common  */
   /* trigger that is defined later, the executed trigger will */

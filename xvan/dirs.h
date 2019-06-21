@@ -1,6 +1,6 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018 Marnix van den Bos.                   */
+/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
 /*                                                                      */
 /* <marnix.home@gmail.com>                                              */
 /*                                                                      */
@@ -23,6 +23,10 @@
 
 #if !defined(__dirs)
 #define __dirs
+
+/*************************/
+/* External declarations */
+/*************************/
 
 extern wordTable *word_table;              /* fileio.c */
 extern verbDir   *verb_dir;                /* fileio.c */

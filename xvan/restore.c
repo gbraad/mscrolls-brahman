@@ -1,6 +1,6 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018 Marnix van den Bos.                   */
+/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
 /*                                                                      */
 /* <marnix.home@gmail.com>                                              */
 /*                                                                      */
@@ -28,7 +28,6 @@
 #include "keyword.h"
 #include "typedefs.h"
 #include "restore.h"
-
 
 /*************************/
 /* function declarations */
@@ -58,13 +57,11 @@ int32_t ReadTimer(timerInfo*, char*, int*, int*, int8_t*);
 int32_t RestoreTimers(char*, int*, int*, int8_t*);
 int32_t Base64Restore(char*);
 
+/************************/
+/* function definitions */
+/************************/
 
-int32_t ReadInt8(n, base64_string, byte_index, leader_len, leader)
- int8_t *n;
- char    *base64_string;
- int     *byte_index;
- int     *leader_len;
- int8_t  *leader;
+int32_t ReadInt8(int8_t *n, char *base64_string, int *byte_index, int *leader_len, int8_t *leader)
 {
   int8_t result = 0;  /* int8_t is 1 byte */
 
@@ -80,12 +77,7 @@ int32_t ReadInt8(n, base64_string, byte_index, leader_len, leader)
 }
 
 
-int32_t ReadInt16(n, base64_string, byte_index, leader_len, leader)
- int16_t *n;
- char    *base64_string;
- int     *byte_index;
- int     *leader_len;
- int8_t  *leader;
+int32_t ReadInt16(int16_t *n, char *base64_string, int *byte_index, int *leader_len, int8_t *leader)
 {
   int8_t result[2] = {0, 0};  /* int16_t is 2 bytes */
 
@@ -103,12 +95,7 @@ int32_t ReadInt16(n, base64_string, byte_index, leader_len, leader)
 }
 
 
-int32_t ReadInt32(n, base64_string, byte_index, leader_len, leader)
- int32_t *n;
- char    *base64_string;
- int     *byte_index;
- int     *leader_len;
- int8_t  *leader;
+int32_t ReadInt32(int32_t *n, char *base64_string, int *byte_index, int *leader_len, int8_t *leader)
 {
   int    i         = 0;
   int8_t result[4] = {0,0,0,0}; /* int32_t is 4 bytes */
@@ -128,12 +115,7 @@ int32_t ReadInt32(n, base64_string, byte_index, leader_len, leader)
 }
 
 
-int32_t ReadInt64(n, base64_string, byte_index, leader_len, leader)
- int64_t *n;
- char    *base64_string;
- int     *byte_index;
- int     *leader_len;
- int8_t  *leader;
+int32_t ReadInt64(int64_t *n, char *base64_string, int *byte_index, int *leader_len, int8_t *leader)
 {
   int    i         = 0;
   int8_t result[8] = {0,0,0,0,0,0,0,0}; /* int32_t is 4 bytes */
@@ -153,12 +135,8 @@ int32_t ReadInt64(n, base64_string, byte_index, leader_len, leader)
 }
 
 
-int32_t ReadBase64String(dest, base64_string, byte_index, leader_len, leader)
- char    *dest;  /* must have enough room */
- char    *base64_string;
- int     *byte_index;
- int     *leader_len;
- int8_t  *leader;
+int32_t ReadBase64String(char *dest, char *base64_string, int *byte_index, int *leader_len, int8_t *leader)
+ /* dest must have enough room */
 {
   int i       = 0;
   int32_t len = 0;
@@ -181,12 +159,7 @@ int32_t ReadBase64String(dest, base64_string, byte_index, leader_len, leader)
 }
 
 
-int32_t ReadId(id,  base64_string, byte_index, leader_len, leader)
- int32_t *id;
- char    *base64_string;
- int     *byte_index;
- int     *leader_len;
- int8_t  *leader;
+int32_t ReadId(int32_t *id,  char *base64_string, int *byte_index, int *leader_len, int8_t *leader)
 {
   if (!ReadInt32(id, base64_string, byte_index, leader_len, leader)) {
     PrintError(14, NULL, "ReadId()");
@@ -196,11 +169,7 @@ int32_t ReadId(id,  base64_string, byte_index, leader_len, leader)
 }
 
 
-int32_t RestoreSpecialIds(base64_string, byte_index, leader_len, leader)
- char   *base64_string;
- int    *byte_index;
- int    *leader_len;
- int8_t *leader;
+int32_t RestoreSpecialIds(char *base64_string, int *byte_index, int *leader_len, int8_t *leader)
 {
   int32_t special_id_array[NR_OF_SPECIAL_IDS];
   int i = 0;
@@ -229,13 +198,28 @@ int32_t RestoreSpecialIds(base64_string, byte_index, leader_len, leader)
 }
 
 
-int32_t RestoreExtendedSysDescr(extended_system_description, base64_string, byte_index, leader_len, leader)
- extendedSysDescr *extended_system_description;
- char             *base64_string;
- int              *byte_index;
- int              *leader_len;
- int8_t           *leader;
+int32_t RestoreExtendedSysDescr(extendedSysDescr *extended_system_description, char *base64_string, 
+                                int *byte_index, int *leader_len, int8_t *leader)
 {
+  int32_t code;
+
+  if (!ReadInt32(&code, base64_string, byte_index, leader_len, leader)) {
+    PrintError(14, NULL, "RestoreExtendedSysDescr()");
+    return(ERROR);
+  }
+
+  if (code == DYN_DSYS) {
+    if (!ReadBase64String(extended_system_description->dynamic, base64_string, byte_index, leader_len, leader)) {
+      PrintError(14, NULL, "RestoreExtendedSysDescr()");
+      return(ERROR);
+    }
+    else {
+      return(OK);
+    }
+  }
+
+  /* it's a 'normal' system description */
+
   if (!RestoreSysDescr(&(extended_system_description->part1), base64_string, byte_index, leader_len, leader))
     return(ERROR);
 
@@ -251,12 +235,7 @@ int32_t RestoreExtendedSysDescr(extended_system_description, base64_string, byte
 }
 
 
-int32_t RestoreSysDescr(system_description,  base64_string, byte_index, leader_len, leader)
- sysDescr *system_description;
- char     *base64_string;
- int      *byte_index;
- int      *leader_len;
- int8_t   *leader;
+int32_t RestoreSysDescr(sysDescr *system_description,  char *base64_string, int *byte_index, int *leader_len, int8_t *leader)
 {
   int32_t i=0;
 
@@ -285,12 +264,7 @@ int32_t RestoreSysDescr(system_description,  base64_string, byte_index, leader_l
 }
 
 
-int32_t RestoreContData(cont_data,  base64_string, byte_index, leader_len, leader)
- contData *cont_data;
- char     *base64_string;
- int      *byte_index;
- int      *leader_len;
- int8_t   *leader;
+int32_t RestoreContData(contData *cont_data,  char *base64_string, int *byte_index, int *leader_len, int8_t *leader)
 {
   int32_t i=0;
 
@@ -309,12 +283,7 @@ int32_t RestoreContData(cont_data,  base64_string, byte_index, leader_len, leade
 }
 
 
-int32_t RestoreStoryInfo(story_info,  base64_string, byte_index, leader_len, leader)
- storyInfo *story_info;
- char      *base64_string;
- int       *byte_index;
- int       *leader_len;
- int8_t    *leader;
+int32_t RestoreStoryInfo(storyInfo *story_info,  char *base64_string, int *byte_index, int *leader_len, int8_t *leader)
 {
   /* Read the storyInfo struct. */
   if (!ReadBase64String(story_info->title, base64_string, byte_index, leader_len, leader)) {
@@ -411,12 +380,7 @@ int32_t RestoreStoryInfo(story_info,  base64_string, byte_index, leader_len, lea
 }
 
 
-int32_t RestoreDirInfo(dir_info,  base64_string, byte_index, leader_len, leader)
- dirInfo *dir_info;
- char    *base64_string;
- int     *byte_index;
- int     *leader_len;
- int8_t  *leader;
+int32_t RestoreDirInfo(dirInfo *dir_info,  char *base64_string, int *byte_index, int *leader_len, int8_t *leader)
 {
   int i = 0;
 
@@ -452,11 +416,7 @@ int32_t RestoreDirInfo(dir_info,  base64_string, byte_index, leader_len, leader)
 }
 
 
-int32_t RestoreLocationDirectory(base64_string, byte_index, leader_len, leader)
- char   *base64_string;
- int    *byte_index;
- int    *leader_len;
- int8_t *leader;
+int32_t RestoreLocationDirectory(char *base64_string, int *byte_index, int *leader_len, int8_t *leader)
 {
   int32_t i = 0;
 
@@ -469,11 +429,7 @@ int32_t RestoreLocationDirectory(base64_string, byte_index, leader_len, leader)
 }
 
 
-int32_t RestoreObjectDirectory(base64_string, byte_index, leader_len, leader)
- char   *base64_string;
- int    *byte_index;
- int    *leader_len;
- int8_t *leader;
+int32_t RestoreObjectDirectory(char *base64_string, int *byte_index, int *leader_len, int8_t *leader)
 {
   int32_t i=0;
 
@@ -485,11 +441,7 @@ int32_t RestoreObjectDirectory(base64_string, byte_index, leader_len, leader)
 }
 
 
-int32_t RestoreExits(base64_string, byte_index, leader_len, leader)
- char   *base64_string;
- int    *byte_index;
- int    *leader_len;
- int8_t *leader;
+int32_t RestoreExits(char *base64_string, int *byte_index, int *leader_len, int8_t *leader)
 {
   int32_t size; /* size of the exit_data array */
   int     i = 0;
@@ -507,12 +459,7 @@ int32_t RestoreExits(base64_string, byte_index, leader_len, leader)
 }
 
 
-int32_t ReadAttribute(attribute,  base64_string, byte_index, leader_len, leader)
- attrInfo *attribute;
- char     *base64_string;
- int      *byte_index;
- int      *leader_len;
- int8_t   *leader;
+int32_t ReadAttribute(attrInfo *attribute,  char *base64_string, int *byte_index, int *leader_len, int8_t *leader)
 {
   if (!ReadInt32(&(attribute->type), base64_string, byte_index, leader_len, leader)) {
     PrintError(14, NULL, "ReadAttribute()");
@@ -533,11 +480,7 @@ int32_t ReadAttribute(attribute,  base64_string, byte_index, leader_len, leader)
 }
 
 
-int32_t RestoreCommonAttributes(base64_string, byte_index, leader_len, leader)
- char   *base64_string;
- int    *byte_index;
- int    *leader_len;
- int8_t *leader;
+int32_t RestoreCommonAttributes(char *base64_string, int *byte_index, int *leader_len, int8_t *leader)
 {
   int32_t total_attrs; /* Total number of common attributes for all locations */
   int i = 0;
@@ -562,11 +505,7 @@ int32_t RestoreCommonAttributes(base64_string, byte_index, leader_len, leader)
 }
 
 
-int32_t RestoreLocalAttributes(base64_string, byte_index, leader_len, leader)
- char   *base64_string;
- int    *byte_index;
- int    *leader_len;
- int8_t *leader;
+int32_t RestoreLocalAttributes(char *base64_string, int *byte_index, int *leader_len, int8_t *leader)
 {
   int i = 0;
   /* Total number of local attributes is stored in global variable nr_of_lattrs */
@@ -580,11 +519,7 @@ int32_t RestoreLocalAttributes(base64_string, byte_index, leader_len, leader)
 }
 
 
-int32_t RestoreCommonFlags(base64_string, byte_index, leader_len, leader)
- char   *base64_string;
- int    *byte_index;
- int    *leader_len;
- int8_t *leader;
+int32_t RestoreCommonFlags(char *base64_string, int *byte_index, int *leader_len, int8_t *leader)
 {
   int32_t com_loc_flags_string_len = 0;
   int32_t com_obj_flags_string_len = 0;
@@ -612,11 +547,7 @@ int32_t RestoreCommonFlags(base64_string, byte_index, leader_len, leader)
 }
 
 
-int32_t RestoreLocalFlags(base64_string, byte_index, leader_len, leader)
- char   *base64_string;
- int    *byte_index;
- int    *leader_len;
- int8_t *leader;
+int32_t RestoreLocalFlags(char *base64_string, int *byte_index, int *leader_len, int8_t *leader)
 {
   int i = 0;
 
@@ -632,12 +563,7 @@ int32_t RestoreLocalFlags(base64_string, byte_index, leader_len, leader)
 }
 
 
-int32_t ReadTimer(timer, base64_string, byte_index, leader_len, leader)
- timerInfo *timer;
- char      *base64_string;
- int       *byte_index;
- int       *leader_len;
- int8_t    *leader;
+int32_t ReadTimer(timerInfo *timer, char *base64_string, int *byte_index, int *leader_len, int8_t *leader)
 {
   if (!ReadInt32(&(timer->value), base64_string, byte_index, leader_len, leader)) {
     PrintError(14, NULL, "ReadTimer()");
@@ -689,11 +615,7 @@ int32_t ReadTimer(timer, base64_string, byte_index, leader_len, leader)
 }
 
 
-int32_t RestoreTimers(base64_string, byte_index, leader_len, leader)
- char   *base64_string;
- int    *byte_index;
- int    *leader_len;
- int8_t *leader;
+int32_t RestoreTimers(char *base64_string, int *byte_index, int *leader_len, int8_t *leader)
 {
   int i = 0;
  /* global vars timerInfo *timers and int nr_of_timers are used here */
@@ -706,8 +628,8 @@ int32_t RestoreTimers(base64_string, byte_index, leader_len, leader)
   return(OK);
 }
 
-int32_t Base64Restore(base64_restore)
- char *base64_restore;
+
+int32_t Base64Restore(char *base64_restore)
 {
   int8_t leader        = 0;
   int    leader_len    = 0;

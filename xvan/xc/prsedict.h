@@ -1,6 +1,6 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018 Marnix van den Bos.                   */
+/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
 /*                                                                      */
 /* <marnix.home@gmail.com>                                              */
 /*                                                                      */
@@ -20,8 +20,8 @@
 /*                                                                      */
 /************************************************************************/
 
-#if !defined(__parsevoc)
-#define __parsevoc
+#if !defined(__parsedict)
+#define __parsedict
 
 /*************/
 /* Externals */
@@ -33,10 +33,7 @@ extern int32_t nr_of_directions;    /* tables.c */
 extern char    current_filename[];  /* init.c */
 extern FILE    *datafile;
 
-
-extern void    PrintWTable(void);
 extern char    *strlwr(char*);
-extern void    PrintWordList(void);        /* REMOVE THIS LINE LATER */
 extern char    *GetNextWord(int32_t*, int32_t, int32_t, FILE**, fileList**);              /* fileio.c  */
 extern int32_t IsValidKeyword(int32_t);                                                   /* keyword.c */
 extern int32_t ChangeInputFile(char**, int32_t*, int32_t, int32_t, FILE**, fileList**);   /* fileio.c  */

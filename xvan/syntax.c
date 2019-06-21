@@ -1,6 +1,6 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018 Marnix van den Bos.                   */
+/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
 /*                                                                      */
 /* <marnix.home@gmail.com>                                              */
 /*                                                                      */
@@ -31,7 +31,6 @@
 #include "typedefs.h"
 #include "syntax.h"
 
-
 /*************************/
 /* Function declarations */
 /*************************/
@@ -48,6 +47,9 @@ int32_t  CheckSyntax(char*, int32_t, int32_t, int32_t*, int32_t, int32_t, int32_
 resultStruct MakeSysDescr(char*, char**, int32_t, int32_t, int32_t*, int32_t, int32_t, sysDescr*);
 int32_t      ParseDSys(char*, extendedSysDescr*);
 
+/************************/
+/* Function definitions */
+/************************/
 
 char *xv_strlwr(char* str)
 {
@@ -61,11 +63,9 @@ char *xv_strlwr(char* str)
 }
 
 
-int32_t    ScanWordTable(word, wt_rec, lower, upper)
- char      *word;    /* word to look for in word_table */
- wordTable *wt_rec;  /* struct to copy info into       */
- int32_t   lower;    /* elements of array between      */
- int32_t   upper;    /* which to search                */
+int32_t ScanWordTable(char *word, wordTable *wt_rec, int32_t lower, int32_t upper)
+ /* word is word to look for in word_table */
+ /* wt_rec is struct to copy info into       */
 {
   int32_t  value;
   int32_t  i;
@@ -79,7 +79,6 @@ int32_t    ScanWordTable(word, wt_rec, lower, upper)
   /* word is max MAX_WORD_LEN chars, no need to check again */
   strncpy(look_for, word, MAX_WORD_LEN);
   xv_strlwr(look_for);
-
 
   /* Check for numberstring. */
   if (StringToNum(look_for, &value)) {
@@ -115,8 +114,7 @@ int32_t    ScanWordTable(word, wt_rec, lower, upper)
 }
 
 
-int32_t LookUpId(word)
- char *word;
+int32_t LookUpId(char *word)
 {
   /* This function is used to quickly find a word's id, without     */
   /* bothering about types etc. All it does is call ScanWordTable() */
@@ -128,10 +126,7 @@ int32_t LookUpId(word)
 }
 
 
-int32_t NextWordId(line_buf, nr_of_types, types)
- char     **line_buf;
- int32_t  *nr_of_types;
- int32_t  *types;
+int32_t NextWordId(char **line_buf, int32_t *nr_of_types, int32_t *types)
 {
   char      *start = *line_buf;   /* remember start of line_buf     */
   int32_t   i      = 0;           /* counter to go through line_buf */
@@ -190,15 +185,12 @@ int32_t NextWordId(line_buf, nr_of_types, types)
     case '\0':
       (*line_buf) += i;    /* end of line */
       break;
-
     case SPACE:
       (*line_buf) += i+1;
       break;
-
     case ',':
       (*line_buf) += i;
       break;
-
     default:
       /* the impossible just happened */
       PrintError(13, NULL, "NextWordId()");
@@ -224,11 +216,11 @@ int32_t NextWordId(line_buf, nr_of_types, types)
 }
 
 
-void InitParsedInput(parsed_input)
- parsedInput *parsed_input;
+void InitParsedInput(parsedInput *parsed_input)
 {
   int32_t i = 0;
 
+  (parsed_input->actor).dynamic                     = NULL;
   (parsed_input->actor).part1.article               = NO_ID;
   (parsed_input->actor).part1.nr_of_adjectives      = 0;
   (parsed_input->actor).part1.noun                  = NO_ID;
@@ -245,15 +237,17 @@ void InitParsedInput(parsed_input)
   parsed_input->direction                           = NO_ID;
 
   for (i=0; i<MAX_SUBJECTS; i++) {
-  (parsed_input->subject[i]).part1.article          = NO_ID;
-  (parsed_input->subject[i]).part1.nr_of_adjectives = 0;
-  (parsed_input->subject[i]).part1.noun             = NO_ID;
-  (parsed_input->subject[i]).connect_prepos         = NO_ID;
-  (parsed_input->subject[i]).part2.article          = NO_ID;
-  (parsed_input->subject[i]).part2.nr_of_adjectives = 0;
-  (parsed_input->subject[i]).part2.noun             = NO_ID;
+    (parsed_input->subject[i]).dynamic                = NULL;
+    (parsed_input->subject[i]).part1.article          = NO_ID;
+    (parsed_input->subject[i]).part1.nr_of_adjectives = 0;
+    (parsed_input->subject[i]).part1.noun             = NO_ID;
+    (parsed_input->subject[i]).connect_prepos         = NO_ID;
+    (parsed_input->subject[i]).part2.article          = NO_ID;
+    (parsed_input->subject[i]).part2.nr_of_adjectives = 0;
+    (parsed_input->subject[i]).part2.noun             = NO_ID;
   }
 
+  (parsed_input->specifier).dynamic                 = NULL;
   (parsed_input->specifier).part1.article           = NO_ID;
   (parsed_input->specifier).part1.nr_of_adjectives  = 0;
   (parsed_input->specifier).part1.noun              = NO_ID;
@@ -268,10 +262,7 @@ void InitParsedInput(parsed_input)
 }
 
 
-int32_t ParseInput(line_buf, parsed_input, syntax)
- char        *line_buf;
- parsedInput *parsed_input;
- int32_t     syntax;
+int32_t ParseInput(char *line_buf, parsedInput *parsed_input, int32_t syntax)
 {
   int32_t state       = 1;
   int32_t nr_of_types = 0;
@@ -291,19 +282,15 @@ int32_t ParseInput(line_buf, parsed_input, syntax)
     case LINE:
       state = 1;
       break;
-
     case SUBJECT:
       state = 2;
       break;
-
     case SPECIFIER:
       state = 8;     /* Used to be 8, 6 sept. 1995 */
       break;         /* aug 24 2015, set back to 8 */
-
     case ANSWER:
       PrintError(61, NULL, NULL);
       return(ERROR);
-
     default:
       /* We should never get here. */
       PrintError(13, NULL, "ParseInput()");
@@ -315,17 +302,8 @@ int32_t ParseInput(line_buf, parsed_input, syntax)
 }
 
 
-int32_t CheckSyntax(line_buf, id, nr_of_types, types, type_index,
-                                  subject_index, state, parsed_input)
- char        *line_buf;
- int32_t     id;
- int32_t     nr_of_types;
- int32_t     *types;
- int32_t     type_index;
- int32_t     subject_index; /* More than one subject allowed. */
- int32_t     state;
- parsedInput *parsed_input;
-
+int32_t CheckSyntax(char *line_buf, int32_t id, int32_t nr_of_types, int32_t *types, int32_t type_index,
+                    int32_t subject_index, int32_t state, parsedInput *parsed_input)
 {
   /* select the right function, depending on the story language */
 
@@ -334,12 +312,10 @@ int32_t CheckSyntax(line_buf, id, nr_of_types, types, type_index,
       return(ENG_CheckSyntax(line_buf, id, nr_of_types, types, type_index,
                                   subject_index, state, parsed_input));
       break;
-
     case NL:
       return(NL_CheckSyntax(line_buf, id, nr_of_types, types, type_index,
                                   subject_index, state, parsed_input));
       break;
-
     default:
       /* we should never get here, use English */
       return(ENG_CheckSyntax(line_buf, id, nr_of_types, types, type_index,
@@ -348,21 +324,13 @@ int32_t CheckSyntax(line_buf, id, nr_of_types, types, type_index,
 }
 
 
-resultStruct MakeSysDescr(line_buf, rest_of_line_buf, id, nr_of_types,
-                          types, type_index, state, descr)
- char     *line_buf;
- char     **rest_of_line_buf;
- int32_t  id;
- int32_t  nr_of_types;
- int32_t  *types;
- int32_t  type_index;
- int32_t  state;
- sysDescr *descr;
+resultStruct MakeSysDescr(char *line_buf, char **rest_of_line_buf, int32_t id, int32_t nr_of_types,
+                          int32_t *types, int32_t type_index, int32_t state, sysDescr *descr)
 {
-  /* descr must be set to default values by caller.               */
+  /* descr must be set to default values by caller. */
 
   int32_t      i      = 0;
-  resultStruct result = {OK, OK};
+  resultStruct result = {OK, NONE, OK};
   int32_t old_state   = state;    /* Remember state for retry in case of  */
                                   /* a type clash.                        */
   int32_t new_types[MAX_TYPES];   /* Needed in case the next word will    */
@@ -424,7 +392,6 @@ resultStruct MakeSysDescr(line_buf, rest_of_line_buf, id, nr_of_types,
       /* no more types, this definitely is a wrong syntax */
       result.tag = ERROR;
       return(result);
-
     case ARTICLES:
       switch (state) {
         case 1:
@@ -444,7 +411,8 @@ resultStruct MakeSysDescr(line_buf, rest_of_line_buf, id, nr_of_types,
                             new_types,-1,state,descr);
       if (result.tag == OK || result.tag == PREPOSITIONS) {
         /* articles in user input must be ignored ?? */
-        /* descr->article = id; */
+        /* 2019May21 turned on again for dynamic d_sys */
+        descr->article = id;
         return(result);
       }
       else if (result.tag == UNKNOWN_WORD) {
@@ -455,7 +423,6 @@ resultStruct MakeSysDescr(line_buf, rest_of_line_buf, id, nr_of_types,
         /* type and original state.                            */
         return(MakeSysDescr(line_buf, rest_of_line_buf, id, nr_of_types,
                             types, ++type_index, old_state, descr));
-
     case ADJECTIVES:
       switch (state) {
         case 1: ;
@@ -513,7 +480,6 @@ resultStruct MakeSysDescr(line_buf, rest_of_line_buf, id, nr_of_types,
         /* type and original state.                              */
         return(MakeSysDescr(line_buf, rest_of_line_buf, id, nr_of_types,
                             types, ++type_index, old_state, descr));
-
     case NOUNS:
       switch (state) {
         case 1: ;
@@ -554,7 +520,6 @@ resultStruct MakeSysDescr(line_buf, rest_of_line_buf, id, nr_of_types,
 
         return(MakeSysDescr(line_buf, rest_of_line_buf, id, nr_of_types,
                             types, ++type_index, old_state, descr));
-
     case CONNECT_PREPOSITIONS:
       switch (state) {
         case 3:
@@ -584,7 +549,6 @@ resultStruct MakeSysDescr(line_buf, rest_of_line_buf, id, nr_of_types,
           return(MakeSysDescr(line_buf, rest_of_line_buf, id, nr_of_types,
                               types, ++type_index, state, descr));
       } /* switch CONNECT_PREPOSITIONS */
-
     default:
       /* wrong syntax; try again with next type */
       return(MakeSysDescr(line_buf, rest_of_line_buf, id, nr_of_types,
@@ -595,9 +559,7 @@ resultStruct MakeSysDescr(line_buf, rest_of_line_buf, id, nr_of_types,
 }
 
 
-int32_t ParseDSys(description, descr)
- char             *description;
- extendedSysDescr *descr;
+int32_t ParseDSys(char *description, extendedSysDescr *descr)
 {
   int32_t      nr_of_types    = 0;
   int32_t      types[MAX_TYPES];

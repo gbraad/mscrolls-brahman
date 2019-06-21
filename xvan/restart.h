@@ -1,6 +1,6 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018 Marnix van den Bos.                   */
+/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
 /*                                                                      */
 /* <marnix.home@gmail.com>                                              */
 /*                                                                      */
@@ -28,22 +28,24 @@
 /* External declarations */
 /*************************/
 
-extern dirData      dirs;            /* dirs.c   */
-extern dirInfo      *loc_dir;        /* fileio.c */
-extern dirInfo      *obj_dir;        /* fileio.c */
-extern locationInfo **locations;     /* fileio.c */
-extern objectInfo   **objects;       /* fileio.c */
-extern int32_t      *exit_data;      /* fileio.c */
-extern int32_t      *com_loc_flags;  /* fileio.c */
-extern int32_t      *com_obj_flags;  /* fileio.c */
-extern int32_t      *local_flags;    /* fileio.c */
-extern attrInfo     *c_loc_attrs;    /* fileio.c */
-extern attrInfo     *c_obj_attrs;    /* fileio.c */
-extern attrInfo     *local_attrs;    /* fileio.c */
-extern timerInfo    *timers;         /* fileio.c */
+extern dirData      dirs;                        /* dirs.c     */
+extern dirInfo      *loc_dir;                    /* fileio.c   */
+extern dirInfo      *obj_dir;                    /* fileio.c   */
+extern locationInfo **locations;                 /* fileio.c   */
+extern objectInfo   **objects;                   /* fileio.c   */
+extern int32_t      *exit_data;                  /* fileio.c   */
+extern int32_t      *com_loc_flags;              /* fileio.c   */
+extern int32_t      *com_obj_flags;              /* fileio.c   */
+extern int32_t      *local_flags;                /* fileio.c   */
+extern attrInfo     *c_loc_attrs;                /* fileio.c   */
+extern attrInfo     *c_obj_attrs;                /* fileio.c   */
+extern attrInfo     *local_attrs;                /* fileio.c   */
+extern timerInfo    *timers;                     /* fileio.c   */
 
-extern int32_t      curr_loc;        /* letsplay.c */
+extern int32_t      curr_loc;                    /* letsplay.c */
 
+extern void     Log(char*, char*, char*);        /* output.c   */
+extern void     ifi_emitResponse(const char*);
 extern void     ResetGlobals(void);              /* resglobs.c */
 extern void     FreeAllLocations(void);          /* cleanup.c  */
 extern void     FreeAllObjects(void);            /* cleanup.c  */
@@ -57,6 +59,5 @@ extern int32_t  ReadObjDir(int64_t);             /* fileio.c   */
 extern int32_t  ReadMapData(int64_t);            /* fileio.c   */
 extern int32_t  ReadFlags(int64_t);              /* fileio.c   */
 extern int32_t  ReadTimers(int64_t);             /* fileio.c   */
-
 
 #endif

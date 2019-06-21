@@ -1,6 +1,6 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018 Marnix van den Bos.                   */
+/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
 /*                                                                      */
 /* <marnix.home@gmail.com>                                              */
 /*                                                                      */
@@ -27,7 +27,6 @@
 #include "typedefs.h"
 #include "NL-checksyntax.h"
 
-extern void PrintActionRec(actionRec*);
 /********************************************************************/
 /* This module is used to parse and translate strings that are used */
 /* to determine which trigger to execute for which user commands.   */
@@ -49,36 +48,25 @@ extern void PrintActionRec(actionRec*);
 /* interpreter's function.                                          */
 /********************************************************************/
 
-
 /*************************/
 /* Function Declarations */
 /*************************/
 
 int32_t NL_CheckSyntax(char*, int32_t, int32_t, int32_t*, int32_t, int32_t, actionRec*);
 
-
 /************************/
 /* Function definitions */
 /************************/
 
-
-int32_t NL_CheckSyntax(line_buf, id, nr_of_types, types, type_index, state,
-                                                          action_rec)
- char       *line_buf;
- int32_t    id;
- int32_t    nr_of_types;
- int32_t    *types;
- int32_t    type_index;
- int32_t    state;
- actionRec  *action_rec;
-
+int32_t NL_CheckSyntax(char *line_buf, int32_t id, int32_t nr_of_types, int32_t *types, int32_t type_index, int32_t state, actionRec *action_rec)
  /* id, nr_of_types, type_index and state cannot be changed by      */
  /* recursive calls. The rest of the parameters can and therefore   */
  /* we will define duplicates when needed.                          */
-
 {
   int32_t  result;               /* needed to test for unknown words and */
                                  /* stop recursive calling               */
+  int32_t  id1;                  /* for parameter id                     */
+  int32_t  id2;                  /* for parameter id                     */
   int32_t  i = 0;
   int32_t  old_state = state;    /* Remember state to retry in case of   */
                                  /* a syntax clash.                      */
@@ -109,10 +97,26 @@ int32_t NL_CheckSyntax(line_buf, id, nr_of_types, types, type_index, state,
   if (id == NO_ID) {
     /* Get the next word from the user input               */
     /* GiveNextId() also returns the remainder of line_buf */
-    if ( (id = GiveNextId(&line_buf, &nr_of_types, types)) == NO_ID)
+    if ( (id = GiveNextId(&line_buf, &id1, &id2, &nr_of_types, types)) == NO_ID)
       /* unknown word */
       return(UNKNOWN_WORD);
     type_index = 0;
+  }
+
+  /* check if the id is for a parameter instead of a dictionary word */
+  if (id1 != NO_ID) {
+    /* yes, it's a parameter. */
+    /* now check if it's a location id, object id or THIS */
+    if (IsLocId(id1) || IsObjId(id1) || id1 == THIS) {
+      /* if id2 is not NO_ID, id1 was an owner of a flag, an   */
+      /* attribute or a description, which we don't allow here */
+      if (id2 != NO_ID) {
+        /* error */
+        ErrHdr();
+        printf("\nLine %d: error in string, unexpected id: %d %d.\n", line_num, id1, id2);
+        return(NO_ID);
+      }
+    }
   }
 
   /* Test for location id, object id, %direction, %prepos, %action    */
@@ -523,6 +527,9 @@ int32_t NL_CheckSyntax(line_buf, id, nr_of_types, types, type_index, state,
         case 8:
           state = 30;
           break;
+        case 21:    /*10feb19: for 'waarom ben ik hier' */
+          state = 28;
+          break;
         default:
           /* wrong syntax; try again with next type */
           return(NL_CheckSyntax(line_buf, id, nr_of_types, types,
@@ -742,4 +749,3 @@ int32_t NL_CheckSyntax(line_buf, id, nr_of_types, types, type_index, state,
   } /* switch */
   /* no return here */
 }
-

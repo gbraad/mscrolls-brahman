@@ -51,7 +51,7 @@ $VERB give
      printcr("")
      Printcr("An example of the syntax I understand is:")
      printcr("  'give the ball to Fred'")
-     printcr("(to turn off these help messages, type 'help')")
+     printcr("(to turn off these help messages, type 'help 1')")
 
 ENDVERB
 

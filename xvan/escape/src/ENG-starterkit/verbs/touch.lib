@@ -1,0 +1,20 @@
+
+$VERB touch
+ PROLOGUE
+   if not(testflag(o_actor.f_alive)) then
+     if trigger(o_actor.t_talk_to_dead) then
+       disagree()
+     endif
+   endif
+
+ "touch"
+   printcr("What do you want to touch?")
+   getsubject()
+
+ "touch [o_subject]"
+   printcr("It feels just like [a] [o_subject].")
+
+ DEFAULT
+   printcr("Nothing happens.")
+
+ENDVERB

@@ -1,6 +1,6 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018 Marnix van den Bos.                   */
+/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
 /*                                                                      */
 /* <marnix.home@gmail.com>                                              */
 /*                                                                      */
@@ -23,7 +23,7 @@
 #if !defined(__prsassgn)
 #define __prsassgn
 
-#define MAX_COND_LEN		100 /* also defined in prsefun.h and prsetrig.h*/
+#define MAX_COND_LEN		100 /* also defined in prsefun.h, fndctrig.h and prsetrig.h*/
 
 
 /*************/
@@ -33,7 +33,6 @@
 extern int32_t     line_num;
 extern FILE    *datafile;
 extern dirData dir_data;
-
 
 extern void     PrintError(int16_t, resultStruct*, char*);                                /* errors.c   */
 extern int32_t  ParseFun(int32_t*, int32_t*, int32_t, int32_t, FILE**, fileList**);       /* prsefun.c  */
@@ -54,4 +53,5 @@ extern int32_t  IsLDescrId(int32_t);
 
 extern int32_t  StringToNum(char*, int32_t*);                                             /* prsetrig.c */
 extern void ErrHdr(void);                                                                 /* output.c   */
+
 #endif

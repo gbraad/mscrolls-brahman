@@ -8,7 +8,6 @@ $VERB restore
    restore()
    printcr("Done.")
 
-
    # timers are not called after a restore
 
    # update the status window

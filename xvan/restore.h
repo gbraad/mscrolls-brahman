@@ -1,6 +1,6 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018 Marnix van den Bos.                   */
+/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
 /*                                                                      */
 /* <marnix.home@gmail.com>                                              */
 /*                                                                      */
@@ -24,9 +24,9 @@
 #if !defined(__restore)
 #define __restore
 
-/*************/
-/* externals */
-/*************/
+/*************************/
+/* External declarations */
+/*************************/
 
 extern int32_t      nr_of_locs;
 extern int32_t      nr_of_objs;
@@ -52,7 +52,6 @@ extern locationInfo **locations;    /* Location pointer array.  */
 extern objectInfo   **objects;      /* Object pointer array.    */
 extern timerInfo    *timers;        /* Timer array.             */
 
-
 /* Special Ids for save() and restore() functions */
 extern int32_t      action;                                                  /* letsplay.c */
 extern int32_t      prepos;                                                  /* letsplay.c */
@@ -75,5 +74,3 @@ extern int32_t      Base64ToBytes(char*, int*, int, int8_t*, int*, int8_t*); /* 
 extern char         *ResetString(char*);
 
 #endif
-
-

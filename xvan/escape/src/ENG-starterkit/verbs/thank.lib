@@ -1,0 +1,19 @@
+
+$VERB thank SYNONYM thanks
+ PROLOGUE
+   if not(testflag(o_actor.f_alive)) then
+     if trigger(o_actor.t_talk_to_dead) then
+       disagree()
+     endif
+   endif
+
+ "thank",
+ "thank [o_player]",   # thank you
+ "thank [o_subject]"
+   printcr("You're welcome.")
+
+ DEFAULT
+   printcr("I only understood you as far as willing to thank someone.")
+
+ENDVERB
+

@@ -1,6 +1,6 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018 Marnix van den Bos.                   */
+/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
 /*                                                                      */
 /* <marnix.home@gmail.com>                                              */
 /*                                                                      */
@@ -31,7 +31,17 @@
 /* globals */
 /***********/
 
-dirData   dirs;
+dirData dirs;
+
+/*************************/
+/* function declarations */
+/*************************/
+
+int32_t InitDirs(void);
+
+/************************/
+/* function defibitions */
+/************************/
 
 int32_t InitDirs()
 {

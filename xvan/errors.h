@@ -1,6 +1,6 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018 Marnix van den Bos.                   */
+/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
 /*                                                                      */
 /* <marnix.home@gmail.com>                                              */
 /*                                                                      */
@@ -28,13 +28,13 @@
 /* External declarations */
 /*************************/
 
-extern storyInfo story_info;         /* init.c   */
+extern storyInfo story_info;              /* init.c   */
 extern char      current_filename[];
 extern int32_t   nr_of_words;
 extern wordTable *word_table;
 extern int32_t   line_num;
-extern char      *outputline;        /* init.c   */
-
-extern void      Output(char*, int); /* output.c */
+extern char      *outputline;             /* init.c   */
+extern void      PrintString(char*, int); /* output.c    */
+extern void      Output(void);            /* output.c */
 
 #endif
