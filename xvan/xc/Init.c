@@ -45,7 +45,7 @@
 int16_t  xvan_language  = ENG;
 int16_t  story_language = ENG;
 
-int16_t  debug = 1;
+int16_t  debug = 0;
 
 char     current_filename[PATH_MAX + MAX_FILENAME_LEN + 1];
 FILE     *source_file;
