@@ -11,16 +11,7 @@ $VERB open
      if not(testflag(o_subject.f_openable)) then
        printcr("[the] [o_subject] is not something that can be opened.")
        disagree()
-     else
-       if testflag(o_subject.f_locked) then
-         printcr("[the] [o_subject] seems to be locked.")
-         disagree()
-       else
-         if testflag(o_subject.f_open) then
-           printcr("But [the] [o_subject] is already open.")
-           disagree()
-         endif
-       endif
+
 
  "open"
    if equal(o_actor, o_player) then
@@ -42,6 +33,16 @@ $VERB open
         score(5)
    END_RULES
 
+   # test for locked/open moved out of prologue for "open subject with key"
+   if testflag(o_subject.f_locked) then
+     printcr("[the] [o_subject] seems to be locked.")
+     disagree()
+   endif
+   if testflag(o_subject.f_open) then
+     printcr("But [the] [o_subject] is already open.")
+     disagree()
+   endif
+
    setflag(o_subject.f_open)
    clearflag(o_subject.f_opaque)
 
@@ -55,7 +56,7 @@ $VERB open
    synchronize(o_subject, o_subject.t_reveal, o_subject.f_any, 1)
    if equal(o_player.r_nr_to_reveal, 0) and testflag(o_player.f_first) then
      # all invisible to the player, nobody printed something
-     printcr("[the] [o_subject] is now open.")
+     printcr("nothing, it's empty.")
    endif
    agree()  # otherwise returns number of objects from sync
 

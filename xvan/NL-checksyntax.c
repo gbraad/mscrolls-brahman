@@ -1,6 +1,6 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018 Marnix van den Bos.                   */
+/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
 /*                                                                      */
 /* <marnix.home@gmail.com>                                              */
 /*                                                                      */
@@ -31,28 +31,18 @@
 #include "typedefs.h"
 #include "NL-checksyntax.h"
 
-
 /*************************/
 /* Function declarations */
 /*************************/
 
 int32_t  NL_CheckSyntax(char*, int32_t, int32_t, int32_t*, int32_t, int32_t, int32_t, parsedInput*);
 
-
 /************************/
 /* Function definitions */
 /************************/
 
-int32_t NL_CheckSyntax(line_buf, id, nr_of_types, types, type_index,
-                                  subject_index, state, parsed_input)
- char        *line_buf;
- int32_t     id;
- int32_t     nr_of_types;
- int32_t     *types;
- int32_t     type_index;
- int32_t     subject_index; /* More than one subject allowed. */
- int32_t     state;
- parsedInput *parsed_input;
+int32_t NL_CheckSyntax(char *line_buf, int32_t id, int32_t nr_of_types, int32_t *types, int32_t type_index,
+                                  int32_t subject_index, int32_t state, parsedInput *parsed_input)
 
  /* id, nr_of_types, type_index and state cannot be changed by      */
  /* recursive calls. The rest of the parameters can and therefore   */
@@ -73,6 +63,8 @@ int32_t NL_CheckSyntax(line_buf, id, nr_of_types, types, type_index,
                                  /* be read in a recursive call, If call */
                                  /* returns ERROR, we must still have    */
                                  /* the types array for a retry.         */
+
+  char text_to_print[OUTPUT_LINE_LEN];
 
   /* parsed_input must be set to default values by caller.   */
 
@@ -329,6 +321,9 @@ int32_t NL_CheckSyntax(line_buf, id, nr_of_types, types, type_index,
         case 8:
           state = 55;
           break;
+        case 21:
+          state = 38;  /* 10feb19: for 'waarom ben ik hier' */
+          break;
         default:
           /* wrong syntax; try again with next type */
           return(NL_CheckSyntax(line_buf, id, nr_of_types, types,
@@ -410,8 +405,8 @@ int32_t NL_CheckSyntax(line_buf, id, nr_of_types, types, type_index,
             break;
           default:
             /* we should never get here */
-            sprintf(outputline, "INTERNAL ERROR. unknown old_state for connecting preposition.\n");
-            Output(outputline, 0);
+            PrintString("INTERNAL ERROR. unknown old_state for connecting preposition.\n", 0);
+            Output();
             return(ERROR);
             break;
         } /* switch */
@@ -491,32 +486,32 @@ int32_t NL_CheckSyntax(line_buf, id, nr_of_types, types, type_index,
           /* Ok, the next subject is coming up. */
           /* Test for too many subjects.        */
           if (++subject_index == MAX_SUBJECTS) {
-            sprintf(outputline, "Too many subjects in input.\n");
-            Output(outputline, 0);
+            PrintString("Too many subjects in input.\n", 0);
+            Output();
             return(ERROR);
           }
           state = 5;
           break;
         case 9: ;
         case 35: ;    /* added on dec 23 2015 to allow <numbers> after a noun */
-        case 53:
+        case 53: ;
         case 56:
           state = 10;
           break;
         case 14: ;
-        case 36:      /* added on dec 23 2015 to allow <numbers> after a noun */
+        case 36: ;    /* added on dec 23 2015 to allow <numbers> after a noun */
         case 47:
           state = 15;
           break; /* break seemed to be missing, added on dec 23rd 2015 */
         case 17: ;
-        case 37:      /* added on dec 23 2015 to allow <numbers> after a noun */
+        case 37: ;    /* added on dec 23 2015 to allow <numbers> after a noun */
         case 41:
           state = 18;
           break;
         default:
           /* error */
-          sprintf(outputline, "There is a comma in the wrong place.\n");
-          Output(outputline, 0);
+          PrintString("There is a comma in the wrong place.\n", 0);
+          Output();
           return(ERROR);
       }
       /* OK to use types here rather than new_types. */
@@ -536,16 +531,16 @@ int32_t NL_CheckSyntax(line_buf, id, nr_of_types, types, type_index,
           break;
         case 9: ;
         case 35: ;    /* added on dec 23 2015 to allow <numbers> after a noun */
-        case 53:
+        case 53: ;
         case 56:
           state = 10;
           break;
         case 14: ;
-        case 36:      /* added on dec 23 2015 to allow <numbers> after a noun */
+        case 36: ;    /* added on dec 23 2015 to allow <numbers> after a noun */
         case 47:
           state = 15;
           break;
-        case 34:      /* added on dec 23 2015 to allow <numbers> after a noun */
+        case 34: ;    /* added on dec 23 2015 to allow <numbers> after a noun */
         case 50:
           state = 5;
           break;
@@ -605,16 +600,16 @@ int32_t NL_CheckSyntax(line_buf, id, nr_of_types, types, type_index,
         case 1:
           state = 29;
           break;
-        case 2:
-        case 3:
+        case 2: ;
+        case 3: ;
         case 5:
           state = 23;
           break;
-        case 8:
+        case 8: ;
         case 10:
           state = 25;
           break;
-        case 13:
+        case 13: ;
         case 15:
           state = 27;
           break;
@@ -765,8 +760,8 @@ int32_t NL_CheckSyntax(line_buf, id, nr_of_types, types, type_index,
             break;
           default:
             /* we should never get here */
-            sprintf(outputline, "INTERNAL ERROR. unknown old_state for noun.\n");
-            Output(outputline, 0);
+            PrintString("INTERNAL ERROR. unknown old_state for noun.\n", 0);
+            Output();
             return(ERROR);
             break;
         } /* switch */
@@ -884,8 +879,8 @@ int32_t NL_CheckSyntax(line_buf, id, nr_of_types, types, type_index,
                                      actor.part1.nr_of_adjectives++] = id;
             break;
           case 42: ;
-          case 43:
-          case 48:       /* subject part 2 adjective */
+          case 43: ;
+          case 48: ;     /* subject part 2 adjective */
           case 49:
             if (parsed_input->subject[subject_index].part2.nr_of_adjectives < MAX_PARSE_ADJ)
               parsed_input->subject[subject_index].part2.
@@ -910,8 +905,8 @@ int32_t NL_CheckSyntax(line_buf, id, nr_of_types, types, type_index,
           break;
           default:
             /* we should never get here */
-            sprintf(outputline, "INTERNAL ERROR. unknown old_state for adjective.\n");
-            Output(outputline, 0);
+            PrintString("INTERNAL ERROR. unknown old_state for adjective.\n", 0);
+            Output();
             return(ERROR);
             break;
         } /* switch */
@@ -926,8 +921,9 @@ int32_t NL_CheckSyntax(line_buf, id, nr_of_types, types, type_index,
                              parsed_input));}
 
     default:
-      sprintf(outputline, "INTERNAL ERROR. unknown keyword type: %d.\n", types[type_index]);
-      Output(outputline, 0);
+      sprintf(text_to_print, "INTERNAL ERROR. unknown keyword type: %d.\n", types[type_index]);
+      PrintString(text_to_print, 0);
+      Output();
       return(ERROR);
   } /* switch */
   /* no return here */

@@ -1,6 +1,6 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018 Marnix van den Bos.                   */
+/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
 /*                                                                      */
 /* <marnix.home@gmail.com>                                              */
 /*                                                                      */
@@ -33,7 +33,6 @@
 #include "IFI.h"       /* IFI_REQ_META */
 #include "defs.h"
 
-
 /***********/
 /* Globals */
 /***********/
@@ -41,9 +40,10 @@
 /* these must be defined as externals in the header files of the */
 /* modules that need them.                                       */
 
-short debug_mode  = 0;
 short testmode    = 0;            /* read input from file is off  */
 short transcript  = 0;            /* copy output to file is off   */
+
+char  prompt[MAX_PROMPT_LEN+1];
 
 int32_t active_entity = NO_ID;    /* Location or object that is   */
                                   /* currently active (especially */
@@ -64,65 +64,73 @@ int32_t capital       = 1;        /* Start printing with a capital character.  *
 int32_t article       = 0;        /* Tells whether to print an article.        */
 int32_t muted         = 0;        /* Tells whether to print the output         */
 
-
 /*************************/
 /* Function declarations */
 /*************************/
 
-void    ResetGlobals(void);                 /* oct 18 18 */  /* @@@@ */
 int32_t LetsPlay(void);
 
 /************************/
 /* Function definitions */
 /************************/
 
-int32_t LetsPlay()
+int32_t LetsPlay(void)
 {
   int  cont = OK;
 
   usrActionRec *dummy_action_rec   = NULL;
   int32_t      dummy_subject_index = 0;
+  char         text_to_print[OUTPUT_LINE_LEN];
+
+  /* set the prompt */
+  if (debug_info)
+    strncpy(prompt, "debug> ", MAX_PROMPT_LEN);
+  else
+    strncpy(prompt, "> ", MAX_PROMPT_LEN);
 
   /* Print interpreter opening message. */
-  PrintString("-- XVAN 2.3.4 interpreter --\n\n", 0);
+  PrintString("-- XVAN 2.4 interpreter --\n\n", 0);
   PrintString("(c) Marnix van den Bos\n\n\n\n", 0);
 
   /* %s doesn't work with PrintString() */
-  sprintf(outputline, "%s", story_info.title);
-  Output(outputline, 0);
+  sprintf(text_to_print, "%s", story_info.title);
+  PrintString(text_to_print, 0);
 
   switch(story_info.story_language) {
     case ENG:
-      sprintf(outputline, " version %s - English\n\n\n\n", story_info.version);
-      Output(outputline, 0);
+      sprintf(text_to_print, " version %s - English\n\n\n\n", story_info.version);
+      PrintString(text_to_print, 0);
       break;
 
     case NL:
-      sprintf(outputline, " versie %s - Nederlands\n\n\n\n", story_info.version);
-      Output(outputline, 0);
+      sprintf(text_to_print, " versie %s - Nederlands\n\n\n\n", story_info.version);
+      PrintString(text_to_print, 0);
       break;
 
     default:
       /* we should never get here */
       sprintf(outputline, " version %s - Unknown language\n\n\n\n", story_info.version);
-      Output(outputline, 0);
+      PrintString(text_to_print, 0);
       break;
   }
+
+  /* print the outputline */
+  Output();
 
   /* Init current location. */
   curr_loc = obj_dir[PLAYER-FIRST_OBJECT_ID].held_by;
 
   while (cont == OK) {
-    cont = ProcessInput("> ");
+    cont = ProcessInput(prompt);
 
     /* check if we already processed the prologue json */
     if (cont == IFI_REQ_META) {
-      /* we processed the prologue json, no fire the timers */
-      /* Handle the timers to allow starting of the game    */
-      /* (printing opening messages etc).                   */
-      /* 06oct2017 added action_rec and subject_index, but  */
-      /* in this first call of HandleTimers() they have     */
-      /* no valid values yet                                */
+      /* we processed the prologue json, now fire the timers */
+      /* Handle the timers to allow starting of the game     */
+      /* (printing opening messages etc).                    */
+      /* 06oct2017 added action_rec and subject_index, but   */
+      /* in this first call of HandleTimers() they have      */
+      /* no valid values yet                                 */
       if (HandleTimers(dummy_action_rec, dummy_subject_index) == QUIT) {
         return(OK);
       }

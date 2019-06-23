@@ -1,6 +1,6 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018 Marnix van den Bos.                   */
+/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
 /*                                                                      */
 /* <marnix.home@gmail.com>                                              */
 /*                                                                      */
@@ -30,7 +30,6 @@
 #include "typedefs.h"
 #include "trnslate.h"
 
-
 /*************************/
 /* Function declarations */
 /*************************/
@@ -40,6 +39,7 @@ void         InitUsrActionrec(usrActionRec*);
 int32_t      FilledOut(extendedSysDescr*);
 int32_t      CountSubjectsInParsedInput(parsedInput*);
 int32_t      HasType(int32_t, int32_t);
+int32_t      ConvertDynamicDSys(char*, extendedSysDescr*);
 int32_t      FlipNoun(sysDescr*);
 int32_t      SplitSubject(parsedInput*, int32_t);
 int32_t      SplitSubjectAndSpecifier(parsedInput*, int32_t);
@@ -55,14 +55,11 @@ int32_t      Find(extendedSysDescr*, int32_t, char*, match*);
 void         PrintNotFound(extendedSysDescr*);
 resultStruct Translate(parsedInput*, int32_t, usrActionRec*, char*);
 
-
 /************************/
 /* Function definitions */
 /************************/
 
-int32_t StringToNum(source, num)
- char *source;
- int32_t  *num;
+int32_t StringToNum(char *source, int32_t *num)
 {
   int32_t i     = 0;
   int32_t start = 0;  /* start value for index. */
@@ -97,8 +94,7 @@ int32_t StringToNum(source, num)
 }
 
 
-void InitUsrActionRec(usr_action_rec)
- usrActionRec *usr_action_rec;
+void InitUsrActionRec(usrActionRec *usr_action_rec)
 {
   int32_t i = 0;
 
@@ -122,8 +118,7 @@ void InitUsrActionRec(usr_action_rec)
 }
 
 
-int32_t CountSubjectsInParsedInput(parsed_input)
- parsedInput *parsed_input;
+int32_t CountSubjectsInParsedInput(parsedInput *parsed_input)
 {
   int count = 0;
 
@@ -135,8 +130,7 @@ int32_t CountSubjectsInParsedInput(parsed_input)
 }
 
 
-int32_t FilledOut(descr)
- extendedSysDescr *descr;
+int32_t FilledOut(extendedSysDescr *descr)
 {
   /* This routine checks for noun value NO_ID and zero */
   /* adjectives in descr->part1. If so, then descr is  */
@@ -150,9 +144,7 @@ int32_t FilledOut(descr)
 }
 
 
-int32_t HasType(word_id, type)
- int32_t word_id;
- int32_t type;
+int32_t HasType(int32_t word_id, int32_t type)
 {
   int i     = 0;
   int j     = 0;
@@ -180,8 +172,77 @@ int32_t HasType(word_id, type)
 }
 
 
-int32_t FlipNoun(descr)
-  sysDescr *descr;
+int32_t ConvertDynamicDSys(char *dyn_text, extendedSysDescr *descr)
+{
+  char    *descr_text;
+  int32_t result = OK;
+  int32_t old_article;
+  int32_t old_capital;
+  int     len;
+
+  /* this functions converts a dynamic system description text */
+  /* string to an extendedSysDescr struct                      */
+  /* we can also just print descr->dynamic, but by converting  */
+  /* to a struct we can handle the article correctly           */
+
+  /* initialize everything but ->dynamic from *descr */
+  descr->part1.article          = NO_ID;
+  descr->part1.nr_of_adjectives = 0;
+  descr->part1.noun             = NO_ID;
+  descr->connect_prepos         = NO_ID;
+  descr->part2.article          = NO_ID;
+  descr->part2.nr_of_adjectives = 0;
+  descr->part2.noun             = NO_ID;
+
+  /* flush the outputline */
+  Output();
+
+  /* convert dynamic d_sys to text        */
+  /* we abuse PrintString here to convert */
+  /* a string with parameters, so we must */
+  /* save some control values             */
+
+  old_article    = article;
+  old_capital    = capital;
+  article        = 0;
+
+  /* prevent \n in printed dyn_text     */
+  /* (will cause an unknown word error  */
+  /* from ParseDSys()                   */
+  /* if this becomes an issue with very */
+  /* long dynamic descriptions, make a  */
+  /* dedicated PrintString() to convert */
+  /* dynamic system descriptions        */
+
+  PrintString(dyn_text, 0);
+
+  capital = old_capital;
+  article = old_article;
+
+  len = strlen(outputline);
+  if (len == 0) {
+    /* empty d_sys */
+    return(OK);
+  }
+
+  if ((descr_text = (char *) malloc((len+1)*sizeof(char))) == NULL) {
+    PrintError(15, NULL, "ConvertDynamicDSys()");
+    return(ERROR);
+  }
+
+  strncpy(descr_text, outputline, len);
+  descr_text[len] = '\0';
+  outputline = ResetString(outputline);
+
+  /* now parse the system description text */
+  result = ParseDSys(descr_text, descr);
+
+  free(descr_text);
+  return(result);
+}
+
+
+int32_t FlipNoun(sysDescr *descr)
 {
   int i = 0;
 
@@ -213,9 +274,7 @@ int32_t FlipNoun(descr)
 }
 
 
-int32_t SplitSubject(p_i, index)
- parsedInput *p_i;
- int32_t     index;
+int32_t SplitSubject(parsedInput *p_i, int32_t index)
 {
   int32_t i = 0;
 
@@ -259,9 +318,7 @@ int32_t SplitSubject(p_i, index)
 }
 
 
-int32_t SplitSubjectAndSpecifier(p_i, index)
- parsedInput *p_i;
- int32_t     index;
+int32_t SplitSubjectAndSpecifier(parsedInput *p_i, int32_t index)
 {
   int32_t i                      = 0;
   int32_t old_prepos_from_struct = NO_ID;
@@ -341,9 +398,7 @@ int32_t SplitSubjectAndSpecifier(p_i, index)
 }
 
 
-int32_t CompareNounsAndAdjectives(source, target)
-  sysDescr source;
-  sysDescr target;
+int32_t CompareNounsAndAdjectives(sysDescr source, sysDescr target)
 {
   int32_t i     = 0;
   int32_t j     = 0;
@@ -386,9 +441,9 @@ int32_t CompareNounsAndAdjectives(source, target)
 }
 
 
-int32_t MatchSysDescr(source, target)
- extendedSysDescr source; /* grabbed from user input */
- extendedSysDescr target; /* in compiled story       */
+int32_t MatchSysDescr(extendedSysDescr source, extendedSysDescr target)
+ /* source is grabbed from user input */
+ /* target is in compiled story       */
 {
   /* This function matches two sysdescr structs. The match succeeds */
   /* if source is a `subset' of target. For example, the sources    */
@@ -423,6 +478,26 @@ int32_t MatchSysDescr(source, target)
 
   /* 29nov2016: moved part of code to CompareNounsAndAdjectives()   */
 
+  /* 19mar2019: added the flipnoun() function. In some cases where  */
+  /* additional info was asked and an entered single adjective was  */
+  /* initially parsed as a noun, there would not be a match which   */
+  /* would result in redefining the search set. With scope all_locs */
+  /* this could lead to strange situations (new things in scope,    */
+  /* based on only the adjective).                                  */
+
+  /* 14may2019: function will now also handle dynamic system        */
+  /* descriptions.                                                  */
+
+  /* check if target is an expanded system description */
+  if (target.dynamic != NULL) {
+    /* dynamic system description */
+    if (!ConvertDynamicDSys(target.dynamic, &target)) {
+      return(ERROR);
+    }
+  }
+
+  /* ok, now we have a 'normal' d_sys */
+
   /* Check for empty target. */
   if (target.part1.noun == NO_ID)
     return(ERROR);
@@ -436,12 +511,28 @@ int32_t MatchSysDescr(source, target)
     return(ERROR);
 
   /* Compare part 1 nouns and adjectives */
-  if (!CompareNounsAndAdjectives(source.part1, target.part1))
-    return(ERROR);
+  if (!CompareNounsAndAdjectives(source.part1, target.part1)) {
+    if (!FlipNoun(&source.part1)) {
+      return(ERROR);
+    }
+    else {
+      if (!CompareNounsAndAdjectives(source.part1, target.part1)) {
+        return(ERROR);
+      }
+    }
+  }
 
   /* Compare part 2 nouns and adjectives */
-  if (!CompareNounsAndAdjectives(source.part2, target.part2))
-    return(ERROR);
+  if (!CompareNounsAndAdjectives(source.part2, target.part2)) {
+    if (!FlipNoun(&source.part2)) {
+      return(ERROR);
+    }
+    else {
+      if (!CompareNounsAndAdjectives(source.part2, target.part2)) {
+        return(ERROR);
+      }
+    }
+  }
 
   /* We made it to here; this definitely is a match!          */
 
@@ -449,9 +540,7 @@ int32_t MatchSysDescr(source, target)
 }
 
 
-void SwapSysDescr(sd1, sd2)
- extendedSysDescr *sd1;
- extendedSysDescr *sd2;
+void SwapSysDescr(extendedSysDescr *sd1, extendedSysDescr *sd2)
 {
   extendedSysDescr sd_temp;
   int32_t          i = 0;
@@ -461,6 +550,7 @@ void SwapSysDescr(sd1, sd2)
   /*****************************/
 
   /* copy sd1 to sdtemp */
+  sd_temp.dynamic                 = sd1->dynamic;
   sd_temp.part1.article = (sd1->part1).article;
   sd_temp.part1.nr_of_adjectives = (sd1->part1).nr_of_adjectives;
   for (i=0; i<MAX_PARSE_ADJ-1; i++)
@@ -471,11 +561,14 @@ void SwapSysDescr(sd1, sd2)
 
   sd_temp.part2.article = (sd1->part2).article;
   sd_temp.part2.nr_of_adjectives = (sd1->part2).nr_of_adjectives;
+
   for (i=0; i<MAX_PARSE_ADJ-1; i++)
     sd_temp.part2.adjectives[i] = (sd1->part2).adjectives[i];
+
   sd_temp.part2.noun = (sd1->part2).noun;
 
   /* copy sd2 to sd1 */
+  sd1->dynamic                  = sd2->dynamic;
   (sd1->part1).article = (sd2->part1).article;
   (sd1->part1).nr_of_adjectives = (sd2->part1).nr_of_adjectives;
   for (i=0; i<MAX_PARSE_ADJ-1; i++)
@@ -486,30 +579,35 @@ void SwapSysDescr(sd1, sd2)
 
   (sd1->part2).article = (sd2->part2).article;
   (sd1->part2).nr_of_adjectives = (sd2->part2).nr_of_adjectives;
+
   for (i=0; i<MAX_PARSE_ADJ-1; i++)
     (sd1->part2).adjectives[i] = (sd2->part2).adjectives[i];
+
   (sd1->part2).noun = (sd2->part2).noun;
 
   /* copy sd_temp to sd2 */
+   sd2->dynamic                 = sd_temp.dynamic;
   (sd2->part1).article = sd_temp.part1.article;
   (sd2->part1).nr_of_adjectives = sd_temp.part1.nr_of_adjectives;
+
   for (i=0; i<MAX_PARSE_ADJ-1; i++)
     (sd2->part1).adjectives[i] = sd_temp.part1.adjectives[i];
+
   (sd2->part1).noun = sd_temp.part1.noun;
 
   sd2->connect_prepos = sd_temp.connect_prepos;
 
   (sd2->part2).article = sd_temp.part2.article;
   (sd2->part2).nr_of_adjectives = sd_temp.part2.nr_of_adjectives;
+
   for (i=0; i<MAX_PARSE_ADJ-1; i++)
     (sd2->part2).adjectives[i] = sd_temp.part2.adjectives[i];
+
   (sd2->part2).noun = sd_temp.part2.noun;
 }
 
 
-int32_t HasMatchingSysDescr(id, descr)
- int32_t          id;
- extendedSysDescr descr;
+int32_t HasMatchingSysDescr(int32_t id, extendedSysDescr descr)
 {
   /* A location or object can have more than one System Description. */
   /* In this function we determine of any one of these matches with  */
@@ -561,13 +659,12 @@ int32_t HasMatchingSysDescr(id, descr)
 }
 
 
-int32_t Search(id, descr, visible, depth, hits)
- int32_t          id;      /* Tells which loc/obj to search through.     */
- extendedSysDescr *descr;
- int32_t          visible; /* 0 means scope is ALL_LOCS.                 */
- int32_t          depth;   /* Tells the containment level of the search. */
-                           /* Value -1 means unlimited depth.            */
- match            *hits;   /* Object ids that match descr.               */
+int32_t Search(int32_t id, extendedSysDescr *descr, int32_t visible, int32_t depth, match *hits)
+ /* is tells which loc/obj to search through.        */
+ /* visible 0 means scope is ALL_LOCS.               */
+ /* depth tells the containment level of the search. */
+ /* Value -1 means unlimited depth.                  */
+ /* hits are bject ids that match descr.             */
 {
   /* This function first determines whether the `id' matches     */
   /* with descr. Next it searches objects that are contained in  */
@@ -643,8 +740,7 @@ int32_t Search(id, descr, visible, depth, hits)
 }
 
 
-int32_t ArrangeVisible(hits)
- match *hits;
+int32_t ArrangeVisible(match *hits)
 {
   int i       = 0;
   int j       = 0;
@@ -687,10 +783,7 @@ int32_t ArrangeVisible(hits)
 }
 
 
-void MoreInfo(descr, hits, line_buf)
- extendedSysDescr *descr;
- match            *hits;
- char             *line_buf;
+void MoreInfo(extendedSysDescr *descr, match *hits, char *line_buf)
 {
   switch(story_info.story_language) {
     case NL:
@@ -707,12 +800,11 @@ void MoreInfo(descr, hits, line_buf)
 }
 
 
-int32_t SearchHits(descr, scope, id, search_set, line_buf)
- extendedSysDescr *descr;      /* Description that must be matched.       */
- int32_t          scope;       /* In case we need to refresh search set   */
- int32_t          *id;         /* Id of matching loc/obj (if only one).   */
- match            *search_set; /* Set of objs locs to compare with descr. */
- char             *line_buf;
+int32_t SearchHits(extendedSysDescr *descr, int32_t scope, int32_t *id, match *search_set, char *line_buf)
+ /* descr is description that must be matched.             */
+ /* scope is needed in case we need to refresh search set. */
+ /* id is id of matching loc/obj (if only one).            */
+ /* search_set is set of objs locs to compare with descr.  */
 {
   /* This function is similar to Find(), in the way that it tries   */
   /* to find an object or location whose description matches descr. */
@@ -726,7 +818,7 @@ int32_t SearchHits(descr, scope, id, search_set, line_buf)
   /* Malloc space for hits->matched_objs. Will never need more than */
   /* than there are in the search_set variable.                     */
   if ((hits.matched_objs = (int32_t *) malloc((search_set->nr_of_hits)*sizeof(int32_t))) == NULL) {
-    PrintError(15, NULL, "SearchHits()");
+    PrintError(15, NULL, "8()");
     return(ERROR);
   }
   /* added 19dec07 - start */
@@ -761,7 +853,7 @@ int32_t SearchHits(descr, scope, id, search_set, line_buf)
 
       switch (ParseDSys(line_buf, descr)) {
         case OK:
-          line_buf[0] = '\0';
+          /* line_buf[0] = '\0'; */ /* moved down below */
           /* Try again with new descr. */
           result = SearchHits(descr, scope, id, &hits, line_buf);
           if (result == NO_MATCH) {
@@ -772,6 +864,15 @@ int32_t SearchHits(descr, scope, id, search_set, line_buf)
             result = SearchHits(descr, scope, id, &hits, line_buf);
           }
           free(hits.matched_objs);
+          /* next if-clause added on 23mar19. If the player types a new */
+          /* command that also has valid object syntax, it will result  */
+          /* in a 'you don't see that here' error. E.g 'open chest' is  */
+          /* new command, but also can be an open chest. So, now we     */
+          /* catch NO_MATCH and return NEXT_SENTENCE.                   */
+          if (result == NO_MATCH) {
+            return(NEXT_SENTENCE);
+          }
+          line_buf[0] = '\0';
           return(result);
         case UNKNOWN_WORD:
           /* User entered an unknown word.                     */
@@ -796,14 +897,10 @@ int32_t SearchHits(descr, scope, id, search_set, line_buf)
 }
 
 
-int32_t Find(descr, scope, line_buf, hits)
- extendedSysDescr *descr;
- int32_t          scope;
- char             *line_buf;
- match            *hits;
+int32_t Find(extendedSysDescr *descr, int32_t scope, char *line_buf, match *hits)
 
- /* IN CASE OF A SUSPECTED MEMORY LEAK: CHECK THE */
- /* MALLOCs AND FREEs FOR hits->matched_objs      */
+  /* IN CASE OF A SUSPECTED MEMORY LEAK: CHECK THE */
+  /* MALLOCs AND FREEs FOR hits->matched_objs      */
 
 {
   int32_t i     = 0;
@@ -870,8 +967,7 @@ int32_t Find(descr, scope, line_buf, hits)
 }
 
 
-void PrintNotFound(descr)
- extendedSysDescr *descr;
+void PrintNotFound(extendedSysDescr *descr)
 {
   switch(story_info.story_language) {
     case NL:
@@ -888,16 +984,13 @@ void PrintNotFound(descr)
 }
 
 
-resultStruct Translate(parsed_input, index, usr_action_rec, line_buf)
- parsedInput  *parsed_input;
- int32_t      index;             /* tells which subject to use from parsed_input */
- usrActionRec *usr_action_rec;
- char         *line_buf;
+resultStruct Translate(parsedInput *parsed_input, int32_t index, usrActionRec *usr_action_rec, char *line_buf)
+ /* index tells which subject to use from parsed_input */
 {
   int32_t      try_to_find = 0;
   int32_t      tries       = 3;  /* actor, subject and specifier */
   int32_t      winners     = 0;
-  resultStruct result      = {OK, OK};
+  resultStruct result      = {OK, NONE, OK};
   match        actor_hits;
   match        subject_hits;
   match        specifier_hits;
@@ -925,13 +1018,11 @@ resultStruct Translate(parsed_input, index, usr_action_rec, line_buf)
         free(actor_hits.matched_objs);
         return(result);
         break;
-
       case OVERFLOW:
         result.tag = OVERFLOW;
         free(actor_hits.matched_objs);
         return(result);
         break;
-
       case OK:
         if (actor_hits.nr_of_hits == 0) {
           result.tag = ACTOR_ERROR;
@@ -980,13 +1071,11 @@ resultStruct Translate(parsed_input, index, usr_action_rec, line_buf)
           free(subject_hits.matched_objs);
           return(result);
           break;
-
         case OVERFLOW:
           result.tag = OVERFLOW;
           free(subject_hits.matched_objs);
           return(result);
           break;
-
         case OK:
           /* continue */
           if (subject_hits.nr_of_hits == 0) {
@@ -1046,13 +1135,11 @@ resultStruct Translate(parsed_input, index, usr_action_rec, line_buf)
         free(specifier_hits.matched_objs);
         return(result);
         break;
-
       case OVERFLOW:
         result.tag = OVERFLOW;
         free(specifier_hits.matched_objs);
         return(result);
         break;
-
       case OK:
         if (specifier_hits.nr_of_hits == 0) {
           result.tag = SPECIFIER_ERROR;
@@ -1067,7 +1154,6 @@ resultStruct Translate(parsed_input, index, usr_action_rec, line_buf)
           tries--;
         }
         break;
-
       default:
         PrintError(77, NULL, NULL);
         /*free(specifier_hits.matched_objs);*/
@@ -1106,7 +1192,6 @@ resultStruct Translate(parsed_input, index, usr_action_rec, line_buf)
             result.tag = ACTOR_ERROR;
             return(result);
             break;
-
           case OK:
             /* There was exactly 1 match.   */
             /* Update actor_hits in case we */
@@ -1114,20 +1199,17 @@ resultStruct Translate(parsed_input, index, usr_action_rec, line_buf)
             actor_hits.nr_of_hits = 1;
             actor_hits.matched_objs[0] = usr_action_rec->actor;
             break;
-
           case UNKNOWN_WORD:
             /* unknown word in user input */
             free(actor_hits.matched_objs);
             result.tag = UNKNOWN_WORD;
             return(result);
             break;
-
           case ERROR:
             free(actor_hits.matched_objs);
             result.tag = ERROR;
             return(result);
             break;
-
           case NEXT_SENTENCE:
             free(actor_hits.matched_objs);
             result.tag = NEXT_SENTENCE;
@@ -1146,7 +1228,6 @@ resultStruct Translate(parsed_input, index, usr_action_rec, line_buf)
               result.tag = SUBJECT_ERROR;
               return(result);
               break;
-
             case OK:
               /* There was exactly 1 match.     */
               /* Update subject_hits in case we */
@@ -1154,20 +1235,17 @@ resultStruct Translate(parsed_input, index, usr_action_rec, line_buf)
               subject_hits.nr_of_hits = 1;
               subject_hits.matched_objs[0] = usr_action_rec->subject[index];
               break;
-
             case UNKNOWN_WORD:
               /* unknown word in user input */
               free(actor_hits.matched_objs);
               result.tag = UNKNOWN_WORD;
               return(result);
               break;
-
             case ERROR:
               free(subject_hits.matched_objs);
               result.tag = ERROR;
               return(result);
               break;
-
             case NEXT_SENTENCE:
               free(subject_hits.matched_objs);
               result.tag = NEXT_SENTENCE;
@@ -1186,7 +1264,6 @@ resultStruct Translate(parsed_input, index, usr_action_rec, line_buf)
                 result.tag = SPECIFIER_ERROR;
                 return(result);
                 break;
-
               case OK:
                 /* There was exactly 1 match.      */
                 /* Update specifier_hits in case   */
@@ -1194,21 +1271,18 @@ resultStruct Translate(parsed_input, index, usr_action_rec, line_buf)
                 specifier_hits.nr_of_hits = 1;
                 specifier_hits.matched_objs[0] = usr_action_rec->specifier;
                 break;
-
               case UNKNOWN_WORD:
                 /* unknown word in user input */
                 free(actor_hits.matched_objs);
                 result.tag = UNKNOWN_WORD;
                 return(result);
                 break;
-
               case ERROR:
                 /* unknown word in user input */
                 free(specifier_hits.matched_objs);
                 result.tag = ERROR;
                 return(result);
                 break;
-
               case NEXT_SENTENCE:
                 free(specifier_hits.matched_objs);
                 result.tag = NEXT_SENTENCE;

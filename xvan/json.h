@@ -1,6 +1,6 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018 Marnix van den Bos.                   */
+/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
 /*                                                                      */
 /* <marnix.home@gmail.com>                                              */
 /*                                                                      */
@@ -24,6 +24,10 @@
 #if !defined(__json)
 #define __json
 
+/***********/
+/* Defines */
+/***********/
+
 #define MAX_INTEGRAL_LEN      6 /* includes space for '\0' */
 #define MAX_FRACTION_LEN      6 /* includes space for '\0' */
 #define MAX_EXPONENT_LEN      3 /* includes space for '\0' */
@@ -44,6 +48,10 @@
 #define JSON_VAL_OBJECT     106
 #define JSON_VAL_ARRAY      107
 
+/********************/
+/* type definitions */
+/********************/
+
 typedef struct {
           int16_t type;
           char    *textstring;
@@ -55,6 +63,12 @@ typedef struct {
           char      *key;
           jsonValue value;
         } kvPair;
+
+/*************************/
+/* External declarations */
+/*************************/
+
+extern void   Log(char*, char*, char*);
 
 extern int32_t ProcessJson(char*, char*);
 extern char    *ExpandString(char*, int);

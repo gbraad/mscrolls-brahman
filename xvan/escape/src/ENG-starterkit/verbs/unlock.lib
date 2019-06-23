@@ -30,7 +30,8 @@ $VERB unlock
     if testflag(o_subject.f_locked) then score(5) endif
    END_RULES
 
-   if owns(o_actor, o_subject.r_key) then
+   if owns(o_actor, o_subject.r_key) or 
+      (owns(o_subject, o_subject.r_key, 0) and cansee(o_actor, o_subject.r_key)) then
      printcr("(with [the] [o_subject.r_key]).")
      clearflag(o_subject.f_locked)
      printcr("[the] [o_subject] is now unlocked.")
@@ -40,16 +41,21 @@ $VERB unlock
  "unlock [o_subject] with [o_spec]"
    DISAMBIGUATION_RULES
     if testflag(o_subject.f_locked) then score(5) endif
+    if testflag(o_spec.f_takeable) then score(5) endif
    END_RULES
 
    if not(owns(o_actor, o_spec)) then
-     printcr("But [the] [o_actor] [o_actor.r_is] not holding [the] [o_spec].")
+     printcr("(taking [the] [o_spec] first).")
+     if not(try(l_location, 0, 1, "take [o_spec]")) then
+       disagree()
+     endif
+   endif
+   if equal(o_spec, o_subject.r_key) then
+     clearflag(o_subject.f_locked)
+     printcr("[the] [o_subject] is now unlocked.")
    else
-     if equal(o_spec, o_subject.r_key) then
-       clearflag(o_subject.f_locked)
-       printcr("[the] [o_subject] is now unlocked.")
-     else
-       printcr("Apparently, [the] [o_spec] is not the key for [the] [o_subject].")
+     printcr("Apparently, [the] [o_spec] is not the key for [the] [o_subject].")
+     disagree()
 
 ENDVERB
 

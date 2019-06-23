@@ -1,6 +1,6 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018 Marnix van den Bos.                   */
+/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
 /*                                                                      */
 /* <marnix.home@gmail.com>                                              */
 /*                                                                      */
@@ -28,17 +28,17 @@
 /* External declarations */
 /*************************/
 
-extern verbInfo **verbs;
-extern int32_t  action;
-extern int32_t  actor;
-extern int32_t  subject;
-extern int32_t  specifier;
+extern verbInfo      **verbs;
+extern int32_t       action;
+extern int32_t       actor;
+extern int32_t       subject;
+extern int32_t       specifier;
 
-extern int32_t  InMem(int32_t);                                       /* fileio.c  */
-extern int32_t  Load(int32_t);                                        /* fileio.c  */
-extern int32_t  Execute(int32_t*, usrActionRec*, int32_t, int32_t*);  /* execute.c */
-extern void     PrintError(int16_t, resultStruct*, char*);            /* errors.c  */
-extern void     PrintParserActionRec(parserActionRec*);               /* debug.c   */
-extern int32_t  MatchActionRec(compActionRec*, usrActionRec*, int32_t);
+extern int32_t       InMem(int32_t);                                         /* fileio.c  */
+extern int32_t       Load(int32_t);                                          /* fileio.c  */
+extern resultStruct  Execute(int32_t*, usrActionRec*, int32_t, int32_t*);    /* execute.c */
+extern void          PrintError(int16_t, resultStruct*, char*);              /* errors.c  */
+extern void          PrintParserActionRec(parserActionRec*);                 /* debug.c   */
+extern int32_t       MatchActionRec(compActionRec*, usrActionRec*, int32_t);
 
 #endif

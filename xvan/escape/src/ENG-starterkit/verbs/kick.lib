@@ -1,0 +1,21 @@
+
+$VERB kick
+ PROLOGUE
+   if not(testflag(o_actor.f_alive)) then
+     if trigger(o_actor.t_talk_to_dead) then
+       disagree()
+     endif
+   endif
+
+ "kick"
+   printcr("What do you want to kick?")
+   getsubject()
+
+ "kick [o_subject]"
+   printcr("Violence is not the answer.")
+
+ DEFAULT
+   printcr("I only understood you as far as wanting to kick something.")
+
+ENDVERB
+

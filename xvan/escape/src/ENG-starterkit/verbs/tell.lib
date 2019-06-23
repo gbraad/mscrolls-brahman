@@ -13,16 +13,51 @@ $VERB tell
      agree()
    endif
 
+   if not(cansee(o_player, o_actor)) then
+     printcr("[the] [o_actor] is not here.")
+     disagree()
+   endif
+
+   if not(cansee(o_actor, o_subject)) then
+     printcr("[the] [o_subject] is not here.")
+     disagree()
+   endif
+
  "[o_player], tell [o_subject] about [o_spec]"
+   DISAMBIGUATION_RULES
+     if equal(o_subject, o_nst) then score(-10) endif
+     if equal(o_spec, o_nst) then score(-10) endif
+     if testflag(o_spec.f_seenbefore) then score(5) endif
+     if cansee(o_actor, o_spec) then score(5) endif
+   END_RULES
+   if not(cansee(o_player, o_subject)) then
+     printcr("[the] [o_subject] is not here.")
+     disagree()
+   endif
    if equal(o_subject, o_actor) then
      printcr("Talking to yourself is a sign of pending mental collapse.")
+     disagree()
+   endif
+   if not(cansee(o_actor, o_subject)) then
+     printcr("[the] [o_subject] is not here.")
+     disagree()
+   endif
+   if not(testflag(o_subject.f_alive)) then
+     printcr("Not surprisingly, [the] [o_subject] does not respond.")
    else
-     if not(testflag(o_subject.f_alive)) then
-       printcr("Not surprisingly, [the] [o_subject] does not respond.")
-     else
-       printcr("Thanks for sharing that.")
+     printcr("Thanks for sharing that.")
 
  "[o_actor], tell [o_subject] about [o_spec]"
+   DISAMBIGUATION_RULES
+     if equal(o_subject, o_nst) then score(-10) endif
+     if equal(o_spec, o_nst) then score(-10) endif
+     if testflag(o_spec.f_seenbefore) then score(5) endif
+     if cansee(o_actor, o_spec) then score(5) endif
+   END_RULES
+   if not(cansee(o_player, o_actor)) then
+     printcr("[the] [o_actor] is not here.")
+     disagree()
+   endif
    if equal(o_actor, o_subject) then
      printcr("That means I would be telling myself something I already know...")
    else
@@ -38,7 +73,7 @@ $VERB tell
       Printcr("Examples of the syntaxes I understand are:")
       printcr("  'tell Fred about the brass key'")
       printcr("  'Fred, tell me about the brass key'")
-      printcr("(to turn off these help messages, type 'help')")
+      printcr("(to turn off these help messages, type 'help 1')")
 
 ENDVERB
 

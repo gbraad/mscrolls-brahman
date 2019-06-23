@@ -1,6 +1,6 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018 Marnix van den Bos.                   */
+/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
 /*                                                                      */
 /* <marnix.home@gmail.com>                                              */
 /*                                                                      */
@@ -24,21 +24,24 @@
 #if !defined(__resglobs)
 #define __resglobs
 
-extern short debug_mode;
+/*************************/
+/* External declarations */
+/*************************/
+
 extern short testmode;
 
- extern int32_t nr_of_locs;
- extern int32_t nr_of_objs;
- extern int32_t nr_of_cflags;
- extern int32_t loc_flags_string_len;
- extern int32_t nr_of_cattrs;
- extern int32_t nr_of_lattrs;
- extern int32_t nr_of_directions;
- extern int32_t nr_of_timers;
+extern int32_t nr_of_locs;
+extern int32_t nr_of_objs;
+extern int32_t nr_of_cflags;
+extern int32_t loc_flags_string_len;
+extern int32_t nr_of_cattrs;
+extern int32_t nr_of_lattrs;
+extern int32_t nr_of_directions;
+extern int32_t nr_of_timers;
 
-extern int32_t  sp;
+extern int32_t sp;
 
-extern int32_t  active_entity;
+extern int32_t active_entity;
 
 extern int32_t curr_loc;
 extern int32_t direction;
@@ -57,12 +60,6 @@ extern int32_t muted;
 
 extern int32_t disambig_score;
 
-extern short    fire_timers;
-
-
-
-
-
-
+extern short   fire_timers;
 
 #endif

@@ -46,7 +46,7 @@ $VERB turn SYNONYM rotate
      printcr("  'turn the arrow to the north'")
      printcr("  'turn on themachine'")
      printcr("  'turn the machine off'")
-     printcr("(to turn off these help messages, type 'help')")
+     printcr("(to turn off these help messages, type 'help 1')")
 
 ENDVERB
 

@@ -1,6 +1,6 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018 Marnix van den Bos.                   */
+/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
 /*                                                                      */
 /* <marnix.home@gmail.com>                                              */
 /*                                                                      */
@@ -41,23 +41,72 @@
 /* to abort the program.                           */
 /***************************************************/
 
-
 /*************************/
 /* Function declarations */
 /*************************/
 
+char    *CreateLocObjeJson(int32_t);
 char    *CreateJsonObjectMap(void);
 int32_t CheckIFI(char*);
 int32_t XeqIFIrequest(int32_t, jsonValue*);
 int32_t ProcessJson(char*, char*);
 void    SendIFIerror(char*, char*);
 
-
 /************************/
 /* Function definitions */
 /************************/
 
-char *CreateJsonObjectMap()
+char *CreateLocObjJson(int32_t id)
+{
+  char      *loc_obj      = NULL;
+  char      *object_json  = NULL;
+  jsonValue value         = {NO_TYPE, NULL, 0, 0};
+
+  /* this function creates a json string with an         */
+  /* object or location: {"id":<value>, "name":<string>} */
+
+  if ( (object_json = NewJsonObject(object_json)) == NULL ) {
+     return(NULL);
+  }
+
+  /* add the id */
+  value.type       = JSON_VAL_INT;
+  value.int_number = id;
+
+  if ( (object_json = AddKV(object_json, "id", &value)) == NULL ) {
+   return(NULL);
+  }
+
+  /* add the name            */
+  /* 1 means add the article */
+  if ( (loc_obj = GetId(id, 1)) == NULL ) {
+    return(NULL);
+  }
+
+  value.type       = JSON_VAL_STRING;
+  value.textstring = ResetString(value.textstring);
+  value.textstring = AddToString(value.textstring, loc_obj);
+
+  loc_obj = ResetString(loc_obj);
+
+  if ( (object_json = AddKV(object_json, "name", &value)) == NULL ) {
+    value.textstring = ResetString(value.textstring);
+    free(loc_obj);
+    return(NULL);
+  }
+
+  if ( (object_json = CloseObject(object_json)) == NULL ) {
+    value.textstring = ResetString(value.textstring);
+    free(loc_obj);
+    return(NULL);
+  }
+
+  free(loc_obj);
+  return(object_json);
+}
+
+
+char *CreateJsonObjectMap(void)
 {
   int       i             = 0;
   int       j             = 0;
@@ -65,7 +114,6 @@ char *CreateJsonObjectMap()
   int       end_value     = 0;
   char      *object_json  = NULL;
   char      *object_array = NULL;
-  char      *loc_obj      = NULL;
   jsonValue value;
 
   /* NOTE: we do locations and objects */
@@ -90,48 +138,23 @@ char *CreateJsonObjectMap()
   end_value   = FIRST_LOCATION_ID + nr_of_locs-1;
 
   for (j=0; j<=1; j++) {
-    for (i=start_value; i<end_value; i++) {
-      if ( (object_json = NewJsonObject(object_json)) == NULL ) {
-        return(NULL);
+    for (i=start_value; i<=end_value; i++) {
+      object_json = CreateLocObjJson(i);
+
+      /* if NULL then just skip this object  */
+      /* there may have been a dynamic d_sys */
+      /* error or so                         */
+
+      if (object_json != NULL) {
+        /* now add the object_json to the array */
+        value.type       = JSON_VAL_OBJECT;
+        value.textstring = object_json;
+
+        if ( (object_array = AddKV(object_array, NULL, &value)) == NULL ) {
+          value.textstring = ResetString(value.textstring);
+           return(NULL);
+        }
       }
-
-      /* add the id */
-      value.type       = JSON_VAL_INT;
-      value.int_number = i;
-
-      if ( (object_json = AddKV(object_json, "id", &value)) == NULL ) {
-       return(NULL);
-      }
-
-      /* add the name            */
-      /* 1 means add the article */
-      if ( (loc_obj = GetId(i, 1)) == NULL ) {
-        return(NULL);
-      }
-      value.type       = JSON_VAL_STRING;
-      value.textstring = AddToString(value.textstring, loc_obj);
-
-      loc_obj = ResetString(loc_obj);
-
-      if ( (object_json = AddKV(object_json, "name", &value)) == NULL ) {
-        value.textstring = ResetString(value.textstring);
-        return(NULL);
-      }
-
-      if ( (object_json = CloseObject(object_json)) == NULL ) {
-        value.textstring = ResetString(value.textstring);
-        return(NULL);
-      }
-
-      /* now add the object_json  to the array          */
-      value.type = JSON_VAL_OBJECT;
-      value.textstring = object_json;
-
-      if ( (object_array = AddKV(object_array, NULL, &value)) == NULL ) {
-        value.textstring = ResetString(value.textstring);
-        return(NULL);
-      }
-
       object_json      = NULL;
       value.textstring = ResetString(value.textstring);
     }
@@ -170,8 +193,7 @@ char *CreateJsonObjectMap()
 }
 
 
-int32_t CheckIFI(request)
- char *request;
+int32_t CheckIFI(char *request)
 {
   /* request labels must be in lowercase */
 
@@ -185,15 +207,17 @@ int32_t CheckIFI(request)
     return(IFI_REQ_ITEMS);
   if (strcmp(request, "loaddata") == 0)
     return(IFI_REQ_LOADDATA);
-  //if (strcmp(request, "location") == 0) return(IFI_REQ_LOCATION);
+/*  if (strcmp(request, "location") == 0) */
+/*    return(IFI_REQ_LOCATION); */
   if (strcmp(request, "map") == 0)
     return(IFI_REQ_MAP);
   if (strcmp(request, "meta") == 0)
     return(IFI_REQ_META);
   if (strcmp(request, "moves") == 0)
     return(IFI_REQ_MOVES);
-  if (strcmp(request, "objects") == 0)
+  if (strcmp(request, "objects") == 0) {
     return(IFI_REQ_OBJECTS);
+  }
   if (strcmp(request, "picture") == 0)
     return(IFI_REQ_PICTURE);
   if (strcmp(request, "savedata") == 0)
@@ -210,9 +234,7 @@ int32_t CheckIFI(request)
 }
 
 
-int32_t XeqIFIrequest(request, value)
- int32_t   request;
- jsonValue *value;
+int32_t XeqIFIrequest(int32_t request, jsonValue *value)
 {
   int32_t   result        = 1;
   jsonValue val;
@@ -233,6 +255,7 @@ int32_t XeqIFIrequest(request, value)
       /* copy it to interpreter_input, because Play()   */
       /* needs a char[] an not a malloced array.        */
       /* otherwise MoreInfo() calls will go wrong       */
+
       strcpy(interpreter_input, value->textstring);
       result = Play(interpreter_input);
       break;
@@ -284,7 +307,7 @@ int32_t XeqIFIrequest(request, value)
         Play(interpreter_input);
       }
       break;
-#endif      
+#endif
     case IFI_REQ_MAP:
       /* if true we must send map updates */
       ifi_stats.map = (value->type == JSON_VAL_TRUE ? 1 : 0);
@@ -458,11 +481,10 @@ int32_t XeqIFIrequest(request, value)
       break;
 
     case IFI_REQ_OBJECTS:
-      if ( (json_string = CreateJsonObjectMap()) == NULL ) {
-        /* do nothing */
+      if ( (json_string = CreateJsonObjectMap()) != NULL ) {
+        ifi_emitResponse(json_string);
+        free(json_string);
       }
-      ifi_emitResponse(json_string);
-      free(json_string);
       break;
 
     case IFI_REQ_PICTURE:
@@ -471,7 +493,6 @@ int32_t XeqIFIrequest(request, value)
       break;
     case IFI_REQ_SAVEDATA:
       /* we must now send the game state to the front-end  */
-
       /* we have a nested json object here that is always     */
       /* the same, so we will build it using string functions */
       if ( (json_string = AddToString(json_string, "{\"savedata\":{\"data\":\"")) == NULL) {
@@ -531,9 +552,7 @@ int32_t XeqIFIrequest(request, value)
 }
 
 
-int32_t ProcessJson(json_string, line_buf)
- char      *json_string;
- char      *line_buf;
+int32_t ProcessJson(char *json_string, char *line_buf)
 {
   kvPair    kv;
   int       index         = 0;
@@ -589,9 +608,7 @@ int32_t ProcessJson(json_string, line_buf)
 }
 
 
-void SendIFIerror(key, error_text)
- char *key;
- char *error_text;
+void SendIFIerror(char *key, char *error_text)
 {
   /* send the error as a json object */
   printf("{\"%s\" : \"%s\"}", key, error_text);

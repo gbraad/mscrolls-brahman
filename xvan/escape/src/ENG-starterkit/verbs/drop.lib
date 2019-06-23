@@ -1,5 +1,5 @@
 
-$VERB drop SYNONYM put
+$VERB drop
  PROLOGUE
    if not(testflag(o_actor.f_alive)) then
      if trigger(o_actor.t_talk_to_dead) then
@@ -50,7 +50,7 @@ $VERB drop SYNONYM put
    if owns(o_actor, o_subject) then
      clearflag(o_subject.f_bypass)
      move(o_subject, owner(owner(o_subject)))
-     printcr("dropped.")
+     printcr("[o_subject]: dropped.")
    else
      if testflag(o_subject.f_takeable) then
        printcr("[the] [o_actor] [o_actor.r_is] not holding the [o_subject].")
@@ -62,10 +62,11 @@ $VERB drop SYNONYM put
     if owns(o_actor, o_subject) then score(5) endif
     if testflag(o_subject.f_takeable) then score(5) endif  # make o_nst loose
     if not(owns(o_actor, o_spec)) then score(5) endif
-    if testflag(o_spec.f_container) then score(5) endif
+    if testflag(o_spec.f_container) and equal(%prepos, in) then score(5) endif
+    if testflag(o_spec.f_supporter) and equal(%prepos, on) then score(5) endif
    END_RULES
 
-   printcr("[the] [o_actor] cannot drop [the] [o_subject] [prepos] [the] [o_spec].")
+   if try(l_location, 0, 1, "put [o_subject] [prepos] [o_spec]") then endif
 
  DEFAULT
    printcr("I only understood you as far as willing to drop something.")

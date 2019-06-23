@@ -1,6 +1,6 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018 Marnix van den Bos.                   */
+/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
 /*                                                                      */
 /* <marnix.home@gmail.com>                                              */
 /*                                                                      */
@@ -35,7 +35,6 @@
 #include "ENG-errors.h"
 #include "NL-errors.h"
 
-
 /*************************/
 /* Function declarations */
 /*************************/
@@ -46,17 +45,14 @@ void  TypeErr(int32_t, char*, char*);
 char  *TranslateKeyword(char*);
 char  *ScanKeywordTable(char*, int32_t, int32_t);
 
-
 /************************/
 /* Function definitions */
 /************************/
 
-void PrintError(err_num, par1, par2)
- int16_t      err_num;
- resultStruct *par1;
- char         *par2;
+void PrintError(int16_t err_num, resultStruct *par1, char *par2)
 {
   const char **errors;
+  char       text_to_print[OUTPUT_LINE_LEN];
 
   /* set the error set for the language */
 
@@ -72,26 +68,32 @@ void PrintError(err_num, par1, par2)
       errors = ENG_errors;
   }
 
-  sprintf(outputline, "%s", errors[err_num]);
-  Output(outputline, 0);
+  /* flush the outputline */
+  Output();
+
+  sprintf(text_to_print, "%s", errors[err_num]);
+  PrintString(text_to_print, 0);
+
 
   if (par1 != NULL) {
     if (par1->tag != NONE) {
-      sprintf(outputline, " %d", par1->value);
-      Output(outputline, 0);
+      sprintf(text_to_print, " %d", par1->value);
+      PrintString(text_to_print, 0);
+      Output();
     }
   }
 
   if (par2 != NULL) {
-    sprintf(outputline, " %s", par2);
-    Output(outputline, 0);
+    sprintf(text_to_print, " %s", par2);
+    PrintString(text_to_print, 0);
+    Output();
   }
-  Output(".\n", 0);
+  PrintString(".\n", 0);
+  Output();
 }
 
-void NrErr(fun_name, nr_of_pars)
- char *fun_name;
- char *nr_of_pars;
+
+void NrErr(char *fun_name, char *nr_of_pars)
 {
   switch (story_info.story_language) {
     case ENG:
@@ -109,42 +111,41 @@ void NrErr(fun_name, nr_of_pars)
 }
 
 
-void TypeErr(par_nr, fun_name, type)
- int32_t  par_nr;
- char *fun_name;
- char *type;
+void TypeErr(int32_t par_nr, char *fun_name, char *type)
 {
+  char text_to_print[OUTPUT_LINE_LEN];
+
   switch (story_info.story_language) {
     case ENG:
-      sprintf(outputline, "\nError, parameter %d for function %s must have type %s\n",
+      sprintf(text_to_print, "\nError, parameter %d for function %s must have type %s\n",
               par_nr, TranslateKeyword(fun_name), TranslateKeyword(type));
-      Output(outputline, 0);
+      PrintString(text_to_print, 0);
+      Output();
       break;
     case NL:
-      printf(outputline, "\nFoutmelding, parameter %d van functie %s moet van type %s zijn.n",
+      sprintf(text_to_print, "\nFoutmelding, parameter %d van functie %s moet van type %s zijn.n",
               par_nr, TranslateKeyword(fun_name), TranslateKeyword(type));
-      Output(outputline, 0);
+      PrintString(text_to_print, 0);
+      Output();
       break;
     default:
       /* we should never get here, use English */
-      printf(outputline, "\nError, parameter %d for function %s must have type %s\n",
+      sprintf(text_to_print, "\nError, parameter %d for function %s must have type %s\n",
               par_nr, TranslateKeyword(fun_name), TranslateKeyword(type));
-      Output(outputline, 0);
+      PrintString(text_to_print, 0);
+      Output();
   }
 }
 
 
-char *TranslateKeyword(word)
- char *word;
+char *TranslateKeyword(char *word)
 {
   return(ScanKeywordTable(word, 0, sizeof(kw_table)/sizeof(kwTable)-1));
 }
 
 
-char *ScanKeywordTable(word, lower, upper)
- char      *word;    /* word to look for in word_table */
- int32_t   lower;    /* elements of array between      */
- int32_t   upper;    /* which to search                */
+char *ScanKeywordTable(char *word, int32_t lower, int32_t upper)
+ /* word is word to look for in word_table */
 {
   int32_t i;
   int32_t result;

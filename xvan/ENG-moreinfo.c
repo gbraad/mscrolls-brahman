@@ -1,6 +1,6 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018 Marnix van den Bos.                   */
+/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
 /*                                                                      */
 /* <marnix.home@gmail.com>                                              */
 /*                                                                      */
@@ -29,8 +29,8 @@
 #include "keyword.h"
 #include "typedefs.h"
 #include "trnslate.h"
-#include "ENG-moreinfo.h"
 
+#include "ENG-moreinfo.h"
 
 /*************************/
 /* Function declarations */
@@ -39,15 +39,11 @@
 void ENG_MoreInfo(extendedSysDescr*, match*, char*);
 void ENG_PrintNotFound(extendedSysDescr*);
 
-
 /************************/
 /* Function definitions */
 /************************/
 
-void ENG_MoreInfo(descr, hits, line_buf)
- extendedSysDescr *descr;
- match            *hits;
- char             *line_buf;
+void ENG_MoreInfo(extendedSysDescr *descr, match *hits, char *line_buf)
 {
   extendedSysDescr *sd;
   int32_t      i =0;
@@ -56,25 +52,25 @@ void ENG_MoreInfo(descr, hits, line_buf)
   capital = 0;
 
   if ((descr->part1).noun == NO_ID) {
-    sprintf(outputline, "What");
-    Output(outputline, 0);
+    PrintString("What", 0);
+    Output();
   }
   else {
-    sprintf(outputline, "Which ");
-    Output(outputline, 0);
+    PrintString("Which ", 0);
+    Output();
     PrintExtendedSysDescr(descr, 0);
   }
-  sprintf(outputline, " do you mean?\nThe ");
-  Output(outputline, 0);
+  PrintString(" do you mean?\nThe ", 0);
+  Output();
 
   for (i=0; i<hits->nr_of_hits; i++) {
     if (i != 0 && i != hits->nr_of_hits-1) {
-      sprintf(outputline, ", the ");
-      Output(outputline, 0);
+      PrintString(", the ", 0);
+      Output();
     }
     else if (i == hits->nr_of_hits-1) {
-      sprintf(outputline, " or the ");
-      Output(outputline, 0);
+      PrintString(" or the ", 0);
+      Output();
     }
     if (IsLocId(hits->matched_objs[i]))
       sd = loc_dir[hits->matched_objs[i]-FIRST_LOCATION_ID].descr;
@@ -84,15 +80,14 @@ void ENG_MoreInfo(descr, hits, line_buf)
     PrintExtendedSysDescr(sd, 0);
   }
 
-  sprintf(outputline, "?\n");
-  Output(outputline, 0);
+  PrintString("?\n", 0);
+  Output();
 
-  GetAddtlInput(line_buf, "> ");
+  GetAddtlInput(line_buf, prompt);
 }
 
 
-void ENG_PrintNotFound(descr)
- extendedSysDescr *descr;
+void ENG_PrintNotFound(extendedSysDescr *descr)
 {
   if (actor == PLAYER) {
     PrintString("You don't ", 0);
@@ -102,4 +97,5 @@ void ENG_PrintNotFound(descr)
     PrintString(" doesn't ", 0);
   }
   PrintString("see that here.\n", 0);
+  Output();
 }

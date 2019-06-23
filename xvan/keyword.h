@@ -1,6 +1,6 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018 Marnix van den Bos.                   */
+/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
 /*                                                                      */
 /* <marnix.home@gmail.com>                                              */
 /*                                                                      */
@@ -41,6 +41,7 @@
 #define MAX_FILENAME_LEN     100 /* must be the same as input_line_len */
 #define MAX_COMPILER_LEN     100 /* must be the same as input_line_len */
 #define MAX_TRIGG_LEN       1000
+#define MAX_PROMPT_LEN        10
 #define INPUT_LINE_LEN       100 /* for interpreter 08mrt2018:     */
                                  /* changed to 100 for IFI-version */
 #define OUTPUT_LINE_LEN       79 /* for interpreter                */
@@ -121,226 +122,229 @@
 /* keywords that are used in the inputfile */
 /*******************************************/
 
-#define LOWER_BOUND_TESTFUN         30
-#define CANSEE           31
-#define OWNS             32
-#define ISLIT            33
-#define TESTFLAG         34
-#define EQUAL            35
-#define LESS_THAN        36
-#define GREATER_THAN     37
-#define VALID_DIRECTION  38
-#define EXIT             39
-#define TRIGGER          40
-#define YES_NO           41
-#define RUNVERB          42
-#define RUNCOMMON        43
-#define TRY              44
-#define ISOBJECT         45
-#define UPPER_BOUND_TESTFUN         50
+#define LOWER_BOUND_TESTFUN         100
+#define CANSEE           101
+#define OWNS             102
+#define ISLIT            103
+#define TESTFLAG         104
+#define EQUAL            105
+#define LESS_THAN        106
+#define GREATER_THAN     107
+#define VALID_DIRECTION  108
+#define EXIT             109
+#define TRIGGER          110
+#define YES_NO           111
+#define RUNVERB          112
+#define RUNCOMMON        113
+#define TRY              114
+#define ISOBJECT         115
+#define UPPER_BOUND_TESTFUN         200
 
-#define LOWER_BOUND_INT_ACT	        51
-#define MOVE            52
-#define OWNER           53
-#define PRINT           54
-#define PRINTBOLD       55
-#define PRINTITALIC     56
-#define PRINTCR         57
-#define PRINTCRBOLD     58
-#define PRINTCRITALIC   59
-#define SETFLAG         60
-#define CLEARFLAG       61
-#define SETATTRIBUTE    62
-#define SETTIMER        63
-#define STARTTIMER      64
-#define STOPTIMER       65
-#define WAIT            66
-#define SYNCHRONIZE     67
-#define AGREE           68
-#define DISAGREE        69
-#define NOMATCH         70  /* Has return value NO_MATCH. */
-#define INDENT          71
-#define QUIT            72
-#define ENTRANCE        73
-#define CONTENTS        74
-#define NEW_EXIT        75
-#define BLOCK_EXIT      76
-#define GET_SUBJECT     77
-#define GET_SPECIFIER   78
-#define GO_TO           79
-#define SAVE			80  /* Dec 20 07: For save() function    */
-#define RESTORE			81  /* Dec 20 07: For restore() function */
-#define ADD             82
-#define EQ_ADD          83
-#define SUB             84
-#define EQ_SUB          85
-#define ASTERIX         86
-#define EQ_MUL          87
-#define QUOT            88
-#define REM             89
-#define RAND            90
-#define BACKGROUND      91
-#define TEXT            92
-#define BOLD            93
-#define ITALIC          94
-#define UNDERLINE       95
-#define TRANSCRIPT      96
-#define TESTMODE        97
-#define DEBUG           98
-#define DISTANCE        99
-#define FIRSTDIR       100
-#define DEST           101
-#define SHUFFLE        102
-#define COUNT          103
-#define PRINTSTATUS    104
-#define PRINTCRSTATUS  105
-#define SETCURSOR      106
-#define CLEARSTATUS    107
-#define CLEARSCREEN    108
-#define HITANYKEY      109
-#define SCORE          110
-#define CLEARJSON      111
-#define ADDJSON        112
-#define SENDJSON       113
-#define NOTIMERS       114
-#define RESTART        115
-#define UPPER_BOUND_INT_ACT         116
+#define LOWER_BOUND_INT_ACT	    201
+#define MOVE            202
+#define OWNER           203
+#define PRINT           204
+#define PRINTBOLD       205
+#define PRINTITALIC     206
+#define PRINTCR         207
+#define PRINTCRBOLD     208
+#define PRINTCRITALIC   209
+#define SETFLAG         210
+#define CLEARFLAG       211
+#define SETATTRIBUTE    212
+#define SETTIMER        213
+#define STARTTIMER      214
+#define STOPTIMER       215
+#define WAIT            216
+#define SYNCHRONIZE     217
+#define AGREE           218
+#define DISAGREE        219
+#define NOMATCH         220  /* Has return value NO_MATCH. */
+#define INDENT          221
+#define QUIT            222
+#define ENTRANCE        223
+#define CONTENTS        224
+#define NEW_EXIT        225
+#define BLOCK_EXIT      226
+#define GET_SUBJECT     227
+#define GET_SPECIFIER   228
+#define GO_TO           229
+#define SAVE		    230  /* Dec 20 07: For save() function    */
+#define RESTORE		    231  /* Dec 20 07: For restore() function */
+#define ADD             232
+#define EQ_ADD          233
+#define SUB             234
+#define EQ_SUB          235
+#define ASTERIX         236
+#define EQ_MUL          237
+#define QUOT            238
+#define REM             239
+#define RAND            240
+#define BACKGROUND      241
+#define TEXT            242
+#define BOLD            243
+#define ITALIC          244
+#define UNDERLINE       245
+#define TRANSCRIPT      246
+#define TESTMODE        247
+#define DEBUG           248
+#define DISTANCE        249
+#define FIRSTDIR        250
+#define DEST            251
+#define SHUFFLE         252
+#define COUNT           253
+#define PRINTSTATUS     254
+#define PRINTCRSTATUS   255
+#define SETCURSOR       256
+#define CLEARSTATUS     257
+#define CLEARSCREEN     258
+#define HITANYKEY       259
+#define SCORE           260
+#define CLEARJSON       261
+#define ADDJSON         262
+#define SENDJSON        263
+#define NOTIMERS        264
+#define RESTART         265
+#define PICKONE         266
+#define NEWDSYS         267
+#define UPPER_BOUND_INT_ACT         400
 
-#define LOWER_BOUND_SPECIAL_CHAR    117
-#define LEFT_PAR        118
-#define RIGHT_PAR       119
-#define EQUAL_SIGN		120
-#define PLUS			121
-#define MINUS			122
-#define COMMA			123
-#define DOT             124
-#define PAR_DELIMITER   125
-#define UPPER_BOUND_SPECIAL_CHAR     126
+#define LOWER_BOUND_SPECIAL_CHAR    401
+#define LEFT_PAR        402
+#define RIGHT_PAR       403
+#define EQUAL_SIGN	    404
+#define PLUS		    405
+#define MINUS		    406
+#define COMMA		    407
+#define DOT             408
+#define PAR_DELIMITER   409
+#define UPPER_BOUND_SPECIAL_CHAR     500
 
-#define LOWER_BOUND_COMPILER_KEYWORD 127
-#define MIN_VALID_COMPILER_KEYWORD 128  /* 4sep2017 for detecting errors */
-#define LOCATION          128
-#define OBJECT            129
-#define TIMERS            130
-#define END_OBJ           131
-#define END_LOC           132
-#define COMMON_DESCRS     133
-#define COMMON_FLAGS      134
-#define COMMON_ATTRS      135
-#define COMMON_TRIGGERS   136
-#define REDEFINE_TRIGGERS 137
-#define REDEFINE_FLAGS    138
-#define REDEFINE_ATTRS 139
-#define STORY_INFO        140
-#define MAX_VALID_COMPILER_KEYWORD 140  /* 4sep2017 for detecting errors */
-#define EXITS           141
-#define AND             142
-#define OR              143
-#define NOT             144
-#define IF              145
-#define THEN            146
-#define ELSE            147
-#define ENDIF           148
-#define UP              149
-#define DOWN            150
-#define TITLE           151
-#define VERSION         152
-#define VOCAB           153
-#define DESCRIPTIONS    154
-#define CONTAINED       155
-#define ATTRIBUTES      156
-#define FLAGS           157
-#define TRIGGERS        158
-#define INIT            159 /* for timer's initial value */
-#define STEP            160
-#define INTERVAL        161
-#define DIRECTION       162 /* Used with timers. */
-#define STATE           163
-#define GO              164
-#define STOP            165
-#define TRIGGER_AT      166
-#define EXECUTE         167 /* Used with timers. */
-#define OR_MORE         168
-#define OR_LESS         169
-#define EXACT           170
-#define THIS            171
-#define NONE            172
-#define PREPOS          173
-#define DIR             174
-#define ARTICLE_A       175
-#define ARTICLE_THE     176
-#define ORDINAL         177 /* special sort of NUMBER e.g. 'take pebble 3' */
-#define FUNCTION        178
-#define DISAMBIG_RULES  179
-#define END_RULES       180
-#define LIBRARY         181 /* a library contains definitions that may be overwritten */
-#define INSERT          182 /* switch to a new inputfile */
-#define AUTHOR          183
-#define ORGANIZATION    184
-#define COVERTEXT       185
-#define CREDITS         186
-#define ANDROID_MARKET  187
-#define IOS_MARKET      188
-#define BACKIMAGE       189
-#define EFFECT          190
-#define NO_SIDEBAR      191
-#define NO_TEXTINPUT    192
-#define NO_COMPASS      193
-#define AUTOLINK        194
-#define UPPER_BOUND_COMPILER_KEYWORD 199
+#define LOWER_BOUND_COMPILER_KEYWORD 501
+#define MIN_VALID_COMPILER_KEYWORD 502  /* 4sep2017 for detecting errors */
+#define LOCATION          502
+#define OBJECT            503
+#define TIMERS            504
+#define END_OBJ           505
+#define END_LOC           506
+#define COMMON_DESCRS     507
+#define COMMON_FLAGS      508
+#define COMMON_ATTRS      509
+#define COMMON_TRIGGERS   510
+#define REDEFINE_TRIGGERS 511
+#define REDEFINE_FLAGS    512
+#define REDEFINE_ATTRS    513
+#define STORY_INFO        514
+#define MAX_VALID_COMPILER_KEYWORD 514  /* 4sep2017 for detecting errors */
+#define EXITS           515
+#define AND             516
+#define OR              517
+#define NOT             518
+#define IF              519
+#define THEN            520
+#define ELSE            521
+#define ENDIF           522
+#define UP              523
+#define DOWN            524
+#define TITLE           525
+#define VERSION         526
+#define VOCAB           527
+#define DESCRIPTIONS    528
+#define CONTAINED       529
+#define ATTRIBUTES      530
+#define FLAGS           531
+#define TRIGGERS        532
+#define INIT            533 /* for timer's initial value */
+#define STEP            534
+#define INTERVAL        535
+#define DIRECTION       536 /* Used with timers. */
+#define STATE           537
+#define GO              538
+#define STOP            539
+#define TRIGGER_AT      540
+#define EXECUTE         541 /* Used with timers. */
+#define OR_MORE         542
+#define OR_LESS         543
+#define EXACT           544
+#define THIS            545
+#define NONE            546
+#define PREPOS          547
+#define DIR             548
+#define ARTICLE_A       549
+#define ARTICLE_THE     550
+#define ORDINAL         551 /* special sort of NUMBER e.g. 'take pebble 3' */
+#define FUNCTION        552
+#define DISAMBIG_RULES  553
+#define END_RULES       554
+#define LIBRARY         555 /* a library contains definitions that may be overwritten */
+#define INSERT          556 /* switch to a new inputfile */
+#define AUTHOR          557
+#define ORGANIZATION    558
+#define COVERTEXT       559
+#define CREDITS         560
+#define ANDROID_MARKET  561
+#define IOS_MARKET      562
+#define BACKIMAGE       563
+#define EFFECT          564
+#define NO_SIDEBAR      565
+#define NO_TEXTINPUT    566
+#define NO_COMPASS      567
+#define AUTOLINK        568
+#define UPPER_BOUND_COMPILER_KEYWORD 700
 
 
 /**************************************************/
 /* Keywords that are used in the vocabulary file  */
 /**************************************************/
 
-#define LOWER_BOUND_VOC_KEYWORD      200
-#define MIN_VALID_VOC_KEYWORD        201  /* 4sep2017 for detecting errors */
-#define VERB                         201
-#define REDEFINE_VERB                202
-#define ENDVERB                      203
-#define NOUNS                        204
-#define ADJECTIVES                   205
-#define PREPOSITIONS                 206
-#define ADVERBS                      207
-#define Q_WORDS                      208  /* question words */
-#define DIRECTIONS                   209
-#define ARTICLES                     210
-#define CONJUNCTION                  211
-#define MAX_VALID_VOC_KEYWORD        211  /* 4sep2017 for detecting errors */
-#define CONNECT_PREPOSITIONS         212  /* for extended system description */
-#define SYNONYM                      213
-#define SCOPE                        214
-#define ACTOR_ONLY                   215
-#define CURR_LOC_ONLY                216
-#define ALL_LOCS                     217
-#define DEFAULT                      218
-#define PROLOGUE                     219
-#define EPILOGUE                     220
-#define UPPER_BOUND_VOC_KEYWORD      221
+#define LOWER_BOUND_VOC_KEYWORD      701
+#define MIN_VALID_VOC_KEYWORD        702  /* 4sep2017 for detecting errors */
+#define VERB                         702
+#define REDEFINE_VERB                703
+#define ENDVERB                      704
+#define NOUNS                        705
+#define ADJECTIVES                   706
+#define PREPOSITIONS                 707
+#define ADVERBS                      708
+#define Q_WORDS                      709  /* question words */
+#define DIRECTIONS                   710
+#define ARTICLES                     711
+#define CONJUNCTION                  712
+#define MAX_VALID_VOC_KEYWORD        713  /* 4sep2017 for detecting errors */
+#define CONNECT_PREPOSITIONS         714  /* for extended system description */
+#define SYNONYM                      715
+#define SCOPE                        716
+#define ACTOR_ONLY                   717
+#define CURR_LOC_ONLY                718
+#define ALL_LOCS                     719
+#define DEFAULT                      720
+#define PROLOGUE                     721
+#define EPILOGUE                     722
+#define UPPER_BOUND_VOC_KEYWORD      800
 
 /*************************************/
 /* keywords that are used internally */
 /* by the compiler and interpreter.  */
 /*************************************/
 
-#define XEQ                          321
-#define NO_XEQ                       322
-#define SKIP                         323
-#define END_OF_CODE                  324
-#define END_OF_PAR                   325
-#define MATCH                        326
-#define NO_MATCH                     327
-#define OVERFLOW                     328
-#define CONTINUE                     329
-#define GET_ANSWER                   330
-#define ANSWER                       331
-#define LINE                         332
+#define XEQ                          801
+#define NO_XEQ                       802
+#define SKIP                         803
+#define END_OF_CODE                  804
+#define END_OF_PAR                   805
+#define MATCH                        806
+#define NO_MATCH                     807
+#define OVERFLOW                     808
+#define CONTINUE                     809
+#define GET_ANSWER                   810
+#define ANSWER                       811
+#define LINE                         812
 #define SPACE                        ' '
-#define ACTOR_ERROR                  333 /* 03dec2016     */
-#define SUBJECT_ERROR                334 /* for translate */
-#define SPECIFIER_ERROR              335 /* errors        */
-#define NEXT_SENTENCE                336
+#define ACTOR_ERROR                  813 /* 03dec2016     */
+#define SUBJECT_ERROR                814 /* for translate */
+#define SPECIFIER_ERROR              815 /* errors        */
+#define NEXT_SENTENCE                816
+#define DYN_DSYS                     817 /* dynamic d_sys 10may2019 */
 
 
 /***********************************************/

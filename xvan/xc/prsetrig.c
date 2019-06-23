@@ -1,6 +1,6 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018 Marnix van den Bos.                   */
+/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
 /*                                                                      */
 /* <marnix.home@gmail.com>                                              */
 /*                                                                      */
@@ -47,6 +47,11 @@ int32_t  ParseThenElse(char**, int32_t*, int32_t, int32_t, int32_t, int32_t, FIL
 int32_t  ParseTriggers(char**, int32_t*, int32_t, FILE**, fileList**);
 int32_t  ParseCondString(int32_t*, int32_t, int32_t);
 
+
+/************************/
+/* function definitions */
+/************************/
+
 void PrintSource(source, len)
  int32_t *source;
  int32_t len;
@@ -58,6 +63,7 @@ void PrintSource(source, len)
     printf("%d ", source[i]);
   printf("\n*********************\n");
 }
+
 
 int32_t StringToNum(source, num)
  char *source;
@@ -95,6 +101,7 @@ int32_t StringToNum(source, num)
   return(OK);
 }
 
+
 int32_t ParseLeftBanana(target, index)
  int32_t *target;
  int32_t *index;
@@ -108,6 +115,7 @@ int32_t ParseLeftBanana(target, index)
   return (OK);
 }
 
+
 int32_t ParseRightBanana(target, index)
   int32_t *target;
   int32_t *index;
@@ -120,6 +128,7 @@ int32_t ParseRightBanana(target, index)
   target[(*index)++] = RIGHT_PAR;
   return (OK);
 }
+
 
 int32_t ParseBoolOp(target, index, op_code)
  int32_t *target;
@@ -460,7 +469,6 @@ int32_t ParseCTrigs(word, keyword, source, file_list)
 }
 
 
-
 int32_t ParseFlags(word, keyword, owner_id, source, file_list)
  char     **word;
  int32_t  *keyword;
@@ -571,6 +579,7 @@ int32_t ParseFlags(word, keyword, owner_id, source, file_list)
   } /* while */
 }
 
+
 int32_t ParseAttributes(word, keyword, owner_id, source, file_list)
  char     **word;
  int32_t  *keyword;
@@ -578,7 +587,6 @@ int32_t ParseAttributes(word, keyword, owner_id, source, file_list)
  FILE     **source;
  fileList **file_list;
 {
-
   /* Function ParseAttributes() added on July 2nd. It replaces  */
   /* ParseCAttributes() and ParseLAttributes(). Revised because */
   /* attributes are now prefixed with r_                        */
@@ -898,6 +906,7 @@ int32_t ParseAttributes(word, keyword, owner_id, source, file_list)
     } /* switch */
   } /* while */
 }
+
 
 int32_t ParseCondString(source, len, leading_not)
  int32_t *source;
@@ -1309,6 +1318,7 @@ int32_t ParseIf(word, keyword, owner_id, disambig, verb, com_trig, source, file_
     return (ParseCondString(right_part, right_index, 0));
 }
 
+
 int32_t ParseThenElse(word, keyword, owner_id, disambig, verb, com_trig, source, file_list)
  char     **word;
  int32_t  *keyword;
@@ -1378,7 +1388,6 @@ int32_t ParseThenElse(word, keyword, owner_id, disambig, verb, com_trig, source,
           case 4:       /* june 1 2016, moved up from next case statement  */
             return(OK);
           case 3:
-/*          case 4: */ /* june 1 2016, moved to previous case statement */
             state = 2;
             break;
           default:
@@ -1559,6 +1568,7 @@ int32_t ParseThenElse(word, keyword, owner_id, disambig, verb, com_trig, source,
   } /* while */
 }
 
+
 int32_t ParseIfThenElse(word, keyword, owner_id, disambig, verb, com_trig, source, file_list)
  char     **word;   /* *word will be "IF" */
  int32_t  *keyword;
@@ -1649,6 +1659,7 @@ int32_t ParseIfThenElse(word, keyword, owner_id, disambig, verb, com_trig, sourc
     } /* switch */
   } /* while */
 }
+
 
 int32_t ParseTriggers(word, keyword, owner_id, source, file_list)
  char     **word;
@@ -1979,4 +1990,3 @@ int32_t ParseTriggers(word, keyword, owner_id, source, file_list)
     } /* switch */
   } /* while */
 }
-

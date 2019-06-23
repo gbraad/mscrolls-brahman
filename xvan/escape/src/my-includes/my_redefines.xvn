@@ -1,49 +1,46 @@
 
-$REDEFINE_VERB is
- SCOPE all_locs
+$REDEFINE_TRIGGERS
 
- "where is [o_subject]"
-   DISAMBIGUATION_RULES
-    if equal(o_subject, o_nst) then score(-10) endif  # make nst always lose
-    if isobject(o_subject) then
-      if owns(l_exit, o_subject) then
-        if owns(l_exit, o_player) then 
-          score(5)
-        else
-          score(-5)          
-   END_RULES
+t_entrance
+  if not(islit(o_player)) then
+    printcr("It is pitch black.")
+    disagree()
+  endif
 
-   if cansee(o_actor, o_subject) then
-     printcr("Right here!")
-     disagree()
-   endif
+  # part for location
+  if equal(%this, l_location) then
+    printcrbold(%this)
+    if not(testflag(%this.f_seenbefore)) or testflag(o_player.f_verbose) then
+      print(%this.d_entr_long)
+      setflag(f_seenbefore)
+    else
+      print(%this.d_entr_short)
+    endif
+    agree()
+  endif
+  # part for objects
+  if cansee(o_player, %this) then
+    if equal(owner(%this), owner(o_player)) then
+      # same containment level
+      if testflag(%this.f_seenbefore) then
+        print(%this.d_entr_short)
+      else
+        print(%this.d_entr_long)
+        setflag(%this.f_seenbefore)
+    else
+      if not(owns(o_player, %this, 0)) and not(owns(o_npc, %this, 0)) then
+        print("\n[this.r_preposition] [the] ")
+        print(owner(%this))
+        printcr(" is [a] [this].")
+      endif
+    endif
+    setflag(%this.f_seenbefore)
+  endif
+  agree()
 
-   if not(isobject(o_subject)) then
-     printcr("You've been to [the] [o_subject], so it is somewhere on the map /
-              that you must have drawn.")
-     disagree()
-   endif
+t_ask
+  printcr(%this.d_ask)
 
-   if testflag(o_subject.f_seenbefore) then
-     if testflag(o_subject.f_alive) then
-       printcr("[the] [o_subject] is a living creature. Could have gone /
-                anywhere since your last encounter.")
-     else
-       print("[the] [o_subject] is [o_subject.r_preposition] [the]")
-       print(owner(o_subject))
-       printcr(".")
-   else
-     printcr("You haven't found that yet.")
-
- DEFAULT
-   printcr("I didn't understand that sentence.")
-   if testflag(o_player.f_verb_help) then
-     printcr("")
-     Printcr("An examples of the syntax I understand is:")
-     printcr("  'where is the ball'")
-     printcr("(to turn off these help messages, type 'help')")
-
-ENDVERB
 
 $REDEFINE_VERB goto
  SCOPE ALL_LOCS
@@ -56,16 +53,22 @@ $REDEFINE_VERB goto
      agree()
    else
      if isobject(o_subject) then
-       printcr("Goto can only be used with locations.")
+       if equal(o_subject, o_nst) then
+         printcr("I don't know any such location.")
+       else
+         printcr("Goto can only be used with locations.")
+       endif
        disagree()
+     else
+       if not(testflag(o_subject.f_seenbefore)) then
+         printcr("At this point in the game I have no recollection /
+                  of that location.")
+         disagree()
 
  "goto [o_subject]"
    DISAMBIGUATION_RULES
-    if equal(o_subject, o_nst) then score(-10) endif  # make nst always lose
-    if not(isobject(o_subject)) then
-      score(10)
-    else
-      if owns(l_exit, o_subject) then
+    if testflag(o_subject.f_seenbefore) then score(5) endif
+     if owns(l_exit, o_subject) then
         if owns(l_exit, o_player) then 
           score(5)
         else
@@ -80,3 +83,4 @@ $REDEFINE_VERB goto
    printcr("I only understood you as far as willing to go somewehere.")
 
 ENDVERB
+

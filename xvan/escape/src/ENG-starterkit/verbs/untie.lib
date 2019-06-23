@@ -16,10 +16,10 @@ $VERB untie
    getsubject()
 
  "untie [o_subject]"
-   printcr("[o_actor] can't untie [the] [o_subject].")
+   printcr("[the] [o_actor] can't untie [the] [o_subject].")
 
  "untie [o_subject] from [o_spec]"
-   printcr("[o_actor] can't untie [the] [o_subject] from [the] [o_spec].")
+   printcr("[the] [o_actor] can't untie [the] [o_subject] from [the] [o_spec].")
 
  DEFAULT
    printcr("I only understood you as far as wanting to untie something.")
@@ -29,7 +29,7 @@ $VERB untie
        printcr("  'untie'")
        printcr("  'untie the rope'")
        printcr("  'untie the rope from the hook'")
-       printcr("(to turn off these help messages, type 'help')")
+       printcr("(to turn off these help messages, type 'help 1')")
 
 ENDVERB
 

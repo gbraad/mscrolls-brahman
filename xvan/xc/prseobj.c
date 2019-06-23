@@ -1,6 +1,6 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018 Marnix van den Bos.                   */
+/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
 /*                                                                      */
 /* <marnix.home@gmail.com>                                              */
 /*                                                                      */
@@ -32,16 +32,15 @@
 /* function declarations */
 /*************************/
 
-
 int32_t PContIn(char**, int32_t*, int32_t, FILE**, fileList**);
 int32_t ParseObj(int64_t, FILE**, fileList**);
 
-int32_t PContIn(word, keyword, owner, source, file_list)
- char     **word;
- int32_t  *keyword;
- int32_t  owner;
- FILE     **source;
- fileList **file_list;
+
+/************************/
+/* function definitions */
+/************************/
+
+int32_t PContIn(char **word, int32_t *keyword, int32_t owner, FILE **source, fileList **file_list)
 {
   int32_t state = 1;
   int32_t id;         /* used to convert object id or location id */
@@ -147,10 +146,7 @@ int32_t PContIn(word, keyword, owner, source, file_list)
 }
 
 
-int32_t ParseObj(offset, source, file_list)
- int64_t  offset; /* object's position in datafile */
- FILE     **source;
- fileList **file_list;
+int32_t ParseObj(int64_t offset, FILE **source, fileList **file_list)
 {
   char    **word = (char **) malloc(sizeof(char *));
   int32_t keyword;

@@ -1,6 +1,6 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018 Marnix van den Bos.                   */
+/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
 /*                                                                      */
 /* <marnix.home@gmail.com>                                              */
 /*                                                                      */
@@ -58,16 +58,15 @@ extern void         PrintError(int16_t, resultStruct*, char*);                  
 extern int32_t      InMem(int32_t);                                                   /* fileio.c   */
 extern int32_t      Load(int32_t);                                                    /* fileio.c   */
 extern void         SkipFun(int32_t**);                                               /* sysfunc.c  */
-extern int32_t      LookUpId(char*);                                                  /* syntax.c   */
-extern int32_t      Exit(int32_t, usrActionRec*, int32_t);                            /* sysfunc.c  */
-extern int32_t      Entrance(int32_t, usrActionRec*, int32_t);                        /* sysfunc.c  */
-extern int32_t      Move(int32_t, int32_t);                                           /* sysfunc.c  */
-extern int32_t      XeqTestFun(int32_t, int32_t**, usrActionRec*, int32_t, int32_t*); /* xeqfun.c   */
-extern int32_t      XeqIntAct(int32_t, int32_t**, usrActionRec*, int32_t);            /* xeqfun.c   */
-extern void         SkipIntAct(int32_t**);                                            /* xeqfun.c   */
-extern void         PrintId(int32_t, int);                                            /* output.c   */
-extern int32_t      GetAttributeInfo(int32_t, int32_t, attrInfo**, int32_t*);         /* sysfunc.h  */
-
+extern int32_t      LookUpId(char*);                                                  /* syntax.c  */
+extern int32_t      Exit(int32_t, usrActionRec*, int32_t);                            /* sysfunc.c */
+extern int32_t      Entrance(int32_t, usrActionRec*, int32_t);                        /* sysfunc.c */
+extern int32_t      Move(int32_t, int32_t);                                           /* sysfunc.c */
+extern int32_t      XeqTestFun(int32_t, int32_t**, usrActionRec*, int32_t, int32_t*); /* xeqfun.c  */
+extern resultStruct XeqIntAct(int32_t, int32_t**, usrActionRec*, int32_t);            /* xeqfun.c  */
+extern void         SkipIntAct(int32_t**);                                            /* xeqfun.c  */
+extern void         PrintId(int32_t);                                                 /* output.c  */
+extern int32_t      GetAttributeInfo(int32_t, int32_t, attrInfo**, int32_t*);         /* sysfunc.h */
 
 /***********************************/
 /* System function implementations */
@@ -79,5 +78,14 @@ extern int32_t      Pop(void);                                                  
 extern void         And(void);                                                        /* sysfunc.c */
 extern void         Or(void);                                                         /* sysfunc.c */
 extern void         Not(void);                                                        /* sysfunc.c */
+
+/* debug stuff */
+extern short        debug_info;                                                       /* init.c */
+extern short        debug_level;                                                      /* init.c */
+extern void         PrintString(char*);
+extern void         Output(void);
+
+extern void         DebugLevel_1(short, char*, int32_t, int32_t, resultStruct);
+extern void         IncreaseDebugIndent(int);
 
 #endif

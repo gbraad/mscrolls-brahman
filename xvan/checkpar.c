@@ -1,6 +1,6 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018 Marnix van den Bos.                   */
+/* Copyright (c) 2016, 2017, 2018 , 2019 Marnix van den Bos.            */
 /*                                                                      */
 /* <marnix.home@gmail.com>                                              */
 /*                                                                      */
@@ -43,18 +43,11 @@
 
 int32_t CheckPars(int32_t, int32_t, int32_t, int32_t, int32_t, int32_t);
 
-
 /*************************/
 /* Function definitions  */
 /*************************/
 
-int32_t CheckPars(fun_code, type1, type2, type3, type4, type5)
- int32_t fun_code;
- int32_t type1;
- int32_t type2;
- int32_t type3;
- int32_t type4;
- int32_t type5;
+int32_t CheckPars(int32_t fun_code, int32_t type1, int32_t type2, int32_t type3, int32_t type4, int32_t type5)
 {
   switch (fun_code) {
     /**************************************************/
@@ -72,6 +65,18 @@ int32_t CheckPars(fun_code, type1, type2, type3, type4, type5)
       }
       if (type2 != LOC_ID && type2 != OBJ_ID) {
         TypeErr(1, "CANSEE", "location or object id");
+        return(ERROR);
+      }
+      return(OK);
+      break;
+
+    case DEBUG:
+      /****************/
+      /* debug(value) */
+      /****************/
+
+      if (type1 != NUMBER) {
+        TypeErr(1, "DEBUG", "number");
         return(ERROR);
       }
       return(OK);
@@ -223,7 +228,7 @@ int32_t CheckPars(fun_code, type1, type2, type3, type4, type5)
       return(OK);
       break;
 
-        case OWNS:
+    case OWNS:
       /*************************************/
       /* owns(loc/obj, obj, num [,prepos]) */
       /*************************************/
@@ -495,6 +500,30 @@ int32_t CheckPars(fun_code, type1, type2, type3, type4, type5)
       return(OK);
       break;
 
+    case GET_SPECIFIER:
+      /*****************/
+      /* getspec(word) */
+      /*****************/
+
+      if (type1 != WORD_ID) {
+        TypeErr(1, "GET_SPEC", "word");
+        return(ERROR);
+      }
+      return(OK);
+      break;
+
+    case GET_SUBJECT:
+      /********************/
+      /* getsubject(word) */
+      /********************/
+
+      if (type1 != WORD_ID) {
+        TypeErr(1, "GET_SUBJECT", "word");
+        return(ERROR);
+      }
+      return(OK);
+      break;
+
     case GO_TO:
       /***********************/
       /* goto(obj, loc, num) */
@@ -554,6 +583,22 @@ int32_t CheckPars(fun_code, type1, type2, type3, type4, type5)
       }
       if (type3 != WORD_ID) {
         TypeErr(3, "MOVE", "word");
+        return(ERROR);
+      }
+      return(OK);
+      break;
+
+    case NEWDSYS:
+      /****************************/
+      /* newdsys(loc/obj, string) */
+      /****************************/
+
+      if (type1 != LOC_ID && type1 != OBJ_ID) {
+        TypeErr(1, "NEWDSYS", "location or object identifier");
+        return(ERROR);
+      }
+      if (type2 != STRING) {
+        TypeErr(2, "NEWDSYS", "string");
         return(ERROR);
       }
       return(OK);
@@ -840,9 +885,9 @@ int32_t CheckPars(fun_code, type1, type2, type3, type4, type5)
       break;
 
     case WAIT:
-      /**********/
-      /* wait() */
-      /**********/
+      /***************/
+      /* wait(value) */
+      /***************/
 
       if (type1 != NUMBER) {
         TypeErr(1, "WAIT", "number");

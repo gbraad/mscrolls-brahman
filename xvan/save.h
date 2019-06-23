@@ -1,6 +1,6 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018 Marnix van den Bos.                   */
+/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
 /*                                                                      */
 /* <marnix.home@gmail.com>                                              */
 /*                                                                      */
@@ -24,9 +24,9 @@
 #if !defined(__save)
 #define __save
 
-/*************/
-/* externals */
-/*************/
+/*************************/
+/* External declarations */
+/*************************/
 
 extern int32_t      nr_of_locs;
 extern int32_t      nr_of_objs;
@@ -72,6 +72,7 @@ extern int32_t      ordinal;                                   /* letsplay.c */
 extern char         *FinalizeBase64(char*, int, int8_t);
 
 extern void         PrintError(int16_t, resultStruct*, char*); /* errors.c */
+extern void         Log(char*, char*, char*);                  /* output.c */
 
 extern int16_t xv_htons(int16_t);                              /* endian.c */
 extern int32_t xv_htonl(int32_t);                              /* endian.c */

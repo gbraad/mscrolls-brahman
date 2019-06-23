@@ -1,0 +1,13 @@
+
+$VERB cry
+ PROLOGUE
+   if not(testflag(o_actor.f_alive)) then
+     if trigger(o_actor.t_talk_to_dead) then
+       disagree()
+     endif
+   endif
+
+ DEFAULT
+   printcr("[the] [o_actor] [o_actor.r_is] not a crybaby.")
+
+ENDVERB

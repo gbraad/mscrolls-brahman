@@ -1,6 +1,6 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018 Marnix van den Bos.                   */
+/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
 /*                                                                      */
 /* <marnix.home@gmail.com>                                              */
 /*                                                                      */
@@ -22,7 +22,6 @@
 
 #if !defined(__NL_errors)
 #define __NL_errors
-
 
 const char *NL_errors[] = {
   "\n(000) Fout bij het openen van bestand:",
@@ -174,7 +173,8 @@ const char *NL_errors[] = {
   "\n(144) Dubbele definitie van:",
   "\n(145) Bij deze vlag ontbreekt de eigenaar:",
   "\n(146) Meer dan 1 vervangende definitie van flag:"
-  "\n(146) Meer dan 1 vervangende definitie van attribuut:"
+  "\n(146) Meer dan 1 vervangende definitie van attribuut:",
+  "\n(148) Dynamische system beschrijvingen mogen alleen attribuut parameters hebben"
 };
 
 #endif

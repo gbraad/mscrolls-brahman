@@ -1,6 +1,6 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018 Marnix van den Bos.                   */
+/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
 /*                                                                      */
 /* <marnix.home@gmail.com>                                              */
 /*                                                                      */
@@ -30,7 +30,6 @@
 #include "typedefs.h"
 #include "NL-moreinfo.h"
 
-
 /*************************/
 /* Function declarations */
 /*************************/
@@ -38,15 +37,11 @@
 void NL_MoreInfo(extendedSysDescr*, match*, char*);
 void NL_PrintNotFound(extendedSysDescr*);
 
-
 /************************/
 /* Function definitions */
 /************************/
 
-void NL_MoreInfo(descr, hits, line_buf)
- extendedSysDescr *descr;
- match            *hits;
- char             *line_buf;
+void NL_MoreInfo(extendedSysDescr *descr, match *hits, char *line_buf)
 {
   extendedSysDescr *sd;
   int32_t          i =0;
@@ -85,12 +80,11 @@ void NL_MoreInfo(descr, hits, line_buf)
 
   PrintString("?\n", 0);
 
-  GetAddtlInput(line_buf, "> ");
+  GetAddtlInput(line_buf, prompt);
 }
 
 
-void NL_PrintNotFound(descr)
- extendedSysDescr *descr;
+void NL_PrintNotFound(extendedSysDescr *descr)
 {
   if (actor == PLAYER) {
     PrintString("Je", 0);
@@ -98,4 +92,5 @@ void NL_PrintNotFound(descr)
   else {
   }
   PrintString(" ziet dat hier niet.\n", 0);
+  Output();
 }

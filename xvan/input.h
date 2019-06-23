@@ -1,6 +1,6 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018 Marnix van den Bos.                   */
+/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
 /*                                                                      */
 /* <marnix.home@gmail.com>                                              */
 /*                                                                      */
@@ -24,26 +24,32 @@
 #if !defined(__input)
 #define __input
 
-extern FILE *transcriptfile;                            /* init.c     */
+/**************************/
+/* External declarations */
+/*************************/
 
-extern short testmode;                                  /* letsplay.c */
-extern short transcript;                                /* letsplay.c */
-extern char  *outputline;                               /* output.c   */
-extern FILE  *testfile;                                 /* init.c     */
+extern FILE     *transcriptfile;                             /* init.c     */
 
-extern void  Output(char*, int);                         /* init.c      */
-extern void  PrintError(int16_t, resultStruct*, char*);  /* errors.c    */
-extern char  *AddToString(char*, char*);                 /* descr2str.c */
-extern char  *ResetString(char*);                        /* descr2str.c */
+extern short     testmode;                                   /* letsplay.c */
+extern short     transcript;                                 /* letsplay.c */
+extern FILE      *testfile;                                  /* init.c     */
+
+extern void      Output(void);                               /* init.c      */
+extern void      PrintError(int16_t, resultStruct*, char*);  /* errors.c    */
+extern void      PrintString(char*, int);                    /* output.c   */
+extern char      *AddToString(char*, char*);                 /* descr2str.c */
+extern char      *ResetString(char*);                        /* descr2str.c */
 
 /* IFI and JSON stuff */
 extern int32_t    ValidateJson(char*);
 extern int32_t    ProcessJson(char*, char*);
 extern const char *ifi_getRequest(void);
 extern void       ifi_emitResponse(const char*);
-extern int32_t    GetNextKVpair(char*, int*, kvPair*);   /* json.c */
-extern int32_t    CheckIFI(char*);                       /* ifi.c  */
-extern int32_t    XeqIFIrequest(int32_t, jsonValue*);    /* ifi.c  */
+extern int32_t    GetNextKVpair(char*, int*, kvPair*);       /* json.c */
+extern int32_t    CheckIFI(char*);                           /* ifi.c  */
+extern int32_t    XeqIFIrequest(int32_t, jsonValue*);        /* ifi.c  */
 extern void       SendIFIerror(char*, char*);
+
+extern void       Log(char*, char*, char*);
 
 #endif

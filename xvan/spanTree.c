@@ -1,6 +1,6 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018 Marnix van den Bos.                   */
+/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
 /*                                                                      */
 /* <marnix.home@gmail.com>                                              */
 /*                                                                      */
@@ -29,7 +29,6 @@
 #include "typedefs.h"
 #include "spantree.h"
 
-
 /*************************/
 /* Function declarations */
 /*************************/
@@ -38,14 +37,11 @@ int32_t InitSpanTree(spanTree**, int32_t**);
 int32_t ExpandTree(int32_t, spanTree*);
 int32_t BuildRoute(int32_t, int32_t*, spanTree*);
 
-
 /************************/
 /* Function definitions */
 /************************/
 
-int32_t InitSpanTree(tree, route)
- spanTree **tree;
- int32_t  **route;
+int32_t InitSpanTree(spanTree **tree, int32_t **route)
 {
   int i = 0;
 
@@ -70,10 +66,7 @@ int32_t InitSpanTree(tree, route)
 }
 
 
-int32_t BuildRoute(to, route, tree)
- int32_t  to;
- int32_t  *route;
- spanTree *tree;
+int32_t BuildRoute(int32_t to, int32_t *route, spanTree *tree)
 {
   int index = 0;
   int i     = 0;
@@ -100,9 +93,7 @@ int32_t BuildRoute(to, route, tree)
 }
 
 
-int32_t ExpandTree(level, tree)
- int32_t  level;
- spanTree *tree;
+int32_t ExpandTree(int32_t level, spanTree *tree)
 {
   int i = 0;
   int j = 0;

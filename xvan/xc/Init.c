@@ -1,6 +1,6 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018 Marnix van den Bos.                   */
+/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
 /*                                                                      */
 /* <marnix.home@gmail.com>                                              */
 /*                                                                      */
@@ -24,6 +24,15 @@
 #include <stdlib.h>    /* malloc(), free() */
 #include <string.h>
 #include <stdint.h>
+#include <limits.h>       /* PATH_MAX */
+
+#include "which_os.h"
+
+#ifdef __osx_os
+#include <sys/param.h>    /* realpath()            */
+#include <mach-o/dyld.h>  /* _NSGetExectablePath() */
+#endif
+
 #include "keyword.h"
 #include "typedefs.h"
 #include "init.h"
@@ -36,13 +45,18 @@
 int16_t  xvan_language  = ENG;
 int16_t  story_language = ENG;
 
-char     current_filename[MAX_FILENAME_LEN+1];
+int16_t  debug = 0;
+
+char     current_filename[PATH_MAX + MAX_FILENAME_LEN + 1];
 FILE     *source_file;
 FILE     *datafile;
+
+char file_path[PATH_MAX + 1];  /* holds absolute path to working directory */
+
 int32_t  line_num    = 1;
-int32_t  total_lines = 0;  /* to keep track of number of lines. Since */
-                           /* there is more than one file we reset    */
-                           /* line_num                                */
+int32_t  total_lines = 0;      /* to keep track of number of lines. Since  */
+                               /* there is more than one file we reset     */
+                               /* line_num                                 */
 
 char entrance_trigger[MAX_ID_LENGTH+1];
 char exit_trigger[MAX_ID_LENGTH+1];
@@ -57,12 +71,16 @@ int32_t GetFileNames(int, char**, char*, char*);
 int32_t PreDefs(void);
 int32_t main(int, char**);
 
+#ifdef __osx_os
+int32_t GetFullPath(char*);
+#endif
+
 
 /************************/
 /* Function definitions */
 /************************/
 
-int32_t ExitMsg()
+int32_t ExitMsg(void)
 {
   char ch;
 
@@ -74,11 +92,56 @@ int32_t ExitMsg()
 }
 
 
-int32_t GetFileNames(nr_args, args, input, output)
- int  nr_args;
- char **args;
- char *input;
- char *output;
+#ifdef __osx_os
+int32_t GetFullPath(char *full_path)
+{
+  char      path_buf[PATH_MAX + 1];
+  char      resolved_name[PATH_MAX + 1];
+  char      *real_path;
+  uint32_t  buf_size = sizeof(path_buf);
+  int       index    = 1;
+
+  /* this functions returns the full path of the current  */
+  /* running application without the application name. In */
+  /* case of an error it returns NULL.                    */
+
+  /* get relative path */
+  if (_NSGetExecutablePath(path_buf, &buf_size) != 0) {
+    /* buffer too small */
+    printf("File Path too long.");
+    return(ERROR);
+  }
+
+  /* convert to absolute path */
+  if ( (real_path = realpath(path_buf, resolved_name)) == NULL) {
+    printf("Could not determine path.\n");
+    return(ERROR);
+  }
+
+  /* strip the application name from the end of the path */
+  index = strlen(real_path) - 1;
+  while (real_path[index] != '/') {
+    index--;
+  }
+
+  /* now check if there's enough room in full_path       */
+  /* this check may not be necessary because of PATH_MAX */
+  if (strlen(real_path) > PATH_MAX + 1) {
+    printf("File path too long.\n");
+    return(ERROR);
+  }
+
+  /* there's enough room, copy real_path to full_path */
+  strncpy(full_path, real_path, index+1);
+  /* do not try to free() real_path */
+  return_path[index+1] = '\0';
+
+  return(OK);
+}
+#endif
+
+
+int32_t GetFileNames(int nr_args, char **args, char *input, char *output)
 {
   int i = 1;
 
@@ -106,7 +169,8 @@ int32_t GetFileNames(nr_args, args, input, output)
       else {
         if (strcmp(args[i], "-d") == 0) {
           /* set debug compile mode */
-          /* implement this later   */
+          printf("Debug Mode\n");
+          debug = 1;
           i++;
         }
         else {
@@ -135,8 +199,9 @@ int32_t GetFileNames(nr_args, args, input, output)
     PrintError(5, NULL, NULL);
     return(ERROR);
   }
-  else
+  else {
     return(OK);
+  }
 }
 
 
@@ -155,21 +220,20 @@ int32_t PreDefs(void)
   }
 }
 
-int32_t main(argc, argv)
- int  argc;
- char **argv;
+int32_t main(int argc, char **argv)
 {
   fileList  **file_list = NULL;
-  char      storyfile[MAX_FILENAME_LEN+1]  = "";
-  char      outputfile[MAX_FILENAME_LEN+1] = "";
+  char      storyfile[PATH_MAX + MAX_FILENAME_LEN + 1]  = "";
+  char      outputfile[PATH_MAX + MAX_FILENAME_LEN+1] = "";
   int32_t   err = 0;       /* No errors yet. */
   storyInfo story_info;
 
-  printf("                     *************************************************\n");
-  printf("                                        XVAN COMPILER\n");
-  printf("                                        version 2.3.4\n");
-  printf("                       Copyright 2016, 2017, 2018 Marnix van den Bos\n");
-  printf("                     *************************************************\n\n");
+
+  printf("                     *******************************************************\n");
+  printf("                                           XVAN COMPILER\n");
+  printf("                                            version 2.4\n");
+  printf("                       Copyright 2016, 2017, 2018, 2019 Marnix van den Bos\n");
+  printf("                     *******************************************************\n\n");
 
 
 
@@ -187,14 +251,23 @@ int32_t main(argc, argv)
   printf("                           max %d verbs\n", LAST_VERB_ID-FIRST_VERB_ID+1);
   printf("                           max  %d timers\n", LAST_TIMER_ID-FIRST_TIMER_ID+1);
 
+  file_path[0] = '\0';
+
+#ifdef __osx_os
+  if (!GetFullPath(file_path)) {
+    ExitMsg();
+    return(ERROR);
+  }
+#endif
+
   /* get the filenames */
   if (!GetFileNames(argc, argv, storyfile, outputfile)) {
     ExitMsg();
     return(ERROR);
   }
   /* open the storyfile */
-  strncpy(current_filename, storyfile, MAX_FILENAME_LEN+1);
-  if ((source_file = fopen(storyfile, "rb")) == NULL) {
+  strncpy(current_filename, storyfile, PATH_MAX + MAX_FILENAME_LEN + 1);
+  if ((source_file = fopen_path(file_path, storyfile, "rb")) == NULL) {
     /* error opening file */
     ErrHdr();
     PrintError(0, NULL, storyfile);
@@ -220,7 +293,7 @@ int32_t main(argc, argv)
     return(ERROR);
   }
 
-  /* read the story info so we can open the vocabulary file */
+  /* read the story info */
   if (!ReadStoryInfo(&story_info, storyfile, file_list)) {
     /* error was already printed by ReadStoryInfo() */
     ExitMsg();
@@ -232,13 +305,12 @@ int32_t main(argc, argv)
   story_language = story_info.story_language;
 
   /* add compiler version to story info */
-  strncpy(story_info.compiler_version, "2.3.4", MAX_COMPILER_LEN);
+  strncpy(story_info.compiler_version, "2.4", MAX_COMPILER_LEN);
 
   printf("\n%s %s\n\n", story_info.title, story_info.version);
 
   /* open the output file */
-  /* strncpy(current_filename, outputfile, MAX_ID_LENGTH); */
-  if ((datafile = fopen(outputfile, "wb")) == NULL) {
+  if ((datafile = fopen_path(file_path, outputfile, "wb")) == NULL) {
     /* error opening file */
     ErrHdr();
     PrintError(0, NULL, outputfile);
@@ -247,7 +319,7 @@ int32_t main(argc, argv)
   }
 
   if (!SetUpTables()) {
-    /* error msg is priinted by SetUpTables() */
+    /* error msg is printed by SetUpTables() */
     ExitMsg();
     return(ERROR);
   }

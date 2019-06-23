@@ -32,8 +32,8 @@ $VERB close
 
  "close [o_subject]"
    DISAMBIGUATION_RULES
-     if testflag(o_subject.f_open) then
-       score(5)
+     if testflag(o_subject.f_open) then score(5) endif
+     if testflag(o_subject.f_openable) then score(5) endif
    END_RULES
 
    clearflag(o_subject.f_open)

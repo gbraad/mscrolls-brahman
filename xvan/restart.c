@@ -1,6 +1,6 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018 Marnix van den Bos.                   */
+/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
 /*                                                                      */
 /* <marnix.home@gmail.com>                                              */
 /*                                                                      */
@@ -31,19 +31,17 @@
 #include "typedefs.h"
 #include "restart.h"
 
-
 /*************************/
 /* function declarations */
 /*************************/
 
 int32_t Restart(void);
 
-
 /************************/
 /* Function definitions */
 /************************/
 
-int32_t Restart()
+int32_t Restart(void)
 {
   char json_string[] = "{\"restart\":true}";
 
@@ -141,6 +139,7 @@ int32_t Restart()
   curr_loc = obj_dir[PLAYER-FIRST_OBJECT_ID].held_by;
 
   /* now tell the front-end to restart */
+
   ifi_emitResponse(json_string);
 
   return(OK);

@@ -1,6 +1,6 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018 Marnix van den Bos.                   */
+/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
 /*                                                                      */
 /* <marnix.home@gmail.com>                                              */
 /*                                                                      */
@@ -50,6 +50,7 @@ typedef struct {
           char    compiler_version[MAX_COMPILER_LEN];
           int16_t xvan_language;
           int16_t story_language;
+          int16_t debug;
         } storyInfo;
 
 /*************************************************************/
@@ -78,13 +79,21 @@ typedef struct {
           int32_t noun;
         } sysDescr;
 
+/* 2019may12 we added dynamic system descriptions. A dynamic  */
+/* system description contains one or more attributes whose   */
+/* value(s) can only be determined at runtime when the system */
+/* description is referenced. Therefore we do not parse the   */
+/* description at compile time, but store the string for real */
+/* time parsing by the interpreter. Compiler and interpreter  */
+/* will test for dynamic == NULL to determine if a system     */
+/* description is dynamic.                                    */
 
 typedef struct {
-          sysDescr part1;          /* This struct is used to  */
-          int32_t  connect_prepos; /* store a description of  */
-          sysDescr part2;          /* an object or location.  */
-        } extendedSysDescr;        /* It is used by the       */
-                                   /* interpreter to track    */
+          char     *dynamic;       /* This struct is used to  */
+          sysDescr part1;          /* store a description of  */
+          int32_t  connect_prepos; /* an object or location.  */
+          sysDescr part2;          /* It is used by the       */
+        } extendedSysDescr;        /* interpreter to track    */
                                    /* down object and loc ids */
                                    /* and print the article   */
 
@@ -107,7 +116,6 @@ typedef struct {           /* It is important to store the scope in   */
           int64_t offset;  /* because of problems that may arise with */
         } verbDir;         /* parsing synonyms. The verb_dir does not */
                            /* distinguish synonyms.                   */
-
 
 typedef struct sl {         /* Needed to keep track of synonym verbs.  */
           int32_t id;       /* Because of the redefine functionality   */
@@ -249,6 +257,11 @@ typedef struct {
           int32_t nr_of_prepositions;
           int32_t preposition[MAX_PARSE_PREPOS];
         } preposInfo;
+
+typedef struct {
+          char     name[MAX_ID_LENGTH+1];
+          int32_t  owner;
+        } debugInfo;
 
 /* 24jan2018: if this struct is changed, make sure  */
 /* to also change the struct size in functions      */

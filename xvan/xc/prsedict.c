@@ -1,6 +1,6 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018 Marnix van den Bos.                   */
+/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
 /*                                                                      */
 /* <marnix.home@gmail.com>                                              */
 /*                                                                      */
@@ -27,8 +27,6 @@
 #include "keyword.h"
 #include "typedefs.h"
 #include "prsedict.h"
-
-extern int32_t nr_of_verbs;  /* REMOVE */
 
 /***********/
 /* Globals */
@@ -59,12 +57,7 @@ int32_t AddWord(char*, char*, int32_t, int32_t, int32_t*, int32_t);
 /* Function definitions */
 /************************/
 
-int32_t ParseWordGroup(word, keyword, word_type, source, file_list)
- char     **word;
- int32_t  *keyword;
- int32_t  word_type;
- FILE     **source;
- fileList **file_list;
+int32_t ParseWordGroup(char **word, int32_t *keyword, int32_t word_type, FILE **source, fileList **file_list)
 {
   int32_t state   = 1;
   char    print_word[MAX_WORD_LEN+1];
@@ -169,13 +162,13 @@ int32_t ParseWordGroup(word, keyword, word_type, source, file_list)
 }
 
 
-int32_t AddWord(word, print_word, type, syn_id, word_id, redefine)
- char     *word;       /* word that must be added                      */
- char     *print_word; /* word that must be printed by the interpreter */
- int32_t  type;        /* type of word                                 */
- int32_t  syn_id;      /* -1 means existing word, new type             */
- int32_t  *word_id;    /* id of added word, output par                 */
- int32_t  redefine;    /* tells whether a verb is redefined.           */
+int32_t AddWord(char *word, char *print_word, int32_t type, int32_t syn_id, int32_t *word_id, int32_t redefine)
+ /* word is word that must be added                            */
+ /* print_word is word that must be printed by the interpreter */
+ /* type of word                                               */
+ /* syn_id -1 means existing word, new type                    */
+ /* word_id is id of added word, output par                    */
+ /* redefine tells whether a verb is redefined.                */
 {
   wordInfo *info;
   int      i = 0;
@@ -207,7 +200,6 @@ int32_t AddWord(word, print_word, type, syn_id, word_id, redefine)
   /* LEAVE IT IT FOR NOW, MUST FIX LATER  (note to self:*/
   /* cannot use LookUpId() here, because the word_table */
   /* does not exist yet.                                */
-
 
   /* fill the wordInfo struct */
   if (syn_id != -1)
@@ -281,7 +273,7 @@ int32_t AddWord(word, print_word, type, syn_id, word_id, redefine)
   /* GetNextWord() to not parse strings but just skip them.     */
 
 
-  /* comments from Pass2Voc() (function is no longer there)         */
+  /* comments from former Pass2Voc() (function is no longer there)  */
   /* In Pass2Voc(), the default verb code is parsed and written to  */
   /* the datafile. All words are listed in the word_table array,    */
   /* together with their id and types.                              */
@@ -299,5 +291,3 @@ int32_t AddWord(word, print_word, type, syn_id, word_id, redefine)
   /* We also choose not to add 'offset' to the wordTable typedef,*/
   /* since this would eliminate the possibility to store         */
   /* word_table in one instruction.                              */
-
-

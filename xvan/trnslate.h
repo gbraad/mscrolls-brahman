@@ -1,6 +1,6 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018 Marnix van den Bos.                   */
+/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
 /*                                                                      */
 /* <marnix.home@gmail.com>                                              */
 /*                                                                      */
@@ -24,53 +24,54 @@
 #if !defined(__trnslate)
 #define __trnslate
 
-
 /**************************/
 /* External declarations. */
 /**************************/
 
-extern storyInfo story_info;  /* init.c */
+extern storyInfo story_info;                                            /* init.c       */
 extern dirInfo   *loc_dir;
 extern dirInfo   *obj_dir;
 extern wordTable *word_table;
 
-extern int32_t capital;       /* letsplay.c */
-extern int32_t article;       /* letsplay.c */
-extern int32_t nr_of_locs;    /* fileio.c   */
-extern int32_t nr_of_objs;    /* fileio.c   */
+extern int32_t capital;                                                 /* letsplay.c   */
+extern int32_t article;                                                 /* letsplay.c   */
+extern int32_t nr_of_locs;                                              /* fileio.c     */
+extern int32_t nr_of_objs;                                              /* fileio.c     */
 extern int32_t nr_of_words;
 
-extern char *outputline;      /* init.c   */
+extern int32_t curr_loc;      /* the current location.     */           /* letsplay.c    */
+extern int32_t direction;     /* the current direction.    */           /* letsplay.c    */
+extern int32_t prepos;        /* the lst preposition.      */           /* letsplay.c    */
+extern int32_t action;        /* the current action.       */           /* letsplay.c    */
+extern int32_t actor;         /* the current actor.        */           /* letsplay.c    */
+extern int32_t subject;       /* the current subject.      */           /* letsplay.c    */
+extern int32_t specifier;     /* the current specifier.    */           /* letsplay.c    */
+extern int32_t value;         /* the current value.        */           /* letsplay.c    */
+extern int32_t ordinal;       /* the current ordinal value */           /* letsplay.c    */
 
-extern int32_t curr_loc;      /* the current location.     */  /* letsplay.c */
-extern int32_t direction;     /* the current direction.    */  /* letsplay.c */
-extern int32_t prepos;        /* the lst preposition.      */  /* letsplay.c */
-extern int32_t action;        /* the current action.       */  /* letsplay.c */
-extern int32_t actor;         /* the current actor.        */  /* letsplay.c */
-extern int32_t subject;       /* the current subject.      */  /* letsplay.c */
-extern int32_t specifier;     /* the current specifier.    */  /* letsplay.c */
-extern int32_t value;         /* the current value.        */  /* letsplay.c */
-extern int32_t ordinal;       /* the current ordinal value */  /* letsplay.c */
+extern char    *outputline;
 
-extern void NL_MoreInfo(extendedSysDescr*, match*, char*);   /* nl-moreinfo.c  */
-extern void NL_PrintNotFound(extendedSysDescr*);             /* nl-moreinfo.c  */
-extern void ENG_MoreInfo(extendedSysDescr*, match*, char*);  /* eng-moreinfo.c */
-extern void ENG_PrintNotFound(extendedSysDescr*);            /* eng-moreinfo.c */
+extern void    Log(char*, char*, char*);
 
-extern void     Output(char*, int);                           /* output.c  */
-extern void     PrintError(int16_t, resultStruct*, char*);    /* errors.c */
+extern void    NL_MoreInfo(extendedSysDescr*, match*, char*);           /* nl-moreinfo.c  */
+extern void    NL_PrintNotFound(extendedSysDescr*);                     /* nl-moreinfo.c  */
+extern void    ENG_MoreInfo(extendedSysDescr*, match*, char*);          /* eng-moreinfo.c */
+extern void    ENG_PrintNotFound(extendedSysDescr*);                    /* eng-moreinfo.c */
+
+extern void     Output(void);                                           /* output.c       */
+extern char     *ResetString(char*);                                    /* jsonbld.c      */
+extern void     PrintError(int16_t, resultStruct*, char*);              /* errors.c       */
 extern int32_t  IsLocId(int32_t);
 extern int32_t  ParseDSys(char*, extendedSysDescr*);
 extern int32_t  LookUpId(char*);
 extern int32_t  TestCFlag(int32_t, int32_t);
 extern int32_t  HasLight(int32_t);
-extern int32_t  IsLit(int32_t);                                             /* sysfunc.c */
-extern int32_t  CanSee(int32_t, int32_t);                                   /* sysfunc.c */
-extern int32_t  Owns(int32_t, int32_t);                                     /* sysfunc.c */
-extern void     PrintId(int32_t, int);                                      /* output.c  */
-extern void     PrintExtendedSysDescr(extendedSysDescr*, int);              /* output.c  */
-extern void     PrintString(char*, int);                                    /* output.c  */
-extern int32_t  ApplyParserRules(parsedInput*, match*, match*, match*);     /* parser.h  */
+extern int32_t  IsLit(int32_t);                                         /* sysfunc.c      */
+extern int32_t  CanSee(int32_t, int32_t);                               /* sysfunc.c      */
+extern int32_t  Owns(int32_t, int32_t);                                 /* sysfunc.c      */
+extern void     PrintId(int32_t, int);                                  /* output.c       */
+extern void     PrintExtendedSysDescr(extendedSysDescr*, int);          /* output.c       */
+extern void     PrintString(char*, int);                                /* output.c       */
+extern int32_t  ApplyParserRules(parsedInput*, match*, match*, match*); /* parser.h       */
 
-extern void PrintUsrActionRec(usrActionRec*);              /* DELETE THIS ONE */
 #endif

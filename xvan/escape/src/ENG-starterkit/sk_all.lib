@@ -32,10 +32,12 @@ $OBJECT o_all
   t_sk_drop_all
     if equal(synchronize(o_actor, t_sk_drop, f_takeable, 1), 0) then
       printcr("There is nothing to drop.")
+    else
+      notimers()  # each 'drop' will fire the timers.
 
   t_sk_drop_all_prepos
     if equal(synchronize(o_actor, t_sk_drop_prepos, f_takeable, 1), 0) then
-      printcr("There is nothing to drop.")
+      printcr("There is nothing to drop [prepos] [the] [o_spec].")
 
   t_sk_take_all
     if equal(synchronize(owner(o_actor), t_sk_take, f_takeable, 1, 0), 0) then
@@ -43,11 +45,13 @@ $OBJECT o_all
 
   t_sk_take_all_prepos
     if equal(synchronize(o_spec, t_sk_take_prepos, f_takeable, 1, 0), 0) then
-      printcr("There is nothing to take from [the] [o_spec].")
+      printcr("There is nothing to take [prepos] [the] [o_spec].")
 
   t_default
     if equal(o_actor, %this) or equal(o_subject, %this) or equal(o_spec, %this) then
-      printcr("For [action] you must address objects individually.")
+      printcr("For [action] you must address objects individually, or separated /
+               by commas.")
+      disagree()
     else
       nomatch()
 
@@ -58,17 +62,17 @@ $COMMON_TRIGGERS
  t_sk_drop
    if owns(o_actor, %this) and not(testflag(f_hidden)) then
      # also o_all which otherwise will cause an endless loop
-     print("[this]: ")
-     if try(l_location, 0, 0, "drop [this]") then endif
+     if try(l_location, 0, 1, "drop [this]") then endif
    else
+     notimers() # do not count this one as a move
      nomatch()
 
  t_sk_drop_prepos
    if owns(o_actor, %this) and not(testflag(f_hidden)) then
      # also o_all which otherwise will cause an endless loop
-     print("[this]: ")
-     if try(l_location, 0, 0, "drop [this] [prepos] [o_spec]") then endif
+     if try(l_location, 0, 1, "drop [this] [prepos] [o_spec]") then endif
    else
+     notimers() # do not count this one as a move
      nomatch()
 
  t_sk_take
@@ -76,9 +80,9 @@ $COMMON_TRIGGERS
       (cansee(o_actor, %this) or testflag(%this.f_bypass)) and
       testflag(%this.f_seenbefore) then
      # also excludes o_all which otherwise will cause an endless loop
-     print("[this]: ")
-     if try(l_location, 0, 0, "take [this]") then endif
+     if try(l_location, 0, 1, "take [this]") then endif
    else
+     notimers() # do not count this one as a move
      nomatch()
 
  t_sk_take_prepos
@@ -86,7 +90,7 @@ $COMMON_TRIGGERS
       (cansee(o_actor, %this) or testflag(%this.f_bypass)) and
       testflag(%this.f_seenbefore) then
      # also excludes o_all which otherwise will cause an endless loop
-     print("[this]: ")
-     if try(l_location, 0, 0, "take [this] [prepos] [o_spec]") then endif
+     if try(l_location, 0, 1, "take [this] [prepos] [o_spec]") then endif
    else
+     notimers() # do not count this one as a move
      nomatch()

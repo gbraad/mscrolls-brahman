@@ -1,6 +1,6 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018 Marnix van den Bos.                   */
+/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
 /*                                                                      */
 /* <marnix.home@gmail.com>                                              */
 /*                                                                      */
@@ -27,7 +27,7 @@
 #include "typedefs.h"
 #include "prsesntc.h"
 
-extern void PrintActionRec(actionRec*);
+
 /********************************************************************/
 /* This module is used to parse and translate strings that are used */
 /* to determine which trigger to execute for which user commands.   */
@@ -53,7 +53,8 @@ extern void PrintActionRec(actionRec*);
 /*************************/
 /* Function Declarations */
 /*************************/
-int32_t GiveNextId(char**, int32_t*, int32_t*);
+
+int32_t GiveNextId(char**, int32_t*, int32_t*, int32_t*, int32_t*);
 int32_t IsDirection(char*, int32_t*);
 int32_t LookUpId(char*);
 void    InitActionRec(actionRec*);
@@ -64,7 +65,6 @@ int32_t ParseSentence(char*, actionRec*);
 /************************/
 /* Function definitions */
 /************************/
-
 
 int32_t LookUpId(word)
  char *word;
@@ -79,21 +79,23 @@ int32_t LookUpId(word)
 }
 
 
-int32_t GiveNextId(line_buf, nr_of_types, types)
- char **line_buf;
+int32_t GiveNextId(line_buf, id1, id2, nr_of_types, types)
+ /* id1 and id2 are to hold parameter ids */
+ char     **line_buf;
+ int32_t  *id1;
+ int32_t  *id2;
  int32_t  *nr_of_types;
  int32_t  *types;
 {
   /* This function is an adapted version of NextWordId(). It is  */
-  /* capable of recognizing parameters and return their id.      */
+  /* capable of recognizing parameters.                          */
 
   char      *start = *line_buf;   /* remember start of line_buf     */
   int32_t   i = 0;                /* counter to go through line_buf */
   int32_t   j = 0;
+  int32_t   word_id = NO_ID;
   char      word[MAX_WORD_LEN+1]; /* include a NULL char            */
   int32_t   len;                  /* word length                    */
-  int32_t   result = NO_ID;
-  int32_t   id2;
   wordTable wt_rec;               /* returned by ScanWordTable      */
 
   /* Initialize wt_rec */
@@ -101,18 +103,22 @@ int32_t GiveNextId(line_buf, nr_of_types, types)
   wt_rec.print_word[0] = '\0';
   wt_rec.id            = NO_ID;
 
+  /* initialize parameter ids */
+  *id1 = NO_ID;
+  *id2 = NO_ID;
+
   for (j=0; j<MAX_TYPES; j++)
     wt_rec.types[j] = NO_TYPE;
 
   /* Test for comma. Comma needs special treatment since it is not  */
   /* recognized as a word by ScanWordTable().                       */
   if (**line_buf == ',') {
-    result       = COMMA; /* Not a word id. May cause error when printed. */
+    word_id      = COMMA; /* Not a word id. May cause error when printed. */
     types[0]     = COMMA;
     types[1]     = NO_TYPE;
     *nr_of_types = 1;
     (*line_buf)++;
-    return(result);
+    return(word_id);
   }
 
   /* First, skip leading spaces */
@@ -142,28 +148,22 @@ int32_t GiveNextId(line_buf, nr_of_types, types)
 
   if (start[i] == (char) -1) {
     /* There is an id coming up. */
-    result  = ( (int32_t) ( ((unsigned char) start[i+1]) & 0xF0) ==  0x10? 0: (int32_t) ( ((unsigned char) start[i+2]))*256);
-    result += ( (int32_t) ( ((unsigned char) start[i+1]) & 0x0F) ==  0x01? 0: (int32_t) ((unsigned char) start[i+3]));
+    *id1  = ( (int32_t) ( ((unsigned char) start[i+1]) & 0xF0) ==  0x10? 0: (int32_t) ( ((unsigned char) start[i+2]))*256);
+    *id1 += ( (int32_t) ( ((unsigned char) start[i+1]) & 0x0F) ==  0x01? 0: (int32_t) ((unsigned char) start[i+3]));
 
     /* Set *line_buf to end of id. */
     *line_buf += 4;
 
     /* check for location, object or THIS */
-    if (IsLocId(result) || IsObjId(result) || result == THIS) {
-      id2  = ( (int32_t) ( ((unsigned char) start[i+5]) & 0xF0) ==  0x10? 0: (int32_t) ( ((unsigned char) start[i+6]))*256);
-      id2 += ( (int32_t) ( ((unsigned char) start[i+5]) & 0x0F) ==  0x01? 0: (int32_t) ((unsigned char) start[i+7]));
+    if (IsLocId(*id1) || IsObjId(*id1) || *id1 == THIS) {
+      *id2  = ( (int32_t) ( ((unsigned char) start[i+5]) & 0xF0) ==  0x10? 0: (int32_t) ( ((unsigned char) start[i+6]))*256);
+      *id2 += ( (int32_t) ( ((unsigned char) start[i+5]) & 0x0F) ==  0x01? 0: (int32_t) ((unsigned char) start[i+7]));
 
-      if (id2 != NO_ID) {
-        /* error */
-        ErrHdr();
-        printf("\nLine %d: error in string, unexpected id.\n", line_num);
-        return(NO_ID);
-      }
       /* Set *line_buf to end of id. */
       *line_buf += 4;
     }
 
-	return(result);
+	return(word_id);
   }
 
   while (!(start[i] == '\0' || start[i] == ',' || start[i] == SPACE
@@ -178,7 +178,7 @@ int32_t GiveNextId(line_buf, nr_of_types, types)
   word[len] = '\0';
 
   /* 0, nr_of_words-1 denote first and last element of word_table */
-  result = ScanWordTable(word, &wt_rec, 0, nr_of_words-1);
+  word_id = ScanWordTable(word, &wt_rec, 0, nr_of_words-1);
 
   /* Set line_buf to remainder of string.                */
   /* We do this always; also in case of an unknown word. */
@@ -204,7 +204,7 @@ int32_t GiveNextId(line_buf, nr_of_types, types)
   } /* switch */
 
   /* In case of an unknown word, exit here */
-  if (result == NO_ID && wt_rec.types[0] == NO_TYPE) {
+  if (word_id == NO_ID && wt_rec.types[0] == NO_TYPE) {
     /* check for type because it may also be a number */
     /* with the same value as the NO_ID #define       */
     ErrHdr();
@@ -224,7 +224,7 @@ int32_t GiveNextId(line_buf, nr_of_types, types)
     i++;
   *nr_of_types = i;
 
-  return(result);  /* result is the word id or the value in case of a number */
+  return(word_id);  /* result is the word id or the value in case of a number */
 }
 
 
@@ -281,6 +281,7 @@ void InitActionRec(action_rec)
   action_rec->execute[0]                      = NO_ID;
   action_rec->execute[1]                      = NO_ID;
 }
+
 
 void InitVerbActionRec(action_rec)
  actionRec *action_rec;

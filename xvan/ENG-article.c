@@ -1,6 +1,6 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018 Marnix van den Bos.                   */
+/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
 /*                                                                      */
 /* <marnix.home@gmail.com>                                              */
 /*                                                                      */
@@ -41,10 +41,7 @@ void ENG_PrintArticle(sysDescr*, int32_t, int);
 /* Function definitions */
 /************************/
 
-void ENG_PrintArticle(descr, type, use_json)
- sysDescr *descr;
- int32_t  type;
- int      use_json;
+void ENG_PrintArticle(sysDescr *descr, int32_t type, int use_json)
 {
   int       i   = 0;
   int32_t   id  = NO_ID;
@@ -101,5 +98,7 @@ void ENG_PrintArticle(descr, type, use_json)
   /* july 6th 2028: added this because 'use' skipped the space */
   /* when the object had no noun. Must check if this is the    */
   /* right solution                                            */
-  else article = 0;
+  else  {
+    article = 0;
+  }
 }

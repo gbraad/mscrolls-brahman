@@ -1,6 +1,6 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018 Marnix van den Bos.                   */
+/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
 /*                                                                      */
 /* <marnix.home@gmail.com>                                              */
 /*                                                                      */
@@ -36,28 +36,25 @@
 #include "lets-try.h"
 #include "defs.h"
 
-
 /*************************/
 /* Function declarations */
 /*************************/
 
 int32_t LetsTry(int32_t, usrActionRec);
 
-
 /************************/
 /* Function definitions */
 /************************/
 
-int32_t LetsTry(target, action_rec)
- int32_t      target;     /* to execute action_rec for */
- usrActionRec action_rec;
+int32_t LetsTry(int32_t target, usrActionRec action_rec)
+ /* action_rec must be executed for target */
 {
-  int32_t  subject_index = 0; /* We have only 1 subject */
-  int32_t* cont_list     = _alloca((nr_of_locs+nr_of_objs)*sizeof(int32_t));
-  int32_t  scope;
-  int32_t  result_prologue;
-  int32_t  result_arec;
-  int32_t  result_verb_default;
+  int32_t      subject_index = 0; /* We have only 1 subject */
+  int32_t*     cont_list     = _alloca((nr_of_locs+nr_of_objs)*sizeof(int32_t));
+  int32_t      scope;
+  resultStruct result_prologue;
+  resultStruct result_arec;
+  resultStruct result_verb_default;
 
   /* This routine executes the action record from the  */
   /* try() function.                                   */
@@ -75,12 +72,12 @@ int32_t LetsTry(target, action_rec)
   /* Set the global subject variable. */
   subject = action_rec.subject[subject_index];
 
-  switch ( (result_prologue = XeqPrologue(action_rec.action1)) )  {
+  result_prologue = XeqPrologue(action_rec.action1);
+  switch (result_prologue.tag)  {
     case QUIT:
       /* exit */
       return(QUIT);
       break;
-
     case DISAGREE:
       /* MUST WE EXECUTE THE EPILOGUE HERE ??? */
       /* Forget the whole thing, continue with */
@@ -88,38 +85,35 @@ int32_t LetsTry(target, action_rec)
 
       /* As executing this action record is part of a */
       /* trigger, do not fire the timers yet          */
-
       return(DISAGREE);
       break;
-
     case GET_SUBJECT:
       /* The subject wasn't specified in the input. */
       PrintError(96, NULL, TranslateKeyword("SUBJECT"));
       /* not a severe enough error to quit?? */
       return(DISAGREE);
       break;
-
     case GET_SPECIFIER:
       /* The specifier wasn't specified in the input. */
       PrintError(96, NULL, TranslateKeyword("SPECIFIER"));
       return(DISAGREE);
       break;
-
     case GET_ANSWER:
       /* We need an answer from the player. */
       return(DISAGREE);
       break;
-
     default:
       /* Either AGREE or NO_MATCH. */
       /* Build list with contained objs for curr_loc. */
       if (!ContList(target, cont_list, scope))
          return(QUIT);
       /* Execute action_rec for list. */
-      switch ( (result_arec = XeqActionRec(&action_rec, cont_list, subject_index)) )  {
+      result_arec = XeqActionRec(&action_rec, cont_list, subject_index);
+      switch (result_arec.tag)  {
         case NO_MATCH:
           /* No match; execute the default verb code. */
-          switch ( (result_verb_default = XeqVerbDefault(&action_rec, subject_index)) )  {
+          result_verb_default = XeqVerbDefault(&action_rec, subject_index);
+          switch (result_verb_default.tag)  {
             case QUIT:
               /* Stop */
               return(QUIT);
@@ -149,7 +143,7 @@ int32_t LetsTry(target, action_rec)
               /* As executing this action record is part of a */
               /* trigger, do not fire the timers yet          */
 
-              return(result_verb_default);
+              return(result_verb_default.tag);
               break;
           } /* switch XeqVerbDefault() */
           break;
@@ -178,10 +172,10 @@ int32_t LetsTry(target, action_rec)
           /* As executing this action record is part of a */
           /* trigger, do not fire the timers yet          */
 
-           return(result_arec);
+           return(result_arec.tag);
            break;
        } /* switch XeqActionRec() */
-       return(result_prologue);
+       return(result_prologue.tag);
        break;
    } /* switch XeqPrologue() */
 }

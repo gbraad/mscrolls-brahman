@@ -1,6 +1,6 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018 Marnix van den Bos.                   */
+/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
 /*                                                                      */
 /* <marnix.home@gmail.com>                                              */
 /*                                                                      */
@@ -23,6 +23,10 @@
 
 #if !defined(__base64)
 #define __base64
+
+/*************************/
+/* External declarations */
+/*************************/
 
 extern void  PrintError(int16_t, resultStruct*, char*); /* errors.c */
 extern char *AddToString(char*, char*);

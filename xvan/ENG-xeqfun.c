@@ -1,6 +1,6 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018 Marnix van den Bos.                   */
+/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
 /*                                                                      */
 /* <marnix.home@gmail.com>                                              */
 /*                                                                      */
@@ -31,11 +31,9 @@
 
 extern const char *ifi_getRequest(void);
 
-
 /*************************/
 /* Function declarations */
 /*************************/
-
 
 int32_t ENG_XeqYesNo(void);
 
@@ -48,7 +46,7 @@ int32_t ENG_XeqYesNo(void)
   char yes_or_no[INPUT_LINE_LEN];
 
   while (1) {
-    GetAddtlInput(yes_or_no, "y/n");
+    GetAddtlInput(yes_or_no, "y/n: ");
     xv_strlwr(yes_or_no);
 
     if ((strcmp(yes_or_no, "yes") == 0) || (strcmp(yes_or_no, "y") == 0))

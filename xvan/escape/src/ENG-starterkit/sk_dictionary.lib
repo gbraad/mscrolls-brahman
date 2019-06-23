@@ -13,7 +13,6 @@ southwest SYNONYM sw,
 up        SYNONYM u,
 down      SYNONYM d
 
-
 $NOUNS
 $insert ".\\ENG-starterkit\\dictionary\\nouns.txt"
 
@@ -28,7 +27,7 @@ through, to, under, with
 
 
 $ADVERBS
-slowly
+here, slowly
 
 
 $ARTICLES
@@ -36,7 +35,7 @@ a, an, the
 
 
 $Q_WORDS
-how, what, where, which, who
+how, what, where, which, who, why
 
 
 $CONJUNCTION

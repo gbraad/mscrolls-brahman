@@ -1,6 +1,6 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018 Marnix van den Bos.                   */
+/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
 /*                                                                      */
 /* <marnix.home@gmail.com>                                              */
 /*                                                                      */
@@ -25,7 +25,6 @@
 
 #define SPACE  ' '
 
-
 /*************************/
 /* External declarations */
 /*************************/
@@ -44,6 +43,5 @@ extern int32_t  ENG_CheckSyntax(char*, int32_t, int32_t, int32_t*, int32_t, int3
 extern int32_t  NL_CheckSyntax(char*, int32_t, int32_t, int32_t*, int32_t, int32_t, actionRec*);
 extern void     ErrHdr(void);                               /* errors.c */
 extern void     PrintError(int16_t, resultStruct*, char*);  /* errors.c */
-
 
 #endif

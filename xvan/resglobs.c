@@ -1,6 +1,6 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018 Marnix van den Bos.                   */
+/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
 /*                                                                      */
 /* <marnix.home@gmail.com>                                              */
 /*                                                                      */
@@ -30,25 +30,22 @@
 #include "typedefs.h"
 #include "resglobs.h"
 
-
 /*************************/
 /* Function declarations */
 /*************************/
 
-void    ResetGlobals(void);                 /* oct 18 18 */  /* @@@@ */
-
+void    ResetGlobals(void);  /* oct 18 18 */
 
 /************************/
 /* Function definitions */
 /************************/
 
-void ResetGlobals()
+void ResetGlobals(void)
 {
   /* this function is used to reset the */
   /* globals in case of a restart       */
 
-  debug_mode  = 0;
-  testmode    = 0;
+  testmode = 0;
   /* transcript  = 0; */  /* transcrip keeps its current value */
 
   active_entity = NO_ID;
@@ -82,6 +79,4 @@ void ResetGlobals()
   nr_of_timers         = 0;
 
   sp                   = 0;
-
 }
-

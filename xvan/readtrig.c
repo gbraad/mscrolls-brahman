@@ -1,6 +1,6 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018 Marnix van den Bos.                   */
+/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
 /*                                                                      */
 /* <marnix.home@gmail.com>                                              */
 /*                                                                      */
@@ -30,7 +30,6 @@
 #include "typedefs.h"
 #include "readtrig.h"
 
-
 /*************************/
 /* function declarations */
 /*************************/
@@ -43,9 +42,12 @@ int32_t       ProcCode(int32_t*, int32_t, int32_t);
 int32_t       *RdTrCode(int32_t*);
 triggerInfo   *ReadTrigger(int32_t*);
 
+/************************/
+/* function definitions */
+/************************/
 
-descrInfo *ReadDescr(code)
- int32_t  *code;  /* Contains the description id. */
+descrInfo *ReadDescr(int32_t *code)
+ /* Code contains the description id. */
 {
   int32_t       len = 0;
   descrInfo *descr;
@@ -86,8 +88,7 @@ descrInfo *ReadDescr(code)
 }
 
 
-int32_t ReadAdverbInfo(adverbs)
- adverbInfo *adverbs;
+int32_t ReadAdverbInfo(adverbInfo *adverbs)
 {
   int i=0;
 
@@ -106,8 +107,7 @@ int32_t ReadAdverbInfo(adverbs)
 }
 
 
-int32_t ReadPreposInfo(prepositions)
- preposInfo *prepositions;
+int32_t ReadPreposInfo(preposInfo *prepositions)
 {
   int i=0;
 
@@ -126,8 +126,7 @@ int32_t ReadPreposInfo(prepositions)
 }
 
 
-compActionRec *ReadActionRec(code)
- int32_t *code;
+compActionRec *ReadActionRec(int32_t *code)
 {
   compActionRec *action_rec;
 
@@ -203,10 +202,7 @@ compActionRec *ReadActionRec(code)
 }
 
 
-int32_t ProcCode(triggercode, pos, code)
- int32_t *triggercode;
- int32_t pos;
- int32_t code;
+int32_t ProcCode(int32_t *triggercode, int32_t pos, int32_t code)
 {
   /* Stores code in array and tests for exceeding array bound. */
   if (pos<MAX_TRIGG_LEN)
@@ -219,8 +215,7 @@ int32_t ProcCode(triggercode, pos, code)
 }
 
 
-int32_t *RdTrCode(code)
- int32_t *code;
+int32_t *RdTrCode(int32_t *code)
 {
   /* Create temporary space for trigger code.                  */
   /* As soon as we know the exact size, we will malloc space.  */
@@ -236,28 +231,24 @@ int32_t *RdTrCode(code)
     switch (*code) {
       case ERROR:
         return(NULL);
-
       case IF:
         if (!ProcCode(temp_triggercode, len++, IF))
           return(NULL);
 
         GetNextCode32(code);
         break;
-
       case THEN:
         if (!ProcCode(temp_triggercode, len++, THEN))
           return(NULL);
 
         GetNextCode32(code);
         break;
-
       case ELSE:
         if (!ProcCode(temp_triggercode, len++, ELSE))
           return(NULL);
 
         GetNextCode32(code);
         break;
-
       case AND:
       case OR:
       case NOT:
@@ -267,14 +258,12 @@ int32_t *RdTrCode(code)
         if (!GetNextCode32(code))
           return(NULL);
         break;
-
       case ENDIF:
         if (!ProcCode(temp_triggercode, len++, ENDIF))
           return(NULL);
 
         GetNextCode32(code);
         break;
-
       default:
         if (IsTestFun(*code) || IsIntAct(*code) ||
                      IsCAttrId(*code) || IsLAttrId(*code)) {
@@ -290,6 +279,7 @@ int32_t *RdTrCode(code)
         break;
     } /* switch */
   } /* while */
+
   /* copy temp_trig_code to a permanent trig */
   /* Add END_OF_CODE */
   if (!ProcCode(temp_triggercode, len++, END_OF_CODE))
@@ -311,11 +301,12 @@ int32_t *RdTrCode(code)
 }
 
 
-triggerInfo *ReadTrigger(code)
- int32_t  *code;  /* Contains the trigger id. */
- /* This function reads a trigger that belongs to a location   */
- /* or an object.                                              */
+triggerInfo *ReadTrigger(int32_t *code)
+ /* Code contains the trigger id. */
 {
+  /* This function reads a trigger that belongs to a location   */
+  /* or an object.                                              */
+
   triggerInfo *trigger;
 
   /* Malloc space for trigger */

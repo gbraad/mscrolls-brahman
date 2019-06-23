@@ -24,7 +24,7 @@ $VERB throw
      move(o_subject, %dir)
        printcr("Thrown.")
      else
-       print("[the] [o_subject] bumps to the [dir] wall and falls on the floor.")
+       print("[the] [o_subject] flies [dir] and then falls on the floor.")
        move(o_subject, owner(o_actor))
 
  "throw [o_subject] [prepos] [o_spec]"
@@ -38,7 +38,6 @@ $VERB throw
      printcr("  'throw the ball'")
      printcr("  'throw the ball to the north'")
      printcr("  'throw the ball at//on//behind//under the desk'")
-     printcr("(to turn off these help messages, type 'help')")
+     printcr("(to turn off these help messages, type 'help 1')")
 
 ENDVERB
-

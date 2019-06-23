@@ -1,6 +1,6 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018 Marnix van den Bos.                   */
+/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
 /*                                                                      */
 /* <marnix.home@gmail.com>                                              */
 /*                                                                      */
@@ -30,6 +30,7 @@
 extern FILE    *source_file;
 extern FILE    *datafile;
 extern int32_t  line_num;
+extern int16_t  debug;
 extern int16_t  xvan_language;    /* init.c */
 extern int16_t  story_language;   /* init.c */
 

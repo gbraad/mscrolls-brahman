@@ -1,6 +1,6 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018 Marnix van den Bos.                   */
+/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
 /*                                                                      */
 /* <marnix.home@gmail.com>                                              */
 /*                                                                      */
@@ -35,12 +35,13 @@
 int32_t ParseExits(char**, int32_t*, int32_t, FILE**, fileList**);
 int32_t ParseLoc(int64_t, FILE**, fileList**);
 
-int32_t ParseExits(word, keyword, owner_id, source, file_list)
- char     **word;
- int32_t  *keyword;
- int32_t  owner_id;  /* Location that exits belong to. */
- FILE     **source;  /* Source file to read from.      */
- fileList **file_list;
+
+/************************/
+/* function definitions */
+/************************/
+
+int32_t ParseExits(char **word, int32_t *keyword, int32_t owner_id, FILE **source, fileList **file_list)
+ /* owner_id is the location that exits belong to. */
 {
   int32_t state = 1;
   int32_t id;              /* needed to convert location ids */
@@ -128,10 +129,8 @@ int32_t ParseExits(word, keyword, owner_id, source, file_list)
   } /* while */
 }
 
-int32_t ParseLoc(offset, source, file_list)
- int64_t  offset;     /* location's position in datafile */
- FILE     **source;   /* sourcefile to read from         */
- fileList **file_list;
+
+int32_t ParseLoc(int64_t offset, FILE **source, fileList **file_list)
 {
   char     **word = (char **) malloc(sizeof(char *));
   int32_t  keyword;
@@ -269,7 +268,6 @@ int32_t ParseLoc(offset, source, file_list)
         }
         if (!StoreKeyword(END_LOC))
           return(ERROR);
-/*        printf("OK\n");*/
         return(OK);
       default:
         ErrHdr();

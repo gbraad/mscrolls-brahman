@@ -15,7 +15,7 @@ $VERB <name1> SYNONYM <name2> SYNONYM <name3>
  "user command1"
    # code to be executed for command 1
 
- "user command2"
+ "user command2",
  "user command3"
    # code to be executed for command 2 and command 3
 

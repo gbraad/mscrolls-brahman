@@ -1,6 +1,6 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018 Marnix van den Bos.                   */
+/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
 /*                                                                      */
 /* <marnix.home@gmail.com>                                              */
 /*                                                                      */
@@ -20,9 +20,9 @@
 /*                                                                      */
 /************************************************************************/
 
+
 #if !defined(__NL_errors)
 #define __NL_errors
-
 
 const char *NL_errors[] = {
   "runtime error (000): XeqLtGt(): onbekende operator:",
@@ -64,7 +64,7 @@ const char *NL_errors[] = {
   "initialization error (034): ReadSysDescr(): fout bij het lezen van",
   "initialization error (035): ReadContData(): fout bij het lezen van",
   "initialization error (036): load(): fout bij het lezen van",
-  "\n\nVersie 2.3.4 van de interpreter kan alleen bestanden van compiler versie 2.3.4 lezen.",
+  "\n\nVersie 2.4 van de interpreter kan alleen bestanden van compiler versie 2.4 lezen.",
   "\nDit bestand is gecompileerd met versie",
   "Druk een willekeurige toets...",
   "initialization error (040): fout bij het openen van bestand:",
@@ -75,7 +75,7 @@ const char *NL_errors[] = {
   "Er zijn teveel dingen die voldoen aan je beschrijving.\n"
   "Gebruik extra bijvoeglijke naamwoorden indien mogelijk...",
   "Ik begrijp deze zin niet",
-  "runtime error (047): fout bij het schrijven naar de debugfile",
+  "runtime error (047): dit bestand heeft geen debug informatie.",
   "runtime error (048): PrintString(): fout bij het ophalen van attribuutinformatie.",
   "runtime error (049): PrintString(): een attribuutparameter in een tekststring mag geen ander attribuut als waarde hebben.\n",
   "runtime error (050): onbekende woord identifier:",
@@ -121,7 +121,7 @@ const char *NL_errors[] = {
   "Testmode staat al aan",
   "Testmode wordt aangezet...",
   "Transcript mode aan",
-  "Turning mode uit",
+  "Transcript mode uit",
   "runtime error (094): XeqIntAct(): onbekende functiecode:",
   "runtime error (095): GetActionRecPar(): fout bij het lezen van actie record",
   "runtime error (096): ontbrekende parameter in try() functie:",
@@ -130,7 +130,9 @@ const char *NL_errors[] = {
   "runtime error (099): strncpy fout in functie:",
   "runtime error (100): Base64 decoderingsfout",
   "runtime error (101): Fout bij laden van opgeslagen game",
-  "runtime error (102): Fout bij het opslaan van de voortgang"
+  "runtime error (102): Fout bij het opslaan van de voortgang",
+  "runtime error (103): Nieuwe systeembeschrijving is te lang",
+  "runtime error (104): debug inspring fout"
 };
 
 #endif

@@ -1,9 +1,16 @@
 
 $VERB wait SYNONYM z
- "[o_player], wait"
+ PROLOGUE
+   if gt(%value, 10) then
+     printcr("You don't need to wait for more than 10 moves in this game.")
+     disagree()
+
+ "wait"
+   printcr("Time passes...")
    wait(1)
 
  "wait [value]"
+   printcr("Time passes...")
    wait(%value)
 
  DEFAULT
@@ -13,7 +20,7 @@ $VERB wait SYNONYM z
      Printcr("Examples of the syntax I understand is:")
      printcr("  'wait'")
      printcr("  'wait 5'")
-     printcr("(to turn off these help messages, type 'help')")
+     printcr("(to turn off these help messages, type 'help 1')")
 
 ENDVERB
 
