@@ -398,6 +398,28 @@ Same meanings as `item`.
 * `channel: int`
    _Optional_. Specify audio channel, default to 0.
 
+## Reply Text Merging
+
+It is often the case that the back-end engine will issue `text` replies a chunk a time. eg;
+
+```
+{ "text":"hello"}
+{ "text":" world."}
+```
+
+Sometimes individual words might be sent over as separate `text` messages, and this could be quite inefficient for the front end if it were to draw text on the UI each time a `text` messages was received.
+
+In fact the front-end usually receives bunch of `ifi` replies before the back-end finally issues a `getRequest` and blocks on something to do.
+
+It is usually at this point that the front-end processes the pending queue of `ifi` replies, although in principle the reply queue could be processed at any time.
+
+Where there are several `text` replies _in sequence_, these can be combined into an equivalent single `text` message. This has the advantage of allowing the UI to draw once instead of several times.
+
+`text` reply combining does not happen with text objects, ie where the text is made into an object for the purposes of adding formatting.
+
+eg `{"text":{"text":"hello world","color":"blue"}}`
+`
+
 ## Save and Load
 
 The actual saving and loading of data to files is performed by the front-end. In order to do this, the back-end must be able to send and receive a complete game state across _IFI_.
