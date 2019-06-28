@@ -83,10 +83,14 @@ int32_t LetsPlay(void)
   char         text_to_print[OUTPUT_LINE_LEN];
 
   /* set the prompt */
-  if (debug_info)
+  if (debug_info) {
+    ifi_emitResponse("{prompt:\"debug> \"}");
     strncpy(prompt, "debug> ", MAX_PROMPT_LEN);
-  else
+  }
+  else {
+    ifi_emitResponse("{prompt:\"debug> \"}");
     strncpy(prompt, "> ", MAX_PROMPT_LEN);
+  }
 
   /* Print interpreter opening message. */
   PrintString("-- XVAN 2.4 interpreter --\n\n", 0);
