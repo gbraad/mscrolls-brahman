@@ -89,6 +89,7 @@ struct DLLX Control: public APIType
     string                      _currentImageJSON;
     string                      _currentMetaJSON;
     string                      _soundJSON;
+    string                      _ifiChoiceJSON;
 
     // datapath is per user data
     string                      _dataPath;
@@ -140,6 +141,7 @@ struct DLLX Control: public APIType
     virtual void imageChanged(const string& js) {}
     virtual void metaChanged(const string& metajs) {}
     virtual void soundChanged(const string& js) {}
+    virtual void ifiChoiceChanged(const string& js) {}
 
     bool updateMapInfo(MapInfo&);
     void evalItemList(ItemsModel::Entries&);

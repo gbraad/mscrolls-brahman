@@ -81,7 +81,12 @@
 #define IFI_USEWITH     "usewith"
 #define IFI_USE         "use"
 #define IFI_COMPASSGO   "compassgo"
-#define IFI_REFRESHCMD "refreshcmd"
+#define IFI_REFRESHCMD  "refreshcmd"
+#define IFI_CHOICE      "choice"
+
+// choiceobj
+#define IFI_CHOSEN      "chosen"
+#define IFI_DEFAULT     "default"
 
 // metaobj
 //#define IFI_TITLE       "title"

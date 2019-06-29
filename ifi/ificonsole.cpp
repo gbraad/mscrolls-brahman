@@ -40,33 +40,6 @@
 #include "strutils.h"
 #include "fd.h"
 
-static std::string makePath(const std::string& prefix, const std::string& name) 
-{
-    std::string path;
-    if (!name.empty())
-    {
-        // windows style or linux style absolute path given
-        // then do not apply prefix
-        if (name.find(':') != std::string::npos || name.at(0) == '/')
-        {
-            // if we have a prefix like C: or https:// then
-            // assume `name` is an absolute path.
-            path = name;
-        }
-        else
-        {
-            path = prefix;
-            if (!path.empty()) path += '/';
-            path += name;
-        }
-
-        // enough backslashes! windows files work forwards too!
-        replaceCharsInplace(path, '\\', '/');
-    }
-
-    return path;
-}
-
 struct Handler: public IFIHandler
 {
     IFIHost*        _host;

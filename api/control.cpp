@@ -1325,6 +1325,18 @@ struct Control::Imp :
         
         return r;
     }
+
+    bool ifiChoiceGeneralResponse(const string& js) override
+    {
+        _host->ifiChoiceChanged(js);
+        return true;
+    }
+
+    bool ifiChoiceListResponse(const string& js) override
+    {
+        _host->ifiChoiceChanged(js);
+        return true;
+    }
     
     /////////////////////////////////
 

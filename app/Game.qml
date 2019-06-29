@@ -92,7 +92,7 @@ C1.SplitView
 
                 }
                 flickableDirection: Flickable.VerticalFlick
-                contentHeight: Math.max(flickarea.height, height)
+                //contentHeight: Math.max(flickarea.height, height)
                 clip: true
 
                 onHeightChanged: ensureVisible(area.cursorRectangle)
@@ -108,68 +108,56 @@ C1.SplitView
                     contentY = Math.max(area.implicitHeight - height,0)
                 }
 
-                onContentHeightChanged: 
-                if (choicebox.visible) contentY = contentHeight - height;
+                ///onContentHeightChanged: if (choicebox.visible) contentY = contentHeight - height;
 
-                Column
+                TextEdit
                 {
-                    id: flickarea
+                    id: area
+                    wrapMode: TextArea.Wrap
+                    textMargin: (QControl.lowMargins ? 8 : 16)*M.Units.dp
+                    color: M.Theme.textColor
+                    font: gameFont
                     width: parent.width
-                    
-                    TextEdit
+                    height: Math.max(implicitHeight, textflick.height - choicebox.height)
+
+                    text: qtranscript.textHTML
+                    textFormat: TextEdit.RichText
+                    readOnly: true
+
+                    // clicked on active text
+                    onLinkActivated:
                     {
-                        id: area
-                        wrapMode: TextArea.Wrap
-                        textMargin: (QControl.lowMargins ? 8 : 16)*M.Units.dp
-                        color: M.Theme.textColor
-                        font: gameFont
-                        width: parent.width
-                        height: Math.max(implicitHeight, textflick.height - choicebox.height)
-
-                        text: qtranscript.textHTML
-                        textFormat: TextEdit.RichText
-                        readOnly: true
-
-                        // clicked on active text
-                        onLinkActivated:
-                        {
-                            if (link.startsWith("http://") || link.startsWith("https://")) Qt.openUrlExternally(link);
-                            else QControl.evalClickCommand(link)
-                        }
-
-                        cursorPosition: length
-                        onCursorRectangleChanged:
-                        textflick.ensureVisible(cursorRectangle)
-
-                        // this is to allow text selection in the game
-                        // window on desktop right mouse button
-                        // you can then C-c to copy etc.
-                        MouseArea
-                        {
-                            id: rightbutton
-                            anchors.fill: parent
-                            acceptedButtons: Qt.RightButton 
-
-                            property int start
-                            
-                            onPressed: 
-                            {
-                                area.deselect()
-                                start = area.positionAt(mouseX, mouseY)
-                                textflick.interactive = false
-                            }
-                            onPositionChanged: area.select(start, area.positionAt(mouseX, mouseY))
-                            onReleased: textflick.interactive = true
-                        }
+                        if (link.startsWith("http://") || link.startsWith("https://")) Qt.openUrlExternally(link);
+                        else QControl.evalClickCommand(link)
+                        //textconsole.forceActiveFocus();
                     }
-                    
-                    ChoiceBox 
+
+                    cursorPosition: length
+                    onCursorRectangleChanged:
+                    textflick.ensureVisible(cursorRectangle)
+
+                    // this is to allow text selection in the game
+                    // window on desktop right mouse button
+                    // you can then C-c to copy etc.
+                    MouseArea
                     {
-                        id: choicebox
-                        width: parent.width
+                        id: rightbutton
+                        anchors.fill: parent
+                        acceptedButtons: Qt.RightButton 
+
+                        property int start
+                        
+                        onPressed: 
+                        {
+                            area.deselect()
+                            start = area.positionAt(mouseX, mouseY)
+                            textflick.interactive = false
+                        }
+                        onPositionChanged: area.select(start, area.positionAt(mouseX, mouseY))
+                        onReleased: textflick.interactive = true
                     }
                 }
-
+                    
                 Keys.onPressed:
                 {
                     if (event.key == Qt.Key_Up || event.key == Qt.Key_PageUp)
@@ -183,6 +171,17 @@ C1.SplitView
                     id: scrollbar 
                     stepSize: textflick.contentHeight ?
                     textflick.height * 0.9/textflick.contentHeight : 0
+                }
+            }
+
+            ChoiceBox 
+            {
+                id: choicebox
+                width: parent.width
+                z: 1
+                anchors
+                {
+                    bottom: parent.bottom
                 }
             }
         }
@@ -232,7 +231,7 @@ C1.SplitView
             }
         }
         
-        visible: app.enableTextInput
+        visible: app.enableTextInput && !choicebox.visible
 
         Component.onCompleted:
         {

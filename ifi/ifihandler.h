@@ -34,10 +34,13 @@
 #pragma once
 
 #include <string>
+#include <list>
 #include "jsonwalker.h"
 #include "logged.h"
 #include "ifischema.h"
 #include "varset.h"
+
+#define TAG "IFIHandler, "
 
 struct IFIHandler
 {
@@ -56,12 +59,71 @@ struct IFIHandler
         string          _text;
         int             _id = 0;
 
+        bool             valid() const { return !_text.empty(); }
+
         friend std::ostream& operator<<(std::ostream& os, const TextF& t)
         {
-            os << "{\"" << t._text << "\", id=" << t._id << '}';
+            return os << "{\"" << t._text << "\", id=" << t._id << '}';
+        }
+
+        void clear() { _text.clear(); }
+    };
+
+    /*
+    struct ChoiceInfo
+    {
+        TextF           _text;
+        string          _response;
+        bool            _default = false;
+
+        friend std::ostream& operator<<(std::ostream& os, const ChoiceInfo& ci)
+        {
+            return os << "{ choice=" << ci._text << ", response=" << ci._response << ", default=" << ci._default << '}';
+        }
+    };
+
+    typedef std::list<ChoiceInfo> ChoiceList;
+    
+    struct ChoicesInfo
+    {
+        TextF       _header;
+        ChoiceList  _choices;
+
+        void clear() 
+        {
+            _header.clear();
+            _choices.clear();
+        }
+
+        friend std::ostream& operator<<(std::ostream& os, const ChoicesInfo& ci)
+        {
+            os << "{ header=" << ci._header << "\n";
+            for (auto& i : ci._choices)
+            {
+                os << i << '\n';
+            }
+            os << "}\n";
             return os;
         }
     };
+
+    struct HandlerCtx
+    {
+        ChoicesInfo      _choices;
+
+        void clear()
+        {
+            _choices.clear();
+        }
+
+        friend std::ostream& operator<<(std::ostream& os, const HandlerCtx& h)
+        {
+            return os << h._choices;
+        }
+    };
+
+    HandlerCtx          _hctx;
+    */
 
     IFIHandler()
     {
@@ -85,8 +147,32 @@ struct IFIHandler
     
     void setProp(const string& key, const var& v)
     {
-        LOG4("IFIHandler, set ", key << " = " << v);
+        LOG4(TAG "set ", key << " = " << v);
         _props[key] = v.copy();
+    }
+
+    static bool atObj(JSONWalker& jw, string& subjs, const string* prefix = 0)
+    {
+        if (*jw._obj == '{')
+        {
+            subjs = string(jw._obj, jw._pos - jw._obj);
+            if (jw._pos[-1] == '}') return true;
+            if (!prefix) prefix = &jw._key;
+            LOG1(TAG "malformed json object; ", prefix << ":" << subjs);
+        }
+        return false;
+    }
+
+    static bool atList(JSONWalker& jw, string& subjs, const string* prefix = 0)
+    {
+        if (*jw._obj == '[')
+        {
+            subjs = string(jw._obj, jw._pos - jw._obj);
+            if (jw._pos[-1] == ']') return true;
+            if (!prefix) prefix = &jw._key;
+            LOG1(TAG "malformed json list; ", prefix << ":" << subjs);
+        }
+        return false;
     }
 
     void handleAux(const char* json, const string& prefix)
@@ -102,7 +188,7 @@ struct IFIHandler
 
             if (!_startDone)
             {
-                LOG3("WARNING, IFI received response before started: ", p);
+                LOG3(TAG "WARNING, IFI received response before started: ", p);
             }
 
             if (!isObject)
@@ -116,62 +202,52 @@ struct IFIHandler
                 }
                 else
                 {
-                    LOG("Bad IFI ", jw._key);
-                    LOG3("in '", json << "'");
+                    LOG(TAG "Bad IFI ", jw._key);
+                    LOG3(TAG "in '", json << "'");
                 }
             }
             else // object
             {
-                bool r = false;
-                
                 // `obj` is start of object, ie "{
                 // `pos` is end of object + 1, ie one past "}"
 
-                string subjs(jw._obj, jw._pos - jw._obj);
-
-                if (*jw._obj == '{')
+                bool r = false;
+                string subjs;
+                
+                if (atObj(jw, subjs, &p))
                 {
-                    if (jw._pos[-1] == '}')
-                    {
-                        if (p == IFI_META)
-                            r = ifiMetaResponsePrep(subjs);
-                        else if (p == IFI_MAP)
-                            r = ifiMapResponse(subjs);
-                        else if (p == IFI_PICTURE) // picture as object
-                            r = ifiPictureResponse(subjs);
-                        else if (p == IFI_SAVEDATA)
-                            r = ifiSaveDataResponse(subjs);
-                        else if (p == IFI_TEXT)
-                            r = ifiTextFormattedResponse(subjs);
-                        else if (p == IFI_SOUND)
-                            r = ifiSoundResponse(subjs);
+                    if (p == IFI_META)
+                        r = ifiMetaResponsePrep(subjs);
+                    else if (p == IFI_MAP)
+                        r = ifiMapResponse(subjs);
+                    else if (p == IFI_PICTURE) // picture as object
+                        r = ifiPictureResponse(subjs);
+                    else if (p == IFI_SAVEDATA)
+                        r = ifiSaveDataResponse(subjs);
+                    else if (p == IFI_TEXT)
+                        r = ifiTextFormattedResponse(subjs);
+                    else if (p == IFI_SOUND)
+                        r = ifiSoundResponse(subjs);
+                    else if (p == IFI_CHOICE) 
+                        r = ifiChoiceGeneralResponse(subjs);
                         
-                        if (!r)
-                            handleAux(jw._obj, p);
-                    }
-                    else
-                    {
-                        LOG1("IFI, malformed json object; ", p << ":" << subjs);
-                    }
+                    if (!r)
+                        handleAux(jw._obj, p);
                 }
-                else if (*jw._obj == '[')
+                else if (atList(jw, subjs, &p))
                 {
-                    // array
-                    if (jw._pos[-1] == ']')
-                    {
-                        if (p == IFI_OBJECTS)
-                            r = ifiObjectsResponse(subjs);
-                        else if (p == IFI_ITEMS)
-                            r = ifiItemsResponse(subjs);
-                        else if (p == IFI_PEOPLE)
-                            r = ifiPeopleResponse(subjs);
-                        else if (p == IFI_MAP "/" IFI_PLACES)
-                            r = ifiMapPlacesResponse(subjs);
-                    }
-                    else
-                    {
-                        LOG1("IFI, malformed json array; ", p << ":" << subjs << "\n\n");
-                    }
+                    string subjs(jw._obj, jw._pos - jw._obj);
+                    
+                    if (p == IFI_OBJECTS)
+                        r = ifiObjectsResponse(subjs);
+                    else if (p == IFI_ITEMS)
+                        r = ifiItemsResponse(subjs);
+                    else if (p == IFI_PEOPLE)
+                        r = ifiPeopleResponse(subjs);
+                    else if (p == IFI_MAP "/" IFI_PLACES)
+                        r = ifiMapPlacesResponse(subjs);
+                    else if (p == IFI_CHOICE)
+                        r = ifiChoiceListResponse(subjs);
                 }
                 else
                 {
@@ -185,6 +261,7 @@ struct IFIHandler
     {
         if (!json || !*json) return;
 
+        //_hctx.clear();
         ifiBegin();
         handleAux(json, string());
         ifiEnd();
@@ -422,36 +499,154 @@ struct IFIHandler
     virtual bool ifiTextFormattedResponse(const string& js)
     {
         TextF textF;
+        bool r = _makeTextF(js, textF);
+
+        if (r)
+        {
+            r = ifiTextFormatted(textF);
+            
+            if (!r)
+            {
+                // fallback to non-formatted
+                r = ifiText(textF._text);
+            }
+        }
+        return r;
+    }
+
+    virtual bool ifiChoiceGeneralResponse(const string& js)
+    {
+        // choice:{text:"heading",choices:[{choiceobj}...]}
+        // choice:{text:{textobj},choices:[{choiceobj}...]}
+
+        // extract the top-level choice properties, then call
+        // the choice list response to extract the choice list itself
         
-        for (JSONWalker jw(js); jw.nextKey(); jw.next())
+        /*
+        bool r = true;
+        
+        for (JSONWalker jw(js); r && jw.nextKey(); jw.next())
         {
             bool isObject;
             const char* st = jw.checkValue(isObject);
+            if (!st) break; // bad json
 
+            string subjs;
+                                
+            if (jw._key == IFI_TEXT) // heading
+            {
+                TextF& textF = _hctx._choices._header;
+
+                // can be just a string or a text object
+                if (isObject) r = atObj(jw, subjs) && _makeTextF(subjs, textF);
+                else textF._text = jw.collectValue(st).toString();
+            } 
+            else if (jw._key == IFI_CHOICE)
+            {
+                // expect list!
+                r = atList(jw, subjs) && ifiChoiceListResponse(subjs);
+            }
+        }
+        */
+
+        // always return true, saying we're done even if fail
+        return true;
+    }
+
+    /*
+    bool addChoice(const string& choiceobj)
+    {
+        // {text:"whatever",default:true,chosen:"whatever"}
+        // {text:{textobj},default:true,chosen:"whatever"}
+        
+        bool r = true;
+
+        LOG3(TAG "choiceobj ", choiceobj);
+
+        ChoiceInfo choice;
+        
+        for (JSONWalker jw(choiceobj); r && jw.nextKey(); jw.next())
+        {
+            bool isObject;
+            const char* st = jw.checkValue(isObject);
+            if (!st) break; // bad json
+
+            if (jw._key == IFI_TEXT) // heading
+            {
+                TextF& textF = choice._text;
+
+                // can be just a string or a text object
+                string subjs;
+                if (isObject) r = atObj(jw, subjs) && _makeTextF(subjs, textF);
+                else textF._text = jw.collectValue(st).toString();
+            } 
+            else if (jw._key == IFI_CHOSEN)
+            {
+                if (isObject) break;
+                choice._response = jw.collectValue(st).toString();              
+            }
+            else if (jw._key == IFI_DEFAULT)
+            {
+                bool v = jw.collectValue(st).isTrue();
+                choice._default = v;
+            }
+        }
+
+        r = r && choice._text.valid();
+        
+        if (r)
+        {
+            if (choice._response.empty())
+            {
+                // use the choice text
+                choice._response = choice._text._text;
+            }
+
+            _hctx._choices._choices.push_back(choice);
+        }
+        else
+        {
+            LOG3(TAG "malformed choice ", choiceobj);
+        }
+
+        return r;
+    }
+    */
+
+    virtual bool ifiChoiceListResponse(const string& js)
+    {
+        // [{choiceobj}...]
+
+        LOG4(TAG "choice list ", js);
+
+        /*
+        JSONWalker jw;
+        jw._json = js.c_str();
+        jw.beginArray();
+        while (!jw._error && !jw._end)
+        {
+            bool isObject;
+            const char* st = jw.checkValue(isObject);
             if (!st) break; // bad json
 
             if (!isObject)
             {
-                if (jw._key == IFI_TEXT)
-                {
-                    textF._text = jw.collectValue(st).toString();
-                }
-                else if (jw._key == IFI_ID)
-                {
-                    textF._id = jw.collectValue(st).toInt();
-                }
-                // ignore others
+                LOG3(TAG "Bad choice list ", st);
+                continue;
             }
-        }
 
-        bool r = ifiTextFormatted(textF);
+            // expect a list of objects
+            string choiceobj;
+            if (!atObj(jw, choiceobj)) continue;
 
-        if (!r)
-        {
-            // fallback to non-formatted
-            r = ifiText(textF._text);
+            // handle cjoiceobj
+            if (!addChoice(choiceobj)) break; // abort if malformed
+
+            jw.next();
         }
-        return r;
+        */
+        
+        return true; // accept regardless
     }
 
     virtual void ifiDefault(const string& key, const var& v)
@@ -542,36 +737,72 @@ struct IFIHandler
     {
         assert(_js);
 
-        // incorporate some direct json if start with "{"
-        if (*cmdp == '{')
-        {
+        bool raw = false;
+        
 
-            JSONWalker jw(cmdp);
-            for (; jw.nextKey(); jw.next()) jw.skipValue();
-            
-            if (!jw.ok())
+#ifndef NDEBUG
+        // incorporate some direct json if start with "{"
+        raw = (*cmdp == '{');
+
+        if (raw)
+        {
+            // find content of json
+            const char* st = cmdp + 1;
+            const char* ep = 0;
+            const char* p = st;
+            while (*p)
             {
-                LOG1("malformed JSON in input: '", jw << "'");
-                return false;
+                if (*p == '}') ep = p;
+                ++p;
             }
-            else
+
+            if (ep)
             {
-                // append content of json (ie not "{" or "}")
-                const char* st = jw._json + 1;
-                const char* ep = jw._pos - 1;
-                if (ep > st) _js->append(st, ep - st);
-                jw.skipSpace();
-                cmdp = jw._pos; // any remainder is command
+                _js->append(st, ep - st);
+                LOG3("IFI raw json ", _js->start());
             }
         }
+#endif
         
-        if (*cmdp)
+        if (!raw)
+        {
             JSONWalker::addStringValue(*_js, IFI_COMMAND, cmdp);
-        
+        }
+
         return true;
+    }
+
+protected:
+    
+    static bool _makeTextF(const string& js, TextF& textF)
+    {
+        bool res = false;
+        
+        for (JSONWalker jw(js); jw.nextKey(); jw.next())
+        {
+            bool isObject;
+            const char* st = jw.checkValue(isObject);
+
+            if (!st) break; // bad json
+
+            if (!isObject)
+            {
+                if (jw._key == IFI_TEXT)
+                {
+                    res = true;
+                    textF._text = jw.collectValue(st).toString();
+                }
+                else if (jw._key == IFI_ID)
+                {
+                    textF._id = jw.collectValue(st).toInt();
+                }
+                // ignore others
+            }
+        }
+        return res;
     }
 
 };
 
-
+#undef TAG
 
