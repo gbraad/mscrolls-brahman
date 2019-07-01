@@ -47,9 +47,10 @@ FocusScope
     
     property int headerHeight: headerText.length > 0 ? lineHeight : 0
     property string ifiChoiceJSON: QControl.ifiChoiceJSON
-    visible: ifiChoiceJSON.length > 0
     property string headerText
     property int hmargin: 16*Units.dp
+
+    visible: ifiChoiceJSON.length > 0
 
     ListModel { id: jchoicemodel }
 
@@ -62,7 +63,7 @@ FocusScope
     {
         // [{choiceobj}...]
         // {text:"heading",choice:[{choiceobj}...]}
-        // choiceobj = {"text":"whatever","chosen":"text","disabled":false}
+        // choiceobj = {"text":"whatever","chosen":"text","enabled":true}
 
         jchoicemodel.clear();
         headerText = ""
@@ -92,7 +93,7 @@ FocusScope
     function acceptChoice(t)
     {
         QControl.ifiChoiceJSON = "";
-        QControl.evalCommand(t)
+        QControl.evalJSON(t)
     }
 
     Rectangle
