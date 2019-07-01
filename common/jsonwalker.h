@@ -456,6 +456,15 @@ struct JSONWalker
             --_level;
             if (_level || _blevel) _error = true;
         }
+        else if (c == ']')
+        {
+            // end of array
+            // this should only happen when we are directly parsing an array
+            // via `beginArray`, and this is the final close
+            _end = true;
+            --_blevel;
+            if (_blevel) _error = true;
+        }
         else
         {
             LOG3("JSON next unexpected ", _pos);

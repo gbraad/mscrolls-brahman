@@ -31,108 +31,108 @@
  */
 
 
-import QtQuick 2.7
-import QtQuick.Controls 2.2 as C2
-import QtGraphicalEffects 1.0
+import QtQuick 2.12
+//import QtQuick.Controls 2.2
+//import QtGraphicalEffects 1.0
 import QtQml 2.2
 
 import Material 0.3 
-import Material.ListItems 0.1 as ListItem
 
 import com.voidware.brahman 1.0
 
-Rectangle
+FocusScope
 {
-    id: choicebox
-    height: choices.height
-    color: theme.backgroundShade
-    visible: customJSON.length > 0
+    id: choicearea
+    property int lineHeight: 48*Units.dp
+    
+    property int headerHeight: headerText.length > 0 ? lineHeight : 0
+    property string ifiChoiceJSON: QControl.ifiChoiceJSON
+    visible: ifiChoiceJSON.length > 0
+    property string headerText
+    property int hmargin: 16*Units.dp
 
     ListModel { id: jchoicemodel }
-                    
-    property alias count: jchoicemodel.count
-    property string customJSON: qtranscript.customControl
-    property string pageButtonText: ""
+
+    height: jchoicemodel.count*lineHeight + headerHeight
+
+    onVisibleChanged: if (visible) choices.forceActiveFocus()
+    
 
     function updateJSONModel(js) 
     {
+        // [{choiceobj}...]
+        // {text:"heading",choice:[{choiceobj}...]}
+        // choiceobj = {"text":"whatever","chosen":"text","disabled":false}
+
         jchoicemodel.clear();
-        pageButtonText = ""
+        headerText = ""
         if (js.length > 0)
         {
             var obj = JSON.parse(js);
-            var choices = obj["choices"];
-            if (choices != null)
-                for ( var c in choices ) jchoicemodel.append(choices[c]);
-            else
-            {
-                var page = obj["page"];
-                if (page != null && page.length > 0) pageButtonText = page
-            }
-        }
-    }
-
-    onCustomJSONChanged:
-    {
-        //console.log("custom json ", customJSON)
-        updateJSONModel(customJSON);
-    }
-    
-    Column
-    {
-        id: choices
-        width: parent.width
-
-        Item
-        {
-            width: parent.width
-            height: pagebutton.height
-            visible: pageButtonText.length > 0
             
-            C2.Button
+            if (!Array.isArray(obj))
             {
-                id: pagebutton
-                width: parent.width
-                height: Units.dp*64
-                text: pageButtonText
-                font.family: sansRegular.name 
-                font.pixelSize: height*0.5
-                onClicked:
-                {
-                    qtranscript.customControl = "";
-                    QControl.evalCommand("page");
-                    
-                }
+                // choice object
+                var t = obj["text"];
+                if (t != null && t.length > 0) headerText = t;
+
+                obj = obj["choice"]
             }
 
-            ColorOverlay 
+            if (Array.isArray(obj))
             {
-                anchors.fill: pagebutton
-                source: pagebutton
-                color: Qt.rgba(Theme.primaryColor.r, 
-                               Theme.primaryColor.g,
-                               Theme.primaryColor.b,
-                               0.5)
+                for (var c in obj) jchoicemodel.append(obj[c]);
             }
         }
 
-        Repeater
-        {
-            model: jchoicemodel
-            ListItem.Standard
-            {
-                width: parent.width;
-                text: model.text
-                iconName: enabled ? "toggle/radio_button_checked" : "toggle/radio_button_unchecked" 
-                enabled: !model.disabled 
+    }
 
-                onClicked:
-                {
-                    var a = model.label
-                    qtranscript.customControl = "";
-                    QControl.evalCommand(a)
-                }
+    onIfiChoiceJSONChanged: updateJSONModel(ifiChoiceJSON)
+
+    function acceptChoice(t)
+    {
+        QControl.ifiChoiceJSON = "";
+        QControl.evalCommand(t)
+    }
+
+    Rectangle
+    {
+        anchors.fill: parent
+        color: theme.backgroundShade
+        
+        ChoiceText
+        {
+            id: header
+            text: headerText
+            height: headerHeight
+            visible: headerHeight > 0
+        }
+
+        ListView
+        {
+            id: choices
+            width: parent.wdith
+            height: choicearea.height - headerHeight
+            anchors.top: header.bottom
+            
+            model: jchoicemodel
+            delegate: ChoiceText
+            {
+                height: lineHeight
+                width: choicearea.width
+
+                text: model.text
+                chosen: model.chosen || null
+                color: ListView.isCurrentItem ? Theme.primaryColor : Theme.textColor  
+                onAccept: acceptChoice(choice)
             }
+            
+            
+            highlight: Rectangle { color: "#e0e0e0"; radius: 5 }
+
+            //keyNavigationWraps: true
+            focus: true
+            Keys.onReturnPressed:  acceptChoice(currentItem.response)
         }
     }
 }

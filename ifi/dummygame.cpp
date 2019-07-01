@@ -44,18 +44,25 @@
  *
  */
 
+#define IFI_TEST
+
 #ifdef IFI_BUILD
 
 #include "ificlient.h"
 #include "ifiglue.h"
 #include "ifihandler.h"
+#include "logged.h"
 
 // so that we can get it from glue
 IFIClient* ifi;
 static int moveCount;
 
+#define TAG  "Dummy, "
+
 struct Handler: public IFIHandler
 {
+    IFIClient* _ifi;
+
     bool ifiCommand(const string&) override { return true; }
     bool ifiMoves(int n) override
     {
@@ -65,6 +72,25 @@ struct Handler: public IFIHandler
         }
         return true;
     }
+    bool ifiMeta(bool v) override
+    {
+        // send meta response
+        GrowString js;
+        buildJSONStart(js);
+        JSONWalker::addStringValue(js, IFI_AUTHOR, "by Nobody");
+        JSONWalker::addStringValue(js, IFI_TITLE, "Dummy Game");
+
+        // enable text input
+        JSONWalker::addBoolValue(js, IFI_UI_TEXTINPUT, true);
+        buildJSONEnd();
+
+        GrowString j1;
+        buildJSONStart(j1);
+        JSONWalker::addKeyObject(j1, IFI_META, js.start());
+        buildJSONEnd();
+        _ifi->emitResponse(j1.start());
+        return true;
+    }
         
 };
 
@@ -72,7 +98,13 @@ Handler ifiHandler;
 
 IFI* IFI::create()
 {
+    Logged initLog;
+
+    LOG1(TAG, "loading");
+    
     ifi = new IFIClient();
+    ifiHandler._ifi = ifi;
+    
     return ifi;
 }
 
@@ -102,6 +134,29 @@ static void prompt()
 #endif
 }
 
+
+bool ifiTest(const char* cmd)
+{
+    bool r = false;
+#ifdef IFI_TEST
+    // implement various tests initiated by commands
+    if ((r = !strcmp(cmd, "#choice1")))
+    {
+        const char* c1 = "{\"choice\":[{\"text\":\"Go North\"},{\"text\":\"Go South\"}]}";
+        LOG3(TAG "emit json ", c1);
+        ifi->emitResponse(c1);
+    }
+    else if ((r = !strcmp(cmd, "#choice2")))
+    {
+        const char* c1 = "{\"choice\":{\"text\":\"What to do now?\",\"choice\":[{\"text\":\"Decide to go on\",\"chosen\":\"Go North\"},{\"text\":\"Give up and go back\",\"chosen\":\"Go South\"}]}}";
+        LOG3(TAG "emit json ", c1);
+        ifi->emitResponse(c1);
+    }
+    
+#endif
+    return r;
+}
+
 int main(int argc, char** argv)
 {
     // OK, not much of a game :-)
@@ -111,9 +166,15 @@ int main(int argc, char** argv)
     for (int i = 1; i < argc; ++i)
     {
         if (!strcmp(argv[i], "-e") && i < argc-1)
-            ifiHandler.handle(argv[++i]);
+        {
+            char* js = argv[++i];
+            LOG1(TAG, "initial json " << js);
+            ifiHandler.handle(js);
+        }
     }
 #endif
+
+    ifiHandler._startDone = true;
 
     for (;;)
     {
@@ -131,10 +192,11 @@ int main(int argc, char** argv)
         char buf[1024];
         char* s = gets_s(buf, sizeof(buf));
         if (!s || !strcmp(s, "q")) break;
-        if (*s)
-        {
-            printf("You said, \"%s\".\n", s);
-        }
+        if (!*s) continue;
+
+        if (ifiTest(s)) continue;
+        printf("You said, \"%s\".\n", s);
+
     }
 
     return 0;

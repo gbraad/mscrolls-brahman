@@ -36,8 +36,6 @@ TEMPLATE=lib
 TARGET=ifigame
 QT = 
 
-#CONFIG += dll
-
 
 PROJ = $$PWD/..
 include($$PROJ/app.pri)       
@@ -54,4 +52,12 @@ macx {
 ### //////////////////  ///////////////////////////////////////////
 
 SOURCES = \
-stub.cpp 
+stub.cpp
+
+dummy {
+# dummy game backend, build with qmake config+=dummy
+SOURCES = dummygame.cpp ifiglue.cpp
+}
+
+target.path=$$PROJ/app/$$BUILDT
+INSTALLS += target

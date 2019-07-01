@@ -118,3 +118,6 @@ HEADERS += \
     trnslate.h \
     typedefs.h \
     xeqfun.h
+
+target.path = $$PROJ/app/$$BUILDT
+INSTALLS += target                  
