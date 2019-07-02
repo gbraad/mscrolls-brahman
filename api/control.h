@@ -125,7 +125,8 @@ struct DLLX Control: public APIType
     virtual int getLogLevel() const;
 
 
-    bool evalCommand(const string& cmd);
+    bool evalCommand(const string& cmd, bool echo = true);
+    bool evalJSON(const string& js);
     bool evalClickCommand(const string& cmd);
     bool refreshCommand();
     bool evalCommandDirect(const string& cmd, bool echo);

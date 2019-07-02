@@ -217,6 +217,12 @@ public:
         return Control::evalCommand(STRQ(cmd));
     }
 
+    Q_INVOKABLE bool evalJSON(const QString& cmd)
+    {
+        // IFI only, raw JSON instead of command
+        return Control::evalJSON(STRQ(cmd));
+    }
+
     Q_INVOKABLE bool evalClickCommand(const QString& cmd)
     {
         // when a link in the text is clicked

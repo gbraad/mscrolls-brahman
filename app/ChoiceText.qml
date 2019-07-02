@@ -42,7 +42,7 @@ Item
     property alias color: txt.color
     property alias text: txt.text
     property string chosen
-    property string response: chosen || text
+    property string response: chosen ? chosen : text
 
     height: 48*Units.dp
     width: parent.width

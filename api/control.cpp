@@ -207,6 +207,12 @@ struct ImpIFI: public IFIHandler, public ControlImpBase
         }
         return r;
     }
+
+    bool evalJSON(const string& js)
+    {
+        LOG3("Control, evalJSON ", js);
+        return _ifiHost.eval(js.c_str());
+    }
     
     bool evalCommand(const string& cmd, const ObjectList& ctx)
     {
@@ -1633,6 +1639,29 @@ struct Control::Imp :
         }
     }
 
+    bool evalJSON(const string& js)
+    {
+        // IFI only
+        // evaluate raw json
+        if (js.empty()) return true; 
+
+        // are we json?
+        if (js[0] == '{')
+        {
+            if (!_ifi) return false;
+            
+            bool r = ImpIFI::evalJSON(js);
+            if (r) r = postEval();
+            return r;
+        }
+        else
+        {
+            // fallback to text command otherwise
+            return evalCommand(js);
+        }
+
+    }
+
     bool evalCommand(const string& cmd, bool echo = true)
     {
         return _evalCommandSpecial(cmd, echo) || evalCommandDirect(cmd, echo);
@@ -2266,7 +2295,9 @@ typedef std::string string;
 string Control::currentVersion() const { return _imp->currentVersion(); }
 void Control::setLogLevel(int level) { _imp->setLogLevel(level); }
 int Control::getLogLevel() const { return _imp->getLogLevel(); }
-bool Control::evalCommand(const string& cmd) { return _imp->evalCommand(cmd); }
+bool Control::evalCommand(const string& cmd, bool echo)
+ { return _imp->evalCommand(cmd, echo); }
+bool Control::evalJSON(const string& js) { return _imp->evalJSON(js); }
 bool Control::evalClickCommand(const string& cmd) { return _imp->evalClickCommand(cmd); }
 bool Control::refreshCommand() { return _imp->refreshCommand(); }
 bool Control::evalCommandDirect(const string& cmd, bool echo)

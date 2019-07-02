@@ -85,14 +85,15 @@ C1.SplitView
             Flickable 
             {
                 id: textflick
+                width: parent.width
+                height: parent.height - choicebox.height
                 anchors
                 {
-                    fill: parent
                     bottomMargin: M.Device.hasTouchScreen ? Math.max(gameFont.pixelSize*1.5,20*M.Units.dp) : 10*M.Units.dp
 
                 }
                 flickableDirection: Flickable.VerticalFlick
-                //contentHeight: Math.max(flickarea.height, height)
+                contentHeight: Math.max(area.height, height)
                 clip: true
 
                 onHeightChanged: ensureVisible(area.cursorRectangle)
@@ -133,8 +134,7 @@ C1.SplitView
                     }
 
                     cursorPosition: length
-                    onCursorRectangleChanged:
-                    textflick.ensureVisible(cursorRectangle)
+                    onCursorRectangleChanged: textflick.ensureVisible(cursorRectangle)
 
                     // this is to allow text selection in the game
                     // window on desktop right mouse button

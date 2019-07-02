@@ -86,7 +86,7 @@
 
 // choiceobj
 #define IFI_CHOSEN      "chosen"
-#define IFI_DEFAULT     "default"
+#define IFI_ENABLED     "enabled"
 
 // metaobj
 //#define IFI_TITLE       "title"
