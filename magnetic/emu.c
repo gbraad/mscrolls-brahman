@@ -5115,7 +5115,7 @@ void do_line_a(void)
                 if (!picOp || !prog_format) picVer = 0;
                 //if (!picOp || !prog_format || (get_game() < 3)) picVer = 0;
 
-                if (gfx_ver > 1 || prog_format)
+                if (gfx_ver > 1 || prog_format && (get_game()!=1))
                     picAddr = read_reg(8,1); // A0
                 
                 /* Do_picture(D0) A0F0 */

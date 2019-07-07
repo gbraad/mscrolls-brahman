@@ -461,8 +461,11 @@ SP.PRESS40
 	AND.B   #$7F,D1
 	CMP.B   #2,D1            ;HOW USED?
 	BHI.S   30$              ;TOO MUCH!
+    TEST_B  REMASTER(A4)	; do not wear off aerosoul in remaster
+	BNE.S	45$
 	ADDQ.B  #1,F_AERO(A4)
 	SUBQ.B  #1,D1
+45$	
 	BNE.S   50$             ;BNE= WAS 2, NOW 1 SO GIVE SECOND MSG
   
 *                              ;BEQ= WAS 1, NOW 0 SO GIVE FIRST ONE

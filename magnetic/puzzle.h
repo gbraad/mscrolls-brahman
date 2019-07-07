@@ -435,6 +435,7 @@ struct PuzzleManager: public PuzzleBase
     void buildProductInfoJSON(GrowString&, const string& credits);
 
     void handleEvent(int quiet);
+    void handleEventPawn(int quiet);
     void handleEventJinxter(int quiet);
     void evalKL(const char* s, bool cr = false);
 };

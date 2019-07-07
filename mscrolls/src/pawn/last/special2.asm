@@ -76,7 +76,7 @@
       XREF     P.SAY2,P.SUB,P.TN
       XREF     SETPRON,W.YSI,W.MVG,W.ATMOMT,UTIL.BS,YCANT
 
-      XREF     TBL.MOVE
+      XREF     TBL.MOVE,REMASTER
 
 SP.ADVEN
  
@@ -125,8 +125,11 @@ SP.ADV1
 	MOVE.L  D1,D0
 12$
 	LEA     TMAP.ADV(A4),A6
+*   TEST_B  REMASTER(A4)	; do not time out on adventurer
+*	BNE.S	13$
 	CMP.W   #500,CLOCK(A4)     ;TIME OUT ON ADV
 	BPL.S   15$			;was BMI - oooops 
+13$
 	TEST_W  F_GUARDS(A4)       ;ADV MOVES WHEN U GIVE NOTE
 	BNE.S   15$                ;TO GUARDS   
 90$
