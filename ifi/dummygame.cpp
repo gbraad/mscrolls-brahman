@@ -187,6 +187,18 @@ bool ifiTest(const char* cmd)
         LOG3(TAG "emit json ", c1);
         ifi->emitResponse(c1);
     }
+    else if ((r = !strcmp(cmd, "#choice5")))
+    {
+        const char* c1 = "{\"choice\":[{\"text\":\"Go North\"},{\"text\":{\"color\":\"blue\",\"text\":\"Go South\"}}]}";
+        LOG3(TAG "emit json ", c1);
+        ifi->emitResponse(c1);
+    }
+    else if ((r = !strcmp(cmd, "#choice6")))
+    {
+        const char* c1 = "{\"choice\":{\"text\":{\"italic\":\"true\",\"color\":\"green\",\"text\":\"What now?\"},\"choice\":[{\"text\":\"Decide to go on\",\"chosen\":\"Go North\"},{\"text\":\"Give up and go back\",\"chosen\":\"Go South\"}]}}";
+        LOG3(TAG "emit json ", c1);
+        ifi->emitResponse(c1);
+    }
     
 #endif
     return r;

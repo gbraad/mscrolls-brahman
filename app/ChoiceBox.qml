@@ -45,16 +45,22 @@ FocusScope
     id: choicearea
     property int lineHeight: 48*Units.dp
     
-    property int headerHeight: headerText.length > 0 ? lineHeight : 0
     property string ifiChoiceJSON: QControl.ifiChoiceJSON
-    property string headerText
     property int hmargin: 16*Units.dp
+    property var jchoicemodel
 
     visible: ifiChoiceJSON.length > 0
 
-    ListModel { id: jchoicemodel }
+    Component
+    {
+        id: jchoice
+        ListModel 
+        {
+            dynamicRoles: true
+        }
+    }
 
-    height: jchoicemodel.count*lineHeight + headerHeight
+    height: jchoicemodel.count*lineHeight + header.aheight
 
     onVisibleChanged: if (visible) choices.forceActiveFocus()
     
@@ -65,8 +71,8 @@ FocusScope
         // {text:"heading",choice:[{choiceobj}...]}
         // choiceobj = {"text":"whatever","chosen":"text","enabled":true}
 
-        jchoicemodel.clear();
-        headerText = ""
+        header.setText(null)
+        jchoicemodel = jchoice.createObject()
         if (js.length > 0)
         {
             var obj = JSON.parse(js);
@@ -74,18 +80,16 @@ FocusScope
             if (!Array.isArray(obj))
             {
                 // choice object
-                var t = obj["text"];
-                if (t != null && t.length > 0) headerText = t;
-
+                header.setText(obj["text"]);
                 obj = obj["choice"]
             }
 
             if (Array.isArray(obj))
             {
-                for (var c in obj) jchoicemodel.append(obj[c]);
+                for (var c in obj) jchoicemodel.append(obj[c])
             }
         }
-
+        choices.model = jchoicemodel
     }
 
     onIfiChoiceJSONChanged: updateJSONModel(ifiChoiceJSON)
@@ -104,28 +108,28 @@ FocusScope
         ChoiceText
         {
             id: header
-            text: headerText
-            height: headerHeight
-            visible: headerHeight > 0
+            visible: aheight > 0
         }
 
         ListView
         {
             id: choices
             width: parent.wdith
-            height: choicearea.height - headerHeight
+            height: choicearea.height - header.aheight
             anchors.top: header.bottom
             
-            model: jchoicemodel
             delegate: ChoiceText
             {
                 height: lineHeight
                 width: choicearea.width
-
-                text: model.text
-                chosen: model.chosen || null
-                color: ListView.isCurrentItem ? Theme.primaryColor : Theme.textColor  
+                selected: ListView.isCurrentItem
                 onAccept: acceptChoice(choice)
+
+                Component.onCompleted:
+                {
+                    setText(model.text)
+                    setChosen(model.chosen)
+                }
             }
             
             
@@ -133,7 +137,7 @@ FocusScope
 
             //keyNavigationWraps: true
             focus: true
-            Keys.onReturnPressed:  acceptChoice(currentItem.response)
+            Keys.onReturnPressed:  acceptChoice(currentItem.chosen)
         }
     }
 }

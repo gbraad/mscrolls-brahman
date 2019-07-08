@@ -212,6 +212,8 @@ C1.SplitView
         Layout.minimumHeight: normalTHeight
         Layout.maximumHeight: splitview.height*2/3
 
+        onVisibleChanged: if (visible) forceActiveFocus();
+        
         onWbhChanged:
         {
             if (wbh)

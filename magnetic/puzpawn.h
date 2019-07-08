@@ -535,6 +535,8 @@ static uchar* atDragon2()
     }
 }
 
+#if 0
+// not needed anymore
 static uchar* atKmeet3()
 {
     if (prog_format)
@@ -549,6 +551,7 @@ static uchar* atKmeet3()
         return getcode() + 0x1a52;
     }
 }
+#endif
 
 struct DragonPuzzle: public Puzzle
 {
@@ -660,7 +663,24 @@ struct SafePuzzle: public Puzzle
     {
         if (has("safe").isOpen())
         {
-            text("maybe [search](search safe) the safe");
+            text("maybe [search](look in safe) the safe");
+        }
+    }
+};
+
+struct PouchPuzzle: public Puzzle
+{
+    PouchPuzzle() : Puzzle("pouch") {}
+
+    void run() override
+    {
+        if (state(0,1))
+        {
+            IItem item("pouch");
+            if (item.isOpen())
+                text("Maybe [close the pouch](close pouch).", 1);
+            else
+                text("Maybe [open the pouch](open pouch).", 1);
         }
     }
 };

@@ -225,11 +225,11 @@ The _reply_ json, sent from the back-end to the front-end, can have these terms 
 * `text: "a choice"` or `text: {textobj}`  
    Text to appear on the UI for this choice.
 
-* `disabled: true`  
+* `enabled: false`  
    _Optional_.  Choice is displayed but cannot be selected.
 
-* `chosen:"some text"` or `chosen:{some json}`  
-   _Optional_. If this is chosen, then either the given json is sent back to the back-end as `{some json}`, or if `text` is given; `{"command":"some text"}` is sent.
+* `chosen:"some text"` or `chosen:"{some json}"`  
+   _Optional_. If this is chosen, then either the given json string is sent back to the back-end as `{some json}`, or if `text` is given; `{"command":"some text"}` is sent. Note that raw json must be a json string and quotes inside will need to be escaped.
 
     If omitted and chosen, `{"command":"a choice"}` will be sent, where the command text is the same as the `text` field.
 
@@ -453,7 +453,7 @@ When, selected the same string will be sent back as a command, eg `{"command":"G
 ### Example3: Press to continue
 
 ```
-{"choice":[{"text":"Press a key to continue"}]}
+{"choice":[{"text":"Press a key to continue","chosen":"{}"}]}
 ```
 
 ## Reply Text Merging

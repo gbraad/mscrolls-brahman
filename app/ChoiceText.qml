@@ -39,19 +39,68 @@ import Material 0.3
 Item
 {
     id: ctext
-    property alias color: txt.color
-    property alias text: txt.text
     property string chosen
-    property string response: chosen ? chosen : text
+    property color textColor: Theme.textColor
+    property bool selected: false
+    property alias text: label.text
+    property int normalSize: 16*Units.dp
+    
+    property int aheight: text.length > 0 ? 48*Units.dp : 0
 
-    height: 48*Units.dp
+    height: aheight
     width: parent.width
-
+    
     signal accept(string choice)
+
+    function setText(t)
+    {
+        if (t == null)
+        {
+            label.text = null
+
+            label.font.bold = false
+            label.font.italic = false
+            label.font.pixelSize = normalSize
+            label.font.family = Theme.fontFamily
+            textColor = Theme.textColor
+        }
+        else
+        {
+            if (typeof t === 'object')
+            {
+                setText(t["text"])
+                
+                var c = t["color"]
+                if (c) textColor = c
+
+                c = t["bold"]
+                if (c) label.font.bold = true
+                
+                c = t["italic"]
+                if (c) label.font.italic = true
+
+                c = t["size"]
+                if (c) label.font.pixelSize = c*Units.dp
+                
+                c = t["family"]
+                if (c) label.font.family = c
+            }
+            else
+            {
+                label.text = t
+            }
+        }
+    }
+
+    function setChosen(t)
+    {
+        if (t != null) chosen = t
+        else chosen = label.text
+    }
     
     Text
     {
-        id: txt
+        id: label
         
         height: parent.height
         leftPadding: 16*Units.dp
@@ -59,14 +108,14 @@ Item
         
         verticalAlignment: Text.AlignVCenter
         elide: Text.ElideRight
-        color: Theme.textColor
-        font.pixelSize: 16*Units.dp
+        color: selected ? Theme.primaryColor : textColor
+        font.pixelSize: normalSize
         font.family: Theme.fontFamily
     }
     
     MouseArea
     {
         anchors.fill: parent
-        onClicked: accept(response)
+        onClicked: accept(chosen)
     }
 }

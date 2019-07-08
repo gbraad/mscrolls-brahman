@@ -83,6 +83,7 @@ void PuzzleManager::start(IFMagnetic* host)
         add(new CreamDoorPuzzle);
         add(new PotPuzzle);
         add(new SafePuzzle);
+        add(new PouchPuzzle);
         break;
     case 2: // the guild
         add(new JettyPuzzle);
@@ -212,12 +213,14 @@ std::string PuzzleManager::messageHook(int m, const char* msg)
     switch (get_game())
     {
     case 1: // the pawn
-        if (prog_format) break;
+        //if (prog_format) break;
         if (m == 1105) 
         {
             // revealing a path to the nw
-            IItem::getRoom(28).setExit(IItem::dir_nw, 31);
+            // N/A
+            //IItem::getRoom(28).setExit(IItem::dir_nw, 31);
         }
+        /*
         if (m == 726)
         {
             LOG3("puz ", "died!, trigger undo");
@@ -228,14 +231,17 @@ std::string PuzzleManager::messageHook(int m, const char* msg)
             }
             else _triggerUndo = true;
         }
+        */
         if (m == 92)
         {
             // halfway down the tower.
             // provide a click link to continue the puzzle
             return has("princess") ? "%s, rescuing the princess" : 0;
         }
+        /* // DONE!
         if (m == 718)
         {
+        
             // vanishes
 
             // blue key doesn't vanish anymore
@@ -246,6 +252,7 @@ std::string PuzzleManager::messageHook(int m, const char* msg)
                 return "worked.";
             }
         }
+        */
         if (m == 273)
         {
             // tree trunk room
@@ -262,19 +269,24 @@ std::string PuzzleManager::messageHook(int m, const char* msg)
                 return "%s. Maybe [mix](mix colours) the colours";
             }
         }
-        if (m == 82)
+        if (m == 83)
         {
+            // DONE!
+            
             // narrow track room
-            IItem::getRoom(31).setExit(IItem::dir_n, 32);
+            //IItem::getRoom(31).setExit(IItem::dir_n, 32);
         }
-        if (m == 1122)
+        if (m == 1175)
         {
             // bright light
+            /*
             if (has("pouch"))
             {
                 return "%s. Maybe put [white back](put white in pouch then close pouch) in its pouch";
             }
+            */
         }
+        /* DONE!
         if (m == 995)
         {
             // magician zaps you back to path
@@ -283,6 +295,7 @@ std::string PuzzleManager::messageHook(int m, const char* msg)
             uchar* flagKMeet3 = atKmeet3();
             WRITEW(flagKMeet3, 0);
         }
+        */
         if (m == 1161)
         {
             // game end message
@@ -333,10 +346,7 @@ std::string PuzzleManager::messageHook(int m, const char* msg)
         break;
     }
 
-    if (!cmd.empty())
-    {
-        LOG3("message hook cmd: ", cmd);
-    }
+    //if (!cmd.empty()) LOG3("message hook cmd: ", cmd);
       
     return cmd;
 }
@@ -870,6 +880,7 @@ void PuzzleManager::buildProductInfoJSON(GrowString& buf,
                 "</ul>"
 
                 "<h4>Special Thanks To</h4>"
+                "<li>Duncan Maclean</li>"
                 "<li><p>"
                 "Contributors to the <a href=\\\"https://strandgames.com/community\\\">Strand forum</a> and others who've helped with feedback, suggestions and testing."
                 "</li></p>"                
@@ -991,6 +1002,7 @@ void PuzzleManager::buildProductInfoJSON(GrowString& buf,
 
                 "<h4>Special Thanks</h4>"
                 "<ul>"
+                "<li>Duncan Maclean</li>"
                 "<li>Rob Jarratt for DEC tape restoration</li>"
                 "<li><p>"
                 "Contributors to the <a href=\\\"https://strandgames.com/community\\\">Strand forum</a> and others who've helped with feedback, suggestions and testing."
@@ -1135,6 +1147,7 @@ void PuzzleManager::buildProductInfoJSON(GrowString& buf,
 
                 "<h4>Additional Credit</h4>"
                 "<ul>"
+                "<li>Duncan Maclean</li>"
                 "<li>" "<p>"
                 "Retro PC fonts from <a href=\\\"http://int10h.org/oldschool-pc-fonts\\\">int10.org</a>."
                 "</p>" "</li>"
@@ -1167,6 +1180,135 @@ void PuzzleManager::buildProductInfoJSON(GrowString& buf,
             build.productCoverTextFont("Kanit Thin");
             build.productCoverTextWeight(300);
             build.productCoverEffect("Plasma"); 
+
+            // add features common to magnetic games
+            buildCommonProductInfo(build);
+        }
+        break;
+    case 5: // fish
+        {
+            build.productTitle("Fish");
+            build.productAuthor("by Magnetic Scrolls");
+            build.productPrivacyPolicy("https://strandgames.com/legal/fish-mobile-privacy.html");
+
+            build.productMarketAndroid("market://details?id=com.voidware.fish");
+
+            // XX FIXME
+            build.productMarketIOS("http://itunes.apple.com/us/app/fish/id1440654170?mt=8");
+
+            GrowString gs;
+            const char* c =
+                "<h1>Fish!<br/><em>by Magnetic Scrolls 1988</em></h1>"
+                "<h3><em>Rewarped</em> in 2019</h3>"
+
+                "<h4>Strand Games Team</h4>"
+                "<ul>"
+                "<li>Hugh Steers</li>"
+                "<li>Stefan Meier</li>"
+                "</ul>"
+
+                "<h4>Emulator Team</h4>"
+                "<ul>"
+                "<li>Niclas Karlsson</li>"
+                "<li>David Kinder</li>"
+                "<li>Stefan Meier</li>"
+                "<li>Paul David Doherty</li>"
+                "</ul>"
+
+                "<h4>Magnetic Scrolls Team</h4>"
+                "<ul>"
+                "<li>Anita Sinclair</li>"
+                "<li>Ken Gordon</li>"
+                "<li>Hugh Steers</li>"
+                "<li>Rob Steggles</li>"
+                "<li>Paul Findley</li>"
+                "<li>Doug Rabson</li>"
+                "<li>Richard Huddy</li>"
+                "<li>Bob Coles</li>"
+                "<li>Servan Keondjian</li>"
+                "<li>Steve Lacey (RIP)</li>"
+                "<li>Mark Taylor</li>"
+                "<li>Phil South</li>"
+                "</ul>"
+
+                "<h4>Writing</h4>"
+                "<ul>"
+                "<li>John Molloy</li>"
+                "<li>Peter Kemp</li>"
+                "<li>Phil South</li>"
+                "<li>Rob Steggles</li>"
+                "</ul>"
+
+                "<h4>Original Art</h4>"
+                "<ul>"
+                "<li>Geoff Quilley</li>"
+                "<li>Allan Hunnisett</li>"
+                "<li>Chris Kent</li>"
+                "<li>Richard Selby</li>"
+                "<li>Tristan Humphries</li>"
+                "</ul>"
+
+                "<h4>Remaster Art</h4>"
+                "<ul>"
+                "<li>-</li>"
+                "</ul>"
+
+                "<h4>Music</h4>"
+                "<ul>"
+                "<li>Ben Supper (remaster) Thanks Ben!</li>"
+                "<li>John Molloy (RIP)</li>"
+                //"<li>Pete Kemp</li>"
+                "</ul>"
+
+                "<h4>Testing</h4>"
+                "<ul>"
+                "<li>Anita Sinclair</li>"
+                "<li>Ben Supper</li>"
+                "<li>Phil South</li>"
+                "</ul>"
+
+                "<h4>Special Thanks</h4>"
+                "<ul>"
+                "<li>Rob Jarratt for DEC tape restoration</li>"
+                "<li><p>"
+                "Contributors to the <a href=\\\"https://strandgames.com/community\\\">Strand forum</a> and others who've helped with feedback, suggestions and testing."
+                "</li></p>"
+                "</ul>"
+                "<h4>Additional Credit</h4>"
+                "<ul>"
+                "<li>Duncan Maclean</li>"
+                "<li>" "<p>"
+                "Retro PC fonts from <a href=\\\"http://int10h.org/oldschool-pc-fonts\\\">int10.org</a>."
+                "</p>" "</li>"
+                "</ul>"
+
+                "<h3>Original Platforms</h3>"
+                "<p>"
+                "Amiga, Amstrad CPC, Amstrad PCW, Apple2, Archimedes, Atari ST, Atari XL/XE, Commodore 128/ 64, IBM PC, Macintosh, Sinclair QL, Spectrum 128K, Spectrum +3"
+                "</p>";
+
+
+            gs.append(c);
+
+            // NB: no original credits for Jinxter
+
+            gs.add(0);
+            build.productCredits(gs.start());
+
+            // add theme colours
+
+            const char* colname = "blue";
+            build.productThemePrimeColor(MatCol::get(colname).toString());
+            build.productThemeContrastColor(MatCol::get(MatCol::getContrastName(colname)).toString());
+
+            // cover page
+
+
+            // the plasma blobs
+            build.productCoverTextColor("white");
+            build.productCoverTextFont("Kanit Thin");
+            build.productCoverTextWeight(300);
+            build.productCoverEffect("Fish");
 
             // add features common to magnetic games
             buildCommonProductInfo(build);
@@ -1225,6 +1367,20 @@ void PuzzleManager::evalKL(const char* expr, bool cr)
 #endif
 }
 
+void PuzzleManager::handleEventPawn(int quiet)
+{
+    //LOG3("MS, ", "quiet");
+
+#ifdef USE_KL
+    // alert if our KL takes longer than 5ms
+    TimeAlert qtime("quiet-handler", 5);
+
+    char cmdbuf[128];
+    sprintf(cmdbuf, "(event-hook-handler %d)", quiet);
+    evalKL(cmdbuf);
+#endif
+}
+
 void PuzzleManager::handleEventJinxter(int quiet)
 {
     //LOG3("MS, ", "quiet");
@@ -1244,6 +1400,9 @@ void PuzzleManager::handleEvent(int quiet)
 
     switch (get_game())
     {
+    case 1: // pawn
+        if (_enabled) handleEventPawn(quiet);
+        break;
     case 3: // jinxter
         if (_enabled) handleEventJinxter(quiet);
         break;

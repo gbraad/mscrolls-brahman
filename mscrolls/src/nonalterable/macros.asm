@@ -474,3 +474,16 @@ TST_WORNBYPLAYER	MACRO
 TST_RELATED	MACRO
 		BTST	#0,6(A0)
 		ENDM
+
+* this is for remaster
+
+InfoAtScreen        EQU     1
+InfoAtCommand       EQU     2
+InfoDump            EQU     3
+InfoHeartBeat       EQU     $ff    
+
+InfoTrap  MACRO
+          DC.W  $A0DC
+          ENDM    
+
+    
