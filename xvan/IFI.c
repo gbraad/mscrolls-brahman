@@ -195,8 +195,8 @@ char *CreateJsonObjectMap(void)
 
 int32_t CheckIFI(char *request)
 {
+Log("IFI request: ", request, "\n");
   /* request labels must be in lowercase */
-
   if (strcmp(request, "command") == 0)
     return(IFI_REQ_COMMAND);
   if (strcmp(request, "configdir") == 0)
@@ -230,6 +230,7 @@ int32_t CheckIFI(char *request)
     return(IFI_REQ_PEOPLE);
 
   /* not an IFI request */
+
   return(IFI_NO_IFI);
 }
 
