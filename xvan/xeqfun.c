@@ -884,6 +884,8 @@ resultStruct XeqAddJson(int32_t **trigger)
   int32_t type1 = NO_TYPE;
   int32_t type2 = NO_TYPE;
 
+  resultStruct par_list[2];  /* for debugging */
+
   nr_of_pars = NextOpcode(trigger);
 
   /* Read the parameters. */
@@ -897,6 +899,18 @@ resultStruct XeqAddJson(int32_t **trigger)
   else
     type2 = OBJ_ID; /* obj_id or loc_id will pass */
 
+  if (debug_level == 2) {
+    par_list[0].tag   = STRING;
+    par_list[0].owner = NO_ID;
+    par_list[0].value = 0;
+    if (nr_of_pars == 2) {
+      par_list[1].tag   = type2;
+      par_list[1].owner = NO_ID;
+      par_list[1].value = par2;
+    }
+    DebugLevel_2_pars("AddJson()", par_list, nr_of_pars);
+  }
+    
   if (!(CheckPars(ADDJSON, type1, type2, NO_TYPE, NO_TYPE, NO_TYPE))) {
     return( (resultStruct) {QUIT, NONE, 0} );
   }
@@ -907,6 +921,8 @@ resultStruct XeqAddJson(int32_t **trigger)
   if (nr_of_pars == 2) {
     PrintNumber(par2, 1);
   }
+
+  DebugLevel_2_result( (resultStruct) {STRING, NONE, 0});
 
   return( (resultStruct) {CONTINUE, NONE, 0} );
 }
@@ -1063,10 +1079,16 @@ resultStruct XeqClearJson(int32_t **trigger)
 
   /* change to: ResetString(json_msg_from_story); */
 
+  if (debug_level == 2) {
+    DebugLevel_2_pars("ClearJson()", NULL, 0);
+  }
+
   if (json_msg_from_story) {
     free(json_msg_from_story);
     json_msg_from_story = NULL;
   }
+
+  DebugLevel_2_result( (resultStruct) {CONTINUE, NONE, 0});
 
   return( (resultStruct) {CONTINUE, NONE, 0} );
 }
@@ -1525,10 +1547,11 @@ resultStruct XeqEntrance(int32_t **trigger, usrActionRec *action_rec, int32_t su
 
 resultStruct XeqFlagVal(int32_t **trigger, int32_t value)
 {
-  int32_t  owner;
-  char *str;   /* dummy */
-  int32_t  par;
-  int32_t  type = NO_TYPE;
+  int32_t      owner;
+  char         *str;   /* dummy */
+  int32_t      par;
+  int32_t      type = NO_TYPE;
+  resultStruct result;
 
   resultStruct par_list;  /* for debugging */
 
@@ -1538,6 +1561,13 @@ resultStruct XeqFlagVal(int32_t **trigger, int32_t value)
   /* Read the parameter. */
   if (!GetPar(&owner, &par, &type, &str, trigger))
     return( (resultStruct) {QUIT, NONE, 0} );
+
+  if (debug_level == 2) {
+    par_list.tag   = FLAG_ID;
+    par_list.owner = owner;  /* only for common flags */
+    par_list.value = par;
+    DebugLevel_2_pars("setflag()", &par_list, 1);
+  }
 
   if (CheckPars(SETFLAG, type, NO_TYPE, NO_TYPE, NO_TYPE, NO_TYPE)) {
     if (IsCFlagId(par)) {
@@ -1549,16 +1579,16 @@ resultStruct XeqFlagVal(int32_t **trigger, int32_t value)
       /* Set the value of the flag to `value'. */
       ProcLFlagVal(par, value);
     }
-    if (debug_level == 2) {
-      par_list.tag = FLAG_ID;
-      par_list.owner = owner;  /* only for common flags */
-      par_list.value = par;
-      DebugLevel_2_pars("setflag()", &par_list, 1);
-    }
-    return( (resultStruct) {CONTINUE, NONE, 0} );
+
+    result = (resultStruct) {CONTINUE, NONE, 0};
   }
-  else
-    return( (resultStruct) {QUIT, NONE, 0} );
+  else {
+    result = (resultStruct) {QUIT, NONE, 0};
+  }
+
+  DebugLevel_2_result(result);
+
+  return(result);
 }
 
 
@@ -1579,14 +1609,15 @@ resultStruct XeqGetSubjectOrSpec(int32_t **trigger, int32_t subj_spec)
   /* Syntax: getsubject([word_id]) or */
   /* getspec([word_id])               */
 
-  int32_t  owner;      /* dummy */
-  char     *str;       /* dummy */
-  char    function[15];
-  int32_t  nr_of_pars;
-  int32_t  par = NO_ID;
-  int32_t  type;
+  int32_t      owner;      /* dummy */
+  char         *str;       /* dummy */
+  char         function[15];
+  int32_t      nr_of_pars;
+  int32_t      par  = NO_ID;
+  int32_t      type = WORD_ID /* make checkpar() succeed with 0 parameters */;
+  resultStruct result;
 
-  resultStruct par_list;  /* for debugging */  /* @!@ */
+  resultStruct par_list;  /* for debugging */
 
   if (subj_spec == GET_SUBJECT) {
     strcpy(function, "getsubject()");
@@ -1602,49 +1633,51 @@ resultStruct XeqGetSubjectOrSpec(int32_t **trigger, int32_t subj_spec)
     /* Read the parameter. */
     if (!GetPar(&owner, &par, &type, &str, trigger))
       return( (resultStruct) {QUIT, NONE, 0} );
-
-    if (!CheckPars(subj_spec, type, NO_TYPE, NO_TYPE, NO_TYPE, NO_TYPE)) {
-      return( (resultStruct) {QUIT, NONE, 0} );
     }
-  }
-
-  /* if nr_of_pars was 0, par will have value NO_ID */
 
   if (debug_level == 2) {
-    if (nr_of_pars == 0) {
-      DebugLevel_2_pars(function, &par_list, 0);
-    }
-    else {
-      par_list.tag = WORD_ID;
-      par_list.owner = owner;  /* only for common flags */
-      par_list.value = par;
-      DebugLevel_2_pars(function, &par_list, 1);
-    }
+    par_list.tag   = type;
+    par_list.owner = owner;  /* only for common flags */
+    par_list.value = par;
+    DebugLevel_2_pars(function, &par_list, nr_of_pars);
   }
 
-  return( (resultStruct) {subj_spec, NONE, par} );
+  if (!CheckPars(subj_spec, type, NO_TYPE, NO_TYPE, NO_TYPE, NO_TYPE)) {
+    result = (resultStruct) {QUIT, NONE, 0};
+  }
+  else {
+    /* if nr_of_pars was 0, par will have value NO_ID */
+    result = (resultStruct) {subj_spec, NONE, par};
+  }
+
+  DebugLevel_2_result(result);
+
+  return(result);
 }
 
 
 resultStruct XeqGoTo(int32_t **trigger)
 {
-  int32_t  owner;
-  char     *str;           /* dummy */
-  int32_t  nr_of_pars;
-  int32_t  par1;           /* Object that must be moved. */
-  int32_t  par2;           /* Location to move par1 to.  */
-  int32_t  par3;           /* Number of moves.           */
-  int32_t  type1 = NO_TYPE;
-  int32_t  type2 = NO_TYPE;
-  int32_t  type3 = NO_TYPE;
+  int32_t      owner;
+  char         *str;           /* dummy */
+  int32_t      nr_of_pars;
+  int32_t      par1;           /* Object that must be moved. */
+  int32_t      par2;           /* Location to move par1 to.  */
+  int32_t      par3;           /* Number of moves.           */
+  int32_t      type1 = NO_TYPE;
+  int32_t      type2 = NO_TYPE;
+  int32_t      type3 = NO_TYPE;
+  resultStruct result;
 
-  int32_t  from_loc;
-  int32_t  level       = 1; /* first level to expand the tree to */
-  int32_t  i           = 0;
-  int32_t  found_route = 0;
-  int32_t  stop        = 0;
-  int32_t  *route      = NULL;
-  spanTree *tree       = NULL;
+  int32_t      from_loc;
+  int32_t      level       = 1; /* first level to expand the tree to */
+  int32_t      i           = 0;
+  int32_t      found_route = 0;
+  int32_t      stop        = 0;
+  int32_t      *route      = NULL;
+  spanTree     *tree       = NULL;
+
+  resultStruct par_list[3];  /* for debugging */
 
   /* Read number of parameters. */
   nr_of_pars = NextOpcode(trigger);
@@ -1664,6 +1697,19 @@ resultStruct XeqGoTo(int32_t **trigger)
     /* default is one move at a time. */
     par3 = 1;
     type3 = NUMBER;
+  }
+
+  if (debug_level == 2) {
+    par_list[0].tag   = type1;
+    par_list[0].owner = NONE;
+    par_list[0].value = par1;
+    par_list[1].tag   = type2;
+    par_list[1].owner = NONE;
+    par_list[1].value = par2;
+    par_list[2].tag   = type3;
+    par_list[2].owner = NONE;
+    par_list[2].value = par3;
+    DebugLevel_2_pars("goto()", par_list, 3);
   }
 
   if (CheckPars(GO_TO, type1, type2, type3, NO_TYPE, NO_TYPE)) {
@@ -1696,35 +1742,38 @@ resultStruct XeqGoTo(int32_t **trigger)
     if (!found_route) {
       /* no route found */
       PrintError(84, NULL, NULL);
-      return( (resultStruct) {CONTINUE, NONE, 0} );
+      result = (resultStruct) {CONTINUE, NONE, 0};
+    }
+    else {
+      /* There is a route, move par1.             */
+      /* par3 denotes max nr of moves, stop if 0. */
+      while (i >= 0 && par3 != 0 && !stop) {
+        /* printf("%d Moving ", i);PrintId(par1);printf(" to ");PrintId(route[level-2]);printf("\n"); */
+        if (!Move(par1, route[level-2-i]))
+          return( (resultStruct) {QUIT, NONE, 0} );
+        if (par1 == PLAYER || Owns(par1, PLAYER, -1))
+          /* Update current location. */
+          curr_loc = route[level-2-i];
+        if (route[level-2-i] == par2)
+          stop = 1;
+        i--;
+        par3--;
+      }
     }
 
-    /* There is a route, move par1.             */
-    /* par3 denotes max nr of moves, stop if 0. */
-    while (i >= 0 && par3 != 0 && !stop) {
-      /* printf("%d Moving ", i);PrintId(par1);printf(" to ");PrintId(route[level-2]);printf("\n"); */
-      if (!Move(par1, route[level-2-i]))
-        return( (resultStruct) {QUIT, 0} );
-      if (par1 == PLAYER || Owns(par1, PLAYER, -1))
-        /* Update current location. */
-        curr_loc = route[level-2-i];
-      if (route[level-2-i] == par2)
-        stop = 1;
-      i--;
-      par3--;
-    }
+    result = (resultStruct) {CONTINUE, NONE, 0};
+  }
+  else {  /* CheckPars() failed */
+    result = (resultStruct) {QUIT, NONE, 0};
+  }
 
-    /* Free the spanning tree and route. */
-    free(tree);
-    free(route);
-    return( (resultStruct) {CONTINUE, NONE, 0} );
-  }
-  else {
-    /* Free the spanning tree and route. */
-    free(tree);
-    free(route);
-    return( (resultStruct) {QUIT, NONE, 0} );
-  }
+  /* Free the spanning tree and route. */
+  free(tree);
+  free(route);
+
+  DebugLevel_2_result(result);
+
+  return(result);
 }
 
 
@@ -1734,6 +1783,22 @@ resultStruct XeqHitAnyKey(int32_t **trigger)
 
   /* Skip the number of parameters value. */
   NextOpcode(trigger);
+
+  if (debug_level == 2) {
+    DebugLevel_2_pars("hitanykey():", NULL, 0);
+  }
+
+  /* flush any text still in the output buffer */
+  Output();
+
+Log("before ifi_emitResponse() in hitanykey()\n", "", "");
+
+ //ifi_emitResponse("{\"choice\":[{\"text\":{\"text\":\"<choice text>\",\"color\":\"blue\",\"chosen\":\"{}\"}}]}");
+ ifi_emitResponse("{\"choice\":[{\"text\":{\"text\":\"<choice text>\",\"color\":\"blue\"},\"chosen\":\"{}\"}]}");
+
+Log("after ifi_emitResponse() in hitanykey()\n", "", "");
+
+  DebugLevel_2_result( (resultStruct) {CONTINUE, NONE, 0} );
 
   return( (resultStruct) {CONTINUE, NONE, 0} );
 }
@@ -1757,7 +1822,7 @@ resultStruct XeqIndent(int32_t **trigger)
       }
       else {
         /* build a string for PrintString(), who will check when */
-        /* wrap around the line.                                 */
+        /* to wrap around the line.                              */
         for (par = 0; par<indent; par++)
           spaces_string[par] = SPACE;
         spaces_string[par] = '\0';
@@ -1825,17 +1890,20 @@ resultStruct XeqMove(int32_t **trigger)
 {
   /* Syntax: move(obj, loc/obj/direction [, preposition]) */
 
-  int32_t owner;          /* dummy */
-  char    *str;           /* dummy */
-  int     nr_of_pars = 0;
-  int     index      = -1;
-  int32_t dest;
-  int32_t par1;
-  int32_t par2;
-  int32_t par3;
-  int32_t type1 = NO_TYPE;
-  int32_t type2 = NO_TYPE;
-  int32_t type3 = NO_TYPE;
+  int32_t      owner;          /* dummy */
+  char         *str;           /* dummy */
+  int          nr_of_pars = 0;
+  int          index      = -1;
+  int32_t      dest;
+  int32_t      par1;
+  int32_t      par2;
+  int32_t      par3;
+  int32_t      type1 = NO_TYPE;
+  int32_t      type2 = NO_TYPE;
+  int32_t      type3 = NO_TYPE;
+  resultStruct result;
+
+  resultStruct par_list[3];  /* for debugging */
 
   nr_of_pars = NextOpcode(trigger);
 
@@ -1863,6 +1931,19 @@ resultStruct XeqMove(int32_t **trigger)
   else
     type3 = WORD_ID;  /* or else typecheck will fail */
 
+  if (debug_level == 2) {
+    par_list[0].tag   = type1;
+    par_list[0].owner = NONE;
+    par_list[0].value = par1;
+    par_list[1].tag   = type2;
+    par_list[1].owner = NONE;
+    par_list[1].value = par2;
+    par_list[2].tag   = type3;
+    par_list[2].owner = NONE;
+    par_list[2].value = par3;
+    DebugLevel_2_pars("move()", par_list, 3);
+  }
+
   /* check for NONE parameters */
   /* will not be caught by CheckPars() because type may */
   /* be correct type for NONE-parameter. */
@@ -1876,6 +1957,7 @@ resultStruct XeqMove(int32_t **trigger)
     /* Test for identical parameters. */
     if (par1 == par2) {
       PrintError(85, NULL, NULL);
+      DebugLevel_2_result( (resultStruct) {DISAGREE, NONE, 0});
       return( (resultStruct) {DISAGREE, NONE, 0} );
     }
 
@@ -1917,10 +1999,13 @@ resultStruct XeqMove(int32_t **trigger)
       curr_loc = dest;
     }
 
-    return( (resultStruct) {CONTINUE, NONE, 0} );
+    result = (resultStruct) {CONTINUE, NONE, 0};
   }
-  else
-    return( (resultStruct) {QUIT, NONE, 0} );
+  else {
+    result = (resultStruct) {QUIT, NONE, 0};
+  }
+
+  return(result);
 }
 
 
@@ -2042,6 +2127,7 @@ resultStruct XeqNoMatch(int32_t **trigger)
 
   if (debug_level == 2) {
     DebugLevel_2_pars("nomatch()", NULL, 0);
+    DebugLevel_2_result( (resultStruct) {NO_MATCH, NONE, NO_MATCH});
   }
   return(result);
 }
@@ -2128,18 +2214,29 @@ resultStruct XeqPickOne(int32_t **trigger)
   int          rnd_par;
   resultStruct result;
 
+  resultStruct *par_list = NULL;  /* for debugging */
+
   /* the nr of parameters for this function is not predetermined */
 
   /* Read nr of parameters. */
   nr_of_pars = NextOpcode(trigger);
 
   if (nr_of_pars == 0) {
+    if (debug_level == 2) {
+      DebugLevel_2_pars("pickone()", NULL, 0);
+      DebugLevel_2_result( (resultStruct) {NONE, NONE, 0});
+    }
     return( (resultStruct) {NONE, NONE, 0} );
   }
 
-  /* determine a random parameter between 0 and nr_of_pars-1, borders inclusive*/
+  /* determine a random parameter between 0 and nr_of_pars-1, borders inclusive */
   rnd_par = rand()%nr_of_pars;
 
+  if ( (par_list = (resultStruct*) malloc(nr_of_pars * sizeof(resultStruct))) == NULL) {
+    PrintError(15, NULL, "pickone()");
+    return( (resultStruct) {QUIT, NONE, 0} );
+  }
+     
   /* Read all parameters and store the one we need. */
   for (i=0; i<nr_of_pars; i++) {
     if (!GetPar(&owner, &par, &type, &str, trigger)) {
@@ -2150,7 +2247,18 @@ resultStruct XeqPickOne(int32_t **trigger)
       result.owner = owner; /* for descriptions, triggers, etc */
       result.value = par;
     }
+    if (debug_level == 2) {
+      par_list[i].tag   = type;
+      par_list[i].owner = owner;
+      par_list[i].value = par;
+    }
   }
+
+  if (debug_level == 2) {
+    DebugLevel_2_pars("pickone()", par_list, nr_of_pars);
+  }
+
+  DebugLevel_2_result(result);
 
   return(result);
 }
@@ -2261,7 +2369,15 @@ resultStruct XeqQuit(int32_t **trigger)
   /* Skip nr of parameters. */
   NextOpcode(trigger);
 
+  if (debug_level == 2) {
+    DebugLevel_2_pars("quit()", NULL, 0);
+    DebugLevel_2_result( (resultStruct) {QUIT, NONE, QUIT});
+  }
+Log("before quit\n", "", "");
+  ifi_emitResponse("{\"choice\":[{\"text\":{\"text\":\"Hit a key\", \"color\":\"blue\"}, \"chosen\":\"{}\"}]}");
+Log("after quit\n", "", "");
   return( (resultStruct) {QUIT, NONE, 0} );
+
 }
 
 
@@ -2272,6 +2388,11 @@ resultStruct XeqRestart(int32_t **trigger)
 
   /* Skip the number of parameters value. */
   NextOpcode(trigger);
+
+  if (debug_level == 2) {
+    DebugLevel_2_pars("restart()", NULL, 0);
+    DebugLevel_2_result( (resultStruct) {CONTINUE, NONE, CONTINUE});
+  }
 
   if (!Restart()) {
      return( (resultStruct) {QUIT, NONE, 0} );
@@ -2290,6 +2411,10 @@ resultStruct XeqRestore(int32_t **trigger)
   /* Skip nr of parameters.      */
   NextOpcode(trigger);
 
+  if (debug_level == 2) {
+    DebugLevel_2_pars("restore()", NULL, 0);
+  }
+
   char json_string[] = "{\"loaddata\":\"\"}";
 
   /* only send a {"loaddata":""} json message to the front-end    */
@@ -2297,6 +2422,8 @@ resultStruct XeqRestore(int32_t **trigger)
   /* by XeqIFIrequest() in ifi.c                                  */
 
   ifi_emitResponse(json_string);
+
+  DebugLevel_2_result( (resultStruct) {CONTINUE, NONE, 0});
 
   return( (resultStruct) {CONTINUE, NONE, 0} );
 }
@@ -2315,6 +2442,10 @@ resultStruct XeqSave(int32_t **trigger)
 
   /* Skip nr of parameters.      */
   NextOpcode(trigger);
+
+  if (debug_level == 2) {
+    DebugLevel_2_pars("save()", NULL, 0);
+  }
 
   /* send the following json string format to the front-end: */
   /* {"savedata:{data:"blob"}"} (we do not send a filename)  */
@@ -2345,16 +2476,21 @@ resultStruct XeqSave(int32_t **trigger)
 
   free(json_save);
 
+  DebugLevel_2_result( (resultStruct) {CONTINUE, NONE, 0});
+
   return( (resultStruct) {CONTINUE, NONE, 0} );
 }
 
 
 resultStruct XeqScore(int32_t **trigger)
 {
-  int32_t owner;   /* dummy */
-  char    *str;    /* dummy */
-  int32_t par;     /* score */
-  int32_t type = NO_TYPE;
+  int32_t      owner;   /* dummy */
+  char         *str;    /* dummy */
+  int32_t      par;     /* score */
+  int32_t      type = NO_TYPE;
+  resultStruct result;
+
+  resultStruct par_list;  /* for debugging */
 
   /* This function is used in the disambiguation rules  */
   /* section of a verb. It is special in the way that   */
@@ -2376,14 +2512,26 @@ resultStruct XeqScore(int32_t **trigger)
   if (!GetPar(&owner, &par, &type, &str, trigger))
     return( (resultStruct) {QUIT, NONE, 0} );
 
+  if (debug_level == 2) {
+    par_list.tag   = type;
+    par_list.owner = NONE;
+    par_list.value = par;
+    DebugLevel_2_pars("score()", &par_list, 1);
+  }
+
   if (CheckPars(SCORE, type, NO_TYPE, NO_TYPE, NO_TYPE, NO_TYPE)) {
     /*return( (resultStruct) {CONTINUE, NONE, 0} );*/
     /*return(par);*/
     disambig_score += par;
-    return( (resultStruct) {CONTINUE, NONE, 0} );
+    result = (resultStruct) {CONTINUE, NONE, 0};
   }
-  else
-    return( (resultStruct) {QUIT, NONE, 0} );
+  else {
+    result =  (resultStruct) {QUIT, NONE, 0};
+  }
+
+  DebugLevel_2_result(result);
+
+  return(result);
 }
 
 
@@ -2398,9 +2546,13 @@ resultStruct XeqSendJson(int32_t **trigger)
 
   NextOpcode(trigger);
 
-  /* check if the frond-end wants to receive this json */
-  /* get the message type, which is the first key      */
+  if (debug_level == 2) {
+    DebugLevel_2_pars("sendjson()", NULL, 0);
+  }
 
+  /* check if the front-end wants to receive this json */
+  /* get the message type, which is the first key      */
+Log("Sending json to GUI: ", json_msg_from_story, "\n");
   json_key_1 = ReadJsonString(json_msg_from_story, &index);
 
   /* now check the ifi_stats if we may send this message */
@@ -2446,22 +2598,28 @@ resultStruct XeqSendJson(int32_t **trigger)
   }
   free(json_key_1);
   free(json_key_2);
+
+  DebugLevel_2_result( (resultStruct) {CONTINUE, NONE, 0});
+
   return( (resultStruct) {CONTINUE, NONE, 0} );
 }
 
 
 resultStruct XeqSetAttribute(int32_t **trigger)
 {
-  int32_t par1;            /* for attribute id                               */
-  int32_t owner1;          /* par1 owner                                     */
-  int32_t type1 = NO_TYPE; /* par1 type                                      */
-  int32_t par2;            /* for value that must be stored in the attribute */
-  int32_t owner2;          /* par2 owner                                     */
-  int32_t type2=NO_TYPE;   /* par2 type                                      */
-  char    *str;            /* dummy                                          */
+  int32_t      par1;            /* for attribute id                               */
+  int32_t      owner1;          /* par1 owner                                     */
+  int32_t      type1 = NO_TYPE; /* par1 type                                      */
+  int32_t      par2;            /* for value that must be stored in the attribute */
+  int32_t      owner2;          /* par2 owner                                     */
+  int32_t      type2=NO_TYPE;   /* par2 type                                      */
+  char         *str;            /* dummy                                          */
+  resultStruct result;
 
-  attrInfo *attributes;       /* No malloc(), we only need the pointer          */
-  int32_t  attribute_index;
+  attrInfo     *attributes;    /* No malloc(), we only need the pointer          */
+  int32_t      attribute_index;
+
+  resultStruct par_list[2];  /* for debugging */
 
   /* Syntax: setattribute([loc/obj].attribute, loc/obj/attribute/direction/value/word) */
 
@@ -2482,6 +2640,16 @@ resultStruct XeqSetAttribute(int32_t **trigger)
   if (!GetPar(&owner2, &par2, &type2, &str, trigger))
     return( (resultStruct) {QUIT, NONE, 0} );
 
+  if (debug_level == 2) {
+    par_list[0].tag   = type1;
+    par_list[0].owner = owner1;
+    par_list[0].value = par1;
+    par_list[1].tag   = type2;
+    par_list[1].owner = owner2;
+    par_list[1].value = par2;
+    DebugLevel_2_pars("setattribute()", par_list, 2);
+  }
+
   /* Retrieve the par1 attribute info struct */
   if (!GetAttributeInfo(par1, owner1, &attributes, &attribute_index))
     return( (resultStruct) {QUIT, NONE, 0} );
@@ -2492,10 +2660,15 @@ resultStruct XeqSetAttribute(int32_t **trigger)
     attributes[attribute_index].value_owner = owner2;
     attributes[attribute_index].type        = type2;
     attributes[attribute_index].value       = par2;
-    return( (resultStruct) {CONTINUE, NONE, 0} );
+    result = (resultStruct) {CONTINUE, NONE, 0};
   }
-  else
-    return( (resultStruct) {QUIT, NONE, 0} );
+  else {
+    result = (resultStruct) {QUIT, NONE, 0};
+  }
+
+  DebugLevel_2_result(result);
+
+  return(result);
 }
 
 
@@ -2561,10 +2734,13 @@ resultStruct XeqShuffle(int32_t **trigger)
   /* object list to create randomness in the order in */
   /* which contained objects respond.                 */
 
-  int32_t owner;   /* dummy */
-  char    *str;    /* dummy */
-  int32_t par;
-  int32_t type = NO_TYPE;
+  int32_t      owner;   /* dummy */
+  char         *str;    /* dummy */
+  int32_t      par;
+  int32_t      type = NO_TYPE;
+  resultStruct result;
+
+  resultStruct par_list;  /* for debugging */
 
   /* Skip nr of parameters. */
   NextOpcode(trigger);
@@ -2573,14 +2749,26 @@ resultStruct XeqShuffle(int32_t **trigger)
   if (!GetPar(&owner, &par, &type, &str, trigger))
     return( (resultStruct) {ERROR, NONE, 0} );
 
+  if (debug_level == 2) {
+    par_list.tag   = type;
+    par_list.owner = owner;
+    par_list.value = par;
+    DebugLevel_2_pars("shuffle()", &par_list, 1);
+  }
+
   if (CheckPars(SHUFFLE, type, NO_TYPE, NO_TYPE, NO_TYPE, NO_TYPE)) {
     if (Shuffle(par))
       return( (resultStruct) {CONTINUE, NONE, 0} );
     else
-      return( (resultStruct) {ERROR, NONE, 0} );
+      result = (resultStruct) {ERROR, NONE, 0};
   }
-  else
-    return( (resultStruct) {QUIT, NONE, 0} );
+  else {
+    result = (resultStruct) {QUIT, NONE, 0};
+  }
+
+  DebugLevel_2_result(result);
+
+  return(result);
 }
 
 
@@ -2588,11 +2776,14 @@ resultStruct XeqStartTimer(int32_t **trigger)
 {
   /* Always has one parameter. */
 
-  int32_t owner;   /* dummy */
-  char    *str;    /* dummy */
-  int32_t par;     /* counter id. */
-  int32_t type = NO_TYPE;
-  int32_t index;  /* To correct a compiler bug. */
+  int32_t      owner;   /* dummy */
+  char         *str;    /* dummy */
+  int32_t      par;     /* counter id. */
+  int32_t      type = NO_TYPE;
+  int32_t      index;  /* To correct a compiler bug. */
+  resultStruct result;
+
+  resultStruct par_list;  /* for debugging */
 
   /* Skip nr of pars. */
   NextOpcode(trigger);
@@ -2601,15 +2792,27 @@ resultStruct XeqStartTimer(int32_t **trigger)
   if (!GetPar(&owner, &par, &type, &str, trigger))
     return( (resultStruct) {QUIT, NONE, 0} );
 
+  if (debug_level == 2) {
+    par_list.tag   = type;
+    par_list.owner = owner;
+    par_list.value = par;
+    DebugLevel_2_pars("starttimer()", &par_list, 1);
+  }
+
   if (CheckPars(STARTTIMER, type, NO_TYPE, NO_TYPE, NO_TYPE, NO_TYPE)) {
     index = par-FIRST_TIMER_ID;
     timers[index].state = GO;
     /* compiler chokes on timers[par-FIRST_TIMER_ID]. */
 
-    return( (resultStruct) {CONTINUE, NONE, 0} );
+    result = (resultStruct) {CONTINUE, NONE, 0};
   }
-  else
-    return( (resultStruct) {QUIT, NONE, 0} );
+  else {
+    result = (resultStruct) {QUIT, NONE, 0};
+  }
+
+  DebugLevel_2_result(result);
+
+  return(result);
 }
 
 
@@ -2617,11 +2820,14 @@ resultStruct XeqStopTimer(int32_t **trigger)
 {
   /* Always has one parameter. */
 
-  int32_t owner;   /* dummy */
-  char    *str;    /* dummy */
-  int32_t par;     /* counter id. */
-  int32_t type = NO_TYPE;
-  int32_t index;   /* To correct a compiler bug. */
+  int32_t      owner;   /* dummy */
+  char         *str;    /* dummy */
+  int32_t      par;     /* counter id. */
+  int32_t      type = NO_TYPE;
+  int32_t      index;   /* To correct a compiler bug. */
+  resultStruct result;
+
+  resultStruct par_list;  /* for debugging */
 
   /* Skip nr of pars. */
   NextOpcode(trigger);
@@ -2630,15 +2836,27 @@ resultStruct XeqStopTimer(int32_t **trigger)
   if (!GetPar(&owner, &par, &type, &str, trigger))
     return( (resultStruct) {QUIT, NONE, 0} );
 
+  if (debug_level == 2) {
+    par_list.tag   = type;
+    par_list.owner = owner;
+    par_list.value = par;
+    DebugLevel_2_pars("stoptimer()", &par_list, 1);
+  }
+
   if (CheckPars(STOPTIMER, type, NO_TYPE, NO_TYPE, NO_TYPE, NO_TYPE)) {
     index = par-FIRST_TIMER_ID;
     timers[index].state = STOP;
     /* compiler chokes on timers[par-FIRST_TIMER_ID]. */
 
-    return( (resultStruct) {CONTINUE, NONE, 0} );
+    result = (resultStruct) {CONTINUE, NONE, 0};
   }
-  else
-    return( (resultStruct) {QUIT, NONE, 0} );
+  else {
+    result = (resultStruct) {QUIT, NONE, 0};
+  }
+
+  DebugLevel_2_result(result);
+
+  return(result);  
 }
 
 
@@ -2653,7 +2871,9 @@ resultStruct XeqSynchro(int32_t **trigger, usrActionRec *action_rec, int32_t sub
   int32_t      type[5];     /* 0 .. 4 */
   resultStruct result;
 
-  for (i=0; i<4; i++)
+  resultStruct par_list[5];  /* for debugging */
+
+  for (i=0; i<5; i++)
     type[i] = NO_TYPE;
 
   nr_of_pars = NextOpcode(trigger); /* either 4 or 5 */
@@ -2680,6 +2900,15 @@ resultStruct XeqSynchro(int32_t **trigger, usrActionRec *action_rec, int32_t sub
     type[4] = NUMBER;
   }
 
+  if (debug_level == 2) {
+    for (i=0; i<5; i++) {
+      par_list[i].tag   = type[i];
+      par_list[i].owner = NONE;
+      par_list[i].value = par[i];
+    }
+    DebugLevel_2_pars("synchronize()", par_list, 5);
+  }
+
   if (CheckPars(SYNCHRONIZE, type[0], type[1], type[2], type[3], type[4])) {
     /* types are correct, now check whether */
     /* par[3] is either 0 or 1.               */
@@ -2692,8 +2921,13 @@ resultStruct XeqSynchro(int32_t **trigger, usrActionRec *action_rec, int32_t sub
     result.value = Synchronize(par[0], par[1], par[2], par[3], par[4], action_rec, subject_index);
     return(result);
   }
-  else
-    return( (resultStruct) {QUIT, NONE, 0} );
+  else {
+    result = (resultStruct) {QUIT, NONE, 0};
+  }
+
+  DebugLevel_2_result(result);
+
+  return(result);
 }
 
 
@@ -2827,11 +3061,15 @@ resultStruct XeqUnderline(int32_t **trigger)
 
 resultStruct XeqWait(int32_t **trigger, usrActionRec *action_rec, int32_t subject_index)
 {
-  int32_t owner;   /* dummy */
-  char    *str;    /* dummy */
-  int32_t par;     /* number of turns to wait. */
-  int32_t type = NO_TYPE;
-  int32_t i;
+  int32_t      owner;   /* dummy */
+  char         *str;    /* dummy */
+  int32_t      par;     /* number of turns to wait. */
+  int32_t      type = NO_TYPE;
+  int32_t      i;
+  resultStruct result;
+
+  resultStruct par_list;  /* for debugging */
+
   /* Always has one parameter. */
 
   /* Skip nr of pars. */
@@ -2840,6 +3078,13 @@ resultStruct XeqWait(int32_t **trigger, usrActionRec *action_rec, int32_t subjec
   /* Read parameter. */
   if (!GetPar(&owner, &par, &type, &str, trigger))
     return( (resultStruct) {QUIT, NONE, 0} );
+
+  if (debug_level == 2) {
+    par_list.tag   = type;
+    par_list.owner = owner;
+    par_list.value = par;
+    DebugLevel_2_pars("wait()", &par_list, 1);
+  }
 
   if (CheckPars(WAIT, type, NO_TYPE, NO_TYPE, NO_TYPE, NO_TYPE)) {
     /* 15aug2015 - HandleTimers() is executed after each move. as wait() is a move, */
@@ -2852,10 +3097,15 @@ resultStruct XeqWait(int32_t **trigger, usrActionRec *action_rec, int32_t subjec
         if (HandleTimers(action_rec, subject_index) == QUIT)
           return( (resultStruct) {QUIT, NONE, 0} );
     }
-    return( (resultStruct) {CONTINUE, NONE, 0} );
+    result = (resultStruct) {CONTINUE, NONE, 0};
   }
-  else
-    return( (resultStruct) {QUIT, NONE, 0} );
+  else {
+    result = (resultStruct) {QUIT, NONE, 0};
+  }
+
+  DebugLevel_2_result(result);
+
+  return(result);
 }
 
 

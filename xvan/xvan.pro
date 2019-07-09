@@ -37,7 +37,7 @@ QT =
 
 PROJ = $$PWD/..
 include($$PROJ/app.pri)       
-DEFINES -= TIMERS LOGGING
+DEFINES -= TIMERS
 
 ### ////////////////// BASE ///////////////////////////////////////////
 

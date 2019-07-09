@@ -261,6 +261,8 @@ struct IFIHandler
     {
         if (!json || !*json) return;
 
+        LOG5("IFI Handler; ", json);
+
         //_hctx.clear();
         ifiBegin();
         handleAux(json, string());

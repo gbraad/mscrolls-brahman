@@ -319,7 +319,7 @@ int32_t main(int argc, char **argv)
   story_info.xvan_language  = ENG;
   story_info.story_language = ENG;
 
-  /* malloc space for stack            */
+  /* malloc space for stack  */
   if ((stack = (int32_t *) malloc(STACK_SIZE*sizeof(int32_t))) == NULL) {
     PrintError(15, NULL, "main()");
     ExitProgram();
@@ -360,21 +360,21 @@ int32_t main(int argc, char **argv)
     return(OK);
   }
 
-  /* Read the max possible number of locations. */
+  /* Read the max possible number of locations.           */
   /* Can only do so AFTER the location dir has been read. */
   if (!InitLocations()) {
     ExitProgram();
     return(OK);
   }
 
-  /* Read the max possible number of objects. */
+  /* Read the max possible number of objects.           */
   /* Can only do so AFTER the object dir has been read. */
   if (!InitObjects()) {
     ExitProgram();
     return(OK);
   }
 
-  /* Read attributes.                    */
+  /* Read attributes.                   */
   /* Can only do this AFTER InitDirs(), */
   /* InitLocations() and InitObjects(). */
   if (!InitAttributes()) {

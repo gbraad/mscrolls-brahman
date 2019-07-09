@@ -99,8 +99,6 @@ Handler ifiHandler;
 
 IFI* IFI::create()
 {
-    Logged initLog;
-
     LOG1(TAG, "loading");
     
     ifi = new IFIClient();
@@ -141,7 +139,7 @@ bool ifiTest(const char* cmd)
     bool r = false;
 #ifdef IFI_TEST
     // implement various tests initiated by commands
-    if ((r = !strcmp(cmd, "#blurb")))
+    if ((r = !strcmp(cmd, "#text1")))
     {
         static const char* latin[] = 
             {
@@ -157,11 +155,18 @@ bool ifiTest(const char* cmd)
             };
 
         for (int i = 0; i < ASIZE(latin); ++i)
-        {
-            char buf[1024];
-            sprintf(buf, "{\"text\":\"%s\\n\"}", latin[i]);
-            ifi->emitResponse(buf);
-        }
+            ifi->emitSingleResponse("text", latin[i]);
+    }
+    else if ((r = !strcmp(cmd, "#text2")))
+    {
+        static const char* words[] =
+            {
+                "the ", "cat ", "sat ", "on ", "the ", "mat."
+            };
+
+        for (int i = 0; i < ASIZE(words); ++i)
+            ifi->emitSingleResponse("text", words[i]);
+        
     }
     else if ((r = !strcmp(cmd, "#choice1")))
     {

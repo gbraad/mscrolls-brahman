@@ -124,6 +124,7 @@ C1.SplitView
                     text: qtranscript.textHTML
                     textFormat: TextEdit.RichText
                     readOnly: true
+                    activeFocusOnPress: false
 
                     // clicked on active text
                     onLinkActivated:
