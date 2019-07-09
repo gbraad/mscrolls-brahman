@@ -84,11 +84,11 @@ int32_t LetsPlay(void)
 
   /* set the prompt */
   if (debug_info) {
-    ifi_emitResponse("{prompt:\"debug> \"}");
+    ifi_emitResponse("{\"prompt\":\"debug> \"}");
     strncpy(prompt, "debug> ", MAX_PROMPT_LEN);
   }
   else {
-    ifi_emitResponse("{prompt:\"debug> \"}");
+    ifi_emitResponse("{\"prompt\":\"debug> \"}");
     strncpy(prompt, "> ", MAX_PROMPT_LEN);
   }
 

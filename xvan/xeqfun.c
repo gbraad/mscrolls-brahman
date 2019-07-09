@@ -1793,7 +1793,8 @@ resultStruct XeqHitAnyKey(int32_t **trigger)
 
 Log("before ifi_emitResponse() in hitanykey()\n", "", "");
 
-  ifi_emitResponse("{\"choice\":[{\"text\":{\"text\":\"<choice text>\",\"color\":\"blue\",\"chosen\":\"{}\"}}]}");
+ //ifi_emitResponse("{\"choice\":[{\"text\":{\"text\":\"<choice text>\",\"color\":\"blue\",\"chosen\":\"{}\"}}]}");
+ ifi_emitResponse("{\"choice\":[{\"text\":{\"text\":\"<choice text>\",\"color\":\"blue\"},\"chosen\":\"{}\"}]}");
 
 Log("after ifi_emitResponse() in hitanykey()\n", "", "");
 
