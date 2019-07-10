@@ -85,7 +85,6 @@ extern int32_t  CheckIFI(char*);
 extern char     *ReadJsonString(char*, int*);
 
 extern char     *TranslateKeyword(char*);                                        /* errors.c     */
-extern void     GetAddtlInput(char*, char*);                                     /* input.c      */
 extern void     PrintError(int16_t, resultStruct*, char*);                       /* errors.c     */
 extern void     Output(void);                                                    /* output.c     */
 extern char     *xv_strlwr(char*);                                               /* syntax.c     */
@@ -108,6 +107,8 @@ extern void     Debug(void);                                                    
 
 extern int32_t  NL_XeqYesNo(void);                                               /* NL-xeqfun.c  */
 extern int32_t  ENG_XeqYesNo(void);                                              /* ENG-xeqfun.c */
+extern void     NL_XeqHitAnyKey(void);                                           /* NL-xeqfun.c  */
+extern void     ENG_XeqHitAnyKey(void);                                          /* ENG-xeqfun.c  */
 
 extern char*    AddToString(char*, char*);                                       /* descr2str.c  */
 extern int32_t  NextOpcode(int32_t**);

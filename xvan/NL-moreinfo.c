@@ -28,6 +28,8 @@
 
 #include "keyword.h"
 #include "typedefs.h"
+#include "json.h"
+#include "ifi.h"
 #include "NL-moreinfo.h"
 
 /*************************/
@@ -80,7 +82,7 @@ void NL_MoreInfo(extendedSysDescr *descr, match *hits, char *line_buf)
 
   PrintString("?\n", 0);
 
-  GetAddtlInput(line_buf, prompt);
+  GetAddtlInput(line_buf, prompt, IFI_REQ_COMMAND);
 }
 
 

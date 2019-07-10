@@ -27,6 +27,8 @@
 
 #include "keyword.h"
 #include "typedefs.h"
+#include "json.h"
+#include "ifi.h"
 #include "ENG-xeqfun.h"
 
 extern const char *ifi_getRequest(void);
@@ -36,6 +38,7 @@ extern const char *ifi_getRequest(void);
 /*************************/
 
 int32_t ENG_XeqYesNo(void);
+void    ENG_XeqHitAnyKey(void);
 
 /****************************/
 /* Testfunction definitions */
@@ -46,7 +49,7 @@ int32_t ENG_XeqYesNo(void)
   char yes_or_no[INPUT_LINE_LEN];
 
   while (1) {
-    GetAddtlInput(yes_or_no, "y/n: ");
+    GetAddtlInput(yes_or_no, "y/n: ", IFI_REQ_COMMAND);
     xv_strlwr(yes_or_no);
 
     if ((strcmp(yes_or_no, "yes") == 0) || (strcmp(yes_or_no, "y") == 0))
@@ -58,3 +61,18 @@ int32_t ENG_XeqYesNo(void)
         PrintString("Please enter Yes or No:", 0);
   }
 }
+
+
+void ENG_XeqHitAnyKey(void)
+{
+  char response_txt[INPUT_LINE_LEN];
+Log("In ENG-hitanykey()\n", "", "");
+  /* send the choice */
+  ifi_emitResponse("{\"choice\":[{\"text\":{\"text\":\"Hit enter...\",\"color\":\"blue\"},\"chosen\":\"{\\\"keyhit\\\":true}\"}]}");
+
+  /* now wait for a key to be hit */
+  GetAddtlInput(response_txt, "", IFI_REQ_KEYHIT);
+Log("ENG_XeqHitAnyKey(): na GetAddtlInput(), responsetext is: ", response_txt, "\n");
+  return;
+}
+

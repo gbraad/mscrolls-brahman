@@ -228,6 +228,8 @@ Log("IFI request: ", request, "\n");
     return(IFI_REQ_RANDOM_SEED);
   if (strcmp(request, "people") == 0)
     return(IFI_REQ_PEOPLE);
+  if (strcmp(request, "keyhit") == 0)
+    return(IFI_REQ_KEYHIT);
 
   /* not an IFI request */
 
@@ -542,10 +544,8 @@ int32_t XeqIFIrequest(int32_t request, jsonValue *value)
       break;
 
     default:
-      /* unknown IFI request code           */
-      /* we should never get here, because  */
-      /* error will be detected in function */
-      /* CheckIFI()                         */
+      /* unknown IFI request code */
+      /* do nothing               */
       break;
   } /* switch */
 
@@ -611,6 +611,8 @@ int32_t ProcessJson(char *json_string, char *line_buf)
 
 void SendIFIerror(char *key, char *error_text)
 {
+  /* must change this, does not work with printf */
+
   /* send the error as a json object */
   printf("{\"%s\" : \"%s\"}", key, error_text);
   printf("\n\n");

@@ -46,6 +46,6 @@ extern void    PrintWord(int32_t, int);                       /* output.c     */
 extern void    PrintExtendedSysDescr(extendedSysDescr*, int); /* output.c     */
 extern void    PrintString(char*, int);                       /* output.c     */
 extern int32_t LookUpId(char*);
-extern void    GetAddtlInput(char*, char*);                   /* input.c      */
+extern void    GetAddtlInput(char*, char*, int32_t);          /* input.c      */
 
 #endif

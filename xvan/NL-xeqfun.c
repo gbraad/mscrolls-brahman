@@ -27,6 +27,8 @@
 
 #include "keyword.h"
 #include "typedefs.h"
+#include "json.h"
+#include "ifi.h"
 #include "NL-xeqfun.h"
 
 /*************************/
@@ -34,6 +36,7 @@
 /*************************/
 
 int32_t NL_XeqYesNo(void);
+void    NL_XeqHitAnyKey(void);
 
 /****************************/
 /* Testfunction definitions */
@@ -44,7 +47,7 @@ int32_t NL_XeqYesNo(void)
   char yes_or_no[INPUT_LINE_LEN];
 
   while (1) {
-    GetAddtlInput(yes_or_no, "j/n: ");
+    GetAddtlInput(yes_or_no, "j/n: ", IFI_REQ_COMMAND);
     xv_strlwr(yes_or_no);
 
     if ((strcmp(yes_or_no, "ja") == 0) || (strcmp(yes_or_no, "j") == 0))
@@ -55,4 +58,18 @@ int32_t NL_XeqYesNo(void)
       else
         PrintString("Ja of nee:", 0);
   }
+}
+
+
+void NL_XeqHitAnyKey(void)
+{
+  char response_txt[INPUT_LINE_LEN];
+
+  /* send the choice */
+  ifi_emitResponse("{\"choice\":[{\"text\":{\"text\":\"Toets enter...\",\"color\":\"blue\"},\"chosen\":\"{\\\"keyhit\\\":true}\"}]}");
+
+  /* now wait for a key to be hit */
+  GetAddtlInput(response_txt, "", IFI_REQ_KEYHIT);
+
+  return;
 }

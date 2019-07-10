@@ -29,6 +29,8 @@
 #include "keyword.h"
 #include "typedefs.h"
 #include "trnslate.h"
+#include "json.h"
+#include "ifi.h"
 
 #include "ENG-moreinfo.h"
 
@@ -83,7 +85,7 @@ void ENG_MoreInfo(extendedSysDescr *descr, match *hits, char *line_buf)
   PrintString("?\n", 0);
   Output();
 
-  GetAddtlInput(line_buf, prompt);
+  GetAddtlInput(line_buf, prompt, IFI_REQ_COMMAND);
 }
 
 

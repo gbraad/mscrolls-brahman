@@ -1,0 +1,45 @@
+1  IFI request: configdir
+2  IFI request: datadir
+3  IFI request: story
+4  IFI request: meta
+5  IFI request: objects
+6  IFI request: map
+7  Sending json to GUI: {"map":{"backimage":"images\\mapback.Jpg","title":"initializing map ...","location":4204,"places":[{"id":4204,"name":"south hallway","gx":1,"gy":5,"exits":[4205,4206,4205],"items":[4503]}]}}
+8  IFI request: map
+9  IFI request: picture
+10  IFI request: items
+11  Sending json to GUI: {"items":[]}
+12  IFI request: items
+13  IFI request: people
+14  IFI request: randomseed
+15  Sending json to GUI: {"picture":{"name":"images\\Grating.Png"}}
+16  IFI request: picture
+17  Sending json to GUI: {"exits":321}
+18  IFI request: exits
+19  Sending json to GUI: {"items":[]}
+20  IFI request: items
+21  Sending json to GUI: {"people":[]}
+22  IFI request: people
+23  Sending json to GUI: {"location":4204}
+24  IFI request: location
+25  Sending json to GUI: {"map":{"backimage":"images\\mapback.Jpg","title":"initializing map ...","location":4204,"places":[{"id":4204,"name":"south hallway","gx":1,"gy":5,"exits":[4205,4206,4205],"items":[4503]}]}}
+26  IFI request: map
+27  Sending json to GUI: {"map":{"backimage":"images\\mapback.Jpg","title":"House","location":4204,"places":[{"id":4204,"name":"south hallway","gx":1,"gy":5,"exits":[4205,4206,4205],"items":[4503]}]}}
+28  IFI request: map
+29  In ENG-hitanykey()
+30  GetAddtlInput(): entering outer loop
+31  GetAddtlInput(): json_string is: {"begin":true}
+32  GatAddtlInput(): entering inner loop
+33  IFI request: begin
+34  GetAddtlInput(): unrecognized ifi request
+35  GetAddtlInput(): ifi request does not match ifi_tag
+36  GatAddtlInput(): entering inner loop
+37  0-char in json_string
+38  aan het eind van else-takje
+39  Na inner while loop
+40  GetAddtlInput(): entering outer loop
+41  GetAddtlInput(): json_string is: {"keyhit":true}
+42  GatAddtlInput(): entering inner loop
+43  IFI request: keyhit
+44  GetAddtlInput(): ifi request matches ifi_tag
+45  Voor strcpy()

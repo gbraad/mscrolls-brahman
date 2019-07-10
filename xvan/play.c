@@ -36,6 +36,9 @@
 #include "play.h"
 #include "defs.h"
 
+#include "ifiglue.h"
+
+
 /*************************/
 /* Function declarations */
 /*************************/
@@ -73,6 +76,10 @@ int32_t Play(char *user_input)
 
   /* flush outputline */
   Output();
+
+  /* now force the GUI to flush as well */
+  /* 'flush' is just an arbitrary tag   */
+  ifi_emitResponse("{\"text\":{\"text\":\"\",\"flush\":true}");
 
   /* Reset subject_index. */
   subject_index = 0;

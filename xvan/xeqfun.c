@@ -1791,12 +1791,18 @@ resultStruct XeqHitAnyKey(int32_t **trigger)
   /* flush any text still in the output buffer */
   Output();
 
-Log("before ifi_emitResponse() in hitanykey()\n", "", "");
-
- //ifi_emitResponse("{\"choice\":[{\"text\":{\"text\":\"<choice text>\",\"color\":\"blue\",\"chosen\":\"{}\"}}]}");
- ifi_emitResponse("{\"choice\":[{\"text\":{\"text\":\"<choice text>\",\"color\":\"blue\"},\"chosen\":\"{}\"}]}");
-
-Log("after ifi_emitResponse() in hitanykey()\n", "", "");
+  switch(story_info.story_language) {
+    case NL:
+      NL_XeqHitAnyKey();
+      break;
+    case ENG:
+      ENG_XeqHitAnyKey();
+      break;
+    default:
+      /* unknown language, use English */
+      ENG_XeqHitAnyKey();
+      break;
+  }
 
   DebugLevel_2_result( (resultStruct) {CONTINUE, NONE, 0} );
 
@@ -2374,7 +2380,7 @@ resultStruct XeqQuit(int32_t **trigger)
     DebugLevel_2_result( (resultStruct) {QUIT, NONE, QUIT});
   }
 Log("before quit\n", "", "");
-  ifi_emitResponse("{\"choice\":[{\"text\":{\"text\":\"Hit a key\", \"color\":\"blue\"}, \"chosen\":\"{}\"}]}");
+  ifi_emitResponse("{\"choice\":[{\"text\":{\"text\":\"Hit a key\",\"color\":\"blue\"},\"chosen\":\"{}\"}]}");
 Log("after quit\n", "", "");
   return( (resultStruct) {QUIT, NONE, 0} );
 
