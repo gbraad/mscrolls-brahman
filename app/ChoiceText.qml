@@ -79,10 +79,10 @@ Item
                 c = t["italic"]
                 if (c) label.font.italic = true
 
-                c = t["size"]
+                c = t["pixelsize"]
                 if (c) label.font.pixelSize = c*Units.dp
                 
-                c = t["family"]
+                c = t["font"]
                 if (c) label.font.family = c
             }
             else
@@ -94,7 +94,11 @@ Item
 
     function setChosen(t)
     {
-        if (t != null) chosen = t
+        if (t != null)
+        {
+            if (typeof t !== 'string') t = JSON.stringify(t)
+            chosen = t
+        }
         else chosen = label.text
     }
     

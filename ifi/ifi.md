@@ -228,9 +228,8 @@ The _reply_ json, sent from the back-end to the front-end, can have these terms 
 * `enabled: false`  
    _Optional_.  Choice is displayed but cannot be selected.
 
-* `chosen:"some text"` or `chosen:"{some json}"`  
-   _Optional_. If this is chosen, then either the given json string is sent back to the back-end as `{some json}`, or if `text` is given; `{"command":"some text"}` is sent. Note that raw json must be a json string and quotes inside will need to be escaped.
-
+* `chosen:"some text"` or `chosen:{some json}`  
+   _Optional_. If this is chosen, then either the given `json` is sent to the back-end as `{some json}`, or if `text` is given; `{"command":"some text"}` is sent. 
     If omitted and chosen, `{"command":"a choice"}` will be sent, where the command text is the same as the `text` field.
 
 ### pictureobj
@@ -398,8 +397,17 @@ Same meanings as `item`.
 * `color: "blue"`  
   _Optional_.
 
+* `bold: "true"`
+  _Optional_. Signify bold
+
+* `italic: "true"`
+  _Optional_. Signify italic
+
+* `pixelsize: int`
+  _Optional_. size of font in pixels (scaled by DPI)
+
 * `id:` int  
-   Used internally as channel number. `-1` clears any previous text
+   _Optional_. Used internally as channel number. `-1` clears any previous text
 
 ### soundobj
 
@@ -453,7 +461,7 @@ When, selected the same string will be sent back as a command, eg `{"command":"G
 ### Example3: Press to continue
 
 ```
-{"choice":[{"text":"Press a key to continue","chosen":"{}"}]}
+{"choice":[{"text":"Press a key to continue","chosen":{"something":"true"}}]}
 ```
 
 ## Reply Text Merging

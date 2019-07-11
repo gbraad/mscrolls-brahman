@@ -182,7 +182,7 @@ bool ifiTest(const char* cmd)
     }
     else if ((r = !strcmp(cmd, "#choice3")))
     {
-        const char* c1 = "{\"choice\":{\"text\":\"Here are your choices:\",\"choice\":[{\"text\":\"A command\",\"chosen\":\"Look at me\"},{\"text\":\"Do some JSON\",\"chosen\":\"{\\\"wibble\\\":1}\"}]}}";        
+        const char* c1 = "{\"choice\":{\"text\":\"Here are your choices:\",\"choice\":[{\"text\":\"A command\",\"chosen\":\"Look at me\"},{\"text\":\"Do some JSON\",\"chosen\":{\"wibble\":1,\"foo\":2}}]}}";        
         LOG3(TAG "emit json ", c1);
         ifi->emitResponse(c1);
     }
