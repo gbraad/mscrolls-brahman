@@ -73,6 +73,7 @@ Page
             {
                 text: "Save"
                 subText: "Save game to file"
+                enabled: app.canSaveLoad
                 onClicked:
                 {
                     saveselectorLoader.asynchronous = false
@@ -85,6 +86,7 @@ Page
             {
                 text: "Load"
                 subText: "Load game from file"
+                enabled: app.canSaveLoad
                 onClicked:
                 {
                     loadselectorLoader.asynchronous = false
@@ -120,6 +122,7 @@ Page
                 text: "Restart Game"
                 subText: "Lose all progress and start over"
                 interactive: false
+                enabled: app.canSaveLoad // applies to restart too
                 secondaryItem: MButton
                 {
                     backgroundColor: app.theme.accentColor

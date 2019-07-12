@@ -67,6 +67,10 @@ ApplicationWindow
     property bool enableSaveLoad: QControl.gameEnableSaveLoad()
     property bool enableClassic: QControl.gameEnableClassic()
     property string privacyPolicy: QControl.gamePrivacyPolicy()
+
+    // whether save & load can happen within a choice
+    property bool enableSaveLoadChoice: false
+    property bool canSaveLoad: true
     
     // classic or enabled through IFI meta
     property bool enableRestart: QControl.gameEnableClassic()
@@ -139,6 +143,8 @@ ApplicationWindow
         if (v) enableSaveLoad = true
         v = js["ui_restart"]
         if (v) enableRestart = true
+        v = js["saveloadchoice"]
+        if (v) saveloadchoice = true
         coverImage = QControl.resolveAsset(js["backimage"])
     }
     
