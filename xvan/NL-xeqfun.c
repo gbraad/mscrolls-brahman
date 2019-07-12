@@ -44,10 +44,15 @@ void    NL_XeqHitAnyKey(void);
 
 int32_t NL_XeqYesNo(void)
 {
-  char yes_or_no[INPUT_LINE_LEN];
+  char   yes_or_no[INPUT_LINE_LEN];
+  kvPair kv = {NULL, {0, NULL, 0, 0}};
 
   while (1) {
-    GetAddtlInput(yes_or_no, "j/n: ", IFI_REQ_COMMAND);
+    GetAddtlInput(&kv, "j/n: ", IFI_REQ_COMMAND);
+    /* what we want is in the kv textstring */
+    strncpy(yes_or_no, kv.value.textstring, INPUT_LINE_LEN);
+    yes_or_no[INPUT_LINE_LEN-1] = '\0';
+    ResetKVPair(&kv);  /* free mallocs */
     xv_strlwr(yes_or_no);
 
     if ((strcmp(yes_or_no, "ja") == 0) || (strcmp(yes_or_no, "j") == 0))
@@ -63,13 +68,15 @@ int32_t NL_XeqYesNo(void)
 
 void NL_XeqHitAnyKey(void)
 {
-  char response_txt[INPUT_LINE_LEN];
+  kvPair kv = {NULL, {0, NULL, 0, 0}};
 
   /* send the choice */
   ifi_emitResponse("{\"choice\":[{\"text\":{\"text\":\"Toets enter...\",\"color\":\"blue\"},\"chosen\":\"{\\\"keyhit\\\":true}\"}]}");
 
   /* now wait for a key to be hit */
-  GetAddtlInput(response_txt, "", IFI_REQ_KEYHIT);
+  GetAddtlInput(&kv, "", IFI_REQ_KEYHIT);
+  /* we don't need anything from the kv-pair */
+  ResetKVPair(&kv);  /* free mallocs */
 
   return;
 }

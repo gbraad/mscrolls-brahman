@@ -28,8 +28,9 @@
 /* External declarations */
 /*************************/
 
-extern void PrintString(char*, int);               /* output.c  */
-extern void GetAddtlInput(char*, char*, int32_t);  /* input.c   */
-extern char *xv_strlwr(char*);                     /* keyword.c */
+extern void PrintString(char*, int);                 /* output.c  */
+extern void GetAddtlInput(kvPair*, char*, int32_t);  /* input.c   */
+extern void ResetKVPair(kvPair*);                    /* json.c     */
+extern char *xv_strlwr(char*);                       /* keyword.c */
 
 #endif

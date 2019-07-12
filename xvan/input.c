@@ -38,14 +38,14 @@
 /* Function declarations */
 /*************************/
 
-void    GetAddtlInput(char*, char*, int32_t);
+void    GetAddtlInput(kvPair*, char*, int32_t);
 int32_t ProcessInput(char*);
 
 /************************/
 /* Function definitions */
 /************************/
 
-void GetAddtlInput(char *addtl_input, char *prompt, int32_t ifi_tag)
+void GetAddtlInput(kvPair *kv, char *prompt, int32_t ifi_tag)
  /* addtl_input must have size INPUT_LINE_LEN */
 {
   /* this function is used when we need extra input from the user to  */
@@ -71,9 +71,6 @@ void GetAddtlInput(char *addtl_input, char *prompt, int32_t ifi_tag)
   int       index           = 0;
   int       done            = 0;
   int32_t   IFI_request     = IFI_NO_IFI;
-  kvPair    kv;
-
-char text_to_print[OUTPUT_LINE_LEN];
 
   PrintString("\n", 0);
   PrintString(prompt, 0);
@@ -81,13 +78,11 @@ char text_to_print[OUTPUT_LINE_LEN];
 
   while (!done) {
 Log("GetAddtlInput(): entering outer loop\n", "", "");
-    /* init the kvPair struct */
-    kv.key                 = NULL;
-    kv.value.type          = 0;
-    kv.value.textstring    = NULL; /* not: '\0' */
-    kv.value.int_number    = 0;
-    kv.value.float_number  = 0;
-
+    /* reset the kvPair struct          */
+    /* kv must be initialized by caller, otherwise */
+    /* the first reset (ResetString()) will crash  */
+    ResetKVPair(kv);
+Log("Na ResetKVPair()\n", "", "");
     /* init index */
     index = 0;
 
@@ -104,8 +99,8 @@ Log("GetAddtlInput(): entering outer loop\n", "", "");
 
     /* check for valid json */
     if (!ValidateJson(json_string)) {
-      /* do not set to NULL */
-      addtl_input[0] = '\0';
+      /* the GUI screwed up */
+      /* WE MUST MAKE SORT OF ERROR RETURN */                  /* <<<======= */
       json_string = ResetString(json_string);
       return;
     }
@@ -114,11 +109,11 @@ Log("GetAddtlInput(): json_string is: ", json_string, "\n");
     /* extract the KV-pair       */
 
     while (json_string[index] != '\0') {
-Log("GatAddtlInput(): entering inner loop\n", "", "");
+Log("GetAddtlInput(): entering inner loop\n", "", "");
       /* read the next key-value pair */
 
-      if (GetNextKVpair(json_string, &index, &kv)) {
-        IFI_request = CheckIFI(kv.key);
+      if (GetNextKVpair(json_string, &index, kv)) {
+        IFI_request = CheckIFI(kv->key);
 
         /* must decide here what we do if not an IFI-request       */
         /* for now, send error msg and stop processing this string */
@@ -130,32 +125,32 @@ Log("GetAddtlInput(): unrecognized ifi request\n", "", "");
         /* test for the required ifi tag */
         if (IFI_request == ifi_tag) {
 Log("GetAddtlInput(): ifi request matches ifi_tag\n", "", "");
+          /* we're ready, any other KV pairs in this */
+          /* json will be ignored.                   */
+          /* kv will be returned to the caller, so   */
+          /* they can pick out of it what they need. */
           done = 1;
-Log("Voor strcpy()\n", "", "");
-          strncpy(addtl_input, kv.value.textstring, INPUT_LINE_LEN);
-          addtl_input[INPUT_LINE_LEN-1] = '\0'; /* just make sure */
         }
         else {
 Log("GetAddtlInput(): ifi request does not match ifi_tag\n", "", "");
           /* not the tag we wanted, process the message */
-          XeqIFIrequest(IFI_request, &(kv.value));
+          XeqIFIrequest(IFI_request, &(kv->value));
         }
       }
       else {
         /* ready with this json */
-        if (json_string[index] == '\0') Log("0-char in json_string\n", "", "");
-        /*json_string         = ResetString(json_string);*/
-        /*kv.value.textstring = ResetString(kv.value.textstring);*/
-        /*kv.key              = ResetString(kv.key);*/
+        if (json_string[index] == '\0')
+          Log("0-char in json_string\n", "", "");
 Log("aan het eind van else-takje\n", "", "");
       }
     }  /* while - json processed */
 Log("Na inner while loop\n", "", "");
-    json_string         = ResetString(json_string);
-    kv.value.textstring = ResetString(kv.value.textstring);
-    kv.key              = ResetString(kv.key);
+Log("Voor reset van json_string\n", "", "");
+    json_string = ResetString(json_string);
+Log("Na reset van json_string\n", "", "");
   } /* while - done */
 
+Log("Voor de return uit GetAddtlInput()\n", "", "");
   return;
 }
 

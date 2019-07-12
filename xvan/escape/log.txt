@@ -4,42 +4,208 @@
 4  IFI request: meta
 5  IFI request: objects
 6  IFI request: map
-7  Sending json to GUI: {"map":{"backimage":"images\\mapback.Jpg","title":"initializing map ...","location":4204,"places":[{"id":4204,"name":"south hallway","gx":1,"gy":5,"exits":[4205,4206,4205],"items":[4503]}]}}
-8  IFI request: map
-9  IFI request: picture
-10  IFI request: items
-11  Sending json to GUI: {"items":[]}
-12  IFI request: items
-13  IFI request: people
-14  IFI request: randomseed
-15  Sending json to GUI: {"picture":{"name":"images\\Grating.Png"}}
-16  IFI request: picture
-17  Sending json to GUI: {"exits":321}
-18  IFI request: exits
-19  Sending json to GUI: {"items":[]}
-20  IFI request: items
-21  Sending json to GUI: {"people":[]}
-22  IFI request: people
-23  Sending json to GUI: {"location":4204}
-24  IFI request: location
-25  Sending json to GUI: {"map":{"backimage":"images\\mapback.Jpg","title":"initializing map ...","location":4204,"places":[{"id":4204,"name":"south hallway","gx":1,"gy":5,"exits":[4205,4206,4205],"items":[4503]}]}}
-26  IFI request: map
-27  Sending json to GUI: {"map":{"backimage":"images\\mapback.Jpg","title":"House","location":4204,"places":[{"id":4204,"name":"south hallway","gx":1,"gy":5,"exits":[4205,4206,4205],"items":[4503]}]}}
-28  IFI request: map
-29  In ENG-hitanykey()
-30  GetAddtlInput(): entering outer loop
-31  GetAddtlInput(): json_string is: {"begin":true}
-32  GatAddtlInput(): entering inner loop
-33  IFI request: begin
-34  GetAddtlInput(): unrecognized ifi request
-35  GetAddtlInput(): ifi request does not match ifi_tag
-36  GatAddtlInput(): entering inner loop
-37  0-char in json_string
-38  aan het eind van else-takje
-39  Na inner while loop
-40  GetAddtlInput(): entering outer loop
-41  GetAddtlInput(): json_string is: {"keyhit":true}
-42  GatAddtlInput(): entering inner loop
-43  IFI request: keyhit
-44  GetAddtlInput(): ifi request matches ifi_tag
-45  Voor strcpy()
+7  user_input: ifi_map
+8  Before flush
+9  After flush
+10  Sending json to GUI: {"map":{"backimage":"images\\mapback.Jpg","title":"initializing map ...","location":4204,"places":[{"id":4204,"name":"south hallway","gx":1,"gy":5,"exits":[4205,4206,4205],"items":[4503]}]}}
+11  IFI request: map
+12  IFI request: picture
+13  IFI request: items
+14  user_input: ifi_items
+15  Before flush
+16  After flush
+17  Sending json to GUI: {"items":[]}
+18  IFI request: items
+19  IFI request: people
+20  IFI request: randomseed
+21  Sending json to GUI: {"picture":{"name":"images\\Grating.Png"}}
+22  IFI request: picture
+23  Sending json to GUI: {"exits":321}
+24  IFI request: exits
+25  Sending json to GUI: {"items":[]}
+26  IFI request: items
+27  Sending json to GUI: {"people":[]}
+28  IFI request: people
+29  Sending json to GUI: {"location":4204}
+30  IFI request: location
+31  Sending json to GUI: {"map":{"backimage":"images\\mapback.Jpg","title":"initializing map ...","location":4204,"places":[{"id":4204,"name":"south hallway","gx":1,"gy":5,"exits":[4205,4206,4205],"items":[4503]}]}}
+32  IFI request: map
+33  Sending json to GUI: {"map":{"backimage":"images\\mapback.Jpg","title":"House","location":4204,"places":[{"id":4204,"name":"south hallway","gx":1,"gy":5,"exits":[4205,4206,4205],"items":[4503]}]}}
+34  IFI request: map
+35  In ENG-hitanykey()
+36  GetAddtlInput(): entering outer loop
+37  Na ResetKVPair()
+38  GetAddtlInput(): json_string is: {"begin":true}
+39  GetAddtlInput(): entering inner loop
+40  IFI request: begin
+41  GetAddtlInput(): unrecognized ifi request
+42  GetAddtlInput(): ifi request does not match ifi_tag
+43  GetAddtlInput(): entering inner loop
+44  0-char in json_string
+45  aan het eind van else-takje
+46  Na inner while loop
+47  Voor reset van json_string
+48  Na reset van json_string
+49  GetAddtlInput(): entering outer loop
+50  Na ResetKVPair()
+51  GetAddtlInput(): json_string is: {"keyhit":true}
+52  GetAddtlInput(): entering inner loop
+53  IFI request: keyhit
+54  GetAddtlInput(): ifi request matches ifi_tag
+55  GetAddtlInput(): entering inner loop
+56  0-char in json_string
+57  aan het eind van else-takje
+58  Na inner while loop
+59  Voor reset van json_string
+60  Na reset van json_string
+61  Voor de return uit GetAddtlInput()
+62  ENG_XeqHitAnyKey(): na GetAddtlInput(), responsetext is: nd now look where it got you...\n\nHit enter...\n\n"}
+63  In ENG-hitanykey()
+64  GetAddtlInput(): entering outer loop
+65  Na ResetKVPair()
+66  GetAddtlInput(): json_string is: {"keyhit":true}
+67  GetAddtlInput(): entering inner loop
+68  IFI request: keyhit
+69  GetAddtlInput(): ifi request matches ifi_tag
+70  GetAddtlInput(): entering inner loop
+71  0-char in json_string
+72  aan het eind van else-takje
+73  Na inner while loop
+74  Voor reset van json_string
+75  Na reset van json_string
+76  Voor de return uit GetAddtlInput()
+77  ENG_XeqHitAnyKey(): na GetAddtlInput(), responsetext is: he looks surprised and a bit confused.\n\nHit enter...\n\n"}
+78  In ENG-hitanykey()
+79  GetAddtlInput(): entering outer loop
+80  Na ResetKVPair()
+81  GetAddtlInput(): json_string is: {"keyhit":true}
+82  GetAddtlInput(): entering inner loop
+83  IFI request: keyhit
+84  GetAddtlInput(): ifi request matches ifi_tag
+85  GetAddtlInput(): entering inner loop
+86  0-char in json_string
+87  aan het eind van else-takje
+88  Na inner while loop
+89  Voor reset van json_string
+90  Na reset van json_string
+91  Voor de return uit GetAddtlInput()
+92  ENG_XeqHitAnyKey(): na GetAddtlInput(), responsetext is: nd then everything goes black again....\n\nHit enter...\n\n"}
+1  IFI request: configdir
+2  IFI request: datadir
+3  IFI request: story
+4  IFI request: meta
+5  IFI request: objects
+6  IFI request: map
+7  user_input: ifi_map
+8  Before flush
+9  After flush
+10  Sending json to GUI: {"map":{"backimage":"images\\mapback.Jpg","title":"initializing map ...","location":4204,"places":[{"id":4204,"name":"south hallway","gx":1,"gy":5,"exits":[4205,4206,4205],"items":[4503]}]}}
+11  IFI request: map
+12  IFI request: picture
+13  IFI request: items
+14  user_input: ifi_items
+15  Before flush
+16  After flush
+17  Sending json to GUI: {"items":[]}
+18  IFI request: items
+19  IFI request: people
+20  IFI request: randomseed
+21  Sending json to GUI: {"picture":{"name":"images\\Grating.Png"}}
+22  IFI request: picture
+23  Sending json to GUI: {"exits":321}
+24  IFI request: exits
+25  Sending json to GUI: {"items":[]}
+26  IFI request: items
+27  Sending json to GUI: {"people":[]}
+28  IFI request: people
+29  Sending json to GUI: {"location":4204}
+30  IFI request: location
+31  Sending json to GUI: {"map":{"backimage":"images\\mapback.Jpg","title":"initializing map ...","location":4204,"places":[{"id":4204,"name":"south hallway","gx":1,"gy":5,"exits":[4205,4206,4205],"items":[4503]}]}}
+32  IFI request: map
+33  Sending json to GUI: {"map":{"backimage":"images\\mapback.Jpg","title":"House","location":4204,"places":[{"id":4204,"name":"south hallway","gx":1,"gy":5,"exits":[4205,4206,4205],"items":[4503]}]}}
+34  IFI request: map
+35  In ENG-hitanykey()
+36  GetAddtlInput(): entering outer loop
+37  Na ResetKVPair()
+38  GetAddtlInput(): json_string is: {"begin":true}
+39  GetAddtlInput(): entering inner loop
+40  IFI request: begin
+41  GetAddtlInput(): unrecognized ifi request
+42  GetAddtlInput(): ifi request does not match ifi_tag
+43  GetAddtlInput(): entering inner loop
+44  0-char in json_string
+45  aan het eind van else-takje
+46  Na inner while loop
+47  Voor reset van json_string
+48  Na reset van json_string
+49  GetAddtlInput(): entering outer loop
+50  Na ResetKVPair()
+51  GetAddtlInput(): json_string is: {"keyhit":true}
+52  GetAddtlInput(): entering inner loop
+53  IFI request: keyhit
+54  GetAddtlInput(): ifi request matches ifi_tag
+55  GetAddtlInput(): entering inner loop
+56  0-char in json_string
+57  aan het eind van else-takje
+58  Na inner while loop
+59  Voor reset van json_string
+60  Na reset van json_string
+61  Voor de return uit GetAddtlInput()
+62  ENG_XeqHitAnyKey(): na GetAddtlInput(), responsetext is: nd now look where it got you...\n\nHit enter...\n\n"}
+63  In ENG-hitanykey()
+64  GetAddtlInput(): entering outer loop
+65  Na ResetKVPair()
+66  GetAddtlInput(): json_string is: {"keyhit":true}
+67  GetAddtlInput(): entering inner loop
+68  IFI request: keyhit
+69  GetAddtlInput(): ifi request matches ifi_tag
+70  GetAddtlInput(): entering inner loop
+71  0-char in json_string
+72  aan het eind van else-takje
+73  Na inner while loop
+74  Voor reset van json_string
+75  Na reset van json_string
+76  Voor de return uit GetAddtlInput()
+77  ENG_XeqHitAnyKey(): na GetAddtlInput(), responsetext is: he looks surprised and a bit confused.\n\nHit enter...\n\n"}
+78  In ENG-hitanykey()
+79  GetAddtlInput(): entering outer loop
+80  Na ResetKVPair()
+81  GetAddtlInput(): json_string is: {"command":"west"}
+82  GetAddtlInput(): entering inner loop
+83  IFI request: command
+84  GetAddtlInput(): ifi request does not match ifi_tag
+85  user_input: west
+86  Before flush
+87  After flush
+88  Sending json to GUI: {"picture":{"name":"0"}}
+89  IFI request: picture
+90  Sending json to GUI: {"exits":5}
+91  IFI request: exits
+92  Sending json to GUI: {"items":[]}
+93  IFI request: items
+94  Sending json to GUI: {"people":[]}
+95  IFI request: people
+96  Sending json to GUI: {"location":4206}
+97  IFI request: location
+98  Sending json to GUI: {"map":{"backimage":"images\\mapback.Jpg","title":"House","location":4206,"places":[{"id":4204,"name":"south hallway","gx":1,"gy":5,"dark":true,"exits":[4205,4206,4205],"items":[]},{"id":4206,"name":"south part of the living room","gx":0,"gy":5,"exits":[4210,4204],"items":[4514,4503]}]}}
+99  IFI request: map
+100  GetAddtlInput(): entering inner loop
+101  0-char in json_string
+102  aan het eind van else-takje
+103  Na inner while loop
+104  Voor reset van json_string
+105  Na reset van json_string
+106  GetAddtlInput(): entering outer loop
+107  Na ResetKVPair()
+108  GetAddtlInput(): json_string is: {"keyhit":true}
+109  GetAddtlInput(): entering inner loop
+110  IFI request: keyhit
+111  GetAddtlInput(): ifi request matches ifi_tag
+112  GetAddtlInput(): entering inner loop
+113  0-char in json_string
+114  aan het eind van else-takje
+115  Na inner while loop
+116  Voor reset van json_string
+117  Na reset van json_string
+118  Voor de return uit GetAddtlInput()
+119  ENG_XeqHitAnyKey(): na GetAddtlInput(), responsetext is: nd then everything goes black again....\n\nHit enter...\n\n"}

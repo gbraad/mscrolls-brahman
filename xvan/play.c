@@ -73,14 +73,15 @@ int32_t Play(char *user_input)
   /* individually now under control of letsplay().                   */
 
   int32_t nr_of_subjects = 0;
-
+Log("user_input: ", user_input, "\n");
   /* flush outputline */
   Output();
 
   /* now force the GUI to flush as well */
   /* 'flush' is just an arbitrary tag   */
-  ifi_emitResponse("{\"text\":{\"text\":\"\",\"flush\":true}");
-
+Log("Before flush\n", "", "");
+  ifi_emitResponse("{\"text\":{\"text\":\"..flushing..\",\"flush\":true}}");
+Log("After flush\n", "", "");
   /* Reset subject_index. */
   subject_index = 0;
 

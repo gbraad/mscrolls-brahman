@@ -46,7 +46,8 @@ void NL_PrintNotFound(extendedSysDescr*);
 void NL_MoreInfo(extendedSysDescr *descr, match *hits, char *line_buf)
 {
   extendedSysDescr *sd;
-  int32_t          i =0;
+  kvPair           kv = {NULL, {0, NULL, 0, 0}};
+  int32_t          i  = 0;
 
   /* do not print a capital */
   capital = 0;
@@ -82,7 +83,11 @@ void NL_MoreInfo(extendedSysDescr *descr, match *hits, char *line_buf)
 
   PrintString("?\n", 0);
 
-  GetAddtlInput(line_buf, prompt, IFI_REQ_COMMAND);
+  GetAddtlInput(&kv, prompt, IFI_REQ_COMMAND);
+  /* what we want is in the kv textstring */
+  strncpy(line_buf, kv.value.textstring, INPUT_LINE_LEN);
+  line_buf[INPUT_LINE_LEN-1] = '\0';
+  ResetKVPair(&kv);  /* free mallocs */
 }
 
 

@@ -36,7 +36,8 @@ extern FILE      *testfile;                                  /* init.c     */
 
 extern void      Output(void);                               /* init.c      */
 extern void      PrintError(int16_t, resultStruct*, char*);  /* errors.c    */
-extern void      PrintString(char*, int);                    /* output.c   */
+extern void      PrintString(char*, int);                    /* output.c    */
+extern char      *ResetString(char*);                        /* jsonbld.c   */
 extern char      *AddToString(char*, char*);                 /* descr2str.c */
 extern char      *ResetString(char*);                        /* descr2str.c */
 
@@ -45,6 +46,7 @@ extern int32_t    ValidateJson(char*);
 extern int32_t    ProcessJson(char*, char*);
 extern const char *ifi_getRequest(void);
 extern void       ifi_emitResponse(const char*);
+extern void       ResetKVPair(kvPair*);                      /* json.c */
 extern int32_t    GetNextKVpair(char*, int*, kvPair*);       /* json.c */
 extern int32_t    CheckIFI(char*);                           /* ifi.c  */
 extern int32_t    XeqIFIrequest(int32_t, jsonValue*);        /* ifi.c  */
