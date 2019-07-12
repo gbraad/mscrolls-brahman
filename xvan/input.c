@@ -38,98 +38,124 @@
 /* Function declarations */
 /*************************/
 
-void    GetAddtlInput(char*, char*);
+void    GetAddtlInput(kvPair*, char*, int32_t, int);
 int32_t ProcessInput(char*);
 
 /************************/
 /* Function definitions */
 /************************/
 
-void GetAddtlInput(char *addtl_input, char *prompt)
+void GetAddtlInput(kvPair *kv, char *prompt, int32_t ifi_tag, int block)
  /* addtl_input must have size INPUT_LINE_LEN */
 {
-  /* this function is used when we need extra  */
-  /* input from the user to complete a command */
-  /* e.g. 'x key (when there are more)' or     */
-  /* 'quit'. If we would use ProcessInput()    */
-  /* the interpreter would try to interpret it */
-  /* as a new command.                         */
-  /* NOTE: for missing subject or specifier we */
-  /* do not use this function, because in this */
-  /* situation we just return to letsplay()    */
-  /* with partially completed action records   */
-  /* and new parse syntax                      */
+  /* this function is used when we need extra input from the user to  */
+  /* complete a command, e.g. 'x key (when there are more)' or quit'.'*/
+  /* If we would use ProcessInput() the interpreter would try to      */
+  /* interpret it as a new command.                                   */
+  /* NOTE: for missing subject or specifier we do not use this        */
+  /* function, because in this situation we just return to letsplay() */
+  /* with partially completed action records and new parse syntax     */
+
+  /* 10jul2019: this routine is now also used for {choice} jsons. We  */
+  /* do not rely on the GUI to always sent the response to a choice   */
+  /* as the first message, but allow other jsons as well. However we  */
+  /* will process jsons until we get the expected response. This      */
+  /* means that ifi_tag must always be the last KV-pair in the last   */
+  /* json because we will stop after this tag.                        */
+  /* This requires 2 loops: the inner loop to process all KV-pairs of */
+  /* of the json string and the outer loop in case the processed json */
+  /* string did not contain our request and we need to read another.  */
 
   char      *ifi_get_result = NULL;
-  char      *json_string = NULL;
+  char      *json_string    = NULL;
   int       index           = 0;
-  int32_t   IFI_request  = IFI_NO_IFI;
-  kvPair    kv;
+  int       done            = 0;
+  int32_t   IFI_request     = IFI_NO_IFI;
 
   PrintString("\n", 0);
   PrintString(prompt, 0);
   Output();
 
-  /* init the kvPair struct */
-  kv.key                 = NULL;
-  kv.value.type          = 0;
-  kv.value.textstring    = NULL; /* not: '\0' */
-  kv.value.int_number    = 0;
-  kv.value.float_number  = 0;
+  while (!done) {
+Log("GetAddtlInput(): entering outer loop\n", "", "");
+    /* reset the kvPair struct          */
+    /* kv must be initialized by caller, otherwise */
+    /* the first reset (ResetString()) will crash  */
+    ResetKVPair(kv);
+Log("Na ResetKVPair()\n", "", "");
+    /* init index */
+    index = 0;
 
-  /* read the json string */
-  ifi_get_result = (char*) ifi_getRequest();
+    /* read the json string */
+    ifi_get_result = (char*) ifi_getRequest();
 
-  /* copy ifi_get_result as soon as we get it, because  */
-  /* ifi_getRequest() will use the same address for all */
-  /* calls. So if we don't copy, the result will be     */
-  /* overwritten when another functions calls           */
-  /* ifi_getRequest                                     */
+    /* copy ifi_get_result as soon as we get it, because  */
+    /* ifi_getRequest() will use the same address for all */
+    /* calls. So if we don't copy, the result will be     */
+    /* overwritten when another functions calls           */
+    /* ifi_getRequest                                     */
 
-  json_string = AddToString(json_string, ifi_get_result);
+    json_string = AddToString(json_string, ifi_get_result);
 
-  /* check for valid json */
-  if (!ValidateJson(json_string)) {
-    /* do not set to NULL */
-    addtl_input[0] = '\0';
-    json_string = ResetString(json_string);
-    return;
-  }
-
-  /* we have a valid json here */
-  /* extract the KV-pair       */
-
-  while (json_string[index] != '\0') {
-    /* read the next key-value pair */
-    if (!GetNextKVpair(json_string, &index, &kv)) {
-      /* ready */
-      json_string         = ResetString(json_string);
-      kv.value.textstring = ResetString(kv.value.textstring);
-      kv.key              = ResetString(kv.key);
+    /* check for valid json */
+    if (!ValidateJson(json_string)) {
+      /* the GUI screwed up */
+      /* WE MUST MAKE SORT OF ERROR RETURN */                  /* <<<======= */
+      json_string = ResetString(json_string);
       return;
     }
+Log("GetAddtlInput(): json_string is: ", json_string, "\n");
+    /* we have a valid json here */
+    /* extract the KV-pair       */
 
-    IFI_request = CheckIFI(kv.key);
+    while (json_string[index] != '\0') {
+Log("GetAddtlInput(): entering inner loop\n", "", "");
+      /* read the next key-value pair */
 
-    /* must decide here what we do if not an IFI-request       */
-    /* for now, send error msg and stop processing this string */
-    if (IFI_request == IFI_NO_IFI) {
-      SendIFIerror("UNKNOWN IFI REQUEST: ", kv.key);
-    }
+      if (GetNextKVpair(json_string, &index, kv)) {
+        IFI_request = CheckIFI(kv->key);
 
-    /* test for IFI_REQ_COMMAND */
-    if (IFI_request == IFI_REQ_COMMAND) {
-      strncpy(addtl_input, kv.value.textstring, INPUT_LINE_LEN);
-      addtl_input[INPUT_LINE_LEN-1] = '\0'; /* just make sure */
-    }
-    else {
-      /* we don't care about the return value, here */
-      XeqIFIrequest(IFI_request, &(kv.value));
-    }
-  }  /* while */
-  json_string         = ResetString(json_string);
-  kv.value.textstring = ResetString(kv.value.textstring);
-  kv.key              = ResetString(kv.key);
+        /* must decide here what we do if not an IFI-request       */
+        /* for now, send error msg and stop processing this string */
+        if (IFI_request == IFI_NO_IFI) {
+Log("GetAddtlInput(): unrecognized ifi request\n", "", "");
+          /*SendIFIerror("UNKNOWN IFI REQUEST: ", kv.key);*/
+        }
+
+        /* test for the required ifi tag */
+        if (IFI_request == ifi_tag) {
+Log("GetAddtlInput(): ifi request matches ifi_tag\n", "", "");
+          /* we're ready, any other KV pairs in this */
+          /* json will be ignored.                   */
+          /* kv will be returned to the caller, so   */
+          /* they can pick out of it what they need. */
+          done = 1;
+        }
+        else {
+Log("GetAddtlInput(): ifi request does not match ifi_tag\n", "", "");
+          /* not the tag we wanted, check if we */
+          /* must process the message           */
+          if (!block) {
+            XeqIFIrequest(IFI_request, &(kv->value));
+          }
+else {Log("json msg not processed: ", json_string, "\n");}
+        }
+      }
+      else {
+        /* ready with this json */
+        if (json_string[index] == '\0')
+          Log("0-char in json_string\n", "", "");
+Log("aan het eind van else-takje\n", "", "");
+      }
+    }  /* while - json processed */
+Log("Na inner while loop\n", "", "");
+Log("Voor reset van json_string\n", "", "");
+    json_string = ResetString(json_string);
+Log("Na reset van json_string\n", "", "");
+  } /* while - done */
+
+Log("Voor de return uit GetAddtlInput()\n", "", "");
+  return;
 }
 
 

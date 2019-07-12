@@ -48,6 +48,7 @@ FocusScope
     property string ifiChoiceJSON: QControl.ifiChoiceJSON
     property int hmargin: 16*Units.dp
     property var jchoicemodel
+    property bool active: false
 
     visible: ifiChoiceJSON.length > 0
 
@@ -60,7 +61,7 @@ FocusScope
         }
     }
 
-    height: jchoicemodel.count*lineHeight + header.aheight
+    height: jchoicemodel ? jchoicemodel.count*lineHeight + header.aheight : 0
 
     onVisibleChanged: if (visible) choices.forceActiveFocus()
     
@@ -88,6 +89,7 @@ FocusScope
             {
                 for (var c in obj) jchoicemodel.append(obj[c])
             }
+            choicearea.active = true
         }
         choices.model = jchoicemodel
     }
@@ -97,6 +99,7 @@ FocusScope
     function acceptChoice(t)
     {
         QControl.ifiChoiceJSON = "";
+        choicearea.active = false
         QControl.evalJSON(t)
     }
 

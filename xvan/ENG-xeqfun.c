@@ -27,6 +27,8 @@
 
 #include "keyword.h"
 #include "typedefs.h"
+#include "json.h"
+#include "ifi.h"
 #include "ENG-xeqfun.h"
 
 extern const char *ifi_getRequest(void);
@@ -36,6 +38,7 @@ extern const char *ifi_getRequest(void);
 /*************************/
 
 int32_t ENG_XeqYesNo(void);
+void    ENG_XeqHitAnyKey(void);
 
 /****************************/
 /* Testfunction definitions */
@@ -43,10 +46,16 @@ int32_t ENG_XeqYesNo(void);
 
 int32_t ENG_XeqYesNo(void)
 {
-  char yes_or_no[INPUT_LINE_LEN];
+  char   yes_or_no[INPUT_LINE_LEN];
+  kvPair kv = {NULL, {0, NULL, 0, 0}};
 
   while (1) {
-    GetAddtlInput(yes_or_no, "y/n: ");
+    GetAddtlInput(&kv, "y/n: ", IFI_REQ_COMMAND, 1);
+    /* 1 means do not process other jsons   */
+    /* what we want is in the kv textstring */
+    strncpy(yes_or_no, kv.value.textstring, INPUT_LINE_LEN);
+    yes_or_no[INPUT_LINE_LEN-1] = '\0';
+    ResetKVPair(&kv);  /* free mallocs */
     xv_strlwr(yes_or_no);
 
     if ((strcmp(yes_or_no, "yes") == 0) || (strcmp(yes_or_no, "y") == 0))
@@ -58,3 +67,25 @@ int32_t ENG_XeqYesNo(void)
         PrintString("Please enter Yes or No:", 0);
   }
 }
+
+
+void ENG_XeqHitAnyKey(void)
+{
+  char   response_txt[INPUT_LINE_LEN];
+  kvPair kv = {NULL, {0, NULL, 0, 0}};
+
+Log("In ENG-hitanykey()\n", "", "");
+  /* send the choice */
+  /*ifi_emitResponse("{\"choice\":[{\"text\":{\"text\":\"Hit enter...\",\"color\":\"blue\"},\"chosen\":\"{\\\"keyhit\\\":true}\"}]}");*/
+  ifi_emitResponse("{\"choice\":[{\"text\":{\"text\":\"Hit enter...\",\"color\":\"blue\"},\"chosen\":{\"keyhit\":true}}]}");
+
+  /* now wait for a key to be hit */
+  GetAddtlInput(&kv, "", IFI_REQ_KEYHIT, 1);
+  /* 1 means do not process other jsons      */
+  /* we don't need anything from the kv-pair */
+  ResetKVPair(&kv);  /* free mallocs */
+
+Log("ENG_XeqHitAnyKey(): na GetAddtlInput(), responsetext is: ", response_txt, "\n");
+  return;
+}
+

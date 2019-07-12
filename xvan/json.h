@@ -70,6 +70,7 @@ typedef struct {
 
 extern void   Log(char*, char*, char*);
 
+extern char    *ResetString(char*);
 extern int32_t ProcessJson(char*, char*);
 extern char    *ExpandString(char*, int);
 

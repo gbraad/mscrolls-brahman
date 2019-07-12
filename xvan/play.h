@@ -39,7 +39,10 @@ extern int32_t      curr_loc;                                                /* 
 
 extern char         *outputline;                                             /* init.c     */
 
+extern void         ifi_emitResponse(const char*);
+
 extern void         Output(void);                                            /* output.c   */
+extern void         Log(char*, char*, char*);                                /* output.c   */
 extern void         PrintError(int16_t, resultStruct*, char*);               /* errors.c   */
 extern void         PrintString(char*, int);                                 /* output.c   */
 extern int32_t      FilledOut(extendedSysDescr*);                            /* trnslate.c */

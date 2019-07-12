@@ -73,6 +73,7 @@ Page
     {
         iconName: "other/download"
         name: "Save"
+        enabled: app.canSaveLoad
         hoverAnimation: true
         visible: !Device.isMobile && app.enableSaveLoad
         onTriggered:
@@ -86,6 +87,7 @@ Page
     {
         iconName: "other/upload"
         name: "Restore"
+        enabled: app.canSaveLoad
         hoverAnimation: true
         visible: !Device.isMobile && app.enableSaveLoad
         onTriggered:
@@ -99,12 +101,14 @@ Page
         iconName: "navigation/refresh"
         name: "Refresh"
         hoverAnimation: true
+        enabled: !game.choiceActive
         onTriggered: QControl.refreshCommand()
     },
     Action
     {
         iconName: "content/undo"
         name: "Undo"
+        enabled: !game.choiceActive
         onTriggered: snackbar.open(QControl.undoredo(true))
         visible: QControl.gameEnableUndoRedo()
     },
@@ -120,6 +124,7 @@ Page
     {
         iconName: "content/redo"
         name: "Redo"
+        enabled: !game.choiceActive
         onTriggered: snackbar.open(QControl.undoredo(false))
         visible: QControl.gameEnableUndoRedo()
     },

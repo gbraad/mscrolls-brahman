@@ -117,7 +117,9 @@ void Output(void)
 void BuildOutputJson(char *line, char *json_line)
 {
   /* this function wraps the text in a json string               */
-  /* example: "drop lamp" will wrapped to {"text" : "drop lamp"} */
+  /* example: "drop lamp" will wrapped to {"text":"drop lamp"} */
+
+  /* example: "drop lamp" will wrapped to {"text":{"text:"drop lamp","flush":true}} */
 
   /* build the output json */
   strcpy(json_line, "{\"text\":\"");

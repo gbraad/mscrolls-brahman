@@ -81,8 +81,12 @@ struct Handler: public IFIHandler
         JSONWalker::addStringValue(js, IFI_AUTHOR, "by Nobody");
         JSONWalker::addStringValue(js, IFI_TITLE, "Dummy Game");
 
-        // enable text input
+        // enable features
         JSONWalker::addBoolValue(js, IFI_UI_TEXTINPUT, true);
+        JSONWalker::addBoolValue(js, IFI_UI_COMPASS, true);
+        JSONWalker::addBoolValue(js, IFI_UI_RESTART, true);
+        JSONWalker::addBoolValue(js, IFI_SAVELOAD, true);
+
         buildJSONEnd();
 
         GrowString j1;
@@ -161,7 +165,7 @@ bool ifiTest(const char* cmd)
     {
         static const char* words[] =
             {
-                "the ", "cat ", "sat ", "on ", "the ", "mat."
+                "the ", "[cat](examine cat) ", "sat ", "on ", "the ", "[mat](examine mat)."
             };
 
         for (int i = 0; i < ASIZE(words); ++i)

@@ -36,6 +36,7 @@
 
 /* Helper functions */
 int32_t IsDigit(char);
+void    ResetKVPair(kvPair*);
 void    GetDigitString(char*, char*, int*, int);
 void    ConvertIntegral(char*, int, int32_t*);
 void    ConvertFraction(char*, float*);
@@ -68,6 +69,18 @@ int32_t GetNextKVpair(char*, int*, kvPair*);
 int32_t IsDigit(char digit)
 {
   return (digit >= '0' && digit <= '9');
+}
+
+
+void ResetKVPair(kvPair *kv)
+{
+  kv->key                 = ResetString(kv->key);
+  kv->value.type          = 0;
+  (kv->value).textstring  = ResetString((kv->value).textstring);
+  kv->value.int_number    = 0;
+  kv->value.float_number  = 0;
+
+  return;
 }
 
 

@@ -106,6 +106,8 @@
 #define IFI_CONTRAST_COL "contrast_color"
 #define IFI_AUTOLINK    "autolink"
 #define IFI_UI_RESTART  "ui_restart"
+#define IFI_SAVELOAD    "saveload"
+#define IFI_SAVELOADCHOICE "saveloadchoice"
 //#define IFI_TITLE       "title"
 
 // textobj

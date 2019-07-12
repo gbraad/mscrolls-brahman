@@ -52,10 +52,16 @@ C1.SplitView
     property alias contenty: textflick.contentY
     property alias drawerypos: rdrawer.dypos
     property int texttopmargin: 0
+    property bool choiceActive: choicebox.active
 
     readonly property int compassSize: 200*M.Units.dp
 
     property font gameFont: QControl.prefs.gameFont
+
+    onChoiceActiveChanged:
+    {
+        app.canSaveLoad = app.enableSaveLoadChoice || !choiceActive
+    }
 
     function dtoggle()
     {
@@ -130,7 +136,7 @@ C1.SplitView
                     onLinkActivated:
                     {
                         if (link.startsWith("http://") || link.startsWith("https://")) Qt.openUrlExternally(link);
-                        else QControl.evalClickCommand(link)
+                        else if (!choiceActive) QControl.evalClickCommand(link)
                         //textconsole.forceActiveFocus();
                     }
 
@@ -192,6 +198,7 @@ C1.SplitView
             id: compass
             anchors.fill: parent
             fgColor: app.theme.contrastColor
+            active: !choiceActive
         }
 
         Component.onCompleted:
@@ -234,7 +241,7 @@ C1.SplitView
             }
         }
         
-        visible: app.enableTextInput && !choicebox.visible
+        visible: app.enableTextInput && !choiceActive
 
         Component.onCompleted:
         {
