@@ -38,14 +38,14 @@
 /* Function declarations */
 /*************************/
 
-void    GetAddtlInput(kvPair*, char*, int32_t);
+void    GetAddtlInput(kvPair*, char*, int32_t, int);
 int32_t ProcessInput(char*);
 
 /************************/
 /* Function definitions */
 /************************/
 
-void GetAddtlInput(kvPair *kv, char *prompt, int32_t ifi_tag)
+void GetAddtlInput(kvPair *kv, char *prompt, int32_t ifi_tag, int block)
  /* addtl_input must have size INPUT_LINE_LEN */
 {
   /* this function is used when we need extra input from the user to  */
@@ -133,8 +133,12 @@ Log("GetAddtlInput(): ifi request matches ifi_tag\n", "", "");
         }
         else {
 Log("GetAddtlInput(): ifi request does not match ifi_tag\n", "", "");
-          /* not the tag we wanted, process the message */
-          XeqIFIrequest(IFI_request, &(kv->value));
+          /* not the tag we wanted, check if we */
+          /* must process the message           */
+          if (!block) {
+            XeqIFIrequest(IFI_request, &(kv->value));
+          }
+else {Log("json msg not processed: ", json_string, "\n");}
         }
       }
       else {

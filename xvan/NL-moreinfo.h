@@ -46,7 +46,7 @@ extern void    PrintWord(int32_t, int);                       /* output.c     */
 extern void    PrintExtendedSysDescr(extendedSysDescr*, int); /* output.c     */
 extern void    PrintString(char*, int);                       /* output.c     */
 extern int32_t LookUpId(char*);
-extern void    GetAddtlInput(kvPair*, char*, int32_t);        /* input.c      */
+extern void    GetAddtlInput(kvPair*, char*, int32_t, int);   /* input.c      */
 extern void    ResetKVPair(kvPair*);                          /* json.c       */
 
 #endif

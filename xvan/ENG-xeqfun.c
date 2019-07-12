@@ -50,7 +50,8 @@ int32_t ENG_XeqYesNo(void)
   kvPair kv = {NULL, {0, NULL, 0, 0}};
 
   while (1) {
-    GetAddtlInput(&kv, "y/n: ", IFI_REQ_COMMAND);
+    GetAddtlInput(&kv, "y/n: ", IFI_REQ_COMMAND, 1);
+    /* 1 means do not process other jsons   */
     /* what we want is in the kv textstring */
     strncpy(yes_or_no, kv.value.textstring, INPUT_LINE_LEN);
     yes_or_no[INPUT_LINE_LEN-1] = '\0';
@@ -79,7 +80,8 @@ Log("In ENG-hitanykey()\n", "", "");
   ifi_emitResponse("{\"choice\":[{\"text\":{\"text\":\"Hit enter...\",\"color\":\"blue\"},\"chosen\":{\"keyhit\":true}}]}");
 
   /* now wait for a key to be hit */
-  GetAddtlInput(&kv, "", IFI_REQ_KEYHIT);
+  GetAddtlInput(&kv, "", IFI_REQ_KEYHIT, 1);
+  /* 1 means do not process other jsons      */
   /* we don't need anything from the kv-pair */
   ResetKVPair(&kv);  /* free mallocs */
 

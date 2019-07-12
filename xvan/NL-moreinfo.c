@@ -83,7 +83,8 @@ void NL_MoreInfo(extendedSysDescr *descr, match *hits, char *line_buf)
 
   PrintString("?\n", 0);
 
-  GetAddtlInput(&kv, prompt, IFI_REQ_COMMAND);
+  GetAddtlInput(&kv, prompt, IFI_REQ_COMMAND, 1);
+  /* 1 means do not process other jsons   */
   /* what we want is in the kv textstring */
   strncpy(line_buf, kv.value.textstring, INPUT_LINE_LEN);
   line_buf[INPUT_LINE_LEN-1] = '\0';
