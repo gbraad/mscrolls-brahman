@@ -506,12 +506,20 @@ bool QControl::loadEngine()
     if (!res)
     {
         LOG4("QControl, ", "loading IFI");
+
+        Pump p = std::bind(QControl::_pumpGUI, this);
         
         // fallback to IFI
-        res = parentT::loadIFI();
+        res = parentT::loadIFI(p);
     }
     
     return res;
+}
+
+void QControl::_pumpGUI()
+{
+    assert(_app);
+    _app->processEvents();
 }
 
 QStringList QControl::loadGameFiles()

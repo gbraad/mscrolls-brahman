@@ -741,6 +741,8 @@ public:
         std::cout << "qcontrol cout sentinel " << msg << "\n" << std::flush;
     }
 
+    void _pumpGUI();
+
 public slots:
 
     void uiInitialised()

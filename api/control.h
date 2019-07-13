@@ -71,6 +71,7 @@ struct DLLX Control: public APIType
     virtual ~Control();
 
     typedef Strings Words;
+    typedef std::function<void(void)> Pump;
 
     Prefs::Ref                  _prefs;
     Transcript::Ref             _transcript;
@@ -117,7 +118,7 @@ struct DLLX Control: public APIType
     void coverPageClosed();
 
     bool loadEngine(IFEngineInterface*);
-    bool loadIFI();
+    bool loadIFI(Pump);
     string prefsFilePath() const;
     
     string currentVersion() const;

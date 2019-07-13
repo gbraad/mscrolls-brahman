@@ -37,12 +37,11 @@
 #include <string>
 #include <deque>
 #include <mutex>
+#include <functional>
 #include "jsonwalker.h"
 #include "logged.h"
 #include "ifischema.h"
 #include "ifihandler.h"
-
-struct IFIHandler;
 
 struct IFIHost
 {
@@ -50,6 +49,7 @@ struct IFIHost
     
     typedef std::string string;
     typedef std::deque<char*>  Queue;
+    typedef IFIHandler::Pump Pump;
 
     IFI*        _ifi = 0;
     mutex       _queueLock;
@@ -58,6 +58,8 @@ struct IFIHost
     bool        _inSync = false;
     bool        _more;
     bool        _combineReplies = true;
+
+    Pump        _pump;
 
     virtual ~IFIHost() {}
 
@@ -182,8 +184,16 @@ struct IFIHost
             }
 
             // handle replies
+            int cc = 0;
             for (int i = 0; i < n; ++i)
             {
+                if (++cc == 3)
+                {
+                    // pump every 3
+                    if (_pump) _pump();
+                    cc = 0;
+                }
+                
                 char* r = rep[i];
                 if (r)
                 {
@@ -244,17 +254,6 @@ struct IFIHost
             _inSync = false;
             _ifi->release();
             return _more;
-        }
-        return false;
-    }
-
-    bool _syncRelease()
-    {
-        // sync and release, but only if not already in sync
-        if (!_inSync)
-        {
-            sync();
-            return release();
         }
         return false;
     }

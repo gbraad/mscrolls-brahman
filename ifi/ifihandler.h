@@ -45,7 +45,8 @@
 struct IFIHandler
 {
     typedef std::string string;
-
+    typedef std::function<void(void)> Pump;
+    
     VarSet              _props;
 
     // valid whilst using builders

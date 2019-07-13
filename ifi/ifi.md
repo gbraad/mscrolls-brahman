@@ -78,6 +78,11 @@ See _Interface_ section for details, but startup has the following sequence;
 
   Note that the `name` can be omitted in an `items` reply if the display label is to be the same as the `objects` table entry.
 
+* `{"begin":true}`
+   This is sent to the back-end after the meta handshake, when the cover page is closed and before any `command` evals occur. `begin` is only sent once. This message may safely be ignored by the back-end.
+
+   However, the game engine may, in fact, wish to defer the start of gameplay itself until `begin` is received. For example, if there is title music playing whilst the cover page is displayed, a game with sound effects at the start will wish to wait until the cover page is closed before starting those sound effects.
+
 * `eval`  
   Subsequent evals may contain any IFI request terms, including `command`. It is not essential that the back-end respond to these requests immediately and it is not an error for no `text` to be issued in response. 
 

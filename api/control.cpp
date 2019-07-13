@@ -113,12 +113,13 @@ struct ImpIFI: public IFIHandler, public ControlImpBase
 
     ~ImpIFI() { delete _ifi; }
     
-    bool loadIFI()
+    bool loadIFI(Pump p)
     {
         _ifi = IFI::create();
         if (_ifi)
         {
             _ifiHost.setIFI(_ifi);
+            _ifiHost._pump = p;
             
             // set the emitter 
             _ifi->setEmitter(&IFIHost::emitter, &_ifiHost);
@@ -2317,7 +2318,7 @@ void Control::evalPeopleList(ItemsModel::Entries& list)
 bool Control::loadEngine(IFEngineInterface* be)
 { return _imp->loadEngine(be); }
 
-bool Control::loadIFI() { return _imp->loadIFI(); }
+bool Control::loadIFI(Pump p) { return _imp->loadIFI(p); }
 
 bool Control::sendOptionToEngine(const string& opt, const var& val)
 { return _imp->sendOptionToEngine(opt, val); }
