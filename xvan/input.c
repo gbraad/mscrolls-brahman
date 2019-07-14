@@ -77,12 +77,11 @@ void GetAddtlInput(kvPair *kv, char *prompt, int32_t ifi_tag, int block)
   Output();
 
   while (!done) {
-Log("GetAddtlInput(): entering outer loop\n", "", "");
     /* reset the kvPair struct          */
     /* kv must be initialized by caller, otherwise */
     /* the first reset (ResetString()) will crash  */
     ResetKVPair(kv);
-Log("Na ResetKVPair()\n", "", "");
+
     /* init index */
     index = 0;
 
@@ -104,12 +103,11 @@ Log("Na ResetKVPair()\n", "", "");
       json_string = ResetString(json_string);
       return;
     }
-Log("GetAddtlInput(): json_string is: ", json_string, "\n");
+
     /* we have a valid json here */
     /* extract the KV-pair       */
 
     while (json_string[index] != '\0') {
-Log("GetAddtlInput(): entering inner loop\n", "", "");
       /* read the next key-value pair */
 
       if (GetNextKVpair(json_string, &index, kv)) {
@@ -118,13 +116,11 @@ Log("GetAddtlInput(): entering inner loop\n", "", "");
         /* must decide here what we do if not an IFI-request       */
         /* for now, send error msg and stop processing this string */
         if (IFI_request == IFI_NO_IFI) {
-Log("GetAddtlInput(): unrecognized ifi request\n", "", "");
           /*SendIFIerror("UNKNOWN IFI REQUEST: ", kv.key);*/
         }
 
         /* test for the required ifi tag */
         if (IFI_request == ifi_tag) {
-Log("GetAddtlInput(): ifi request matches ifi_tag\n", "", "");
           /* we're ready, any other KV pairs in this */
           /* json will be ignored.                   */
           /* kv will be returned to the caller, so   */
@@ -132,29 +128,18 @@ Log("GetAddtlInput(): ifi request matches ifi_tag\n", "", "");
           done = 1;
         }
         else {
-Log("GetAddtlInput(): ifi request does not match ifi_tag\n", "", "");
           /* not the tag we wanted, check if we */
           /* must process the message           */
           if (!block) {
             XeqIFIrequest(IFI_request, &(kv->value));
           }
-else {Log("json msg not processed: ", json_string, "\n");}
         }
       }
-      else {
-        /* ready with this json */
-        if (json_string[index] == '\0')
-          Log("0-char in json_string\n", "", "");
-Log("aan het eind van else-takje\n", "", "");
-      }
     }  /* while - json processed */
-Log("Na inner while loop\n", "", "");
-Log("Voor reset van json_string\n", "", "");
+
     json_string = ResetString(json_string);
-Log("Na reset van json_string\n", "", "");
   } /* while - done */
 
-Log("Voor de return uit GetAddtlInput()\n", "", "");
   return;
 }
 

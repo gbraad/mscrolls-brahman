@@ -2379,9 +2379,9 @@ resultStruct XeqQuit(int32_t **trigger)
     DebugLevel_2_pars("quit()", NULL, 0);
     DebugLevel_2_result( (resultStruct) {QUIT, NONE, QUIT});
   }
-Log("before quit\n", "", "");
-  ifi_emitResponse("{\"choice\":[{\"text\":{\"text\":\"Hit a key\",\"color\":\"blue\"},\"chosen\":\"{}\"}]}");
-Log("after quit\n", "", "");
+
+/*  ifi_emitResponse("{\"choice\":[{\"text\":{\"text\":\"Hit a key\",\"color\":\"blue\"},\"chosen\":\"{}\"}]}");*/
+
   return( (resultStruct) {QUIT, NONE, 0} );
 
 }
@@ -2558,7 +2558,6 @@ resultStruct XeqSendJson(int32_t **trigger)
 
   /* check if the front-end wants to receive this json */
   /* get the message type, which is the first key      */
-Log("Sending json to GUI: ", json_msg_from_story, "\n");
   json_key_1 = ReadJsonString(json_msg_from_story, &index);
 
   /* now check the ifi_stats if we may send this message */
