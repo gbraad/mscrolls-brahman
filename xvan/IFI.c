@@ -195,7 +195,6 @@ char *CreateJsonObjectMap(void)
 
 int32_t CheckIFI(char *request)
 {
-Log("IFI request: ", request, "\n");
   /* request labels must be in lowercase */
   if (strcmp(request, "command") == 0)
     return(IFI_REQ_COMMAND);

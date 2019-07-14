@@ -74,7 +74,6 @@ void ENG_XeqHitAnyKey(void)
   char   response_txt[INPUT_LINE_LEN];
   kvPair kv = {NULL, {0, NULL, 0, 0}};
 
-Log("In ENG-hitanykey()\n", "", "");
   /* send the choice */
   /*ifi_emitResponse("{\"choice\":[{\"text\":{\"text\":\"Hit enter...\",\"color\":\"blue\"},\"chosen\":\"{\\\"keyhit\\\":true}\"}]}");*/
   ifi_emitResponse("{\"choice\":[{\"text\":{\"text\":\"Hit enter...\",\"color\":\"blue\"},\"chosen\":{\"keyhit\":true}}]}");
@@ -85,7 +84,6 @@ Log("In ENG-hitanykey()\n", "", "");
   /* we don't need anything from the kv-pair */
   ResetKVPair(&kv);  /* free mallocs */
 
-Log("ENG_XeqHitAnyKey(): na GetAddtlInput(), responsetext is: ", response_txt, "\n");
   return;
 }
 
