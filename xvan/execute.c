@@ -668,7 +668,7 @@ resultStruct XeqPrologue(int32_t verb_id)
 
   verb = verbs[verb_id-FIRST_VERB_ID];
 
-  if ((verb->action_rec)->action1 == PROLOGUE) {  /* @!@ */
+  if ((verb->action_rec)->action1 == PROLOGUE) {
     /* Execute() needs action_rec, subject_index and    */
     /* com_trig vars for functions runverb() and        */
     /* runcommon(). But as these functions are not      */
@@ -774,6 +774,13 @@ resultStruct XeqVerbDefault(usrActionRec *action_rec, int32_t subject_index)
   int32_t       cont   = 1;
   resultStruct  result = {NO_MATCH, NONE, 0};
   compActionRec *arec  = NULL;
+
+  /* when called from t_choice there will not be a valid */  /* @!@ */
+  /* action record. We must check the action1.           */
+  if (!IsVerbId(action_rec->action1)) {
+    PrintError(105, NULL, NULL);
+    return( (resultStruct) {QUIT, NONE, QUIT} );
+  }
 
   if (!InMem(action_rec->action1))
     switch (Load(action_rec->action1)) {

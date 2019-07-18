@@ -321,6 +321,11 @@ char *SaveStoryInfo(char *json_save, int *trailer_len, int8_t *trailer)
     return(ERROR);
   }
 
+  if ( (json_save = StoreInt16(story_info.play_mode, json_save, trailer_len, trailer)) == NULL) {   /* @!@ */
+    PrintError(56, NULL, "SaveStoryInfo()");
+    return(ERROR);
+  }
+
   return(json_save);
 }
 

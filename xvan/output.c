@@ -324,7 +324,7 @@ void PrintString(char *str, int use_json)
                 PrintNumber(attributes[attribute_index].value, use_json);
                 break;
               default:
-                if (attributes[attribute_index].value != NONE) {   /* @!@ */
+                if (attributes[attribute_index].value != NONE) {
                   PrintId(attributes[attribute_index].value, use_json);
                   article = 0;
                 }

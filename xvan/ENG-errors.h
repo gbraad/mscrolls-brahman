@@ -132,7 +132,8 @@ const char *ENG_errors[] = {
   "runtime error (101): Error restoring game state",
   "runtime error (102): Error saving game progress",
   "runtime error (103): New system description too long",
-  "runtime error (104): debug indent error"
+  "runtime error (104): debug indent error",
+  "runtime error (105): XeqVerbDefault(): invalid action, probably called from t_choice"  /* @!@ */
 };
 
 #endif

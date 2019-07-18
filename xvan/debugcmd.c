@@ -42,7 +42,7 @@ int debug_indent = 0;
 
 debugInfo *loc_dbug       = NULL;
 debugInfo *obj_dbug       = NULL;
-debugInfo *com_attr_dbug  = NULL;  /* @@ */
+debugInfo *com_attr_dbug  = NULL;
 debugInfo *loc_attr_dbug  = NULL;
 debugInfo *com_flag_dbug  = NULL;
 debugInfo *loc_flag_dbug  = NULL;

@@ -281,7 +281,7 @@ int32_t GetPar(int32_t *owner, int32_t *par, int32_t *type, char **str, int32_t 
     /* firstdir()   : DIRECTIONS                   */
     /* dest()       : LOC_ID                       */
     /* owner()      : LOC_ID, OBJ_ID, NONE or QUIT */
-    /* pickone()    : anything but a string        */  /* @!@ */
+    /* pickone()    : anything but a string        */
 
     /* First execute the internal action.     */
     /* Testfunctions cannot be parameters, so */

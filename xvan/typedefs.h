@@ -43,6 +43,7 @@ typedef struct {
           char    compiler_version[MAX_COMPILER_LEN];
           int16_t xvan_language;
           int16_t story_language;
+          int16_t play_mode;        /* @!@ */
         } storyInfo;
 
 

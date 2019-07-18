@@ -132,7 +132,8 @@ const char *NL_errors[] = {
   "runtime error (101): Fout bij laden van opgeslagen game",
   "runtime error (102): Fout bij het opslaan van de voortgang",
   "runtime error (103): Nieuwe systeembeschrijving is te lang",
-  "runtime error (104): debug inspring fout"
+  "runtime error (104): debug inspring fout",
+  "runtime error (105): XeqVerbDefault(): ongeldige actie, mogelijke aanroep vanuit t_choice"  /* @!@ */
 };
 
 #endif

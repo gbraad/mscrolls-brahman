@@ -117,7 +117,7 @@ int32_t XeqEqual(int32_t **trigger)
    /* Not necessary to call CheckPars() here. All pars are */
    /* ok as long as they are of the same type.             */
    if ( ((type1 == NO_TYPE || type2 == NO_TYPE) || (type1 == type2)) && (par1 == par2) ) {
-     result = OK;  /* @!@ */
+     result = OK;
    }
    else {
      result = ERROR; /* par1 and par2 are not equal */

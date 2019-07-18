@@ -152,6 +152,12 @@ int32_t ProcessInput(char *prompt)
 
   char line_buf[INPUT_LINE_LEN];
 
+  /* check if we must updte the choices menu */   /* @!@ */
+  /* for choice or hybrid mode               */
+  if (story_info.play_mode != INTERPRETER_MODE) {
+    UpdateChoicesMenu();
+  }    
+
   /* Input is either read from the */
   /* IFI interface or from a file  */
 
@@ -240,7 +246,7 @@ int32_t ProcessInput(char *prompt)
   else {
     /* it's an invalid json string */
     /* DO NOTHING OR SEND AN ERROR JSON BACKT TO FE? */
-    /* stay in the loop, we need a user command */
+    /* stay in the loop, we need a user command      */
   }
 
   free(json_string);

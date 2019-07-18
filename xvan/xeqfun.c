@@ -61,6 +61,7 @@ int32_t XeqTry(int32_t**);
 int32_t XeqValDir(int32_t**);
 int32_t XeqYesNo(int32_t**);
 
+resultStruct XeqAddChoice(int32_t**);
 resultStruct XeqAddJson(int32_t**);
 resultStruct XeqAgree(int32_t**);
 resultStruct XeqBackground(int32_t**);
@@ -871,6 +872,67 @@ int32_t XeqTestFun(int32_t opcode, int32_t **trigger, usrActionRec *action_rec, 
 /* <value> : integer value.                                 */
 /************************************************************/
 
+resultStruct XeqAddChoice(int32_t **trigger)
+{
+  /* addchoice(string, trigger/string) */
+
+  int32_t owner1;
+  int32_t owner2;
+  char    *str1;
+  char    *str2;
+  int32_t par1;
+  int32_t par2;
+  int32_t type1 = NO_TYPE;
+  int32_t type2 = NO_TYPE;
+
+  resultStruct par_list[2];  /* for debugging */
+
+  /* skip nr_of_pars which is always 2 */
+  NextOpcode(trigger);
+
+  /* Read the parameters. */
+  if (!GetPar(&owner1, &par1, &type1, &str1, trigger)) {
+    return( (resultStruct) {QUIT, NONE, 0} );
+  }
+
+  if (!GetPar(&owner2, &par2, &type2, &str2, trigger)) {
+    return( (resultStruct) {QUIT, NONE, 0} );
+  }
+
+  if (debug_level == 2) {
+    par_list[0].tag   = type1;
+    par_list[0].owner = owner1;
+    par_list[0].value = par1;
+    par_list[1].tag   = type2;
+    par_list[1].owner = owner2;
+    par_list[1].value = par2;
+    DebugLevel_2_pars("addchoice()", par_list, 2);
+  }
+    
+  if (!(CheckPars(ADDCHOICE, type1, type2, NO_TYPE, NO_TYPE, NO_TYPE))) {
+    return( (resultStruct) {QUIT, NONE, 0} );
+  }
+
+  /* now add the parameters to the choice string    */
+  /* 1 means print to json string and not to screen */
+
+  /* we must make: {"text":"string1", "chosen":"string2"} */
+  /* we cannot directly use a trigger here, because the   */
+  /* wildcards will be set during parsing the user input  */
+
+  PrintString("\"text\":\"", 1);
+  PrintString(str1, 1);
+  PrintString("\",\"chosen\":", 1);
+  PrintString("\"", 1);
+  PrintString(str2, 1);
+  PrintString("\"}", 1);
+
+  DebugLevel_2_result( (resultStruct) {STRING, NONE, 0} );
+
+  return( (resultStruct) {CONTINUE, NONE, 0} );
+}
+
+
 resultStruct XeqAddJson(int32_t **trigger)
 {
   /* addjson(string [, loc/obj]) */
@@ -908,7 +970,7 @@ resultStruct XeqAddJson(int32_t **trigger)
       par_list[1].owner = NO_ID;
       par_list[1].value = par2;
     }
-    DebugLevel_2_pars("AddJson()", par_list, nr_of_pars);
+    DebugLevel_2_pars("addjson()", par_list, nr_of_pars);
   }
     
   if (!(CheckPars(ADDJSON, type1, type2, NO_TYPE, NO_TYPE, NO_TYPE))) {
@@ -996,9 +1058,9 @@ resultStruct XeqBlockExit(int32_t **trigger)
   int32_t  par2;
   int32_t  type1 = NO_TYPE;
   int32_t  type2 = NO_TYPE;
-  resultStruct result = {CONTINUE ,NONE, 0};  /* @!@ */
+  resultStruct result = {CONTINUE ,NONE, 0};
 
-  resultStruct par_list[2];  /* for debugging */  /* @!@ */
+  resultStruct par_list[2];  /* for debugging */
 
   /* Skip nr of parameters (which will be 2). */
   NextOpcode(trigger);
@@ -1119,7 +1181,7 @@ resultStruct XeqClearWindow(int32_t **trigger, int which_one)
 }
 
 
-resultStruct XeqContents(int32_t **trigger, usrActionRec *action_rec, int32_t subject_index)  /* @!@ */
+resultStruct XeqContents(int32_t **trigger, usrActionRec *action_rec, int32_t subject_index)
 {
   /* Contents(loc/obj) always has one parameter. */
 
@@ -1174,7 +1236,7 @@ resultStruct XeqCount(int32_t **trigger)
 
   int32_t  result;
 
-  resultStruct par_list[4];  /* for debugging */   /* @!@ */
+  resultStruct par_list[4];  /* for debugging */
 
   nr_of_pars = NextOpcode(trigger);
 
@@ -1291,7 +1353,7 @@ resultStruct XeqDest(int32_t **trigger)
   int32_t type2  = NO_TYPE;
   resultStruct result = {LOC_ID, NONE, NONE};
 
-  resultStruct par_list[2];   /* for debugging */  /* @!@ */
+  resultStruct par_list[2];   /* for debugging */
 
   /* Skip nr_of_pars, which will be 2. */
   NextOpcode(trigger);
@@ -1517,7 +1579,7 @@ resultStruct XeqEntrance(int32_t **trigger, usrActionRec *action_rec, int32_t su
   int32_t type = NO_TYPE;
   resultStruct result = {CONTINUE, NONE, 0};
 
-  resultStruct par_list;  /* for debugging */  /* @!@ */
+  resultStruct par_list;  /* for debugging */
 
   /* Skip nr of parameters (which will be 1). */
   NextOpcode(trigger);
@@ -2019,6 +2081,8 @@ resultStruct XeqNewDSys(int32_t **trigger)
 {
   /* Syntax: newdsys(loc/obj, string) */
 
+  /* THIS FUNCTION IS NOT USED AND NOT YET FINISHED */
+
   int32_t  owner;
   int32_t  par1;
   int32_t  par2;
@@ -2080,7 +2144,6 @@ resultStruct XeqNewDSys(int32_t **trigger)
   outputline = ResetString(outputline);
 
   /* ok, now we have the text for the new system description */
-
 
   return( (resultStruct) {CONTINUE, NONE, 0} );
 
@@ -3118,12 +3181,14 @@ resultStruct XeqIntAct(int32_t opcode, int32_t **trigger, usrActionRec *action_r
 {
   switch (opcode) {
     /* Internal actions are listed in alfabetical order. */
-    case AGREE:
-      return(XeqAgree(trigger));
     case ADD:
       return(XeqBasicOperator(opcode, trigger));
+    case ADDCHOICE:
+      return(XeqAddChoice(trigger));
     case ADDJSON:
       return(XeqAddJson(trigger));
+    case AGREE:
+      return(XeqAgree(trigger));
     case ASTERIX:
       return(XeqBasicOperator(opcode, trigger));
     case BACKGROUND:

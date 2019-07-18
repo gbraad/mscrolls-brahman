@@ -318,6 +318,7 @@ int32_t main(int argc, char **argv)
   story_info.autolink       = 0;
   story_info.xvan_language  = ENG;
   story_info.story_language = ENG;
+  story_info.play_mode      = INTERPRETER_MODE;  /* @!@ */
 
   /* malloc space for stack  */
   if ((stack = (int32_t *) malloc(STACK_SIZE*sizeof(int32_t))) == NULL) {
