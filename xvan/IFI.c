@@ -231,8 +231,6 @@ int32_t CheckIFI(char *request)
     return(IFI_REQ_PEOPLE);
   if (strcmp(request, "keyhit") == 0)
     return(IFI_REQ_KEYHIT);
-  if (strcmp(request, "begin") == 0)
-    return(IFI_REQ_BEGIN);
 
   /* not an IFI request */
 
@@ -342,7 +340,9 @@ int32_t XeqIFIrequest(int32_t request, jsonValue *value)
         json_string = ResetString(json_string);
         break;
       }
-      /* mandatory stuff */
+      /************************/
+      /* mandatory meta stuff */
+      /************************/
       if (value->type == JSON_VAL_TRUE) {
         val.type = JSON_VAL_STRING;
         val.textstring = ResetString(val.textstring);
@@ -386,7 +386,24 @@ int32_t XeqIFIrequest(int32_t request, jsonValue *value)
           val.textstring = ResetString(val.textstring);
           break;
         }
-        /* optional stuff */
+        /***********************/
+        /* optional meta stuff */
+        /***********************/
+        if (story_info.play_mode != INTERPRETER_MODE) {
+          val.type = JSON_VAL_STRING;
+          val.textstring = ResetString(val.textstring);
+          if (story_info.play_mode == CHOICE_MODE) {
+            val.textstring = AddToString(val.textstring, "choice_mode");
+          }
+          else {
+            val.textstring = AddToString(val.textstring, "hybrid_mode");
+          }
+          if ( !(value_string = AddKV(value_string, "play_mode", &val))) {
+            val.textstring = ResetString(val.textstring);
+            break;
+          }
+        }
+
         if (strlen(story_info.android_mkt) != 0) {
           val.type = JSON_VAL_STRING;
           val.textstring = ResetString(val.textstring);
@@ -497,6 +514,7 @@ int32_t XeqIFIrequest(int32_t request, jsonValue *value)
       /* if true we must send picture updates */
       ifi_stats.picture = (value->type == JSON_VAL_TRUE ? 1 : 0);
       break;
+
     case IFI_REQ_SAVEDATA:
       /* we must now send the game state to the front-end  */
       /* we have a nested json object here that is always     */
@@ -549,6 +567,7 @@ int32_t XeqIFIrequest(int32_t request, jsonValue *value)
     default:
       /* unknown IFI request code */
       /* do nothing               */
+
       break;
   } /* switch */
 
@@ -579,7 +598,7 @@ int32_t ProcessJson(char *json_string, char *line_buf)
       /* ready */
       kv.value.textstring = ResetString(kv.value.textstring);
       kv.key              = ResetString(kv.key);
-      return(prologue_json ? IFI_REQ_META : result);
+      return(prologue_json ? IFI_REQ_BEGIN : result);
     }
 
     /* check if the key is an IFI-request */
@@ -590,7 +609,7 @@ int32_t ProcessJson(char *json_string, char *line_buf)
     /* off the timers) until after we processed the   */
     /* prologue json.                                 */
 
-    if (IFI_request == IFI_REQ_META) {
+    if (IFI_request == IFI_REQ_BEGIN) {
       prologue_json = 1;
     }
 
@@ -602,13 +621,12 @@ int32_t ProcessJson(char *json_string, char *line_buf)
 
    /* now execute the IFI request */
    result = XeqIFIrequest(IFI_request, &(kv.value));
-
   }  /* while */
 
   kv.value.textstring = ResetString(kv.value.textstring);
   kv.key              = ResetString(kv.key);
 
-  return(prologue_json ? IFI_REQ_META : result);
+  return(prologue_json ? IFI_REQ_BEGIN : result);
 }
 
 

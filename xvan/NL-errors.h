@@ -111,7 +111,7 @@ const char *NL_errors[] = {
   "runtime error (080): XeqRunCommon(): er is geen common triggercommon trigger",
   "runtime error (081): XeqTestFun(): ongedefinieerde opcode voor testfunctie:",
   "runtime error (082): Xeqbackground(): alleen zwart en blauw zijn toegestaan als achtergrondkleur",
-  "runtime error (083): parameter moet waarde aan of uit hebben in functie:",
+  "runtime error (083): onbekende parameterwaarde in functie:",  /* @!@ */
   "XeqGoto(): geen route gevonden van vertrekpunt naar bestemming",
   "runtime error (085): XeqMove(): een ding kan niet in zichzelf gestopt worden",
   "runtime error (086): XeqIndent(): de inspringwaarde is te groot:",

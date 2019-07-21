@@ -111,7 +111,7 @@ const char *ENG_errors[] = {
   "runtime error (080): XeqRunCommon(): there is no common trigger",
   "runtime error (081): XeqTestFun(): undefined testfunction opcode:",
   "runtime error (082): Xeqbackground(): only blue and black are supported background colors",
-  "runtime error (083): unknown parameter (must be on or off) in function:",
+  "runtime error (083): unknown parameter in function:",  /* @!@ */
   "XeqGoto(): no route found from source to destination",
   "runtime error (085): XeqMove(): something cannot be moved into itself",
   "runtime error (086): XeqIndent(): indent value too large:",

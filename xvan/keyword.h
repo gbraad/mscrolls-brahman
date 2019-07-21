@@ -211,6 +211,7 @@
 #define PICKONE         266
 #define NEWDSYS         267
 #define ADDCHOICE       268
+#define PLAYMODE        269
 #define UPPER_BOUND_INT_ACT         400
 
 #define LOWER_BOUND_SPECIAL_CHAR    401

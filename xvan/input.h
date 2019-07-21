@@ -42,7 +42,7 @@ extern void       PrintString(char*, int);                    /* output.c    */
 extern char       *ResetString(char*);                        /* jsonbld.c   */
 extern char       *AddToString(char*, char*);                 /* descr2str.c */
 extern char       *ResetString(char*);                        /* descr2str.c */
-extern void       UpdateChoicesMenu(void);                    /* choices.c   */   /* @!@ */
+extern int32_t    UpdateChoicesMenu(char*);                   /* choices.c   */   /* @!@ */
 
 /* IFI and JSON stuff */
 extern int32_t    ValidateJson(char*);

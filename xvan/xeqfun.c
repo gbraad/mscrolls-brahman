@@ -61,7 +61,7 @@ int32_t XeqTry(int32_t**);
 int32_t XeqValDir(int32_t**);
 int32_t XeqYesNo(int32_t**);
 
-resultStruct XeqAddChoice(int32_t**);
+resultStruct XeqAddChoice(int32_t**);  /* @!@ */
 resultStruct XeqAddJson(int32_t**);
 resultStruct XeqAgree(int32_t**);
 resultStruct XeqBackground(int32_t**);
@@ -90,6 +90,7 @@ resultStruct XeqNoMatch(int32_t**);
 resultStruct XeqNoTimers(int32_t**);
 resultStruct XeqOwner(int32_t**);
 resultStruct XeqPickOne(int32_t**);
+resultStruct XeqPlayMode(int32_t**);         /* jul 20 19 */  /* @!@ */
 resultStruct XeqPrt(int32_t**);
 resultStruct XeqPrtcr(int32_t**);
 resultStruct XeqPrtStat(int32_t**);
@@ -872,7 +873,7 @@ int32_t XeqTestFun(int32_t opcode, int32_t **trigger, usrActionRec *action_rec, 
 /* <value> : integer value.                                 */
 /************************************************************/
 
-resultStruct XeqAddChoice(int32_t **trigger)
+resultStruct XeqAddChoice(int32_t **trigger)  /* @!@ */
 {
   /* addchoice(string, trigger/string) */
 
@@ -916,14 +917,14 @@ resultStruct XeqAddChoice(int32_t **trigger)
   /* now add the parameters to the choice string    */
   /* 1 means print to json string and not to screen */
 
-  /* we must make: {"text":"string1", "chosen":"string2"} */
-  /* we cannot directly use a trigger here, because the   */
-  /* wildcards will be set during parsing the user input  */
+  /* we must make: "{"text":"string1", "chosen":"string2"}," */
+  /* he last comma will be deleted when clsing the json      */
+  /* we cannot directly use a trigger here, because the      */
+  /* wildcards will be set during parsing the user input     */
 
-  PrintString("\"text\":\"", 1);
+  PrintString("{\"text\":\"", 1);
   PrintString(str1, 1);
-  PrintString("\",\"chosen\":", 1);
-  PrintString("\"", 1);
+  PrintString("\",\"chosen\":\"", 1);
   PrintString(str2, 1);
   PrintString("\"}", 1);
 
@@ -1102,9 +1103,8 @@ resultStruct XeqBold(int32_t **trigger)
 
   int32_t owner; /* dummy */
   char    *str;  /* dummy */
-  int32_t par;   /* color */
+  int32_t par;                /* @!@ */
   int32_t type = NO_TYPE;
-
 
   /* Skip nr of parameters (which will be 1). */
   NextOpcode(trigger);
@@ -2222,6 +2222,7 @@ resultStruct XeqNoTimers(int32_t **trigger)
   return(result);
 }
 
+
 resultStruct XeqOwner(int32_t **trigger)
 {
   /* syntax: owner(obj) */
@@ -2330,6 +2331,51 @@ resultStruct XeqPickOne(int32_t **trigger)
   DebugLevel_2_result(result);
 
   return(result);
+}
+
+
+resultStruct XeqPlayMode(int32_t **trigger)  /* @!@ */
+{
+  /* syntax: playmode(word)                           */
+  /* word must be 'interpreter', 'choice' or 'hybrid' */
+
+  int32_t owner; /* dummy */
+  char    *str;  /* dummy */
+  int32_t par;   
+  int32_t type = NO_TYPE;
+Log("entering playmode()\n","","");
+  /* Skip nr of parameters (which will be 1). */
+  NextOpcode(trigger);
+
+  /* Read parameter. */
+  if (!GetPar(&owner, &par, &type, &str, trigger))
+    return( (resultStruct) {QUIT, NONE, 0} );
+
+  if (!CheckPars(PLAYMODE, type, NO_TYPE, NO_TYPE, NO_TYPE, NO_TYPE)) {
+    return( (resultStruct) {QUIT, NONE, 0} );
+  }
+
+  if (par == LookUpId(TranslateKeyword("INTERPRETER"))) {
+Log("switching to interpreter mode\n","","");
+    story_info.play_mode = INTERPRETER_MODE;
+  }
+  else {
+    if (par == LookUpId(TranslateKeyword("CHOICE"))) {
+Log("switching to choice mode\n","","");
+      story_info.play_mode = CHOICE_MODE;
+    }
+    else {
+      if (par == LookUpId(TranslateKeyword("HYBRID"))) {
+        story_info.play_mode = HYBRID_MODE;
+      }
+      else {
+        PrintError(83, NULL, "XeqPlayMode()");
+        return( (resultStruct) {QUIT, NONE, 0} );
+      }
+    }
+  }
+Log("Leaving playmode()\n","","");
+  return( (resultStruct) {CONTINUE, NONE, 0} );
 }
 
 
@@ -3243,6 +3289,8 @@ resultStruct XeqIntAct(int32_t opcode, int32_t **trigger, usrActionRec *action_r
       return(XeqOwner(trigger));
     case PICKONE:
       return(XeqPickOne(trigger));
+    case PLAYMODE:
+      return(XeqPlayMode(trigger));   /* @!@ */
     case PRINT:
       return(XeqPrt(trigger));
     case PRINTBOLD:
