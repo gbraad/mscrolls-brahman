@@ -2343,7 +2343,7 @@ resultStruct XeqPlayMode(int32_t **trigger)  /* @!@ */
   char    *str;  /* dummy */
   int32_t par;   
   int32_t type = NO_TYPE;
-Log("entering playmode()\n","","");
+
   /* Skip nr of parameters (which will be 1). */
   NextOpcode(trigger);
 
@@ -2356,12 +2356,10 @@ Log("entering playmode()\n","","");
   }
 
   if (par == LookUpId(TranslateKeyword("INTERPRETER"))) {
-Log("switching to interpreter mode\n","","");
     story_info.play_mode = INTERPRETER_MODE;
   }
   else {
     if (par == LookUpId(TranslateKeyword("CHOICE"))) {
-Log("switching to choice mode\n","","");
       story_info.play_mode = CHOICE_MODE;
     }
     else {
@@ -2374,7 +2372,7 @@ Log("switching to choice mode\n","","");
       }
     }
   }
-Log("Leaving playmode()\n","","");
+
   return( (resultStruct) {CONTINUE, NONE, 0} );
 }
 

@@ -59,7 +59,7 @@ int32_t UpdateChoicesMenu(char *response_txt)
   resultStruct result = {OK, NONE, OK};
   kvPair       kv     = {NULL, {0, NULL, 0, 0}};
   usrActionRec dummy_rec;
-Log("In updatchoices()\n","","");
+
   /* we need dummy_rec to enforce an error when t_choice */
   /* ends up in XeqVerbDefault()                         */
   dummy_rec.action1 = NO_ID;
@@ -111,7 +111,7 @@ Log("In updatchoices()\n","","");
 
   /* now send the choice */
   ifi_emitResponse(json_msg_from_story);
-Log("sending choice: ", json_msg_from_story, "\n");
+
   /* in case of CHOICE_MODE we must block until the player made a choice */
   /* in case of HYBRID_MODE we can just continue                         */
   /* 0 means to also process other messages sent by the GUI, e.g. save   */
@@ -119,7 +119,6 @@ Log("sending choice: ", json_msg_from_story, "\n");
 
   strncpy(response_txt, kv.value.textstring, INPUT_LINE_LEN);
   response_txt[INPUT_LINE_LEN] = '\0';
-Log("Gekozen: ", response_txt, "\n");
-Log("leaving updatechoices()\n","","");
+
   return(OK);
 }
