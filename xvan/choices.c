@@ -38,13 +38,14 @@
 /* Function declarations */
 /*************************/
 
-int32_t UpdateChoicesMenu(void);
+int32_t UpdateChoicesMenu(char*);
+
 
 /************************/
 /* Function definitions */
 /************************/
 
-int32_t UpdateChoicesMenu(void)
+int32_t UpdateChoicesMenu(char *response_txt)
 {
   /* this function is called in choice or hybrid mode   */
   /* it calls t_choice for all locations and objects in */
@@ -58,11 +59,7 @@ int32_t UpdateChoicesMenu(void)
   resultStruct result = {OK, NONE, OK};
   kvPair       kv     = {NULL, {0, NULL, 0, 0}};
   usrActionRec dummy_rec;
-  char         response_txt[INPUT_LINE_LEN];
-
-char text_to_print[OUTPUT_LINE_LEN];
-
-Log("In UpdateChoicesMenu()\n", "", "");
+Log("In updatchoices()\n","","");
   /* we need dummy_rec to enforce an error when t_choice */
   /* ends up in XeqVerbDefault()                         */
   dummy_rec.action1 = NO_ID;
@@ -81,15 +78,11 @@ Log("In UpdateChoicesMenu()\n", "", "");
     /* must be hybrid mode */
     PrintString("{\"choice\":{\"text\":\"Suggestions:\", \"choice\":[", 1);
   }
-Log("Before executing t_choice triggers\n", "", "");
+
   /* now execute t_choice for each list member      */
   /* each member may add options to the choice list */
   while (i<size && list[i] != NO_ID) {
-sprintf(text_to_print, "before xeqtrigger %d\n", i);
-Log(text_to_print,"","");
     result = XeqTrigger(list[i], CHOICE, &dummy_rec, 0);
-sprintf(text_to_print, "na xeqtrigger %d, result is %d\n", i, result.tag);
-Log(text_to_print,"","");
     switch (result.tag) {
       case QUIT:
         return(QUIT);
@@ -99,28 +92,26 @@ Log(text_to_print,"","");
         return(OK);
         break;
       default:
-Log("In default for XeqTrigger() result\n", "", "");
         /* do nothing */
         break;
     }
     i++;
   }
 
-  /* now finalize the {joice} json */
+  /* now finalize the {choice} json */
   /* we have built something like: */
-  /* {"text":"Suggestions", "choice":[{"text":"string1":"chosen":"response1"}, {..}, {..}, */
-  /* if it ends with a comma, remove the comma and add ]} to close the json */
-
+  /* {"choice":{"text":"Suggestions", "choice":[{"text":"string1":"chosen":"response1"}, {..}, {..}, */
+  /* if it ends with a comma, remove the comma and add ]}} to close the json */
   len = strlen(json_msg_from_story);
-  if (json_msg_from_story[len] == COMMA) {
+  if (json_msg_from_story[len-1] == ',') {
     /* at least 1 entry in the choice list */
-    json_msg_from_story[len] = '\0';
+    json_msg_from_story[len-1] = '\0';
   }
-  PrintString("]}", 1);
+  PrintString("]}}", 1);
 
   /* now send the choice */
   ifi_emitResponse(json_msg_from_story);
-
+Log("sending choice: ", json_msg_from_story, "\n");
   /* in case of CHOICE_MODE we must block until the player made a choice */
   /* in case of HYBRID_MODE we can just continue                         */
   /* 0 means to also process other messages sent by the GUI, e.g. save   */
@@ -128,9 +119,7 @@ Log("In default for XeqTrigger() result\n", "", "");
 
   strncpy(response_txt, kv.value.textstring, INPUT_LINE_LEN);
   response_txt[INPUT_LINE_LEN] = '\0';
-  
-
-
-Log("Einde UpdateChoicesMenu()\n", "", "");
+Log("Gekozen: ", response_txt, "\n");
+Log("leaving updatechoices()\n","","");
   return(OK);
 }

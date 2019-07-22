@@ -343,6 +343,18 @@ int32_t CheckPars(int32_t fun_code, int32_t type1, int32_t type2, int32_t type3,
       return(OK);
       break;
 
+    case ADDCHOICE:
+      if (type1 != STRING) {
+        TypeErr(1, "ADDCHOICE", "string");
+        return(ERROR);
+      }
+      if (type2 != STRING) {
+        TypeErr(2, "ADDCHOICE", "string");
+        return(ERROR);
+      }
+      return(OK);
+      break;
+
     case ADDJSON:
       if (type1 != STRING) {
         TypeErr(1, "ADDJSON", "string");

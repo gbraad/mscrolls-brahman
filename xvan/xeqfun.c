@@ -926,7 +926,7 @@ resultStruct XeqAddChoice(int32_t **trigger)  /* @!@ */
   PrintString(str1, 1);
   PrintString("\",\"chosen\":\"", 1);
   PrintString(str2, 1);
-  PrintString("\"}", 1);
+  PrintString("\"},", 1);
 
   DebugLevel_2_result( (resultStruct) {STRING, NONE, 0} );
 
