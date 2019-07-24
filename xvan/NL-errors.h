@@ -111,7 +111,7 @@ const char *NL_errors[] = {
   "runtime error (080): XeqRunCommon(): er is geen common triggercommon trigger",
   "runtime error (081): XeqTestFun(): ongedefinieerde opcode voor testfunctie:",
   "runtime error (082): Xeqbackground(): alleen zwart en blauw zijn toegestaan als achtergrondkleur",
-  "runtime error (083): onbekende parameterwaarde in functie:",  /* @!@ */
+  "runtime error (083): onbekende parameterwaarde in functie:",
   "XeqGoto(): geen route gevonden van vertrekpunt naar bestemming",
   "runtime error (085): XeqMove(): een ding kan niet in zichzelf gestopt worden",
   "runtime error (086): XeqIndent(): de inspringwaarde is te groot:",
@@ -133,7 +133,8 @@ const char *NL_errors[] = {
   "runtime error (102): Fout bij het opslaan van de voortgang",
   "runtime error (103): Nieuwe systeembeschrijving is te lang",
   "runtime error (104): debug inspring fout",
-  "runtime error (105): XeqVerbDefault(): ongeldige actie, mogelijke aanroep vanuit t_choice"  /* @!@ */
+  "runtime error (105): XeqVerbDefault(): ongeldige actie, mogelijke aanroep vanuit t_choice",
+  "runtime error (106): Het maximum aantal keuzes is overschreden"
 };
 
 #endif

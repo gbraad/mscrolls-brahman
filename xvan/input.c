@@ -197,7 +197,7 @@ int32_t ProcessInput(char prompt[])
   /* cause an 'I do not understand...' error.            */
 
   if (!testmode) {
-    /* check if we must update the choices menu */   /* @!@ */
+    /* check if we must update the choices menu */
     /* for choice or hybrid mode                */
     if (story_info.play_mode != INTERPRETER_MODE) {
       UpdateChoicesMenu(line_buf);

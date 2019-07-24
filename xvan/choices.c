@@ -51,6 +51,8 @@ int32_t UpdateChoicesMenu(char *response_txt)
   /* it calls t_choice for all locations and objects in */
   /* scope and builds a choice list that is send to the */
   /* front-end                                          */
+  /* next, it catches the player's choice and returns   */
+  /* it for processing as a normally entered command    */
 
   int32_t list[nr_of_locs+nr_of_objs];
   int          i      = 0;

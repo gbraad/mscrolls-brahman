@@ -40,5 +40,4 @@ extern void         GetAddtlInput(kvPair*, char*, int32_t, int);           /* in
 extern void         PrintString(char*, int);                               /* output.c   */
 extern char         *ResetString(char*);                                   /* jsonbld.c  */
 
-
 #endif

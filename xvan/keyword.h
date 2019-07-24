@@ -74,6 +74,7 @@
 #define MAX_AMBIGUITY        100 /* do not try to resolve if more   */
                                  /* than 100 possibilities for      */
                                  /* mapping objects                 */
+#define MAX_CHOICES            5 /* for choice and hybrid mode      */
 
 /***********************/
 /* keyword definitions */

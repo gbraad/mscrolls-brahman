@@ -747,7 +747,7 @@ int32_t ReadStoryInfo(storyInfo *info)
     return(ERROR);
   }
 
-  if (!GetNextCode16(&(info->play_mode))) {  /* @!@ */
+  if (!GetNextCode16(&(info->play_mode))) {
     PrintError(24, NULL, "play mode");
     return(ERROR);
   }

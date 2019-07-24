@@ -61,7 +61,7 @@ int32_t XeqTry(int32_t**);
 int32_t XeqValDir(int32_t**);
 int32_t XeqYesNo(int32_t**);
 
-resultStruct XeqAddChoice(int32_t**);  /* @!@ */
+resultStruct XeqAddChoice(int32_t**);
 resultStruct XeqAddJson(int32_t**);
 resultStruct XeqAgree(int32_t**);
 resultStruct XeqBackground(int32_t**);
@@ -90,7 +90,7 @@ resultStruct XeqNoMatch(int32_t**);
 resultStruct XeqNoTimers(int32_t**);
 resultStruct XeqOwner(int32_t**);
 resultStruct XeqPickOne(int32_t**);
-resultStruct XeqPlayMode(int32_t**);         /* jul 20 19 */  /* @!@ */
+resultStruct XeqPlayMode(int32_t**);         /* jul 20 19 */
 resultStruct XeqPrt(int32_t**);
 resultStruct XeqPrtcr(int32_t**);
 resultStruct XeqPrtStat(int32_t**);
@@ -873,7 +873,7 @@ int32_t XeqTestFun(int32_t opcode, int32_t **trigger, usrActionRec *action_rec, 
 /* <value> : integer value.                                 */
 /************************************************************/
 
-resultStruct XeqAddChoice(int32_t **trigger)  /* @!@ */
+resultStruct XeqAddChoice(int32_t **trigger)
 {
   /* addchoice(string, trigger/string) */
 
@@ -1103,7 +1103,7 @@ resultStruct XeqBold(int32_t **trigger)
 
   int32_t owner; /* dummy */
   char    *str;  /* dummy */
-  int32_t par;                /* @!@ */
+  int32_t par;
   int32_t type = NO_TYPE;
 
   /* Skip nr of parameters (which will be 1). */
@@ -2334,7 +2334,7 @@ resultStruct XeqPickOne(int32_t **trigger)
 }
 
 
-resultStruct XeqPlayMode(int32_t **trigger)  /* @!@ */
+resultStruct XeqPlayMode(int32_t **trigger)
 {
   /* syntax: playmode(word)                           */
   /* word must be 'interpreter', 'choice' or 'hybrid' */
@@ -3288,7 +3288,7 @@ resultStruct XeqIntAct(int32_t opcode, int32_t **trigger, usrActionRec *action_r
     case PICKONE:
       return(XeqPickOne(trigger));
     case PLAYMODE:
-      return(XeqPlayMode(trigger));   /* @!@ */
+      return(XeqPlayMode(trigger));
     case PRINT:
       return(XeqPrt(trigger));
     case PRINTBOLD:
