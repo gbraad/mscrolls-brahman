@@ -46,6 +46,7 @@ char *GetId(int32_t, int);
 
 char *AddToString(char *dest, char *to_add)
 {
+char text_to_print[OUTPUT_LINE_LEN];
   /* dest must be malloced */
 
   int len = 0;
@@ -245,14 +246,26 @@ char *GetId(int32_t id, int with_article)
   }
 
   if (dir[offset].nr_of_dsys == 0) {
+    /* create an empty string */
+
     if ( !(text_descr = ExpandString(text_descr, 0)) ) {
       return(NULL);
     }
   }
   else {
-    if ( !(text_descr = GetExtendedSysDescr(&(dir[offset].descr[0]), with_article)) ) {
-      return(NULL);
+    /* check if sys_descr has an expanded system description */
+    if (dir[offset].descr[0].dynamic != NULL) {
+      /* dynamic system description */
+      if (!ConvertDynamicDSys(dir[offset].descr[0].dynamic, &(dir[offset].descr[0]))) {
+        return(ERROR);
+      }
     }
   }
+
+  /* ok, now we have a 'normal' d_sys */
+  if ( !(text_descr = GetExtendedSysDescr(&(dir[offset].descr[0]), with_article)) ) {
+    return(NULL);
+  }
+
   return(text_descr);
 }

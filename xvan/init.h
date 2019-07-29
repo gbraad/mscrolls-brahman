@@ -36,6 +36,7 @@
 /* External declarations */
 /*************************/
 
+<<<<<<< HEAD
 extern short   transcript;                                 /* letsplay.c */
 extern char    *outputline;                                /* init.c     */
 
@@ -56,5 +57,29 @@ extern void    PrintString(char*, int);                    /* output.c    */
 /* IFI stuff */
 extern int32_t ValidateJson(char*);
 extern int32_t CheckIFI(char*);
+=======
+extern void Log(char*, char*, char*);
+
+extern short    transcript;                                 /* letsplay.c */
+
+extern void     PrintError(int16_t, resultStruct*, char*);  /* errors.c    */
+extern void     *Output(void);                              /* output.c    */
+extern char     *ResetString(char*);                        /* jsonbld.c   */
+extern char     *AddToString(char*, char*);                 /* descr2str.c */
+extern int32_t  ReadStoryInfo(storyInfo*);                  /* fileio.c    */
+extern int32_t  InitDirs(void);                             /* fileio.c    */
+extern int32_t  InitVerbs(void);                            /* fileio.c    */
+extern int32_t  InitLocations(void);                        /* fileio.c    */
+extern int32_t  InitObjects(void);                          /* fileio.c    */
+extern int32_t  InitAttributes(void);                       /* fileio.c    */
+extern void     ProcLFlagVal(int32_t, int32_t);
+extern int32_t  LetsPlay(void);                             /* letsplay.c  */
+extern void     CleanUp(void);                              /* cleanup.c   */
+extern void     PrintString(char*, int);                    /* output.c    */
+
+/* IFI stuff */
+extern int32_t  ValidateJson(char*);
+extern int32_t  CheckIFI(char*);
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 
 #endif

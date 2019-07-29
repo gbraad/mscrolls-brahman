@@ -162,7 +162,7 @@ FocusScope {
        use \c forcePop() as a shortcut to this behavior.
      */
     function pop(event, force) {
-        if (Controls.Stack.view.currentItem !== page)
+        if (app.pageStack.currentItem !== page)
             return false
 
         if (!event)
@@ -174,7 +174,7 @@ FocusScope {
         if (event.accepted) {
             return true
         } else {
-            return Controls.Stack.view.pop()
+            return app.pageStack.pop()
         }
     }
 
@@ -186,7 +186,7 @@ FocusScope {
        Push the specified component onto the page stack.
      */
     function push(component, properties) {
-        return Controls.Stack.view.push({item: component, properties: properties});
+        return app.pageStack.push({item: component, properties: properties});
     }
 
     onRightSidebarChanged: {

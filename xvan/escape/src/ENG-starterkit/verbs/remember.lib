@@ -1,0 +1,33 @@
+
+$VERB remember
+ SCOPE all_locs
+
+ PROLOGUE
+   if not(testflag(o_actor.f_alive)) then
+     if trigger(o_actor.t_talk_to_dead) then
+       disagree()
+     endif
+   endif
+
+ "remember"
+   if equal(o_actor, o_player) then
+     printcr("What do you want to remember?")
+   else
+     printcr("What do you want [the] [o_actor] to remember?")
+   endif
+   getsubject()
+
+ "remember [o_subject]"
+   if testflag(o_subject.f_seenbefore) then
+     printcr(o_subject.d_remember)
+   else
+     if equal(o_actor, o_player) then
+       printcr("You have no recollection of [a] [o_subject].")
+     else
+       printcr("[the] [o_actor] has no recollection of [a] [o_subject].")
+
+ DEFAULT
+   printcr("I only understood you as far as wanting to remember something.")
+
+ENDVERB
+

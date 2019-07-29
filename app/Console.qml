@@ -65,6 +65,13 @@ FocusScope
     readonly property int dialogWidth: app.width/2
     readonly property int dialogHeight: app.height/2
 
+    function enterCommand()
+    {
+        var t = textinput.text
+        textinput.text = "";
+        if (!qconsole.evalCommand(t)) quitDialog.show();
+    }
+
     Column
     {
         spacing: 0
@@ -87,7 +94,11 @@ FocusScope
 
             placeholderText: "type here"
             focus: true
-            EnterKey.type: Qt.EnterKeyReturn
+	    
+	    // Having EnterKeyReturn breaks some Android devices
+	    // So in theory this test will work, but does iOS actually need the EnterKeyReturn
+	    // or is it just a cosmetic display thing.
+            // EnterKey.type: M.Device.isIOS() ? Qt.EnterKeyReturn : Qt.EnterKeyDefault
 
             fontSize: height*6/10
             showBorder: false
@@ -97,13 +108,15 @@ FocusScope
 
             Keys.onTabPressed: text = wordsModel.addBestSuggestion(text)
 
-            Keys.priority: Keys.BeforeItem
-
-            Keys.onReturnPressed: {
-                    event.accepted = true;
-                    var t = text
-                    text = "";
-                    if (!qconsole.evalCommand(t)) quitDialog.show();
+            // When not handled by `onReturnPressed`
+            // handle here, but not for IOS as it closes the window
+            onAccepted: if (!M.Device.isIOS()) enterCommand();
+            
+            Keys.onReturnPressed:
+            {
+                // all systems including IOS
+                event.accepted = true;
+                enterCommand();
             }
         }
   

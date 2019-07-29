@@ -64,7 +64,7 @@ const char *ENG_errors[] = {
   "initialization error (034): ReadSysDescr(): error reading",
   "initialization error (035): ReadContData(): error reading",
   "initialization error (036): load(): error reading",
-  "\n\nThis interpreter version 2.3.4 needs compiler version 2.3.4 stories.",
+  "\n\nThis interpreter version 2.4 needs compiler version 2.4 stories",
   "\nThis story was compiled with XVAN compiler version",
   "Hit a key...",
   "initialization error (040): error opening file:",
@@ -75,8 +75,8 @@ const char *ENG_errors[] = {
   "There are too many items that match your description.\n"
   "Try using some adjectives to narrow it down...",
   "I don't understand that sentence",
-  "runtime error (047): error writing to debug file",
-  "runtime error (048): PrintString(): error retrieving attribute info.",
+  "runtime error (047): this file has no debug information",
+  "runtime error (048): PrintString(): error retrieving attribute info",
   "runtime error (049): PrintString(): Attribute par in string may not contain another attribute.\n",
   "runtime error (050): unknown word id:",
   "runtime error (051): CheckedStore(): array bound overflow",
@@ -85,7 +85,7 @@ const char *ENG_errors[] = {
   "runtime error (054): ReadDescr(): error reading",
   "runtime error (055): ProcCode(): triggercode too long",
   "runtime error (056): Write error in function",
-  "runtime error (057): BuildRoute(): no starting point.",
+  "runtime error (057): BuildRoute(): no starting point",
   "I don't know the word",
   "Too many adjectives, but will give it a try",
   "You have entered a double adjective",
@@ -111,7 +111,7 @@ const char *ENG_errors[] = {
   "runtime error (080): XeqRunCommon(): there is no common trigger",
   "runtime error (081): XeqTestFun(): undefined testfunction opcode:",
   "runtime error (082): Xeqbackground(): only blue and black are supported background colors",
-  "runtime error (083): unknown parameter (must be on or off) in function:",
+  "runtime error (083): unknown parameter in function:",
   "XeqGoto(): no route found from source to destination",
   "runtime error (085): XeqMove(): something cannot be moved into itself",
   "runtime error (086): XeqIndent(): indent value too large:",
@@ -130,7 +130,11 @@ const char *ENG_errors[] = {
   "runtime error (099): strncpy failed in function:",
   "runtime error (100): Base64 decoding error",
   "runtime error (101): Error restoring game state",
-  "runtime error (102): Error saving game progress"
+  "runtime error (102): Error saving game progress",
+  "runtime error (103): New system description too long",
+  "runtime error (104): debug indent error",
+  "runtime error (105): XeqVerbDefault(): invalid action, probably called from t_choice",
+  "runtime error (106): Max number of choices exceeded"
 };
 
 #endif

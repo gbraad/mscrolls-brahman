@@ -81,7 +81,12 @@
 #define IFI_USEWITH     "usewith"
 #define IFI_USE         "use"
 #define IFI_COMPASSGO   "compassgo"
-#define IFI_REFRESHCMD "refreshcmd"
+#define IFI_REFRESHCMD  "refreshcmd"
+#define IFI_CHOICE      "choice"
+
+// choiceobj
+#define IFI_CHOSEN      "chosen"
+#define IFI_ENABLED     "enabled"
 
 // metaobj
 //#define IFI_TITLE       "title"
@@ -101,6 +106,8 @@
 #define IFI_CONTRAST_COL "contrast_color"
 #define IFI_AUTOLINK    "autolink"
 #define IFI_UI_RESTART  "ui_restart"
+#define IFI_SAVELOAD    "saveload"
+#define IFI_SAVELOADCHOICE "saveloadchoice"
 //#define IFI_TITLE       "title"
 
 // textobj

@@ -109,6 +109,10 @@ int32_t HandleTimers(usrActionRec *action_rec, int32_t subject_index)
           if (timers[i].value >= timers[i].trigger_at) {
             /* Trigger has fired. */
             /* If trigger returns QUIT, we must exit immediately. */
+<<<<<<< HEAD
+=======
+
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
             result = XeqTrigger(timers[i].execute[0], timers[i].execute[1], action_rec, subject_index);
             if (result.tag == QUIT)
               return(QUIT);
@@ -118,6 +122,10 @@ int32_t HandleTimers(usrActionRec *action_rec, int32_t subject_index)
           if (timers[i].value <= timers[i].trigger_at) {
             /* Trigger has fired. */
             /* If trigger returns QUIT, we must exit immediately. */
+<<<<<<< HEAD
+=======
+
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
             result = XeqTrigger(timers[i].execute[0], timers[i].execute[1], action_rec, subject_index);
             if ( result.tag == QUIT)
               return(QUIT);
@@ -130,5 +138,8 @@ int32_t HandleTimers(usrActionRec *action_rec, int32_t subject_index)
     } /* Not an active timer. */
   } /* for */
   /* Ready.*/
+
+  /* flush outputline */
+  Output();
   return(OK);
 }

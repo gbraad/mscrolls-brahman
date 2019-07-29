@@ -179,7 +179,8 @@ void FreeLocation(locationInfo *loc)
 
 void CleanUp(void)
 {
-  int32_t i=0;
+  int32_t i = 0;
+  int32_t j = 0;
 
   /* complicated Free()'s */
 
@@ -196,7 +197,29 @@ void CleanUp(void)
   /* free common triggers */
   FreeCommonTriggers();
 
+  /* free dynamic sysdescr strings */
+  for (i=0; i<nr_of_locs; i++) {
+    for (j=0; j<loc_dir[i].nr_of_dsys; j++) {
+      ResetString( (loc_dir[i]).descr[j].dynamic);
+    }
+  }
+
+  for (i=0; i<nr_of_objs; i++) {
+    for (j=0; j<obj_dir[i].nr_of_dsys; j++) {
+      ResetString( (obj_dir[i]).descr[j].dynamic);
+    }
+  }
+
   /* simple Free()'s */
+  free(loc_dbug);
+  free(obj_dbug);
+  free(com_attr_dbug);
+  free(loc_attr_dbug);
+  free(com_flag_dbug);
+  free(loc_flag_dbug);
+  free(com_trig_dbug);
+  free(loc_trig_dbug);
+  free(timer_dbug);
   free(timers);
   free(exit_data);
   free(com_loc_flags);

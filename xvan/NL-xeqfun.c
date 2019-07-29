@@ -27,6 +27,8 @@
 
 #include "keyword.h"
 #include "typedefs.h"
+#include "json.h"
+#include "ifi.h"
 #include "NL-xeqfun.h"
 
 /*************************/
@@ -34,6 +36,10 @@
 /*************************/
 
 int32_t NL_XeqYesNo(void);
+<<<<<<< HEAD
+=======
+void    NL_XeqHitAnyKey(void);
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 
 /****************************/
 /* Testfunction definitions */
@@ -41,10 +47,16 @@ int32_t NL_XeqYesNo(void);
 
 int32_t NL_XeqYesNo(void)
 {
-  char yes_or_no[INPUT_LINE_LEN];
+  char   yes_or_no[INPUT_LINE_LEN];
+  kvPair kv = {NULL, {0, NULL, 0, 0}};
 
   while (1) {
-    GetAddtlInput(yes_or_no, "j/n");
+    GetAddtlInput(&kv, "j/n: ", IFI_REQ_COMMAND, 1);
+    /* 1 means do not process other jsons   */
+    /* what we want is in the kv textstring */
+    strncpy(yes_or_no, kv.value.textstring, INPUT_LINE_LEN);
+    yes_or_no[INPUT_LINE_LEN-1] = '\0';
+    ResetKVPair(&kv);  /* free mallocs */
     xv_strlwr(yes_or_no);
 
     if ((strcmp(yes_or_no, "ja") == 0) || (strcmp(yes_or_no, "j") == 0))
@@ -55,4 +67,21 @@ int32_t NL_XeqYesNo(void)
       else
         PrintString("Ja of nee:", 0);
   }
+}
+
+
+void NL_XeqHitAnyKey(void)
+{
+  kvPair kv = {NULL, {0, NULL, 0, 0}};
+
+  /* send the choice */
+  ifi_emitResponse("{\"choice\":[{\"text\":{\"text\":\"Toets enter...\",\"color\":\"blue\"},\"chosen\":\"{\\\"keyhit\\\":true}\"}]}");
+
+  /* now wait for a key to be hit */
+  GetAddtlInput(&kv, "", IFI_REQ_KEYHIT, 1);
+  /* 1 means do not process other jsons      */
+  /* we don't need anything from the kv-pair */
+  ResetKVPair(&kv);  /* free mallocs */
+
+  return;
 }

@@ -37,7 +37,7 @@ QT =
 
 PROJ = $$PWD/..
 include($$PROJ/app.pri)       
-DEFINES -= TIMERS LOGGING
+DEFINES -= TIMERS
 
 ### ////////////////// BASE ///////////////////////////////////////////
 
@@ -47,7 +47,10 @@ DEFINES += IFI_BUILD
 ### //////////////////  ///////////////////////////////////////////
 
 SOURCES = \
-arithmtc.c checkpar.c cleanup.c debug.c dirs.c disambig.c endian.c execute.c fileio.c init.c input.c letsplay.c lets-try.c output.c readfun.c readloc.c readobj.c readtrig.c readverb.c restore.c save.c spanTree.c syntax.c sysfunc.c timers.c trnslate.c xeqfun.c errors.c ENG-checksyntax.c ENG-moreinfo.c ENG-xeqfun.c ENG-article.c NL-checksyntax.c NL-moreinfo.c NL-xeqfun.c NL-article.c json.c IFI.c play.c jsonbld.c descr2str.c base64.c resglobs.c restart.c \
+arithmtc.c checkpar.c cleanup.c dirs.c disambig.c endian.c execute.c fileio.c init.c input.c letsplay.c lets-try.c output.c readfun.c readloc.c readobj.c readtrig.c readverb.c restore.c save.c spanTree.c syntax.c sysfunc.c timers.c trnslate.c xeqfun.c errors.c ENG-checksyntax.c ENG-moreinfo.c ENG-xeqfun.c ENG-article.c NL-checksyntax.c NL-moreinfo.c NL-xeqfun.c NL-article.c json.c IFI.c play.c jsonbld.c descr2str.c base64.c resglobs.c restart.c \
+    choices.c \
+    debugcmd.c \
+    debugdev.c \
 ifixvan.cpp
 
 ### //////////////////  ///////////////////////////////////////////
@@ -65,3 +68,58 @@ DEFINES -= IFI_BUILD
 SOURCES -= $$IFIDIR/ifiglue.cpp
 SOURCES -= ifixvan.cpp
 }
+
+HEADERS += \
+    ENG-article.h \
+    ENG-checksyntax.h \
+    ENG-errors.h \
+    ENG-moreinfo.h \
+    ENG-xeqfun.h \
+    IFI.h \
+    NL-article.h \
+    NL-checksyntax.h \
+    NL-errors.h \
+    NL-kwtable.h \
+    NL-moreinfo.h \
+    NL-xeqfun.h \
+    arithmtc.h \
+    base64.h \
+    checkpar.h \
+    choices.h \
+    cleanup.h \
+    debugcmd.h \
+    debugdev.h \
+    defs.h \
+    descr2str.h \
+    dirs.h \
+    disambig.h \
+    errors.h \
+    execute.h \
+    fileio.h \
+    init.h \
+    input.h \
+    json.h \
+    keyword.h \
+    lets-try.h \
+    letsplay.h \
+    output.h \
+    play.h \
+    readfun.h \
+    readloc.h \
+    readobj.h \
+    readtrig.h \
+    readverb.h \
+    resglobs.h \
+    restart.h \
+    restore.h \
+    save.h \
+    spantree.h \
+    syntax.h \
+    sysfunc.h \
+    timers.h \
+    trnslate.h \
+    typedefs.h \
+    xeqfun.h
+
+target.path = $$PROJ/app/$$BUILDT
+INSTALLS += target                  

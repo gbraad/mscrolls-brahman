@@ -72,6 +72,7 @@ extern int32_t      ordinal;                                   /* letsplay.c */
 extern char         *FinalizeBase64(char*, int, int8_t);
 
 extern void         PrintError(int16_t, resultStruct*, char*); /* errors.c */
+extern void         Log(char*, char*, char*);                  /* output.c */
 
 extern int16_t xv_htons(int16_t);                              /* endian.c */
 extern int32_t xv_htonl(int32_t);                              /* endian.c */

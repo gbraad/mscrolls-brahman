@@ -1,6 +1,6 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018 Marnix van den Bos.                   */
+/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
 /*                                                                      */
 /* <marnix.home@gmail.com>                                              */
 /*                                                                      */
@@ -52,7 +52,7 @@ char  *ScanKeywordTable(char*, int32_t, int32_t);
 /* Function definitions */
 /************************/
 
-void ErrHdr()
+void ErrHdr(void)
 {
   switch (xvan_language) {
     case ENG:
@@ -71,10 +71,7 @@ void ErrHdr()
   }
 }
 
-void PrintError(err_num, par1, par2)
- int16_t      err_num;
- resultStruct *par1;
- char         *par2;
+void PrintError(int16_t err_num, resultStruct *par1, char *par2)
 {
   const char **errors;
 
@@ -106,9 +103,7 @@ void PrintError(err_num, par1, par2)
   printf(".\n");
 }
 
-void NrErr(fun_name, nr_of_pars)
- char *fun_name;
- char *nr_of_pars;
+void NrErr(char *fun_name, char *nr_of_pars)
 {
   ErrHdr();
 
@@ -127,10 +122,7 @@ void NrErr(fun_name, nr_of_pars)
   }
 }
 
-void TypeErr(par_nr, fun_name, type)
- int32_t  par_nr;
- char *fun_name;
- char *type;
+void TypeErr(int32_t par_nr, char *fun_name, char *type)
 {
   ErrHdr();
 
@@ -150,17 +142,13 @@ void TypeErr(par_nr, fun_name, type)
   }
 }
 
-char *TranslateKeyword(word)
- char *word;
+char *TranslateKeyword(char *word)
 {
   return(ScanKeywordTable(word, 0, sizeof(kw_table)/sizeof(kwTable)-1));
 }
 
 
-char *ScanKeywordTable(word, lower, upper)
- char      *word;    /* word to look for in word_table */
- int32_t   lower;    /* elements of array between      */
- int32_t   upper;    /* which to search                */
+char *ScanKeywordTable(char *word, int32_t lower, int32_t upper)
 {
   int32_t i;
   int32_t result;
@@ -200,6 +188,3 @@ char *ScanKeywordTable(word, lower, upper)
 
   return(ScanKeywordTable(word, lower, upper));
 }
-
-
-

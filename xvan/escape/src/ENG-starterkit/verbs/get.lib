@@ -47,7 +47,7 @@ $VERB get SYNONYM take SYNONYM grab
      if not(owns(o_actor, o_subject)) then
        setflag(o_subject.f_bypass)
        move(o_subject, o_actor)
-       printcr("taken.")
+       printcr("[o_subject]: taken.")
      else
        printcr("But [the] [o_actor] already [o_actor.r_have] the [o_subject].")
      endif
@@ -69,7 +69,7 @@ $VERB get SYNONYM take SYNONYM grab
      if owns(o_spec, o_subject) then
        setflag(o_subject.f_bypass)
        move(o_subject, o_actor)
-       printcr("taken.")
+       printcr("[o_subject]: taken.")
      else
        printcr("[the] [o_actor] cannot get [the] [o_subject] [prepos] [the] [o_spec].")
        disagree()
@@ -78,5 +78,5 @@ $VERB get SYNONYM take SYNONYM grab
 
  DEFAULT
    printcr("I only understood you as far as willing to get something.")
-ENDVERB
 
+ENDVERB

@@ -71,6 +71,6 @@ attribute_QUEUES	EQU	TRUE
 set_QUEUES	EQU	30
 attribute_ISMONEY	EQU	TRUE
 wanted_ATTRIBUTES	EQU	TRUE
-* produced on Mon Jun 11 21:57:50 2018
+* produced on Tue Jun 12 09:38:16 2018
 
-* checksum = bb7297d1
+* checksum = 8882e646

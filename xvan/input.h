@@ -28,26 +28,42 @@
 /* External declarations */
 /*************************/
 
+<<<<<<< HEAD
 extern FILE *transcriptfile;                             /* init.c     */
 
 extern short testmode;                                   /* letsplay.c */
 extern short transcript;                                 /* letsplay.c */
 extern char  *outputline;                                /* output.c   */
 extern FILE  *testfile;                                  /* init.c     */
+=======
+extern FILE      *transcriptfile;                             /* init.c     */
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 
-extern void  Output(char*, int);                         /* init.c      */
-extern void  PrintError(int16_t, resultStruct*, char*);  /* errors.c    */
-extern char  *AddToString(char*, char*);                 /* descr2str.c */
-extern char  *ResetString(char*);                        /* descr2str.c */
+extern short      testmode;                                   /* letsplay.c */
+extern short      transcript;                                 /* letsplay.c */
+extern FILE       *testfile;                                  /* init.c     */
+
+extern storyInfo  story_info;                                 /* init.c     */   /* @!@ */
+
+extern void       Output(void);                               /* init.c      */
+extern void       PrintError(int16_t, resultStruct*, char*);  /* errors.c    */
+extern void       PrintString(char*, int);                    /* output.c    */
+extern char       *ResetString(char*);                        /* jsonbld.c   */
+extern char       *AddToString(char*, char*);                 /* descr2str.c */
+extern char       *ResetString(char*);                        /* descr2str.c */
+extern int32_t    UpdateChoicesMenu(char*);                   /* choices.c   */   /* @!@ */
 
 /* IFI and JSON stuff */
 extern int32_t    ValidateJson(char*);
 extern int32_t    ProcessJson(char*, char*);
 extern const char *ifi_getRequest(void);
 extern void       ifi_emitResponse(const char*);
-extern int32_t    GetNextKVpair(char*, int*, kvPair*);   /* json.c */
-extern int32_t    CheckIFI(char*);                       /* ifi.c  */
-extern int32_t    XeqIFIrequest(int32_t, jsonValue*);    /* ifi.c  */
+extern void       ResetKVPair(kvPair*);                       /* json.c */
+extern int32_t    GetNextKVpair(char*, int*, kvPair*);        /* json.c */
+extern int32_t    CheckIFI(char*);                            /* ifi.c  */
+extern int32_t    XeqIFIrequest(int32_t, jsonValue*);         /* ifi.c  */
 extern void       SendIFIerror(char*, char*);
+
+extern void       Log(char*, char*, char*);
 
 #endif

@@ -39,9 +39,14 @@
 /* Function declarations */
 /*************************/
 
+<<<<<<< HEAD
 int32_t XeqEqual(int32_t**);
 int32_t XeqLtGt(int32_t, int32_t**);
 
+=======
+int32_t      XeqEqual(int32_t**);
+int32_t      XeqLtGt(int32_t, int32_t**);
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 resultStruct XeqBasicOperator(int32_t, int32_t**);
 resultStruct XeqRnd(int32_t**);
 resultStruct XeqSetTimer(int32_t**);
@@ -64,6 +69,9 @@ int32_t XeqEqual(int32_t **trigger)
   int32_t par2;  /* Equal() always has two parameters. */
   int32_t type1 = NO_TYPE;
   int32_t type2 = NO_TYPE;
+  int32_t  result;
+
+  resultStruct par_list[2];  /* for debugging */
 
   int32_t index; /* For fixing bug(?).                 */
 
@@ -102,13 +110,28 @@ int32_t XeqEqual(int32_t **trigger)
   /* wildcard has value NONE. Therefore, when both values are NONE and either one  */
   /* of the types is NO_TYPE, the comparison must succeed.                         */
 
+  if (debug_level == 2) {
+     par_list[0].tag   = type1;
+     par_list[0].owner = NO_ID;  /* only for common flags */
+     par_list[0].value = par1;
+     par_list[1].tag   = type2;
+     par_list[1].owner = NO_ID;  /* only for common flags */
+     par_list[1].value = par2;
+     DebugLevel_2_pars("equal()", par_list, 2);
+   }
+
    /* Not necessary to call CheckPars() here. All pars are */
    /* ok as long as they are of the same type.             */
-   if ( ((type1 == NO_TYPE || type2 == NO_TYPE) || (type1 == type2)) &&
-        (par1 == par2) )
-       return(OK);
-     else
-       return(ERROR); /* par1 and par2 are not equal */
+   if ( ((type1 == NO_TYPE || type2 == NO_TYPE) || (type1 == type2)) && (par1 == par2) ) {
+     result = OK;
+   }
+   else {
+     result = ERROR; /* par1 and par2 are not equal */
+   }
+
+   DebugLevel_2_result( (resultStruct) {result, NONE, 0});
+
+   return(result);
 }
 
 

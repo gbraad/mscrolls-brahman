@@ -1,6 +1,6 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018 Marnix van den Bos.                   */
+/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
 /*                                                                      */
 /* <marnix.home@gmail.com>                                              */
 /*                                                                      */
@@ -45,9 +45,8 @@ int32_t  ParsePar(char**, int32_t*, int32_t*, int32_t*, int32_t, int32_t, FILE**
 /* Function definitions */
 /************************/
 
-int32_t HasType(id, type)
- int32_t id;   /* Either word id, function id, or attribute id. */
- int32_t type;
+int32_t HasType(int32_t id, int32_t type)
+/* id is either word id, function id, or attribute id. */
 {
   /* This routine checks whether the word or function */
   /* denoted by id has a type of type `type'.         */
@@ -119,6 +118,11 @@ int32_t HasType(id, type)
         if (type != LOC_ID)
           return(ERROR);
         break;
+      case PICKONE:
+        /* can have all types except string */
+        if (type == STRING)
+          return(ERROR);
+        break;
       default:
         /* This internal action has no type. */
         return(ERROR);
@@ -149,9 +153,8 @@ int32_t HasType(id, type)
   }
 }
 
-int32_t IsType(id, type)
- int32_t id;
- int32_t type;
+
+int32_t IsType(int32_t id, int32_t type)
 {
   /* This routine returns true if id has type as   */
   /* indicated by the type parameter.              */
@@ -219,9 +222,7 @@ int32_t IsType(id, type)
 }
 
 
-int32_t NextPar(fun_string, index)
- int32_t *fun_string;
- int32_t *index;
+int32_t NextPar(int32_t *fun_string, int32_t *index)
 {
   /* This routine returns the parameter prior to the next   */
   /* END_OF_PAR keyword from a function's parameter list.   */
@@ -293,8 +294,7 @@ int32_t NextPar(fun_string, index)
 }
 
 
-int32_t CheckPars(fun_string)
- int32_t *fun_string;
+int32_t CheckPars(int32_t *fun_string)
 {
   /* This routine checks the parameter syntax for the function  */
   /* contained in fun_string. Function syntax is:               */
@@ -304,6 +304,7 @@ int32_t CheckPars(fun_string)
   int32_t index = 3;               /* skip the function code, nr_of_pars and */
                                    /* left parenthesis                       */
   int32_t nr_of_pars;
+  int     i;
   int32_t par;                     /* Needed for typechecking.               */
 
   nr_of_pars = fun_string[1];
@@ -565,7 +566,8 @@ int32_t CheckPars(fun_string)
         return(ERROR);
       }
       break;
-/* do we still use the EQ_... funtions??? */
+
+    /* do we still use the EQ_... funtions??? */
     case EQ_ADD:
       /* eq_plus(attribute/timer, attribute/timer/value) */
       if (fun_name[0] == '\0')
@@ -1034,12 +1036,6 @@ int32_t CheckPars(fun_string)
     case DISAGREE:         /* disagree() */
       if (fun_name[0] == '\0')
         strncpy(fun_name, "disagree()", MAX_WORD_LEN);
-    case GET_SUBJECT:
-      if (fun_name[0] == '\0')
-        strncpy(fun_name, "getsubject()", MAX_WORD_LEN);
-    case GET_SPECIFIER:
-      if (fun_name[0] == '\0')
-        strncpy(fun_name, "getspec()", MAX_WORD_LEN);
     case NOMATCH:          /* nomatch()    */
       if (fun_name[0] == '\0')
         strncpy(fun_name, "nomatch()", MAX_WORD_LEN);
@@ -1058,9 +1054,6 @@ int32_t CheckPars(fun_string)
     case TRANSCRIPT:	   /* transcript() */
 	  if (fun_name[0] == '\0')
 		strncpy(fun_name, "transcript()", MAX_WORD_LEN);
-    case DEBUG:            /* debug()      */
-      if (fun_name[0] == '\0')
-        strncpy(fun_name, "debug()", MAX_WORD_LEN);
     case YES_NO:           /* yesno()      */
       if (fun_name[0] == '\0')
         strncpy(fun_name, "yesno()", MAX_WORD_LEN);
@@ -1101,6 +1094,9 @@ int32_t CheckPars(fun_string)
     case WAIT:  /* wait(number) */
 	  if (fun_name[0] == '\0')
 		strncpy(fun_name, "wait()", MAX_WORD_LEN);
+    case DEBUG:  /* debug(number) */
+	  if (fun_name[0] == '\0')
+		strncpy(fun_name, "debug()", MAX_WORD_LEN);
     case SCORE: /* score(number) */
 	  if (fun_name[0] == '\0')
 		strncpy(fun_name, "score()", MAX_WORD_LEN);
@@ -1134,6 +1130,27 @@ int32_t CheckPars(fun_string)
       }
       break;
 
+    case GET_SUBJECT:   /* getsubject([word]) */
+      if (fun_name[0] == '\0')
+        strncpy(fun_name, "getsubject()", MAX_WORD_LEN);
+    case GET_SPECIFIER:
+      if (fun_name[0] == '\0')
+        strncpy(fun_name, "getspec()", MAX_WORD_LEN);
+
+      if (nr_of_pars != 0 && nr_of_pars != 1) {
+        NrErr(fun_name, "0 or 1");
+        return(ERROR);
+      }
+      if (nr_of_pars == 1) {
+        par = NextPar(fun_string, &index);
+
+        if (!IsType(par, WORD_ID)) {
+          TypeErr(1, fun_name, "word");
+          return(ERROR);
+        }
+      }
+      break;
+
     case BACKGROUND:  /* background(string) */
 	  if (fun_name[0] == '\0')
 		strncpy(fun_name, "background()", MAX_WORD_LEN);
@@ -1162,6 +1179,22 @@ int32_t CheckPars(fun_string)
       }
       break;
 
+    case PICKONE:   /* pickone(par_1, par_2, .... par_n) */
+      if (nr_of_pars == 0) {
+        NrErr("pickone()", "at least 1");
+        return(ERROR);
+      }
+      /* now check the par list. */
+      /* strings are not allowed */
+      for (i=0; i<nr_of_pars; i++) {
+        par = NextPar(fun_string, &index);
+        if (IsType(par, STRING)) {
+          TypeErr(i+1, "pickone()", "anything but a string");
+          return(ERROR);
+        }
+      }
+      break;
+
     default:
       /* Not an attribute id. */
       /* Normally, this branch will never be reached */
@@ -1173,10 +1206,8 @@ int32_t CheckPars(fun_string)
   return(OK);
 }
 
-void ActionRecToIntArray(target, index, action_rec)
- int32_t   *target;
- int32_t   *index;
- actionRec action_rec;
+
+void ActionRecToIntArray(int32_t *target, int32_t *index, actionRec action_rec)
 {
   int i = 0;
 
@@ -1213,16 +1244,12 @@ void ActionRecToIntArray(target, index, action_rec)
 }
 
 
-int32_t ParsePar(word, keyword, target, index, par_owner, fun_par, source, file_list)
- char     **word;
- int32_t  *keyword;
- int32_t  *target;
- int32_t  *index;     /* First free position in target.               */
- int32_t  par_owner;  /* Location or object that owns the parameter.  */
- int32_t  fun_par;    /* Tells whether or not parse as a function par */
-                      /* or as an attribute par (different delimiters). (No longer necessary??) */
- FILE     **source;
- fileList **file_list;
+int32_t ParsePar(char **word, int32_t *keyword, int32_t *target, int32_t *index, int32_t par_owner,
+                 int32_t fun_par, FILE **source, fileList **file_list)
+  /* index is first free position in target.                       */
+  /* par_owner is location or object that owns the parameter.      */
+  /* fun_par tells whether or not parse as a function par or as an */
+  /* attribute par (different delimiters). (No longer necessary??) */
 {
   int32_t   state = 1;
   int32_t   id_code;
@@ -1544,7 +1571,6 @@ int32_t ParsePar(word, keyword, target, index, par_owner, fun_par, source, file_
           /* Owner id is missing. This means that     */
           /* the trigger owner is the function owner. */
           target[(*index)++] = owner_id;
-
         }
 
         /* In case of a local trigger with a preceding owner, the  */
@@ -1845,13 +1871,11 @@ int32_t ParsePar(word, keyword, target, index, par_owner, fun_par, source, file_
 
 }
 
-int32_t ParseFun(target, index, fun_code, fun_owner, source, file_list)
- int32_t  *target;
- int32_t  *index;     /* First free position in target. */
- int32_t  fun_code;   /* function id */
- int32_t  fun_owner;  /* Location or object that owns the function call */
- FILE     **source;
- fileList **file_list;
+
+int32_t ParseFun(int32_t *target, int32_t *index, int32_t fun_code, int32_t fun_owner, FILE **source, fileList **file_list)
+ /* index is first free position in target. */
+ /* fun_code is the function id */
+ /* fun_owner is the location or object that owns the function call */
 {
   int32_t start      = *index;
   int32_t state      = 1;

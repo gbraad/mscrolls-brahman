@@ -139,7 +139,7 @@ struct IFIClient: public IFI, public Worker
         
         Opt::rebuildArgs(_argc, _argv);
         
-        return Worker::start();
+        return Worker::start("IFIClient");
     }
 
     virtual int sync(int timeoutms = 0) override

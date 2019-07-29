@@ -39,6 +39,7 @@
 <file alias="match.svg">../mscrolls/jinxter/itemicons/match.svg</file>
 <file alias="paddle.svg">../mscrolls/jinxter/itemicons/paddle.svg</file>
 <file alias="spectacles.svg">../mscrolls/jinxter/itemicons/spectacles.svg</file>
+<file alias="notecase.svg">../mscrolls/jinxter/itemicons/notecase.svg</file>
 <file alias="1fergcoin.svg">../mscrolls/jinxter/itemicons/1fergcoin.svg</file>
 <file alias="swimsuit.svg">../mscrolls/jinxter/itemicons/swimsuit.svg</file>
 <file alias="flippers.svg">../mscrolls/jinxter/itemicons/flippers.svg</file>
@@ -46,8 +47,10 @@
 <file alias="aqualung.svg">../mscrolls/jinxter/itemicons/aqualung.svg</file>
 <file alias="baker.svg">../mscrolls/jinxter/itemicons/baker.svg</file>
 <file alias="canofworms.svg">../mscrolls/jinxter/itemicons/canofworms.svg</file>
+<file alias="dough.svg">../mscrolls/jinxter/itemicons/dough.svg</file>
 <file alias="bread.svg">../mscrolls/jinxter/itemicons/bread.svg</file>
 <file alias="bakingtin2.svg">../mscrolls/jinxter/itemicons/bakingtin2.svg</file>
+<file alias="flybath.svg">../mscrolls/jinxter/itemicons/flybath.svg</file>
 <file alias="umbrella.svg">../mscrolls/jinxter/itemicons/umbrella.svg</file>
 <file alias="beerglass.svg">../mscrolls/jinxter/itemicons/beerglass.svg</file>
 <file alias="saddle.svg">../mscrolls/jinxter/itemicons/saddle.svg</file>
@@ -60,8 +63,10 @@
 <file alias="guardian2.svg">../mscrolls/jinxter/itemicons/guardian2.svg</file>
 <file alias="busticket.svg">../mscrolls/jinxter/itemicons/busticket.svg</file>
 <file alias="inspector.svg">../mscrolls/jinxter/itemicons/inspector.svg</file>
+<file alias="blob.svg">../mscrolls/jinxter/itemicons/blob.svg</file>
 <file alias="letter.svg">../mscrolls/jinxter/itemicons/letter.svg</file>
 <file alias="postmistress.svg">../mscrolls/jinxter/itemicons/postmistress.svg</file>
+<file alias="plumroll.svg">../mscrolls/jinxter/itemicons/plumroll.svg</file>
 <file alias="bread2.svg">../mscrolls/jinxter/itemicons/bread2.svg</file>
 <file alias="xam.svg">../mscrolls/jinxter/itemicons/xam.svg</file>
 <file alias="dfspell.svg">../mscrolls/jinxter/itemicons/dfspell.svg</file>

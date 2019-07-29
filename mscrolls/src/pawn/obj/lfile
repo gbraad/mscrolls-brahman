@@ -110,3 +110,4 @@ strangle.o
 wear.o
 dig.o
 spool.o
+undo.o

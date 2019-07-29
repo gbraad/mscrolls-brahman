@@ -1,6 +1,6 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018 Marnix van den Bos.                   */
+/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
 /*                                                                      */
 /* <marnix.home@gmail.com>                                              */
 /*                                                                      */
@@ -37,11 +37,7 @@ int32_t  ParseCDescrs(char**, int32_t*, FILE**, fileList**);
 int32_t  ParseDescriptions(char**, int32_t*, int32_t, FILE**, fileList**);
 
 
-int32_t ParseCDescrs(word, keyword, source, file_list)
- char     **word;
- int32_t  *keyword;
- FILE     **source;
- fileList **file_list;
+int32_t ParseCDescrs(char **word, int32_t *keyword, FILE **source, fileList **file_list)
 {
   int32_t state = 1;
   int32_t id;        /* Not used, needed for GetDescrID(). */
@@ -106,12 +102,9 @@ int32_t ParseCDescrs(word, keyword, source, file_list)
   } /* while */
 }
 
-int32_t ParseDescriptions(word, keyword, owner_id, source, file_list)
- char     **word;
- int32_t  *keyword;
- int32_t  owner_id; /* needed to look up or store the description id */
- FILE     **source;
- fileList **file_list;
+
+int32_t ParseDescriptions(char **word, int32_t *keyword, int32_t owner_id, FILE **source, fileList **file_list)
+/* owner_id is needed to look up or store the description id */
 {
   int32_t state = 1;
   int32_t id;            /* Needed to convert description ids.  */
@@ -253,4 +246,3 @@ int32_t ParseDescriptions(word, keyword, owner_id, source, file_list)
     } /* switch */
   } /* while */
 }
-

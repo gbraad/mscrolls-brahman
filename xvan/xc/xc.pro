@@ -80,7 +80,7 @@ $$NL/NL-checkwc.c \
 $$NL/NL-keyword.c \
 $$NL/NL-predefs.c
 
-HEADERS =  \ 
+HEADERS =  \
 color.h \
 debug.h \
 fileio.h \
@@ -109,4 +109,5 @@ $$ENG/ENG-predefs.h \
 $$NL/NL-checksyntax.h \
 $$NL/NL-errors.h \
 $$NL/NL-kwtable.h \
-$$NL/NL-predefs.h
+$$NL/NL-predefs.h \
+    which_os.h

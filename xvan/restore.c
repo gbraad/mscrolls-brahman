@@ -201,6 +201,25 @@ int32_t RestoreSpecialIds(char *base64_string, int *byte_index, int *leader_len,
 int32_t RestoreExtendedSysDescr(extendedSysDescr *extended_system_description, char *base64_string, 
                                 int *byte_index, int *leader_len, int8_t *leader)
 {
+  int32_t code;
+
+  if (!ReadInt32(&code, base64_string, byte_index, leader_len, leader)) {
+    PrintError(14, NULL, "RestoreExtendedSysDescr()");
+    return(ERROR);
+  }
+
+  if (code == DYN_DSYS) {
+    if (!ReadBase64String(extended_system_description->dynamic, base64_string, byte_index, leader_len, leader)) {
+      PrintError(14, NULL, "RestoreExtendedSysDescr()");
+      return(ERROR);
+    }
+    else {
+      return(OK);
+    }
+  }
+
+  /* it's a 'normal' system description */
+
   if (!RestoreSysDescr(&(extended_system_description->part1), base64_string, byte_index, leader_len, leader))
     return(ERROR);
 
@@ -353,6 +372,11 @@ int32_t RestoreStoryInfo(storyInfo *story_info,  char *base64_string, int *byte_
   }
 
   if (!ReadInt16(&(story_info->story_language), base64_string, byte_index, leader_len, leader)) {
+    PrintError(14, NULL, "RestoreStoryInfo()");
+    return(ERROR);
+  }
+
+  if (!ReadInt16(&(story_info->play_mode), base64_string, byte_index, leader_len, leader)) {
     PrintError(14, NULL, "RestoreStoryInfo()");
     return(ERROR);
   }

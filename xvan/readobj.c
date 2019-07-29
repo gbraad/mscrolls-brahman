@@ -82,7 +82,6 @@ objectInfo *ReadObject(int64_t offset)
     switch (code) {
       case ERROR:
         return(NULL);
-
       case ACTION_REC:
         /* Read the action_rec and trigger to execute.     */
         /* action_rec will be malloced by ReadActionRec(). */
@@ -98,10 +97,8 @@ objectInfo *ReadObject(int64_t offset)
 
         /* Next code is returned by ReadActionRec(). */
         break;
-
      case END_OBJ:
         return(obj);
-
       default:
         /* Check for description/trigger id. */
         if (IsDescrId(code)) {
@@ -133,7 +130,7 @@ objectInfo *ReadObject(int64_t offset)
           /* will either be an END_OBJ or TRIGG_ID code.   */
         }
         else {
-          PrintError(53, &((resultStruct) {VALUE,code}), "PrintObject()");
+          PrintError(53, &((resultStruct) {VALUE, NONE, code}), "PrintObject()");
           return(ERROR);
         }
 

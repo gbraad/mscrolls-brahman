@@ -41,9 +41,12 @@ Item
 {
     id: compass
 
+    property bool active: true
     property string fgColor: "black"
     property string bgColor: "white"
-    property string ringColor: Qt.tint(fgColor, "#A0FFFFFF")
+    property string ringColor:Qt.tint(fgColor, "#A0FFFFFF")
+    opacity: active ? 1 : 0.5
+
     MouseArea 
     {
         anchors.fill: parent
@@ -58,7 +61,7 @@ Item
                 var a = Math.atan2(s/2 - mouse.y, mouse.x - s/2)*200/Math.PI + 200
                 q = 7 - ((Math.floor(a/50 + 0.5) + 1) & 7)
             }
-            if (qmapbox.cango(q)) QControl.compassDirection(q);
+            if (active && qmapbox.cango(q)) QControl.compassDirection(q);
         }
     }
 

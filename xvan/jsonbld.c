@@ -20,6 +20,7 @@
 /*                                                                      */
 /************************************************************************/
 
+
 #include <stdio.h>
 #include <stdlib.h>   /* free()    */
 #include <string.h>   /* strlen()  */
@@ -101,8 +102,10 @@ char *ExpandString(char *source, int amount)
     len = strlen(source);
     if ( !(temp = (char *) malloc((len+1)*sizeof(char))) )
       return(NULL);
+
     strcpy(temp, source);
     free(source);
+
     if ( !(source = (char *) malloc((len+amount+1)*sizeof(char))) )  /* +1 for the '\0\ */
       return(NULL);
     strcpy(source, temp);
@@ -115,6 +118,7 @@ char *ExpandString(char *source, int amount)
 char *ResetString(char *string)
  /* string must be maloc-ed */
 {
+
   if (string == NULL) {
     return(NULL);
   }

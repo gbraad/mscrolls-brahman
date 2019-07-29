@@ -1,6 +1,6 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018 Marnix van den Bos.                   */
+/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
 /*                                                                      */
 /* <marnix.home@gmail.com>                                              */
 /*                                                                      */
@@ -36,18 +36,15 @@ void NL_CheckLocWildCard(char*, resultStruct*);
 void NL_CheckObjWildCard(char*, resultStruct*);
 
 
-/* one external, don want to make a header file */
+/* one external, don't want to make a header file */
 extern char *strlwr(char*);
-
 
 /************************/
 /* function definitions */
 /************************/
 
 
-void NL_CheckLocWildCard(name, result)
- char         *name;
- resultStruct *result;
+void NL_CheckLocWildCard(char *name, resultStruct *result)
 {
   char word_lwr[MAX_WORD_LEN+1];
 
@@ -68,9 +65,8 @@ void NL_CheckLocWildCard(name, result)
   }
 }
 
-void NL_CheckObjWildCard(name, result)
- char         *name;
- resultStruct *result;
+
+void NL_CheckObjWildCard(char *name, resultStruct *result)
 {
 
   char word_lwr[MAX_WORD_LEN+1];

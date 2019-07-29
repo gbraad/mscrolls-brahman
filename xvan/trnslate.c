@@ -39,6 +39,7 @@ void         InitUsrActionrec(usrActionRec*);
 int32_t      FilledOut(extendedSysDescr*);
 int32_t      CountSubjectsInParsedInput(parsedInput*);
 int32_t      HasType(int32_t, int32_t);
+int32_t      ConvertDynamicDSys(char*, extendedSysDescr*);
 int32_t      FlipNoun(sysDescr*);
 int32_t      SplitSubject(parsedInput*, int32_t);
 int32_t      SplitSubjectAndSpecifier(parsedInput*, int32_t);
@@ -171,6 +172,79 @@ int32_t HasType(int32_t word_id, int32_t type)
 }
 
 
+<<<<<<< HEAD
+=======
+int32_t ConvertDynamicDSys(char *dyn_text, extendedSysDescr *descr)
+{
+  char    *descr_text;
+  int32_t result = OK;
+  int32_t old_article;
+  int32_t old_capital;
+  int     len;
+
+  /* this functions converts a dynamic system description text */
+  /* string to an extendedSysDescr struct                      */
+  /* we can also just print descr->dynamic, but by converting  */
+  /* to a struct we can handle the article correctly           */
+
+  /* initialize everything but ->dynamic from *descr */
+  descr->part1.article          = NO_ID;
+  descr->part1.nr_of_adjectives = 0;
+  descr->part1.noun             = NO_ID;
+  descr->connect_prepos         = NO_ID;
+  descr->part2.article          = NO_ID;
+  descr->part2.nr_of_adjectives = 0;
+  descr->part2.noun             = NO_ID;
+
+  /* flush the outputline */
+  Output();
+
+  /* convert dynamic d_sys to text        */
+  /* we abuse PrintString here to convert */
+  /* a string with parameters, so we must */
+  /* save some control values             */
+
+  old_article    = article;
+  old_capital    = capital;
+  article        = 0;
+
+  /* prevent \n in printed dyn_text     */
+  /* (will cause an unknown word error  */
+  /* from ParseDSys()                   */
+  /* if this becomes an issue with very */
+  /* long dynamic descriptions, make a  */
+  /* dedicated PrintString() to convert */
+  /* dynamic system descriptions        */
+
+  PrintString(dyn_text, 0);
+
+  capital = old_capital;
+  article = old_article;
+
+  len = strlen(outputline);
+  if (len == 0) {
+    /* empty d_sys */
+    return(OK);
+  }
+
+  if ((descr_text = (char *) malloc((len+1)*sizeof(char))) == NULL) {
+    PrintError(15, NULL, "ConvertDynamicDSys()");
+    return(ERROR);
+  }
+
+  strncpy(descr_text, outputline, len);
+  descr_text[len] = '\0';
+  outputline = ResetString(outputline);
+
+  /* now parse the system description text */
+  result = ParseDSys(descr_text, descr);
+
+  free(descr_text);
+  return(result);
+}
+
+
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 int32_t FlipNoun(sysDescr *descr)
 {
   int i = 0;
@@ -414,6 +488,22 @@ int32_t MatchSysDescr(extendedSysDescr source, extendedSysDescr target)
   /* this could lead to strange situations (new things in scope,    */
   /* based on only the adjective).                                  */
 
+<<<<<<< HEAD
+=======
+  /* 14may2019: function will now also handle dynamic system        */
+  /* descriptions.                                                  */
+
+  /* check if target is an expanded system description */
+  if (target.dynamic != NULL) {
+    /* dynamic system description */
+    if (!ConvertDynamicDSys(target.dynamic, &target)) {
+      return(ERROR);
+    }
+  }
+
+  /* ok, now we have a 'normal' d_sys */
+
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
   /* Check for empty target. */
   if (target.part1.noun == NO_ID)
     return(ERROR);
@@ -466,6 +556,7 @@ void SwapSysDescr(extendedSysDescr *sd1, extendedSysDescr *sd2)
   /*****************************/
 
   /* copy sd1 to sdtemp */
+  sd_temp.dynamic                 = sd1->dynamic;
   sd_temp.part1.article = (sd1->part1).article;
   sd_temp.part1.nr_of_adjectives = (sd1->part1).nr_of_adjectives;
   for (i=0; i<MAX_PARSE_ADJ-1; i++)
@@ -476,11 +567,14 @@ void SwapSysDescr(extendedSysDescr *sd1, extendedSysDescr *sd2)
 
   sd_temp.part2.article = (sd1->part2).article;
   sd_temp.part2.nr_of_adjectives = (sd1->part2).nr_of_adjectives;
+
   for (i=0; i<MAX_PARSE_ADJ-1; i++)
     sd_temp.part2.adjectives[i] = (sd1->part2).adjectives[i];
+
   sd_temp.part2.noun = (sd1->part2).noun;
 
   /* copy sd2 to sd1 */
+  sd1->dynamic                  = sd2->dynamic;
   (sd1->part1).article = (sd2->part1).article;
   (sd1->part1).nr_of_adjectives = (sd2->part1).nr_of_adjectives;
   for (i=0; i<MAX_PARSE_ADJ-1; i++)
@@ -491,23 +585,30 @@ void SwapSysDescr(extendedSysDescr *sd1, extendedSysDescr *sd2)
 
   (sd1->part2).article = (sd2->part2).article;
   (sd1->part2).nr_of_adjectives = (sd2->part2).nr_of_adjectives;
+
   for (i=0; i<MAX_PARSE_ADJ-1; i++)
     (sd1->part2).adjectives[i] = (sd2->part2).adjectives[i];
+
   (sd1->part2).noun = (sd2->part2).noun;
 
   /* copy sd_temp to sd2 */
+   sd2->dynamic                 = sd_temp.dynamic;
   (sd2->part1).article = sd_temp.part1.article;
   (sd2->part1).nr_of_adjectives = sd_temp.part1.nr_of_adjectives;
+
   for (i=0; i<MAX_PARSE_ADJ-1; i++)
     (sd2->part1).adjectives[i] = sd_temp.part1.adjectives[i];
+
   (sd2->part1).noun = sd_temp.part1.noun;
 
   sd2->connect_prepos = sd_temp.connect_prepos;
 
   (sd2->part2).article = sd_temp.part2.article;
   (sd2->part2).nr_of_adjectives = sd_temp.part2.nr_of_adjectives;
+
   for (i=0; i<MAX_PARSE_ADJ-1; i++)
     (sd2->part2).adjectives[i] = sd_temp.part2.adjectives[i];
+
   (sd2->part2).noun = sd_temp.part2.noun;
 }
 
@@ -803,6 +904,13 @@ int32_t SearchHits(extendedSysDescr *descr, int32_t scope, int32_t *id, match *s
 
 
 int32_t Find(extendedSysDescr *descr, int32_t scope, char *line_buf, match *hits)
+<<<<<<< HEAD
+=======
+
+  /* IN CASE OF A SUSPECTED MEMORY LEAK: CHECK THE */
+  /* MALLOCs AND FREEs FOR hits->matched_objs      */
+
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 {
   int32_t i     = 0;
   int32_t ready = 0;
@@ -894,7 +1002,7 @@ resultStruct Translate(parsedInput *parsed_input, int32_t index, usrActionRec *u
   int32_t      try_to_find = 0;
   int32_t      tries       = 3;  /* actor, subject and specifier */
   int32_t      winners     = 0;
-  resultStruct result      = {OK, OK};
+  resultStruct result      = {OK, NONE, OK};
   match        actor_hits;
   match        subject_hits;
   match        specifier_hits;
@@ -922,13 +1030,11 @@ resultStruct Translate(parsedInput *parsed_input, int32_t index, usrActionRec *u
         free(actor_hits.matched_objs);
         return(result);
         break;
-
       case OVERFLOW:
         result.tag = OVERFLOW;
         free(actor_hits.matched_objs);
         return(result);
         break;
-
       case OK:
         if (actor_hits.nr_of_hits == 0) {
           result.tag = ACTOR_ERROR;
@@ -977,13 +1083,11 @@ resultStruct Translate(parsedInput *parsed_input, int32_t index, usrActionRec *u
           free(subject_hits.matched_objs);
           return(result);
           break;
-
         case OVERFLOW:
           result.tag = OVERFLOW;
           free(subject_hits.matched_objs);
           return(result);
           break;
-
         case OK:
           /* continue */
           if (subject_hits.nr_of_hits == 0) {
@@ -1043,13 +1147,11 @@ resultStruct Translate(parsedInput *parsed_input, int32_t index, usrActionRec *u
         free(specifier_hits.matched_objs);
         return(result);
         break;
-
       case OVERFLOW:
         result.tag = OVERFLOW;
         free(specifier_hits.matched_objs);
         return(result);
         break;
-
       case OK:
         if (specifier_hits.nr_of_hits == 0) {
           result.tag = SPECIFIER_ERROR;
@@ -1064,7 +1166,6 @@ resultStruct Translate(parsedInput *parsed_input, int32_t index, usrActionRec *u
           tries--;
         }
         break;
-
       default:
         PrintError(77, NULL, NULL);
         /*free(specifier_hits.matched_objs);*/
@@ -1103,7 +1204,6 @@ resultStruct Translate(parsedInput *parsed_input, int32_t index, usrActionRec *u
             result.tag = ACTOR_ERROR;
             return(result);
             break;
-
           case OK:
             /* There was exactly 1 match.   */
             /* Update actor_hits in case we */
@@ -1111,20 +1211,17 @@ resultStruct Translate(parsedInput *parsed_input, int32_t index, usrActionRec *u
             actor_hits.nr_of_hits = 1;
             actor_hits.matched_objs[0] = usr_action_rec->actor;
             break;
-
           case UNKNOWN_WORD:
             /* unknown word in user input */
             free(actor_hits.matched_objs);
             result.tag = UNKNOWN_WORD;
             return(result);
             break;
-
           case ERROR:
             free(actor_hits.matched_objs);
             result.tag = ERROR;
             return(result);
             break;
-
           case NEXT_SENTENCE:
             free(actor_hits.matched_objs);
             result.tag = NEXT_SENTENCE;
@@ -1143,7 +1240,6 @@ resultStruct Translate(parsedInput *parsed_input, int32_t index, usrActionRec *u
               result.tag = SUBJECT_ERROR;
               return(result);
               break;
-
             case OK:
               /* There was exactly 1 match.     */
               /* Update subject_hits in case we */
@@ -1151,20 +1247,17 @@ resultStruct Translate(parsedInput *parsed_input, int32_t index, usrActionRec *u
               subject_hits.nr_of_hits = 1;
               subject_hits.matched_objs[0] = usr_action_rec->subject[index];
               break;
-
             case UNKNOWN_WORD:
               /* unknown word in user input */
               free(actor_hits.matched_objs);
               result.tag = UNKNOWN_WORD;
               return(result);
               break;
-
             case ERROR:
               free(subject_hits.matched_objs);
               result.tag = ERROR;
               return(result);
               break;
-
             case NEXT_SENTENCE:
               free(subject_hits.matched_objs);
               result.tag = NEXT_SENTENCE;
@@ -1183,7 +1276,6 @@ resultStruct Translate(parsedInput *parsed_input, int32_t index, usrActionRec *u
                 result.tag = SPECIFIER_ERROR;
                 return(result);
                 break;
-
               case OK:
                 /* There was exactly 1 match.      */
                 /* Update specifier_hits in case   */
@@ -1191,21 +1283,18 @@ resultStruct Translate(parsedInput *parsed_input, int32_t index, usrActionRec *u
                 specifier_hits.nr_of_hits = 1;
                 specifier_hits.matched_objs[0] = usr_action_rec->specifier;
                 break;
-
               case UNKNOWN_WORD:
                 /* unknown word in user input */
                 free(actor_hits.matched_objs);
                 result.tag = UNKNOWN_WORD;
                 return(result);
                 break;
-
               case ERROR:
                 /* unknown word in user input */
                 free(specifier_hits.matched_objs);
                 result.tag = ERROR;
                 return(result);
                 break;
-
               case NEXT_SENTENCE:
                 free(specifier_hits.matched_objs);
                 result.tag = NEXT_SENTENCE;

@@ -125,7 +125,7 @@ You find yourself in a room with freshly [papered walls](do paper wall). There i
 You find yourself on a ledge about ten [feet] below the papered room. Far below, the pit descends into a disconcerting red glow and [southward](s) is a tight, narrow passageway sloping gently down. Or you can try [climbing](get rope and climb up) back up
 This is a tight, meandering passage leading [north](n) to a ledge and [east](e) to some tall, double doors
 This is a dark cylindrical shaft with an iron ladder leading [down](d) into a wispy, yellow cloud and up to some double doors. The stench of sulphur here and the growing heat make you feel quite queasy. There's a small ledge [south](s) to rest here
-This is a small protrusion some way down (or up) the shaft, and you are thankful for a short rest- it's so hot. [north](n) is the ladder.
+This is a small protrusion some way down (or up) the shaft, and you are thankful for a short rest- it's so hot. [north](n) is the ladder
 This chamber has been cut into the rock by the river, which is now kept out by a low, fragile looking wall
 has no barriers to stop you taking a tumble down the mountain-side
 is a mound of precariously balanced rocks across the track
@@ -1042,7 +1042,7 @@ The adventurer looks a little nonplussed at your actions.
 The princess is standing around waiting for you to take some decisive action.
 The princess gets fed up with your futile attempts at rescue and rushes out of the door. You hear a shrill "Wheeeeeeee!" and then a sickening thud as she hits the floor of the ice tower.
 The princess follows you.
-I'm very sorry, I would love to talk some more but I must get back to my family. Goodbye.^She then runs off towards the palace.
+"I'm very sorry, I would love to talk some more but I must get back to my family. Goodbye."^She then runs off towards the palace.
 The adventurer leaps in front of you and says, "Stand back, fair maid, I'll save you from this varlet." He then swiftly executes you and leaves you to the mercy of the vultures.
 Ensure 'The Pawn' is in drive one.
 ^Do you want to quit or restart (q/r) ?
@@ -1221,7 +1221,7 @@ You begin to feel quite poorly.
 Suddenly you are gripped by a terrible pain in your stomach. Maybe it was something you ate?
  from a possible 350.
 The [bridge](look bridge) creaks whenever it sways.
-The Pawn - Copyright (c) 1985,1986 Magnetic Scrolls Ltd.^Version 3.1. Remastered by \\_[Strand Games](http://strandgames.com)_ 2017^^
+The Pawn - Copyright (c) 1985, 1986 Magnetic Scrolls Ltd.^Version 3.2. Remastered by \\_[Strand Games](http://strandgames.com)_ 2017^^
 The Pawn was created by Magnetic Scrolls, special thanks to Geoff Quilley for the graphics, Rob Steggles for the literary prowess, Tony Lambert for the Silly Room, Nick for his (constructive) critisism, and Jeremy San for his hard disk(s), and to Duncan Maclean for the loan of Britain's largest commercial (and independent) television news station.
 Have you got a photographic memory? If you have you will find the following question to be very easy. If you haven't please find your novella that came with the game called "A tale of Kerovnia".^Please turn to Page 
  then find line 

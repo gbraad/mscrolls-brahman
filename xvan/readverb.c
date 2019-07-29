@@ -94,7 +94,6 @@ verbInfo *RdVerb(int64_t offset)
     switch (code) {
       case ERROR:
         return(NULL);
-
       case ACTION_REC:
         if (new_verb_info) {
           /* Create and init a new struct.   */
@@ -124,11 +123,9 @@ verbInfo *RdVerb(int64_t offset)
 
         /* Next code is returned by ReadActionRec(). */
         break;
-
       case ENDVERB:
         return(verb);
         break;
-
       default:
         /* This is the start of the default code.     */
 

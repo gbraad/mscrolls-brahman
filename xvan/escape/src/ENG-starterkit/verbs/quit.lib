@@ -5,6 +5,10 @@ $VERB quit SYNONYM q
    print("Do you really want to quit? ")
    if yesno() then
      background(black)
+<<<<<<< HEAD
+=======
+     clearscreen()
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
      quit()
 
  DEFAULT

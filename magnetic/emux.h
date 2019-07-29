@@ -515,7 +515,7 @@ struct IItem
     bool isInSet(const char * set) const
     {
         int addr = get_sym_value(set);
-        assert(addr);
+        if (!addr) return false;  // if set doesnt exist
         uchar* itemSet = getcode() + addr;
         for (int i = 0; ; ++i)
         {

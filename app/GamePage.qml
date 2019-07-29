@@ -52,6 +52,9 @@ Page
     property string currentImage
     property bool picValid
 
+    // does the text move with the image or go behind it
+    property bool textFollowScrollMode: QControl.prefs.textmoveEnabled
+
     onCurrentImageChanged:
     {
         pic.play(currentImage)
@@ -68,15 +71,44 @@ Page
     actions: [
     Action
     {
+        iconName: "other/download"
+        name: "Save"
+        enabled: app.canSaveLoad
+        hoverAnimation: true
+        visible: !Device.isMobile && app.enableSaveLoad
+        onTriggered:
+        {
+            saveselectorLoader.asynchronous = false
+            saveselectorLoader.item.open()
+        }
+
+    },
+    Action
+    {
+        iconName: "other/upload"
+        name: "Restore"
+        enabled: app.canSaveLoad
+        hoverAnimation: true
+        visible: !Device.isMobile && app.enableSaveLoad
+        onTriggered:
+        {
+            loadselectorLoader.asynchronous = false
+            loadselectorLoader.item.open()
+        }
+    },
+    Action
+    {
         iconName: "navigation/refresh"
         name: "Refresh"
         hoverAnimation: true
+        enabled: !game.choiceActive
         onTriggered: QControl.refreshCommand()
     },
     Action
     {
         iconName: "content/undo"
         name: "Undo"
+        enabled: !game.choiceActive
         onTriggered: snackbar.open(QControl.undoredo(true))
         visible: QControl.gameEnableUndoRedo()
     },
@@ -92,6 +124,7 @@ Page
     {
         iconName: "content/redo"
         name: "Redo"
+        enabled: !game.choiceActive
         onTriggered: snackbar.open(QControl.undoredo(false))
         visible: QControl.gameEnableUndoRedo()
     },
@@ -212,9 +245,12 @@ Page
             
             content: Game
             {
+                // where the game text lives
                 id: game 
                 anchors.fill: parent
                 drawerypos: QControl.prefs.compassmoveEnabled ? gamearea.rollHeightShown + Units.dp*16 : 0
+
+                texttopmargin: textFollowScrollMode ? gamearea.rollHeightShown : 0
             }
             
             thumbcontent: RowLayout
@@ -357,6 +393,33 @@ Page
                     }
                 }
             }
+        }
+    }
+
+    Loader
+    {
+        id: saveselectorLoader
+        asynchronous: true
+
+        sourceComponent: SaveLoadSelector 
+        {
+            maxWidth: app.dialogWidth
+            maxHeight: app.dialogHeight
+            onAccepted: snackbar.open(QControl.saveGame(filename) ? "OK" : "Save FAILED!")
+        }
+    }
+
+    Loader
+    {
+        id: loadselectorLoader
+        asynchronous: true
+
+        sourceComponent: SaveLoadSelector
+        {
+            maxWidth: app.dialogWidth
+            maxHeight: app.dialogHeight
+            saveMode: false
+            onAccepted: snackbar.open(QControl.loadGame(filename) ? "OK" : "Load Failed")
         }
     }
 

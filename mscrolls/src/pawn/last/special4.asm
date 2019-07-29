@@ -65,6 +65,8 @@
       XDEF     SP.DEVIL,SP.DEVL2,SP.ALCH,SP.EXIT,SP.SNOW,SP.PRIN2,SP.CLOSE
       XDEF     SP.OPEN,SP.THROW
 
+      XDEF RESETDRAGON    
+
       XREF     F_DEVIL,DO.SCORE
       XREF     F_ALCH,F_COLOUR,F_DRAG,F_DRAG2,F_DRAG3,F_KMEET3,F_KMEET2
       XREF     P.LOC,P.SCN,GETDATA
@@ -73,7 +75,8 @@
       XREF     NOUNBUF,NOUNBUF2,NOUNBUF3
       XREF     WHOOPS,ROOM,SUBJECT,TIMER5,COUNT.DE,VERB,PRINC.CO
       XREF     SNOWLOC,PRTTXT,DO.SCN
-
+      XREF   REMASTER
+    
 SP.POINT 
 
 	CMP.W   #NSHAPES,D0
@@ -151,9 +154,34 @@ SP.DRAGO
 ; Get here if killed by the dragon!
 DRAGKILL
 	SCN     77                  ;DRAGON GETS U
+    TEST_B  REMASTER(A4)
+    BEQ.S   90$
+
+    TEST_W  F_KMEET3(A4)        ; is kronos dead?
+    BPL.S   10$                 ; no, zapped to ledge
+    MOVE.W  #RNWORKSHOP,ROOM(A4)
+    BRA.S   20$                 ; if dead zapped to workshop
+10$    
+    MOVE.W  #RNLEDGE2,ROOM(A4)
+20$    
+    CALL_S  RESETDRAGON
+90$    
 	BRA     DEAD
- 
- 
+
+RESETDRAGON    
+    TEST_B  REMASTER(A4)
+    BEQ.S   90$
+    CLR.B   F_DRAG(A4)
+    CLR.B   F_DRAG3(A4)
+
+    ;;  kmeet3 also stores whether kronos is dead, so dont reset this!
+    TEST_W  F_KMEET3(A4)
+    BMI.S   90$
+    CLR.W   F_KMEET3(A4)
+    CLR.B   F_DRAG2(A4)
+90$    
+    RET
+    
 SP.DRAGON2 
  
 	TEST_B  F_DRAG3(A4)
@@ -188,8 +216,8 @@ SP.DRAGON2
 	RET
  
 80$
-	SCN     236
-	BRA.S   DRAGKILL
+	SCN     236                 ;you're not kronos!
+	BRA     DRAGKILL
  
 *--------------------------------
  
@@ -323,7 +351,7 @@ SP.KRON3
 	TEST_B  F_KMEET2(A4)                  ;HAS KR GIVEN US CHEST?
 	BMI.S   10$                        ;YES = OK
 	SCN     348                        ;NO = U DIE
-	BRA     DEAD
+    BRA.S   28$                        ;dead!
  
 10$
 	MOVE.W  #NADVENT,D0
@@ -337,11 +365,15 @@ SP.KRON3
 	BEQ.S   60$                       ;IF POTION BOTTLE CARRIED U GET A GO
 26$
 	SCN     209                   ;ZAPPED TO START
+    CALL    RESETDRAGON    
 	MOVE.W  #RNSTART,D1
 	BRA     SETMODE
 25$
 	SCN     34                   ;HO HO - FELL FOR PLY N-1 (OR 2??) ((OR 3!?)
 	SCN     348
+28$    
+    MOVE.W  #RNSTART,ROOM(A4)
+    CALL    RESETDRAGON
 	BRA     DEAD
 60$
 	CMP.W   #1,F_KMEET3(A4)          ;ONE GO TO THROW BOTTLE
@@ -395,7 +427,9 @@ LIST.THROW
 	DC.L     0
  
 SP.THROW.ADVENT  
-   
+
+    ;;;  !! BUG reported here. CHKNPC will pop a ret, but we have
+    ;; already done so!!
 	BTST    #1,(A5)             ;ADV DEAD ALREADY?  
 	BNE     CHKNPC              ;AND PRINT ERROR
   
@@ -536,6 +570,10 @@ SP.DEVIL
 	BTST    #2,F_DEVIL(A4)        ;GOT SOUL?
 	BNE.S   20$                 ;YES
 	SCN     234                 ;'DEATH WILL NOW REIGN...'
+	TEST_B  REMASTER(A4)
+	BEQ.S	15$
+	MOVE.W  #RNCHAMBER,ROOM(A4)
+15$
 	BRA     DEAD
 20$
 *      MOVE.W  #NBAND,D0           ;DONE WI 'GIVE DEVIL AEROSOUL'
@@ -547,6 +585,10 @@ SP.DEVIL
 	CALL    CARRIED
 	BEQ.S   90$
 	SCN     339                 ;REAL GORY MSG 'SUPPING WARM BLOOD'
+	TEST_B  REMASTER(A4)
+	BEQ.S	25$
+	MOVE.W  #RNCHAMBER,ROOM(A4)
+25$
 	BRA     DEAD
   
 90$

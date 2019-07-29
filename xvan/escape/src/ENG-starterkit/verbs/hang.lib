@@ -14,7 +14,11 @@ $VERB hang
        endif
        if not(owns(o_actor, o_subject)) then
          printcr("(taking [the] [o_subject]).\n")
+<<<<<<< HEAD
          if not(try(l_location, 0, 0, "get [o_subject]")) then
+=======
+         if not(try(l_location, 0, 1, "get [o_subject]")) then
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
            disagree()
          endif
        endif
@@ -54,7 +58,7 @@ $VERB hang
      printcr("")
      Printcr("An example of the syntax I understand is:")
      printcr("  'hang the cloak on the hook'")
-     printcr("(to turn off these help messages, type 'help')")
+     printcr("(to turn off these help messages, type 'help 1')")
 
 ENDVERB
 

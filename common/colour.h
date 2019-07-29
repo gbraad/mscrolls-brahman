@@ -129,7 +129,7 @@ public:
             if (h < 3.0f)   return _toARGB (alpha, x, intV, floatToUChar (v * (1.0f - (s * (1.0f - f)))));
             if (h < 4.0f)   return _toARGB (alpha, x, floatToUChar (v * (1.0f - s * f)), intV);
             if (h < 5.0f)   return _toARGB (alpha, floatToUChar (v * (1.0f - (s * (1.0f - f)))), x, intV);
-                            return _toARGB (alpha, intV, x, floatToUChar (v * (1.0f - s * f)));
+            return _toARGB (alpha, intV, x, floatToUChar (v * (1.0f - s * f)));
         }
     };
     

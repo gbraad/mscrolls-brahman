@@ -52,7 +52,6 @@ mscrolls/src/tools/bin/mcaout
 mscrolls/src/tools/lnk/lf
 mscrolls/src/tools/lnk/mcaout
 prog
-sim
 mkt
 clean
 setenv.sh

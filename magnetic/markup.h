@@ -94,6 +94,9 @@ struct Markup
     void skipToWord()
     {
         // skip markup, spaces and punctuation until we start a word
+
+        skipMarkup();
+        
         for (;;)
         {
             skipSpace();

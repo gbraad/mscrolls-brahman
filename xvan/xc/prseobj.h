@@ -1,6 +1,6 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018 Marnix van den Bos.                   */
+/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
 /*                                                                      */
 /* <marnix.home@gmail.com>                                              */
 /*                                                                      */
@@ -23,7 +23,6 @@
 #if !defined(__prseobj)
 #define __prseobj
 
-
 /*************/
 /* Externals */
 /*************/
@@ -38,7 +37,6 @@ extern int32_t  ParseDescriptions(char**, int32_t*, int32_t, FILE**, fileList**)
 extern int32_t  ProcObjDSys(char*, int32_t);
 extern int32_t  LookUpId(char*);
 extern int32_t  HasType(int32_t, int32_t);
-/* extern int32_t  PCont(char**, int32_t*, int32_t, FILE*); */
 extern int32_t  ProcCIData(int32_t, int32_t, int32_t);
 extern int32_t  ProcCData(int32_t, int32_t);
 extern int32_t  ParseFlags(char**, int32_t*, int32_t, FILE**, fileList**);
@@ -49,4 +47,3 @@ extern void     PrintError(int16_t, resultStruct*, char*);                      
 extern char     *TranslateKeyword(char*);                                           /* errors.c */
 
 #endif
-

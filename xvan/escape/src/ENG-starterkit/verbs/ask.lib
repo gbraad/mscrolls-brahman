@@ -8,6 +8,11 @@ $VERB ask
      disagree()
    endif
 
+   if not(cansee(o_actor, o_subject)) then
+     printcr("[the] [o_subject] is not here.")
+     disagree()
+   endif
+
    if equal(o_spec, o_nst) then
      printcr("I don't know what you're talking about.")
      disagree()
@@ -16,9 +21,17 @@ $VERB ask
  "ask [o_subject] about [o_spec]"
    DISAMBIGUATION_RULES
      if equal(o_subject, o_nst) then score(-10) endif
+<<<<<<< HEAD
+=======
+     if equal(o_spec, o_nst) then score(-10) endif
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
      if testflag(o_spec.f_seenbefore) then score(5) endif
+     if cansee(o_actor, o_spec) then score(5) endif
    END_RULES
+<<<<<<< HEAD
 
+=======
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
    if equal(o_subject, o_actor) then
      printcr("Talking to yourself is a sign of pending mental collapse.")
    else
@@ -33,6 +46,6 @@ $VERB ask
       printcr("")
       Printcr("An example of the syntax I understand is:")
       printcr("  'ask Fred about the old wooden chest'")
-      printcr("(to turn off these help messages, type 'help')")
+      printcr("(to turn off these help messages, type 'help 1')")
 
 ENDVERB

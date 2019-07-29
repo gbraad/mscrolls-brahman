@@ -37,12 +37,11 @@
 #include <string>
 #include <deque>
 #include <mutex>
+#include <functional>
 #include "jsonwalker.h"
 #include "logged.h"
 #include "ifischema.h"
 #include "ifihandler.h"
-
-struct IFIHandler;
 
 struct IFIHost
 {
@@ -50,6 +49,7 @@ struct IFIHost
     
     typedef std::string string;
     typedef std::deque<char*>  Queue;
+    typedef IFIHandler::Pump Pump;
 
     IFI*        _ifi = 0;
     mutex       _queueLock;
@@ -58,6 +58,8 @@ struct IFIHost
     bool        _inSync = false;
     bool        _more;
     bool        _combineReplies = true;
+
+    Pump        _pump;
 
     virtual ~IFIHost() {}
 
@@ -133,32 +135,65 @@ struct IFIHost
 
             // combined text record, if used
             GrowString cjs;
-            int len = 0;
-                
+
             if (n > 1 && _combineReplies)
             {
-                cjs.append("{\"" IFI_TEXT "\":\"");
-                for (int i = 0; i < n; ++i)
+                // scan for first simple text
+                int i;
+                string t1;
+                for (i = 0; i < n-1; ++i)
                 {
-                    string t;
-                    if (isSimpleText(rep[i], t))
-                    {
-                        // combine text and discard
-                        len += t.size();
-                        cjs.append(t);
-
-                        delete [] rep[i];
-                        rep[i] = 0;
-                    }
+                    if (isSimpleText(rep[i], t1)) break;
                 }
 
-                cjs.append("\"}");
-                cjs.add(0);
+                if (!t1.empty())
+                {
+                    // scan for subsequent simple text
+                    int j = i;
+                    while (++j < n)
+                    {
+                        string t2;
+                        if (isSimpleText(rep[j], t2))
+                        {
+                            if (j == i + 1)
+                            {
+                                // initialise
+                                cjs.append("{\"" IFI_TEXT "\":\"");
+                                cjs.append(t1);
+
+                                delete [] rep[i];
+                                rep[i] = 0;
+                            }
+
+                            // append subsequent
+                            cjs.append(t2);
+                            
+                            delete [] rep[j];
+                            rep[j] = 0;
+                            
+                        }
+                        else break;
+                    }
+
+                    if (!cjs.isEmpty())
+                    {
+                        cjs.append("\"}");
+                        cjs.add(0);
+                    }
+                }
             }
 
             // handle replies
+            int cc = 0;
             for (int i = 0; i < n; ++i)
             {
+                if (++cc == 3)
+                {
+                    // pump every 3
+                    if (_pump) _pump();
+                    cc = 0;
+                }
+                
                 char* r = rep[i];
                 if (r)
                 {
@@ -171,10 +206,12 @@ struct IFIHost
                     // we combined
                     // emit the combined text here, as if it all occured at
                     // the same point
-                    if (len > 0)
+                    if (!cjs.isEmpty())
                     {
                         if (_handler) _handler->handle(cjs.start());
-                        len = 0; // only once!
+
+                        // only once
+                        cjs.clear();
                     }
                 }
             }
@@ -221,17 +258,6 @@ struct IFIHost
         return false;
     }
 
-    bool _syncRelease()
-    {
-        // sync and release, but only if not already in sync
-        if (!_inSync)
-        {
-            sync();
-            return release();
-        }
-        return false;
-    }
-
     bool syncRelease()
     {
         // sync and release, but only if not already in sync
@@ -252,6 +278,8 @@ struct IFIHost
     bool eval(const char* s)
     {
         bool r;
+
+        LOG5("IFIHost sending; ", s);
 
         if (_inSync)
         {

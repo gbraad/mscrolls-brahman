@@ -164,6 +164,7 @@
 *       DC.B   'DOO',$52+$80		;large multiple door/doors
        DC.B   'boar',$44+$80		;board=floorboard
        DC.B	'lette',$72+$80		;letter = note
+       DC.B	$5A+$80             ; z = wait 
 
 
 * included by wtable7.asm

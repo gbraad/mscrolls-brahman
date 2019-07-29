@@ -45,6 +45,8 @@
 * table of multiples 
 
               DC.W    NHOE,NTROWEL,NRAKE,0
+	XDEF	Denotation_KEYS
+Denotation_KEYS              
               DC.W    NMKEY,NWKEY,NKEY,0           ;METAL,WOODEN,BLUE KEYS
               DC.W    NBLUE,NGREEN,NRED,NWHITE,0
               DC.W    NBOTTLE1,NBOTTLE2,NBOTTLE3,NBOTTLE4,0   ;BOTTLES
@@ -89,6 +91,8 @@
               DC.W    NSBALBX,NLBALBX,NBOXES,0
               DC.W    NLAMP,NLAMPS,NLANTERN,0
               DC.W    NWALL,NLWALL,NSWALL,NPWALL,0
+	XDEF	Denotation_DOORS
+Denotation_DOORS
 * doors
 		DC.W	NDOOR,NDOORS,NDOOR2,NDDOORS
 		DC.W	NTREEDOOR,NSHEDDOOR,NFRONTDOOR

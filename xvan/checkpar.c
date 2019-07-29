@@ -70,6 +70,18 @@ int32_t CheckPars(int32_t fun_code, int32_t type1, int32_t type2, int32_t type3,
       return(OK);
       break;
 
+    case DEBUG:
+      /****************/
+      /* debug(value) */
+      /****************/
+
+      if (type1 != NUMBER) {
+        TypeErr(1, "DEBUG", "number");
+        return(ERROR);
+      }
+      return(OK);
+      break;
+
     case EQUAL:
       /* You may can compare any 2 parameters.   */
       /* To prevent false positives, we return   */
@@ -216,7 +228,7 @@ int32_t CheckPars(int32_t fun_code, int32_t type1, int32_t type2, int32_t type3,
       return(OK);
       break;
 
-        case OWNS:
+    case OWNS:
       /*************************************/
       /* owns(loc/obj, obj, num [,prepos]) */
       /*************************************/
@@ -326,6 +338,18 @@ int32_t CheckPars(int32_t fun_code, int32_t type1, int32_t type2, int32_t type3,
       }
       if (type3 != NUMBER) {
         TypeErr(3, "ADD", "number");
+        return(ERROR);
+      }
+      return(OK);
+      break;
+
+    case ADDCHOICE:
+      if (type1 != STRING) {
+        TypeErr(1, "ADDCHOICE", "string");
+        return(ERROR);
+      }
+      if (type2 != STRING) {
+        TypeErr(2, "ADDCHOICE", "string");
         return(ERROR);
       }
       return(OK);
@@ -576,6 +600,22 @@ int32_t CheckPars(int32_t fun_code, int32_t type1, int32_t type2, int32_t type3,
       return(OK);
       break;
 
+    case NEWDSYS:
+      /****************************/
+      /* newdsys(loc/obj, string) */
+      /****************************/
+
+      if (type1 != LOC_ID && type1 != OBJ_ID) {
+        TypeErr(1, "NEWDSYS", "location or object identifier");
+        return(ERROR);
+      }
+      if (type2 != STRING) {
+        TypeErr(2, "NEWDSYS", "string");
+        return(ERROR);
+      }
+      return(OK);
+      break;
+
     case NEW_EXIT:
       /**************************/
       /* newexit(loc, dir, loc) */
@@ -605,6 +645,18 @@ int32_t CheckPars(int32_t fun_code, int32_t type1, int32_t type2, int32_t type3,
         /* we must allow locations here, in case */
         /* they use the THIS parameter.          */
         TypeErr(1, "OWNER", "location or object");
+        return(ERROR);
+      }
+      return(OK);
+      break;
+
+    case PLAYMODE:
+      /******************/
+      /* playmode(word) */
+      /******************/
+
+      if (type1 != WORD_ID) {
+        TypeErr(1, "PLAYMODE", "word");
         return(ERROR);
       }
       return(OK);
@@ -857,9 +909,9 @@ int32_t CheckPars(int32_t fun_code, int32_t type1, int32_t type2, int32_t type3,
       break;
 
     case WAIT:
-      /**********/
-      /* wait() */
-      /**********/
+      /***************/
+      /* wait(value) */
+      /***************/
 
       if (type1 != NUMBER) {
         TypeErr(1, "WAIT", "number");
@@ -869,7 +921,7 @@ int32_t CheckPars(int32_t fun_code, int32_t type1, int32_t type2, int32_t type3,
       break;
 
     default:
-      PrintError(6, &((resultStruct) {VALUE, fun_code}), NULL);
+      PrintError(6, &((resultStruct) {VALUE, NONE, fun_code}), NULL);
       return(ERROR);
   } /* switch */
 }

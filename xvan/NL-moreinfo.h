@@ -33,21 +33,20 @@ extern dirInfo *loc_dir;
 extern dirInfo *obj_dir;
 
 extern int32_t capital;                                       /* letsplay.c   */
-
 extern int32_t actor;
-
 extern char    *outputline;                                   /* init.c       */
-
+extern char    prompt[];                                      /* letsplay.c   */  /* @!@ */
 extern void    NL_PrintArticle(sysDescr*, int32_t, int);      /* nl-article.c */
-
-extern void    Output(char*, int);                            /* output.c     */
+extern void    Output(void);                                  /* output.c     */
 extern int32_t IsLocId(int32_t);
 
+extern void    Output(void);                                  /* output.c     */
 extern void    PrintId(int32_t, int);                         /* output.c     */
 extern void    PrintWord(int32_t, int);                       /* output.c     */
 extern void    PrintExtendedSysDescr(extendedSysDescr*, int); /* output.c     */
 extern void    PrintString(char*, int);                       /* output.c     */
 extern int32_t LookUpId(char*);
-extern void    GetAddtlInput(char*, char*);                   /* input.c      */
+extern void    GetAddtlInput(kvPair*, char*, int32_t, int);   /* input.c      */
+extern void    ResetKVPair(kvPair*);                          /* json.c       */
 
 #endif

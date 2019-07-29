@@ -1,6 +1,6 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018 Marnix van den Bos.                   */
+/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
 /*                                                                      */
 /* <marnix.home@gmail.com>                                              */
 /*                                                                      */
@@ -34,92 +34,90 @@
 
 int32_t NL_CheckIfKeyword(char*);
 
-
 /************************/
 /* function definitions */
 /************************/
 
-int32_t NL_CheckIfKeyword(word_lwr)
- char *word_lwr;
+int32_t NL_CheckIfKeyword(char *word_lwr)
 {
-  /* 10may2018: story info keywords added, because if the
-*/
+  /* 10may2018: story info keywords added, because if the */
   /* language is changed, the keywords won't be recognized */
 
   /* story info keywords */
-    if (strncmp(word_lwr, "story_info", MAX_WORD_LEN) == 0)
-      return(STORY_INFO);
-    if (strncmp(word_lwr, "verhaal_info", MAX_WORD_LEN) == 0)
-      return(STORY_INFO);
-    if (strncmp(word_lwr, "xvan_language", MAX_WORD_LEN) == 0)
-      return(XVAN_LANGUAGE);
-    if (strncmp(word_lwr, "xvan_taal", MAX_WORD_LEN) == 0)
-      return(XVAN_LANGUAGE);
-    if (strncmp(word_lwr, "story_language", MAX_WORD_LEN) == 0)
-      return(STORY_LANGUAGE);
-    if (strncmp(word_lwr, "story_taal", MAX_WORD_LEN) == 0)
-      return(STORY_LANGUAGE);
-    if (strncmp(word_lwr, "english", MAX_WORD_LEN) == 0)
-      return(ENG);
-    if (strncmp(word_lwr, "eng", MAX_WORD_LEN) == 0)
-      return(ENG);
-    if (strncmp(word_lwr, "nederlands", MAX_WORD_LEN) == 0)
-      return(NL);
-    if (strncmp(word_lwr, "nl", MAX_WORD_LEN) == 0)
-      return(NL);
-    if (strncmp(word_lwr, "dutch", MAX_WORD_LEN) == 0)
-      return(NL);
-    if (strncmp(word_lwr, "title", MAX_WORD_LEN) == 0)
-      return(TITLE);
-    if (strncmp(word_lwr, "titel", MAX_WORD_LEN) == 0)
-      return(TITLE);
-    if (strncmp(word_lwr, "version", MAX_WORD_LEN) == 0)
-      return(VERSION);
-    if (strncmp(word_lwr, "versie", MAX_WORD_LEN) == 0)
-      return(VERSION);
-    if (strncmp(word_lwr, "author", MAX_WORD_LEN) == 0)
-      return(AUTHOR);
-    if (strncmp(word_lwr, "auteur", MAX_WORD_LEN) == 0)
-      return(AUTHOR);
-    if (strncmp(word_lwr, "organization", MAX_WORD_LEN) == 0)
-      return(ORGANIZATION);
-    if (strncmp(word_lwr, "organisatie", MAX_WORD_LEN) == 0)
-      return(ORGANIZATION);
-    if (strncmp(word_lwr, "covertext", MAX_WORD_LEN) == 0)
-      return(COVERTEXT);
-    if (strncmp(word_lwr, "kafttekst", MAX_WORD_LEN) == 0)
-      return(COVERTEXT);
-    if (strncmp(word_lwr, "credits", MAX_WORD_LEN) == 0)
-      return(CREDITS);
-    if (strncmp(word_lwr, "android_market", MAX_WORD_LEN) == 0)
-      return(ANDROID_MARKET);
-    if (strncmp(word_lwr, "ios_market", MAX_WORD_LEN) == 0)
-      return(IOS_MARKET);
-    if (strncmp(word_lwr, "backimage", MAX_WORD_LEN) == 0)
-      return(BACKIMAGE);
-    if (strncmp(word_lwr, "achtergrond", MAX_WORD_LEN) == 0)
-      return(BACKIMAGE);
-    if (strncmp(word_lwr, "effect", MAX_WORD_LEN) == 0)
-      return(EFFECT);
-    if (strncmp(word_lwr, "no_sidebar", MAX_WORD_LEN) == 0)
-      return(NO_SIDEBAR);
-    if (strncmp(word_lwr, "geen_sidebar", MAX_WORD_LEN) == 0)
-      return(NO_SIDEBAR);
-    if (strncmp(word_lwr, "no_textinput", MAX_WORD_LEN) == 0)
-      return(NO_TEXTINPUT);
-    if (strncmp(word_lwr, "geen_tekstinvoer", MAX_WORD_LEN) == 0)
-      return(NO_TEXTINPUT);
-    if (strncmp(word_lwr, "no_compass", MAX_WORD_LEN) == 0)
-      return(NO_COMPASS);
-    if (strncmp(word_lwr, "geen_kompas", MAX_WORD_LEN) == 0)
-      return(NO_COMPASS);
-    if (strncmp(word_lwr, "autolink", MAX_WORD_LEN) == 0)
-      return(AUTOLINK);
-    if (strncmp(word_lwr, "primary_color", MAX_WORD_LEN) == 0)
-      return(PRIMARY_COLOR);
-    if (strncmp(word_lwr, "hoofdkleur", MAX_WORD_LEN) == 0)
-      return(PRIMARY_COLOR);
-    /* end of story info keywords */
+  if (strncmp(word_lwr, "story_info", MAX_WORD_LEN) == 0)
+    return(STORY_INFO);
+  if (strncmp(word_lwr, "verhaal_info", MAX_WORD_LEN) == 0)
+    return(STORY_INFO);
+  if (strncmp(word_lwr, "xvan_language", MAX_WORD_LEN) == 0)
+    return(XVAN_LANGUAGE);
+  if (strncmp(word_lwr, "xvan_taal", MAX_WORD_LEN) == 0)
+    return(XVAN_LANGUAGE);
+  if (strncmp(word_lwr, "story_language", MAX_WORD_LEN) == 0)
+    return(STORY_LANGUAGE);
+  if (strncmp(word_lwr, "story_taal", MAX_WORD_LEN) == 0)
+    return(STORY_LANGUAGE);
+  if (strncmp(word_lwr, "english", MAX_WORD_LEN) == 0)
+    return(ENG);
+  if (strncmp(word_lwr, "eng", MAX_WORD_LEN) == 0)
+    return(ENG);
+  if (strncmp(word_lwr, "nederlands", MAX_WORD_LEN) == 0)
+    return(NL);
+  if (strncmp(word_lwr, "nl", MAX_WORD_LEN) == 0)
+    return(NL);
+  if (strncmp(word_lwr, "dutch", MAX_WORD_LEN) == 0)
+    return(NL);
+  if (strncmp(word_lwr, "title", MAX_WORD_LEN) == 0)
+    return(TITLE);
+  if (strncmp(word_lwr, "titel", MAX_WORD_LEN) == 0)
+    return(TITLE);
+  if (strncmp(word_lwr, "version", MAX_WORD_LEN) == 0)
+    return(VERSION);
+  if (strncmp(word_lwr, "versie", MAX_WORD_LEN) == 0)
+    return(VERSION);
+  if (strncmp(word_lwr, "author", MAX_WORD_LEN) == 0)
+    return(AUTHOR);
+  if (strncmp(word_lwr, "auteur", MAX_WORD_LEN) == 0)
+    return(AUTHOR);
+  if (strncmp(word_lwr, "organization", MAX_WORD_LEN) == 0)
+    return(ORGANIZATION);
+  if (strncmp(word_lwr, "organisatie", MAX_WORD_LEN) == 0)
+    return(ORGANIZATION);
+  if (strncmp(word_lwr, "covertext", MAX_WORD_LEN) == 0)
+    return(COVERTEXT);
+  if (strncmp(word_lwr, "kafttekst", MAX_WORD_LEN) == 0)
+    return(COVERTEXT);
+  if (strncmp(word_lwr, "credits", MAX_WORD_LEN) == 0)
+    return(CREDITS);
+  if (strncmp(word_lwr, "android_market", MAX_WORD_LEN) == 0)
+    return(ANDROID_MARKET);
+  if (strncmp(word_lwr, "ios_market", MAX_WORD_LEN) == 0)
+    return(IOS_MARKET);
+  if (strncmp(word_lwr, "backimage", MAX_WORD_LEN) == 0)
+    return(BACKIMAGE);
+  if (strncmp(word_lwr, "achtergrond", MAX_WORD_LEN) == 0)
+    return(BACKIMAGE);
+  if (strncmp(word_lwr, "effect", MAX_WORD_LEN) == 0)
+    return(EFFECT);
+  if (strncmp(word_lwr, "no_sidebar", MAX_WORD_LEN) == 0)
+    return(NO_SIDEBAR);
+  if (strncmp(word_lwr, "geen_sidebar", MAX_WORD_LEN) == 0)
+    return(NO_SIDEBAR);
+  if (strncmp(word_lwr, "no_textinput", MAX_WORD_LEN) == 0)
+    return(NO_TEXTINPUT);
+  if (strncmp(word_lwr, "geen_tekstinvoer", MAX_WORD_LEN) == 0)
+    return(NO_TEXTINPUT);
+  if (strncmp(word_lwr, "no_compass", MAX_WORD_LEN) == 0)
+    return(NO_COMPASS);
+  if (strncmp(word_lwr, "geen_kompas", MAX_WORD_LEN) == 0)
+    return(NO_COMPASS);
+  if (strncmp(word_lwr, "autolink", MAX_WORD_LEN) == 0)
+    return(AUTOLINK);
+  if (strncmp(word_lwr, "primary_color", MAX_WORD_LEN) == 0)
+    return(PRIMARY_COLOR);
+  if (strncmp(word_lwr, "hoofdkleur", MAX_WORD_LEN) == 0)
+    return(PRIMARY_COLOR);
+
+  /* end of story info keywords */
 
   if (strncmp(word_lwr, "kanzien", MAX_WORD_LEN) == 0)
     return(CANSEE);
@@ -250,6 +248,8 @@ int32_t NL_CheckIfKeyword(word_lwr)
   if (strncmp(word_lwr, "hussel", MAX_WORD_LEN) == 0)
     return(SHUFFLE);
   if (strncmp(word_lwr, "herstart", MAX_WORD_LEN) == 0)
+    return(RESTART);
+  if (strncmp(word_lwr, "eenvan", MAX_WORD_LEN) == 0)
     return(RESTART);
   if (strncmp(word_lwr, "(", MAX_WORD_LEN) == 0)
     return(LEFT_PAR);
@@ -491,4 +491,3 @@ int32_t NL_CheckIfKeyword(word_lwr)
     return(NOTIMERS);
   return(NO_KEYWORD);
 }
-

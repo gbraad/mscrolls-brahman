@@ -30,8 +30,6 @@
 
 extern FILE          *datafile;
 
-extern char          *outputline;                                /* init.c    */
-
 extern void          PrintError(int16_t, resultStruct*, char*);  /* errors.c  */
 extern void          PrintCompActionRec(compActionRec*);         /* debug.c   */
 extern void          PrintLocation(locationInfo*);               /* debug.c   */

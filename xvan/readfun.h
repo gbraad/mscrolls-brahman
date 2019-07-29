@@ -30,8 +30,6 @@
 
 extern FILE    *datafile;
 
-extern char    *outputline;                                /* init.c    */
-
 extern void    PrintError(int16_t, resultStruct*, char*);  /* errors.c  */
 extern int32_t GetNextCode32(int32_t*);                    /* fileio.c  */
 extern int32_t IsTestFun(int32_t);                         /* execute.c */

@@ -476,6 +476,35 @@ inline std::string CapitaliseStartWords(const std::string& s)
     return r;
 }
 
+static inline std::string makePath(const std::string& prefix,
+                                   const std::string& name) 
+{
+    std::string path;
+    if (!name.empty())
+    {
+        // windows style or linux style absolute path given
+        // then do not apply prefix
+        if (name.find(':') != std::string::npos || name.at(0) == '/')
+        {
+            // if we have a prefix like C: or https:// or "/" then
+            // assume `name` is an absolute path.
+            path = name;
+        }
+        else
+        {
+            path = prefix;
+            if (!path.empty()) path += '/';
+            path += name;
+        }
+
+        // enough backslashes! windows files work forwards too!
+        replaceCharsInplace(path, '\\', '/');
+    }
+
+    return path;
+}
+
+
 #if 0
 inline void subst(char* s, size_t n, const char* replace)
 {

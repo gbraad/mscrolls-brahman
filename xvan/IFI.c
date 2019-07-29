@@ -45,6 +45,7 @@
 /* Function declarations */
 /*************************/
 
+char    *CreateLocObjeJson(int32_t);
 char    *CreateJsonObjectMap(void);
 int32_t CheckIFI(char*);
 int32_t XeqIFIrequest(int32_t, jsonValue*);
@@ -55,6 +56,59 @@ void    SendIFIerror(char*, char*);
 /* Function definitions */
 /************************/
 
+<<<<<<< HEAD
+=======
+char *CreateLocObjJson(int32_t id)
+{
+  char      *loc_obj      = NULL;
+  char      *object_json  = NULL;
+  jsonValue value         = {NO_TYPE, NULL, 0, 0};
+
+  /* this function creates a json string with an         */
+  /* object or location: {"id":<value>, "name":<string>} */
+
+  if ( (object_json = NewJsonObject(object_json)) == NULL ) {
+     return(NULL);
+  }
+
+  /* add the id */
+  value.type       = JSON_VAL_INT;
+  value.int_number = id;
+
+  if ( (object_json = AddKV(object_json, "id", &value)) == NULL ) {
+   return(NULL);
+  }
+
+  /* add the name            */
+  /* 1 means add the article */
+  if ( (loc_obj = GetId(id, 1)) == NULL ) {
+    return(NULL);
+  }
+
+  value.type       = JSON_VAL_STRING;
+  value.textstring = ResetString(value.textstring);
+  value.textstring = AddToString(value.textstring, loc_obj);
+
+  loc_obj = ResetString(loc_obj);
+
+  if ( (object_json = AddKV(object_json, "name", &value)) == NULL ) {
+    value.textstring = ResetString(value.textstring);
+    free(loc_obj);
+    return(NULL);
+  }
+
+  if ( (object_json = CloseObject(object_json)) == NULL ) {
+    value.textstring = ResetString(value.textstring);
+    free(loc_obj);
+    return(NULL);
+  }
+
+  free(loc_obj);
+  return(object_json);
+}
+
+
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 char *CreateJsonObjectMap(void)
 {
   int       i             = 0;
@@ -63,7 +117,6 @@ char *CreateJsonObjectMap(void)
   int       end_value     = 0;
   char      *object_json  = NULL;
   char      *object_array = NULL;
-  char      *loc_obj      = NULL;
   jsonValue value;
 
   /* NOTE: we do locations and objects */
@@ -88,48 +141,23 @@ char *CreateJsonObjectMap(void)
   end_value   = FIRST_LOCATION_ID + nr_of_locs-1;
 
   for (j=0; j<=1; j++) {
-    for (i=start_value; i<end_value; i++) {
-      if ( (object_json = NewJsonObject(object_json)) == NULL ) {
-        return(NULL);
+    for (i=start_value; i<=end_value; i++) {
+      object_json = CreateLocObjJson(i);
+
+      /* if NULL then just skip this object  */
+      /* there may have been a dynamic d_sys */
+      /* error or so                         */
+
+      if (object_json != NULL) {
+        /* now add the object_json to the array */
+        value.type       = JSON_VAL_OBJECT;
+        value.textstring = object_json;
+
+        if ( (object_array = AddKV(object_array, NULL, &value)) == NULL ) {
+          value.textstring = ResetString(value.textstring);
+           return(NULL);
+        }
       }
-
-      /* add the id */
-      value.type       = JSON_VAL_INT;
-      value.int_number = i;
-
-      if ( (object_json = AddKV(object_json, "id", &value)) == NULL ) {
-       return(NULL);
-      }
-
-      /* add the name            */
-      /* 1 means add the article */
-      if ( (loc_obj = GetId(i, 1)) == NULL ) {
-        return(NULL);
-      }
-      value.type       = JSON_VAL_STRING;
-      value.textstring = AddToString(value.textstring, loc_obj);
-
-      loc_obj = ResetString(loc_obj);
-
-      if ( (object_json = AddKV(object_json, "name", &value)) == NULL ) {
-        value.textstring = ResetString(value.textstring);
-        return(NULL);
-      }
-
-      if ( (object_json = CloseObject(object_json)) == NULL ) {
-        value.textstring = ResetString(value.textstring);
-        return(NULL);
-      }
-
-      /* now add the object_json  to the array          */
-      value.type = JSON_VAL_OBJECT;
-      value.textstring = object_json;
-
-      if ( (object_array = AddKV(object_array, NULL, &value)) == NULL ) {
-        value.textstring = ResetString(value.textstring);
-        return(NULL);
-      }
-
       object_json      = NULL;
       value.textstring = ResetString(value.textstring);
     }
@@ -171,7 +199,8 @@ char *CreateJsonObjectMap(void)
 int32_t CheckIFI(char *request)
 {
   /* request labels must be in lowercase */
-
+  if (strcmp(request, "begin") == 0)
+    return(IFI_REQ_BEGIN);
   if (strcmp(request, "command") == 0)
     return(IFI_REQ_COMMAND);
   if (strcmp(request, "configdir") == 0)
@@ -190,8 +219,9 @@ int32_t CheckIFI(char *request)
     return(IFI_REQ_META);
   if (strcmp(request, "moves") == 0)
     return(IFI_REQ_MOVES);
-  if (strcmp(request, "objects") == 0)
+  if (strcmp(request, "objects") == 0) {
     return(IFI_REQ_OBJECTS);
+  }
   if (strcmp(request, "picture") == 0)
     return(IFI_REQ_PICTURE);
   if (strcmp(request, "savedata") == 0)
@@ -202,8 +232,11 @@ int32_t CheckIFI(char *request)
     return(IFI_REQ_RANDOM_SEED);
   if (strcmp(request, "people") == 0)
     return(IFI_REQ_PEOPLE);
+  if (strcmp(request, "keyhit") == 0)
+    return(IFI_REQ_KEYHIT);
 
   /* not an IFI request */
+
   return(IFI_NO_IFI);
 }
 
@@ -229,6 +262,7 @@ int32_t XeqIFIrequest(int32_t request, jsonValue *value)
       /* copy it to interpreter_input, because Play()   */
       /* needs a char[] an not a malloced array.        */
       /* otherwise MoreInfo() calls will go wrong       */
+
       strcpy(interpreter_input, value->textstring);
       result = Play(interpreter_input);
       break;
@@ -309,7 +343,9 @@ int32_t XeqIFIrequest(int32_t request, jsonValue *value)
         json_string = ResetString(json_string);
         break;
       }
-      /* mandatory stuff */
+      /************************/
+      /* mandatory meta stuff */
+      /************************/
       if (value->type == JSON_VAL_TRUE) {
         val.type = JSON_VAL_STRING;
         val.textstring = ResetString(val.textstring);
@@ -353,7 +389,24 @@ int32_t XeqIFIrequest(int32_t request, jsonValue *value)
           val.textstring = ResetString(val.textstring);
           break;
         }
-        /* optional stuff */
+        /***********************/
+        /* optional meta stuff */
+        /***********************/
+        if (story_info.play_mode != INTERPRETER_MODE) {
+          val.type = JSON_VAL_STRING;
+          val.textstring = ResetString(val.textstring);
+          if (story_info.play_mode == CHOICE_MODE) {
+            val.textstring = AddToString(val.textstring, "choice_mode");
+          }
+          else {
+            val.textstring = AddToString(val.textstring, "hybrid_mode");
+          }
+          if ( !(value_string = AddKV(value_string, "play_mode", &val))) {
+            val.textstring = ResetString(val.textstring);
+            break;
+          }
+        }
+
         if (strlen(story_info.android_mkt) != 0) {
           val.type = JSON_VAL_STRING;
           val.textstring = ResetString(val.textstring);
@@ -454,20 +507,19 @@ int32_t XeqIFIrequest(int32_t request, jsonValue *value)
       break;
 
     case IFI_REQ_OBJECTS:
-      if ( (json_string = CreateJsonObjectMap()) == NULL ) {
-        /* do nothing */
+      if ( (json_string = CreateJsonObjectMap()) != NULL ) {
+        ifi_emitResponse(json_string);
+        free(json_string);
       }
-      ifi_emitResponse(json_string);
-      free(json_string);
       break;
 
     case IFI_REQ_PICTURE:
       /* if true we must send picture updates */
       ifi_stats.picture = (value->type == JSON_VAL_TRUE ? 1 : 0);
       break;
+
     case IFI_REQ_SAVEDATA:
       /* we must now send the game state to the front-end  */
-
       /* we have a nested json object here that is always     */
       /* the same, so we will build it using string functions */
       if ( (json_string = AddToString(json_string, "{\"savedata\":{\"data\":\"")) == NULL) {
@@ -516,10 +568,9 @@ int32_t XeqIFIrequest(int32_t request, jsonValue *value)
       break;
 
     default:
-      /* unknown IFI request code           */
-      /* we should never get here, because  */
-      /* error will be detected in function */
-      /* CheckIFI()                         */
+      /* unknown IFI request code */
+      /* do nothing               */
+
       break;
   } /* switch */
 
@@ -550,7 +601,7 @@ int32_t ProcessJson(char *json_string, char *line_buf)
       /* ready */
       kv.value.textstring = ResetString(kv.value.textstring);
       kv.key              = ResetString(kv.key);
-      return(prologue_json ? IFI_REQ_META : result);
+      return(prologue_json ? IFI_REQ_BEGIN : result);
     }
 
     /* check if the key is an IFI-request */
@@ -561,7 +612,7 @@ int32_t ProcessJson(char *json_string, char *line_buf)
     /* off the timers) until after we processed the   */
     /* prologue json.                                 */
 
-    if (IFI_request == IFI_REQ_META) {
+    if (IFI_request == IFI_REQ_BEGIN) {
       prologue_json = 1;
     }
 
@@ -573,18 +624,19 @@ int32_t ProcessJson(char *json_string, char *line_buf)
 
    /* now execute the IFI request */
    result = XeqIFIrequest(IFI_request, &(kv.value));
-
   }  /* while */
 
   kv.value.textstring = ResetString(kv.value.textstring);
   kv.key              = ResetString(kv.key);
 
-  return(prologue_json ? IFI_REQ_META : result);
+  return(prologue_json ? IFI_REQ_BEGIN : result);
 }
 
 
 void SendIFIerror(char *key, char *error_text)
 {
+  /* must change this, does not work with printf */
+
   /* send the error as a json object */
   printf("{\"%s\" : \"%s\"}", key, error_text);
   printf("\n\n");

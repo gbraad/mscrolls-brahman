@@ -66,17 +66,20 @@
 	XREF   RND.CHIN,RND.D1,RNDGEN,INITRND3,STWINDOW,ROOM,BIOS
 	XREF   OUTMODE,SUBJECT,P.LOC,SCRPNT,LJPOS,POS,DO.SCN
 	XREF   PEND2,NPCINRM,LINE,REALBAD,SCREEN,PRTTXT,INITRND
-	XREF   D.NOUNS,INBUFF
+	XREF   D.NOUNS
+
+	XREF	BIOSA4,INBUFF
 
 INIT
 *	LEA     BIOS(PC),A4
+	CALL	BIOSA4
 
      IFEQ    M68000
 
 	LEA     D.NOUNS-14(A4),A0	;noun data
 
 	XREF	MessageCode,SpaceTable,MinSpaceEntry
-	XREF	SLADDR,SLADDR.E
+        XREF    SLADDR,SLADDR.E,MsgMSGBASE,MsgSCNBASE
 
 	LEA	SLADDR(A4),A1		;start of restart/save area
 	LEA	SLADDR.E(A4),A2		;end of same
@@ -87,6 +90,20 @@ INIT
 	LEA	SpaceTable,A5		;for clever F-lines
 	ADD.L	A4,A5
 	MOVE.L	#MinSpaceEntry,D7	;F-lines =< this are messages
+    MOVE.L  #MsgMSGBASE,D6
+    MOVE.L  #MsgSCNBASE,D5
+
+    ;; These are now used to pass clonedata and maxnoun
+    ;;  used to be A6 and D5.
+    SUB.L   A2,A2               ;clear
+
+    ;; pass anyway!
+*  	MOVE.W	#NMAXNOUN,D4        ; not for PAWN
+    
+	IFD	wanted_CLONES
+	XREF	CLONEDATA
+    LEA	CLONEDATA(A4),A2
+	ENDC
 
 	DC.W    $A0FD               ;Set base address of noun data - SETNOUNS
 

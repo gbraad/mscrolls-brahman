@@ -78,6 +78,11 @@ See _Interface_ section for details, but startup has the following sequence;
 
   Note that the `name` can be omitted in an `items` reply if the display label is to be the same as the `objects` table entry.
 
+* `{"begin":true}`
+   This is sent to the back-end after the meta handshake, when the cover page is closed and before any `command` evals occur. `begin` is only sent once. This message may safely be ignored by the back-end.
+
+   However, the game engine may, in fact, wish to defer the start of gameplay itself until `begin` is received. For example, if there is title music playing whilst the cover page is displayed, a game with sound effects at the start will wish to wait until the cover page is closed before starting those sound effects.
+
 * `eval`  
   Subsequent evals may contain any IFI request terms, including `command`. It is not essential that the back-end respond to these requests immediately and it is not an error for no `text` to be issued in response. 
 
@@ -125,7 +130,7 @@ These are the json tags that may appear in a _request_. See the _Replies_ sectio
    Request back-end to emit `savedata` with current game state.
 
 * `loaddata: "game-state"`  
-    The entire game state is sent to restore a game position. The string "game-state" is _entirely_ back-end specific, for example base64 encoded binary data, whose content and meaning is only known to the back-end. This will include any internal headers, formatting, version numbers etc.
+    The entire game state is sent to restore a game position. The string "game-state" is _entirely_ back-end specific, for example base85 (see base85.h) encoded binary data, whose content and meaning is only known to the back-end. This will include any internal headers, formatting, version numbers etc.
 
     The "game-state" string will correspond _exactly_ to one previously sent through `savedata` earlier.
 
@@ -150,11 +155,8 @@ These are the json tags that may appear in a _request_. See the _Replies_ sectio
 
 The _reply_ json, sent from the back-end to the front-end, can have these terms at the top level. Some of the terms have values that are (optionally) json objects. In these cases, consult the subsequent json object definitions.
 
-* `text: "You are in a maze of twisty passages all alike."`  
+* `text: "You are in a maze of twisty passages all alike."` or `text:{textobj}`  
    Block of text from the game to be formatted and shown in the transcript window. A newline will be added to the end when displayed. The `text` may contain a subset of [Markdown](https://daringfireball.net/projects/markdown/) and HTML.
-
-* `text:{textobj}`  
-   Supply formatted text.
 
 * `title: "In the Lounge"`  
   Game text to be displayed in any GUI title bar.
@@ -219,6 +221,21 @@ The _reply_ json, sent from the back-end to the front-end, can have these terms 
 
 * `refreshcmd: "look"`  
   Set the `command` sent when the refresh button is pressed.
+
+* `choice:[{choiceobj}...]` or `choice:{text:"heading",choice:[{choiceobj}...]}`  
+  Prompt user for decisions before continuing. See [Choices](#choices) for details.
+
+### choiceobj
+
+* `text: "a choice"` or `text: {textobj}`  
+   Text to appear on the UI for this choice.
+
+* `enabled: false`  
+   _Optional_.  Choice is displayed but cannot be selected.
+
+* `chosen:"some text"` or `chosen:{some json}`  
+   _Optional_. If this is chosen, then either the given `json` is sent to the back-end as `{some json}`, or if `text` is given; `{"command":"some text"}` is sent. 
+    If omitted and chosen, `{"command":"a choice"}` will be sent, where the command text is the same as the `text` field.
 
 ### pictureobj
 
@@ -366,7 +383,7 @@ Same meanings as `item`.
 ### saveobj
 
 * `data: "game-state"`  
-   The entire game state encoded as a string (eg base64) that can later be accommodated by a `loaddata` request to completely restore a position (see also request `loaddata`).
+   The entire game state encoded as a string (eg base85) that can later be accommodated by a `loaddata` request to completely restore a position (see also request `loaddata`).
 
 * `name: "filepath"`  
    _Optional_. path relative to datadir.
@@ -385,8 +402,17 @@ Same meanings as `item`.
 * `color: "blue"`  
   _Optional_.
 
+* `bold: "true"`
+  _Optional_. Signify bold
+
+* `italic: "true"`
+  _Optional_. Signify italic
+
+* `pixelsize: int`
+  _Optional_. size of font in pixels (scaled by DPI)
+
 * `id:` int  
-   Used internally as channel number. `-1` clears any previous text
+   _Optional_. Used internally as channel number. `-1` clears any previous text
 
 ### soundobj
 
@@ -397,6 +423,73 @@ Same meanings as `item`.
 
 * `channel: int`
    _Optional_. Specify audio channel, default to 0.
+
+## Choices<a name="choices"></a>
+
+The back-end can require the player to make decisions before continuing. In this circumstance, it will want to issue the player with a "choice".
+
+In general, the front-end GUI will present a set of choices to the player as a pop-up dialog. This pauses gameplay and a choice must be selected before the dialog is dismissed and the game continues.
+
+The choice dialog may also be used for other situations where player confirmation is required, such as save/load confirmation or breaking up a large portion of text with "continue" or to add a pause for dramatic effect.
+
+A choice is prompted by sending a `choice` reply to the front-end.
+
+A `choiceobj` is a json object containing the text to display, the response to send back if selected and any other information.
+
+The simplest `choiceobj` contains just the text to display for the choice. If `chosen` is omitted, the choice text itself is used for the reply.
+
+### Example1: Two command choices
+
+```
+{"choice":[{"text":"Go North"},{"text":"Go South"}]}
+```
+
+The UI will display the menu,
+
+* Go North
+* Go South
+
+When, selected the same string will be sent back as a command, eg `{"command":"Go North"}`, this would be handled by the back-end as if it were entered normally.
+
+### Example2: Two choices with custom text and a Header
+
+```
+{"choice":{
+    "text":"What are you doing to do?",
+    "choice":[{"text":"Decide to go on","chosen":"go north"},
+            {"text":"Give up and go back","chosen":"go south"}]
+    }
+}    
+```
+
+
+### Example3: Press to continue
+
+```
+{"choice":[{"text":"Press a key to continue","chosen":{"something":"true"}}]}
+```
+
+## Reply Text Merging
+
+It is often the case that the back-end engine will issue `text` replies a chunk a time. eg;
+
+```
+{ "text":"hello"}
+{ "text":" world."}
+```
+
+Sometimes individual words might be sent over as separate `text` messages, and this could be quite inefficient for the front end if it were to draw text on the UI each time a `text` messages was received.
+
+In fact the front-end usually receives bunch of `ifi` replies before the back-end finally issues a `getRequest` and blocks on something to do.
+
+It is usually at this point that the front-end processes the pending queue of `ifi` replies, although in principle the reply queue could be processed at any time.
+
+Where there are several `text` replies _in sequence_, these can be combined into an equivalent single `text` message. This has the advantage of allowing the UI to draw once instead of several times.
+
+`text` reply combining does not happen with text objects, ie where the text is made into an object for the purposes of adding formatting.
+
+eg `{"text":{"text":"hello world","color":"blue"}}`
+
 
 ## Save and Load
 

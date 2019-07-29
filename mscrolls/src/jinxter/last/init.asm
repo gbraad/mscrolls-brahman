@@ -87,7 +87,19 @@ INIT
     MOVE.L  #MsgMSGBASE,D6
     MOVE.L  #MsgSCNBASE,D5
 
-    SetNouns        ;Set base address of noun data - SETNOUNS
+    ;; These are now used to pass clonedata and maxnoun
+    ;;  used to be A6 and D5.
+    SUB.L   A2,A2               ;clear
+
+    ;; pass anyway!
+  	MOVE.W	#NMAXNOUN,D4
+    
+	IFD	wanted_CLONES
+	XREF	CLONEDATA
+    LEA	CLONEDATA(A4),A2
+	ENDC
+
+	SetNouns		;Set base address of noun data - SETNOUNS
 
      ENDC
 

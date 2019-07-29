@@ -164,6 +164,10 @@ public:
         delete this;
     }
 
+    T*      next() { return (T*)_next; }
+    T*      prev() { return (T*)_prev; }
+    
+
 private:
     
     void _init() { _next = this; _prev = this; }

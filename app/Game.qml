@@ -37,7 +37,7 @@ import QtQuick.Controls.Material 2.0
 import QtQuick.Controls 1.4 as C1
 import QtQuick.Controls.Styles 1.4 as C1
 
-import QtQuick.Layouts 1.0
+import QtQuick.Layouts 1.3
 import Material 0.3 as M
 
 import com.voidware.brahman 1.0
@@ -51,10 +51,17 @@ C1.SplitView
     property alias textarea: area
     property alias contenty: textflick.contentY
     property alias drawerypos: rdrawer.dypos
+    property int texttopmargin: 0
+    property bool choiceActive: choicebox.active
 
     readonly property int compassSize: 200*M.Units.dp
 
     property font gameFont: QControl.prefs.gameFont
+
+    onChoiceActiveChanged:
+    {
+        app.canSaveLoad = app.enableSaveLoadChoice || !choiceActive
+    }
 
     function dtoggle()
     {
@@ -74,95 +81,90 @@ C1.SplitView
         
         content: Rectangle 
         {
+            // game text lives here
             id: transcript
             anchors.fill: parent
             onWidthChanged: qtranscript.setWidth(width);
             color: theme.backgroundColor
+            anchors.topMargin: texttopmargin
 
             Flickable 
             {
                 id: textflick
+                width: parent.width
+                height: parent.height - choicebox.height
                 anchors
                 {
-                    fill: parent
                     bottomMargin: M.Device.hasTouchScreen ? Math.max(gameFont.pixelSize*1.5,20*M.Units.dp) : 10*M.Units.dp
 
                 }
                 flickableDirection: Flickable.VerticalFlick
-                contentHeight: Math.max(flickarea.height, height)
+                contentHeight: Math.max(area.height, height)
                 clip: true
 
                 onHeightChanged: ensureVisible(area.cursorRectangle)
 
                 function ensureVisible(r)
                 {
+                    /*
                     if (contentY >= r.y) contentY = r.y;
                     else if (contentY+height < r.y+r.height)
                     contentY = r.y+r.height-height;
+                    */
+                    // snap!
+                    contentY = Math.max(area.implicitHeight - height,0)
                 }
 
-                onContentHeightChanged: 
-                if (choicebox.visible) contentY = contentHeight - height;
+                ///onContentHeightChanged: if (choicebox.visible) contentY = contentHeight - height;
 
-                Column
+                TextEdit
                 {
-                    id: flickarea
+                    id: area
+                    wrapMode: TextArea.Wrap
+                    textMargin: (QControl.lowMargins ? 8 : 16)*M.Units.dp
+                    color: M.Theme.textColor
+                    font: gameFont
                     width: parent.width
-                    
-                    TextEdit
+                    height: Math.max(implicitHeight, textflick.height - choicebox.height)
+
+                    text: qtranscript.textHTML
+                    textFormat: TextEdit.RichText
+                    readOnly: true
+                    activeFocusOnPress: false
+
+                    // clicked on active text
+                    onLinkActivated:
                     {
-                        id: area
-                        wrapMode: TextArea.Wrap
-                        textMargin: (QControl.lowMargins ? 8 : 16)*M.Units.dp
-                        color: M.Theme.textColor
-                        font: gameFont
-                        width: parent.width
-                        height: Math.max(implicitHeight, textflick.height - choicebox.height)
-
-                        text: qtranscript.textHTML
-                        textFormat: TextEdit.RichText
-                        readOnly: true
-
-                        // clicked on active text
-                        onLinkActivated:
-                        {
-                            if (link.startsWith("http://") || link.startsWith("https://")) Qt.openUrlExternally(link);
-                            else QControl.evalClickCommand(link)
-                        }
-
-                        cursorPosition: length
-                        onCursorRectangleChanged:
-                        textflick.ensureVisible(cursorRectangle)
-
-                        // this is to allow text selection in the game
-                        // window on desktop right mouse button
-                        // you can then C-c to copy etc.
-                        MouseArea
-                        {
-                            id: rightbutton
-                            anchors.fill: parent
-                            acceptedButtons: Qt.RightButton 
-
-                            property int start
-                            
-                            onPressed: 
-                            {
-                                area.deselect()
-                                start = area.positionAt(mouseX, mouseY)
-                                textflick.interactive = false
-                            }
-                            onPositionChanged: area.select(start, area.positionAt(mouseX, mouseY))
-                            onReleased: textflick.interactive = true
-                        }
+                        if (link.startsWith("http://") || link.startsWith("https://")) Qt.openUrlExternally(link);
+                        else if (!choiceActive) QControl.evalClickCommand(link)
+                        //textconsole.forceActiveFocus();
                     }
-                    
-                    ChoiceBox 
+
+                    cursorPosition: length
+                    onCursorRectangleChanged: textflick.ensureVisible(cursorRectangle)
+
+                    // this is to allow text selection in the game
+                    // window on desktop right mouse button
+                    // you can then C-c to copy etc.
+                    MouseArea
                     {
-                        id: choicebox
-                        width: parent.width
+                        id: rightbutton
+                        anchors.fill: parent
+                        acceptedButtons: Qt.RightButton 
+
+                        property int start
+                        
+                        onPressed: 
+                        {
+                            area.deselect()
+                            start = area.positionAt(mouseX, mouseY)
+                            textflick.interactive = false
+                        }
+                        onPositionChanged: area.select(start, area.positionAt(mouseX, mouseY))
+                        onReleased: textflick.interactive = true
                     }
                 }
-
+                    
                 Keys.onPressed:
                 {
                     if (event.key == Qt.Key_Up || event.key == Qt.Key_PageUp)
@@ -178,6 +180,17 @@ C1.SplitView
                     textflick.height * 0.9/textflick.contentHeight : 0
                 }
             }
+
+            ChoiceBox 
+            {
+                id: choicebox
+                width: parent.width
+                z: 1
+                anchors
+                {
+                    bottom: parent.bottom
+                }
+            }
         }
 
         dcontent: Compass
@@ -185,6 +198,7 @@ C1.SplitView
             id: compass
             anchors.fill: parent
             fgColor: app.theme.contrastColor
+            active: !choiceActive
         }
 
         Component.onCompleted:
@@ -206,6 +220,8 @@ C1.SplitView
         Layout.minimumHeight: normalTHeight
         Layout.maximumHeight: splitview.height*2/3
 
+        onVisibleChanged: if (visible) forceActiveFocus();
+        
         onWbhChanged:
         {
             if (wbh)
@@ -225,7 +241,7 @@ C1.SplitView
             }
         }
         
-        visible: app.enableTextInput
+        visible: app.enableTextInput && !choiceActive
 
         Component.onCompleted:
         {

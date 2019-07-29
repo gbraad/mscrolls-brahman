@@ -231,28 +231,24 @@ int32_t *RdTrCode(int32_t *code)
     switch (*code) {
       case ERROR:
         return(NULL);
-
       case IF:
         if (!ProcCode(temp_triggercode, len++, IF))
           return(NULL);
 
         GetNextCode32(code);
         break;
-
       case THEN:
         if (!ProcCode(temp_triggercode, len++, THEN))
           return(NULL);
 
         GetNextCode32(code);
         break;
-
       case ELSE:
         if (!ProcCode(temp_triggercode, len++, ELSE))
           return(NULL);
 
         GetNextCode32(code);
         break;
-
       case AND:
       case OR:
       case NOT:
@@ -262,14 +258,12 @@ int32_t *RdTrCode(int32_t *code)
         if (!GetNextCode32(code))
           return(NULL);
         break;
-
       case ENDIF:
         if (!ProcCode(temp_triggercode, len++, ENDIF))
           return(NULL);
 
         GetNextCode32(code);
         break;
-
       default:
         if (IsTestFun(*code) || IsIntAct(*code) ||
                      IsCAttrId(*code) || IsLAttrId(*code)) {
@@ -285,6 +279,7 @@ int32_t *RdTrCode(int32_t *code)
         break;
     } /* switch */
   } /* while */
+
   /* copy temp_trig_code to a permanent trig */
   /* Add END_OF_CODE */
   if (!ProcCode(temp_triggercode, len++, END_OF_CODE))

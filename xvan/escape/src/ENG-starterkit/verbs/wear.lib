@@ -9,7 +9,7 @@ $VERB wear
 
    if not(equal(o_subject, %none)) then
      if not(testflag(o_subject.f_wearable)) then
-       printcr("[the] [o_subject] is not something that can be worn.")
+       printcr("[the] [o_subject] [o_subject.r_is] not something that can be worn.")
        disagree()
      else
        if testflag(o_subject.f_worn) then
@@ -38,9 +38,10 @@ $VERB wear
    END_RULES
 
    if not(owns(o_actor, o_subject)) then
-     printcr("[[picking up [the] [o_subject] first.")
-     move(o_subject, o_actor)
-     setflag(o_subject.f_bypass)
+     printcr("(picking up [the] [o_subject] first).")
+     if not(try(l_location, 0, 1, "get [o_subject]")) then
+       disagree()
+     endif
    endif
 
    setflag(o_subject.f_worn)

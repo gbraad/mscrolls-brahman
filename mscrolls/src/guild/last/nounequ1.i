@@ -479,6 +479,6 @@ NNOUNS	EQU	463
 
 	include "cdequ.i"
 	include	"cloneequ.i"
-* produced on Mon Jun 11 21:57:50 2018
+* produced on Tue Jun 12 09:38:16 2018
 
-* checksum = 96d060ed
+* checksum = 1ec71afc

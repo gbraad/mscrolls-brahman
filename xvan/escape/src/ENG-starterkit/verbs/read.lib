@@ -18,4 +18,3 @@ $VERB read
    printcr("I only understood you as far as willing to read something.")
 
 ENDVERB
-

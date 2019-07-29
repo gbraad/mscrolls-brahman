@@ -1,6 +1,6 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018 Marnix van den Bos.                   */
+/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
 /*                                                                      */
 /* <marnix.home@gmail.com>                                              */
 /*                                                                      */
@@ -61,8 +61,8 @@ synList *NewSynListStruct(void)
   return(sl);
 }
 
-void FreeSynList(sl)
- synList *sl;
+
+void FreeSynList(synList *sl)
 {
   if ((sl != NULL)) {
     FreeSynList(sl->next);
@@ -71,9 +71,8 @@ void FreeSynList(sl)
   return;
 }
 
-resultStruct RedefinedVerb(verb, verb_id)
- char    *verb;
- int32_t *verb_id;
+
+resultStruct RedefinedVerb(char *verb, int32_t *verb_id)
 {
   wordTable    wt_rec;
   resultStruct result;
@@ -94,11 +93,8 @@ resultStruct RedefinedVerb(verb, verb_id)
   return(result);
 }
 
-int32_t ParseVerb(offset, redefined, source, file_list)
- int64_t  offset;    /* current position in datafile */
- int32_t  redefined;
- FILE     **source;  /* file to read from            */
- fileList **file_list;
+
+int32_t ParseVerb(int64_t offset, int32_t redefined, FILE **source, fileList **file_list)
 {
   /* With other parse functions (like ParseLocation()), the      */
   /* directory is not passed as a parameter. This is because in  */

@@ -55,7 +55,8 @@
 
 // 1.1.X pre ifi
 // 1.2.X post ifi
-#define VERSION_STRING  "1.2.12"
+// 1.3.X move to Qt5.12.X
+#define VERSION_STRING  "1.3.1"
 
 struct ControlImpBase
 {
@@ -112,12 +113,13 @@ struct ImpIFI: public IFIHandler, public ControlImpBase
 
     ~ImpIFI() { delete _ifi; }
     
-    bool loadIFI()
+    bool loadIFI(Pump p)
     {
         _ifi = IFI::create();
         if (_ifi)
         {
             _ifiHost.setIFI(_ifi);
+            _ifiHost._pump = p;
             
             // set the emitter 
             _ifi->setEmitter(&IFIHost::emitter, &_ifiHost);
@@ -205,6 +207,12 @@ struct ImpIFI: public IFIHandler, public ControlImpBase
             }
         }
         return r;
+    }
+
+    bool evalJSON(const string& js)
+    {
+        LOG3("Control, evalJSON ", js);
+        return _ifiHost.eval(js.c_str());
     }
     
     bool evalCommand(const string& cmd, const ObjectList& ctx)
@@ -1324,35 +1332,20 @@ struct Control::Imp :
         
         return r;
     }
+
+    bool ifiChoiceGeneralResponse(const string& js) override
+    {
+        _host->ifiChoiceChanged(js);
+        return true;
+    }
+
+    bool ifiChoiceListResponse(const string& js) override
+    {
+        _host->ifiChoiceChanged(js);
+        return true;
+    }
     
     /////////////////////////////////
-
-    static string makePath(const string& prefix, const string& name) 
-    {
-        string path;
-        if (!name.empty())
-        {
-            // windows style or linux style absolute path given
-            // then do not apply prefix
-            if (name.find(':') != std::string::npos || name.at(0) == '/')
-            {
-                // if we have a prefix like C: or https:// then
-                // assume `name` is an absolute path.
-                path = name;
-            }
-            else
-            {
-                path = prefix;
-                if (!path.empty()) path += '/';
-                path += name;
-            }
-
-            // enough backslashes! windows files work forwards too!
-            replaceCharsInplace(path, '\\', '/');
-        }
-
-        return path;
-    }
 
     string makeConfigPath(const string& name) const
     {
@@ -1645,6 +1638,29 @@ struct Control::Imp :
             // pass on if engine loaded (BE only)
             ImpEngine::updateLogLevel();
         }
+    }
+
+    bool evalJSON(const string& js)
+    {
+        // IFI only
+        // evaluate raw json
+        if (js.empty()) return true; 
+
+        // are we json?
+        if (js[0] == '{')
+        {
+            if (!_ifi) return false;
+            
+            bool r = ImpIFI::evalJSON(js);
+            if (r) r = postEval();
+            return r;
+        }
+        else
+        {
+            // fallback to text command otherwise
+            return evalCommand(js);
+        }
+
     }
 
     bool evalCommand(const string& cmd, bool echo = true)
@@ -2280,7 +2296,9 @@ typedef std::string string;
 string Control::currentVersion() const { return _imp->currentVersion(); }
 void Control::setLogLevel(int level) { _imp->setLogLevel(level); }
 int Control::getLogLevel() const { return _imp->getLogLevel(); }
-bool Control::evalCommand(const string& cmd) { return _imp->evalCommand(cmd); }
+bool Control::evalCommand(const string& cmd, bool echo)
+ { return _imp->evalCommand(cmd, echo); }
+bool Control::evalJSON(const string& js) { return _imp->evalJSON(js); }
 bool Control::evalClickCommand(const string& cmd) { return _imp->evalClickCommand(cmd); }
 bool Control::refreshCommand() { return _imp->refreshCommand(); }
 bool Control::evalCommandDirect(const string& cmd, bool echo)
@@ -2300,7 +2318,7 @@ void Control::evalPeopleList(ItemsModel::Entries& list)
 bool Control::loadEngine(IFEngineInterface* be)
 { return _imp->loadEngine(be); }
 
-bool Control::loadIFI() { return _imp->loadIFI(); }
+bool Control::loadIFI(Pump p) { return _imp->loadIFI(p); }
 
 bool Control::sendOptionToEngine(const string& opt, const var& val)
 { return _imp->sendOptionToEngine(opt, val); }

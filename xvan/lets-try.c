@@ -78,7 +78,6 @@ int32_t LetsTry(int32_t target, usrActionRec action_rec)
       /* exit */
       return(QUIT);
       break;
-
     case DISAGREE:
       /* MUST WE EXECUTE THE EPILOGUE HERE ??? */
       /* Forget the whole thing, continue with */
@@ -86,28 +85,23 @@ int32_t LetsTry(int32_t target, usrActionRec action_rec)
 
       /* As executing this action record is part of a */
       /* trigger, do not fire the timers yet          */
-
       return(DISAGREE);
       break;
-
     case GET_SUBJECT:
       /* The subject wasn't specified in the input. */
       PrintError(96, NULL, TranslateKeyword("SUBJECT"));
       /* not a severe enough error to quit?? */
       return(DISAGREE);
       break;
-
     case GET_SPECIFIER:
       /* The specifier wasn't specified in the input. */
       PrintError(96, NULL, TranslateKeyword("SPECIFIER"));
       return(DISAGREE);
       break;
-
     case GET_ANSWER:
       /* We need an answer from the player. */
       return(DISAGREE);
       break;
-
     default:
       /* Either AGREE or NO_MATCH. */
       /* Build list with contained objs for curr_loc. */

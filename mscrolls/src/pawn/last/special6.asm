@@ -461,8 +461,11 @@ SP.PRESS40
 	AND.B   #$7F,D1
 	CMP.B   #2,D1            ;HOW USED?
 	BHI.S   30$              ;TOO MUCH!
+    TEST_B  REMASTER(A4)	; do not wear off aerosoul in remaster
+	BNE.S	45$
 	ADDQ.B  #1,F_AERO(A4)
 	SUBQ.B  #1,D1
+45$	
 	BNE.S   50$             ;BNE= WAS 2, NOW 1 SO GIVE SECOND MSG
   
 *                              ;BEQ= WAS 1, NOW 0 SO GIVE FIRST ONE
@@ -512,12 +515,12 @@ SP.UNLOC
 	CMP.W   #NKEY,D5           ;WITH BLUE KEY??
 	BNE.S   90$                ;NO - FORGET IT!
         
-        TEST_B  REMASTER(A4)
-        BEQ.S   10$
+    TEST_B  REMASTER(A4)
+    BEQ.S   10$
 
-        ;; remaster version
+    ;; remaster version
 	SCN     395             ; the key worked!
-        BRA.S   20$
+    BRA.S   20$
 10$
 
 	EXG     D0,D5              ;SAVE D0

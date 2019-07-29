@@ -79,4 +79,13 @@ extern void         And(void);                                                  
 extern void         Or(void);                                                         /* sysfunc.c */
 extern void         Not(void);                                                        /* sysfunc.c */
 
+/* debug stuff */
+extern short        debug_info;                                                       /* init.c */
+extern short        debug_level;                                                      /* init.c */
+extern void         PrintString(char*);
+extern void         Output(void);
+
+extern void         DebugLevel_1(short, char*, int32_t, int32_t, resultStruct);
+extern void         IncreaseDebugIndent(int);
+
 #endif

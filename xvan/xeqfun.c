@@ -20,6 +20,7 @@
 /*                                                                      */
 /************************************************************************/
 
+
 /********************************************************************/
 /* This module contains the code for the functions that the user    */
 /* may use in his sourcefile. This code will use so called system   */
@@ -55,11 +56,20 @@ int32_t XeqOwns(int32_t**);
 int32_t XeqRunCommon(int32_t**, usrActionRec*, int32_t, int32_t*);  /* 06oct2017 */
 int32_t XeqRunVerb(int32_t**, usrActionRec*, int32_t);              /* 06oct2017 */
 int32_t XeqTstFlag(int32_t**);
+<<<<<<< HEAD
 int32_t XeqValDir(int32_t**);
 int32_t XeqYesNo(int32_t**);
 int32_t XeqTry(int32_t**);
 int32_t XeqTestFun(int32_t, int32_t**, usrActionRec*, int32_t, int32_t*);
 
+=======
+int32_t XeqTestFun(int32_t, int32_t**, usrActionRec*, int32_t, int32_t*);
+int32_t XeqTry(int32_t**);
+int32_t XeqValDir(int32_t**);
+int32_t XeqYesNo(int32_t**);
+
+resultStruct XeqAddChoice(int32_t**);
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 resultStruct XeqAddJson(int32_t**);
 resultStruct XeqAgree(int32_t**);
 resultStruct XeqBackground(int32_t**);
@@ -82,10 +92,19 @@ resultStruct XeqHitAnyKey(int32_t**);
 resultStruct XeqIndent(int32_t**);
 resultStruct XeqItalic(int32_t**);
 resultStruct XeqMove(int32_t**);
+<<<<<<< HEAD
+=======
+resultStruct XeqNewDSys(int32_t**);
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 resultStruct XeqNewExit(int32_t**);
 resultStruct XeqNoMatch(int32_t**);
 resultStruct XeqNoTimers(int32_t**);
 resultStruct XeqOwner(int32_t**);
+<<<<<<< HEAD
+=======
+resultStruct XeqPickOne(int32_t**);
+resultStruct XeqPlayMode(int32_t**);         /* jul 20 19 */
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 resultStruct XeqPrt(int32_t**);
 resultStruct XeqPrtcr(int32_t**);
 resultStruct XeqPrtStat(int32_t**);
@@ -114,12 +133,15 @@ resultStruct XeqIntAct(int32_t, int32_t**, usrActionRec*, int32_t);
 
 int32_t XeqCanSee(int32_t **trigger)
 {
-  int32_t owner;  /* dummy */
-  char    *str;   /* dummy */
-  int32_t par1;
-  int32_t par2;   /* CanSee() always has two parameters. */
-  int32_t type1 = NO_TYPE;
-  int32_t type2 = NO_TYPE;
+  int32_t  owner;  /* dummy */
+  char     *str;   /* dummy */
+  int32_t  par1;
+  int32_t  par2;   /* CanSee() always has two parameters. */
+  int32_t  type1 = NO_TYPE;
+  int32_t  type2 = NO_TYPE;
+  int32_t  result;
+
+  resultStruct par_list[2];  /* for debugging */
 
   /* Skip nr of parameters. */
   NextOpcode(trigger);
@@ -131,13 +153,27 @@ int32_t XeqCanSee(int32_t **trigger)
   if (!GetPar(&owner, &par2, &type2, &str, trigger))
     return(QUIT);
 
+  /* for debugging */
+  if (debug_level == 2) {
+    par_list[0].tag   = type1;
+    par_list[0].owner = NO_ID;
+    par_list[0].value = par1;
+    par_list[1].tag   = type2;
+    par_list[1].owner = NO_ID;
+    par_list[1].value = par2;
+    DebugLevel_2_pars("cansee()", par_list, 2);
+  }
+
   if (par1 == NONE || par2 == NONE) {
     PrintError(78, NULL, "XeqCanSee()");
     return(QUIT);
   }
 
-  if (CheckPars(CANSEE, type1, type2, NO_TYPE, NO_TYPE, NO_TYPE))
-    return(CanSee(par1, par2));
+  if (CheckPars(CANSEE, type1, type2, NO_TYPE, NO_TYPE, NO_TYPE)) {
+    result = CanSee(par1, par2);
+    DebugLevel_2_result( (resultStruct) {result, NO_ID, 0} );
+    return(result);
+  }
   else
     return(QUIT);
 }
@@ -150,9 +186,17 @@ int32_t XeqExecute(int32_t **trigger, usrActionRec *action_rec, int32_t subject_
 
   int32_t      owner;
   char         *str;  /* dummy */
+<<<<<<< HEAD
   int32_t       par;
   int32_t       type = NO_TYPE;
   resultStruct  result;
+=======
+  int32_t      par;
+  int32_t      type = NO_TYPE;
+  resultStruct result;
+
+  resultStruct par_list;   /* for debugging */
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 
   /* Skip nr of parameters (which will be 1). */
   NextOpcode(trigger);
@@ -161,8 +205,17 @@ int32_t XeqExecute(int32_t **trigger, usrActionRec *action_rec, int32_t subject_
   if (!GetPar(&owner, &par, &type, &str, trigger))
     return(QUIT);
 
+  if (debug_level == 2) {
+    par_list.tag   = type;
+    par_list.owner = owner;
+    par_list.value = par;
+    DebugLevel_2_pars("Trigger()", &(par_list), 1);
+  }
+
   if (CheckPars(TRIGGER, type, NO_TYPE, NO_TYPE, NO_TYPE, NO_TYPE)) {
     result = XeqTrigger(owner, par, action_rec, subject_index);
+
+    DebugLevel_2_result(result);
 
     /* XeqTrigger() returns either AGREE, DISAGREE, NO_MATCH or */
     /* QUIT. However, in this case, the trigger is executed as  */
@@ -176,17 +229,18 @@ int32_t XeqExecute(int32_t **trigger, usrActionRec *action_rec, int32_t subject_
       case NO_MATCH:
         return(OK);
         break;
-
       case DISAGREE:
         return(ERROR);
         break;
-
       case QUIT:
         return(QUIT);
         break;
-
       default:
+<<<<<<< HEAD
         PrintError(79, &((resultStruct) {VALUE, result.tag}), "XeqExecute()");
+=======
+        PrintError(79, &((resultStruct) {VALUE, NONE, result.tag}), "XeqExecute()");
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
         return(QUIT);
         break;
     }
@@ -201,10 +255,13 @@ int32_t XeqExit(int32_t **trigger, usrActionRec *action_rec, int32_t subject_ind
 {
   /* exit(loc/obj) */
 
-  int32_t owner; /* dummy */
-  char    *str;  /* dummy */
-  int32_t par;
-  int32_t type  = NO_TYPE;
+  int32_t  owner;       /* dummy */
+  char *str;            /* dummy */
+  int32_t  par;
+  int32_t  type   = NO_TYPE;
+  int32_t  result = AGREE;
+
+  resultStruct par_list;   /* for debugging */
 
   /* Skip nr of parameters. */
   NextOpcode(trigger);
@@ -213,8 +270,19 @@ int32_t XeqExit(int32_t **trigger, usrActionRec *action_rec, int32_t subject_ind
   if (!GetPar(&owner, &par, &type, &str, trigger))
     return(ERROR);
 
+  if (debug_level == 2) {
+    par_list.tag   = type;
+    par_list.owner = NO_ID;  /* only for common flags */
+    par_list.value = par;
+    DebugLevel_2_pars("exit()", &par_list, 1);
+  }
+
   if (CheckPars(EXIT, type, NO_TYPE, NO_TYPE, NO_TYPE, NO_TYPE)) {
-    if (Exit(par, action_rec, subject_index) == AGREE)
+    result = Exit(par, action_rec, subject_index);
+
+    DebugLevel_2_result( (resultStruct) {result, NONE, result});
+
+    if (result == AGREE)
       return(OK);
     else
       return(ERROR);
@@ -227,11 +295,13 @@ int32_t XeqExit(int32_t **trigger, usrActionRec *action_rec, int32_t subject_ind
 int32_t XeqIsLit(int32_t **trigger)
 {
   /* IsLit(loc/obj) */
+  int32_t  owner; /* dummy */
+  char     *str;  /* dummy */
+  int32_t  par;
+  int32_t  type   = NO_TYPE;
+  int32_t  result = OK;
 
-  int32_t owner; /* dummy */
-  char    *str;  /* dummy */
-  int32_t par;
-  int32_t type = NO_TYPE;
+  resultStruct par_list;  /* for debugging */
 
   /* Skip nr of parameters (which will be 1). */
   NextOpcode(trigger);
@@ -240,8 +310,20 @@ int32_t XeqIsLit(int32_t **trigger)
   if (!GetPar(&owner, &par, &type, &str, trigger))
     return(QUIT);
 
-  if (CheckPars(ISLIT, type, NO_TYPE, NO_TYPE, NO_TYPE, NO_TYPE))
-    return(IsLit(par));
+  if (debug_level == 2) {
+    par_list.tag   = type;
+    par_list.owner = NO_ID;  /* only for common flags */
+    par_list.value = par;
+    DebugLevel_2_pars("exit()", &par_list, 1);
+  }
+
+  if (CheckPars(ISLIT, type, NO_TYPE, NO_TYPE, NO_TYPE, NO_TYPE)) {
+    result = IsLit(par);  /* either OK or ERROR */
+
+    DebugLevel_2_result( (resultStruct) {result, NONE, result});
+
+    return(result);
+  }
   else
     return(QUIT);
 }
@@ -250,11 +332,13 @@ int32_t XeqIsLit(int32_t **trigger)
 int32_t XeqIsObject(int32_t **trigger)
 {
   /* IsObject(loc/obj) */
+  int32_t  owner; /* dummy */
+  char     *str;  /* dummy */
+  int32_t  par;
+  int32_t  type   = NO_TYPE;
+  int32_t  result = OK;
 
-  int32_t owner; /* dummy */
-  char    *str;  /* dummy */
-  int32_t par;
-  int32_t type = NO_TYPE;
+  resultStruct par_list;  /* for debugging */
 
   /* Skip nr of parameters (which will be 1). */
   NextOpcode(trigger);
@@ -263,8 +347,20 @@ int32_t XeqIsObject(int32_t **trigger)
   if (!GetPar(&owner, &par, &type, &str, trigger))
     return(QUIT);
 
-  if (CheckPars(ISOBJECT, type, NO_TYPE, NO_TYPE, NO_TYPE, NO_TYPE))
-    return(IsObjId(par));
+  if (debug_level == 2) {
+    par_list.tag   = type;
+    par_list.owner = NO_ID;  /* only for common flags */
+    par_list.value = par;
+    DebugLevel_2_pars("exit()", &par_list, 1);
+  }
+
+  if (CheckPars(ISOBJECT, type, NO_TYPE, NO_TYPE, NO_TYPE, NO_TYPE)) {
+    result = IsObjId(par);
+
+    DebugLevel_2_result( (resultStruct) {result, NONE, result});
+
+    return(result);
+  }
   else
     return(QUIT);
 }
@@ -285,6 +381,9 @@ int32_t XeqOwns(int32_t **trigger)
   int32_t  type3 = NO_TYPE;
   int32_t  type4 = NO_TYPE;
   int      index = 0;
+  int32_t  result;
+
+  resultStruct par_list[4];  /* for debugging */
 
   /* Read number of parameters. */
   nr_of_pars = NextOpcode(trigger);
@@ -323,6 +422,7 @@ int32_t XeqOwns(int32_t **trigger)
       if (IsWordId(par3)) {
         preposition = par3;
         type4       = WORD_ID;
+        nr_of_pars  = 4;
         depth       = 1;
         type3       = NUMBER;
       }
@@ -333,9 +433,26 @@ int32_t XeqOwns(int32_t **trigger)
     else {
       /* there are only 2 parameters, so set */
       /* containment level to 1              */
-      depth = 1;
-      type3 = NUMBER;
+      depth      = 1;
+      type3      = NUMBER;
+      nr_of_pars = 3;
     }
+  }
+
+  if (debug_level == 2) {
+    par_list[0].tag   = type1;
+    par_list[0].owner = NO_ID;
+    par_list[0].value = par1;
+    par_list[1].tag   = type2;
+    par_list[1].owner = NO_ID;
+    par_list[1].value = par2;
+    par_list[2].tag   = type3;
+    par_list[2].owner = NO_ID;
+    par_list[2].value = depth;
+    par_list[3].tag   = type4;
+    par_list[3].owner = NO_ID;
+    par_list[3].value = preposition;
+    DebugLevel_2_pars("owns():", par_list, nr_of_pars);
   }
 
   /* We now must test if par1 owns (contains) par2. */
@@ -343,21 +460,22 @@ int32_t XeqOwns(int32_t **trigger)
   if (CheckPars(OWNS, type1, type2, type3, type4, NO_TYPE)) {
     if (Owns(par1, par2, depth)) {
       /* par1 owns par2, now check if the prepositions match */
-      /* r_preposotion has id FIRST_COMMON_ATTR_ID.          */
+      /* r_preposition has id FIRST_COMMON_ATTR_ID.          */
       /* This is set at compile time.                        */
       index = (par2-FIRST_OBJECT_ID)*nr_of_cattrs;
       if (preposition == NO_ID || c_obj_attrs[index].value == preposition) {
-        return(OK);
+        result = OK;
       }
       else {
-        return(ERROR);
+        result = ERROR;
       }
-      return(OK);
     }
     else {
-      return(ERROR);
+      result = ERROR;
     }
-    return(OK);
+
+    DebugLevel_2_result( (resultStruct) {result, NONE, result} );
+    return(result);
   }
   else
     return(QUIT);
@@ -367,6 +485,10 @@ int32_t XeqOwns(int32_t **trigger)
 int32_t XeqRunCommon(int32_t **trigger, usrActionRec *action_rec, int32_t subject_index, int32_t *com_trig)
 {
   resultStruct result;
+<<<<<<< HEAD
+=======
+  int32_t      xeq_result;
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 
   /* RunCommon() always has 0 parameters. */
   /* Syntax in triggercode: RUNCOMMON 0   */
@@ -383,37 +505,59 @@ int32_t XeqRunCommon(int32_t **trigger, usrActionRec *action_rec, int32_t subjec
   /* or common trigger code (the compiler checks for this), but */
   /* it can be called indirectly when verb code or common       */
   /* trigger code calls another trigger through the trigger()   */
+<<<<<<< HEAD
   /* function. We only detect this at runtime.                  */
+=======
+  /* function. We can only detect this at runtime.              */
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 
   if (com_trig == NULL) {
     PrintError(80, NULL, NULL);
     return(QUIT);
   }
 
+<<<<<<< HEAD
+=======
+  if (debug_level == 2) {
+    DebugLevel_2_pars("runcommon():", NULL, 0);
+  }
+
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
   result = Execute(com_trig, action_rec, subject_index, NULL);
 
   switch (result.tag) {
     case AGREE: ;
     case NO_MATCH:
-      return(OK);
+      xeq_result = OK;
       break;
     case DISAGREE:
-      return(ERROR);
+      xeq_result = ERROR;
       break;
     case QUIT:
-      return(QUIT);
+      xeq_result = QUIT;
       break;
     default:
+<<<<<<< HEAD
       PrintError(79, &((resultStruct) {VALUE,result.tag}), "XeqRunCommon()");
+=======
+      PrintError(79, &((resultStruct) {VALUE, NONE, result.tag}), "XeqRunCommon()");
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
       return(QUIT);
       break;
   }
+
+  DebugLevel_2_result( (resultStruct) {xeq_result, NONE, xeq_result} );
+  return(xeq_result);
 }
 
 
 int32_t XeqRunVerb(int32_t **trigger, usrActionRec *action_rec, int32_t subject_index)
 {
   resultStruct result;
+<<<<<<< HEAD
+=======
+  int32_t      xeq_result;
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 
   /* RunVerb() always has 0 parameters.   */
   /* Syntax in triggercode: RUNVERB 0     */
@@ -427,35 +571,55 @@ int32_t XeqRunVerb(int32_t **trigger, usrActionRec *action_rec, int32_t subject_
   /* as one instruction. If the trigger returns QUIT, this     */
   /* routine will return QUIT. Otherwise it will return        */
   /* CONTINUE.                                                 */
+<<<<<<< HEAD
+=======
+
+  if (debug_level == 2) {
+    DebugLevel_2_pars("runverb():", NULL, 0);
+  }
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 
   result = XeqVerbDefault(action_rec, subject_index);
 
   switch (result.tag) {
     case AGREE: ;
     case NO_MATCH:
-      return(OK);
+      xeq_result = OK;
       break;
     case DISAGREE:
-      return(ERROR);
+      xeq_result = ERROR;
       break;
     case QUIT:
-      return(QUIT);
+      xeq_result = QUIT;
       break;
     default:
+<<<<<<< HEAD
       PrintError(79, &((resultStruct) {VALUE,result.tag}), "XeqRunVerb()");
       return(QUIT);
       break;
   }
+=======
+      PrintError(79, &((resultStruct) {VALUE, NONE, result.tag}), "XeqRunVerb()");
+      return(QUIT);
+      break;
+  }
+
+  DebugLevel_2_result( (resultStruct) {xeq_result, NONE, xeq_result} );
+  return(xeq_result);
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 }
 
 
 int32_t XeqTstFlag(int32_t **trigger)
 {
-  /* Has one parameter. */
-  int32_t owner;
-  char    *str; /* dummy */
-  int32_t par;
-  int32_t type = NO_TYPE;
+  /* Has one parameters. */
+  int32_t  owner;
+  char     *str; /* dummy */
+  int32_t  par;
+  int32_t  type = NO_TYPE;
+
+  resultStruct par_list; /* for debugging */
+  resultStruct result;   /* for debugging */
 
   /* Skip nr of parameters. */
   NextOpcode(trigger);
@@ -468,12 +632,13 @@ int32_t XeqTstFlag(int32_t **trigger)
     return(ERROR);
   }
 
-  if (CheckPars(TESTFLAG, type, NO_TYPE, NO_TYPE, NO_TYPE, NO_TYPE)) {
-    if (IsCFlagId(par))
-      return(TestCFlag(owner, par));
-    else
-      return(TestLFlag(par));
+  if (debug_level == 2 ) {
+    par_list.tag   = type;
+    par_list.owner = owner;
+    par_list.value = par;
+    DebugLevel_2_pars("testflag()", &(par_list), 1);
   }
+<<<<<<< HEAD
   else
     return(QUIT);
 }
@@ -489,32 +654,29 @@ int32_t XeqValDir(int32_t **trigger)
   int32_t par2;
   int32_t type1 = NO_TYPE;
   int32_t type2 = NO_TYPE;
+=======
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 
-  /* Skip nr of pars. */
-  NextOpcode(trigger);
 
-  /* Read first parameter. */
-  if (!GetPar(&owner, &par1, &type1, &str, trigger))
-    return(QUIT);
+  if (CheckPars(TESTFLAG, type, NO_TYPE, NO_TYPE, NO_TYPE, NO_TYPE)) {
+    if (IsCFlagId(par)) {
+      result.value = TestCFlag(owner, par);
+    }
+    else {
+      result.value = TestLFlag(par);
+    }
+    result.tag   = NUMBER;
+    result.owner = NO_ID;
+    DebugLevel_2_result(result);
 
-  /* Read second parameter. */
-  if (!GetPar(&owner, &par2, &type2, &str, trigger))
-    return(QUIT);
-
-  if (CheckPars(VALID_DIRECTION, type1, type2, NO_TYPE, NO_TYPE, NO_TYPE)) {
-    /* Test if dir is a valid direction from loc. */
-    if (exit_data[(par1-FIRST_LOCATION_ID)*nr_of_directions+
-                                   par2-first_direction_id] == NO_ID)
-      /* Not a valid exit. */
-      return(ERROR);
-    else
-      return(OK);
+    return(result.value);
   }
   else
     return(QUIT);
 }
 
 
+<<<<<<< HEAD
 int32_t XeqYesNo(int32_t **trigger)
 {
 
@@ -536,6 +698,8 @@ int32_t XeqYesNo(int32_t **trigger)
 }
 
 
+=======
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 int32_t XeqTry(int32_t **trigger)
 {
   /* Syntax: try(loc/obj, [number], action record). */
@@ -675,8 +839,86 @@ int32_t XeqTry(int32_t **trigger)
 }
 
 
+<<<<<<< HEAD
 int32_t XeqTestFun(int32_t opcode, int32_t **trigger, usrActionRec *action_rec, int32_t subject_index, int32_t *com_trig)
 {
+=======
+int32_t XeqValDir(int32_t **trigger)
+{
+  /* Syntax: valdir(loc, direction). */
+
+  int32_t  owner; /* dummy */
+  char *str;      /* dummy */
+  int32_t  par1;
+  int32_t  par2;
+  int32_t  type1 = NO_TYPE;
+  int32_t  type2 = NO_TYPE;
+  int32_t  result;
+
+  resultStruct par_list[2];  /* for debugging */
+
+  /* Skip nr of pars. */
+  NextOpcode(trigger);
+
+  /* Read first parameter. */
+  if (!GetPar(&owner, &par1, &type1, &str, trigger))
+    return(QUIT);
+
+  /* Read second parameter. */
+  if (!GetPar(&owner, &par2, &type2, &str, trigger))
+    return(QUIT);
+
+  if (debug_level == 2) {
+    par_list[0].tag   = type1;
+    par_list[0].owner = NO_ID;
+    par_list[0].value = par1;
+    par_list[1].tag   = type2;
+    par_list[1].owner = NO_ID;
+    par_list[1].value = par2;
+    DebugLevel_2_pars("valdir():", par_list, 2);
+  }
+
+  if (CheckPars(VALID_DIRECTION, type1, type2, NO_TYPE, NO_TYPE, NO_TYPE)) {
+    /* Test if dir is a valid direction from loc. */
+    if (exit_data[(par1-FIRST_LOCATION_ID)*nr_of_directions+ par2-first_direction_id] == NO_ID) {
+      /* Not a valid exit. */
+      result = ERROR;
+    }
+    else {
+      result = OK;
+    }
+    DebugLevel_2_result( (resultStruct) {result, NONE, result});
+    return(result);
+  }
+  else
+    return(QUIT);
+}
+
+
+int32_t XeqYesNo(int32_t **trigger)
+{
+
+  /* Skip the number of parameters value. */
+  NextOpcode(trigger);
+
+  switch(story_info.story_language) {
+    case NL:
+      return(NL_XeqYesNo());
+      break;
+    case ENG:
+      return(ENG_XeqYesNo());
+      break;
+    default:
+      /* unknown language, use English */
+      return(ENG_XeqYesNo());
+      break;
+  }
+}
+
+
+int32_t XeqTestFun(int32_t opcode, int32_t **trigger, usrActionRec *action_rec, int32_t subject_index, int32_t *com_trig)
+{
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
   switch (opcode) {
     /* Testfunctions are listed in alphabetical order. */
     case CANSEE:
@@ -729,6 +971,70 @@ int32_t XeqTestFun(int32_t opcode, int32_t **trigger, usrActionRec *action_rec, 
 /* <value> : integer value.                                 */
 /************************************************************/
 
+<<<<<<< HEAD
+=======
+resultStruct XeqAddChoice(int32_t **trigger)
+{
+  /* addchoice(string, trigger/string) */
+
+  int32_t owner1;
+  int32_t owner2;
+  char    *str1;
+  char    *str2;
+  int32_t par1;
+  int32_t par2;
+  int32_t type1 = NO_TYPE;
+  int32_t type2 = NO_TYPE;
+
+  resultStruct par_list[2];  /* for debugging */
+
+  /* skip nr_of_pars which is always 2 */
+  NextOpcode(trigger);
+
+  /* Read the parameters. */
+  if (!GetPar(&owner1, &par1, &type1, &str1, trigger)) {
+    return( (resultStruct) {QUIT, NONE, 0} );
+  }
+
+  if (!GetPar(&owner2, &par2, &type2, &str2, trigger)) {
+    return( (resultStruct) {QUIT, NONE, 0} );
+  }
+
+  if (debug_level == 2) {
+    par_list[0].tag   = type1;
+    par_list[0].owner = owner1;
+    par_list[0].value = par1;
+    par_list[1].tag   = type2;
+    par_list[1].owner = owner2;
+    par_list[1].value = par2;
+    DebugLevel_2_pars("addchoice()", par_list, 2);
+  }
+    
+  if (!(CheckPars(ADDCHOICE, type1, type2, NO_TYPE, NO_TYPE, NO_TYPE))) {
+    return( (resultStruct) {QUIT, NONE, 0} );
+  }
+
+  /* now add the parameters to the choice string    */
+  /* 1 means print to json string and not to screen */
+
+  /* we must make: "{"text":"string1", "chosen":"string2"}," */
+  /* he last comma will be deleted when clsing the json      */
+  /* we cannot directly use a trigger here, because the      */
+  /* wildcards will be set during parsing the user input     */
+
+  PrintString("{\"text\":\"", 1);
+  PrintString(str1, 1);
+  PrintString("\",\"chosen\":\"", 1);
+  PrintString(str2, 1);
+  PrintString("\"},", 1);
+
+  DebugLevel_2_result( (resultStruct) {STRING, NONE, 0} );
+
+  return( (resultStruct) {CONTINUE, NONE, 0} );
+}
+
+
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 resultStruct XeqAddJson(int32_t **trigger)
 {
   /* addjson(string [, loc/obj]) */
@@ -742,21 +1048,47 @@ resultStruct XeqAddJson(int32_t **trigger)
   int32_t type1 = NO_TYPE;
   int32_t type2 = NO_TYPE;
 
+  resultStruct par_list[2];  /* for debugging */
+
   nr_of_pars = NextOpcode(trigger);
 
   /* Read the parameters. */
   if (!GetPar(&owner, &par1, &type1, &str, trigger))
+<<<<<<< HEAD
     return( (resultStruct) {QUIT, 0} );
 
   if (nr_of_pars == 2) {
     if (!GetPar(&owner, &par2, &type2, &str, trigger))
       return( (resultStruct) {QUIT, 0} );
+=======
+    return( (resultStruct) {QUIT, NONE, 0} );
+
+  if (nr_of_pars == 2) {
+    if (!GetPar(&owner, &par2, &type2, &str, trigger))
+      return( (resultStruct) {QUIT, NONE, 0} );
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
   }
   else
     type2 = OBJ_ID; /* obj_id or loc_id will pass */
 
+  if (debug_level == 2) {
+    par_list[0].tag   = STRING;
+    par_list[0].owner = NO_ID;
+    par_list[0].value = 0;
+    if (nr_of_pars == 2) {
+      par_list[1].tag   = type2;
+      par_list[1].owner = NO_ID;
+      par_list[1].value = par2;
+    }
+    DebugLevel_2_pars("addjson()", par_list, nr_of_pars);
+  }
+    
   if (!(CheckPars(ADDJSON, type1, type2, NO_TYPE, NO_TYPE, NO_TYPE))) {
+<<<<<<< HEAD
     return( (resultStruct) {QUIT, 0} );
+=======
+    return( (resultStruct) {QUIT, NONE, 0} );
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
   }
 
   /* 1 means print to json string and not to screen */
@@ -766,7 +1098,13 @@ resultStruct XeqAddJson(int32_t **trigger)
     PrintNumber(par2, 1);
   }
 
+<<<<<<< HEAD
   return( (resultStruct) {CONTINUE, 0} );
+=======
+  DebugLevel_2_result( (resultStruct) {STRING, NONE, 0});
+
+  return( (resultStruct) {CONTINUE, NONE, 0} );
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 }
 
 
@@ -776,10 +1114,21 @@ resultStruct XeqAgree(int32_t **trigger)
   /* Agree() always has 0 parameters. */
   /* Syntax in triggercode: AGREE 0   */
 
+  resultStruct result = {AGREE, NONE, 0};
+
   /* Skip the number of parameters value. */
   NextOpcode(trigger);
 
+<<<<<<< HEAD
   return( (resultStruct) {AGREE, 0} );
+=======
+  if (debug_level == 2) {
+    DebugLevel_2_pars("agree()", NULL, 0);
+    DebugLevel_2_result( (resultStruct) {AGREE, NONE, AGREE});
+  }
+
+  return(result);
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 }
 
 
@@ -805,12 +1154,17 @@ resultStruct XeqBackground(int32_t **trigger)
       /* set background color to blue   */
       /* this is  system dependent code */
 
+<<<<<<< HEAD
       return( (resultStruct) {CONTINUE, 0} );
+=======
+      return( (resultStruct) {CONTINUE, NONE, 0} );
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
     }
     if (par == LookUpId(TranslateKeyword("BLACK"))) {
       /* set background color to black */
       /* this is system dependent code */
 
+<<<<<<< HEAD
       return( (resultStruct) {CONTINUE, 0} );
     }
     PrintError(82, NULL, NULL);
@@ -818,6 +1172,15 @@ resultStruct XeqBackground(int32_t **trigger)
   }
   else
     return( (resultStruct) {QUIT, 0} );
+=======
+      return( (resultStruct) {CONTINUE, NONE,0} );
+    }
+    PrintError(82, NULL, NULL);
+    return( (resultStruct) {CONTINUE, NONE, 0} ); /* not a severe error */
+  }
+  else
+    return( (resultStruct) {QUIT, NONE, 0} );
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 }
 
 
@@ -825,18 +1188,22 @@ resultStruct XeqBlockExit(int32_t **trigger)
 {
   /* blockexit(loc, dir) */
 
-  int32_t owner; /* dummy */
-  char    *str;  /* dummy */
-  int32_t par1;
-  int32_t par2;
-  int32_t type1 = NO_TYPE;
-  int32_t type2 = NO_TYPE;
+  int32_t  owner; /* dummy */
+  char *str;  /* dummy */
+  int32_t  par1;
+  int32_t  par2;
+  int32_t  type1 = NO_TYPE;
+  int32_t  type2 = NO_TYPE;
+  resultStruct result = {CONTINUE ,NONE, 0};
+
+  resultStruct par_list[2];  /* for debugging */
 
   /* Skip nr of parameters (which will be 2). */
   NextOpcode(trigger);
 
   /* Read the parameters. */
   if (!GetPar(&owner, &par1, &type1, &str, trigger))
+<<<<<<< HEAD
     return( (resultStruct) {QUIT, 0} );
 
   if (!GetPar(&owner, &par2, &type2, &str, trigger))
@@ -850,6 +1217,33 @@ resultStruct XeqBlockExit(int32_t **trigger)
   }
   else
     return( (resultStruct) {QUIT, 0} );
+=======
+    return( (resultStruct) {QUIT, NONE, 0} );
+
+  if (!GetPar(&owner, &par2, &type2, &str, trigger))
+    return( (resultStruct) {QUIT, NONE, 0} );
+
+  if (debug_level == 2) {
+    par_list[0].tag   = type1;
+    par_list[0].owner = NO_ID;  /* only for common flags */
+    par_list[0].value = par1;
+    par_list[1].tag   = type2;
+    par_list[1].owner = NO_ID;  /* only for common flags */
+    par_list[1].value = par2;
+    DebugLevel_2_pars("blockexit()", par_list, 2);
+  }
+
+  if (CheckPars(BLOCK_EXIT, type1, type2, NO_TYPE, NO_TYPE, NO_TYPE)) {
+     /* Now block the exit. */
+    exit_data[(par1-FIRST_LOCATION_ID)*nr_of_directions + par2-first_direction_id] = NO_ID;
+
+    DebugLevel_2_result(result);
+
+    return(result);
+  }
+  else
+    return( (resultStruct) {QUIT, NONE, 0} );
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 }
 
 
@@ -860,20 +1254,24 @@ resultStruct XeqBold(int32_t **trigger)
 
   int32_t owner; /* dummy */
   char    *str;  /* dummy */
-  int32_t par;   /* color */
+  int32_t par;
   int32_t type = NO_TYPE;
-
 
   /* Skip nr of parameters (which will be 1). */
   NextOpcode(trigger);
 
   /* Read parameter. */
   if (!GetPar(&owner, &par, &type, &str, trigger))
+<<<<<<< HEAD
     return( (resultStruct) {QUIT, 0} );
+=======
+    return( (resultStruct) {QUIT, NONE, 0} );
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 
   if (CheckPars(BOLD, type, NO_TYPE, NO_TYPE, NO_TYPE, NO_TYPE)) {
     if (par == LookUpId(TranslateKeyword("ON"))) {
       /* set bold on */
+<<<<<<< HEAD
       return( (resultStruct) {CONTINUE, 0} );
     }
     else if (par == LookUpId(TranslateKeyword("OFF"))) {
@@ -887,6 +1285,21 @@ resultStruct XeqBold(int32_t **trigger)
   }
   else
     return( (resultStruct) {QUIT, 0} );
+=======
+      return( (resultStruct) {CONTINUE, NONE, 0} );
+    }
+    else if (par == LookUpId(TranslateKeyword("OFF"))) {
+      /* set bold off */
+      return( (resultStruct) {CONTINUE, NONE, 0} );
+    }
+    else {
+      PrintError(83, NULL, "XeqBold()");
+      return( (resultStruct) {CONTINUE, NONE, 0} ); /* not a severe error */
+    }
+  }
+  else
+    return( (resultStruct) {QUIT, NONE, 0} );
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 }
 
 
@@ -897,12 +1310,24 @@ resultStruct XeqClearJson(int32_t **trigger)
   /* skip nr_of_pars */
   NextOpcode(trigger);
 
+  /* change to: ResetString(json_msg_from_story); */
+
+  if (debug_level == 2) {
+    DebugLevel_2_pars("ClearJson()", NULL, 0);
+  }
+
   if (json_msg_from_story) {
     free(json_msg_from_story);
     json_msg_from_story = NULL;
   }
 
+<<<<<<< HEAD
   return( (resultStruct) {CONTINUE, 0} );
+=======
+  DebugLevel_2_result( (resultStruct) {CONTINUE, NONE, 0});
+
+  return( (resultStruct) {CONTINUE, NONE, 0} );
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 }
 
 
@@ -927,26 +1352,40 @@ resultStruct XeqClearWindow(int32_t **trigger, int which_one)
       /* not a severe error       */
       break;
   }
+<<<<<<< HEAD
   return( (resultStruct) {CONTINUE, 0} );
+=======
+  return( (resultStruct) {CONTINUE, NONE, 0} );
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 }
 
 
 resultStruct XeqContents(int32_t **trigger, usrActionRec *action_rec, int32_t subject_index)
 {
+<<<<<<< HEAD
   int32_t result;
 
+=======
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
   /* Contents(loc/obj) always has one parameter. */
 
   int32_t owner; /* dummy */
   char    *str;  /* dummy */
   int32_t par;
   int32_t type = NO_TYPE;
+<<<<<<< HEAD
+=======
+  resultStruct result = {CONTINUE, NONE, 0};
+
+  resultStruct par_list;  /* for debugging */
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 
   /* Skip nr of parameters (which will be 1). */
   NextOpcode(trigger);
 
   /* Read the parameter. */
   if (!GetPar(&owner, &par, &type, &str, trigger))
+<<<<<<< HEAD
     return( (resultStruct) {QUIT, 0} );
 
   if (CheckPars(CONTENTS, type, NO_TYPE, NO_TYPE, NO_TYPE, NO_TYPE)) {
@@ -955,28 +1394,53 @@ resultStruct XeqContents(int32_t **trigger, usrActionRec *action_rec, int32_t su
   }
   else
     return( (resultStruct) {QUIT, 0} );
+=======
+    return( (resultStruct) {QUIT, NONE, 0} );
+
+  if (debug_level == 2) {
+    par_list.tag   = type;
+    par_list.owner = NO_ID;  /* only for common flags */
+    par_list.value = par;
+    DebugLevel_2_pars("contents()", &par_list, 1);
+  }
+
+  if (CheckPars(CONTENTS, type, NO_TYPE, NO_TYPE, NO_TYPE, NO_TYPE)) {
+    result.tag = Contents(par, action_rec, subject_index);
+
+    DebugLevel_2_result(result);
+
+    return(result.tag != QUIT ? (resultStruct) {CONTINUE, NONE, 0} : result);
+  }
+  else
+    return( (resultStruct) {QUIT, NONE, 0} );
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 }
 
 
 resultStruct XeqCount(int32_t **trigger)
 {
   /* Count(loc/obj, common flag, 0/1 [,preposition]) */
-  int32_t owner;       /* dummy */
-  char    *str;        /* dummy */
-  int32_t nr_of_pars;
-  int32_t par1;
-  int32_t par2;
-  int32_t par3;
-  int32_t par4;
-  int32_t type1 = NO_TYPE;
-  int32_t type2 = NO_TYPE;
-  int32_t type3 = NO_TYPE;
-  int32_t type4 = NO_TYPE;
+  int32_t  owner;       /* dummy */
+  char     *str;        /* dummy */
+  int32_t  nr_of_pars;
+  int32_t  par1;
+  int32_t  par2;
+  int32_t  par3;
+  int32_t  par4;
+  int32_t  type1 = NO_TYPE;
+  int32_t  type2 = NO_TYPE;
+  int32_t  type3 = NO_TYPE;
+  int32_t  type4 = NO_TYPE;
+
+  int32_t  result;
+
+  resultStruct par_list[4];  /* for debugging */
 
   nr_of_pars = NextOpcode(trigger);
 
   /* Read the parameters. */
   if (!GetPar(&owner, &par1, &type1, &str, trigger))
+<<<<<<< HEAD
     return( (resultStruct) {QUIT, 0} );
 
   if (!GetPar(&owner, &par2, &type2, &str, trigger))
@@ -988,33 +1452,82 @@ resultStruct XeqCount(int32_t **trigger)
   if (nr_of_pars == 4) {
     if (!GetPar(&owner, &par4, &type4, &str, trigger))
       return( (resultStruct) {QUIT, 0} );
+=======
+    return( (resultStruct) {QUIT, NONE, 0} );
+
+  if (!GetPar(&owner, &par2, &type2, &str, trigger))
+    return( (resultStruct) {QUIT, NONE, 0} );
+
+  if (!GetPar(&owner, &par3, &type3, &str, trigger))
+    return( (resultStruct) {QUIT, NONE, 0} );
+
+  if (nr_of_pars == 4) {
+    if (!GetPar(&owner, &par4, &type4, &str, trigger))
+      return( (resultStruct) {QUIT, NONE, 0} );
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
   }
   else {
     par4  = 1;       /* 0 is default level */
     type4 = NUMBER;
   }
 
+  if (debug_level == 2) {
+    par_list[0].tag   = type1;
+    par_list[0].owner = NO_ID;  /* only for common flags */
+    par_list[0].value = par1;
+    par_list[1].tag   = type2;
+    par_list[1].owner = NO_ID;
+    par_list[1].value = par2;
+    par_list[2].tag   = type3;
+    par_list[2].owner = NO_ID;
+    par_list[2].value = par3;
+    par_list[3].tag   = type4;
+    par_list[3].owner = NO_ID;
+    par_list[3].value = par4;
+    DebugLevel_2_pars("count()", par_list, 4);
+  }
+
   if (CheckPars(COUNT, type1, type2, type3, type4, NO_TYPE)) {
     /* types are correct, now check whether */
     /* par3 is either 0 or 1.               */
     if (par3 != 0 && par3 != 1) {
+<<<<<<< HEAD
       sprintf(outputline, "count(): parameter 3 must be 0 or 1.\n");
       Output(outputline, 0);
       return( (resultStruct) {QUIT, 0} );
+=======
+      outputline = ResetString(outputline);
+      PrintString("count(): parameter 3 must be 0 or 1.\n", 0);
+      Output();
+      return( (resultStruct) {QUIT, NONE, 0} );
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
     }
     /* level must be greater than 0 */
-    if (par4 < 0)
+    if (par4 < 0) {
       par4 = 1;   /* set to default level */
+    }
 
+    result = CountObjects(par1, par2, par3, par4);
+
+    DebugLevel_2_result( (resultStruct) {NUMBER, NONE, result});
+
+<<<<<<< HEAD
     return( (resultStruct) {VALUE, CountObjects(par1, par2, par3, par4)} );
   }
   else
     return( (resultStruct) {QUIT, 0} );
+=======
+    return( (resultStruct) {VALUE, NONE, result} );
+  }
+  else
+    return( (resultStruct) {QUIT, NONE, 0} );
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 }
 
 
 resultStruct XeqDebug(int32_t **trigger)
 {
+<<<<<<< HEAD
   /* Skip nr of parameters. */
   NextOpcode(trigger);
 
@@ -1036,16 +1549,48 @@ resultStruct XeqDebug(int32_t **trigger)
   debug_mode = 1;
 
   Debug();
+=======
+  int32_t  owner;       /* dummy */
+  char     *str;        /* dummy */
+  int32_t  par;
+  int32_t  type = NO_TYPE;
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 
-  /* turn off debug mode */
-  debug_mode = 0;
+  /* Skip nr of pars, debug always has 1 parameter. */
+  NextOpcode(trigger);
 
-  sprintf(outputline, "%s\n", "Done.");
-  Output(outputline, 0);
+  /* Read parameter. */
+  if (!GetPar(&owner, &par, &type, &str, trigger))
+    return( (resultStruct) {QUIT, NONE, 0} );
 
-  fclose(debugfile);
+  if (CheckPars(DEBUG, type, NO_TYPE, NO_TYPE, NO_TYPE, NO_TYPE)) {
+    if (debug_info == 0) {
+      PrintError(47, NULL, NULL);
+    }
+    else {
+      switch (par) {
+        case 0:
+          /* turn off debug */
+          debug_level = 0;
+          break;
+        case 1:
+          debug_level = 1;
+          break;
+        case 2:
+          debug_level = 2;
+          break;
+        default:
+          /* do nothing */
+          break;
+      }
+    }
+  }
 
+<<<<<<< HEAD
   return( (resultStruct) {CONTINUE, 0} );
+=======
+  return( (resultStruct) {CONTINUE, NONE, 0} );
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 }
 
 
@@ -1053,30 +1598,43 @@ resultStruct XeqDest(int32_t **trigger)
 {
   /* Syntax: dest(loc/obj, direction) */
 
-  int32_t owner; /* dummy */
-  char    *str;  /* dummy */
+  int32_t  owner;   /* dummy */
+  char     *str;    /* dummy */
   int32_t par1;
   int32_t par2;
   int32_t type1  = NO_TYPE;
   int32_t type2  = NO_TYPE;
-  int32_t result = NONE;
+  resultStruct result = {LOC_ID, NONE, NONE};
+
+  resultStruct par_list[2];   /* for debugging */
 
   /* Skip nr_of_pars, which will be 2. */
   NextOpcode(trigger);
 
   /* Read parameters. */
   if (!GetPar(&owner, &par1, &type1, &str, trigger))
+<<<<<<< HEAD
     return( (resultStruct) {QUIT, 0} );
 
   if (!GetPar(&owner, &par2, &type2, &str, trigger))
     return( (resultStruct) {QUIT, 0} );
+=======
+    return( (resultStruct) {QUIT, NONE, 0} );
+
+  if (!GetPar(&owner, &par2, &type2, &str, trigger))
+    return( (resultStruct) {QUIT, NONE, 0} );
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 
   /* check for NONE parameters */
   /* will not be caught by CheckPars() because type may */
   /* be correct type for NONE-parameter. */
   if (par1 == NONE || par2 == NONE) {
     PrintError(78, NULL, "XeqDest()");
+<<<<<<< HEAD
     return( (resultStruct) {QUIT, 0} );
+=======
+    return( (resultStruct) {QUIT, NONE, 0} );
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
   }
 
   if (CheckPars(DEST, type1, type2, NO_TYPE, NO_TYPE, NO_TYPE)) {
@@ -1088,15 +1646,35 @@ resultStruct XeqDest(int32_t **trigger)
     /* find the destination when moving from par1 */
     /* in direction par2                          */
 
-    result = exit_data[(par1-FIRST_LOCATION_ID)*nr_of_directions +
-                       (par2-first_direction_id)];
+    result.value = exit_data[(par1-FIRST_LOCATION_ID)*nr_of_directions +
+                            (par2-first_direction_id)];
 
+    if (debug_level == 2) {
+      par_list[0].tag   = type1;
+      par_list[0].owner = NO_ID;  /* only for common flags */
+      par_list[0].value = par1;
+      par_list[1].tag   = type2;
+      par_list[1].owner = NO_ID;  /* only for common flags */
+      par_list[1].value = par2;
+      DebugLevel_2_pars("dest()", par_list, 2);
+    }
+
+    return(result);
+
+<<<<<<< HEAD
 
     /* SHOULD WE USE VALUE OR LOC_ID HERE? */
     return(result == NO_ID ? (resultStruct) {LOC_ID, NONE} : (resultStruct) {LOC_ID, result} );
   }
   else
     return( (resultStruct) {QUIT, 0} );
+=======
+    /* SHOULD WE USE VALUE OR LOC_ID HERE? */
+    return(result.value == NO_ID ? (resultStruct) {LOC_ID, NONE, NONE} : result);
+  }
+  else
+    return( (resultStruct) {QUIT, NONE, 0} );
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 }
 
 
@@ -1105,10 +1683,19 @@ resultStruct XeqDisagree(int32_t **trigger)
   /* Disagree() always has 0 parameters. */
   /* Syntax in triggercode: DISAGREE 0   */
 
+  resultStruct result = {DISAGREE, NONE, 0};
+
   /* Skip the number of parameters value. */
   NextOpcode(trigger);
 
+<<<<<<< HEAD
   return( (resultStruct) {DISAGREE, 0} );
+=======
+  if (debug_level == 2) {
+    DebugLevel_2_pars("disagree()", NULL, 0);
+  }
+  return(result);
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 }
 
 
@@ -1130,11 +1717,18 @@ resultStruct XeqDistance(int32_t **trigger, int32_t return_value)
   int32_t found_route = 0;
   int32_t found_dir   = 0;
   int32_t level       = 1;
+<<<<<<< HEAD
 
   resultStruct result;
+=======
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 
   int32_t  *route  = NULL;
   spanTree *tree   = NULL;
+
+  resultStruct result;
+
+  resultStruct par_list[2];   /* for debugging */
 
   /* Initialize fun_name. */
   fun_name[0] = '\0';
@@ -1156,21 +1750,33 @@ resultStruct XeqDistance(int32_t **trigger, int32_t return_value)
       break;
     default:
       PrintError(79, NULL, "XeqDistance()");
+<<<<<<< HEAD
       return( (resultStruct) {QUIT, 0} );
+=======
+      return( (resultStruct) {QUIT, NONE, 0} );
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
   }
 
   /* Read parameters. */
   if (!GetPar(&owner, &from, &type1, &str, trigger))
+<<<<<<< HEAD
     return( (resultStruct) {QUIT, 0} );
 
   if (!GetPar(&owner, &to, &type2, &str, trigger))
     return( (resultStruct) {QUIT, 0} );
+=======
+    return( (resultStruct) {QUIT, NONE, 0} );
+
+  if (!GetPar(&owner, &to, &type2, &str, trigger))
+    return( (resultStruct) {QUIT, NONE, 0} );
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 
   /* check for NONE parameters */
   /* will not be caught by CheckPars() because type */
   /* may be correct type for NONE-parameter.        */
   if (from == NONE || to == NONE) {
     PrintError(78, NULL, fun_name);
+<<<<<<< HEAD
     return( (resultStruct) {QUIT, 0} );
   }
 
@@ -1179,6 +1785,16 @@ resultStruct XeqDistance(int32_t **trigger, int32_t return_value)
 
 /* WHAT IF THE NUMBER OF HOPS IS EQUAL TO THE QUIT CODE??? */
 /* fixed this by usinf resultStruct                        */
+=======
+    return( (resultStruct) {QUIT, NONE, 0} );
+  }
+
+  if (!CheckPars(return_value, type1, type2, NO_TYPE, NO_TYPE, NO_TYPE))
+    return( (resultStruct) {QUIT, NONE, 0} );
+
+/* WHAT IF THE NUMBER OF HOPS IS EQUAL TO THE QUIT CODE??? */
+/* => fixed that by using resultStruct                     */
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 
   /* convert from and to to their containing */
   /* locations in  case they are objects.    */
@@ -1192,7 +1808,11 @@ resultStruct XeqDistance(int32_t **trigger, int32_t return_value)
   /* don't go through the rest of the process because there may */
   /* be a (long) route from a location to itself.               */
   if(to == from) {
+<<<<<<< HEAD
     result = (return_value == DISTANCE ? (resultStruct) {VALUE, 0} : (resultStruct) {NONE, 0});
+=======
+    result = (return_value == DISTANCE ? (resultStruct) {VALUE, NONE, 0} : (resultStruct) {NONE, NONE, 0});
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
     free(tree);
     free(route);
     return(result);
@@ -1200,7 +1820,11 @@ resultStruct XeqDistance(int32_t **trigger, int32_t return_value)
 
   /* Initialize spanning tree and route. */
   if (!InitSpanTree(&tree, &route))
+<<<<<<< HEAD
     return( (resultStruct) {QUIT, 0} );
+=======
+    return( (resultStruct) {QUIT, NONE, 0} );
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 
   /* prepare tree for running ExpandTree */
   tree[from-FIRST_LOCATION_ID].level = 0;
@@ -1212,7 +1836,11 @@ resultStruct XeqDistance(int32_t **trigger, int32_t return_value)
         /* a route was found */
         found_route = 1;
         if (!BuildRoute(to, route, tree))
+<<<<<<< HEAD
           return( (resultStruct) {QUIT, 0} );
+=======
+          return( (resultStruct) {QUIT, NONE, 0} );
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
       }
     }
     level++;
@@ -1221,14 +1849,22 @@ resultStruct XeqDistance(int32_t **trigger, int32_t return_value)
   if (found_route) {
     /* There is a route */
     if (return_value == DISTANCE) {
+<<<<<<< HEAD
       result = (level == 0 ? (resultStruct) {VALUE, 0} : (resultStruct) {VALUE, level-1} ); /* level-1 is nr of hops to dest */
+=======
+      result = (level == 0 ? (resultStruct) {VALUE, NONE, 0} : (resultStruct) {VALUE, NONE, level-1} ); /* level-1 is nr of hops to dest */
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
     }
     else { /* FIRSTDIR */
       /* determine first direction to go to */
       while (i<nr_of_directions && !found_dir) {
          /* route[level-2] is first dir after 'from' location */
         if (exit_data[(from-FIRST_LOCATION_ID)*nr_of_directions+i] == route[level-2]) {
+<<<<<<< HEAD
           result = (resultStruct) {DIRECTION, i + first_direction_id};
+=======
+          result = (resultStruct) {DIRECTION, NONE, i + first_direction_id};
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
           found_dir = 1;
         }
         else
@@ -1238,7 +1874,22 @@ resultStruct XeqDistance(int32_t **trigger, int32_t return_value)
   }
   else
     /* no route found, so no distance or first direction*/
+<<<<<<< HEAD
     result = return_value == DISTANCE ? (resultStruct) {VALUE, -1} : (resultStruct) {NONE, 0};
+=======
+    result = return_value == DISTANCE ? (resultStruct) {VALUE, NONE, -1} : (resultStruct) {NONE, NONE, 0};
+
+  if (debug_level == 2) {
+    par_list[0].tag   = type1;
+    par_list[0].owner = NO_ID;  /* only for common flags */
+    par_list[0].value = from;
+    par_list[1].tag   = type2;
+    par_list[1].owner = NO_ID;  /* only for common flags */
+    par_list[1].value = to;
+    DebugLevel_2_pars(fun_name, par_list, 2);
+  }
+
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
   /* Free the spanning tree and route. */
   free(tree);
   free(route);
@@ -1248,20 +1899,22 @@ resultStruct XeqDistance(int32_t **trigger, int32_t return_value)
 
 resultStruct XeqEntrance(int32_t **trigger, usrActionRec *action_rec, int32_t subject_index)
 {
-  int32_t result;
-
   /* Entrance(loc/obj) always has one parameter. */
 
   int32_t owner; /* dummy */
   char    *str;  /* dummy */
   int32_t par;
   int32_t type = NO_TYPE;
+  resultStruct result = {CONTINUE, NONE, 0};
+
+  resultStruct par_list;  /* for debugging */
 
   /* Skip nr of parameters (which will be 1). */
   NextOpcode(trigger);
 
   /* Read the parameter. */
   if (!GetPar(&owner, &par, &type, &str, trigger))
+<<<<<<< HEAD
     return( (resultStruct) {QUIT, 0} );
 
   if (CheckPars(ENTRANCE, type, NO_TYPE, NO_TYPE, NO_TYPE, NO_TYPE)) {
@@ -1270,31 +1923,67 @@ resultStruct XeqEntrance(int32_t **trigger, usrActionRec *action_rec, int32_t su
   }
   else
     return( (resultStruct) {QUIT, 0} );
+=======
+    return( (resultStruct) {QUIT, NONE, 0} );
+
+  if (debug_level == 2) {
+    par_list.tag   = type;
+    par_list.owner = NO_ID;  /* only for common flags */
+    par_list.value = par;
+    DebugLevel_2_pars("contents()", &par_list, 1);
+  }
+
+  if (CheckPars(ENTRANCE, type, NO_TYPE, NO_TYPE, NO_TYPE, NO_TYPE)) {
+    result.tag = Entrance(par, action_rec, subject_index);
+
+    DebugLevel_2_result(result);
+
+    return(result.tag != QUIT ? (resultStruct) {CONTINUE, NONE, 0} : result);
+  }
+  else
+    return( (resultStruct) {QUIT, NONE, 0} );
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 }
 
 
 resultStruct XeqFlagVal(int32_t **trigger, int32_t value)
 {
-  int32_t owner;
-  char    *str;  /* dummy */
-  int32_t par;
-  int32_t type = NO_TYPE;
+  int32_t      owner;
+  char         *str;   /* dummy */
+  int32_t      par;
+  int32_t      type = NO_TYPE;
+  resultStruct result;
+
+  resultStruct par_list;  /* for debugging */
 
   /* Skip nr of pars (which will be 1). */
   NextOpcode(trigger);
 
   /* Read the parameter. */
   if (!GetPar(&owner, &par, &type, &str, trigger))
+<<<<<<< HEAD
     return( (resultStruct) {QUIT, 0} );
+=======
+    return( (resultStruct) {QUIT, NONE, 0} );
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
+
+  if (debug_level == 2) {
+    par_list.tag   = FLAG_ID;
+    par_list.owner = owner;  /* only for common flags */
+    par_list.value = par;
+    DebugLevel_2_pars("setflag()", &par_list, 1);
+  }
 
   if (CheckPars(SETFLAG, type, NO_TYPE, NO_TYPE, NO_TYPE, NO_TYPE)) {
-    if (IsCFlagId(par))
+    if (IsCFlagId(par)) {
       /* Set the value of the flag to `value'.   */
       ProcCFlagVal(owner, par, value);
-    else
+    }
+    else {
       /* Local flag. */
       /* Set the value of the flag to `value'. */
       ProcLFlagVal(par, value);
+<<<<<<< HEAD
     return( (resultStruct) {CONTINUE, 0} );
   }
   else
@@ -1307,6 +1996,25 @@ resultStruct XeqGetSubjectOrSpec(int32_t **trigger, int32_t subj_spec)
 {
   /* Syntax: getsubject([word_id]) or */
   /* getspec([word_id])               */
+=======
+    }
+
+    result = (resultStruct) {CONTINUE, NONE, 0};
+  }
+  else {
+    result = (resultStruct) {QUIT, NONE, 0};
+  }
+
+  DebugLevel_2_result(result);
+
+  return(result);
+}
+
+
+resultStruct XeqGetAnswer(int32_t **trigger)
+{
+  /* Syntax: getanswer() */
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 
   int32_t  owner;      /* dummy */
   char     *str;       /* dummy */
@@ -1314,6 +2022,7 @@ resultStruct XeqGetSubjectOrSpec(int32_t **trigger, int32_t subj_spec)
   int32_t  par = NO_ID;
   int32_t  type;
 
+<<<<<<< HEAD
   /* Get number of parameters. */
   nr_of_pars = NextOpcode(trigger);
 
@@ -1336,39 +2045,98 @@ resultStruct XeqGetSubjectOrSpec(int32_t **trigger, int32_t subj_spec)
 resultStruct XeqGetAnswer(int32_t **trigger)
 {
   /* Syntax: getanswer() */
+=======
+  return( (resultStruct) {GET_ANSWER, NONE, 0} );
+}
 
-  /* Skip number of parameters. */
-  NextOpcode(trigger);
 
+resultStruct XeqGetSubjectOrSpec(int32_t **trigger, int32_t subj_spec)
+ /* subj_spec is either GET_SUBJECT or GET_SPEC */
+{
+  /* Syntax: getsubject([word_id]) or */
+  /* getspec([word_id])               */
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
+
+  int32_t      owner;      /* dummy */
+  char         *str;       /* dummy */
+  char         function[15];
+  int32_t      nr_of_pars;
+  int32_t      par  = NO_ID;
+  int32_t      type = WORD_ID /* make checkpar() succeed with 0 parameters */;
+  resultStruct result;
+
+  resultStruct par_list;  /* for debugging */
+
+  if (subj_spec == GET_SUBJECT) {
+    strcpy(function, "getsubject()");
+  }
+  else {
+    strcpy(function, "getspec()");
+  }
+
+  /* Get number of parameters. */
+  nr_of_pars = NextOpcode(trigger);
+
+  if (nr_of_pars == 1) {
+    /* Read the parameter. */
+    if (!GetPar(&owner, &par, &type, &str, trigger))
+      return( (resultStruct) {QUIT, NONE, 0} );
+    }
+
+  if (debug_level == 2) {
+    par_list.tag   = type;
+    par_list.owner = owner;  /* only for common flags */
+    par_list.value = par;
+    DebugLevel_2_pars(function, &par_list, nr_of_pars);
+  }
+
+  if (!CheckPars(subj_spec, type, NO_TYPE, NO_TYPE, NO_TYPE, NO_TYPE)) {
+    result = (resultStruct) {QUIT, NONE, 0};
+  }
+  else {
+    /* if nr_of_pars was 0, par will have value NO_ID */
+    result = (resultStruct) {subj_spec, NONE, par};
+  }
+
+<<<<<<< HEAD
   return( (resultStruct) {GET_ANSWER, 0} );
+=======
+  DebugLevel_2_result(result);
+
+  return(result);
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 }
 
 
 resultStruct XeqGoTo(int32_t **trigger)
 {
-  int32_t  owner;
-  char     *str;           /* dummy */
-  int32_t  nr_of_pars;
-  int32_t  par1;           /* Object that must be moved. */
-  int32_t  par2;           /* Location to move par1 to.  */
-  int32_t  par3;           /* Number of moves.           */
-  int32_t  type1 = NO_TYPE;
-  int32_t  type2 = NO_TYPE;
-  int32_t  type3 = NO_TYPE;
+  int32_t      owner;
+  char         *str;           /* dummy */
+  int32_t      nr_of_pars;
+  int32_t      par1;           /* Object that must be moved. */
+  int32_t      par2;           /* Location to move par1 to.  */
+  int32_t      par3;           /* Number of moves.           */
+  int32_t      type1 = NO_TYPE;
+  int32_t      type2 = NO_TYPE;
+  int32_t      type3 = NO_TYPE;
+  resultStruct result;
 
-  int32_t  from_loc;
-  int32_t  level       = 1; /* first level to expand the tree to */
-  int32_t  i           = 0;
-  int32_t  found_route = 0;
-  int32_t  stop        = 0;
-  int32_t  *route      = NULL;
-  spanTree *tree       = NULL;
+  int32_t      from_loc;
+  int32_t      level       = 1; /* first level to expand the tree to */
+  int32_t      i           = 0;
+  int32_t      found_route = 0;
+  int32_t      stop        = 0;
+  int32_t      *route      = NULL;
+  spanTree     *tree       = NULL;
+
+  resultStruct par_list[3];  /* for debugging */
 
   /* Read number of parameters. */
   nr_of_pars = NextOpcode(trigger);
 
   /* Read the parameters. */
   if (!GetPar(&owner, &par1, &type1, &str, trigger))
+<<<<<<< HEAD
     return( (resultStruct) {QUIT, 0} );
 
   if (!GetPar(&owner, &par2, &type2, &str, trigger))
@@ -1377,11 +2145,34 @@ resultStruct XeqGoTo(int32_t **trigger)
   if (nr_of_pars == 3) {
     if (!GetPar(&owner, &par3, &type3, &str, trigger))
       return( (resultStruct) {QUIT, 0} );
+=======
+    return( (resultStruct) {QUIT, NONE, 0} );
+
+  if (!GetPar(&owner, &par2, &type2, &str, trigger))
+    return( (resultStruct) {QUIT, NONE, 0} );
+
+  if (nr_of_pars == 3) {
+    if (!GetPar(&owner, &par3, &type3, &str, trigger))
+      return( (resultStruct) {QUIT, NONE, 0} );
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
   }
   else {
     /* default is one move at a time. */
     par3 = 1;
     type3 = NUMBER;
+  }
+
+  if (debug_level == 2) {
+    par_list[0].tag   = type1;
+    par_list[0].owner = NONE;
+    par_list[0].value = par1;
+    par_list[1].tag   = type2;
+    par_list[1].owner = NONE;
+    par_list[1].value = par2;
+    par_list[2].tag   = type3;
+    par_list[2].owner = NONE;
+    par_list[2].value = par3;
+    DebugLevel_2_pars("goto()", par_list, 3);
   }
 
   if (CheckPars(GO_TO, type1, type2, type3, NO_TYPE, NO_TYPE)) {
@@ -1393,7 +2184,11 @@ resultStruct XeqGoTo(int32_t **trigger)
 
     /* Initialize spanning tree and route. */
     if (!InitSpanTree(&tree, &route))
+<<<<<<< HEAD
       return( (resultStruct) {QUIT, 0} );
+=======
+      return( (resultStruct) {QUIT, NONE, 0} );
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 
     /* prepare tree for running ExpandTree */
     tree[from_loc-FIRST_LOCATION_ID].level = 0;
@@ -1405,7 +2200,11 @@ resultStruct XeqGoTo(int32_t **trigger)
           /* a route was found */
           found_route = 1;
           if (!BuildRoute(par2, route, tree))
+<<<<<<< HEAD
             return( (resultStruct) {QUIT, 0} );
+=======
+            return( (resultStruct) {QUIT, NONE, 0} );
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
         }
       }
       level++;
@@ -1414,6 +2213,7 @@ resultStruct XeqGoTo(int32_t **trigger)
     if (!found_route) {
       /* no route found */
       PrintError(84, NULL, NULL);
+<<<<<<< HEAD
       return( (resultStruct) {CONTINUE, 0} );
     }
 
@@ -1442,7 +2242,40 @@ resultStruct XeqGoTo(int32_t **trigger)
     free(tree);
     free(route);
     return( (resultStruct) {QUIT, 0} );
+=======
+      result = (resultStruct) {CONTINUE, NONE, 0};
+    }
+    else {
+      /* There is a route, move par1.             */
+      /* par3 denotes max nr of moves, stop if 0. */
+      while (i >= 0 && par3 != 0 && !stop) {
+        /* printf("%d Moving ", i);PrintId(par1);printf(" to ");PrintId(route[level-2]);printf("\n"); */
+        if (!Move(par1, route[level-2-i]))
+          return( (resultStruct) {QUIT, NONE, 0} );
+        if (par1 == PLAYER || Owns(par1, PLAYER, -1))
+          /* Update current location. */
+          curr_loc = route[level-2-i];
+        if (route[level-2-i] == par2)
+          stop = 1;
+        i--;
+        par3--;
+      }
+    }
+
+    result = (resultStruct) {CONTINUE, NONE, 0};
   }
+  else {  /* CheckPars() failed */
+    result = (resultStruct) {QUIT, NONE, 0};
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
+  }
+
+  /* Free the spanning tree and route. */
+  free(tree);
+  free(route);
+
+  DebugLevel_2_result(result);
+
+  return(result);
 }
 
 
@@ -1453,7 +2286,36 @@ resultStruct XeqHitAnyKey(int32_t **trigger)
   /* Skip the number of parameters value. */
   NextOpcode(trigger);
 
+<<<<<<< HEAD
   return( (resultStruct) {CONTINUE, 0} );
+}
+
+
+resultStruct XeqIndent(int32_t **trigger)
+=======
+  if (debug_level == 2) {
+    DebugLevel_2_pars("hitanykey():", NULL, 0);
+  }
+
+  /* flush any text still in the output buffer */
+  Output();
+
+  switch(story_info.story_language) {
+    case NL:
+      NL_XeqHitAnyKey();
+      break;
+    case ENG:
+      ENG_XeqHitAnyKey();
+      break;
+    default:
+      /* unknown language, use English */
+      ENG_XeqHitAnyKey();
+      break;
+  }
+
+  DebugLevel_2_result( (resultStruct) {CONTINUE, NONE, 0} );
+
+  return( (resultStruct) {CONTINUE, NONE, 0} );
 }
 
 
@@ -1465,6 +2327,54 @@ resultStruct XeqIndent(int32_t **trigger)
   int32_t type = NO_TYPE;
   char    spaces_string[OUTPUT_LINE_LEN-1];
 
+  /* Has either 0 or 1 par. If 0 pars, then we must print the   */
+  /* indent; if 1 par, then we must change the value of indent. */
+  switch (NextOpcode(trigger)) {
+    case 0:
+      if (indent > OUTPUT_LINE_LEN-1) {
+        PrintError(86, &((resultStruct) {VALUE,indent}), NULL);
+        return( (resultStruct) {ERROR, NONE, 0} );
+      }
+      else {
+        /* build a string for PrintString(), who will check when */
+        /* to wrap around the line.                              */
+        for (par = 0; par<indent; par++)
+          spaces_string[par] = SPACE;
+        spaces_string[par] = '\0';
+        PrintString(spaces_string, 0);
+      }
+      break;
+    case 1:
+      /* 1 parameter. */
+      if (!GetPar(&owner, &par, &type, &str, trigger))
+        return( (resultStruct) {QUIT, NONE, 0} );
+      if (CheckPars(INDENT, type, NO_TYPE, NO_TYPE, NO_TYPE, NO_TYPE)) {
+        indent += par;
+        /* correct negative value */
+        indent = (indent<0? 0 : indent);
+      }
+      else
+        return( (resultStruct) {QUIT, NONE, 0} );
+      break;
+    default:
+      PrintString("XeqIndent(): error.\n", 0);
+      Output();
+      break;
+  } /* switch */
+  return( (resultStruct) {CONTINUE, NONE, 0} );
+}
+
+
+resultStruct XeqItalic(int32_t **trigger)
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
+{
+  int32_t owner;  /* dummy */
+  char    *str;   /* dummy */
+  int32_t par;
+  int32_t type = NO_TYPE;
+  char    spaces_string[OUTPUT_LINE_LEN-1];
+
+<<<<<<< HEAD
   /* Has either 0 or 1 par. If 0 pars, then we must print the   */
   /* indent; if 1 par, then we must change the value of indent. */
   switch (NextOpcode(trigger)) {
@@ -1513,16 +2423,23 @@ resultStruct XeqItalic(int32_t **trigger)
   int32_t par;     /* color */
   int32_t type = NO_TYPE;
 
+=======
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
   /* Skip nr of parameters (which will be 1). */
   NextOpcode(trigger);
 
   /* Read parameter. */
   if (!GetPar(&owner, &par, &type, &str, trigger))
+<<<<<<< HEAD
     return( (resultStruct) {QUIT, 0} );
+=======
+    return( (resultStruct) {QUIT, NONE, 0} );
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 
   if (CheckPars(ITALIC, type, NO_TYPE, NO_TYPE, NO_TYPE, NO_TYPE)) {
     if (par == LookUpId(TranslateKeyword("ON"))) {
      /* set italic on */
+<<<<<<< HEAD
      return( (resultStruct) {CONTINUE, 0} );
     }
     else if (par == LookUpId(TranslateKeyword("OFF"))) {
@@ -1536,6 +2453,21 @@ resultStruct XeqItalic(int32_t **trigger)
   }
   else
     return( (resultStruct) {QUIT, 0} );
+=======
+     return( (resultStruct) {CONTINUE, NONE, 0} );
+    }
+    else if (par == LookUpId(TranslateKeyword("OFF"))) {
+      /* set italic off */
+      return( (resultStruct) {CONTINUE, NONE, 0} );
+    }
+    else {
+      PrintError(83, NULL, "XeqItalic()");
+      return( (resultStruct) {CONTINUE, NONE, 0} ); /* not a severe error */
+    }
+  }
+  else
+    return( (resultStruct) {QUIT, NONE, 0} );
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 }
 
 
@@ -1543,6 +2475,7 @@ resultStruct XeqMove(int32_t **trigger)
 {
   /* Syntax: move(obj, loc/obj/direction [, preposition]) */
 
+<<<<<<< HEAD
   int32_t owner;          /* dummy */
   char    *str;           /* dummy */
   int     nr_of_pars = 0;
@@ -1554,11 +2487,28 @@ resultStruct XeqMove(int32_t **trigger)
   int32_t type1 = NO_TYPE;
   int32_t type2 = NO_TYPE;
   int32_t type3 = NO_TYPE;
+=======
+  int32_t      owner;          /* dummy */
+  char         *str;           /* dummy */
+  int          nr_of_pars = 0;
+  int          index      = -1;
+  int32_t      dest;
+  int32_t      par1;
+  int32_t      par2;
+  int32_t      par3;
+  int32_t      type1 = NO_TYPE;
+  int32_t      type2 = NO_TYPE;
+  int32_t      type3 = NO_TYPE;
+  resultStruct result;
+
+  resultStruct par_list[3];  /* for debugging */
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 
   nr_of_pars = NextOpcode(trigger);
 
   /* Read parameters. */
   if (!GetPar(&owner, &par1, &type1, &str, trigger))
+<<<<<<< HEAD
     return( (resultStruct) {QUIT, 0} );
 
   if (!GetPar(&owner, &par2, &type2, &str, trigger))
@@ -1567,6 +2517,16 @@ resultStruct XeqMove(int32_t **trigger)
   if (nr_of_pars == 3) {
     if (!GetPar(&owner, &par3, &type3, &str, trigger))
       return( (resultStruct) {QUIT, 0} );
+=======
+    return( (resultStruct) {QUIT, NONE, 0} );
+
+  if (!GetPar(&owner, &par2, &type2, &str, trigger))
+    return( (resultStruct) {QUIT, NONE, 0} );
+
+  if (nr_of_pars == 3) {
+    if (!GetPar(&owner, &par3, &type3, &str, trigger))
+      return( (resultStruct) {QUIT, NONE, 0} );
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
     /* Help CheckPars() a bit. Par3 must be of type     */
     /* prepositions but because words may have multiple */
     /* types, we may get the wrong type here. GetPar()  */
@@ -1581,34 +2541,68 @@ resultStruct XeqMove(int32_t **trigger)
   else
     type3 = WORD_ID;  /* or else typecheck will fail */
 
+  if (debug_level == 2) {
+    par_list[0].tag   = type1;
+    par_list[0].owner = NONE;
+    par_list[0].value = par1;
+    par_list[1].tag   = type2;
+    par_list[1].owner = NONE;
+    par_list[1].value = par2;
+    par_list[2].tag   = type3;
+    par_list[2].owner = NONE;
+    par_list[2].value = par3;
+    DebugLevel_2_pars("move()", par_list, 3);
+  }
+
   /* check for NONE parameters */
   /* will not be caught by CheckPars() because type may */
   /* be correct type for NONE-parameter. */
   if (par1 == NONE || par2 == NONE) {
+<<<<<<< HEAD
     sprintf(outputline, "XeqMove(): NONE-parameter.\n");
     Output(outputline, 0);
     return( (resultStruct) {QUIT, 0} );
+=======
+    PrintString("XeqMove(): NONE-parameter.\n", 0);
+    Output();
+    return( (resultStruct) {QUIT, NONE, 0} );
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
   }
 
   if (CheckPars(MOVE, type1, type2, type3, NO_TYPE, NO_TYPE)) {
     /* Test for identical parameters. */
     if (par1 == par2) {
       PrintError(85, NULL, NULL);
+<<<<<<< HEAD
       return( (resultStruct) {DISAGREE, 0} );
+=======
+      DebugLevel_2_result( (resultStruct) {DISAGREE, NONE, 0});
+      return( (resultStruct) {DISAGREE, NONE, 0} );
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
     }
 
     if (!(IsLocId(par2) || IsObjId(par2)))
       /* Par2 is a direction; convert it to a location. */
       if ((par2 = exit_data[(curr_loc-FIRST_LOCATION_ID)*nr_of_directions+
                        par2-first_direction_id]) == NO_ID) {
+<<<<<<< HEAD
         sprintf(outputline, "XeqMove(): Invalid direction.\n");
         Output(outputline, 0);
         return( (resultStruct) {QUIT, 0} );
+=======
+        PrintString("XeqMove(): Invalid direction.\n", 0);
+        Output();
+        return( (resultStruct) {QUIT, NONE, 0} );
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
       }
 
     /* Par1 must be moved into par2.     */
     if (!Move(par1, par2))
+<<<<<<< HEAD
       return( (resultStruct) {QUIT, 0} );
+=======
+      return( (resultStruct) {QUIT, NONE, 0} );
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 
     /* Check if preposition of par1 must be updated */
     /* r_preposotion has id FIRST_COMMON_ATTR_ID.   */
@@ -1635,10 +2629,93 @@ resultStruct XeqMove(int32_t **trigger)
       curr_loc = dest;
     }
 
+<<<<<<< HEAD
     return( (resultStruct) {CONTINUE, 0} );
   }
   else
     return( (resultStruct) {QUIT, 0} );
+=======
+    result = (resultStruct) {CONTINUE, NONE, 0};
+  }
+  else {
+    result = (resultStruct) {QUIT, NONE, 0};
+  }
+
+  return(result);
+}
+
+
+resultStruct XeqNewDSys(int32_t **trigger)
+{
+  /* Syntax: newdsys(loc/obj, string) */
+
+  /* THIS FUNCTION IS NOT USED AND NOT YET FINISHED */
+
+  int32_t  owner;
+  int32_t  par1;
+  int32_t  par2;
+  int32_t  type1 = NO_TYPE;
+  int32_t  type2 = NO_TYPE;
+
+  char *str      = NULL;
+  int  len;
+  char *new_dsys = NULL;
+
+  /* Skip the number of parameters, which will be 2. */
+  NextOpcode(trigger);
+
+  /* Read the parameters. */
+  if (!GetPar(&owner, &par1, &type1, &str, trigger))
+    return( (resultStruct) {QUIT, NONE, 0} );
+
+  if (!GetPar(&owner, &par2, &type2, &str, trigger))
+    return( (resultStruct) {QUIT, NONE, 0} );
+
+  if (!CheckPars(NEWDSYS, type1, type2, NO_TYPE, NO_TYPE, NO_TYPE)) {
+    return( (resultStruct) {QUIT, NONE, 0} );
+  }
+
+  /* check if there actually is a string with text in it */
+  len = strlen(str);
+  if (str == NULL || len == 0) {
+    /* empty or no string, just continue */
+    return( (resultStruct) {CONTINUE, NONE, 0} );
+  }
+
+  /* str contains the string with the new d_sys. We must expand  */
+  /* it first, in case there are attributes in there.            */
+  /* we expand the string by printing str and copying the result */
+  /* from the outputline to the new_dys string.                  */
+
+  /* assign space to new_dsys */
+  if ( (new_dsys = (char *) malloc(len*sizeof(char))) == NULL) {
+    PrintError(15, NULL, "newdsys()");
+    return( (resultStruct) {QUIT, NONE, 0} );
+  }
+
+  /* first clear the outputline */
+  Output();
+
+  /* now expand str, in case it contains parameters */
+  PrintString(str, 0);
+
+  len = strlen(outputline);
+
+  if (len > OUTPUT_LINE_LEN) {
+    PrintError(103, &((resultStruct) {NUMBER, NONE, len}), outputline);
+    return( (resultStruct) {QUIT, NONE, 0} );
+  }
+
+  strncpy(new_dsys, outputline, len);
+  new_dsys[len] = '\0';
+
+  outputline = ResetString(outputline);
+
+  /* ok, now we have the text for the new system description */
+
+  return( (resultStruct) {CONTINUE, NONE, 0} );
+
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 }
 
 
@@ -1661,7 +2738,11 @@ resultStruct XeqNewExit(int32_t **trigger)
   /* Read the parameters. */
   for (i=0; i<3; i++) {
     if (!GetPar(&owner, &(par[i]), &(type[i]), &str, trigger))
+<<<<<<< HEAD
       return( (resultStruct) {QUIT, 0} );
+=======
+      return( (resultStruct) {QUIT, NONE, 0} );
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
   }
 
   if (CheckPars(NEW_EXIT, type[0], type[1], type[2], NO_TYPE, NO_TYPE)) {
@@ -1669,10 +2750,17 @@ resultStruct XeqNewExit(int32_t **trigger)
     exit_data[(par[0]-FIRST_LOCATION_ID)*nr_of_directions +
               par[1]-first_direction_id] = par[2];
 
+<<<<<<< HEAD
     return( (resultStruct) {CONTINUE, 0} );
   }
   else
     return( (resultStruct) {QUIT, 0} );
+=======
+    return( (resultStruct) {CONTINUE, NONE, 0} );
+  }
+  else
+    return( (resultStruct) {QUIT, NONE, 0} );
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 }
 
 
@@ -1681,10 +2769,23 @@ resultStruct XeqNoMatch(int32_t **trigger)
   /* NoMatch() always has 0 parameters. */
   /* Syntax in triggercode: NOMATCH 0   */
 
+<<<<<<< HEAD
   /* Skip the number of parameters value. */
   NextOpcode(trigger);
 
   return( (resultStruct) {NO_MATCH, 0} );
+=======
+  resultStruct result = {NO_MATCH, NONE, 0};
+
+  /* Skip the number of parameters value. */
+  NextOpcode(trigger);
+
+  if (debug_level == 2) {
+    DebugLevel_2_pars("nomatch()", NULL, 0);
+    DebugLevel_2_result( (resultStruct) {NO_MATCH, NONE, NO_MATCH});
+  }
+  return(result);
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 }
 
 
@@ -1693,13 +2794,23 @@ resultStruct XeqNoTimers(int32_t **trigger)
   /* syntax: notimers() */
   /* Always has zero parameters. */
 
+  resultStruct result = {CONTINUE, NONE, 0};
+
   /* Skip nr of parameters. */
   NextOpcode(trigger);
 
   /* disable timers for the next move */
   fire_timers = ERROR;
 
+<<<<<<< HEAD
   return( (resultStruct) {CONTINUE, 0} );
+=======
+  if (debug_level == 2) {
+    DebugLevel_2_pars("notimers()", NULL, 0);
+  }
+
+  return(result);
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 }
 
 
@@ -1712,18 +2823,28 @@ resultStruct XeqOwner(int32_t **trigger)
   int32_t      par;
   int32_t      type = NO_TYPE;
   resultStruct result;
+<<<<<<< HEAD
+=======
+
+  resultStruct par_list;  /* for debugging */
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 
   /* Skip nr of parameters, which will be 1. */
   NextOpcode(trigger);
 
   /* Read the parameter. */
   if (!GetPar(&owner, &par, &type, &str, trigger))
+<<<<<<< HEAD
     return( (resultStruct) {QUIT, 0} );
+=======
+    return( (resultStruct) {QUIT, NONE, 0} );
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 
   if (CheckPars(OWNER, type, NO_TYPE, NO_TYPE, NO_TYPE, NO_TYPE)) {
     /* Test for none-parameter. */
     if (par == NONE) {
       /* None cannot have an owner, so NONE */
+<<<<<<< HEAD
       return( (resultStruct) {NONE, 0} );
     }
 
@@ -1737,6 +2858,144 @@ resultStruct XeqOwner(int32_t **trigger)
   }
   else
     return( (resultStruct) {QUIT, 0} );
+}
+=======
+      result = (resultStruct) {NONE, NONE, 0};
+    }
+    else {
+      if (!IsObjId(par)) {
+        /* only object ids can have an owner, so NONE */
+        result = (resultStruct) {NONE, NONE, 0};
+      }
+      else {
+        result.value = obj_dir[par-FIRST_OBJECT_ID].held_by;
+        result.tag = IsObjId(result.value) ? OBJ_ID : LOC_ID;
+      }
+    }
+    if (debug_level == 2) {
+      par_list.tag = type;
+      par_list.owner = owner;  /* only for common flags */
+      par_list.value = par;
+      DebugLevel_2_pars("owner()", &par_list, 1);
+    }
+    return(result);
+  }
+  else
+    return( (resultStruct) {QUIT, NONE, 0} );
+}
+
+
+resultStruct XeqPickOne(int32_t **trigger)
+{
+  /* syntax: pickone(par_1, par_2, ....., par_n) */
+
+  int32_t      owner;
+  char         *str;    /* dummy */
+  int32_t      par;
+  int32_t      type;
+  int32_t      nr_of_pars;
+  int          i;
+  int          rnd_par;
+  resultStruct result;
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
+
+  resultStruct *par_list = NULL;  /* for debugging */
+
+<<<<<<< HEAD
+resultStruct XeqPrt(int32_t **trigger)
+{
+  /* Syntax: print(loc/obj, descr) or        */
+  /*         print(<addrpart1> ..<addrpartn> */
+=======
+  /* the nr of parameters for this function is not predetermined */
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
+
+  /* Read nr of parameters. */
+  nr_of_pars = NextOpcode(trigger);
+
+  if (nr_of_pars == 0) {
+    if (debug_level == 2) {
+      DebugLevel_2_pars("pickone()", NULL, 0);
+      DebugLevel_2_result( (resultStruct) {NONE, NONE, 0});
+    }
+    return( (resultStruct) {NONE, NONE, 0} );
+  }
+
+  /* determine a random parameter between 0 and nr_of_pars-1, borders inclusive */
+  rnd_par = rand()%nr_of_pars;
+
+  if ( (par_list = (resultStruct*) malloc(nr_of_pars * sizeof(resultStruct))) == NULL) {
+    PrintError(15, NULL, "pickone()");
+    return( (resultStruct) {QUIT, NONE, 0} );
+  }
+     
+  /* Read all parameters and store the one we need. */
+  for (i=0; i<nr_of_pars; i++) {
+    if (!GetPar(&owner, &par, &type, &str, trigger)) {
+      return( (resultStruct) {QUIT, NONE, 0} );
+    }
+    if (i == rnd_par) {
+      result.tag   = type;
+      result.owner = owner; /* for descriptions, triggers, etc */
+      result.value = par;
+    }
+    if (debug_level == 2) {
+      par_list[i].tag   = type;
+      par_list[i].owner = owner;
+      par_list[i].value = par;
+    }
+  }
+
+  if (debug_level == 2) {
+    DebugLevel_2_pars("pickone()", par_list, nr_of_pars);
+  }
+
+  DebugLevel_2_result(result);
+
+  return(result);
+}
+
+
+resultStruct XeqPlayMode(int32_t **trigger)
+{
+  /* syntax: playmode(word)                           */
+  /* word must be 'interpreter', 'choice' or 'hybrid' */
+
+  int32_t owner; /* dummy */
+  char    *str;  /* dummy */
+  int32_t par;   
+  int32_t type = NO_TYPE;
+
+  /* Skip nr of parameters (which will be 1). */
+  NextOpcode(trigger);
+
+  /* Read parameter. */
+  if (!GetPar(&owner, &par, &type, &str, trigger))
+    return( (resultStruct) {QUIT, NONE, 0} );
+
+  if (!CheckPars(PLAYMODE, type, NO_TYPE, NO_TYPE, NO_TYPE, NO_TYPE)) {
+    return( (resultStruct) {QUIT, NONE, 0} );
+  }
+
+  if (par == LookUpId(TranslateKeyword("INTERPRETER"))) {
+    story_info.play_mode = INTERPRETER_MODE;
+  }
+  else {
+    if (par == LookUpId(TranslateKeyword("CHOICE"))) {
+      story_info.play_mode = CHOICE_MODE;
+    }
+    else {
+      if (par == LookUpId(TranslateKeyword("HYBRID"))) {
+        story_info.play_mode = HYBRID_MODE;
+      }
+      else {
+        PrintError(83, NULL, "XeqPlayMode()");
+        return( (resultStruct) {QUIT, NONE, 0} );
+      }
+    }
+  }
+
+  return( (resultStruct) {CONTINUE, NONE, 0} );
 }
 
 
@@ -1756,7 +3015,11 @@ resultStruct XeqPrt(int32_t **trigger)
 
   /* Read the parameter. */
   if (!GetPar(&owner, &par, &type, &str, trigger))
+<<<<<<< HEAD
     return( (resultStruct) {QUIT, 0} );
+=======
+    return( (resultStruct) {QUIT, NONE, 0} );
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 
   if (CheckPars(PRINT, type, NO_TYPE, NO_TYPE, NO_TYPE, NO_TYPE)) {
     if (type == STRING)
@@ -1767,7 +3030,11 @@ resultStruct XeqPrt(int32_t **trigger)
 
     else if (owner == NONE || (type == NO_TYPE && par == NONE))
 	  /* print nothing. */
+<<<<<<< HEAD
       return( (resultStruct) {CONTINUE, 0} );
+=======
+      return( (resultStruct) {CONTINUE, NONE, 0} );
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 
     /* now check for a d_sys parameter. We must not use GetDescr()  */
     /* to retrieve a d_sys, because multiple System Descriptions    */
@@ -1796,20 +3063,30 @@ resultStruct XeqPrt(int32_t **trigger)
     else if (IsWordId(par)) {
       PrintWord(par, 0);
     }
+<<<<<<< HEAD
     return( (resultStruct) {CONTINUE, 0} );
   }
   else
     return( (resultStruct) {QUIT, 0} );
+=======
+    return( (resultStruct) {CONTINUE, NONE, 0} );
+  }
+  else
+    return( (resultStruct) {QUIT, NONE, 0} );
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 }
 
 
 resultStruct XeqPrtcr(int32_t **trigger)
 {
   XeqPrt(trigger);
-  sprintf(outputline, "\n");
-  Output(outputline, 0);
+  PrintString("\n", 0);
 
+<<<<<<< HEAD
   return( (resultStruct) {CONTINUE, 0} );
+=======
+  return( (resultStruct) {CONTINUE, NONE, 0} );
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 }
 
 
@@ -1830,23 +3107,47 @@ resultStruct XeqPrtStat(int32_t **trigger)
 
   /* Read the parameter. */
   if (!GetPar(&owner, &par, &type, &str, trigger))
+<<<<<<< HEAD
     return( (resultStruct) {QUIT, 0} );
 
   if (!CheckPars(PRINT, type, NO_TYPE, NO_TYPE, NO_TYPE, NO_TYPE))
     return( (resultStruct) {QUIT, 0} );
   else
     return( (resultStruct) {CONTINUE, 0} );
+=======
+    return( (resultStruct) {QUIT, NONE, 0} );
+
+  if (!CheckPars(PRINT, type, NO_TYPE, NO_TYPE, NO_TYPE, NO_TYPE))
+    return( (resultStruct) {QUIT, NONE, 0} );
+  else
+    return( (resultStruct) {CONTINUE, NONE, 0} );
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 }
 
 
 resultStruct XeqQuit(int32_t **trigger)
 {
   /* Always has zero parameters. */
+<<<<<<< HEAD
+=======
 
   /* Skip nr of parameters. */
   NextOpcode(trigger);
 
+  if (debug_level == 2) {
+    DebugLevel_2_pars("quit()", NULL, 0);
+    DebugLevel_2_result( (resultStruct) {QUIT, NONE, QUIT});
+  }
+
+/*  ifi_emitResponse("{\"choice\":[{\"text\":{\"text\":\"Hit a key\",\"color\":\"blue\"},\"chosen\":\"{}\"}]}");*/
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
+
+  return( (resultStruct) {QUIT, NONE, 0} );
+
+<<<<<<< HEAD
   return( (resultStruct) {QUIT, 0} );
+=======
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 }
 
 
@@ -1857,12 +3158,26 @@ resultStruct XeqRestart(int32_t **trigger)
 
   /* Skip the number of parameters value. */
   NextOpcode(trigger);
+<<<<<<< HEAD
 
   if (!Restart()) {
      return( (resultStruct) {QUIT, 0} );
   }
   else {
     return( (resultStruct) {CONTINUE, 0} );
+=======
+
+  if (debug_level == 2) {
+    DebugLevel_2_pars("restart()", NULL, 0);
+    DebugLevel_2_result( (resultStruct) {CONTINUE, NONE, CONTINUE});
+  }
+
+  if (!Restart()) {
+     return( (resultStruct) {QUIT, NONE, 0} );
+  }
+  else {
+    return( (resultStruct) {CONTINUE, NONE, 0} );
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
   }
 }
 
@@ -1875,6 +3190,13 @@ resultStruct XeqRestore(int32_t **trigger)
   /* Skip nr of parameters.      */
   NextOpcode(trigger);
 
+<<<<<<< HEAD
+=======
+  if (debug_level == 2) {
+    DebugLevel_2_pars("restore()", NULL, 0);
+  }
+
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
   char json_string[] = "{\"loaddata\":\"\"}";
 
   /* only send a {"loaddata":""} json message to the front-end    */
@@ -1883,7 +3205,13 @@ resultStruct XeqRestore(int32_t **trigger)
 
   ifi_emitResponse(json_string);
 
+<<<<<<< HEAD
   return( (resultStruct) {CONTINUE, 0} );
+=======
+  DebugLevel_2_result( (resultStruct) {CONTINUE, NONE, 0});
+
+  return( (resultStruct) {CONTINUE, NONE, 0} );
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 }
 
 
@@ -1895,10 +3223,16 @@ resultStruct XeqSave(int32_t **trigger)
   char *json_save  = NULL;
   char *game_state = NULL;
 
+<<<<<<< HEAD
+=======
+  /* print the save message from the verb */
+  Output();
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 
   /* Skip nr of parameters.      */
   NextOpcode(trigger);
 
+<<<<<<< HEAD
   /* send the following json string format to the front-end: */
   /* {"savedata:{data:"blob"}"} (we do not send a filename)  */
 
@@ -1919,27 +3253,64 @@ resultStruct XeqSave(int32_t **trigger)
   if ( (json_save = AddToString(json_save, game_state)) == NULL) {
     json_save = ResetString(game_state);
     return( (resultStruct) {ERROR, 0} );
+=======
+  if (debug_level == 2) {
+    DebugLevel_2_pars("save()", NULL, 0);
+  }
+
+  /* send the following json string format to the front-end: */
+  /* {"savedata:{data:"blob"}"} (we do not send a filename)  */
+
+  /* start the json string */
+  if ( (json_save = AddToString(json_save, "{\"savedata\":{\"data\":\"")) == NULL)
+    return( (resultStruct) {ERROR, NONE, 0} );
+
+  /* get the game state (save info) in a base64 encoded string */
+  if ( (game_state = Base64Save(game_state)) == NULL) {
+    /* something went wrong, error was already printed */
+    json_save = ResetString(json_save);
+    return( (resultStruct) {ERROR, NONE, 0} );
+  }
+
+  /* add the game state to the json string */
+  if ( (json_save = AddToString(json_save, game_state)) == NULL) {
+    json_save = ResetString(game_state);
+    return( (resultStruct) {ERROR, NONE, 0} );
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
   }
 
   /* end the json string */
   if ( (json_save = AddToString(json_save, "\"}}")) == NULL)
+<<<<<<< HEAD
     return( (resultStruct) {ERROR, 0} );
+=======
+    return( (resultStruct) {ERROR, NONE, 0} );
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 
   /* send to front-end */
   ifi_emitResponse(json_save);
 
   free(json_save);
 
+<<<<<<< HEAD
   return( (resultStruct) {CONTINUE, 0} );
+=======
+  DebugLevel_2_result( (resultStruct) {CONTINUE, NONE, 0});
+
+  return( (resultStruct) {CONTINUE, NONE, 0} );
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 }
 
 
 resultStruct XeqScore(int32_t **trigger)
 {
-  int32_t owner;   /* dummy */
-  char    *str;    /* dummy */
-  int32_t par;     /* score */
-  int32_t type = NO_TYPE;
+  int32_t      owner;   /* dummy */
+  char         *str;    /* dummy */
+  int32_t      par;     /* score */
+  int32_t      type = NO_TYPE;
+  resultStruct result;
+
+  resultStruct par_list;  /* for debugging */
 
   /* This function is used in the disambiguation rules  */
   /* section of a verb. It is special in the way that   */
@@ -1959,6 +3330,7 @@ resultStruct XeqScore(int32_t **trigger)
 
   /* Read parameter. */
   if (!GetPar(&owner, &par, &type, &str, trigger))
+<<<<<<< HEAD
     return( (resultStruct) {QUIT, 0} );
 
   if (CheckPars(SCORE, type, NO_TYPE, NO_TYPE, NO_TYPE, NO_TYPE)) {
@@ -1969,6 +3341,30 @@ resultStruct XeqScore(int32_t **trigger)
   }
   else
     return( (resultStruct) {QUIT, 0} );
+=======
+    return( (resultStruct) {QUIT, NONE, 0} );
+
+  if (debug_level == 2) {
+    par_list.tag   = type;
+    par_list.owner = NONE;
+    par_list.value = par;
+    DebugLevel_2_pars("score()", &par_list, 1);
+  }
+
+  if (CheckPars(SCORE, type, NO_TYPE, NO_TYPE, NO_TYPE, NO_TYPE)) {
+    /*return( (resultStruct) {CONTINUE, NONE, 0} );*/
+    /*return(par);*/
+    disambig_score += par;
+    result = (resultStruct) {CONTINUE, NONE, 0};
+  }
+  else {
+    result =  (resultStruct) {QUIT, NONE, 0};
+  }
+
+  DebugLevel_2_result(result);
+
+  return(result);
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 }
 
 
@@ -1983,9 +3379,12 @@ resultStruct XeqSendJson(int32_t **trigger)
 
   NextOpcode(trigger);
 
-  /* check if the frond-end wants to receive this json */
-  /* get the message type, which is the first key      */
+  if (debug_level == 2) {
+    DebugLevel_2_pars("sendjson()", NULL, 0);
+  }
 
+  /* check if the front-end wants to receive this json */
+  /* get the message type, which is the first key      */
   json_key_1 = ReadJsonString(json_msg_from_story, &index);
 
   /* now check the ifi_stats if we may send this message */
@@ -2000,13 +3399,11 @@ resultStruct XeqSendJson(int32_t **trigger)
         ifi_emitResponse(json_msg_from_story);
       }
       break;
-
     case IFI_REQ_LOCATION:
       if (ifi_stats.location) {
         ifi_emitResponse(json_msg_from_story);
       }
       break;
-
     case IFI_REQ_MAP:
       if (ifi_stats.map) {
         ifi_emitResponse(json_msg_from_story);
@@ -2016,20 +3413,16 @@ resultStruct XeqSendJson(int32_t **trigger)
         ifi_emitResponse(json_msg_from_story);
       }
       break;
-
     case IFI_REQ_PICTURE:
       if (ifi_stats.picture) {
         ifi_emitResponse(json_msg_from_story);
       }
       break;
-
-
     case IFI_REQ_PEOPLE:
       if (ifi_stats.people) {
         ifi_emitResponse(json_msg_from_story);
       }
       break;
-
     default:
       /* send the msg */
       ifi_emitResponse(json_msg_from_story);
@@ -2037,22 +3430,32 @@ resultStruct XeqSendJson(int32_t **trigger)
   }
   free(json_key_1);
   free(json_key_2);
+<<<<<<< HEAD
   return( (resultStruct) {CONTINUE, 0} );
+=======
+
+  DebugLevel_2_result( (resultStruct) {CONTINUE, NONE, 0});
+
+  return( (resultStruct) {CONTINUE, NONE, 0} );
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 }
 
 
 resultStruct XeqSetAttribute(int32_t **trigger)
 {
-  int32_t par1;            /* for attribute id                               */
-  int32_t owner1;          /* par1 owner                                     */
-  int32_t type1 = NO_TYPE; /* par1 type                                      */
-  int32_t par2;            /* for value that must be stored in the attribute */
-  int32_t owner2;          /* par2 owner                                     */
-  int32_t type2=NO_TYPE;   /* par2 type                                      */
-  char    *str;            /* dummy                                          */
+  int32_t      par1;            /* for attribute id                               */
+  int32_t      owner1;          /* par1 owner                                     */
+  int32_t      type1 = NO_TYPE; /* par1 type                                      */
+  int32_t      par2;            /* for value that must be stored in the attribute */
+  int32_t      owner2;          /* par2 owner                                     */
+  int32_t      type2=NO_TYPE;   /* par2 type                                      */
+  char         *str;            /* dummy                                          */
+  resultStruct result;
 
-  attrInfo *attributes;       /* No malloc(), we only need the pointer          */
-  int32_t  attribute_index;
+  attrInfo     *attributes;    /* No malloc(), we only need the pointer          */
+  int32_t      attribute_index;
+
+  resultStruct par_list[2];  /* for debugging */
 
   /* Syntax: setattribute([loc/obj].attribute, loc/obj/attribute/direction/value/word) */
 
@@ -2065,17 +3468,39 @@ resultStruct XeqSetAttribute(int32_t **trigger)
   /* the attribute itself.                                 */
 
    if (!GetLvaluePar(&owner1, &par1, &type1, &str, trigger))
+<<<<<<< HEAD
      return( (resultStruct) {QUIT, 0} );
+=======
+     return( (resultStruct) {QUIT, NONE, 0} );
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 
   /* Read second parameter.                                     */
   /* In case the second par is an attribute, its value and type */
   /* will be returned by GetPar().                              */
   if (!GetPar(&owner2, &par2, &type2, &str, trigger))
+<<<<<<< HEAD
     return( (resultStruct) {QUIT, 0} );
 
   /* Retrieve the par1 attribute info struct */
   if (!GetAttributeInfo(par1, owner1, &attributes, &attribute_index))
     return( (resultStruct) {QUIT, 0} );
+=======
+    return( (resultStruct) {QUIT, NONE, 0} );
+
+  if (debug_level == 2) {
+    par_list[0].tag   = type1;
+    par_list[0].owner = owner1;
+    par_list[0].value = par1;
+    par_list[1].tag   = type2;
+    par_list[1].owner = owner2;
+    par_list[1].value = par2;
+    DebugLevel_2_pars("setattribute()", par_list, 2);
+  }
+
+  /* Retrieve the par1 attribute info struct */
+  if (!GetAttributeInfo(par1, owner1, &attributes, &attribute_index))
+    return( (resultStruct) {QUIT, NONE, 0} );
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 
   if (CheckPars(SETATTRIBUTE, type1, type2, NO_TYPE, NO_TYPE, NO_TYPE)) {
     /* Store par2 in attribute for par1. */
@@ -2083,10 +3508,19 @@ resultStruct XeqSetAttribute(int32_t **trigger)
     attributes[attribute_index].value_owner = owner2;
     attributes[attribute_index].type        = type2;
     attributes[attribute_index].value       = par2;
+<<<<<<< HEAD
     return( (resultStruct) {CONTINUE, 0} );
+=======
+    result = (resultStruct) {CONTINUE, NONE, 0};
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
   }
-  else
-    return( (resultStruct) {QUIT, 0} );
+  else {
+    result = (resultStruct) {QUIT, NONE, 0};
+  }
+
+  DebugLevel_2_result(result);
+
+  return(result);
 }
 
 
@@ -2098,6 +3532,69 @@ resultStruct XeqSetCursor(int32_t **trigger)
 
   /* setcursor(x-pos, y-pos) */
 
+  int32_t owner;
+  char    *str;  /* dummy */
+  int32_t par1;
+  int32_t par2;
+  int32_t type1 = NO_TYPE;
+  int32_t type2 = NO_TYPE;
+
+  int32_t index; /* For fixing bug(?). */
+
+  /* Skip nr of parameters. */
+  NextOpcode(trigger);
+
+  /* Read first parameter. */
+  /* For attribute parameters, GetPar() returns the */
+  /* attribute's type and value.                     */
+  if (!GetPar(&owner, &par1, &type1, &str, trigger))
+    return( (resultStruct) {QUIT, NONE, 0} );
+
+  /* It may be a timer id */
+  if (IsTimerId(par1)) {
+    index = par1-FIRST_TIMER_ID;
+    par1 = timers[index].value;
+    type1 = NUMBER;
+  }
+
+  /* Read second parameter. */
+  if (!GetPar(&owner, &par2, &type2, &str, trigger))
+    return( (resultStruct) {QUIT, NONE, 0} );
+
+  /* It may be a timer id */
+  if (IsTimerId(par2)) {
+    index = par2-FIRST_TIMER_ID;
+    par2  = timers[index].value;
+    type2 = NUMBER;
+  }
+  /* Now both pars are numeric. */
+
+  if (CheckPars(SETCURSOR, type1, type2, NO_TYPE, NO_TYPE, NO_TYPE)) {
+    /* do nothing, just get this function off the stack */
+    return( (resultStruct) {CONTINUE, NONE, 0} );
+  } /* if */
+  else
+<<<<<<< HEAD
+    return( (resultStruct) {QUIT, 0} );
+}
+
+
+resultStruct XeqSetCursor(int32_t **trigger)
+=======
+    return( (resultStruct) {QUIT, NONE, 0} );
+}
+
+
+resultStruct XeqShuffle(int32_t **trigger)
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
+{
+  /* This function is for use with the Glk version of XVAN. */
+  /* For compatibility reasons we must process it here,     */
+  /* although it will do nothing.                           */
+
+  /* setcursor(x-pos, y-pos) */
+
+<<<<<<< HEAD
   int32_t owner;
   char    *str;  /* dummy */
   int32_t par1;
@@ -2156,12 +3653,22 @@ resultStruct XeqShuffle(int32_t **trigger)
   char    *str;    /* dummy */
   int32_t par;
   int32_t type = NO_TYPE;
+=======
+  int32_t      owner;   /* dummy */
+  char         *str;    /* dummy */
+  int32_t      par;
+  int32_t      type = NO_TYPE;
+  resultStruct result;
+
+  resultStruct par_list;  /* for debugging */
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 
   /* Skip nr of parameters. */
   NextOpcode(trigger);
 
   /* Read the parameter. */
   if (!GetPar(&owner, &par, &type, &str, trigger))
+<<<<<<< HEAD
     return( (resultStruct) {ERROR, 0} );
 
   if (CheckPars(SHUFFLE, type, NO_TYPE, NO_TYPE, NO_TYPE, NO_TYPE)) {
@@ -2172,6 +3679,30 @@ resultStruct XeqShuffle(int32_t **trigger)
   }
   else
     return( (resultStruct) {QUIT, 0} );
+=======
+    return( (resultStruct) {ERROR, NONE, 0} );
+
+  if (debug_level == 2) {
+    par_list.tag   = type;
+    par_list.owner = owner;
+    par_list.value = par;
+    DebugLevel_2_pars("shuffle()", &par_list, 1);
+  }
+
+  if (CheckPars(SHUFFLE, type, NO_TYPE, NO_TYPE, NO_TYPE, NO_TYPE)) {
+    if (Shuffle(par))
+      return( (resultStruct) {CONTINUE, NONE, 0} );
+    else
+      result = (resultStruct) {ERROR, NONE, 0};
+  }
+  else {
+    result = (resultStruct) {QUIT, NONE, 0};
+  }
+
+  DebugLevel_2_result(result);
+
+  return(result);
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 }
 
 
@@ -2179,28 +3710,54 @@ resultStruct XeqStartTimer(int32_t **trigger)
 {
   /* Always has one parameter. */
 
-  int32_t owner;   /* dummy */
-  char    *str;    /* dummy */
-  int32_t par;     /* counter id. */
-  int32_t type = NO_TYPE;
-  int32_t index;  /* To correct a compiler bug. */
+  int32_t      owner;   /* dummy */
+  char         *str;    /* dummy */
+  int32_t      par;     /* counter id. */
+  int32_t      type = NO_TYPE;
+  int32_t      index;  /* To correct a compiler bug. */
+  resultStruct result;
+
+  resultStruct par_list;  /* for debugging */
 
   /* Skip nr of pars. */
   NextOpcode(trigger);
 
   /* Read parameter. */
   if (!GetPar(&owner, &par, &type, &str, trigger))
+<<<<<<< HEAD
     return( (resultStruct) {QUIT, 0} );
+=======
+    return( (resultStruct) {QUIT, NONE, 0} );
+
+  if (debug_level == 2) {
+    par_list.tag   = type;
+    par_list.owner = owner;
+    par_list.value = par;
+    DebugLevel_2_pars("starttimer()", &par_list, 1);
+  }
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 
   if (CheckPars(STARTTIMER, type, NO_TYPE, NO_TYPE, NO_TYPE, NO_TYPE)) {
     index = par-FIRST_TIMER_ID;
     timers[index].state = GO;
     /* compiler chokes on timers[par-FIRST_TIMER_ID]. */
 
+<<<<<<< HEAD
     return( (resultStruct) {CONTINUE, 0} );
   }
   else
     return( (resultStruct) {QUIT, 0} );
+=======
+    result = (resultStruct) {CONTINUE, NONE, 0};
+  }
+  else {
+    result = (resultStruct) {QUIT, NONE, 0};
+  }
+
+  DebugLevel_2_result(result);
+
+  return(result);
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 }
 
 
@@ -2208,28 +3765,54 @@ resultStruct XeqStopTimer(int32_t **trigger)
 {
   /* Always has one parameter. */
 
-  int32_t owner;   /* dummy */
-  char    *str;    /* dummy */
-  int32_t par;     /* counter id. */
-  int32_t type = NO_TYPE;
-  int32_t index;   /* To correct a compiler bug. */
+  int32_t      owner;   /* dummy */
+  char         *str;    /* dummy */
+  int32_t      par;     /* counter id. */
+  int32_t      type = NO_TYPE;
+  int32_t      index;   /* To correct a compiler bug. */
+  resultStruct result;
+
+  resultStruct par_list;  /* for debugging */
 
   /* Skip nr of pars. */
   NextOpcode(trigger);
 
   /* Read parameter. */
   if (!GetPar(&owner, &par, &type, &str, trigger))
+<<<<<<< HEAD
     return( (resultStruct) {QUIT, 0} );
+=======
+    return( (resultStruct) {QUIT, NONE, 0} );
+
+  if (debug_level == 2) {
+    par_list.tag   = type;
+    par_list.owner = owner;
+    par_list.value = par;
+    DebugLevel_2_pars("stoptimer()", &par_list, 1);
+  }
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 
   if (CheckPars(STOPTIMER, type, NO_TYPE, NO_TYPE, NO_TYPE, NO_TYPE)) {
     index = par-FIRST_TIMER_ID;
     timers[index].state = STOP;
     /* compiler chokes on timers[par-FIRST_TIMER_ID]. */
 
+<<<<<<< HEAD
     return( (resultStruct) {CONTINUE, 0} );
   }
   else
     return( (resultStruct) {QUIT, 0} );
+=======
+    result = (resultStruct) {CONTINUE, NONE, 0};
+  }
+  else {
+    result = (resultStruct) {QUIT, NONE, 0};
+  }
+
+  DebugLevel_2_result(result);
+
+  return(result);  
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 }
 
 
@@ -2244,13 +3827,20 @@ resultStruct XeqSynchro(int32_t **trigger, usrActionRec *action_rec, int32_t sub
   int32_t      type[5];     /* 0 .. 4 */
   resultStruct result;
 
+<<<<<<< HEAD
   for (i=0; i<4; i++)
+=======
+  resultStruct par_list[5];  /* for debugging */
+
+  for (i=0; i<5; i++)
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
     type[i] = NO_TYPE;
 
   nr_of_pars = NextOpcode(trigger); /* either 4 or 5 */
 
   /* Read the parameters. */
   if (!GetPar(&owner, par, type, &str, trigger))
+<<<<<<< HEAD
     return( (resultStruct) {QUIT, 0} );
 
   if (!GetPar(&owner, par+1, type+1, &str, trigger))
@@ -2265,26 +3855,67 @@ resultStruct XeqSynchro(int32_t **trigger, usrActionRec *action_rec, int32_t sub
   if (nr_of_pars == 5) {
     if (!GetPar(&owner, par+4, type+4, &str, trigger))
       return( (resultStruct) {QUIT, 0} );
+=======
+    return( (resultStruct) {QUIT, NONE, 0} );
+
+  if (!GetPar(&owner, par+1, type+1, &str, trigger))
+    return( (resultStruct) {QUIT, NONE, 0} );
+
+  if (!GetPar(&owner, par+2, type+2, &str, trigger))
+    return( (resultStruct) {QUIT, NONE, 0} );
+
+  if (!GetPar(&owner, par+3, type+3, &str, trigger))
+    return( (resultStruct) {QUIT, NONE, 0} );
+
+  if (nr_of_pars == 5) {
+    if (!GetPar(&owner, par+4, type+4, &str, trigger))
+      return( (resultStruct) {QUIT, NONE, 0} );
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
   }
   else {
     par[4]  = 1;       /* 0 is default level */
     type[4] = NUMBER;
   }
 
+  if (debug_level == 2) {
+    for (i=0; i<5; i++) {
+      par_list[i].tag   = type[i];
+      par_list[i].owner = NONE;
+      par_list[i].value = par[i];
+    }
+    DebugLevel_2_pars("synchronize()", par_list, 5);
+  }
+
   if (CheckPars(SYNCHRONIZE, type[0], type[1], type[2], type[3], type[4])) {
     /* types are correct, now check whether */
     /* par[3] is either 0 or 1.               */
     if (par[3] != 0 && par[3] != 1) {
+<<<<<<< HEAD
       sprintf(outputline, "synchronize(): parameter 3 must be 0 or 1.\n");
       Output(outputline, 0);
       return( (resultStruct) {QUIT, 0} );
+=======
+      PrintString("synchronize(): parameter 3 must be 0 or 1.\n", 0);
+      Output();
+      return( (resultStruct) {QUIT, NONE, 0} );
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
     }
     result.tag   = NUMBER;
     result.value = Synchronize(par[0], par[1], par[2], par[3], par[4], action_rec, subject_index);
     return(result);
   }
+<<<<<<< HEAD
   else
     return( (resultStruct) {QUIT, 0} );
+=======
+  else {
+    result = (resultStruct) {QUIT, NONE, 0};
+  }
+
+  DebugLevel_2_result(result);
+
+  return(result);
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 }
 
 
@@ -2296,18 +3927,30 @@ resultStruct XeqTestmode(int32_t **trigger)
   if (testmode) {
     /* testmode already active */
     PrintError(90, NULL, NULL);
+<<<<<<< HEAD
     return( (resultStruct) {CONTINUE, 0} );
+=======
+    return( (resultStruct) {CONTINUE, NONE, 0} );
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
   }
 
   /* Open the file with testdata */
   if ((testfile = fopen(TESTFILE, "r")) == NULL) {
     /* not a severe error */
     PrintError(40, NULL, TESTFILE);
+<<<<<<< HEAD
     return( (resultStruct) {CONTINUE, 0} );
   }
   PrintError(91, NULL, NULL);  /* not an error */
   testmode = 1;
   return( (resultStruct) {CONTINUE, 0} );
+=======
+    return( (resultStruct) {CONTINUE, NONE, 0} );
+  }
+  PrintError(91, NULL, NULL);  /* not an error */
+  testmode = 1;
+  return( (resultStruct) {CONTINUE, NONE, 0} );
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 }
 
 
@@ -2327,19 +3970,28 @@ resultStruct XeqText(int32_t **trigger)
 
   /* Read parameter. */
   if (!GetPar(&owner, &par, &type, &str, trigger))
+<<<<<<< HEAD
     return( (resultStruct) {QUIT, 0} );
+=======
+    return( (resultStruct) {QUIT, NONE, 0} );
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 
   if (CheckPars(TEXT, type, NO_TYPE, NO_TYPE, NO_TYPE, NO_TYPE)) {
     if (par == LookUpId(TranslateKeyword("BLUE"))) {
       /* set text color to blue        */
       /* this is system dependent code */
       /* system("COLOR F1"); */
+<<<<<<< HEAD
       return( (resultStruct) {CONTINUE, 0} );
+=======
+      return( (resultStruct) {CONTINUE, NONE, 0} );
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
     }
     else if (par == LookUpId(TranslateKeyword("BLACK"))) {
       /* set text color to black       */
       /* this is system dependent code */
       /* system("COLOR F0"); */
+<<<<<<< HEAD
       return( (resultStruct) {CONTINUE, 0} );
     }
     else {
@@ -2384,6 +4036,52 @@ resultStruct XeqTranscript(int32_t **trigger)
 }
 
 
+=======
+      return( (resultStruct) {CONTINUE, NONE, 0} );
+    }
+    else {
+      PrintError(87, NULL, NULL);
+      return( (resultStruct) {CONTINUE, NONE, 0} ); /* not a severe error */
+    }
+  }
+  else
+    return( (resultStruct) {QUIT, NONE, 0} );
+}
+
+
+resultStruct XeqTranscript(int32_t **trigger)
+{
+  /* Skip nr of parameters. */
+  NextOpcode(trigger);
+
+  if (transcript) {
+    /* transcript mode already activated, turn it off */
+    PrintError(93, NULL, NULL);  /* not an error */
+    transcript = 0;
+    fclose(transcriptfile);
+    return( (resultStruct) {CONTINUE, NONE, 0} );
+  }
+  /* Open the transcript output file */
+  if ((transcriptfile = fopen(TRANSCRIPTFILE, "w")) == NULL) {
+    /* not a severe error */
+    PrintError(40, NULL, TRANSCRIPTFILE);
+    return( (resultStruct) {CONTINUE, NONE, 0} );
+  }
+  /* write headers to transcript file */
+  fprintf(transcriptfile, "%s", "\n=====================================\n");
+  fprintf(transcriptfile, "%s", "XVAN transcript for: ");
+  fprintf(transcriptfile, "%s\n", story_info.title);
+  fprintf(transcriptfile, "%s", "version: ");
+  fprintf(transcriptfile, "%s\n", story_info.version);
+  fprintf(transcriptfile, "%s", "\n=====================================\n");
+
+  PrintError (92, NULL, NULL);  /* not an error */
+  transcript = 1;
+  return( (resultStruct) {CONTINUE, NONE, 0} );
+}
+
+
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 resultStruct XeqUnderline(int32_t **trigger)
 {
   /* underline(word)            */
@@ -2400,6 +4098,7 @@ resultStruct XeqUnderline(int32_t **trigger)
 
   /* Read parameter. */
   if (!GetPar(&owner, &par, &type, &str, trigger))
+<<<<<<< HEAD
     return( (resultStruct) {QUIT, 0} );
 
   if (par == LookUpId(TranslateKeyword("ON"))) {
@@ -2413,16 +4112,35 @@ resultStruct XeqUnderline(int32_t **trigger)
 
   PrintError(83, NULL, "XeqUnderline()");
   return( (resultStruct) {CONTINUE, 0} ); /* not a severe error */
+=======
+    return( (resultStruct) {QUIT, NONE, 0} );
+
+  if (par == LookUpId(TranslateKeyword("ON"))) {
+    /* set underline on */
+    return( (resultStruct) {CONTINUE, NONE, 0} );
+  }
+  if (par == LookUpId(TranslateKeyword("OFF"))) {
+    /* set underline off */
+    return( (resultStruct) {CONTINUE, NONE, 0} );
+  }
+
+  PrintError(83, NULL, "XeqUnderline()");
+  return( (resultStruct) {CONTINUE, NONE, 0} ); /* not a severe error */
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 }
 
 
 resultStruct XeqWait(int32_t **trigger, usrActionRec *action_rec, int32_t subject_index)
 {
-  int32_t owner;   /* dummy */
-  char    *str;    /* dummy */
-  int32_t par;     /* number of turns to wait. */
-  int32_t type = NO_TYPE;
-  int32_t i;
+  int32_t      owner;   /* dummy */
+  char         *str;    /* dummy */
+  int32_t      par;     /* number of turns to wait. */
+  int32_t      type = NO_TYPE;
+  int32_t      i;
+  resultStruct result;
+
+  resultStruct par_list;  /* for debugging */
+
   /* Always has one parameter. */
 
   /* Skip nr of pars. */
@@ -2430,7 +4148,18 @@ resultStruct XeqWait(int32_t **trigger, usrActionRec *action_rec, int32_t subjec
 
   /* Read parameter. */
   if (!GetPar(&owner, &par, &type, &str, trigger))
+<<<<<<< HEAD
     return( (resultStruct) {QUIT, 0} );
+=======
+    return( (resultStruct) {QUIT, NONE, 0} );
+
+  if (debug_level == 2) {
+    par_list.tag   = type;
+    par_list.owner = owner;
+    par_list.value = par;
+    DebugLevel_2_pars("wait()", &par_list, 1);
+  }
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 
   if (CheckPars(WAIT, type, NO_TYPE, NO_TYPE, NO_TYPE, NO_TYPE)) {
     /* 15aug2015 - HandleTimers() is executed after each move. as wait() is a move, */
@@ -2441,12 +4170,26 @@ resultStruct XeqWait(int32_t **trigger, usrActionRec *action_rec, int32_t subjec
       /* the interpreter will kick off HandleTimers as part of the move. */
       for (i=0; i<par-1; i++)
         if (HandleTimers(action_rec, subject_index) == QUIT)
+<<<<<<< HEAD
           return( (resultStruct) {QUIT, 0} );
     }
     return( (resultStruct) {CONTINUE, 0} );
   }
   else
     return( (resultStruct) {QUIT, 0} );
+=======
+          return( (resultStruct) {QUIT, NONE, 0} );
+    }
+    result = (resultStruct) {CONTINUE, NONE, 0};
+  }
+  else {
+    result = (resultStruct) {QUIT, NONE, 0};
+  }
+
+  DebugLevel_2_result(result);
+
+  return(result);
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 }
 
 
@@ -2454,12 +4197,23 @@ resultStruct XeqIntAct(int32_t opcode, int32_t **trigger, usrActionRec *action_r
 {
   switch (opcode) {
     /* Internal actions are listed in alfabetical order. */
+<<<<<<< HEAD
     case AGREE:
       return(XeqAgree(trigger));
     case ADD:
       return(XeqBasicOperator(opcode, trigger));
     case ADDJSON:
       return(XeqAddJson(trigger));
+=======
+    case ADD:
+      return(XeqBasicOperator(opcode, trigger));
+    case ADDCHOICE:
+      return(XeqAddChoice(trigger));
+    case ADDJSON:
+      return(XeqAddJson(trigger));
+    case AGREE:
+      return(XeqAgree(trigger));
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
     case ASTERIX:
       return(XeqBasicOperator(opcode, trigger));
     case BACKGROUND:
@@ -2512,6 +4266,13 @@ resultStruct XeqIntAct(int32_t opcode, int32_t **trigger, usrActionRec *action_r
       return(XeqNoTimers(trigger));
     case OWNER:
       return(XeqOwner(trigger));
+<<<<<<< HEAD
+=======
+    case PICKONE:
+      return(XeqPickOne(trigger));
+    case PLAYMODE:
+      return(XeqPlayMode(trigger));
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
     case PRINT:
       return(XeqPrt(trigger));
     case PRINTBOLD:
@@ -2581,7 +4342,12 @@ resultStruct XeqIntAct(int32_t opcode, int32_t **trigger, usrActionRec *action_r
 	case RESTORE:					/* dec 21 07 */
 	  return(XeqRestore(trigger));
     default:
+<<<<<<< HEAD
       PrintError(94, &((resultStruct) {VALUE,opcode}), NULL);
       return( (resultStruct) {ERROR, 0} );
+=======
+      PrintError(94, &((resultStruct) {VALUE, NONE, opcode}), NULL);
+      return( (resultStruct) {ERROR, NONE, 0} );
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
   } /* switch */
 }

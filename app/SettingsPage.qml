@@ -49,9 +49,6 @@ Page
     
     title: "Settings"
 
-    readonly property int dialogWidth: width*3/4
-    readonly property int dialogHeight: height*8/10
-    
     readonly property string marketAndroid: QControl.gameMarketAndroid()
     readonly property string marketIOS: QControl.gameMarketIOS()
     
@@ -76,6 +73,7 @@ Page
             {
                 text: "Save"
                 subText: "Save game to file"
+                enabled: app.canSaveLoad
                 onClicked:
                 {
                     saveselectorLoader.asynchronous = false
@@ -88,6 +86,7 @@ Page
             {
                 text: "Load"
                 subText: "Load game from file"
+                enabled: app.canSaveLoad
                 onClicked:
                 {
                     loadselectorLoader.asynchronous = false
@@ -123,6 +122,7 @@ Page
                 text: "Restart Game"
                 subText: "Lose all progress and start over"
                 interactive: false
+                enabled: app.canSaveLoad // applies to restart too
                 secondaryItem: MButton
                 {
                     backgroundColor: app.theme.accentColor
@@ -230,6 +230,20 @@ Page
                 }
                 onClicked: compassmoveSwitch.checked = !compassmoveSwitch.checked
                 visible: app.enableCompass
+            }
+
+            ListItem.Subtitled
+            {
+                text: "Text Moves"
+                subText: "Does the text move with the picture or go behind it"
+                secondaryItem: Switch
+                {
+                    id: textmoveSwitch
+                    anchors.verticalCenter: parent.verticalCenter
+                    checked: QControl.prefs.textmoveEnabled
+                    onCheckedChanged: QControl.prefs.textmoveEnabled = checked
+                }
+                onClicked: textmoveSwitch.checked = !textmoveSwitch.checked
             }
 
             ListItem.Subtitled
@@ -395,7 +409,7 @@ Page
         id: modernEnableDialog
         title: "Classic Mode"
         negativeButtonText: ""
-        width: settingspage.dialogWidth
+        width: app.dialogWidth
         backgroundColor: app.theme.dialogColor
         
         text: "By disabling Modern Mode, you have selected Classic mode, where some of the new helpful features are disabled, and you're on your own!"
@@ -405,8 +419,8 @@ Page
     {
         id: creditsDialog
         negativeButtonText: ""
-        width: dialogWidth
-        height: dialogHeight
+        width: app.dialogWidth
+        height: app.dialogHeight
         backgroundColor: app.theme.dialogColor
 
         onOpened: app.playTitleMusic()
@@ -457,7 +471,7 @@ Page
 
         sourceComponent: ThemeSelector
         {
-            height: dialogHeight
+            height: app.dialogHeight
         }
     }
 
@@ -468,8 +482,8 @@ Page
 
         sourceComponent: SaveLoadSelector 
         {
-            maxWidth: dialogWidth
-            maxHeight: dialogHeight
+            maxWidth: app.dialogWidth
+            maxHeight: app.dialogHeight
             onAccepted: settingsSnackbar.open(QControl.saveGame(filename) ? "OK" : "Save FAILED!")
         }
     }
@@ -481,8 +495,8 @@ Page
 
         sourceComponent: SaveLoadSelector
         {
-            maxWidth: dialogWidth
-            maxHeight: dialogHeight
+            maxWidth: app.dialogWidth
+            maxHeight: app.dialogHeight
             saveMode: false
             onAccepted: settingsSnackbar.open(QControl.loadGame(filename) ? "OK" : "Load Failed")
         }
@@ -496,8 +510,8 @@ Page
         // our version
         sourceComponent: FontSelector
         {
-            maxWidth: dialogWidth
-            maxHeight: dialogHeight
+            maxWidth: app.dialogWidth
+            maxHeight: app.dialogHeight
             currentFont: QControl.prefs.gameFont            
             onAccepted: QControl.prefs.gameFont = font
         }
@@ -510,8 +524,8 @@ Page
 
         sourceComponent: ScaleSelector
         {
-            maxWidth: dialogWidth
-            maxHeight: 0.2*dialogHeight
+            maxWidth: app.dialogWidth
+            maxHeight: 0.2*app.dialogHeight
             currentScale: QControl.prefs.dpScale*100
             onAccepted: QControl.prefs.dpScale = currentScale/100
         }

@@ -43,7 +43,9 @@ typedef struct {
           char    compiler_version[MAX_COMPILER_LEN];
           int16_t xvan_language;
           int16_t story_language;
+          int16_t play_mode;
         } storyInfo;
+
 
 /*************************************************************/
 /* ******************* nov 18 2016 ***************************/
@@ -64,6 +66,7 @@ typedef struct {
 /* structs and a preposition.                                */
 /*************************************************************/
 
+
 typedef struct {
           int32_t article;                    /* This struct is used to store */
           int32_t nr_of_adjectives;           /* part of a description of an  */
@@ -71,7 +74,9 @@ typedef struct {
           int32_t noun;
         } sysDescr;
 
+
 typedef struct {
+          char     *dynamic;
           sysDescr part1;          /* This struct is used to  */
           int32_t  connect_prepos; /* store a description of  */
           sysDescr part2;          /* an object or location.  */
@@ -80,12 +85,15 @@ typedef struct {
                                    /* down object and loc ids */
                                    /* and print the article   */
 
+
 typedef struct cd {
           int32_t nr_of_objects;
           int32_t object_ids[MAX_CONTAINED_OBJECTS];
         } contData;
 
+
 /* 20 jun 2015: struct attrData removed for it wasn't used */
+
 
 typedef struct {
           int32_t          nr_of_dsys;
@@ -96,10 +104,12 @@ typedef struct {
           int64_t  offset;
         } dirInfo;
 
+
 typedef struct {
           int32_t scope;
           int64_t offset;
         } verbDir;
+
 
 typedef struct {  /* directory offsets in datafile */
           int64_t story_info_offset;   /* story_info struct offset     */
@@ -116,11 +126,13 @@ typedef struct {  /* directory offsets in datafile */
           int64_t attribute_data_offset;
         } dirData;
 
+
 typedef struct {
           int32_t type;
           int32_t value;
           int32_t value_owner; /* 10march2017: for description types */
         } attrInfo;
+
 
 typedef struct wt {
           char word[MAX_WORD_LEN+1];
@@ -129,10 +141,12 @@ typedef struct wt {
           int32_t types[MAX_TYPES];
         } wordTable;
 
+
 typedef struct {
           char keyword_eng[MAX_WORD_LEN+1];
           char keyword_nl[MAX_WORD_LEN+1];
   } kwTable;
+
 
 typedef struct tc {
           int32_t       id;
@@ -140,11 +154,13 @@ typedef struct tc {
           struct tc *next;
         } triggerInfo;
 
+
 typedef struct dc {
           int32_t       id;
           char      *text;
           struct dc *next;
         } descrInfo;
+
 
 typedef struct ti {
           int32_t   value;
@@ -158,15 +174,18 @@ typedef struct ti {
           int32_t   execute[2];
         } timerInfo;
 
+
 typedef struct {
           int32_t nr_of_adverbs;
           int32_t adverb[MAX_PARSE_ADVERBS];
         } adverbInfo;
 
+
 typedef struct {
           int32_t nr_of_prepositions;
           int32_t preposition[MAX_PARSE_PREPOS];
         } preposInfo;
+
 
 typedef struct pi {
           extendedSysDescr actor;
@@ -183,6 +202,7 @@ typedef struct pi {
           int32_t          ordinal;
           struct pi        *next;         /* DO WE REALLY NEED THIS?? */
         } parsedInput;
+
 
 typedef struct ar3 {
     /* used to create action records by the interpreter       */
@@ -204,6 +224,7 @@ typedef struct ar3 {
           struct ar3 *next;    /* This must remain the last field. */
         } parserActionRec;
 
+
 typedef struct ar1 {
    /* Used to store compiler generated action records read from */
    /* the datafile. These action records have only one subject. */
@@ -222,6 +243,7 @@ typedef struct ar1 {
           struct ar1 *next;    /* This must remain the last field. */
         } compActionRec;
 
+
 typedef struct ar2 {
    /* Used to store action records generated from user input */
    /* These action records may have more than one subject.   */
@@ -239,6 +261,7 @@ typedef struct ar2 {
           struct ar2 *next;    /* This must remain the last field. */
         } usrActionRec;
 
+
 typedef struct vi {
           compActionRec *action_rec;
           int32_t       *code;
@@ -246,11 +269,13 @@ typedef struct vi {
           struct vi     *next;
         } verbInfo;
 
+
 typedef struct lc {
           descrInfo     *descriptions;
           compActionRec *action_recs;
           triggerInfo   *triggers;
         } locationInfo;
+
 
 typedef struct oc {
           descrInfo     *descriptions;
@@ -258,10 +283,18 @@ typedef struct oc {
           triggerInfo   *triggers;
         } objectInfo;
 
+
+typedef struct {
+          char     *name;
+          int32_t  owner;
+        } debugInfo;
+
+
 typedef struct {
           int32_t nr_of_hits;
           int32_t *matched_objs;
         } match;
+
 
 typedef struct {
           int32_t   from_loc;
@@ -269,13 +302,17 @@ typedef struct {
           int16_t   level;
         } spanTree;
 
+
 /* 19nov2016, added resultStruct for functions that */
 /* may return a status code as well as a value (in  */
 /* case a value is returned that is equal to a      */
 /* status code, we have ambiguity.                  */
 
+
 typedef struct {
           int32_t tag;
+          int32_t owner; /* 02may19, for descriptions */
           int32_t value;
         } resultStruct;
+
 #endif

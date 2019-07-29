@@ -20,6 +20,7 @@
         <file>SidebarList.qml</file>
         <file>SidebarItem.qml</file>
         <file>ChoiceBox.qml</file>
+        <file>ChoiceText.qml</file>
         <file>Console.qml</file>
         <file>WordBar.qml</file>
         <file>AnimatedImage2.qml</file>

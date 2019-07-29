@@ -60,6 +60,8 @@ typedef struct {
 #define IFI_REQ_STORY       113
 #define IFI_REQ_RANDOM_SEED 114
 #define IFI_REQ_PEOPLE      115
+#define IFI_REQ_KEYHIT      116
+#define IFI_REQ_BEGIN       117
 
 
 /*****************************/

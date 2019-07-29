@@ -32,12 +32,29 @@
 #define MAX_LOCS_IN_MEM     10
 #define MAX_OBJS_IN_MEM     10
 
+<<<<<<< HEAD
 /*************************/
 /* External declarations */
 /*************************/
+=======
+/*************/
+/* externals */
+/*************/
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 
-extern FILE    *datafile;
-extern dirData dirs;
+extern FILE         *datafile;
+extern dirData      dirs;
+extern short        debug_info;
+extern short        debug_level;
+extern debugInfo    *loc_dbug;
+extern debugInfo    *obj_dbug;
+extern debugInfo    *timer_dbug;
+extern debugInfo    *com_attr_dbug;
+extern debugInfo    *loc_attr_dbug;
+extern debugInfo    *com_flag_dbug;
+extern debugInfo    *loc_flag_dbug;
+extern debugInfo    *com_trig_dbug;
+extern debugInfo    *loc_trig_dbug;
 
 extern uint16_t     xv_htons(uint16_t);                         /* endian.c   */
 extern uint16_t     xv_ntohs(uint16_t);                         /* endian.c   */
@@ -55,6 +72,8 @@ extern void         PrintVerb(verbInfo*);                       /* debug.c    */
 extern void         PrintLocation(locationInfo*);               /* debug.c    */
 extern void         PrintObject(objectInfo*);                   /* debug.c    */
 extern void         PrintError(int16_t, resultStruct*, char*);  /* errors.c   */
+
+extern void         Log(char*, char*, char*);                    /* output.c   */
 
 extern int32_t      IsVerbId(int32_t);                           /* execute.c  */
 extern int32_t      IsLocId(int32_t);                            /* execute.c  */

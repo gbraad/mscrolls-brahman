@@ -64,6 +64,8 @@ int32_t NL_CheckSyntax(char *line_buf, int32_t id, int32_t nr_of_types, int32_t 
                                  /* returns ERROR, we must still have    */
                                  /* the types array for a retry.         */
 
+  char text_to_print[OUTPUT_LINE_LEN];
+
   /* parsed_input must be set to default values by caller.   */
 
   /* No check for empty line_buf here. We may be in the next */
@@ -403,8 +405,8 @@ int32_t NL_CheckSyntax(char *line_buf, int32_t id, int32_t nr_of_types, int32_t 
             break;
           default:
             /* we should never get here */
-            sprintf(outputline, "INTERNAL ERROR. unknown old_state for connecting preposition.\n");
-            Output(outputline, 0);
+            PrintString("INTERNAL ERROR. unknown old_state for connecting preposition.\n", 0);
+            Output();
             return(ERROR);
             break;
         } /* switch */
@@ -484,8 +486,8 @@ int32_t NL_CheckSyntax(char *line_buf, int32_t id, int32_t nr_of_types, int32_t 
           /* Ok, the next subject is coming up. */
           /* Test for too many subjects.        */
           if (++subject_index == MAX_SUBJECTS) {
-            sprintf(outputline, "Too many subjects in input.\n");
-            Output(outputline, 0);
+            PrintString("Too many subjects in input.\n", 0);
+            Output();
             return(ERROR);
           }
           state = 5;
@@ -508,8 +510,8 @@ int32_t NL_CheckSyntax(char *line_buf, int32_t id, int32_t nr_of_types, int32_t 
           break;
         default:
           /* error */
-          sprintf(outputline, "There is a comma in the wrong place.\n");
-          Output(outputline, 0);
+          PrintString("There is a comma in the wrong place.\n", 0);
+          Output();
           return(ERROR);
       }
       /* OK to use types here rather than new_types. */
@@ -758,8 +760,8 @@ int32_t NL_CheckSyntax(char *line_buf, int32_t id, int32_t nr_of_types, int32_t 
             break;
           default:
             /* we should never get here */
-            sprintf(outputline, "INTERNAL ERROR. unknown old_state for noun.\n");
-            Output(outputline, 0);
+            PrintString("INTERNAL ERROR. unknown old_state for noun.\n", 0);
+            Output();
             return(ERROR);
             break;
         } /* switch */
@@ -903,8 +905,8 @@ int32_t NL_CheckSyntax(char *line_buf, int32_t id, int32_t nr_of_types, int32_t 
           break;
           default:
             /* we should never get here */
-            sprintf(outputline, "INTERNAL ERROR. unknown old_state for adjective.\n");
-            Output(outputline, 0);
+            PrintString("INTERNAL ERROR. unknown old_state for adjective.\n", 0);
+            Output();
             return(ERROR);
             break;
         } /* switch */
@@ -919,8 +921,9 @@ int32_t NL_CheckSyntax(char *line_buf, int32_t id, int32_t nr_of_types, int32_t 
                              parsed_input));}
 
     default:
-      sprintf(outputline, "INTERNAL ERROR. unknown keyword type: %d.\n", types[type_index]);
-      Output(outputline, 0);
+      sprintf(text_to_print, "INTERNAL ERROR. unknown keyword type: %d.\n", types[type_index]);
+      PrintString(text_to_print, 0);
+      Output();
       return(ERROR);
   } /* switch */
   /* no return here */

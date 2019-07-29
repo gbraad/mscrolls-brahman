@@ -1,6 +1,6 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018 Marnix van den Bos.                   */
+/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
 /*                                                                      */
 /* <marnix.home@gmail.com>                                              */
 /*                                                                      */
@@ -21,6 +21,7 @@
 /************************************************************************/
 
 #include <stdio.h>
+#include <stdlib.h>  /* malloc(), realloc(), free() */
 #include <string.h>
 #include <stdint.h>
 
@@ -40,13 +41,19 @@ void    PrintVerbDir(void);
 void    PrintActionRec(actionRec*);
 void    PrintWTable(void);
 
+int32_t CreateLocDebugInfo(debugInfo**);
+int32_t CreateObjDebugInfo(debugInfo**);
+int32_t CreateAttrDebugInfo(debugInfo**, debugInfo**);
+int32_t CreateFlagDebugInfo(debugInfo**, debugInfo**);
+int32_t CreateTimerDebugInfo(debugInfo**);
+int32_t CreateTriggerDebugInfo(debugInfo**, debugInfo**);
+
 /************************/
 /* Function definitions */
 /************************/
 
 
-void PrintFileList(file_list)
- fileList **file_list;
+void PrintFileList(fileList **file_list)
 {
   fileList *runner = *file_list;
   printf("\n\n******** Filelist ********\n\n");
@@ -64,8 +71,7 @@ void PrintFileList(file_list)
     printf("\n\n**************************\n\n");
 }
 
-void PrintStoryInfo(info)
- storyInfo *info;
+void PrintStoryInfo(storyInfo *info)
 {
   printf("\n\n******** Meta data ********\n\n");
   printf("Title: %s\n", info->title);
@@ -89,8 +95,7 @@ void PrintStoryInfo(info)
   printf("\n********************************\n\n");
 }
 
-int32_t Test4SpecId(id)
- int32_t id;
+int32_t Test4SpecId(int32_t id)
 {
   /* This function tests whether id has one of the following */
   /* values: NO_ID, CURR_LOC, SUBJECT, ACTOR, SPECIFIER, and */
@@ -116,7 +121,8 @@ int32_t Test4SpecId(id)
       /* Not a special id. */
       return(ERROR);
   } /* switch */
-  /* No OK here, makes compiler happy. */
+
+  return(OK);
 }
 
 
@@ -134,8 +140,7 @@ void PrintVerbDir(void)
   printf("\n\n********************************\n\n");
 }
 
-void PrintActionRec(action_rec)
- actionRec *action_rec;
+void PrintActionRec(actionRec *action_rec)
 {
   int32_t      i = 0;
 
@@ -213,7 +218,7 @@ void PrintActionRec(action_rec)
   printf("\n********************\n\n");
 }
 
-void PrintWTable()
+void PrintWTable(void)
 {
   int32_t i,j = 0;
 
@@ -228,7 +233,7 @@ void PrintWTable()
 }
 
 
-void PrintWList()
+void PrintWList(void)
 {
   wordInfo *wp = word_list;
   int32_t i = 0;
@@ -249,4 +254,244 @@ void PrintWList()
   printf("nr_of_verbs: %d\n", nr_of_verbs);
   printf("nr_of_directions: %d\n", nr_of_directions);
   printf("first_direction_id: %d\n", first_direction_id);
+}
+
+/*****************************************************************/
+/* following routines are for adding debug info to the game file */
+/*****************************************************************/
+
+int32_t CreateLocDebugInfo(debugInfo **loc_dbug)
+{
+  locationData *ld = loc_table;
+  int i;
+
+  /* Malloc() space for location debug info. */
+  if ((*loc_dbug = (debugInfo *) malloc(nr_of_locations*sizeof(debugInfo))) == NULL) {
+    PrintError(1, NULL, "location debug info");
+    return(ERROR);
+  }
+
+  /* Initialize location debug info.     */
+  for (i=0; i<nr_of_locations; i++) {
+    strcpy((*loc_dbug)[i].name, "<unused>");
+    (*loc_dbug)[i].owner = NO_ID;
+  }
+
+  while (ld->next != NULL) {
+    strcpy( (*loc_dbug)[ld->l_id - FIRST_LOCATION_ID].name, ld->l_word);
+    ld = ld->next;
+  }
+
+  return(OK);
+}
+
+
+int32_t CreateObjDebugInfo(debugInfo **obj_dbug)
+{
+  objectData *od = obj_table;
+  int i;
+
+  /* Malloc() space for object debug info. */
+  if ((*obj_dbug = (debugInfo *) malloc(nr_of_objects*sizeof(debugInfo))) == NULL) {
+    PrintError(1, NULL, "object debug info");
+    return(ERROR);
+  }
+
+  /* Initialize object debug info.     */
+  for (i=0; i<nr_of_objects; i++) {
+    strcpy((*obj_dbug)[i].name, "<unused>");
+    (*obj_dbug)[i].owner = NO_ID;
+  }
+
+  while (od->next != NULL) {
+    strcpy( (*obj_dbug)[od->o_id - FIRST_OBJECT_ID].name, od->o_word);
+    od = od->next;
+  }
+
+  return(OK);
+}
+
+
+int32_t CreateTriggerDebugInfo(debugInfo **com_trigg_dbug, debugInfo **loc_trigg_dbug)
+{
+  triggerData *tp = trigg_table;
+  int i = 0;
+
+  /* Malloc() space for common triggers debug info. */
+  if ((*com_trigg_dbug = (debugInfo *) malloc(nr_of_ctrigs*sizeof(debugInfo))) == NULL) {
+    PrintError(1, NULL, "common triggers debug info");
+    return(ERROR);
+  }
+
+  /* Malloc() space for local triggers debug info. */
+  if ((*loc_trigg_dbug = (debugInfo *) malloc(nr_of_ltrigs*sizeof(debugInfo))) == NULL) {
+    PrintError(1, NULL, "local triggers debug info");
+    return(ERROR);
+  }
+
+  /* Initialize common triggers debug info.     */
+  for (i=0; i<nr_of_ctrigs; i++) {
+    strcpy((*com_trigg_dbug)[i].name, "<unused>");
+    (*com_trigg_dbug)[i].owner = NO_ID;
+  }
+
+  /* Initialize local triggers debug info.     */
+  for (i=0; i<nr_of_ltrigs; i++) {
+    strcpy((*loc_trigg_dbug)[i].name, "<unused>");
+    (*loc_trigg_dbug)[i].owner = NO_ID;
+  }
+
+  /* Next, we have to go through the trigg_table and put the */
+  /* names and owners in the debug info array.               */
+  /* We have to check tp->next rather than tp, since the     */
+  /* last struct is a TERMINATOR struct.                     */
+  while (tp->next != NULL) {
+    if (tp->common) {
+      /* It is a common trigger, no need to store the owner */
+      strcpy((*com_trigg_dbug)[tp->t_id - FIRST_COMMON_TRIGGER_ID].name, tp->t_word);
+    }
+    else {
+      /* It is a local trigger */
+      strcpy((*loc_trigg_dbug)[tp->t_id - FIRST_LOCAL_TRIGGER_ID].name, tp->t_word);
+      (*loc_trigg_dbug)[tp->t_id - FIRST_LOCAL_TRIGGER_ID].owner = tp->owner;
+    }
+
+    tp = tp->next;
+  } /* while */
+  return(OK);
+}
+
+
+int32_t CreateTimerDebugInfo(debugInfo **timer_dbug)
+{
+  timerData *td = tim_table;;
+
+  int i = 0;
+
+  /* Malloc() space for timer debug info. */
+  if ((*timer_dbug = (debugInfo *) malloc(nr_of_timers*sizeof(debugInfo))) == NULL) {
+    PrintError(1, NULL, "timer debug info");
+    return(ERROR);
+  }
+
+  /* Initialize timer debug info.     */
+  for (i=0; i<nr_of_timers; i++) {
+    strcpy((*timer_dbug)[i].name, "<unused>");
+    (*timer_dbug)[i].owner = NO_ID;
+  }
+
+  /* Next, we have to go through the timers          */
+  /* and put the names in the debug info array.      */
+  /* We have to check tp->next rather than tp, since */
+  /* the last struct is a TERMINATOR struct.         */
+  while (td->next != NULL) {
+    strcpy((*timer_dbug)[td->m_id - FIRST_TIMER_ID].name, td->m_word);
+    td = td->next;
+  }
+
+  return(OK);
+}
+
+
+int32_t CreateFlagDebugInfo(debugInfo **com_flag_dbug, debugInfo **loc_flag_dbug)
+{
+  flagData  *ft = flag_table;
+
+  int i = 0;
+
+  /* Malloc() space for common flags debug info. */
+  if ((*com_flag_dbug = (debugInfo *) malloc(nr_of_cflags*sizeof(debugInfo))) == NULL) {
+    PrintError(1, NULL, "common flags debug info");
+    return(ERROR);
+  }
+
+  /* Malloc() space for local flags debug info. */
+  if ((*loc_flag_dbug = (debugInfo *) malloc(nr_of_lflags*sizeof(debugInfo))) == NULL) {
+    PrintError(1, NULL, "local flags debug info");
+    return(ERROR);
+  }
+
+  /* Initialize common flag debug info.     */
+  for (i=0; i<nr_of_cflags; i++) {
+    strcpy((*com_flag_dbug)[i].name, "<unused>");
+    (*com_flag_dbug)[i].owner = NO_ID;
+  }
+
+  /* Initialize local flag debug info.     */
+  for (i=0; i<nr_of_lflags; i++) {
+    strcpy((*loc_flag_dbug)[i].name, "<unused>");
+    (*loc_flag_dbug)[i].owner = NO_ID;
+  }
+
+  /* Next, we have to go through the flag_table and put the */
+  /* names and owners in the debug info array.              */
+  /* We have to check ft->next rather than ft, since the    */
+  /* last struct is a TERMINATOR struct.                    */
+  while (ft->next != NULL) {
+    if (ft->common) {
+      /* It is a common flag, no need to store the owner */
+      strcpy((*com_flag_dbug)[ft->f_id - FIRST_COMMON_FLAG_ID].name, ft->f_word);
+    }
+    else {
+      /* It is a local flag */
+      strcpy((*loc_flag_dbug)[ft->f_id - FIRST_LOCAL_FLAG_ID].name, ft->f_word);
+      (*loc_flag_dbug)[ft->f_id - FIRST_LOCAL_FLAG_ID].owner = ft->owner;
+    }
+
+    ft = ft->next;
+  } /* while */
+
+  return(OK);
+}
+
+
+int32_t CreateAttrDebugInfo(debugInfo **com_attr_dbug, debugInfo **loc_attr_dbug)
+{
+  attrData  *rt = attr_table;
+
+  int i = 0;
+
+  /* Malloc() space for common attributes debug info. */
+  if ((*com_attr_dbug = (debugInfo *) malloc(nr_of_cattrs*sizeof(debugInfo))) == NULL) {
+    PrintError(1, NULL, "common attributes debug info");
+    return(ERROR);
+  }
+
+  /* Malloc() space for local attributes debug info. */
+  if ((*loc_attr_dbug = (debugInfo *) malloc(nr_of_lattrs*sizeof(debugInfo))) == NULL) {
+    PrintError(1, NULL, "local attributes debug info");
+    return(ERROR);
+  }
+
+  /* Initialize common attribute debug info.     */
+  for (i=0; i<nr_of_cattrs; i++) {
+    strcpy((*com_attr_dbug)[i].name, "<unused>");
+    (*com_attr_dbug)[i].owner = NO_ID;
+  }
+
+  /* Initialize local attribute debug info.     */
+  for (i=0; i<nr_of_lattrs; i++) {
+    strcpy((*loc_attr_dbug)[i].name, "<unused>");
+    (*loc_attr_dbug)[i].owner = NO_ID;
+  }
+
+  /* Next, we have to go through the attr_table and put the */
+  /* names and owners in the debug info array.              */
+  /* We have to check rt->next rather than rt, since the    */
+  /* last struct is a TERMINATOR struct.                    */
+  while (rt->next != NULL) {
+    if (rt->common) {
+      /* It is a common attribute, no need to store the owner */
+      strcpy((*com_attr_dbug)[rt->r_id - FIRST_COMMON_ATTR_ID].name, rt->r_word);
+    }
+    else {
+      /* It is a local attribute. */
+      strcpy((*loc_attr_dbug)[rt->r_id - FIRST_LOCAL_ATTR_ID].name, rt->r_word);
+      (*loc_attr_dbug)[rt->r_id - FIRST_LOCAL_ATTR_ID].owner = rt->owner;
+    }
+
+    rt = rt->next;
+  } /* while */
+
+  return(OK);
 }

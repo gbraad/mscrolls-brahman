@@ -63,7 +63,11 @@ char *xv_strlwr(char* str)
 }
 
 
+<<<<<<< HEAD
 int32_t    ScanWordTable(char *word, wordTable *wt_rec, int32_t lower, int32_t upper)
+=======
+int32_t ScanWordTable(char *word, wordTable *wt_rec, int32_t lower, int32_t upper)
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
  /* word is word to look for in word_table */
  /* wt_rec is struct to copy info into       */
 {
@@ -185,15 +189,12 @@ int32_t NextWordId(char **line_buf, int32_t *nr_of_types, int32_t *types)
     case '\0':
       (*line_buf) += i;    /* end of line */
       break;
-
     case SPACE:
       (*line_buf) += i+1;
       break;
-
     case ',':
       (*line_buf) += i;
       break;
-
     default:
       /* the impossible just happened */
       PrintError(13, NULL, "NextWordId()");
@@ -223,6 +224,7 @@ void InitParsedInput(parsedInput *parsed_input)
 {
   int32_t i = 0;
 
+  (parsed_input->actor).dynamic                     = NULL;
   (parsed_input->actor).part1.article               = NO_ID;
   (parsed_input->actor).part1.nr_of_adjectives      = 0;
   (parsed_input->actor).part1.noun                  = NO_ID;
@@ -239,6 +241,10 @@ void InitParsedInput(parsedInput *parsed_input)
   parsed_input->direction                           = NO_ID;
 
   for (i=0; i<MAX_SUBJECTS; i++) {
+<<<<<<< HEAD
+=======
+    (parsed_input->subject[i]).dynamic                = NULL;
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
     (parsed_input->subject[i]).part1.article          = NO_ID;
     (parsed_input->subject[i]).part1.nr_of_adjectives = 0;
     (parsed_input->subject[i]).part1.noun             = NO_ID;
@@ -248,6 +254,7 @@ void InitParsedInput(parsedInput *parsed_input)
     (parsed_input->subject[i]).part2.noun             = NO_ID;
   }
 
+  (parsed_input->specifier).dynamic                 = NULL;
   (parsed_input->specifier).part1.article           = NO_ID;
   (parsed_input->specifier).part1.nr_of_adjectives  = 0;
   (parsed_input->specifier).part1.noun              = NO_ID;
@@ -282,19 +289,15 @@ int32_t ParseInput(char *line_buf, parsedInput *parsed_input, int32_t syntax)
     case LINE:
       state = 1;
       break;
-
     case SUBJECT:
       state = 2;
       break;
-
     case SPECIFIER:
       state = 8;     /* Used to be 8, 6 sept. 1995 */
       break;         /* aug 24 2015, set back to 8 */
-
     case ANSWER:
       PrintError(61, NULL, NULL);
       return(ERROR);
-
     default:
       /* We should never get here. */
       PrintError(13, NULL, "ParseInput()");
@@ -316,12 +319,10 @@ int32_t CheckSyntax(char *line_buf, int32_t id, int32_t nr_of_types, int32_t *ty
       return(ENG_CheckSyntax(line_buf, id, nr_of_types, types, type_index,
                                   subject_index, state, parsed_input));
       break;
-
     case NL:
       return(NL_CheckSyntax(line_buf, id, nr_of_types, types, type_index,
                                   subject_index, state, parsed_input));
       break;
-
     default:
       /* we should never get here, use English */
       return(ENG_CheckSyntax(line_buf, id, nr_of_types, types, type_index,
@@ -336,7 +337,7 @@ resultStruct MakeSysDescr(char *line_buf, char **rest_of_line_buf, int32_t id, i
   /* descr must be set to default values by caller. */
 
   int32_t      i      = 0;
-  resultStruct result = {OK, OK};
+  resultStruct result = {OK, NONE, OK};
   int32_t old_state   = state;    /* Remember state for retry in case of  */
                                   /* a type clash.                        */
   int32_t new_types[MAX_TYPES];   /* Needed in case the next word will    */
@@ -398,7 +399,6 @@ resultStruct MakeSysDescr(char *line_buf, char **rest_of_line_buf, int32_t id, i
       /* no more types, this definitely is a wrong syntax */
       result.tag = ERROR;
       return(result);
-
     case ARTICLES:
       switch (state) {
         case 1:
@@ -418,7 +418,8 @@ resultStruct MakeSysDescr(char *line_buf, char **rest_of_line_buf, int32_t id, i
                             new_types,-1,state,descr);
       if (result.tag == OK || result.tag == PREPOSITIONS) {
         /* articles in user input must be ignored ?? */
-        /* descr->article = id; */
+        /* 2019May21 turned on again for dynamic d_sys */
+        descr->article = id;
         return(result);
       }
       else if (result.tag == UNKNOWN_WORD) {
@@ -429,7 +430,6 @@ resultStruct MakeSysDescr(char *line_buf, char **rest_of_line_buf, int32_t id, i
         /* type and original state.                            */
         return(MakeSysDescr(line_buf, rest_of_line_buf, id, nr_of_types,
                             types, ++type_index, old_state, descr));
-
     case ADJECTIVES:
       switch (state) {
         case 1: ;
@@ -487,7 +487,6 @@ resultStruct MakeSysDescr(char *line_buf, char **rest_of_line_buf, int32_t id, i
         /* type and original state.                              */
         return(MakeSysDescr(line_buf, rest_of_line_buf, id, nr_of_types,
                             types, ++type_index, old_state, descr));
-
     case NOUNS:
       switch (state) {
         case 1: ;
@@ -528,7 +527,6 @@ resultStruct MakeSysDescr(char *line_buf, char **rest_of_line_buf, int32_t id, i
 
         return(MakeSysDescr(line_buf, rest_of_line_buf, id, nr_of_types,
                             types, ++type_index, old_state, descr));
-
     case CONNECT_PREPOSITIONS:
       switch (state) {
         case 3:
@@ -558,7 +556,6 @@ resultStruct MakeSysDescr(char *line_buf, char **rest_of_line_buf, int32_t id, i
           return(MakeSysDescr(line_buf, rest_of_line_buf, id, nr_of_types,
                               types, ++type_index, state, descr));
       } /* switch CONNECT_PREPOSITIONS */
-
     default:
       /* wrong syntax; try again with next type */
       return(MakeSysDescr(line_buf, rest_of_line_buf, id, nr_of_types,

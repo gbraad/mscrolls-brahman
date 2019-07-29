@@ -94,6 +94,7 @@
 
       IFNE     Graphics
          XDEF        PICTNUM
+		 XDEF        OLDPICTNUM
       ENDC
 
 
@@ -225,6 +226,7 @@ FILENO      DS.W  1        ;Used to store file handle in ATARI
 
            IFNE   Graphics
 PICTNUM     DC.B  0     ;Current picture on screen
+OLDPICTNUM  DC.B  0     ;previous picture on screen (incase of error in load)
            ENDC
 
            IFNE   SpoolLen

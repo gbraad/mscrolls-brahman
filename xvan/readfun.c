@@ -107,7 +107,6 @@ int32_t ReadFun(int32_t *trigger_code, int32_t *index, int32_t fun_code)
           /* the value of the END_OF_PAR keyword, we have an issue */
           par = NO_ID;
           break;
-
         case STRING:
           /* -1 means a char pointer is coming next. */
           if (!CheckedStore(trigger_code, MAX_TRIGG_LEN, index, -1))
@@ -156,7 +155,6 @@ int32_t ReadFun(int32_t *trigger_code, int32_t *index, int32_t fun_code)
           } /* for */
 
           break;
-
         case ACTION_REC:
           /* next, the members of an action record are coming. */
           /* They are stored as a row of int32_t values. We    */
@@ -188,7 +186,6 @@ int32_t ReadFun(int32_t *trigger_code, int32_t *index, int32_t fun_code)
           /* we have an issue                                  */
           par = NO_ID;
           break;
-
         default:
           /* It may be a function. */
           if (IsTestFun(par) || IsIntAct(par)) {

@@ -33,6 +33,8 @@
 /* function declarations */
 /*************************/
 
+extern char *GetSysDescr(sysDescr*, int);
+
 char *SaveSpecialIds(char*, int*, int8_t*);
 char *StoreInt8(int8_t, char*, int*, int8_t*);
 char *StoreInt16(int16_t, char*, int*, int8_t*);
@@ -319,12 +321,42 @@ char *SaveStoryInfo(char *json_save, int *trailer_len, int8_t *trailer)
     return(ERROR);
   }
 
+  if ( (json_save = StoreInt16(story_info.play_mode, json_save, trailer_len, trailer)) == NULL) {
+    PrintError(56, NULL, "SaveStoryInfo()");
+    return(ERROR);
+  }
+
   return(json_save);
 }
 
 
 char *SaveExtendedSysDescr(extendedSysDescr *extended_system_description, char *json_save, int *trailer_len, int8_t *trailer)
 {
+ /* first check if it is a dynamic system description */
+  if (extended_system_description->dynamic != NULL) {
+    /* dynamic system description */
+    /* store keyword */
+    if ( (json_save = StoreInt32(DYN_DSYS, json_save, trailer_len, trailer)) == NULL) {
+      PrintError(56, NULL, "SaveExtendedSystemDescription()");
+      return(NULL);
+    }
+    /* store the string */
+    if ( (json_save = StoreString(extended_system_description->dynamic, json_save, trailer_len, trailer)) == NULL) {
+      PrintError(56, NULL, "SaveStoryInfo()");
+      return(NULL);
+    }
+    else {
+      return(json_save);
+    }
+  }
+
+  /* not a dynamic system description */
+  /* store keyword */
+  if ( (json_save = StoreInt32(DSYS, json_save, trailer_len, trailer)) == NULL) {
+    PrintError(56, NULL, "SaveExtendedSystemDescription()");
+    return(NULL);
+  }
+
   if ( (json_save = SaveSysDescr(&(extended_system_description->part1), json_save, trailer_len, trailer)) == NULL)
     return(NULL);
 
@@ -364,6 +396,7 @@ char *SaveSysDescr(sysDescr *system_description, char *json_save, int *trailer_l
     PrintError(56, NULL, "SaveSysDescr()");
     return(NULL);
   }
+
   return(json_save);
 }
 
@@ -411,7 +444,7 @@ char *SaveDirInfo(dirInfo *dir_info, char *json_save, int *trailer_len, int8_t *
     PrintError(56, NULL, "SaveDirInfo()");
     return(NULL);
   }
-
+;
   /* store offset */
   if ( (json_save = StoreInt64(dir_info->offset, json_save, trailer_len, trailer)) == NULL) {
     PrintError(56, NULL, "SaveDirInfo()");

@@ -2,7 +2,7 @@
 # XVAN Starter Kit version 1.2
 
 $COMMON_DESCRS
-  d_entr_long, d_entr_short, d_exa
+  d_entr_long, d_entr_short, d_exa, d_remember
 
 
 $COMMON_FLAGS
@@ -15,6 +15,7 @@ $COMMON_FLAGS
   f_wearable   = 0
   f_worn       = 0
   f_container  = 0
+  f_supporter  = 0
   f_alive      = 0
   f_fixed      = 1
   f_any        = 1

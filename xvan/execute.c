@@ -279,8 +279,12 @@ int32_t SkipCond(int32_t **trigger)
 }
 
 
+<<<<<<< HEAD
 resultStruct Ite(int32_t **trigger, int32_t state, int32_t *opcode, usrActionRec *action_rec, 
                  int32_t subject_index, int32_t *com_trig)
+=======
+resultStruct Ite(int32_t **trigger, int32_t state, int32_t *opcode, usrActionRec *action_rec, int32_t subject_index, int32_t *com_trig)
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 {
   int32_t      new_state  = XEQ;
   resultStruct result     = {CONTINUE, 0};
@@ -653,14 +657,21 @@ resultStruct XeqPrologue(int32_t verb_id)
   /* See also XeqVerbDefault().                             */
 
   verbInfo *verb;
+  resultStruct result = {NO_MATCH, NONE, 0};
 
   if (!InMem(verb_id))
     switch (Load(verb_id)) {
       case ERROR:
         PrintError(12, &((resultStruct) {VALUE, verb_id}), "XeqPrologue()");
+<<<<<<< HEAD
         return( (resultStruct) {QUIT, 0} );
       case NO_MATCH:
         return( (resultStruct) {NO_MATCH, 0} );
+=======
+        return( (resultStruct) {QUIT, NONE, 0} );
+      case NO_MATCH:
+        return( (resultStruct) {NO_MATCH, NONE, 0} );
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
       default:
         /* OK */
         break;
@@ -668,7 +679,7 @@ resultStruct XeqPrologue(int32_t verb_id)
 
   verb = verbs[verb_id-FIRST_VERB_ID];
 
-  if ((verb->action_rec)->action1 == PROLOGUE)
+  if ((verb->action_rec)->action1 == PROLOGUE) {
     /* Execute() needs action_rec, subject_index and    */
     /* com_trig vars for functions runverb() and        */
     /* runcommon(). But as these functions are not      */
@@ -676,10 +687,22 @@ resultStruct XeqPrologue(int32_t verb_id)
     /* compiler) we can set action_rec  and com_trig to */
     /* NULL and subject_index to -1 here, because they  */
     /* will not be used.                                */
+<<<<<<< HEAD
 
     return(Execute(verb->code, NULL, -1, NULL));
 
   return( (resultStruct) {NO_MATCH, 0} );
+=======
+
+    IncreaseDebugIndent(2);
+    DebugLevel_1(1, " **** entering prologue for action ", verb_id, NO_ID, result);
+    result = Execute(verb->code, NULL, -1, NULL);
+    DebugLevel_1(0, " **** prologue for action ", verb_id, NO_ID, result);
+    IncreaseDebugIndent(-2);
+  }
+
+  return(result);
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 }
 
 
@@ -696,14 +719,21 @@ resultStruct XeqEpilogue(int32_t verb_id)
 
   verbInfo *verb;
   int32_t  *code;
+  resultStruct result = {NO_MATCH, NONE, 0};
 
   if (!InMem(verb_id))
     switch (Load(verb_id)) {
       case ERROR:
         PrintError(12, &((resultStruct) {VALUE, verb_id}), "XeqEpilogue()");
+<<<<<<< HEAD
         return( (resultStruct) {QUIT, 0} );
       case NO_MATCH:
         return( (resultStruct) {NO_MATCH, 0} );
+=======
+        return( (resultStruct) {QUIT, NONE, 0} );
+      case NO_MATCH:
+        return( (resultStruct) {NO_MATCH, NONE, 0} );
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
       default:
         /* OK */
         break;
@@ -718,7 +748,11 @@ resultStruct XeqEpilogue(int32_t verb_id)
     code = verb->next->code;
   else
     /* No epilogue. */
+<<<<<<< HEAD
     return( (resultStruct) {NO_MATCH, 0} );
+=======
+    return( (resultStruct) {NO_MATCH, NONE, 0} );
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 
     /* Execute() needs action_rec, subject_index and    */
     /* com_trig vars for functions runverb() and        */
@@ -728,7 +762,17 @@ resultStruct XeqEpilogue(int32_t verb_id)
     /* NULL and subject_index to -1 here, because they  */
     /* will not be used.                                */
 
+<<<<<<< HEAD
   return(Execute(code, NULL, -1, NULL));
+=======
+  IncreaseDebugIndent(2);
+  DebugLevel_1(1, " **** entering epilogue for action ", verb_id, NO_ID, result);
+  result = Execute(code, NULL, -1, NULL);
+  DebugLevel_1(0, " **** epilogue for action ", verb_id, NO_ID, result);
+  IncreaseDebugIndent(-2);
+
+  return(result);
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 }
 
 
@@ -760,16 +804,33 @@ resultStruct XeqVerbDefault(usrActionRec *action_rec, int32_t subject_index)
 
   verbInfo      *verb  = NULL;
   int32_t       cont   = 1;
+<<<<<<< HEAD
   resultStruct  result = {NO_MATCH, 0};
+=======
+  resultStruct  result = {NO_MATCH, NONE, 0};
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
   compActionRec *arec  = NULL;
+
+  /* when called from t_choice there will not be a valid */  /* @!@ */
+  /* action record. We must check the action1.           */
+  if (!IsVerbId(action_rec->action1)) {
+    PrintError(105, NULL, NULL);
+    return( (resultStruct) {QUIT, NONE, QUIT} );
+  }
 
   if (!InMem(action_rec->action1))
     switch (Load(action_rec->action1)) {
       case ERROR:
         PrintError(12, &((resultStruct) {VALUE, action_rec->action1}), "XeqVerbDefault()");
+<<<<<<< HEAD
         return( (resultStruct) {QUIT, 0} );
       case NO_MATCH: /* printf("Load geeft no_match\n"); */
         return( (resultStruct) {NO_MATCH, 0} );
+=======
+        return( (resultStruct) {QUIT, NONE, 0} );
+      case NO_MATCH: /* printf("Load geeft no_match\n"); */
+        return( (resultStruct) {NO_MATCH, NONE, 0} );
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
       default: /* printf("Load geeft ok\n"); */
         /* OK */
         break;
@@ -806,14 +867,22 @@ resultStruct Execute(int32_t *trigger, usrActionRec *action_rec, int32_t subject
   int32_t      state     = XEQ;
   int32_t      new_state = XEQ;
   int32_t      opcode;
+<<<<<<< HEAD
   resultStruct result    = {AGREE, 0}; /* By default, a trigger returns agree. */
+=======
+  resultStruct result    = {AGREE, NONE, 0}; /* By default, a trigger returns agree. */
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 
   opcode = NextOpcode(&trigger);
 
   while (1) {
     switch (opcode) {
       case END_OF_CODE:
+<<<<<<< HEAD
         return((result.tag == CONTINUE? (resultStruct) {AGREE, 0} : result));
+=======
+        return((result.tag == CONTINUE? (resultStruct) {AGREE, NONE, 0} : result));
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
       case IF:
         switch (state) {
           case XEQ:
@@ -827,7 +896,11 @@ resultStruct Execute(int32_t *trigger, usrActionRec *action_rec, int32_t subject
             break;
           default:
             PrintError(13, NULL, "Execute()");
+<<<<<<< HEAD
             return( (resultStruct) {QUIT, 0} );
+=======
+            return( (resultStruct) {QUIT, NONE, 0} );
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
         } /* switch */
 
         result = Ite(&trigger, new_state, &opcode, action_rec, subject_index, com_trig);
@@ -839,8 +912,13 @@ resultStruct Execute(int32_t *trigger, usrActionRec *action_rec, int32_t subject
         /* It should be an internal action or a attribute. */
         if (!(IsIntAct(opcode) || IsCAttrId(opcode) ||
                                   IsLAttrId(opcode))) {
+<<<<<<< HEAD
           PrintError(12, &((resultStruct) {VALUE,opcode}), "Execute()");
           return( (resultStruct) {QUIT, 0} );
+=======
+          PrintError(12, &((resultStruct) {VALUE, NONE, opcode}), "Execute()");
+          return( (resultStruct) {QUIT, NONE, 0} );
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
         }
 
         /* It's an internal action.                     */
@@ -902,11 +980,19 @@ resultStruct Execute(int32_t *trigger, usrActionRec *action_rec, int32_t subject
 resultStruct XeqTrigger(int32_t owner, int32_t id, usrActionRec *action_rec, int32_t subject_index)
 {
   int32_t      *triggers[2];                        /* Pointers to start of trigger code. */
+<<<<<<< HEAD
   resultStruct result            = {NO_MATCH, 0};
   int32_t      old_active_entity = active_entity;
 
   if (!GetTrigger(owner, id, triggers))
     return( (resultStruct) {QUIT, 0} );
+=======
+  resultStruct result            = {NO_MATCH, NONE, 0};
+  int32_t      old_active_entity = active_entity;
+
+  if (!GetTrigger(owner, id, triggers))
+    return( (resultStruct) {QUIT, NONE, 0} );
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 
   /* triggers[0] is override code (defined with loc/obj). */
   /* triggers[1] is common trigger code.                  */
@@ -927,24 +1013,46 @@ resultStruct XeqTrigger(int32_t owner, int32_t id, usrActionRec *action_rec, int
   if (triggers[0] != NULL) {
     /* there is override code (local trigger). Pass on  */
     /* the pointer to the common trigger to Execute()   */
+<<<<<<< HEAD
     result = Execute(triggers[0], action_rec, subject_index, triggers[1]);
     if (result.tag == NO_MATCH)
+=======
+
+    IncreaseDebugIndent(2);
+    DebugLevel_1(1, " **** entering local trigger ", id, owner, result);
+    result = Execute(triggers[0], action_rec, subject_index, triggers[1]);
+    DebugLevel_1(0, " **** local trigger ", id, owner, result);
+    IncreaseDebugIndent(-2);
+
+    if (result.tag == NO_MATCH) {
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
       /* Execute the common trigger code, if it exists. */
-      if (triggers[1] != NULL)
+      if (triggers[1] != NULL) {
         /* there is a common trigger. From the common   */
         /* trigger we may not call runcommon(), so we   */
         /* set the com_trig par to NULL. When they do   */
         /* try to call runcommon(), the interpreter     */
         /* will throw a runtime error                   */
         /* Change made august 6 1995. */
+
+        IncreaseDebugIndent(2);
+        DebugLevel_1(0, " **** entering common trigger ", id, owner, result);
         result = Execute(triggers[1], action_rec, subject_index, NULL);
+        DebugLevel_1(0, " **** common trigger ", id, owner, result);
+        IncreaseDebugIndent(-2);
+      }
+    }
   }
   else
     /* Execute the common trigger code (if any). */
-    if (triggers[1] != NULL)
+    if (triggers[1] != NULL) {
       /* Change made august 6 1995.    */
-      /* return(Execute(triggers[1])); */
+      IncreaseDebugIndent(2);
+      DebugLevel_1(1, " **** entering common trigger ", id, owner, result);
       result = Execute(triggers[1], action_rec, subject_index, NULL);
+      DebugLevel_1(0, " **** common trigger ", id, owner, result);
+      IncreaseDebugIndent(-2);
+    }
 
   /* Restore the active entity. */
   active_entity = old_active_entity;
@@ -970,6 +1078,10 @@ int32_t IsVerbId(int32_t id)
   return(ERROR);
 }
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 int32_t IsLocId(int32_t id)
 {
   switch (id) {

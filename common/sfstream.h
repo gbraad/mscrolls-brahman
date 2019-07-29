@@ -80,11 +80,17 @@ struct StdFStream: public StdStream
 
     bool _emit(StdStreamBuf* buf) override
     {
-        size_t n = 1;
+        bool r = false;
         if (_fp)
         {
-            n = fwrite(*buf, buf->size(), 1, _fp);
-            fflush(_fp);
+            size_t nw = buf->size();
+            r = (fwrite(*buf, 1, buf->size(), _fp) == nw) && !fflush(_fp);
+            
+            if (!r)
+            {
+                // failed, signal error
+                close();
+            }
         }
         
         if (_also)
@@ -92,7 +98,8 @@ struct StdFStream: public StdStream
             _also->write(*buf, buf->size());
             _also->flush();
         }
-        return n == 1;
+        
+        return r;
     }
 
 protected:

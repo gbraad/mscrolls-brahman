@@ -20,12 +20,12 @@ $VERB use
  "use [o_subject] with [o_spec]"
    if testflag(o_spec.f_alive) then
      if testflag(o_subject.f_alive) then
-       print("\n> ask [o_spec] about [o_subject].\n")
+       print("\n> ask [o_spec] about [o_subject]\n")
        if try(l_location, 0, 0, "ask [o_spec] about [o_subject]") then
          agree()
        endif
      else
-       print("\n> give [o_spec] to [o_subject].\n")
+       print("\n> give [o_spec] to [o_subject]\n")
        if try(l_location, 0, 0, "give [o_spec] to [o_subject]") then
          agree()
        endif
@@ -33,28 +33,25 @@ $VERB use
      agree()
    endif
    if testflag(o_spec.f_locked) and testflag(o_subject.f_key) then
-     print("\n> unlock [o_spec] with [o_subject].\n")
+     print("\n> unlock [o_spec] with [o_subject]\n")
      if try(l_location, 0, 0, "unlock [o_spec] with [o_subject]") then
        agree()
      endif
    else
      if testflag(o_spec.f_container) then
-       print("\n> put [o_subject] in [o_spec].\n")
+       print("\n> put [o_subject] in [o_spec]\n")
        if try(l_location, 0, 0, "put [o_subject] in [o_spec]") then
          agree()
        endif
      else
-       print("\n> put [o_subject] on [o_spec].\n")
-       if try(o_actor, 0, 0, "put [o_subject] on [o_spec]") then
+       print("\n> put [o_subject] on [o_spec]\n")
+       if try(l_location, 0, 0, "put [o_subject] on [o_spec]") then
          agree()
        endif
      endif
    endif
  DEFAULT
+   printcr("You must be more specific about the action you want to perform.")
    agree() # do nothing
 
 ENDVERB
-
-
-
-   

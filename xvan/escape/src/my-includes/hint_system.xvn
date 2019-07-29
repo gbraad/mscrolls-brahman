@@ -1,0 +1,35 @@
+
+$VERB hint
+ SCOPE all_locs
+ "hint for [o_subject]",
+ "hint [o_subject]"
+   DISAMBIGUATION_RULES
+    if testflag(o_subject.f_sk_puzzle) then score(5) endif
+    if testflag(o_subject.f_seenbefore) then score(5) endif
+   END_RULES
+   if testflag(o_subject.f_sk_puzzle) then
+     printcr("You have to ask that to someone from the staff.")
+   else
+     printcr("That is not a puzzle.")
+
+ DEFAULT
+   printcr("You must specify a valid puzzle, like \"hint dial puzzle\"")
+ENDVERB
+
+
+$VERB solution
+ SCOPE all_locs
+ "solution for [o_subject]",
+ "solution [o_subject]"
+   DISAMBIGUATION_RULES
+    if testflag(o_subject.f_sk_puzzle) then score(5) endif
+    if testflag(o_subject.f_seenbefore) then score(5) endif
+   END_RULES
+   if testflag(o_subject.f_sk_puzzle) then
+     printcr("You have to ask that to someone from the staff.")
+   else
+     printcr("That is not a puzzle.")
+
+ DEFAULT
+   printcr("You must specify a valid puzzle, like \"solution dial puzzle\"")
+ENDVERB

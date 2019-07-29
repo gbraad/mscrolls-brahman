@@ -393,7 +393,6 @@ struct WordStat
             { "tip", 1 },
             { "unscrew", 1 },
             { "cast", 1 },
-#if 0    
             // pawn
             { "mix", 1 },
             { "hide", 1 },
@@ -407,8 +406,7 @@ struct WordStat
             { "kiss", 1 },
             { "vote", 1 },
             { "mount", 1 },
-            { "pray", 2 },
-#endif            
+            { "pray", 2 }
         };
 
         *count = ASIZE(gameVerbTable);

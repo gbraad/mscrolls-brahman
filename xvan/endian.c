@@ -57,7 +57,7 @@ uint16_t xv_ntohs(uint16_t val)
   int      i;
 
   for (i=0; i<2; i++) {
-    result |= (uint16_t)v[i] << ((1-i) * 2);
+    result |= (uint16_t)v[i] << ((1-i) * 8);
   }
 
   return result;
@@ -71,7 +71,7 @@ uint16_t xv_htons(uint16_t val)
   int      i;
 
   for (i=0; i<2; i++) {
-    v[i] = (uint8_t)(val >> ((1-i) * 2));
+    v[i] = (uint8_t)(val >> ((1-i) * 8));
   }
 
    return *result;

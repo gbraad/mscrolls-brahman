@@ -71,6 +71,7 @@ struct DLLX Control: public APIType
     virtual ~Control();
 
     typedef Strings Words;
+    typedef std::function<void(void)> Pump;
 
     Prefs::Ref                  _prefs;
     Transcript::Ref             _transcript;
@@ -89,6 +90,7 @@ struct DLLX Control: public APIType
     string                      _currentImageJSON;
     string                      _currentMetaJSON;
     string                      _soundJSON;
+    string                      _ifiChoiceJSON;
 
     // datapath is per user data
     string                      _dataPath;
@@ -116,7 +118,7 @@ struct DLLX Control: public APIType
     void coverPageClosed();
 
     bool loadEngine(IFEngineInterface*);
-    bool loadIFI();
+    bool loadIFI(Pump);
     string prefsFilePath() const;
     
     string currentVersion() const;
@@ -124,7 +126,8 @@ struct DLLX Control: public APIType
     virtual int getLogLevel() const;
 
 
-    bool evalCommand(const string& cmd);
+    bool evalCommand(const string& cmd, bool echo = true);
+    bool evalJSON(const string& js);
     bool evalClickCommand(const string& cmd);
     bool refreshCommand();
     bool evalCommandDirect(const string& cmd, bool echo);
@@ -140,6 +143,7 @@ struct DLLX Control: public APIType
     virtual void imageChanged(const string& js) {}
     virtual void metaChanged(const string& metajs) {}
     virtual void soundChanged(const string& js) {}
+    virtual void ifiChoiceChanged(const string& js) {}
 
     bool updateMapInfo(MapInfo&);
     void evalItemList(ItemsModel::Entries&);

@@ -162,7 +162,8 @@ bool getlocaltime(struct tm* t)
 
     if (res)
     {
-        struct tm* t1 = localtime(&tv.tv_sec);
+        time_t t2 = tv.tv_sec;
+        struct tm* t1 = localtime(&t2);
         if (t1) *t = *t1;
         else res = false;
     }

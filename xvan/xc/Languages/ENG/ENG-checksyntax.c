@@ -1,6 +1,6 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018 Marnix van den Bos.                   */
+/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
 /*                                                                      */
 /* <marnix.home@gmail.com>                                              */
 /*                                                                      */
@@ -27,7 +27,7 @@
 #include "typedefs.h"
 #include "ENG-checksyntax.h"
 
-extern void PrintActionRec(actionRec*);
+
 /**********************************************************************/
 /* This module is used to parse and translate strings that are used   */
 /* to determine which trigger to execute for which user commands.     */
@@ -62,24 +62,16 @@ int32_t ENG_CheckSyntax(char*, int32_t, int32_t, int32_t*, int32_t, int32_t, act
 /************************/
 
 
-int32_t ENG_CheckSyntax(line_buf, id, nr_of_types, types, type_index, state,
-                                                          action_rec)
- char       *line_buf;
- int32_t    id;
- int32_t    nr_of_types;
- int32_t    *types;
- int32_t    type_index;
- int32_t    state;
- actionRec  *action_rec;
-
+int32_t ENG_CheckSyntax(char *line_buf, int32_t id, int32_t nr_of_types, int32_t *types, int32_t type_index, int32_t state, actionRec *action_rec)
  /* id, nr_of_types, type_index and state cannot be changed by      */
  /* recursive calls. The rest of the parameters can and therefore   */
  /* we will define duplicates when needed.                          */
-
 {
   int32_t  result;               /* needed to test for unknown words and */
                                  /* stop recursive calling               */
   int32_t  i = 0;
+  int32_t  id1 = NO_ID;
+  int32_t  id2 = NO_ID;
   int32_t  old_state = state;    /* Remember state to retry in case of   */
                                  /* a syntax clash.                      */
                                  /* Also used to fill action_rec for     */
@@ -109,9 +101,22 @@ int32_t ENG_CheckSyntax(line_buf, id, nr_of_types, types, type_index, state,
   if (id == NO_ID) {
     /* Get the next word from the user input               */
     /* GiveNextId() also returns the remainder of line_buf */
-    if ( (id = GiveNextId(&line_buf, &nr_of_types, types)) == NO_ID)
-      /* unknown word */
-      return(UNKNOWN_WORD);
+    if ( (id = GiveNextId(&line_buf, &id1, &id2, &nr_of_types, types)) == NO_ID) {
+      /* it may be a parameter */
+      /* word ids are returned as function result. */
+      /* parameters are returned in id1 and id2    */
+      if (id1 != NO_ID) {
+        /* id2 must be NO_ID */
+        if (id2 != NO_ID) {
+          return(ERROR);
+        }
+        id = id1;
+      }
+      else {
+        /* unknown word */
+        return(UNKNOWN_WORD);
+      }
+    }
     type_index = 0;
   }
 
@@ -452,6 +457,9 @@ int32_t ENG_CheckSyntax(line_buf, id, nr_of_types, types, type_index, state,
         case 24:    /* 26 dec 2015 */
           state = 6;
           break;
+        case 21:    /*10feb19: for 'why am I here' */
+          state = 28;
+          break;
         default:
           /* wrong syntax; try again with next type */
           return(ENG_CheckSyntax(line_buf, id, nr_of_types, types,
@@ -474,7 +482,18 @@ int32_t ENG_CheckSyntax(line_buf, id, nr_of_types, types, type_index, state,
       else /* error */ {
         /* Oops! it wasn't an adverb after all; try again */
         return(ENG_CheckSyntax(line_buf, id, nr_of_types, types,
-                             ++type_index, old_state, action_rec));}
+                             ++type_index, old_state, action_rec));}    /* yes, it's a parameter. */
+    /* now check if it's a location id, object id or THIS */
+    if (IsLocId(id1) || IsObjId(id1) || id1 == THIS) {
+      /* if id2 is not NO_ID, id1 was an owner of a flag, an   */
+      /* attribute or a description, which we don't allow here */
+      if (id2 != NO_ID) {
+        /* error */
+        ErrHdr();
+        printf("\nLine %d: error in string, unexpected id: %d %d.\n", line_num, id1, id2);
+        return(NO_ID);
+      }
+    }
     case PREPOSITIONS:
     case CONNECT_PREPOSITIONS:  /* same type as PREPOSITIONS */
       switch (state) {
@@ -572,7 +591,18 @@ int32_t ENG_CheckSyntax(line_buf, id, nr_of_types, types, type_index, state,
       }
       /* assume it's a conjunction */
       result = ENG_CheckSyntax(line_buf, NO_ID, nr_of_types, new_types,
-                           -1, state, action_rec);
+                           -1, state, action_rec);    /* yes, it's a parameter. */
+    /* now check if it's a location id, object id or THIS */
+    if (IsLocId(id1) || IsObjId(id1) || id1 == THIS) {
+      /* if id2 is not NO_ID, id1 was an owner of a flag, an   */
+      /* attribute or a description, which we don't allow here */
+      if (id2 != NO_ID) {
+        /* error */
+        ErrHdr();
+        printf("\nLine %d: error in string, unexpected id: %d %d.\n", line_num, id1, id2);
+        return(NO_ID);
+      }
+    }
       if (result == OK) {
         /* fill the action record */
         return(OK);
@@ -658,4 +688,3 @@ int32_t ENG_CheckSyntax(line_buf, id, nr_of_types, types, type_index, state,
   } /* switch */
   /* no return here */
 }
-

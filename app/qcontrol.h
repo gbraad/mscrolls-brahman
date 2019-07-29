@@ -81,6 +81,8 @@ class QControl : public QObject, public Control
     Q_PROPERTY (QString soundJSON READ soundJSON NOTIFY soundJSONChanged)
     Q_PROPERTY (int force READ force NOTIFY forceChanged);
 
+    Q_PROPERTY (QString ifiChoiceJSON READ ifiChoiceJSON WRITE setIfiChoiceJSON NOTIFY ifiChoiceJSONChanged)
+
     typedef Control parentT;
 
 public:
@@ -213,6 +215,12 @@ public:
     Q_INVOKABLE bool evalCommand(const QString& cmd)
     {
         return Control::evalCommand(STRQ(cmd));
+    }
+
+    Q_INVOKABLE bool evalJSON(const QString& cmd)
+    {
+        // IFI only, raw JSON instead of command
+        return Control::evalJSON(STRQ(cmd));
     }
 
     Q_INVOKABLE bool evalClickCommand(const QString& cmd)
@@ -492,12 +500,19 @@ public:
     DEF_JSON(currentImage);
     DEF_JSON(currentMeta);
     DEF_JSON(sound);
+    DEF_JSON(ifiChoice);
 
     // called from transcripti
     void imageChanged(const string& js) override { currentImageJSON(js); }
 
     // from ifiMetaResponse
     void metaChanged(const string& js) override { currentMetaJSON(js); }
+
+    // from `ifiChoiceGeneralResponse` and `ifiChoiceListResponse
+    void ifiChoiceChanged(const string& js) override { ifiChoiceJSON(js); }
+
+    // from property
+    void setIfiChoiceJSON(const QString& s) { ifiChoiceChanged(STRQ(s)); }
 
     // trigger a sound, from ifiSoundResponse 
     // called also from transcripti
@@ -726,6 +741,8 @@ public:
         std::cout << "qcontrol cout sentinel " << msg << "\n" << std::flush;
     }
 
+    void _pumpGUI();
+
 public slots:
 
     void uiInitialised()
@@ -742,6 +759,7 @@ signals:
     void titleTextChanged();
     void soundJSONChanged();
     void forceChanged();
+    void ifiChoiceJSONChanged();
 
 public:
     

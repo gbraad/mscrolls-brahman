@@ -48,7 +48,7 @@ struct TextFormat
 
     static const char* _html_char(int c)
     {
-        static char buf[32];
+        static char buf[2];
 
         buf[0] = c;
         buf[1] = 0;
@@ -107,8 +107,6 @@ struct TextFormat
         void operator()(const char* s) { _add(s); }
         void operator()(char c) { _add(c); }
 
-        
-        
         void emitLink(const string& link, 
                       const string* linktext = 0)
         {
@@ -380,18 +378,18 @@ struct TextFormat
         else if (startsWithIgnoreCase(s, "https://"))
         {
             res = true;
-            s += 6;
+            s += 8;
         }
 
         if (res)
         {
-
             int level = 0;
             int blevel = 0;
 
             for (;;)
             {
                 char c = *s;
+                if (!c) break;
 
                 if (c == '(') ++level;
                 else if (c == ')')
@@ -407,6 +405,7 @@ struct TextFormat
                 ++s;
             }
             
+            // s will be on the character that ended, eg ), or zero
             link = string(str, s - str);
             str = s; // update end
         }

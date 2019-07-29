@@ -28,12 +28,20 @@
 /* External declarations */
 /*************************/
 
+<<<<<<< HEAD
+=======
+extern short        debug_info;  /* init.c   */
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 extern dirInfo      *obj_dir;                                       /* fileio.c */
 extern storyInfo    story_info;                                     /* init.c   */
 
 extern char         *outputline;                                    /* init.c   */
 
+<<<<<<< HEAD
 extern void         Output(char*, int);                             /* output.c   */
+=======
+extern void         Output(void);                                   /* output.c   */
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 extern void         PrintString(char*, int);                        /* output.c   */
 extern int32_t      ProcessInput(char*);                            /* input.c    */
 extern int32_t      HandleTimers(usrActionRec*, int32_t);           /* timers.c   */

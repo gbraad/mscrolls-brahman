@@ -38,105 +38,127 @@
 /* Function declarations */
 /*************************/
 
-void  GetAddtlInput(char*, char*);
-int32_t ProcessInput(char*);
+void    GetAddtlInput(kvPair*, char[], int32_t, int);
+int32_t ProcessInput(char[]);
 
 /************************/
 /* Function definitions */
 /************************/
 
+<<<<<<< HEAD
 void GetAddtlInput(char *addtl_input, char *prompt)
+=======
+void GetAddtlInput(kvPair *kv, char prompt[], int32_t ifi_tag, int block)
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
  /* addtl_input must have size INPUT_LINE_LEN */
 {
-  /* this function is used when we need extra  */
-  /* input from the user to complete a command */
-  /* e.g. 'x key (when there are more)' or     */
-  /* 'quit'. If we would use ProcessInput()    */
-  /* the interpreter would try to interpret it */
-  /* as a new command.                         */
-  /* NOTE: for missing subject or specifier we */
-  /* do not use this function, because in this */
-  /* situation we just return to letsplay()    */
-  /* with partially completed action records   */
-  /* and new parse syntax                      */
+  /* this function is used when we need extra input from the user to  */
+  /* complete a command, e.g. 'x key (when there are more)' or quit'.'*/
+  /* If we would use ProcessInput() the interpreter would try to      */
+  /* interpret it as a new command.                                   */
+  /* NOTE: for missing subject or specifier we do not use this        */
+  /* function, because in this situation we just return to letsplay() */
+  /* with partially completed action records and new parse syntax     */
+
+  /* 10jul2019: this routine is now also used for {choice} jsons. We  */
+  /* do not rely on the GUI to always sent the response to a choice   */
+  /* as the first message, but allow other jsons as well. However we  */
+  /* will process jsons until we get the expected response. This      */
+  /* means that ifi_tag must always be the last KV-pair in the last   */
+  /* json because we will stop after this tag.                        */
+  /* This requires 2 loops: the inner loop to process all KV-pairs of */
+  /* of the json string and the outer loop in case the processed json */
+  /* string did not contain our request and we need to read another.  */
 
   char      *ifi_get_result = NULL;
-  char      *json_string = NULL;
+  char      *json_string    = NULL;
   int       index           = 0;
-  int32_t   IFI_request  = IFI_NO_IFI;
-  kvPair    kv;
+  int       done            = 0;
+  int32_t   IFI_request     = IFI_NO_IFI;
 
-  /* init the kvPair struct */
-  kv.key                 = NULL;
-  kv.value.type          = 0;
-  kv.value.textstring    = NULL; /* not: '\0' */
-  kv.value.int_number    = 0;
-  kv.value.float_number  = 0;
+  PrintString("\n", 0);
+  PrintString(prompt, 0);
+  Output();
 
-  /* read the json string */
-  ifi_get_result = (char*) ifi_getRequest();
+  while (!done) {
+    /* reset the kvPair struct          */
+    /* kv must be initialized by caller, otherwise */
+    /* the first reset (ResetString()) will crash  */
+    ResetKVPair(kv);
 
-  /* copy ifi_get_result as soon as we get it, because  */
-  /* ifi_getRequest() will use the same address for all */
-  /* calls. So if we don't copy, the result will be     */
-  /* overwritten when another functions calls           */
-  /* ifi_getRequest                                     */
+    /* init index */
+    index = 0;
 
-  json_string = AddToString(json_string, ifi_get_result);
+    /* read the json string */
+    ifi_get_result = (char*) ifi_getRequest();
 
-  /* check for valid json */
-  if (!ValidateJson(json_string)) {
-    /* do not set to NULL */
-    addtl_input[0] = '\0';
-    json_string = ResetString(json_string);
-    return;
-  }
+    /* copy ifi_get_result as soon as we get it, because  */
+    /* ifi_getRequest() will use the same address for all */
+    /* calls. So if we don't copy, the result will be     */
+    /* overwritten when another functions calls           */
+    /* ifi_getRequest                                     */
 
-  /* we have a valid json here */
-  /* extract the KV-pair       */
+    json_string = AddToString(json_string, ifi_get_result);
 
-  while (json_string[index] != '\0') {
-    /* read the next key-value pair */
-    if (!GetNextKVpair(json_string, &index, &kv)) {
-      /* ready */
-      json_string         = ResetString(json_string);
-      kv.value.textstring = ResetString(kv.value.textstring);
-      kv.key              = ResetString(kv.key);
+    /* check for valid json */
+    if (!ValidateJson(json_string)) {
+      /* the GUI screwed up */
+      /* WE MUST MAKE SORT OF ERROR RETURN */                  /* <<<======= */
+      json_string = ResetString(json_string);
       return;
     }
 
-    IFI_request = CheckIFI(kv.key);
+    /* we have a valid json here */
+    /* extract the KV-pair       */
 
-    /* must decide here what we do if not an IFI-request       */
-    /* for now, send error msg and stop processing this string */
-    if (IFI_request == IFI_NO_IFI) {
-      SendIFIerror("UNKNOWN IFI REQUEST: ", kv.key);
-    }
+    while (json_string[index] != '\0') {
+      /* read the next key-value pair */
 
-    /* test for IFI_REQ_COMMAND */
-    if (IFI_request == IFI_REQ_COMMAND) {
-      strncpy(addtl_input, kv.value.textstring, INPUT_LINE_LEN);
-      addtl_input[INPUT_LINE_LEN-1] = '\0'; /* just make sure */
-    }
-    else {
-      /* we don't care about the return value, here */
-      XeqIFIrequest(IFI_request, &(kv.value));
-    }
-  }  /* while */
-  json_string         = ResetString(json_string);
-  kv.value.textstring = ResetString(kv.value.textstring);
-  kv.key              = ResetString(kv.key);
+      if (GetNextKVpair(json_string, &index, kv)) {
+        IFI_request = CheckIFI(kv->key);
+
+        /* must decide here what we do if not an IFI-request       */
+        /* for now, send error msg and stop processing this string */
+        if (IFI_request == IFI_NO_IFI) {
+          /*SendIFIerror("UNKNOWN IFI REQUEST: ", kv.key);*/
+        }
+
+        /* test for the required ifi tag */
+        if (IFI_request == ifi_tag) {
+          /* we're ready, any other KV pairs in this */
+          /* json will be ignored.                   */
+          /* kv will be returned to the caller, so   */
+          /* they can pick out of it what they need. */
+          done = 1;
+        }
+        else {
+          /* not the tag we wanted, check if we */
+          /* must process the message           */
+          if (!block) {
+            XeqIFIrequest(IFI_request, &(kv->value));
+          }
+        }
+      }
+    }  /* while - json processed */
+
+    json_string = ResetString(json_string);
+  } /* while - done */
+
+  return;
 }
 
 
+<<<<<<< HEAD
 int32_t ProcessInput(char *prompt)
+=======
+int32_t ProcessInput(char prompt[])
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 {
-  char *ifi_get_result = NULL;
-  char  *json_string   = NULL;
-  int32_t result       = OK;
+  char    *ifi_get_result = NULL;
+  char    *json_string    = NULL;
+  int32_t result          = OK;
 
   char line_buf[INPUT_LINE_LEN];
-
 
   /* Input is either read from the */
   /* IFI interface or from a file  */
@@ -154,17 +176,17 @@ int32_t ProcessInput(char *prompt)
       /* line_buf must be terminated with */
       /* a '\0' for this to work.         */
       line_buf[strlen(line_buf)-1] = '\0';
-      Output(line_buf, 0);
-      Output("\n", 0);
+
+      PrintString(line_buf, 0);
+      PrintString("\n", 0);
+      Output();
 
       /* now, wrap the line in a json string  */
       /* will always fit, because line_buf is */
       /* INPUT_LINE_LEN length at the max     */
-
       json_string = AddToString(json_string, "{\"command\":\"");
       json_string = AddToString(json_string, line_buf);
       json_string = AddToString(json_string, "\"}");
-
     }
     else {
       /* we reached the end of the testfile*/
@@ -183,24 +205,35 @@ int32_t ProcessInput(char *prompt)
   /* cause an 'I do not understand...' error.            */
 
   if (!testmode) {
-    ifi_get_result = (char*) ifi_getRequest();
-
-    if (ifi_get_result == NULL) {
-      /* front-end wants to quit */
-      return(QUIT);
+    /* check if we must update the choices menu */
+    /* for choice or hybrid mode                */
+    if (story_info.play_mode != INTERPRETER_MODE) {
+      UpdateChoicesMenu(line_buf);
+      json_string = AddToString(json_string, "{\"command\":\"");
+      json_string = AddToString(json_string, line_buf);
+      json_string = AddToString(json_string, "\"}");
     }
+    else {
+      ifi_get_result = (char*) ifi_getRequest();
 
-    /* copy ifi_get_result as soon as we get it, because  */
-    /* ifi_getRequest() will use the same address for all */
-    /* calls. So if we don't copy, the result will be     */
-    /* overwritten when another functions calls           */
-    /* ifi_getRequest                                     */
+      if (ifi_get_result == NULL) {
+        /* front-end wants to quit */
+        return(QUIT);
+      }
 
-    json_string = AddToString(json_string, ifi_get_result);
+      /* copy ifi_get_result as soon as we get it, because  */
+      /* ifi_getRequest() will use the same address for all */
+      /* calls. So if we don't copy, the result will be     */
+      /* overwritten when another functions calls           */
+      /* ifi_getRequest                                     */
+
+      json_string = AddToString(json_string, ifi_get_result);
+    }
   }
 
-  /* ok, now we have a json_string, either from   */
-  /* the front end, or from file input (testmode) */
+  /* ok, now we have a json_string, either from  */
+  /* the front end (keyboard or choice menu), or */
+  /* from file input (testmode)                  */
 
   /* check for a valid json */
   if (ValidateJson(json_string)) {
@@ -225,8 +258,9 @@ int32_t ProcessInput(char *prompt)
   else {
     /* it's an invalid json string */
     /* DO NOTHING OR SEND AN ERROR JSON BACKT TO FE? */
-    /* stay in the loop, we need a user command */
+    /* stay in the loop, we need a user command      */
   }
+
   free(json_string);
   return(result);
 }

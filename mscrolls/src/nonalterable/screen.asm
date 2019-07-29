@@ -94,7 +94,9 @@ REALBAD
  
 SCREEN
 
-      IFNE	VAX&YCHEAT
+    MOVE.W  #InfoAtScreen,-(A7)
+    InfoTrap    
+    IFNE	VAX&YCHEAT
 	CMP.L	#$1F400,A7
 	BEQ.S	05$
 	PRINT	<'Waaaa - unhealthy sp!!!!!!^'>
@@ -151,6 +153,9 @@ NOTNEWROOM
 	
       ENDC
 	
+    ;; this should be after the check for EXTRA. but it doesn't work!
+    MOVE.W  #InfoAtCommand,-(A7)
+    InfoTrap
 	TEST_W  EXTRA(A4)          ;PENDING COMMAND?
 	BEQ.S   SC70               ;EQ => no
 	MOVE.L  EXTRAPNT(A4),A6    ;Get addr of current posn in command line

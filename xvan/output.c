@@ -44,7 +44,8 @@
 /* Function declarations */
 /*************************/
 
-void    Output(char*, int);
+void    Log(char*, char*, char*);
+void    Output(void);
 void    BuildOutputJson(char*, char*);
 void    PrintString(char*, int);
 void    PrintWord(int32_t, int);
@@ -66,49 +67,63 @@ int32_t Power(int32_t, int32_t);
 /* exit when muted == 1                       */
 
 
+<<<<<<< HEAD
 void Output(char *line, int use_json)
+=======
+void Log(char *info1, char *info2, char *info3)
 {
-  char *json_text = _alloca((strlen(line)+JSON_TEXT_OVERHEAD + 1)*sizeof(char));
+ FILE   *logfile;
+ static int line_nr = 1;
+ char   line_nr_to_print[10];
 
-  if (muted == 1 && !use_json) {
+  sprintf(line_nr_to_print, "%d  ", line_nr++);
+  logfile = fopen("log.txt", "a");
+  fprintf(logfile, line_nr_to_print);
+  fprintf(logfile, "%s%s%s", info1, info2, info3);
+  fclose(logfile);
+}
+
+
+void Output(void)
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
+{
+  char *json_text;
+
+  /* this routine converts the global string */
+  /* outputline to a json text message and   */
+  /* sends it to the GUI                     */
+
+  if (outputline == NULL)
+    return;
+
+  json_text = _alloca((strlen(outputline)+JSON_TEXT_OVERHEAD + 1)*sizeof(char));
+
+  if (muted == 1) {
+    outputline = ResetString(outputline);
     return;
   }
 
-  /* check if it is a json message from the story to the front-end */
-  if (use_json) {
-    /* we must add line to the json message parameter */
-    /* no test for NULL resul, we will always return directly */
-    json_msg_from_story = AddToString(json_msg_from_story, line);
-    return;
+  BuildOutputJson(outputline, json_text);
+  ifi_emitResponse(json_text);
+
+  if (transcript) {
+    if (fprintf(transcriptfile, "%s", outputline) < 0) {
+      PrintError(44, NULL, NULL);
+      /* not a severe error, continue but turn off transcript mode */
+      transcript = 0;
+    }
   }
 
-  if (debug_mode) {
-    /* debug info will not be written to the transcript file */
-    if (fprintf(debugfile, "%s", line) < 0) {
-      PrintError(47, NULL, NULL);
-      /* not a severe error, continue but turn off debug mode */
-      debug_mode = 0;
-    }
-  }
-  else {
-    BuildOutputJson(line, json_text);
-    ifi_emitResponse(json_text);
-    /*printf("%s", line);*/
-    if (transcript) {
-      if (fprintf(transcriptfile, "%s", line) < 0) {
-        PrintError(44, NULL, NULL);
-        /* not a severe error, continue but turn off transcript mode */
-        transcript = 0;
-      }
-    }
-  }
+  outputline = ResetString(outputline);
 }
 
 
 void BuildOutputJson(char *line, char *json_line)
 {
   /* this function wraps the text in a json string               */
-  /* example: "drop lamp" will wrapped to {"text" : "drop lamp"} */
+  /* example: "drop lamp" will wrapped to {"text":"drop lamp"} */
+
+  /* example: "drop lamp" will wrapped to {"text":{"text:"drop lamp","flush":true}} */
 
   /* build the output json */
   strcpy(json_line, "{\"text\":\"");
@@ -140,9 +155,7 @@ void PrintString(char *str, int use_json)
   attrInfo *attributes = NULL;        /* only need the pointer */
   int32_t  attribute_index = 0;
 
-  /* outputline is global and otherwise is not freed properly, so */
-  /* use a local buffer                                           */
-  char *o_line = (char *) _alloca(2*len*sizeof(char));
+
 
   if (muted == 1 && use_json == 0)
     return;
@@ -205,8 +218,12 @@ void PrintString(char *str, int use_json)
       if (j != 0) {
         /* print the string */
         word_buffer[j] = '\0';
-        sprintf(o_line, "%s", word_buffer);
-        Output(o_line, use_json);
+        if (use_json) {
+          json_msg_from_story = AddToString(json_msg_from_story, word_buffer);
+        }
+        else {
+           outputline = AddToString(outputline, word_buffer);
+        }
         j = 0;
       }
       /* An id is coming next.                                   */
@@ -311,8 +328,20 @@ void PrintString(char *str, int use_json)
                 PrintNumber(attributes[attribute_index].value, use_json);
                 break;
               default:
-                PrintId(attributes[attribute_index].value, use_json);
-                article = 0;
+                if (attributes[attribute_index].value != NONE) {
+                  PrintId(attributes[attribute_index].value, use_json);
+                  article = 0;
+                }
+                else {
+                  /* the attribute value is NONE, don't print anything  */
+                  /* we must check if a white space was already printed */
+                  /* if so, the space was already added to outputbuffer */
+                  if (outputline[strlen(outputline)-1] == ' ') {
+                    outputline[strlen(outputline)-1] = '\0';
+                  }
+                  /* NOTE: outputbuffer now ends with to '\0' chars */
+                  /* THIS SHOULD NOT BE A PROBLEM                   */
+                }
                 break;
             }
           }
@@ -333,8 +362,12 @@ void PrintString(char *str, int use_json)
   if (j != 0) {
     /* print the string */
     word_buffer[j] = '\0';
-    sprintf(o_line, "%s", word_buffer);
-    Output(o_line, use_json);
+    if (use_json) {
+      json_msg_from_story = AddToString(json_msg_from_story, word_buffer);
+    }
+    else {
+      outputline = AddToString(outputline, word_buffer);
+    }
     j = 0;
   }
 }
@@ -354,7 +387,7 @@ void PrintWord(int32_t id, int use_json)
 
   if (i == nr_of_words) {
     /* Internal error; this shouldn't happen. */
-    PrintError(50, &((resultStruct) {VALUE, id}), NULL);
+    PrintError(50, &((resultStruct) {VALUE, NONE, id}), NULL);
   }
   else
     PrintString(wt[i].print_word, use_json);
@@ -363,6 +396,12 @@ void PrintWord(int32_t id, int use_json)
 
 void PrintExtendedSysDescr(extendedSysDescr *extended_sys_descr, int use_json)
 {
+  if (extended_sys_descr->dynamic != NULL) {
+    if (!ConvertDynamicDSys(extended_sys_descr->dynamic, extended_sys_descr)) {
+      return;
+    }
+  }
+
   PrintSysDescr(&(extended_sys_descr->part1), use_json);
 
   if (extended_sys_descr->connect_prepos != NO_ID) {
@@ -432,6 +471,7 @@ void PrintId(int32_t id, int use_json)
   int32_t type             = NO_TYPE;
   int32_t num              = 0;
   int32_t remember_capital = 0;
+  char    text_to_print[OUTPUT_LINE_LEN];
 
   /* Remember whether it's a number. */
   if (id == VALUE || id == ORDINAL)
@@ -482,8 +522,8 @@ void PrintId(int32_t id, int use_json)
   }
   else if (IsTimerId(id)) {
     offset = id - FIRST_TIMER_ID;
-    sprintf(outputline, "%d", timers[offset].value);
-    Output(outputline, use_json);
+    sprintf(text_to_print, "%d", timers[offset].value);
+    PrintString(text_to_print, use_json);
   }
   else
     /* Assume it's a word id. */
@@ -493,8 +533,10 @@ void PrintId(int32_t id, int use_json)
 
 void PrintNumber(int32_t number, int use_json)
 {
-  sprintf(outputline, "%d", number);
-  Output(outputline, use_json);
+  char text_to_print[OUTPUT_LINE_LEN];
+
+  sprintf(text_to_print, "%d", number);
+  PrintString(text_to_print, use_json);
 }
 
 

@@ -1,6 +1,6 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018 Marnix van den Bos.                   */
+/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
 /*                                                                      */
 /* <marnix.home@gmail.com>                                              */
 /*                                                                      */
@@ -31,6 +31,7 @@ extern int32_t       endian;
 extern uint32_t      xv_htonl(uint32_t);                            /* endian.c      */
 extern uint32_t      xv_ntohl(uint32_t);                            /* endian.c      */
 
+extern FILE         *fopen_path(const char*, const char*, const char*); /* fileio.c */
 extern int32_t       ReadStoryInfo(storyInfo*, char*, fileList**);  /* storyinf.c    */
 extern int32_t       StoreStoryInfo(storyInfo*);                    /* storyinf.c    */
 extern int32_t       SetUpTables(void);                             /* tables.c      */

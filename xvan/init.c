@@ -45,14 +45,16 @@
 FILE      *datafile       = NULL;  /* storyfile             */
 FILE      *transcriptfile = NULL;  /* to store transcript   */
 FILE      *testfile       = NULL;  /* to read testinput     */
-FILE      *debugfile      = NULL;  /* to store debug dump   */
+
+short     debug_info      = 0;
+short     debug_level     = 0;
 
 ifiStats  ifi_stats;
 storyInfo story_info;
 int32_t   *stack;     /* Needed for executing triggers. */
 int32_t   sp = 0;     /* stackpointer                   */
 
-char      *outputline;
+char      *outputline = NULL;
 char      *json_msg_from_story;
 
 /*************************/
@@ -74,9 +76,10 @@ int32_t CompilerVersionOK(void)
   if (!ReadStoryInfo(&story_info))
     return(ERROR);
 
-  if (strcmp(story_info.compiler_version, "2.3.4") != 0) {
+  if (strcmp(story_info.compiler_version, "2.4") != 0) {
     PrintError(37, NULL, NULL);
     PrintError(38, NULL, story_info.compiler_version);
+    Output();
     return(ERROR);
   }
 
@@ -88,6 +91,9 @@ int32_t CompilerVersionOK(void)
 int32_t ExitProgram(void)
 {
   /* we need to exit, but don't close the console window immediately */
+
+  /* flush the outputline */
+  Output();
 
   /* close transcript file */
   if (transcript) {
@@ -285,15 +291,6 @@ int32_t main(int argc, char **argv)
   /* init random number generator */
   srand((unsigned) time(NULL));
 
-  /* malloc space for outputline */
-  /* This must be the firsts malloc() because we need */
-  /* outputline to print messages.                    */
-  if ((outputline = (char *) malloc(OUTPUT_LINE_LEN*sizeof(char))) == NULL) {
-    PrintError(15, NULL, "main()");
-    ExitProgram();
-    return(OK);
-  }
-
   /* initialize ifi_stats struct  */
   ifi_stats.objects  = 0;
   ifi_stats.location = 1;
@@ -321,8 +318,13 @@ int32_t main(int argc, char **argv)
   story_info.autolink       = 0;
   story_info.xvan_language  = ENG;
   story_info.story_language = ENG;
+  story_info.play_mode      = INTERPRETER_MODE;  /* @!@ */
 
+<<<<<<< HEAD
   /* malloc space for stack            */
+=======
+  /* malloc space for stack  */
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
   if ((stack = (int32_t *) malloc(STACK_SIZE*sizeof(int32_t))) == NULL) {
     PrintError(15, NULL, "main()");
     ExitProgram();
@@ -363,21 +365,21 @@ int32_t main(int argc, char **argv)
     return(OK);
   }
 
-  /* Read the max possible number of locations. */
+  /* Read the max possible number of locations.           */
   /* Can only do so AFTER the location dir has been read. */
   if (!InitLocations()) {
     ExitProgram();
     return(OK);
   }
 
-  /* Read the max possible number of objects. */
+  /* Read the max possible number of objects.           */
   /* Can only do so AFTER the object dir has been read. */
   if (!InitObjects()) {
     ExitProgram();
     return(OK);
   }
 
-  /* Read attributes.                    */
+  /* Read attributes.                   */
   /* Can only do this AFTER InitDirs(), */
   /* InitLocations() and InitObjects(). */
   if (!InitAttributes()) {

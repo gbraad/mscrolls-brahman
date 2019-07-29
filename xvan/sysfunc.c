@@ -96,7 +96,7 @@ int32_t IsDirection(int32_t id)
 
   if (i == nr_of_words) {
     /* Internal error; this shouldn't happen. */
-    PrintError(50, &((resultStruct) {VALUE,id}),NULL);
+    PrintError(50, &((resultStruct) {VALUE, NONE, id}), NULL);
   }
   else {
     while (j < MAX_TYPES) {
@@ -125,51 +125,41 @@ void ConvSpecId(int32_t *id, int32_t *type)
         *id   = action;
         *type = VERB;
         break;
-
       case PREPOS:
         *id   = prepos;
         *type = PREPOSITIONS;
         break;
-
       case DIR:
         *id = direction;
         *type = DIRECTIONS;
         break;
-
       case THIS:
         *id   = active_entity;
         *type = IsLocId(*id) ? LOC_ID : OBJ_ID;
         break;
-
       case CURR_LOC:
         *id   = curr_loc;
         *type = LOC_ID;
         break;
-
       case ACTOR:
         *id   = actor;
         *type = IsLocId(*id) ? LOC_ID : OBJ_ID;
         break;
-
       case SUBJECT:
         *id   = subject;
         *type = IsLocId(*id) ? LOC_ID : OBJ_ID;
         break;
-
       case SPECIFIER:
         *id   = specifier;
         *type = IsLocId(*id) ? LOC_ID : OBJ_ID;
         break;
-
       case VALUE:
         *id   = value;
         *type = NUMBER;
         break;
-
       case ORDINAL:
         *id   = ordinal;
         *type = NUMBER;
-
       default:
         /* do nothing */;
     } /* switch */
@@ -191,12 +181,21 @@ int32_t GetPar(int32_t *owner, int32_t *par, int32_t *type, char **str, int32_t 
   /*                   loc/obj attr [attr attr ..] EOP */
   /*                   <wildcard> EOP                  */
 
+<<<<<<< HEAD
   int32_t      ratio;
   int32_t      i;
   attrInfo     *attributes;
   int32_t      index;
   int32_t      next;
   resultStruct result;
+=======
+  int32_t      ratio       = 1;
+  int32_t      i           = 0;
+  attrInfo     *attributes = NULL;;
+  int32_t      index       = 0;
+  int32_t      next        = NO_ID;
+  resultStruct result      = {NO_ID, NONE, 0};;
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 
   next = NextOpcode(trigger);
 
@@ -291,11 +290,13 @@ int32_t GetPar(int32_t *owner, int32_t *par, int32_t *type, char **str, int32_t 
     /* firstdir()   : DIRECTIONS                   */
     /* dest()       : LOC_ID                       */
     /* owner()      : LOC_ID, OBJ_ID, NONE or QUIT */
+    /* pickone()    : anything but a string        */
 
     /* First execute the internal action.     */
     /* Testfunctions cannot be parameters, so */
     /* set action_rec to NULL and             */
     /* subject_index to -1                    */
+
     *owner = NO_ID;
     result = XeqIntAct(next, trigger, NULL, -1);
     *par   = result.value;
@@ -319,13 +320,18 @@ int32_t GetPar(int32_t *owner, int32_t *par, int32_t *type, char **str, int32_t 
         *type = NUMBER;
         break;
       case FIRSTDIR:
-        if (*par == NONE)
+        if (result.tag == NONE) {
+          *par  = NONE;
           *type = NO_TYPE;
+        }
         else
-          if (*par == QUIT)
+          if (result.tag == QUIT) {
             return(ERROR);
-          else
+          }
+          else {
             *type = DIRECTIONS;
+            *par  = result.value;
+          }
         break;
       case DEST:
         if (*par == NONE)
@@ -347,6 +353,20 @@ int32_t GetPar(int32_t *owner, int32_t *par, int32_t *type, char **str, int32_t 
           else
             *type = IsLocId(*par) ? LOC_ID : OBJ_ID;
         break;
+<<<<<<< HEAD
+=======
+      case PICKONE:
+        if (*par == NONE)
+          *type = NO_TYPE;
+        else
+          if (*par == QUIT)
+            return(ERROR);
+          else {
+            *type  = result.tag;
+            *owner = result.owner;
+          }
+        break;
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
       default:
         /* all other internal actions */
         *type = NO_TYPE;
@@ -437,7 +457,7 @@ int32_t GetPar(int32_t *owner, int32_t *par, int32_t *type, char **str, int32_t 
         /* do nothing */ ;
   }
   else {
-    PrintError(62, &((resultStruct) {VALUE,next}), "GetPar()");
+    PrintError(62, &((resultStruct) {VALUE, NONE, next}), "GetPar()");
     return(ERROR);
   }
   return(OK);
@@ -563,7 +583,7 @@ int32_t GetActionRecPar(usrActionRec *action_rec, int32_t **trigger)
 
   if ((i=NextOpcode(trigger)) != END_OF_PAR) {
     /* abusing i because we still got it */
-    PrintError(95, &((resultStruct) {VALUE,i}), NULL);
+    PrintError(95, &((resultStruct) {VALUE, NONE, i}), NULL);
     return(QUIT);
   }
 
@@ -600,7 +620,7 @@ int32_t GetAttributeInfo(int32_t id, int32_t owner, attrInfo **attributes, int32
   }
   else {
     /* error */
-    PrintError(65, &((resultStruct) {VALUE,id}), NULL);
+    PrintError(65, &((resultStruct) {VALUE,NONE, id}), NULL);
     return(ERROR);
   }
   return(OK);
@@ -896,8 +916,13 @@ int32_t Exit(int32_t par, usrActionRec *action_rec, int32_t subject_index)
   /* Executes the t_exit triggers for par and all its */
   /* contained objects.                               */
 
+<<<<<<< HEAD
   resultStruct next_result = {AGREE, 0};
   resultStruct result      = {AGREE, 0}; /* Not NO_MATCH, since we have no */
+=======
+  resultStruct next_result = {AGREE, NONE, 0};
+  resultStruct result      = {AGREE, NONE, 0}; /* Not NO_MATCH, since we have no */
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
   int32_t i = 0;                         /* default t_exit.                */
   int32_t list[nr_of_locs+nr_of_objs];
 
@@ -925,8 +950,13 @@ int32_t Entrance(int32_t par, usrActionRec *action_rec, int32_t subject_index)
   /* Executes the t_entrance triggers for par and all its */
   /* contained objects.                                   */
 
+<<<<<<< HEAD
   resultStruct next_result = {AGREE, 0};
   resultStruct result      = {AGREE, 0}; /* Not NO_MATCH, since we have no */
+=======
+  resultStruct next_result = {AGREE, NONE, 0};
+  resultStruct result      = {AGREE, NONE, 0}; /* Not NO_MATCH, since we have no */
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
   int32_t i = 0;                         /* default t_entrance.            */
   int32_t list[nr_of_locs+nr_of_objs];
 
@@ -1281,15 +1311,23 @@ int32_t CountObjects(int32_t id, int32_t flag, int32_t flag_val, int32_t level)
 }
 
 
+<<<<<<< HEAD
 int32_t Synchronize(int32_t id, int32_t trigger_id, int32_t flag, int32_t flag_val, int32_t level, 
                     usrActionRec *action_rec, int32_t subject_index)
+=======
+int32_t Synchronize(int32_t id, int32_t trigger_id, int32_t flag, int32_t flag_val, int32_t level, usrActionRec *action_rec, int32_t subject_index)
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 {
   int          i        = 0;
   int32_t      count    = 0;
   int32_t      cont     = 1;
   int32_t      list[nr_of_objs+1];
   int32_t      index    = 0;
+<<<<<<< HEAD
   resultStruct result   = {NO_MATCH, 0};
+=======
+  resultStruct result   = {NO_MATCH, NONE, 0};
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 
   /* Calls trigger_id for each object that is    */
   /* contained in id with flag set to flag_val.  */
@@ -1328,7 +1366,11 @@ int32_t Synchronize(int32_t id, int32_t trigger_id, int32_t flag, int32_t flag_v
           /* do not update the count */
           break;
         default:
+<<<<<<< HEAD
           PrintError(71, &((resultStruct) {VALUE,result.tag}), NULL);
+=======
+          PrintError(71, &((resultStruct) {VALUE, NONE, result.tag}), NULL);
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
           break;
       }
     }

@@ -17,11 +17,11 @@ $VERB tie
 
  "tie [o_subject]"
    if equal(o_actor, o_player) then
-     printcr("Where do you want to tie [the] [o_subject]?")
+     printcr("Where do you want to tie [the] [o_subject] to?")
    else
-     printcr("Where do you want [the] [o_actor] to tie [the] [o_subject]?")
+     printcr("Where do you want [the] [o_actor] to tie [the] [o_subject] to?")
    endif
-   getsubject()
+   getspec(to)
 
  "tie [o_subject] to [o_spec]"
    printcr("[o_actor] can't tie [the] [o_subject] to [the] [o_spec].")
@@ -34,7 +34,7 @@ $VERB tie
        printcr("  'tie'")
        printcr("  'tie the rope'")
        printcr("  'tie the rope to the hook'")
-       printcr("(to turn off these help messages, type 'help')")
+       printcr("(to turn off these help messages, type 'help 1')")
 
 ENDVERB
 

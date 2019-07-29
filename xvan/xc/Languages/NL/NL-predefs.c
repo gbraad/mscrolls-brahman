@@ -1,6 +1,6 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018 Marnix van den Bos.                   */
+/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
 /*                                                                      */
 /* <marnix.home@gmail.com>                                              */
 /*                                                                      */
@@ -35,12 +35,9 @@
 
 int32_t NL_PreDefs(void);
 
-
-
 /************************/
 /* Function definitions */
 /************************/
-
 
 int32_t NL_PreDefs(void)
 {
@@ -107,5 +104,3 @@ int32_t NL_PreDefs(void)
 
   return(OK);
 }
-
-

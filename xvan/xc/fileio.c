@@ -1,6 +1,6 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018 Marnix van den Bos.                   */
+/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
 /*                                                                      */
 /* <marnix.home@gmail.com>                                              */
 /*                                                                      */
@@ -24,6 +24,7 @@
 #include <stdlib.h>  /* malloc(), realloc(), free() */
 #include <string.h>
 #include <stdint.h>
+#include <limits.h>       /* PATH_MAX */
 #include "keyword.h"
 #include "typedefs.h"
 #include "fileio.h"
@@ -38,6 +39,7 @@ dirData dir_data;      /* Used by StoreDirInfo. */
 /* function declarations */
 /*************************/
 
+FILE     *fopen_path(const char*, const char*, const char*);
 static   int NextChar(FILE*);
 void     ConvertFilePath(char**);
 int32_t  ChangeInputFile(char**, int32_t*, int32_t, int32_t, FILE**, fileList**);
@@ -58,6 +60,7 @@ char     *ReadWord(char*, FILE*);
 char     *GetNextWord(int32_t*, int32_t, int32_t, FILE**, fileList**);
 int32_t  StoreOffsets(void);
 int32_t  StoreKeyword(int32_t);
+int32_t  StoreInt16(int16_t);
 int32_t  StoreInt32(int32_t);
 int32_t  StoreInt64(int64_t);
 int32_t  StoreId(int32_t);
@@ -94,12 +97,31 @@ extern void PrintFileList(fileList**);
 
 extern int32_t total_lines;
 
+
+/************************/
+/* function definitions */
+/************************/
+
+FILE *fopen_path(const char *file_path, const char *file_name, const char *mode)
+{
+  /* this function opens a file, taking into account the path to the file */
+  /* file_path must end with a path delimiter ('/' or '\')                */
+  /* initially developed for macOS                                        */
+
+  char full_name[PATH_MAX + MAX_FILENAME_LEN + 1] = "";
+
+  strcpy(full_name, file_path);
+  strncat(full_name, file_name, MAX_FILENAME_LEN);
+
+  return(fopen(full_name, mode));
+}
+
+
 /***********************/
 /* file input routines */
 /***********************/
 
-static int NextChar(fp)
- FILE *fp;
+static int NextChar(FILE *fp)
 {
   /* nextchar() for windows                   */
   /* will read dos, mac and linux text files  */
@@ -131,8 +153,7 @@ static int NextChar(fp)
 }
 
 
-void ConvertFilePath(path)
- char **path;
+void ConvertFilePath(char **path)
 {
   int32_t len = strlen(*path);
   int32_t i   = 0;
@@ -146,13 +167,10 @@ void ConvertFilePath(path)
   }
 }
 
-int32_t ChangeInputFile(word, keyword, owner, voc_pass1, source, file_list)
- char     **word;
- int32_t  *keyword;
- int32_t  owner;     /* in case we encounter a parameter in a string */
- int32_t  voc_pass1; /* tells whether we have to read (and parse) strings or skip them */
- FILE     **source;
- fileList **file_list;
+
+int32_t ChangeInputFile(char **word, int32_t *keyword, int32_t owner, int32_t voc_pass1, FILE **source, fileList **file_list)
+/* owner is needed in case we encounter a parameter in a string */
+/* voc_pass1 tells whether we have to read (and parse) strings or skip them */
 {
   /* We got here because the compiler encountered an INSERT or EOF keyword */
   switch (*keyword) {
@@ -180,7 +198,8 @@ int32_t ChangeInputFile(word, keyword, owner, voc_pass1, source, file_list)
         PrintError(6, NULL, NULL);
         return(ERROR);
       }
-            /* check for loop in inserts */
+
+      /* check for loop in inserts */
       if (CheckForLoop(*word, *file_list)) {
         ErrHdr();
         PrintError(7, NULL, *word);
@@ -188,12 +207,12 @@ int32_t ChangeInputFile(word, keyword, owner, voc_pass1, source, file_list)
       }
 
       /* open the new file */
-      if ((*source = fopen(*word, "rb")) == NULL) {
+      if ((*source = fopen_path(file_path, *word, "rb")) == NULL) {
         /* error may be caused because we are running linux */
         /* windows uses '\' as path delimiter and linux '/' */
         /* Convert path to linux syntax and try again       */
         ConvertFilePath(word);
-        if ((*source = fopen(*word, "rb")) == NULL) {
+        if ((*source = fopen_path(file_path, *word, "rb")) == NULL) {
           ErrHdr();
           PrintError(0, NULL, *word);
           return(ERROR);
@@ -223,11 +242,7 @@ int32_t ChangeInputFile(word, keyword, owner, voc_pass1, source, file_list)
 }
 
 
-int32_t GetPrevFile(file_name, fp, file_list)
- char     file_name[];
- FILE     **fp;
- fileList **file_list;
-
+int32_t GetPrevFile(char file_name[], FILE **fp, fileList **file_list)
 {
   fileList *runner = *file_list;
   fileList *temp;
@@ -278,10 +293,7 @@ int32_t GetPrevFile(file_name, fp, file_list)
 }
 
 
-int32_t AddToFileList(file_name, file_pointer, file_list)
- char     file_name[];
- FILE     *file_pointer;
- fileList **file_list;
+int32_t AddToFileList(char file_name[], FILE *file_pointer, fileList **file_list)
 {
   /* at first use, *file_list will be NULL, so initialization */
   /* will be done automatically in this function.             */
@@ -332,9 +344,7 @@ int32_t AddToFileList(file_name, file_pointer, file_list)
 }
 
 
-int32_t CheckForLoop(file_name, file_list)
- char     file_name[];
- fileList *file_list;
+int32_t CheckForLoop(char file_name[], fileList *file_list)
 {
   fileList *runner = file_list;
   int found        = 0;
@@ -354,8 +364,7 @@ int32_t CheckForLoop(file_name, file_list)
 }
 
 
-char *Concat(str1,str2)
- char *str1,*str2;
+char *Concat(char *str1, char *str2)
 {
   /* Concatenates str2 to str1. str1 must be malloc'ed, since it */
   /* is free'ed. TC's strcat(str1,str2)  doesn't malloc extra   */
@@ -369,8 +378,7 @@ char *Concat(str1,str2)
 }
 
 
-int32_t IsSpecialChar(ch)
- char ch;
+int32_t IsSpecialChar(char ch)
 {
   if ( (((int32_t) ch>=97) && ((int32_t) ch<=122)) ||   /* a..z                       */
        (((int32_t) ch>=65) && ((int32_t) ch<=90))  ||   /* A..Z                       */
@@ -384,9 +392,7 @@ int32_t IsSpecialChar(ch)
 }
 
 
-int32_t ConvertBackSlashChar(ch, source)
- char *ch;
- FILE *source;
+int32_t ConvertBackSlashChar(char *ch, FILE *source)
 {
   char chs[2];  /* for error message */
 
@@ -426,9 +432,7 @@ int32_t ConvertBackSlashChar(ch, source)
 }
 
 
-void SkipSpacesPlusCR(ch, source)
- char *ch;
- FILE *source;
+void SkipSpacesPlusCR(char *ch, FILE *source)
 {
   int state = 0;
   int cont  = 1;
@@ -459,7 +463,6 @@ void SkipSpacesPlusCR(ch, source)
           case 1:
             /* they entered a second '/' */
             cont = 0;
-
             /* do not read the next char */
             break;
         }
@@ -472,9 +475,8 @@ void SkipSpacesPlusCR(ch, source)
   } /* while */
 }
 
-void SkipComment(ch, source)
- char *ch;
- FILE *source;
+
+void SkipComment(char *ch, FILE *source)
 {
   while ((*ch != CR) && (!feof(source)))
     *ch = NextChar(source);
@@ -488,13 +490,12 @@ void SkipComment(ch, source)
   }
 }
 
-void IdToChar(id, str)
- int32_t  id;
- char *str;
+
+void IdToChar(int32_t id, char *str)
 {
   /* Length of str is expected to be 5. */
 
-  /* Syntax of str[] is: */
+  /* Syntax of str[] is:                                       */
   /* str[0] indicates a parameter is coming.                   */
   /* str[1] left nibble indicates whether str[2] should be     */
   /*        be read as a 0 (nibble is 1) or not (nibble is 2). */
@@ -538,12 +539,8 @@ void IdToChar(id, str)
   }
 }
 
-char *ReadParInString(owner, r_s, ch, source, file_list)
- int32_t  owner;  /* the parameter's owner */
- char     *r_s;
- char     *ch;   /* *ch = '[' */
- FILE     *source;
- fileList **file_list;
+
+char *ReadParInString(int32_t owner, char *r_s, char *ch, FILE *source, fileList **file_list)
 {
   int32_t state = 1;
   char    *par;
@@ -800,7 +797,7 @@ char *ReadParInString(owner, r_s, ch, source, file_list)
             case 2:
               break;
             case 3:
-              /* we have a single occurence of THIS */
+              /* we have a single occurrence of THIS */
               /* add a second id, because the interpreter expects 2 */
               IdToChar(NO_ID, str);
               r_s = Concat(r_s, str);
@@ -843,13 +840,9 @@ char *ReadParInString(owner, r_s, ch, source, file_list)
 }
 
 
-char *ReadString(ch, owner, error, voc_pass1, source, file_list)
- char     *ch;
- int32_t  owner;   /* in case we encounter a parameter */
- int16_t  *error;
- int32_t  voc_pass1;  /* tells whether we are in Pass1Voc() */
- FILE     *source;
- fileList **file_list;
+char *ReadString(char *ch, int32_t owner, int16_t *error, int32_t voc_pass1, FILE *source, fileList **file_list)
+/* owner is needed in case we encounter a parameter */
+/* voc_pass1 tells whether we are in Pass1Voc()     */
 {
   /* 08feb2018: We had issues tracking down missing end quotes in */
   /* strings. Because a string could contain a <cr> there was no  */
@@ -896,13 +889,9 @@ char *ReadString(ch, owner, error, voc_pass1, source, file_list)
 }
 
 
-char *Read1String(ch, owner, error, voc_pass1, source, file_list)
- char     *ch;
- int32_t  owner;   /* in case we encounter a parameter */
- int16_t  *error;
- int32_t  voc_pass1;  /* tells whether we are in Pass1Voc() */
- FILE     *source;
- fileList **file_list;
+char *Read1String(char *ch, int32_t owner, int16_t *error, int32_t voc_pass1, FILE *source, fileList **file_list)
+/* owner is needed in case we encounter a parameter */
+/* voc_pass1 tells whether we are in Pass1Voc()     */
 {
 
   /* 08feb2018: This is the original ReadString() function.   */
@@ -976,9 +965,8 @@ char *Read1String(ch, owner, error, voc_pass1, source, file_list)
     return (result_string);
 }
 
-char *HandleSpecialChar(ch, source)
- char *ch;
- FILE *source;
+
+char *HandleSpecialChar(char *ch, FILE *source)
 {
   char ch1;
   char *word      = malloc(2*sizeof(char));
@@ -1007,9 +995,8 @@ char *HandleSpecialChar(ch, source)
   return(word);
 }
 
-char *ReadWord(ch, source)
- char *ch;
- FILE *source;
+
+char *ReadWord(char *ch, FILE *source)
 {
   /* Returns everything from *ch up to the next special_char. */
 
@@ -1029,12 +1016,10 @@ char *ReadWord(ch, source)
   return(result_string);
 }
 
-char *GetNextWord(keyword, owner, voc_pass1, source, file_list)
- int32_t  *keyword;
- int32_t  owner;     /* in case we encounter a parameter in a string */
- int32_t  voc_pass1; /* tells whether we have to read (and parse) strings or skip them */
- FILE     **source;
- fileList **file_list;
+
+char *GetNextWord(int32_t *keyword, int32_t owner, int32_t voc_pass1, FILE **source, fileList **file_list)
+/* owner is needed in case we encounter a parameter in a string */
+/* vocpass1 tells whether we have to read (and parse) strings or skip them */
 {
   /* Returns the next word in source. A word is bounded         */
   /* either by SPACE, CR, ", EOF or a specialchar. SPACE and    */
@@ -1098,7 +1083,7 @@ char *GetNextWord(keyword, owner, voc_pass1, source, file_list)
 /* file output routines */
 /************************/
 
-int32_t StoreOffsets()
+int32_t StoreOffsets(void)
 {
   if (fseek(datafile, 0, 0) == -1) {
     ErrHdr();
@@ -1173,8 +1158,8 @@ int32_t StoreOffsets()
   return(OK);
 }
 
-int32_t StoreKeyword(keyword)
- int32_t keyword;
+
+int32_t StoreKeyword(int32_t keyword)
 {
   if (!StoreInt32(keyword))
     return(ERROR);
@@ -1182,8 +1167,8 @@ int32_t StoreKeyword(keyword)
   return(OK);
 }
 
-int32_t StoreInt16(n)
- int16_t n;
+
+int32_t StoreInt16(int16_t n)
 {
   /* convert to big endian */
   n = xv_htons(n);
@@ -1195,8 +1180,8 @@ int32_t StoreInt16(n)
   return(OK);
 }
 
-int32_t StoreInt32(n)
- int32_t n;
+
+int32_t StoreInt32(int32_t n)
 {
   /* convert to big endian */
   n = xv_htonl(n);
@@ -1208,8 +1193,8 @@ int32_t StoreInt32(n)
   return(OK);
 }
 
-int32_t StoreInt64(n)
- int64_t n;
+
+int32_t StoreInt64(int64_t n)
 {
   /* convert to big endian */
   n = xv_htonll(n);
@@ -1221,8 +1206,8 @@ int32_t StoreInt64(n)
   return(OK);
 }
 
-int32_t StoreId(id)
- int32_t id;
+
+int32_t StoreId(int32_t id)
 {
   if (!StoreInt32(id)) {
     ErrHdr();
@@ -1232,8 +1217,8 @@ int32_t StoreId(id)
   return(OK);
 }
 
-int32_t StoreString(str)
- char *str;
+
+int32_t StoreString(char *str)
 {
   uint32_t len = strlen(str)+1; /* include the '\0' character */
 
@@ -1253,9 +1238,30 @@ int32_t StoreString(str)
 }
 
 
-int32_t StoreExtendedSysDescr(extended_sys_descr)
- extendedSysDescr *extended_sys_descr;
+int32_t StoreExtendedSysDescr(extendedSysDescr *extended_sys_descr)
 {
+  /* first check if it is a dynamic system description */
+  if (extended_sys_descr->dynamic != NULL) {
+    /* dynamic system description */
+    /* store keyword */
+    if (!StoreKeyword(DYN_DSYS)) {
+      return(ERROR);
+    }
+    /* store the string */
+    if (!StoreString(extended_sys_descr->dynamic)) {
+      return(ERROR);
+    }
+    else {
+      return(OK);
+    }
+  }
+
+  /* not a dynamic system description */
+  /* store keyword */
+  if (!StoreKeyword(DSYS)) {
+    return(ERROR);
+  }
+
   if (!StoreSysDescr(&(extended_sys_descr->part1))) {
     return(ERROR);
   }
@@ -1273,8 +1279,7 @@ int32_t StoreExtendedSysDescr(extended_sys_descr)
 }
 
 
-int32_t StoreSysDescr(sys_descr)
- sysDescr *sys_descr;
+int32_t StoreSysDescr(sysDescr *sys_descr)
 {
   int i=0;
 
@@ -1303,8 +1308,8 @@ int32_t StoreSysDescr(sys_descr)
   return(OK);
 }
 
-int32_t StoreContData(cont_data)
- contData *cont_data;
+
+int32_t StoreContData(contData *cont_data)
 {
   int i=0;
 
@@ -1323,8 +1328,8 @@ int32_t StoreContData(cont_data)
 return(OK);
 }
 
-int32_t StoreAdverbInfo(adverbs)
- adverbInfo *adverbs;
+
+int32_t StoreAdverbInfo(adverbInfo *adverbs)
 {
   int i=0;
 
@@ -1344,8 +1349,8 @@ int32_t StoreAdverbInfo(adverbs)
   return(OK);
 }
 
-int32_t StorePreposInfo(prepositions)
- preposInfo *prepositions;
+
+int32_t StorePreposInfo(preposInfo *prepositions)
 {
   int i=0;
 
@@ -1365,8 +1370,8 @@ int32_t StorePreposInfo(prepositions)
   return(OK);
 }
 
-int32_t StoreActionRec(action_rec)
- actionRec *action_rec;
+
+int32_t StoreActionRec(actionRec *action_rec)
 {
   if (!StoreKeyword(ACTION_REC))
     return(ERROR);
@@ -1440,8 +1445,8 @@ int32_t StoreActionRec(action_rec)
   return(OK);
 }
 
-int32_t StoreStoryInfo(info)
- storyInfo *info;
+
+int32_t StoreStoryInfo(storyInfo *info)
 {
   int64_t offset;
   int32_t len;
@@ -1655,10 +1660,17 @@ int32_t StoreStoryInfo(info)
     return(ERROR);
   }
 
+  if (!StoreInt16(debug)) {
+    ErrHdr();
+    PrintError(33, NULL, NULL);
+    return(ERROR);
+  }
+
   return(OK);
 }
 
-int32_t StoreWordTable()
+
+int32_t StoreWordTable(void)
 {
   int i=0;
   int j=0;
@@ -1708,10 +1720,13 @@ int32_t StoreWordTable()
 }
 
 
-int32_t StoreTimerInfo()
+int32_t StoreTimerInfo(void)
 {
   timerInfo *info = md_start;
   int64_t offset;
+
+  debugInfo *timer_dbug = NULL;
+  int i = 0;
 
   if (nr_of_timers == 0) {
     PrintError(35, NULL, NULL);
@@ -1795,13 +1810,31 @@ int32_t StoreTimerInfo()
     info = info->next;
   } /* while */
 
+  /* Check if we must generate debug info */
+  if (debug) {
+
+    if (CreateTimerDebugInfo(&timer_dbug)) {
+
+      /* store the debug info */
+      if (!StoreKeyword(DEBUG))
+        return(ERROR);
+      for (i=0; i<nr_of_timers; i++) {
+        if (!StoreString(timer_dbug[i].name))
+          return(ERROR);
+      }
+    }
+    else {
+      /* error */
+      return(ERROR);
+    }
+    free(timer_dbug);
+  }
+
   return(OK);
 }
 
 
-int32_t StoreFun(source, len)
- int32_t *source;
- int32_t len;      /* length of source */
+int32_t StoreFun(int32_t *source, int32_t len)
 {
   /* Syntax: fun_code nr_of_pars ( par_list ) */
 
@@ -1821,9 +1854,9 @@ int32_t StoreFun(source, len)
   return(OK);
 }
 
-int32_t StoreParList(source, len)
- int32_t *source; /* Format: nr_of_pars ( par1par2par3..parn ) */
- int32_t len;     /* length of source                          */
+
+int32_t StoreParList(int32_t *source, int32_t len)
+/* Format: nr_of_pars ( par1par2par3..parn ) */
 {
   int32_t  i;
   int      index=0;
@@ -1914,7 +1947,8 @@ int32_t StoreParList(source, len)
   return(OK);
 }
 
-int32_t StoreExits()
+
+int32_t StoreExits(void)
 {
   uint32_t size = nr_of_locations*nr_of_directions;
   int i=0;
@@ -1953,14 +1987,14 @@ int32_t StoreExits()
   return(OK);
 }
 
-int32_t StoreFlags()
+
+int32_t StoreFlags(void)
 {
   int64_t  offset;
   uint32_t com_loc_len = ((nr_of_cflags*nr_of_locations)/WORD_LEN)+1;
   uint32_t com_obj_len = ((nr_of_cflags*nr_of_objects)/WORD_LEN)+1;
   uint32_t local_len   = (nr_of_lflags/WORD_LEN)+1;
   flagData *ft         = flag_table;
-
 
   /* The flags are stored in three parts:            */
   /* - common location flags                         */
@@ -1975,6 +2009,10 @@ int32_t StoreFlags()
   int32_t *com_loc_flags;
   int32_t *com_obj_flags;
   int32_t *local_flags;
+
+  /* for debugging */
+  debugInfo *com_flag_dbug = NULL;
+  debugInfo *loc_flag_dbug = NULL;
 
   int32_t i = 0;             /* index. */
 
@@ -2049,14 +2087,13 @@ int32_t StoreFlags()
   if (!StoreKeyword(FLAGS))
     return(ERROR);
 
-  /* First store the common location flags.               */
-  /* Tell the interpreter the number of the common flags. */
+  /* store the number of common flags */
   if (!StoreInt32(nr_of_cflags)) {
     PrintError(39, NULL, NULL);
     return(ERROR);
   }
-
-    if (fwrite((void *) com_loc_flags, sizeof(int32_t), com_loc_len,
+  /* First store the common location flags.               */
+  if (fwrite((void *) com_loc_flags, sizeof(int32_t), com_loc_len,
                                           datafile) != com_loc_len) {
     ErrHdr();
     PrintError(39, NULL, NULL);
@@ -2082,6 +2119,40 @@ int32_t StoreFlags()
     PrintError(39, NULL, NULL);
     return(ERROR);
   }
+
+  /* Check if we must generate debug info */
+  if (debug) {
+    if (CreateFlagDebugInfo(&com_flag_dbug, &loc_flag_dbug)) {
+      /* store the debug info */
+      if (!StoreKeyword(DEBUG))
+        return(ERROR);
+
+      for (i=0; i<nr_of_cflags; i++) {
+        if (!StoreString(com_flag_dbug[i].name))
+          return(ERROR);
+      }
+      /* store the number of local flags.    */
+      /* we store it here, because it is     */
+      /* only needed when we have debug info */
+      if (!StoreInt32(nr_of_lflags)) {
+        PrintError(39, NULL, NULL);
+        return(ERROR);
+      }
+      for (i=0; i<nr_of_lflags; i++) {
+        if (!StoreString(loc_flag_dbug[i].name))
+          return(ERROR);
+        if (!StoreInt32(loc_flag_dbug[i].owner))
+          return(ERROR);
+      }
+    }
+    else {
+      /* error */
+      return(ERROR);
+    }
+    free(com_flag_dbug);
+    free(loc_flag_dbug);
+  }
+
   free(com_loc_flags);
   free(com_obj_flags);
   free(local_flags);
@@ -2089,13 +2160,13 @@ int32_t StoreFlags()
   return(OK);
 }
 
-int32_t StoreAttributes()
+
+int32_t StoreAttributes(void)
 {
   int64_t   offset;
   int32_t   com_loc_len = nr_of_cattrs*nr_of_locations;
   int32_t   com_obj_len = nr_of_cattrs*nr_of_objects;
   attrData  *rt         = attr_table;
-
 
   /* The attributes are stored in three parts: */
   /* - common location attributes              */
@@ -2107,6 +2178,10 @@ int32_t StoreAttributes()
   attrInfo *com_loc_attrs;
   attrInfo *com_obj_attrs;
   attrInfo *local_attrs;
+
+  /* for debugging */
+  debugInfo *com_attr_dbug = NULL;
+  debugInfo *loc_attr_dbug = NULL;
 
   int32_t i = 0;             /* index. */
 
@@ -2179,7 +2254,7 @@ int32_t StoreAttributes()
     rt = rt->next;
   } /* while */
 
-  /* Ok, we've filled the attribute arrays.           */
+  /* Ok, we've filled the attribute arrays. */
   /* now store the attribute arrays */
   /* get offset */
   offset = ftell(datafile);
@@ -2189,12 +2264,13 @@ int32_t StoreAttributes()
   if (!StoreKeyword(ATTRIBUTES))
     return(ERROR);
 
-  /* First store the common location attributes.               */
   /* Tell the interpreter the number of the common attributes. */
   if (!StoreInt32(nr_of_cattrs)) {
     PrintError(40, NULL, NULL);
     return(ERROR);
   }
+
+  /* First store the common location attributes.               */
   for (i=0; i<com_loc_len; i++) {
     if (!StoreInt32(com_loc_attrs[i].type)) {
       PrintError(40, NULL, NULL);
@@ -2248,13 +2324,40 @@ int32_t StoreAttributes()
     }
   }
 
+  /* Check if we must generate debug info */
+  if (debug) {
+    if (CreateAttrDebugInfo(&com_attr_dbug, &loc_attr_dbug)) {
+      /* store the debug info */
+      if (!StoreKeyword(DEBUG))
+        return(ERROR);
+
+      for (i=0; i<nr_of_cattrs; i++) {
+        if (!StoreString(com_attr_dbug[i].name))
+          return(ERROR);
+      }
+      for (i=0; i<nr_of_lattrs; i++) {
+        if (!StoreString(loc_attr_dbug[i].name))
+          return(ERROR);
+        if (!StoreInt32(loc_attr_dbug[i].owner))
+          return(ERROR);
+      }
+    }
+    else {
+      /* error */
+      return(ERROR);
+    }
+    free(com_attr_dbug);
+    free(loc_attr_dbug);
+  }
+
   free(com_loc_attrs);
   free(com_obj_attrs);
   free(local_attrs);
   return(OK);
 }
 
-int32_t StoreVerbDir()
+
+int32_t StoreVerbDir(void)
 
 { int32_t i;
   int32_t size = nr_of_verbs;
@@ -2288,12 +2391,16 @@ int32_t StoreVerbDir()
   return(OK);
 }
 
-int32_t StoreLocDir()
+
+int32_t StoreLocDir(void)
 {
   int64_t      offset;  /* directory's offset in outputfile */
   locationData *lp = loc_table;
   dirInfo      *loc_dir;
   int          i,j;
+
+  /* for debugging */
+  debugInfo *loc_dbug = NULL;
 
   /* loc_dir will be stored in the outputfile for */
   /* later lookups, it is indexed by location id  */
@@ -2356,16 +2463,39 @@ int32_t StoreLocDir()
       return(ERROR);
     }
   }
+
+  /* Check if we must generate debug info */
+  if (debug) {
+    if (CreateLocDebugInfo(&loc_dbug)) {
+      /* store the debug info */
+      if (!StoreKeyword(DEBUG))
+        return(ERROR);
+
+      for (i=0; i<nr_of_locations; i++) {
+        if (!StoreString(loc_dbug[i].name))
+          return(ERROR);
+      }
+    }
+    else {
+      /* error */
+      return(ERROR);
+    }
+    free(loc_dbug);
+  }
   free(loc_dir);
   return(OK);
 }
 
-int32_t StoreObjDir()
+
+int32_t StoreObjDir(void)
 {
   int64_t      offset;  /* directory's offset in outputfile */
   objectData   *op = obj_table;
   dirInfo      *obj_dir;
   int32_t      i,j;
+
+  /* for debugging */
+  debugInfo *obj_dbug = NULL;
 
   /* obj_dir will be stored in the outputfile for */
   /* later lookups, it is indexed by object id    */
@@ -2427,11 +2557,31 @@ int32_t StoreObjDir()
     }
   }
 
+  /* Check if we must generate debug info */
+  if (debug) {
+    if (CreateObjDebugInfo(&obj_dbug)) {
+      /* store the debug info */
+      if (!StoreKeyword(DEBUG))
+        return(ERROR);
+
+      for (i=0; i<nr_of_objects; i++) {
+        if (!StoreString(obj_dbug[i].name))
+          return(ERROR);
+      }
+    }
+    else {
+      /* error */
+      return(ERROR);
+    }
+    free(obj_dbug);
+  }
+
   free(obj_dir);
   return(OK);
 }
 
-int32_t StoreTriggOwners()
+
+int32_t StoreTriggOwners(void)
 {
   triggerData *tp = trigg_table;
   int32_t     *trigg_owners;   /* The trigg_owners array is used   */
@@ -2440,6 +2590,9 @@ int32_t StoreTriggOwners()
                                /* tables.c                         */
   int64_t     offset;
   int         i=0;
+
+  debugInfo *com_trigg_dbug = NULL;
+  debugInfo *loc_trigg_dbug = NULL;
 
   /* get the offset */
   offset = ftell(datafile);
@@ -2467,7 +2620,7 @@ int32_t StoreTriggOwners()
 
   /* Store the number of local triggers.                         */
   /* There is no need to store the number of common triggers, as */
-  /* the interpreter doesn't need to know  this.                 */
+  /* the interpreter doesn't need to know this.                  */
   if (!StoreInt32(nr_of_ltrigs)) {
     PrintError(44, NULL, NULL);
     free(trigg_owners);
@@ -2483,11 +2636,43 @@ int32_t StoreTriggOwners()
     }
   }
 
+  /* Check if we must generate debug info */
+  if (debug) {
+    if (CreateTriggerDebugInfo(&com_trigg_dbug, &loc_trigg_dbug)) {
+      /* store the debug info */
+      if (!StoreKeyword(DEBUG))
+        return(ERROR);
+
+      /* Tell the interpreter the number of the common triggers. */
+      if (!StoreInt32(nr_of_ctrigs)) {
+        PrintError(44, NULL, NULL);
+        return(ERROR);
+      }
+      for (i=0; i<nr_of_ctrigs; i++) {
+        if (!StoreString(com_trigg_dbug[i].name))
+          return(ERROR);
+      }
+      for (i=0; i<nr_of_ltrigs; i++) {
+        if (!StoreString(loc_trigg_dbug[i].name))
+          return(ERROR);
+        if (!StoreInt32(loc_trigg_dbug[i].owner))
+          return(ERROR);
+      }
+    }
+    else {
+      /* error */
+      return(ERROR);
+    }
+    free(com_trigg_dbug);
+    free(loc_trigg_dbug);
+  }
+
   free(trigg_owners);
   return(OK);
 }
 
-int32_t StoreDescrOwners()
+
+int32_t StoreDescrOwners(void)
 {
   descrData *dp = descr_table;
   int32_t   *descr_owners;     /* The descr_owners array is used   */
@@ -2545,44 +2730,39 @@ int32_t StoreDescrOwners()
 }
 
 
-
-int32_t StoreDirs()
+int32_t StoreDirs(void)
 {
-  if (!StoreWordTable())  /* maps words to ids en types */
+  if (!StoreWordTable())    /* maps words to ids en types */
     return(ERROR);
 
-  if (!StoreVerbDir())    /* tells where to find the default code */
-    return(ERROR);        /* for verbs                            */
+  if (!StoreVerbDir())      /* tells where to find the default code */
+    return(ERROR);          /* for verbs                            */
 
-  if (!StoreLocDir())    /* store the location directory */
+  if (!StoreLocDir())       /* store the location directory */
     return(ERROR);
 
-  if (!StoreObjDir())    /* store the object directory   */
+  if (!StoreObjDir())       /* store the object directory   */
     return(ERROR);
 
-  if (!StoreTriggOwners())     /* triggers are stored together    */
-    return(ERROR);             /* with their owner's code         */
+  if (!StoreTriggOwners())  /* triggers are stored together    */
+    return(ERROR);          /* with their owner's code         */
 
   if (!StoreDescrOwners())  /* desriptions are stored together */
     return(ERROR);          /* with their owner's code          */
 
-  if (!StoreExits())     /* Map information. */
+  if (!StoreExits())        /* Map information. */
     return(ERROR);
 
-  if (!StoreFlags())     /* Default flag values. */
+  if (!StoreFlags())        /* Default flag values. */
     return(ERROR);
 
-  if (!StoreAttributes()) /* Default attribute values. */
+  if (!StoreAttributes())   /* Default attribute values. */
     return(ERROR);
 
-  if (!StoreTimerInfo()) /* timer info */
+  if (!StoreTimerInfo())    /* timer info */
     return(ERROR);
 
-  /* FOLLOWING COMMENTED OUT ON JAN12 2015 */
-  /* Force program to flush buffer; bug in TC 1.0 ???? */
-  /*fwrite((void *) "h", 1, 1, datafile);    ???? */
-
-  if (!StoreOffsets())    /* contains directory offsets       */
+  if (!StoreOffsets())      /* contains directory offsets       */
     return(ERROR);
 
   return(OK);
@@ -2594,11 +2774,7 @@ int32_t StoreDirs()
 /* StoreFlags() and StoreAttributes(). */
 /**************************************/
 
-void InitCFlags(flags, size, id, value)
- int32_t *flags;
- int32_t size;
- int32_t id;
- int32_t value;
+void InitCFlags(int32_t *flags, int32_t size, int32_t id, int32_t value)
 {
   int32_t i           = 0;
   int32_t word_offset = 0;
@@ -2614,11 +2790,8 @@ void InitCFlags(flags, size, id, value)
  }
 }
 
-void ProcCFlagVal(flags, owner, id, value)
- int32_t *flags;
- int32_t owner;
- int32_t id;
- int32_t value;
+
+void ProcCFlagVal(int32_t *flags, int32_t owner, int32_t id, int32_t value)
 {
   int32_t word_offset = 0;
   int32_t bit_offset  = 0;
@@ -2637,10 +2810,7 @@ void ProcCFlagVal(flags, owner, id, value)
 }
 
 
-void ProcLFlagVal(flags, id, value)
- int32_t *flags;
- int32_t id;
- int32_t value;
+void ProcLFlagVal(int32_t *flags, int32_t id, int32_t value)
 {
   /* Id is used as an offset to address within flags. */
   int32_t word_offset = (id - FIRST_LOCAL_FLAG_ID) / WORD_LEN;
@@ -2649,10 +2819,8 @@ void ProcLFlagVal(flags, id, value)
   SetBitVal(flags+word_offset, bit_offset, value);
 }
 
-void SetBitVal(word, bit_pos, value)
- int32_t *word;
- int32_t bit_pos;
- int32_t value;
+
+void SetBitVal(int32_t *word, int32_t bit_pos, int32_t value)
 {
   switch (value) {
     case 0:
@@ -2668,13 +2836,9 @@ void SetBitVal(word, bit_pos, value)
   }
 }
 
-void InitCAttrs(attrs, size, id, type, value, value_owner)  /*10march2017 */
- attrInfo *attrs;
- int32_t  size;
- int32_t  id;
- int32_t  type;
- int32_t  value;
- int32_t  value_owner; /* for descriptions */  /*10march2017 */
+
+void InitCAttrs(attrInfo *attrs, int32_t size, int32_t id, int32_t type, int32_t value, int32_t value_owner)  /*10march2017 */
+/* value_owner is for for descriptions */  /*10march2017 */
 {
   int32_t i     = 0;
   int32_t index = 0;
@@ -2687,13 +2851,9 @@ void InitCAttrs(attrs, size, id, type, value, value_owner)  /*10march2017 */
  }
 }
 
-void ProcCAttrVal(attrs, owner, id, type, value, value_owner)  /*10march2017 */
- attrInfo *attrs;
- int32_t  owner;
- int32_t  id;
- int32_t  type;
- int32_t  value;
- int32_t  value_owner; /* for descriptions */ /*10march2017 */
+
+void ProcCAttrVal(attrInfo *attrs, int32_t owner, int32_t id, int32_t type, int32_t value, int32_t value_owner)  /*10march2017 */
+ /* value_owner is for descriptions */ /*10march2017 */
 {
   int32_t index    = 0;
   int32_t first_id = 0;
@@ -2707,12 +2867,9 @@ void ProcCAttrVal(attrs, owner, id, type, value, value_owner)  /*10march2017 */
   attrs[index].owner = value_owner; /*10march2017 */
 }
 
-void ProcLAttrVal(attrs, id, type, value, value_owner)  /*10march2017 */
- attrInfo *attrs;
- int32_t  id;
- int32_t  type;
- int32_t  value;
- int32_t  value_owner; /*10march2017 */
+
+void ProcLAttrVal(attrInfo *attrs, int32_t id, int32_t type, int32_t value, int32_t value_owner)  /*10march2017 */
+ /* value_owner is for descriptions */ /*10march2017 */
 {
   /* Id is used as an offset to address within attrs. */
   int32_t index = id - FIRST_LOCAL_ATTR_ID;

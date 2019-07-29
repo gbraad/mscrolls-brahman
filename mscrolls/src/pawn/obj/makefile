@@ -26,11 +26,12 @@ S	=	$(SCEN)
 
 # I=include S=scenario C=computer M=main
 
-
 OMAIN	=	\
+equates.i	\
 newparsersub.o	\
 message.o	\
 dig.o		\
+swim.o		\
 npcsub.o	\
 bioslink.o	\
 random.o	\
@@ -73,6 +74,7 @@ search.o	\
 newsearch.o	\
 searcher.o	\
 decode.o	\
+scenery.o	\
 break.o		\
 buy.o		\
 cover.o		\
@@ -120,8 +122,11 @@ wtable.o	\
 common.o	\
 in.o		\
 parserdat.o	\
+makelocal.o	\
+makelocaldat.o	\
 verbsub6.o \
 pictcode.o \
+undo.o \
 m2pic.o
 
 OMACHINE	=	
@@ -135,6 +140,7 @@ data2.o		\
 data3.o		\
 network.o	\
 score.o		\
+scorecode.o	\
 timer.o		\
 prspcmd.o	\
 setmode.o	\
@@ -145,16 +151,24 @@ special4.o	\
 special6.o	\
 ask.o		\
 charts.o	\
+info24.o	\
 pictures.o	\
 m2pawn.o
 
 prog : $(OMAIN) $(OMACHINE) $(OSCENARIO) firstfile.o 
-	$(LNK) -tp -l lfile -o prog
+	$(LNK) -tpv -l lfile -o prog
+
+equates.i : $E/equates.head $E/equates.tail $E/misc.prof
+	cat  $E/equates.head gamedef.i $E/misc.prof $E/equates.tail > equates.i
 
 firstfile.o : $M/firstfile.asm
 	$(AS) $M/firstfile.asm $(FLAGS) -o firstfile.o  $O
 dig.o : $M/dig.asm
-	$(AS) $M/dig.asm $(FLAGS)  -o dig.o $O 
+	$(AS) $M/dig.asm $(FLAGS)  -o dig.o $O
+swim.o : $M/swim.asm
+	$(AS) $M/swim.asm $(FLAGS)  -o swim.o $O 
+info24.o : $S/info24.asm
+	$(AS) $S/info24.asm $(FLAGS) -o info24.o $O
 pictures.o : $S/pictures.asm
 	$(AS) $S/pictures.asm $(FLAGS) -o pictures.o $O
 m2pawn.o : $S/m2pawn.asm
@@ -179,11 +193,11 @@ setmode.o : $S/setmode.asm
 	$(AS) $S/setmode.asm $(FLAGS) -o setmode.o $O
 init.o : $S/init.asm
 	$(AS) $S/init.asm $(FLAGS) -o init.o $O
-common.o : $M/common.asm $S/nounsyms.asm $S/miscsyms.asm $S/scendata.asm $S/sets.asm
+common.o : $M/common.asm $S/nounsyms.i $S/miscsyms.asm $S/scendata.i $S/sets.i
 	$(AS) $M/common.asm $(FLAGS) -o common.o $O
 data1.o : $S/data1.asm $S/scenrw.asm
 	$(AS) $S/data1.asm $(FLAGS) -o data1.o $O
-data2.o : $S/data2.asm 
+data2.o : $S/data2.asm $S/npclist.i  $S/npcdata.i
 	$(AS) $S/data2.asm $(FLAGS) -o data2.o $O
 data3.o : $S/data3.asm
 	$(AS) $S/data3.asm $(FLAGS) -o data3.o $O
@@ -193,6 +207,8 @@ charin.o : $M/charin.asm
 	$(AS) $M/charin.asm $(FLAGS) -o charin.o $O
 charout.o : $M/charout.asm
 	$(AS) $M/charout.asm $(FLAGS) -o charout.o $O
+charset.o : $C/charset.tst
+	$(AS) $C/charset.tst $(FLAGS) -o charset.o $O
 cout.o : $C/cout.tst
 	$(AS) $C/cout.tst $(FLAGS) -o cout.o $O
 charutil.o : $C/charutil.tst
@@ -207,11 +223,11 @@ decom.o : $M/decom.asm
 	$(AS) $M/decom.asm $(FLAGS) -o decom.o $O
 direct.o : $M/direct.asm
 	$(AS) $M/direct.asm $(FLAGS) -o direct.o $O
-evalwht.o : $M/evalwht.asm $S/nounequ2.asm
+evalwht.o : $M/evalwht.asm $S/nounequ2.i
 	$(AS) $M/evalwht.asm $(FLAGS) -o evalwht.o $O
 functinf.o : $M/functinf.asm
 	$(AS) $M/functinf.asm $(FLAGS) -o functinf.o $O
-getdata.o : $M/getdata.asm $S/nounequ2.asm
+getdata.o : $M/getdata.asm $S/nounequ2.i
 	$(AS) $M/getdata.asm $(FLAGS) -o getdata.o $O
 getline.o : $M/getline.asm
 	$(AS) $M/getline.asm $(FLAGS) -o getline.o $O
@@ -288,6 +304,8 @@ say.o : $M/say.asm
 	$(AS) $M/say.asm $(FLAGS) -o say.o $O
 score.o : $S/score.asm
 	$(AS) $S/score.asm $(FLAGS) -o score.o $O
+scorecode.o : $S/scorecode.asm
+	$(AS) $S/scorecode.asm $(FLAGS) -o scorecode.o $O
 show.o : $M/show.asm
 	$(AS) $M/show.asm $(FLAGS) -o show.o $O
 sit.o : $M/sit.asm
@@ -311,14 +329,16 @@ wear.o : $M/wear.asm
 
 verbsub0.o : $M/verbsub0.asm
 	$(AS) $M/verbsub0.asm $(FLAGS) -o verbsub0.o $O
-verbsub2.o : $M/verbsub2.asm $S/nounequ2.asm $S/msginfo.i
+verbsub2.o : $M/verbsub2.asm $S/nounequ2.i $S/msginfo.i
 	$(AS) $M/verbsub2.asm $(FLAGS) -o verbsub2.o $O
 verbsub4.o : $M/verbsub4.asm
 	$(AS) $M/verbsub4.asm $(FLAGS) -o verbsub4.o $O
-verbsub6.o : $M/verbsub6.asm $S/nounequ2.asm
+verbsub6.o : $M/verbsub6.asm $S/nounequ2.i
 	$(AS) $M/verbsub6.asm $(FLAGS) -o verbsub6.o $O
 pictcode.o : $M/pictcode.asm 
 	$(AS) $M/pictcode.asm $(FLAGS) -o pictcode.o $O
+undo.o : $M/undo.asm 
+	$(AS) $M/undo.asm $(FLAGS) -o undo.o $O
 m2pic.o : $M/m2pic.asm 
 	$(AS) $M/m2pic.asm $(FLAGS) -o m2pic.o $O
 
@@ -373,11 +393,13 @@ newsearch.o : $M/newsearch.asm
 	$(AS) $M/newsearch.asm $(FLAGS) -o newsearch.o $O
 search.o : $M/search.asm
 	$(AS) $M/search.asm $(FLAGS) -o search.o $O
+scenery.o : $M/scenery.asm
+	$(AS) $M/scenery.asm $(FLAGS) -o scenery.o $O
 decode.o : $M/decode.asm
 	$(AS) $M/decode.asm $(FLAGS) -o decode.o $O
 searcher.o : $M/searcher.asm
 	$(AS) $M/searcher.asm $(FLAGS) -o searcher.o $O
-wtable.o : $M/wtable1.asm $S/wtable5.asm $S/wtable6.asm $M/wtable7.asm $S/wtable11noun.asm $S/wtable11misc.asm $S/wtable18.asm $S/wtable4.asm
+wtable.o : equates.i $M/wtable1.asm $S/wtable5.i $S/wtable6.i $M/wtable7.asm $S/wtable11noun.i $S/wtable11misc.i $S/wtable18.i $S/wtable24.i $S/wtable4.i
 	$(AS) $M/wtable.asm $(FLAGS) -o wtable.o $O
 printbit.o : $M/printbit.asm
 	$(AS) $M/printbit.asm $(FLAGS) -o printbit.o $O
@@ -397,6 +419,10 @@ valid.o : $M/valid.asm
 	$(AS) $M/valid.asm $(FLAGS) -o valid.o $O
 verblist.o : $M/verblist.asm $S/verbequ.asm
 	$(AS) $M/verblist.asm $(FLAGS) -o verblist.o $O
+makelocal.o : $M/makelocal.asm
+	$(AS) $M/makelocal.asm $(FLAGS) -o makelocal.o $O
+makelocaldat.o : $M/makelocaldat.asm
+	$(AS) $M/makelocaldat.asm $(FLAGS) -o makelocaldat.o $O
 message.o : $M/message.asm
 	$(AS) $M/message.asm $(FLAGS) -o message.o $O
 newparsersub.o : $M/newparsersub.asm

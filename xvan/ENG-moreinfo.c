@@ -29,8 +29,14 @@
 #include "keyword.h"
 #include "typedefs.h"
 #include "trnslate.h"
+#include "json.h"
+#include "ifi.h"
+
+<<<<<<< HEAD
+=======
 #include "ENG-moreinfo.h"
 
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 /*************************/
 /* Function declarations */
 /*************************/
@@ -45,31 +51,32 @@ void ENG_PrintNotFound(extendedSysDescr*);
 void ENG_MoreInfo(extendedSysDescr *descr, match *hits, char *line_buf)
 {
   extendedSysDescr *sd;
-  int32_t      i =0;
+  kvPair           kv = {NULL, {0, NULL, 0, 0}};
+  int32_t          i =0;
 
   /* do not print a capital */
   capital = 0;
 
   if ((descr->part1).noun == NO_ID) {
-    sprintf(outputline, "What");
-    Output(outputline, 0);
+    PrintString("What", 0);
+    Output();
   }
   else {
-    sprintf(outputline, "Which ");
-    Output(outputline, 0);
+    PrintString("Which ", 0);
+    Output();
     PrintExtendedSysDescr(descr, 0);
   }
-  sprintf(outputline, " do you mean?\nThe ");
-  Output(outputline, 0);
+  PrintString(" do you mean?\nThe ", 0);
+  Output();
 
   for (i=0; i<hits->nr_of_hits; i++) {
     if (i != 0 && i != hits->nr_of_hits-1) {
-      sprintf(outputline, ", the ");
-      Output(outputline, 0);
+      PrintString(", the ", 0);
+      Output();
     }
     else if (i == hits->nr_of_hits-1) {
-      sprintf(outputline, " or the ");
-      Output(outputline, 0);
+      PrintString(" or the ", 0);
+      Output();
     }
     if (IsLocId(hits->matched_objs[i]))
       sd = loc_dir[hits->matched_objs[i]-FIRST_LOCATION_ID].descr;
@@ -79,10 +86,15 @@ void ENG_MoreInfo(extendedSysDescr *descr, match *hits, char *line_buf)
     PrintExtendedSysDescr(sd, 0);
   }
 
-  sprintf(outputline, "?\n");
-  Output(outputline, 0);
+  PrintString("?\n", 0);
+  Output();
 
-  GetAddtlInput(line_buf, "> ");
+  GetAddtlInput(&kv, prompt, IFI_REQ_COMMAND, 1);
+  /* 1 means do not process other jsons   */
+  /* what we want is in the kv textstring */
+  strncpy(line_buf, kv.value.textstring, INPUT_LINE_LEN);
+  line_buf[INPUT_LINE_LEN-1] = '\0';
+  ResetKVPair(&kv);  /* free mallocs */
 }
 
 
@@ -96,4 +108,5 @@ void ENG_PrintNotFound(extendedSysDescr *descr)
     PrintString(" doesn't ", 0);
   }
   PrintString("see that here.\n", 0);
+  Output();
 }

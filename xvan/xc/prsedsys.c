@@ -1,6 +1,6 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018 Marnix van den Bos.                   */
+/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
 /*                                                                      */
 /* <marnix.home@gmail.com>                                              */
 /*                                                                      */
@@ -35,6 +35,7 @@
 
 int32_t      ScanWordTable(char*, wordTable*, int32_t, int32_t);
 int32_t      NextWordId(char**, int32_t*, int32_t*);
+resultStruct IsDynamicSysDescr(char*);
 resultStruct MakeSysDescr(char*, char**, int32_t, int32_t, int32_t*,
                           int32_t, int32_t, sysDescr*);
 int32_t      ParseDSys(char*, extendedSysDescr*);
@@ -43,11 +44,9 @@ int32_t      ParseDSys(char*, extendedSysDescr*);
 /* Function definitions */
 /************************/
 
-int32_t    ScanWordTable(word, wt_rec, lower, upper)
- char      *word;    /* word to look for in word_table */
- wordTable *wt_rec;  /* struct to copy info into       */
- int32_t   lower;    /* elements of array between      */
- int32_t   upper;    /* which to search                */
+int32_t    ScanWordTable(char *word, wordTable *wt_rec, int32_t lower, int32_t upper)
+/* word is word to look for in word_table */
+/* wt_rec is struct to copy info into       */
 {
   int32_t i;
   int32_t j;
@@ -98,10 +97,8 @@ int32_t    ScanWordTable(word, wt_rec, lower, upper)
   return(ScanWordTable(word, wt_rec, lower, upper));
 }
 
-int32_t NextWordId(line_buf, nr_of_types, types)
- char     **line_buf;
- int32_t  *nr_of_types;
- int32_t  *types;
+
+int32_t NextWordId(char **line_buf, int32_t *nr_of_types, int32_t *types)
 {
   char      *start = *line_buf;   /* remember start of line_buf     */
   int32_t   i = 0;                /* counter to go through line_buf */
@@ -167,16 +164,62 @@ int32_t NextWordId(line_buf, nr_of_types, types)
   return(result);  /* result is the word id */
 }
 
-resultStruct MakeSysDescr(line_buf, rest_of_line_buf, id, nr_of_types,
-                          types, type_index, state, descr)
- char      *line_buf;
- char      **rest_of_line_buf;
- int32_t   id;
- int32_t   nr_of_types;
- int32_t   *types;
- int32_t   type_index;
- int32_t   state;
- sysDescr  *descr;
+
+resultStruct IsDynamicSysDescr(char* descr)
+{
+  /* This function scans descr for '-1' occurences         */
+  /* If it finds one, it reads the upcoming parameter      */
+  /* and checks if it's an attribute or a description.     */
+  /* It also checks the words in descr for unknown words.  */
+  /* We don't want to throw a runtime error for an unknown */
+  /* word because we can check it here at compile time.    */
+  /* Possible return values {tag, owner, value}:           */
+  /* {DSYS, OK}        => not a dynamic description        */
+  /* {DSYS, ERROR}     => normal or dynamic description    */
+  /*                      with an unknown word             */
+  /* {DYN_DSYS, OK}    => dynamic description with correct */
+  /*                      syntax                           */
+  /* {DYN_DSYS, ERROR} => dynamic description but with an  */
+  /*                      attribute type error or unknown  */
+  /*                      word                             */
+
+  int32_t      id1         = NO_ID;
+  int32_t      id2         = NO_ID;
+  int32_t      word_id     = NO_ID;
+  int32_t      nr_of_types = 0;   /* dummy */
+  int32_t      types[MAX_TYPES];  /* dummy */
+  resultStruct result  = {DSYS, OK};
+
+  while (strlen(descr) != 0) {
+    word_id = GiveNextId(&descr, &id1, &id2, &nr_of_types, types);
+    if (word_id == NO_ID ) {
+      /* unknown word, but it may be a parameter */
+      if (id1 == NO_ID) {
+        /* nope, not a parameter either */
+        return( (resultStruct) {DSYS, ERROR} );
+      }
+      else {
+        /* it's a parameter */
+        /* for a dynamic system description, we only */
+        /* allow <loc/obj><attribute> as parameter   */
+        if ( !((IsLocId(id1) || IsObjId(id1)) && (IsCAttrId(id2) || IsLAttrId(id2))) ) {
+          ErrHdr();
+          PrintError(148, NULL, NULL);
+          return( (resultStruct) {DYN_DSYS, ERROR});
+        }
+        else {
+          result = (resultStruct) {DYN_DSYS, OK};
+        }
+      }
+    }
+  }  /* while */
+
+  return(result);
+}
+
+
+resultStruct MakeSysDescr(char *line_buf, char **rest_of_line_buf, int32_t id, int32_t nr_of_types,
+                          int32_t *types, int32_t type_index, int32_t state, sysDescr *descr)
 {
   /* descr must be set to default values by caller */
 
@@ -376,12 +419,12 @@ resultStruct MakeSysDescr(line_buf, rest_of_line_buf, id, nr_of_types,
   /* no return needed here */
 }
 
-int32_t ParseDSys(descr_text, descr)
- char             *descr_text;
- extendedSysDescr *descr;
+
+int32_t ParseDSys(char *descr_text, extendedSysDescr *descr)
 {
   int32_t      nr_of_types = 0;
   int32_t      types[MAX_TYPES];
+  int          len = 0;                 /* for dynamic description */ /* @!@ */
   char         **descr_text_2 = NULL;;  /* for parsing descr.part2 */
   resultStruct result;
 
@@ -389,6 +432,33 @@ int32_t ParseDSys(descr_text, descr)
 
   result.tag   = OK;
   result.value = OK;
+
+  /* if we have a dynamic system description (with attributes), don't */  /* @!@ */
+  /* parse it, because it will change at runtime. Just store the text */
+  /* string, so the interpreter can fill in the values and parse it   */
+  /* at runtime. 10may2019                                            */
+  result = IsDynamicSysDescr(descr_text);
+
+  if (result.value == ERROR) {
+    /* error msg has already been printed */
+    return(ERROR);
+  }
+
+  /* OK */
+  if (result.tag == DYN_DSYS) {
+    /* dynamic d_sys, store text for real time parsing by interpreter */
+    len = strlen(descr_text);
+    if ( (descr->dynamic = (char*) malloc(len * sizeof(char))) == NULL) {
+      PrintError(1, NULL, "dynamic");
+      result.tag = ERROR;
+      return(result.tag);
+    }
+    strncpy(descr->dynamic, descr_text, len);
+    (descr->dynamic)[len] = '\0';
+    return(OK);
+  }
+
+  /* ok, it's a normal d_sys without unknown words, continue */
 
   /* Malloc() space for descr_text_2 */
   if ((descr_text_2 = (char **) malloc(sizeof(char*))) == NULL) {
