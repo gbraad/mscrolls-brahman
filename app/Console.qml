@@ -173,6 +173,8 @@ FocusScope
         width: dialogWidth
         height: dialogHeight
 
+        Keys.onPressed: accepted();
+
         text: "The game has ended and the application will now terminate"
         onAccepted: Qt.quit()
     }
