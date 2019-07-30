@@ -143,7 +143,6 @@ char *TranslateKeyword(char *word)
   return(ScanKeywordTable(word, 0, sizeof(kw_table)/sizeof(kwTable)-1));
 }
 
-
 char *ScanKeywordTable(char *word, int32_t lower, int32_t upper)
  /* word is word to look for in word_table */
 {

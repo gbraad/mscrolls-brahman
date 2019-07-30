@@ -74,6 +74,7 @@
 #define MAX_AMBIGUITY        100 /* do not try to resolve if more   */
                                  /* than 100 possibilities for      */
                                  /* mapping objects                 */
+#define MAX_CHOICES            5 /* for choice and hybrid mode      */
 
 /***********************/
 /* keyword definitions */
@@ -88,34 +89,37 @@
 /* by the compiler and interpreter.  */
 /*************************************/
 
-#define ERROR           0   /* do not change the OK and ERROR values */
-#define OK              1
-#define NO_KEYWORD      2
-#define VALUE           4
-#define ARROW           5
-#define KEYWORD_TAG     6
-#define PAR_LIST_TAG    7
-#define LOC_ID          8
-#define OBJ_ID          9
-#define TRIGG_ID        10
-#define FLAG_ID         11
-#define ATTR_ID         12  /* added on July 1st 2015, for change to prefix attributes with r_ */
-#define STRING          13
-#define NUMBER          14  /* e.g. 'take 3 pebbles, set dial to 123' */
-#define TIM_ID          15
-#define DESCR_ID        16
-#define FLAG_VALUES     17
-#define LOC_DIR         18
-#define OBJ_DIR         19
-#define NO_TYPE         20
-#define VOCABULARY      21
-#define ACTION_REC      22
-#define WORD_ID         23  /* For parameter typechecking. */
-#define XVAN_LANGUAGE   24
-#define STORY_LANGUAGE  25
-#define ENG             26
-#define NL              27
-#define PRIMARY_COLOR   28
+#define ERROR            0   /* do not change the OK and ERROR values */
+#define OK               1
+#define NO_KEYWORD       2
+#define VALUE            4
+#define ARROW            5
+#define KEYWORD_TAG      6
+#define PAR_LIST_TAG     7
+#define LOC_ID           8
+#define OBJ_ID           9
+#define TRIGG_ID         10
+#define FLAG_ID          11
+#define ATTR_ID          12  /* added on July 1st 2015, for change to prefix attributes with r_ */
+#define STRING           13
+#define NUMBER           14  /* e.g. 'take 3 pebbles, set dial to 123' */
+#define TIM_ID           15
+#define DESCR_ID         16
+#define FLAG_VALUES      17
+#define LOC_DIR          18
+#define OBJ_DIR          19
+#define NO_TYPE          20
+#define VOCABULARY       21
+#define ACTION_REC       22
+#define WORD_ID          23  /* For parameter typechecking. */
+#define XVAN_LANGUAGE    24
+#define STORY_LANGUAGE   25
+#define ENG              26
+#define NL               27
+#define PRIMARY_COLOR    28
+#define INTERPRETER_MODE 29
+#define CHOICE_MODE      30
+#define HYBRID_MODE      31
 
 
 /*******************************************/
@@ -207,6 +211,8 @@
 #define RESTART         265
 #define PICKONE         266
 #define NEWDSYS         267
+#define ADDCHOICE       268
+#define PLAYMODE        269
 #define UPPER_BOUND_INT_ACT         400
 
 #define LOWER_BOUND_SPECIAL_CHAR    401
@@ -382,6 +388,7 @@
                                      /* defined trigger.            */
 #define EXITT                   5401 /* same for t_exit.            */
 #define DEFAULT_TRIGG           5402 /* and for t_default           */  /* added on sep 3rd 2015 for Cloak of Darkness */
+#define CHOICE                  5403 /* and for t_choice            */  /* added on jul 17th 2019 for choice IF        */
 #define LAST_COMMON_TRIGGER_ID  5508 /* 100 common triggers.        */
 #define FIRST_LOCAL_TRIGGER_ID  5509
 #define LAST_LOCAL_TRIGGER_ID   6198 /* 689 local triggers.         */

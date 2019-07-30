@@ -33,7 +33,7 @@ extern dirInfo *obj_dir;
 
 extern int32_t actor;
 extern int32_t capital;
-extern char   *prompt;                                        /* letsplay.c */
+extern char    prompt[];                                      /* letsplay.c */
 extern char    *outputline;                                   /* init.c     */
 extern void    Output(void);                                  /* output.c   */
 extern int32_t IsLocId(int32_t);

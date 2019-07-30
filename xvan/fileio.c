@@ -747,6 +747,11 @@ int32_t ReadStoryInfo(storyInfo *info)
     return(ERROR);
   }
 
+  if (!GetNextCode16(&(info->play_mode))) {
+    PrintError(24, NULL, "play mode");
+    return(ERROR);
+  }
+
   if (!GetNextCode16(&(debug_info))) {
     PrintError(24, NULL, "debug mode");
     return(ERROR);

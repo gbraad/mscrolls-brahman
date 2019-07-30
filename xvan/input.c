@@ -38,14 +38,14 @@
 /* Function declarations */
 /*************************/
 
-void    GetAddtlInput(kvPair*, char*, int32_t, int);
-int32_t ProcessInput(char*);
+void    GetAddtlInput(kvPair*, char[], int32_t, int);
+int32_t ProcessInput(char[]);
 
 /************************/
 /* Function definitions */
 /************************/
 
-void GetAddtlInput(kvPair *kv, char *prompt, int32_t ifi_tag, int block)
+void GetAddtlInput(kvPair *kv, char prompt[], int32_t ifi_tag, int block)
  /* addtl_input must have size INPUT_LINE_LEN */
 {
   /* this function is used when we need extra input from the user to  */
@@ -144,11 +144,11 @@ void GetAddtlInput(kvPair *kv, char *prompt, int32_t ifi_tag, int block)
 }
 
 
-int32_t ProcessInput(char *prompt)
+int32_t ProcessInput(char prompt[])
 {
-  char *ifi_get_result = NULL;
-  char  *json_string   = NULL;
-  int32_t result       = OK;
+  char    *ifi_get_result = NULL;
+  char    *json_string    = NULL;
+  int32_t result          = OK;
 
   char line_buf[INPUT_LINE_LEN];
 
@@ -176,11 +176,9 @@ int32_t ProcessInput(char *prompt)
       /* now, wrap the line in a json string  */
       /* will always fit, because line_buf is */
       /* INPUT_LINE_LEN length at the max     */
-
       json_string = AddToString(json_string, "{\"command\":\"");
       json_string = AddToString(json_string, line_buf);
       json_string = AddToString(json_string, "\"}");
-
     }
     else {
       /* we reached the end of the testfile*/
@@ -199,23 +197,35 @@ int32_t ProcessInput(char *prompt)
   /* cause an 'I do not understand...' error.            */
 
   if (!testmode) {
-    ifi_get_result = (char*) ifi_getRequest();
-    if (ifi_get_result == NULL) {
-      /* front-end wants to quit */
-      return(QUIT);
+    /* check if we must update the choices menu */
+    /* for choice or hybrid mode                */
+    if (story_info.play_mode != INTERPRETER_MODE) {
+      UpdateChoicesMenu(line_buf);
+      json_string = AddToString(json_string, "{\"command\":\"");
+      json_string = AddToString(json_string, line_buf);
+      json_string = AddToString(json_string, "\"}");
     }
+    else {
+      ifi_get_result = (char*) ifi_getRequest();
 
-    /* copy ifi_get_result as soon as we get it, because  */
-    /* ifi_getRequest() will use the same address for all */
-    /* calls. So if we don't copy, the result will be     */
-    /* overwritten when another functions calls           */
-    /* ifi_getRequest                                     */
+      if (ifi_get_result == NULL) {
+        /* front-end wants to quit */
+        return(QUIT);
+      }
 
-    json_string = AddToString(json_string, ifi_get_result);
+      /* copy ifi_get_result as soon as we get it, because  */
+      /* ifi_getRequest() will use the same address for all */
+      /* calls. So if we don't copy, the result will be     */
+      /* overwritten when another functions calls           */
+      /* ifi_getRequest                                     */
+
+      json_string = AddToString(json_string, ifi_get_result);
+    }
   }
 
-  /* ok, now we have a json_string, either from   */
-  /* the front end, or from file input (testmode) */
+  /* ok, now we have a json_string, either from  */
+  /* the front end (keyboard or choice menu), or */
+  /* from file input (testmode)                  */
 
   /* check for a valid json */
   if (ValidateJson(json_string)) {
@@ -240,7 +250,7 @@ int32_t ProcessInput(char *prompt)
   else {
     /* it's an invalid json string */
     /* DO NOTHING OR SEND AN ERROR JSON BACKT TO FE? */
-    /* stay in the loop, we need a user command */
+    /* stay in the loop, we need a user command      */
   }
 
   free(json_string);

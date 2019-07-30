@@ -343,6 +343,18 @@ int32_t CheckPars(int32_t fun_code, int32_t type1, int32_t type2, int32_t type3,
       return(OK);
       break;
 
+    case ADDCHOICE:
+      if (type1 != STRING) {
+        TypeErr(1, "ADDCHOICE", "string");
+        return(ERROR);
+      }
+      if (type2 != STRING) {
+        TypeErr(2, "ADDCHOICE", "string");
+        return(ERROR);
+      }
+      return(OK);
+      break;
+
     case ADDJSON:
       if (type1 != STRING) {
         TypeErr(1, "ADDJSON", "string");
@@ -638,6 +650,18 @@ int32_t CheckPars(int32_t fun_code, int32_t type1, int32_t type2, int32_t type3,
       return(OK);
       break;
 
+    case PLAYMODE:
+      /******************/
+      /* playmode(word) */
+      /******************/
+
+      if (type1 != WORD_ID) {
+        TypeErr(1, "PLAYMODE", "word");
+        return(ERROR);
+      }
+      return(OK);
+      break;
+
     case PRINT:
       /**************************************************************/
       /* print(string/number/description/location/object/direction/ */
@@ -897,7 +921,7 @@ int32_t CheckPars(int32_t fun_code, int32_t type1, int32_t type2, int32_t type3,
       break;
 
     default:
-      PrintError(6, &((resultStruct) {VALUE, fun_code}), NULL);
+      PrintError(6, &((resultStruct) {VALUE, NONE, fun_code}), NULL);
       return(ERROR);
   } /* switch */
 }

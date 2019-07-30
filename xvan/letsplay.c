@@ -88,7 +88,7 @@ int32_t LetsPlay(void)
     strncpy(prompt, "debug> ", MAX_PROMPT_LEN);
   }
   else {
-    ifi_emitResponse("{\"prompt\":\"debug> \"}");
+    ifi_emitResponse("{\"prompt\":\"> \"}");
     strncpy(prompt, "> ", MAX_PROMPT_LEN);
   }
 
@@ -128,13 +128,14 @@ int32_t LetsPlay(void)
     cont = ProcessInput(prompt);
 
     /* check if we already processed the prologue json */
-    if (cont == IFI_REQ_META) {
-      /* we processed the prologue json, now fire the timers */
-      /* Handle the timers to allow starting of the game     */
-      /* (printing opening messages etc).                    */
-      /* 06oct2017 added action_rec and subject_index, but   */
-      /* in this first call of HandleTimers() they have      */
-      /* no valid values yet                                 */
+    if (cont == IFI_REQ_BEGIN) {
+      /* we processed the prologue jsons, now fire the timers */
+      /* Handle the timers to allow starting of the game      */
+      /* (printing opening messages etc).                     */
+      /* 06oct2017 added action_rec and subject_index, but in */
+      /* this first call of HandleTimers() they have no valid */
+      /* values yet                                           */
+
       if (HandleTimers(dummy_action_rec, dummy_subject_index) == QUIT) {
         return(OK);
       }

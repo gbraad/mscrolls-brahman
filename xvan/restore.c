@@ -376,6 +376,11 @@ int32_t RestoreStoryInfo(storyInfo *story_info,  char *base64_string, int *byte_
     return(ERROR);
   }
 
+  if (!ReadInt16(&(story_info->play_mode), base64_string, byte_index, leader_len, leader)) {
+    PrintError(14, NULL, "RestoreStoryInfo()");
+    return(ERROR);
+  }
+
   return(OK);
 }
 
