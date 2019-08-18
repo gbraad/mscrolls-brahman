@@ -137,6 +137,7 @@ class IFMagnetic : public QObject, public IFEngineInterface
     RequestExtraFn*     _requestLoadExtraFn = 0;
     void*               _requestLoadExtraCtx = 0;
     bool                _allMapCheat = false;
+    Pump                _pump;
 
 public:
 
@@ -185,6 +186,10 @@ public:
     string configDir() const { return _configDir; }
 
     void emitScene() override;
+    void setPump(Pump p) override
+    {
+        _pump = p;
+    }
 
     bool setOptions(const VarSet&) override;
 

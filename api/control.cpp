@@ -425,6 +425,7 @@ struct ImpEngine
 {
     typedef std::string string;
     typedef IFEngineInterface::CommandResultI CommandResultI;
+    typedef Control::Pump Pump;
 
     IFEngineInterface*  _be = 0;
 
@@ -447,13 +448,14 @@ struct ImpEngine
         }
     }
 
-    bool loadEngine(IFEngineInterface* be)
+    bool loadEngine(IFEngineInterface* be, Pump p)
     {
         _be = be;
 
         // provide callback to engine to request additional save data
         _be->setRequestSaveExtra(_saveWordsRequest, this);
         _be->setRequestLoadExtra(_loadWordsRequest, this);
+        _be->setPump(p);
         
         // pass on current log level
         updateLogLevel();
@@ -2315,8 +2317,8 @@ void Control::evalItemList(ItemsModel::Entries& list)
 void Control::evalPeopleList(ItemsModel::Entries& list)
 { _imp->evalPeopleList(list); }
 
-bool Control::loadEngine(IFEngineInterface* be)
-{ return _imp->loadEngine(be); }
+bool Control::loadEngine(IFEngineInterface* be, Pump p)
+{ return _imp->loadEngine(be, p); }
 
 bool Control::loadIFI(Pump p) { return _imp->loadIFI(p); }
 

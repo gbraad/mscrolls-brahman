@@ -117,7 +117,7 @@ struct DLLX Control: public APIType
     void beginGame();
     void coverPageClosed();
 
-    bool loadEngine(IFEngineInterface*);
+    bool loadEngine(IFEngineInterface*, Pump);
     bool loadIFI(Pump);
     string prefsFilePath() const;
     
