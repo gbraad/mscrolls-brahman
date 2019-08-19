@@ -39,14 +39,11 @@
 /* Function declarations */
 /*************************/
 
-<<<<<<< HEAD
 int32_t XeqEqual(int32_t**);
 int32_t XeqLtGt(int32_t, int32_t**);
 
-=======
 int32_t      XeqEqual(int32_t**);
 int32_t      XeqLtGt(int32_t, int32_t**);
->>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 resultStruct XeqBasicOperator(int32_t, int32_t**);
 resultStruct XeqRnd(int32_t**);
 resultStruct XeqSetTimer(int32_t**);
