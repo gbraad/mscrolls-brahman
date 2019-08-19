@@ -55,6 +55,8 @@ extern int32_t      *stack;              /* init.c   */
 extern char         *outputline;         /* init.c   */
 
 extern char         *ResetString(char*); /* output.c */
+<<<<<<< HEAD
+=======
 
 extern debugInfo *loc_dbug;
 extern debugInfo *obj_dbug;
@@ -65,5 +67,6 @@ extern debugInfo *loc_flag_dbug;
 extern debugInfo *com_trig_dbug;
 extern debugInfo *loc_trig_dbug;
 extern debugInfo *timer_dbug;
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 
 #endif

@@ -67,6 +67,9 @@ int32_t Power(int32_t, int32_t);
 /* exit when muted == 1                       */
 
 
+<<<<<<< HEAD
+void Output(char *line, int use_json)
+=======
 void Log(char *info1, char *info2, char *info3)
 {
  FILE   *logfile;
@@ -82,6 +85,7 @@ void Log(char *info1, char *info2, char *info3)
 
 
 void Output(void)
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 {
   char *json_text;
 

@@ -32,6 +32,8 @@
 /***********/
 
 dirData dirs;
+<<<<<<< HEAD
+=======
 
 /*************************/
 /* function declarations */
@@ -42,7 +44,17 @@ int32_t InitDirs(void);
 /************************/
 /* function defibitions */
 /************************/
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 
+/*************************/
+/* function declarations */
+/*************************/
+
+int32_t InitDirs(void);
+
+/************************/
+/* function defibitions */
+/************************/
 int32_t InitDirs()
 {
   /* read directory offsets */

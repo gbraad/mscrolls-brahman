@@ -1513,7 +1513,11 @@ int32_t RdDescOwners(int64_t offset)
 }
 
 
+<<<<<<< HEAD
+int32_t ReadExtendedSysDescr(extendedSysDescr *extended_sys_descr)
+=======
 void InitSysDescr(sysDescr *descr)
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 {
   int i = 0;
 

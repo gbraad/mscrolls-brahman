@@ -36,9 +36,12 @@
 #include "play.h"
 #include "defs.h"
 
+<<<<<<< HEAD
+=======
 #include "ifiglue.h"
 
 
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 /*************************/
 /* Function declarations */
 /*************************/
@@ -60,7 +63,11 @@ int32_t Play(char *user_input)
   int32_t* cont_list = _alloca((nr_of_locs+nr_of_objs)*sizeof(int32_t));
 
   static int32_t      parse_result; /* Needed to process result of ParseInput(). */
+<<<<<<< HEAD
+  static resultStruct translate_result = {OK, 0};
+=======
   static resultStruct translate_result = {OK, NONE, 0};
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
   static resultStruct arec_result;
   static resultStruct prologue_result;
   static resultStruct verb_def_result;
@@ -159,6 +166,66 @@ int32_t Play(char *user_input)
           /* Set the global subject variable. */
           subject = action_rec.subject[subject_index];
 
+<<<<<<< HEAD
+            prologue_result = XeqPrologue(action_rec.action1);
+            switch (prologue_result.tag) {
+            case QUIT:
+              /* exit */
+              return(QUIT);
+            case DISAGREE:
+              /* MUST WE EXECUTE THE EPILOGUE HERE ??? */
+              /* Forget the whole thing, continue with */
+              /* next user input.                      */
+
+              /* Check if we must handle the timers. */
+              if (CheckDoTimers()) {
+                if (HandleTimers(&action_rec, subject_index) == QUIT)
+                  return(QUIT);
+              }
+              break;
+            case GET_SUBJECT:
+                /* The subject wasn't specified in the input.  */
+                /* prologue_result.value may contain a word id */
+                /* that must be copied to the prepositions in  */
+                /* the parsed_input struct                     */
+                if (prologue_result.value != NO_ID) {
+                   if (parsed_input.prepositions.nr_of_prepositions != MAX_PARSE_PREPOS) {
+                    /* room for an extra preposition*/
+                    parsed_input.prepositions.preposition[parsed_input.
+                         prepositions.nr_of_prepositions++] = prologue_result.value;
+                  }
+                }
+                parse_syntax = SUBJECT;
+                break;
+            case GET_SPECIFIER:
+                /* The specifier wasn't specified in the input. */
+                if (prologue_result.value != NO_ID) {
+                   if (parsed_input.prepositions.nr_of_prepositions != MAX_PARSE_PREPOS) {
+                    /* room for an extra preposition*/
+                    parsed_input.prepositions.preposition[parsed_input.
+                         prepositions.nr_of_prepositions++] = prologue_result.value;
+                  }
+                }
+                parse_syntax = SPECIFIER;
+                break;
+            case GET_ANSWER:
+              /* We need an answer from the player. */
+              parse_syntax = ANSWER;
+              break;
+            default:
+              /* Either AGREE or NO_MATCH. */
+              /* Build list with contained objs for curr_loc. */
+              if (!ContList(curr_loc, cont_list, parsed_input.scope))
+                return(ERROR); /* actually, is an error */
+
+              /* Execute action_rec for list. */
+                arec_result = XeqActionRec(&action_rec, cont_list, subject_index);
+                switch (arec_result.tag) {
+                case NO_MATCH:
+                  /* No match; execute the default verb code. */
+                    verb_def_result = XeqVerbDefault(&action_rec, subject_index);
+                    switch (verb_def_result.tag) {
+=======
           prologue_result = XeqPrologue(action_rec.action1);
           Output();
           switch (prologue_result.tag) {
@@ -232,10 +299,40 @@ Log ("Prologue returned GET_SPECIFIER\n", "", "");
                   verb_def_result = XeqVerbDefault(&action_rec, subject_index);
                   Output();
                   switch (verb_def_result.tag) {
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
                     case QUIT:
                       /* Stop */
                       return(QUIT);
                     case GET_SUBJECT:
+<<<<<<< HEAD
+                        /* The subject wasn't specified in the input. */
+                        /* verb_def_result.value may contain a word id  */
+                        /* that must be copied to the prepositions in   */
+                        /* the parsed_input struct                      */
+                        if (verb_def_result.value != NO_ID) {
+                          if (parsed_input.prepositions.nr_of_prepositions != MAX_PARSE_PREPOS) {
+                            /* room for an extra preposition*/
+                            parsed_input.prepositions.preposition[parsed_input.
+                                 prepositions.nr_of_prepositions++] = verb_def_result.value;
+                          }
+                        }
+                        parse_syntax = SUBJECT;
+                        break;
+                    case GET_SPECIFIER:
+                        /* The specifier wasn't specified in the input. */
+                        /* verb_def_result.value may contain a word id  */
+                        /* that must be copied to the prepositions in   */
+                        /* the parsed_input struct                      */ PrintString("Hoi", 0);
+                        if (verb_def_result.value != NO_ID) {
+                          if (parsed_input.prepositions.nr_of_prepositions != MAX_PARSE_PREPOS) {
+                            /* room for an extra preposition*/
+                            parsed_input.prepositions.preposition[parsed_input.
+                                 prepositions.nr_of_prepositions++] = verb_def_result.value;
+                          }
+                        }
+                        parse_syntax = SPECIFIER;
+                        break;
+=======
                       /* The subject wasn't specified in the input. */
                       /* verb_def_result.value may contain a word id  */
                       /* that must be copied to the prepositions in   */
@@ -263,6 +360,7 @@ Log ("Prologue returned GET_SPECIFIER\n", "", "");
                       }
                       parse_syntax = SPECIFIER;
                       break;
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
                     case GET_ANSWER:
                       /* We need an answer from the player. */
                       parse_syntax = ANSWER;
@@ -285,6 +383,54 @@ Log ("Prologue returned GET_SPECIFIER\n", "", "");
                       }
                       break;
                   } /* switch XeqVerbDefault() */
+<<<<<<< HEAD
+                  break;
+                case QUIT:
+                  /* Stop */
+                  /*scanf("%c", &ch);*/
+                  return(QUIT);
+                case GET_SUBJECT:
+                    /* The subject wasn't specified in the input. */
+                    /* arec_result.value may contain a word id that */
+                    /* must be copied to the prepositions in the    */
+                    /* parsed_input struct                          */
+                    if (arec_result.value != NO_ID) {
+                      if (parsed_input.prepositions.nr_of_prepositions != MAX_PARSE_PREPOS) {
+                        /* room for an extra preposition*/
+                        parsed_input.prepositions.preposition[parsed_input.
+                             prepositions.nr_of_prepositions++] = arec_result.value;
+                      }
+                    }
+                    parse_syntax = SUBJECT;
+                    break;
+                case GET_SPECIFIER:
+                    /* The specifier wasn't specified in the input. */
+                    /* arec_result.value may contain a word id that */
+                    /* must be copied to the prepositions in the    */
+                    /* parsed_input struct                          */
+                    if (arec_result.value != NO_ID) {
+                      if (parsed_input.prepositions.nr_of_prepositions != MAX_PARSE_PREPOS) {
+                        /* room for an extra preposition*/
+                        parsed_input.prepositions.preposition[parsed_input.
+                             prepositions.nr_of_prepositions++] = arec_result.value;
+                      }
+                    }
+                    parse_syntax = SPECIFIER;
+                    break;
+                case GET_ANSWER:
+                    /* We need an answer from the player. */
+                  parse_syntax = ANSWER;
+                  break;
+                default:
+                  /* AGREE or DISAGREE     */
+                  /* Execute the epilogue. */
+                  XeqEpilogue(action_rec.action1);
+
+                  /* Check if we must handle the timers. */
+                  if (CheckDoTimers()) {
+                    if (HandleTimers(&action_rec, subject_index) == QUIT)
+                      return(QUIT);
+=======
                 break;
               case QUIT:
                 /* Stop */
@@ -300,6 +446,7 @@ Log ("Prologue returned GET_SPECIFIER\n", "", "");
                     /* room for an extra preposition*/
                     parsed_input.prepositions.preposition[parsed_input.
                         prepositions.nr_of_prepositions++] = arec_result.value;
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
                   }
                 }
                 parse_syntax = SUBJECT;

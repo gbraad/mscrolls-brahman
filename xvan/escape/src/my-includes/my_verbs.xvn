@@ -1,9 +1,21 @@
 
 # my verbs for stairs.xvn
 
+$VERB debug DEFAULT debug() ENDVERB
+
 $verb zwoosh endverb
 
 #--------------------------------------------------------------------
+<<<<<<< HEAD
+$VERB info
+ DEFAULT
+   print("\n  This is a sample story for XVAN 2.3.4.\n\n"
+         "  It has 24 locations and 68 objects, including the player /
+         and one NPC named\n"
+         "  Fred. The story contains several puzzles, and you need /
+          to interact with\n"
+         "  Fred to solve some of them. Your goal is: escape!\n")
+=======
 $VERB info SYNONYM about
  DEFAULT
    print("\n  This is a story for XVAN 2.3.4.\n\n"
@@ -30,6 +42,7 @@ $VERB apply
  DEFAULT
    printcr("I only understood you as far as wanting to apply something.")
 
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 ENDVERB
 #--------------------------------------------------------------------
 

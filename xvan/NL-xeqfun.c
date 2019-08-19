@@ -36,7 +36,10 @@
 /*************************/
 
 int32_t NL_XeqYesNo(void);
+<<<<<<< HEAD
+=======
 void    NL_XeqHitAnyKey(void);
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 
 /****************************/
 /* Testfunction definitions */

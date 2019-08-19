@@ -28,11 +28,18 @@
 /* External declarations */
 /*************************/
 
+<<<<<<< HEAD
+extern int32_t   nr_of_timers;    /* fileio.c */
+extern timerInfo *timers;         /* fileio.c */
+
+extern void         Output(char*);                                         /* output.c  */
+=======
 extern int32_t      nr_of_timers;                                          /* fileio.c */
 extern timerInfo    *timers;                                               /* fileio.c */
 
 extern void         Log(char*, char*, char*);                              /* output.c  */
 extern void         Output(void);                                          /* output.c  */
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 extern void         PrintError(int16_t, resultStruct*, char*);             /* errors.c  */
 extern char         *TranslateKeyword(char*);                              /* errors.c  */
 extern resultStruct XeqTrigger(int32_t, int32_t, usrActionRec*, int32_t);  /* execute.c */

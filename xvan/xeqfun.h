@@ -28,6 +28,10 @@
 /* Defines */
 /***********/
 
+<<<<<<< HEAD
+#define DEBUGFILE      "debug.txt"
+=======
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 #define TESTFILE       "testinput.txt"
 #define TRANSCRIPTFILE "transcript.txt"
 #define SAVEFILE       "save.dat"
@@ -124,6 +128,27 @@ extern int32_t  IsLit(int32_t);                                                 
 extern int32_t  CountObjects(int32_t, int32_t, int32_t, int32_t);                /* sysfunc.c    */
 extern int32_t  Synchronize(int32_t, int32_t, int32_t, int32_t, int32_t,
                             usrActionRec*, int32_t);                             /* sysfunc.c    */
+<<<<<<< HEAD
+extern resultStruct  XeqTrigger(int32_t, int32_t, usrActionRec*, int32_t);     /* execute.c  */
+extern int32_t       CanSee(int32_t, int32_t);                                 /* sysfunc.c  */
+extern int32_t       Move(int32_t, int32_t);                                   /* sysfunc.c  */
+extern int32_t       Owns(int32_t, int32_t, int32_t);                          /* spantree.c */
+extern int32_t       InitSpanTree(spanTree**, int32_t**);                      /* sysfunc.c  */
+extern int32_t       Shuffle(int32_t);                                         /* sysfunc.c  */
+extern int32_t       ExpandTree(int32_t, spanTree*);                           /* spantree.c */
+extern int32_t       BuildRoute(int32_t, int32_t*, spanTree*);                 /* spantree.c */
+extern int32_t       SpanTree(int32_t, int32_t, int32_t, spanTree*);           /* sysfunc.c  */
+extern int32_t       LetsTry(int32_t, usrActionRec);                           /* lets-try.c */
+extern char          *GetDescr(int32_t, int32_t);                              /* execute.c  */
+extern int32_t       CheckDoTimers(void);                                      /* timers.c   */
+extern int32_t       HandleTimers(usrActionRec*, int32_t);                     /* timers.c   */
+extern void          PrintString(char*, int);                                  /* output.c   */
+extern void          PrintWord(int32_t, int);                                  /* output.c   */
+extern void          PrintNumber(int32_t, int);                                /* output.c   */
+extern resultStruct  XeqVerbDefault(usrActionRec*, int32_t);                   /* execute.c  */
+extern int32_t       IsWordId(int32_t);                                        /* execute.c  */
+extern resultStruct  Execute(int32_t*, usrActionRec*, int32_t, int32_t*);      /* execute.c  */
+=======
 extern resultStruct  XeqTrigger(int32_t, int32_t, usrActionRec*, int32_t);       /* execute.c  */
 extern int32_t       CanSee(int32_t, int32_t);                                   /* sysfunc.c  */
 extern int32_t       Move(int32_t, int32_t);                                     /* sysfunc.c  */
@@ -143,6 +168,7 @@ extern void          PrintNumber(int32_t, int);                                 
 extern resultStruct  XeqVerbDefault(usrActionRec*, int32_t);                     /* execute.c  */
 extern int32_t       IsWordId(int32_t);                                          /* execute.c  */
 extern resultStruct  Execute(int32_t*, usrActionRec*, int32_t, int32_t*);        /* execute.c  */
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 extern int32_t       IsLocId(int32_t);
 extern int32_t       IsObjId(int32_t);
 extern int32_t       IsCDescrId(int32_t);
@@ -154,10 +180,17 @@ extern int32_t       IsTestFun(int32_t);
 extern int32_t       IsIntAct(int32_t);
 extern int32_t       IsCAttrId(int32_t);
 extern int32_t       IsLAttrId(int32_t);
+<<<<<<< HEAD
+extern void          PrintId(int32_t, int); /* output.c */
+extern int32_t       LookUpId(char*);       /* syntax.c */
+
+extern char *Base64Save(char*);
+=======
 extern void          PrintId(int32_t, int);                                      /* output.c   */
 extern int32_t       LookUpId(char*);                                            /* syntax.c   */
 
 extern char          *Base64Save(char*);
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 
 /* Debug functions */
 extern void          DebugLevel_2_pars(char*, resultStruct*, int);

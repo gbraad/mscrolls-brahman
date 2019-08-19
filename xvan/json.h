@@ -68,9 +68,12 @@ typedef struct {
 /* External declarations */
 /*************************/
 
+<<<<<<< HEAD
+=======
 extern void   Log(char*, char*, char*);
 
 extern char    *ResetString(char*);
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 extern int32_t ProcessJson(char*, char*);
 extern char    *ExpandString(char*, int);
 

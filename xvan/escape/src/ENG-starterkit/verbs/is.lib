@@ -1,0 +1,37 @@
+
+$VERB is
+ SCOPE all_locs
+
+ "where is [o_subject]"
+   if cansee(o_actor, o_subject) then
+     printcr("Right here!")
+     disagree()
+   endif
+
+   if not(isobject(o_subject)) then
+     printcr("You've been there, so it is somewhere on the map that /
+              you must have drawn.")
+     disagree()
+   endif
+
+   if testflag(o_subject.f_seenbefore) then
+     if testflag(o_subject.f_alive) then
+       printcr("[the] [o_subject] is a living creature. Could have gone /
+                anywhere since your last encounter.")
+     else
+       print("[the] [o_subject] [o_subject.r_is] [o_subject.r_preposition] [the]")
+       print(owner(o_subject))
+       printcr(".")
+   else
+     printcr("You haven't found that yet.")
+
+ DEFAULT
+   printcr("I didn't understand that sentence.")
+   if testflag(o_player.f_verb_help) then
+     printcr("")
+     Printcr("An examples of the syntax I understand is:")
+     printcr("  'where is the ball'")
+     printcr("(to turn off these help messages, type 'help')")
+
+ENDVERB
+

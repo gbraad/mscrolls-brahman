@@ -12,9 +12,15 @@
 #======================================
 
 TITLE         "Escape!"
+<<<<<<< HEAD
+VERSION       "1.10"
+AUTHOR        "Marnix van den Bos"
+CREDITS       "Mathbrush, Andrew Schultz."
+=======
 VERSION       "1.19"
 AUTHOR        "Marnix van den Bos"
 CREDITS       "type 'credits' on command line."
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 ORGANIZATION  "XVAN"
 COVERTEXT     "An XVAN story"
 BACKIMAGE     "images\\\\coverimage.jpg"  # need '\\' in json string
@@ -300,7 +306,11 @@ END_LOC
 #-------------------------------------------------------------------------------
 $LOCATION l_garden
  DESCRIPTIONS
+<<<<<<< HEAD
+   d_picture       "images\\\\Dialroom.Png"
+=======
    d_picture    "images\\\\Shed.jpg"
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 
    d_sys        "the garden", "the hedges", "the hedge"
 
@@ -397,7 +407,11 @@ $LOCATION l_halfway
 
    d_up_closed  "When you walk farther up the stairs one of the steps makes /
                  a hollow sound. You try to pinpoint it but can only narrow /
+<<<<<<< HEAD
+                 the source to the upper half of the stairs.\n"
+=======
                  the source down to somewhere around step 10.\n"
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 
    d_up_open    "You carefully step over step 11, so you don't fall down /
                  into the closet.\n"
@@ -460,8 +474,13 @@ $LOCATION l_upstairs
    d_entr_short  "The [o_stairs] lead down and there is an exit to the west.\n"
 
    d_down_closed "When you walk down, one of the steps makes a hollow sound. /
+<<<<<<< HEAD
+                  You try to pinpoint it but can only narrow the source to the /
+                  upper half of the stairs.\n"
+=======
                   You try to pinpoint it but can only narrow the source down /
                   to somewhere around step 10.\n"
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 
    d_down_open  "You carefully step over step 11, so you don't fall down /
                  into the closet.\n"
@@ -620,13 +639,41 @@ $LOCATION l_cellar
    d_picture_closed "images\\\\Chestroom closed.Png"
    d_picture_open   "images\\\\Chestroom open.Png"
 
+<<<<<<< HEAD
+   d_sys          "the chest room"
+
+   d_entr_long    "Thanks to the [o_lamp]'s light, you see that you are in a /
+=======
    d_sys          "the cellar"
 
    d_entr_long    "In the [o_lamp]'s light, you see that you are in a /
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
                    small dark room. An exit is to the east and there is a /
                    closed [o_trapdoor] in the [o_generic_ceiling].\n"
 
    d_entr_short   "An exit leads east.\n"
+<<<<<<< HEAD
+
+   d_burning      "You walk down the stairs. Down below, you see the red glow /
+                   of a fire. As you walk down further, it gets hotter and /
+                   hotter. You realize you will be fried if you continue and /
+                   you hurry back to the [l_closet].\n"
+
+   d_not_burning  "There is still a lot of smoke, but through the clearing /
+                   haze you can make out an old chest and an exit to the /
+                   east.\n\n"
+                  "On the chest is [a] [o_lamp].\n\n"
+                  "Above you, the trap door slams shut. It is now pitch black."
+
+   d_no_go        "When you want to exit the room, you feel there is a force /
+                   holding you back. The [o_brass_key] vibrates slightly."
+
+   d_exa_trapdoor "This side of the trapdoor is completely smooth. There's /
+                   now way to open it from this side."
+
+   d_no_tie       "There's nothing to tie the rope to."
+
+=======
 
    d_burning      "You walk down the stairs. Down below, you see the red glow /
                    of a fire. As you walk down further, it gets hotter and /
@@ -647,6 +694,7 @@ $LOCATION l_cellar
 
    d_no_tie       "There's nothing to tie the rope to."
 
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
    d_no_push      "It's locked and will remain so."
 
  EXITS
@@ -749,10 +797,17 @@ $LOCATION l_dial_room
    d_solved_dials1 "You hear a squeaking noise. Looking at the [o_dials], you /
                     see that all three hands point to the number 8. At the /
                     same time, the door in the south wall moves back a few /
+<<<<<<< HEAD
+                    inches and turns 180 degrees, revealing a metal ladder on /
+                    its other side. Then the door retracts further, moving the /
+                    ladder out of sight. What remains is a small alcove to the /
+                    south."
+=======
                     inches and turns 180 degrees, revealing a wooden ladder /
                     on its other side. Then the door retracts further, moving /
                     the ladder out of sight. What remains is a small alcove /
                     to the south."
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 
    d_solved_dials2 "You hear a squeaking noise. It looks like it's coming from [the] /
                     [l_dial_room]. Maybe you better check it out..."
@@ -927,6 +982,10 @@ $LOCATION l_alcove
    r_ifi_maplevel = 0
 
  TRIGGERS
+<<<<<<< HEAD
+   "look up"       -> t_look
+   "ifi_map"       -> t_ifi_place
+=======
    "look up"              -> t_look
    "x [o_south_wall]"     -> t_exa_south
    "x [o_west_wall]"      -> t_exa_west
@@ -934,6 +993,7 @@ $LOCATION l_alcove
    "climb [o_south_wall]" -> t_climb
    "go up"                -> t_climb
    "ifi_map"              -> t_ifi_place
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 
    t_entrance
      l_json.r_maptext = o_player.d_maptext_basement
@@ -1145,6 +1205,17 @@ $LOCATION l_dark_place_1
  DESCRIPTIONS
    d_sys        "the dark place"
 
+<<<<<<< HEAD
+   d_entr_first "The moment you step into the dark place, a grating slides /
+                 down from the ceiling, closing the exit to the north.\n"
+
+   d_entr_1     "You are in a dark place. It is dimly lit, with an /
+                 exit to the north."
+
+   d_entr_2     "The only thing you can make out are two buttons way in the /
+                 back on the south wall."
+
+=======
    d_entr_long  "You are in a dark place. It is dimly lit, with an /
                  exit back to the north where you came from. The room /
                  extents to the south.\n\nOne of the walls has a large mural /
@@ -1153,8 +1224,13 @@ $LOCATION l_dark_place_1
 
    d_entr_short "Exits are to the north and the south."
 
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
    d_lamp       "\nStrangely enough, turning on the [o_lamp] doesn't make a /
                  difference."
+
+   d_wrong      "It's a solid wall now. You can still finish the game, only /
+                 not with a perfect score. Accept that you lost the 30 /
+                 points or start over again."
 
  EXITS
    n -> l_escape_hallway
@@ -1172,6 +1248,30 @@ $LOCATION l_dark_place_1
    "turn on [o_lamp]" -> t_light
    "ifi_map"          -> t_ifi_place
 
+<<<<<<< HEAD
+   t_entrance
+     printcrbold(%this)
+     if testflag(f_first_entry) then
+       printcr(d_entr_first)
+       move(o_grating, %this)
+       setflag(f_seenbefore)
+       clearflag(f_first_entry)
+     endif
+     printcr(d_entr_1)
+     if not(testflag(f_solved)) then
+       printcr(d_entr_2)
+
+  t_north
+    if owns(%this, o_grating) then
+      printcr("That way is blocked by the [o_grating].")
+      disagree()
+
+   t_south
+     if testflag(l_dark_place_1.f_solved) then
+       printcr(d_wrong)
+
+=======
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
    t_light
      if trigger(o_lamp.t_light) then
        printcr(d_lamp)
@@ -1295,8 +1395,13 @@ $LOCATION l_circular_room
                  a 12 ft (4 m) deep [o_pit].\nAn exit leads to the east.\n"
                 "\nIn the middle of the room is a [o_disk].\n"
 
+<<<<<<< HEAD
+   d_entr_short "A circular shaped room surrounding a pit with a wooden circle /
+                in the center.\n"
+=======
    d_entr_short "A circular shaped room with a wooden disk in the center. /
                  The lower half of the room is a pit.\n"
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 
  EXITS
    w -> l_escape_hallway2
@@ -1386,6 +1491,15 @@ $LOCATION l_escape_room
    r_ifi_maplevel = 1
 
  TRIGGERS
+<<<<<<< HEAD
+   "south"            -> t_south
+   "down"             -> t_south
+   "enter [o_chute]"  -> t_south
+   "up"               -> t_up
+   "look up"          -> t_look_up
+   "x [o_south_wall]" -> t_exa
+   "ifi_map"          -> t_ifi_place
+=======
    "south"                                  -> t_south
    "down"                                   -> t_south
    "enter [o_chute]"                        -> t_south
@@ -1394,6 +1508,7 @@ $LOCATION l_escape_room
    "x [o_south_wall]"                       -> t_exa
    "climb [o_ladder]"                       -> t_climb
    "ifi_map"                                -> t_ifi_place
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 
    t_entrance
      move(o_chute, %this)
@@ -1500,7 +1615,11 @@ $LOCATION l_exit
                  is a beautiful watch.\n\n"
 
    d_exit       "You can't help but feel a bit sorry for Fred. He has to /
+<<<<<<< HEAD
+                 stay in this small sample story. But, you tell yourself, /
+=======
                  stay in this small story. But, you tell yourself, /
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
                  he seems to like it here, and you ask yourself whether he /
                  would be able to survive in the real world outside his /
                  28 locations.\n\n"
@@ -1611,6 +1730,43 @@ END_LOC
 $OBJECT o_player
  # The o_player object is mandatory and represents the human player.
  DESCRIPTIONS
+<<<<<<< HEAD
+   d_sys  "You", "me", "head"
+
+   d_exa  "The average adventurer.\n"
+
+   d_init1 "Suddenly you are here. You have no recollection of anything. Your /
+           mind is empty, like it just started.\n\n"
+          "It looks like you are in a house, but then again, it looks like /
+           you're not. It is like you're in all rooms at the same time. You /
+           see a kitchen and a bathroom, but somehow you can also see through /
+           them. The house merges with the outside world. It is like your /
+           surroundings are not yet finished.\n\n"
+          "You faintly see a garden, hedges and meadows. Looking down, you /
+           can also make out blue, red and green objects in the near /
+           distance and a shiny object that looks like gold.\n\n"
+          "Very weird...\n\n"
+          "Someone walks into the room. A big nondescript guy. He is carrying /
+           a tablet. When he sees you, he looks surprised and a bit confused.\n"
+
+   d_init2 "\"What's going on? Who put you in here already? The world isn't even /
+           finished, yet. They all know that the player object should only be /
+           enabled during the final test cases and regression tests. We're /
+           not that far yet!\"\n\n"
+          "He looks at you and smiles. \"I'm sorry, buddy. This shouldn't have /
+           happened. I am going to fix this right away.\"\n\n"
+          "After a few swipes on the tablet screen, he starts typing. You hear /
+           him mumbling something about \"commenting out\" and "
+          "\"recompiling\".\n\n"
+          "And then everything goes black again....\n"
+
+   d_score_25 "\n\nYour score just went up by 25 points!"
+
+   d_score_50 "\n\nYour score just went up by 50 points!"
+
+   d_cut  "Technically speaking, committing suicide would count as an /
+           escape. But that is not the intent of this game."
+=======
    d_sys   "You", "me", "I", "head"
 
    d_exa   "The average adventurer.\n"
@@ -1668,6 +1824,7 @@ $OBJECT o_player
 
    d_cut      "Technically speaking, committing suicide would count as an /
                escape. But that is not the intent of this game."
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 
    d_no_route "There is no known route from [the] [l_location] to [the] /
                [o_subject]."
@@ -1679,6 +1836,9 @@ $OBJECT o_player
    d_save_cheat "\nFred tilts his head and looks at you. \"Come on buddy... This is /
                  so obvious. At least wait a couple of moves before you pull /
                  something like that.\"\n"
+
+   d_ask  "\"I've seen many adventurers, trying to escape from here. Don't /
+           disappoint me...\""
 
    d_maptext_basement "Basement"
    d_maptext_house    "House"
@@ -1715,6 +1875,22 @@ $OBJECT o_player
    r_test = %none
 
  TRIGGERS
+<<<<<<< HEAD
+   "[dir]"                        -> t_move
+   "go to [dir]"                  -> t_move
+   "goto [o_subject]"             -> t_goto
+   "ask [o_npc] about [o_player]" -> t_ask
+   "cut [o_player] with [o_spec]" -> t_cut
+   "help"                         -> t_help
+   "zwoosh"                       -> t_zwoosh  # used for testing
+
+   t_zwoosh
+     printcrbold("Dit is bold")
+     printcritalic("Dit is italic")
+     bold(on) printcr("bold") bold(off)
+     underline(on) printcr("underline") underline(off)
+     agree()
+=======
    "why am [o_player] here"          -> t_why
    "where am [o_player]"             -> t_where
    "[o_npc], why am [o_player] here" -> t_why
@@ -1732,6 +1908,7 @@ $OBJECT o_player
      if owns(l_location, o_player) then endif
      if owns(l_location, o_player, 2) then endif
      disagree()
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 
    t_entrance
      agree()
@@ -1753,6 +1930,16 @@ $OBJECT o_player
      if try(l_json, 0, 0, "ifi_map") then endif
 
      background(blue)       # blue background with white text
+<<<<<<< HEAD
+     printcr(d_init1)        # print opening message
+     printcr("  Hit a key...\n")
+     hitanykey()
+
+     printcr(d_init2)
+
+     printcr("  Hit a key...\n")
+     hitanykey()
+=======
      printcr(d_init0)       # print opening message
      printcr("Hit enter...\n")
      hitanykey()
@@ -1769,6 +1956,7 @@ $OBJECT o_player
      hitanykey()
      clearscreen()
      printitalic("[d_credits]\n\n")
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 
      # restore f_seenbefore for south hallway (was set to 1 for ifi-xvan
      clearflag(l_hallway_south.f_seenbefore)
@@ -1874,6 +2062,9 @@ $OBJECT o_player
      if equal(r_next_dir, d) then 
        if try(l_location, 0, 1, "go d") and equal(l_location, r_dest) then agree() else disagree() endif
 
+   t_ask
+     printcr(d_ask)
+
 END_OBJ
 #-------------------------------------------------------------------------------
 
@@ -1896,8 +2087,15 @@ $OBJECT o_npc
                       starts talking to you.\n"
                      "\"Hi there, you must be the new adventurer. I'm Fred. /
                       I'm a non-player character. I live here. Although this /
+<<<<<<< HEAD
+                      is a sample story with only a few locations, I like it /
+                      here. It's my home. In case you /
+                      want to look me up in the source file and see what I can /
+                      do, my object id is o_npc.\n\n"
+=======
                       is a small story with only a few locations, I like it /
                       here. It's my home.\n\n"
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
                      "\"Your goal is to escape from this story. In order to /
                       pull that off, you will need my help. You may ask me /
                       about things and I might give a clue. I can also perform /
@@ -1905,8 +2103,13 @@ $OBJECT o_npc
                      "\"Oh, before I forget...\" Fred raises his tablet and /
                       takes a picture of you.\n\n"
                      "\"Hope to see you soon, buddy.\" Fred pulls a key from /
+<<<<<<< HEAD
+                      his pocket and unlocks and opens the closet door. He looks /
+                      at you and smiles:\n\n\"Happy adventuring!\"\n\n/
+=======
                       his pocket and opens the closet door. He looks at you /
                       and smiles:\n\n\"Happy adventuring!\"\n\n/
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
                       Fred steps into the closet. You hear the sound of the /
                       door being locked and after some time there's a sound of /
                       squeaking hinges, followed by a slam.\n\n"
@@ -1917,6 +2120,13 @@ $OBJECT o_npc
                       tablet and starts typing. \"I'll award you 50 /
                       points for your achievements. But you're not there yet. /
                       There's more to do before you can get out of here,\" /
+<<<<<<< HEAD
+                      he says.\n"
+                     "\"I'll be walking around here between locations. If you /
+                      want me to stay, say 'Fred, wait'. To let me go again, /
+                      just say 'Fred, go'. Otherwise, I'll stay forever, and /
+                      you may need me in another room\".\n\n"
+=======
                       he says.\n\n"
                      "\"I'll be walking around here between locations. If you /
                       want me to stay, say 'Fred, wait'. To let me go again, /
@@ -1924,6 +2134,7 @@ $OBJECT o_npc
                       you may need me in another room. You may also ask me /
                       about things. Just say 'Fred, tell me about something' /
                       or 'ask Fred about something'.\".\n\n"
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
                      "\"Happy adventuring!\"."
 
    d_why             "I'm here to monitor your progress and make notes about /
@@ -1940,8 +2151,15 @@ $OBJECT o_npc
                       out by now. Throwing the hook at this moment is not a /
                       good idea. Nice rope, by the way.\""
 
+<<<<<<< HEAD
+   d_rope_attach     "Since the [o_rope] is tied to the hook, it's also /
+                      pulled through the hole by the weight of the hook. /
+                      Apparently, the [o_hook] got stuck behind something /
+                      outside the room."
+=======
    d_rope_attach     "\nSince the [o_rope] is tied to the hook, it follows /
                       the hook."
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 
    d_dangling        "The [o_rope] is dangling from the ceiling."
 
@@ -1958,11 +2176,20 @@ $OBJECT o_npc
    d_takes_watch1    "The voice continues. \"Oh my, that's a beautiful watch /
                       in there!\""
 
+<<<<<<< HEAD
+   d_takes_watch2    "Opening the safe reveals [a] [o_watch] and [a] /
+                      [o_brass_key]. Before you can do anything, [o_npc] /
+                      snatches the watch out of the safe, puts it around /
+                      his wrist and slams the safe door shut. Just before /
+                      the safe closed, you caught a glimpse of something /
+                      reddish brown."
+=======
    d_takes_watch2    "Opening the safe reveals [a] [o_watch]. Before you /
                       can do anything, [o_npc] snatches the watch out of /
                       the safe, puts it around his wrist and slams the /
                       safe door shut. Just before the safe closed, you /
                       caught a glimpse of something reddish brown."
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 
    d_key             "\nFred looks at you carefully. \"Ah, I see you've got [the] /
                       [o_brass_key]! /
@@ -1980,11 +2207,19 @@ $OBJECT o_npc
                       found out I helped the guy that was here last week. /
                       This is not going to work. "
                      "\"Oh, wait! It's only the player code that checks for /
+<<<<<<< HEAD
+                      the brass key when entering the chest room. My npc code /
+                      doesn't. So... Well, you do the math, buddy...\""
+
+   d_give_key        "Fred looks at you and smiles from ear to ear. \"Cool! You /
+                      figured it out. I'll meet you in [the] [l_chest_room].\" /
+=======
                       the brass key when entering the cellar. My npc code /
                       doesn't. So... Well, you do the math, buddy...\""
 
    d_give_key        "Fred looks at you and smiles from ear to ear. \"Cool! You /
                       figured it out. I'll meet you in [the] [l_cellar].\" /
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
                       Fred takes the key and wanders off..."
 
    d_fred_curious    "\nFred says \"let's open the [o_chest] so we can see /
@@ -2229,7 +2464,11 @@ FLAGS
        agree()
 
    t_wait # tells fred to stop moving around
+<<<<<<< HEAD
+     if testflag(f_endgame) then
+=======
      if testflag(f_endgame) or testflag(f_open_chest) then
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
        printcr("\"I'm not going anywhere.\"")
      else
        printcr("\"Huh? Ok, I'll wait, then.\"")
@@ -2241,7 +2480,11 @@ FLAGS
      disagree()
    
    t_go # tells Fred to start moving again
+<<<<<<< HEAD
+     if testflag(f_endgame) then
+=======
      if testflag(f_endgame) or testflag(f_open_chest) then
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
        printcr("\"I think I'll stay. You need me now.\"")
      else
        printcr("\"Ok, see you around. Bye!\"")
@@ -2493,8 +2736,11 @@ $OBJECT o_row_photos
    d_exa        "Each photo is a portrait of a person, framed and fixed to /
                  the wall (the photo, not the person).\n"
 
+<<<<<<< HEAD
+=======
    d_ask        "\"It's sort of a hall of fame\"."
 
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
    d_good_look  "From your current position you only have a good view of the photos"
 
  CONTAINED in l_living_south
@@ -2827,10 +3073,17 @@ $OBJECT o_kitchen_window
  TRIGGERS
    "x [o_kitchen_window]"                          -> t_exa
    "get [o_kitchen_window]"                        -> t_get
+<<<<<<< HEAD
+   "look through [o_kitchen_window]"               -> t_look_through
+   "look in [o_kitchen_window]"                    -> t_look_through
+   "put [o_player] in [o_kitchen_window]"          -> t_look_through
+   "put [o_player] through [o_kitchen_window]"     -> t_look_through
+=======
    "look [prepos] [o_kitchen_window]"              -> t_look_through
    "put [o_player] [prepos] [o_kitchen_window]"    -> t_look_through
 #   "look outside"                                 -> t_look_outside
    "look north"                                    -> t_look_outside
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
    "break [o_kitchen_window]"                      -> t_break_no
    "break [o_kitchen_window] with [o_spec]"        -> t_break
    "throw [o_subject] [prepos] [o_kitchen_window]" -> t_throw
@@ -2851,6 +3104,16 @@ $OBJECT o_kitchen_window
        nomatch()
 
    t_get
+<<<<<<< HEAD
+     if testflag(f_broken) then
+       print("[d_scattered] You might hurt yourself.")
+       disagree()
+     else
+       printcr(d_get)
+
+   t_look_through
+=======
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
      if testflag(f_broken) then
        print("[d_scattered] You might hurt yourself.")
        disagree()
@@ -2909,7 +3172,24 @@ $OBJECT o_kitchen_window
    t_throw
      # may only work for 'at' and 'through'
      if equal(%prepos, at) or equal(%prepos, through) then
+<<<<<<< HEAD
+       print("You throw [the] [o_subject] at the window")
+       if not(testflag(o_subject.f_heavy)) then
+         printcr(", but it bounces back. It obviously isn't /
+                  heavy enough.")
+         move(o_subject, l_kitchen, in)
+       else
+         printcr(", and it goes straight through. The window /
+                  is shattered all over the floor. One of the /
+                  glass fragments is a bit larger than the rest.")
+         move(o_subject, l_garden, in)
+         setflag(f_broken)
+         move(%this, l_kitchen)
+         move(o_fragment, l_kitchen)
+       endif
+=======
        if try(l_location, 0, 0, "break [o_kitchen_window] with [o_subject]") then agree() endif
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
      else
        nomatch()
 
@@ -2955,7 +3235,11 @@ $OBJECT o_keyhole_door
    d_sys  "the rusty keyhole"
 
    d_peek "You peek through the keyhole but cannot see a thing. /
+<<<<<<< HEAD
+           something on the other side of the keyhole blocks your view."
+=======
            something in the other side of the keyhole blocks your view."
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 
    d_look "You see the garden. At the far east end, there is a /
            garden shed."
@@ -3264,11 +3548,19 @@ $OBJECT o_sticky_note
                 "  # what do we use for game world boundaries?\n"
                 "  # chose hedges now, but can change if necessary."
 
+<<<<<<< HEAD
+   d_ask        "Fred looks at you wearily. \"Oh, not the world dev team /
+                 again. We call them the world mess team here. They always /
+                 leave stuff lying around. The other day they forgot to /
+                 comment out the player character during early world tests. /
+                 Luckily I found out and was able to fix it just in time\"."
+=======
    d_ask        "Fred looks at you wearily. \"Oh, not the dev team again /
                  We call them the mess team here. They always leave stuff /
                  lying around. The other day they forgot to comment out the /
                  player character during early world tests. Luckily I found /
                  out and was able to fix it just in time\"."
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 
    d_no_take_1  "You grab the note. But on second thought you stick it back /
                  because it looks important. You decide to just ask Fred /
@@ -3553,6 +3845,13 @@ $OBJECT o_carpet
                  about covers the floor. On a closer examination, it /
                  turns out that its sides are glued to the floor.\n"
 
+<<<<<<< HEAD
+   d_cut        "You use the [o_fragment] to cut along the glued /
+                 sides of the carpet. You grab the middle part /
+                 of the carpet that is now no longer attached to /
+                 the floor and lift it. Removing the carpet /
+                 reveals a trapdoor in the floor!"
+=======
    d_ask        "\"Why are you still carrying that around? You're not going /
                  to need it anymore\"."
 
@@ -3563,6 +3862,7 @@ $OBJECT o_carpet
 
    d_no_cut     "The [o_fragment] is very sharp. It would certainly cut the /
                  carpet, but you would hurt yourself when applying pressure."
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 
    d_no_move    "The carpet won't move. On closer examination /
                  you find that its edges are glued to the floor."
@@ -3766,7 +4066,11 @@ $OBJECT o_drain_pipe_bathroom
                  the wall."
 
    d_no_cut     "The [o_drain_pipe_bathroom] is recessed in the wall. You /
+<<<<<<< HEAD
+                 cannot cut it with the [o_hacksaw]."
+=======
                  cannot cut it with [the] [o_spec]."
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 
  CONTAINED in l_bathroom
 
@@ -3774,9 +4078,14 @@ $OBJECT o_drain_pipe_bathroom
    f_cuttable = 1
 
  TRIGGERS
+<<<<<<< HEAD
+   "get [o_drain_pipe_bathroom]"                  -> t_get
+   "cut [o_drain_pipe_bathroom] with [o_hacksaw]" -> t_cut
+=======
    "get [o_drain_pipe_bathroom]"               -> t_get
    "cut [o_drain_pipe_bathroom] with [o_spec]" -> t_cut
    "listen to [o_drain_pipe_bathroom]"         -> t_listen
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 
    t_get
      printcr(d_no_get)
@@ -3853,6 +4162,14 @@ $OBJECT o_drain_pipe_closet
    f_cut      = 0  # not yet cut.
 
  TRIGGERS
+<<<<<<< HEAD
+   "examine [o_drain_pipe_closet]"                -> t_exa
+   "get [o_drain_pipe_closet]"                    -> t_get
+   "break [o_drain_pipe_closet]"                  -> t_break
+   "cut [o_drain_pipe_closet] with [o_hacksaw]"   -> t_cut
+   "break [o_drain_pipe_closet] with [o_hacksaw]" -> t_cut
+   "look in [o_drain_pipe_closet]"                -> t_look
+=======
    "examine [o_drain_pipe_closet]"             -> t_exa
    "touch [o_drain_pipe_closet]"               -> t_touch
    "get [o_drain_pipe_closet]"                 -> t_get
@@ -3864,6 +4181,7 @@ $OBJECT o_drain_pipe_closet
    "listen to [o_drain_pipe_closet]"           -> o_drain_pipe_bathroom.t_listen
    "pull [o_drain_pipe_closet]"                -> t_pull_push
    "push [o_drain_pipe_closet]"                -> t_pull_push
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 
    t_entrance
      print(d_entr)
@@ -3899,18 +4217,25 @@ $OBJECT o_drain_pipe_closet
          endif
      endif
 
+<<<<<<< HEAD
+=======
    t_touch
      if testflag(o_tap.f_open) then
        printcr(d_touch)
      else
        nomatch()
 
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
    t_get
      printcr(d_no_get)
 
   t_break
     printcr("Not with your bare hands, you won't.")
+<<<<<<< HEAD
+     
+=======
 
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
    t_cut
      if not(equal(o_spec, o_hacksaw)) then
        printcr("That will take forever. You need something more like a saw.")
@@ -3981,11 +4306,18 @@ $OBJECT o_flames
                  You look down and see a dark red glow deep down in /
                  the cellar."
 
+<<<<<<< HEAD
+   d_extinguish "As soon as the water touches the flames, you hear a loud hissing /
+                 sound, and then a huge steam cloud billows up. After a /
+                 while, the hissing gets less until it completely stops. The fire /
+                 has died.\nIt seems safe to go down into the cellar now."
+=======
    d_extinguish "As soon as the water touches the flames, you hear a loud /
                  hissing sound, and then a huge steam cloud billows up. /
                  After a while, the hissing decreases until it completely /
                  stops. The fire has died.\nIt seems safe to go down into /
                  the cellar now."
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 
    d_burn       "You throw [the] [o_subject] into [the] [o_flames]. The heat "
                 "completely disintegrates it and it is gone forever."
@@ -4047,14 +4379,22 @@ $OBJECT o_hacksaw
    d_exa        "This is just an ordinary hacksaw. It can be used /
                  to saw metal objects. The saw looks a bit worn, /
                  but it probably will last for one more job."
+<<<<<<< HEAD
+=======
 
    d_ask        "\"Completeley worn out. Will be of no use anymore\"."
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 
    d_no_saw     "The saw is pretty worn. It will probably last for /
                  one more job, and cutting [the] [o_subject] seems /
                  like a poor choice."
 
+<<<<<<< HEAD
+   d_worn       "The saw is completely worn out. Whatever you are going to /
+                 do with it, it won't be cutting."
+=======
    d_worn       "The saw is completely worn out."
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 
  CONTAINED in l_shed
 
@@ -4306,7 +4646,11 @@ $OBJECT o_water_closet
    d_exa      "Just plain ordinary water.\n"
 
    d_no_drink "It's better not to drink from the floor. if you are thirsty, /
+<<<<<<< HEAD
+               better to go to the tap in the bathroom upstairs for some fresh water."
+=======
                go to the tap in the bathroom upstairs for some fresh water."
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 
  CONTAINED in l_closet
 
@@ -4343,8 +4687,14 @@ $OBJECT o_water_living
 
    d_exa        "Just plain ordinary water.\n"
 
+<<<<<<< HEAD
+   d_no_drink   "It's better not to drink from the floor. if you are /
+                 thirsty, better go to the tap in the bathroom upstairs for /
+                 some fresh water."
+=======
    d_no_drink   "It's better not to drink from the floor. if you are thirsty, /
                  go to the tap in the bathroom upstairs for some fresh water."
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 
  CONTAINED in l_living_middle
 
@@ -4417,6 +4767,64 @@ END_OBJ
 
 #-------------------------------------------------------------------------------
 $OBJECT o_engravings
+<<<<<<< HEAD
+ DESCRIPTIONS
+   d_sys "the engravings"
+
+   d_ask "Maybe it's a clue about the corresponding dial, if any."
+
+ CONTAINED in l_dial_room
+
+ FLAGS
+   f_hidden   = 1 # must be invisible
+   f_bypass   = 1 # must also work when not visible
+
+ ATTRIBUTES
+   r_is = are
+
+  TRIGGERS
+    "examine [o_engravings]"             -> t_read
+    "read [o_engravings]"                -> t_read
+    "ask [o_npc] about [o_engravings]"   -> t_ask
+    "ask [o_npc] about [o_red_button]"   -> t_ask
+    "ask [o_npc] about [o_green_button]" -> t_ask
+    "ask [o_npc] about [o_blue_button]"  -> t_ask
+    "ask [o_npc] about [o_black_button]" -> t_ask
+    "[action] [o_engravings]"            -> t_individual
+
+   t_entrance
+     setflag(f_seenbefore)
+     agree()      # do not use default t_entrance code
+ 
+   t_exit         # do not use default t_exit code
+     agree()
+
+   t_read
+     printbold("\n[o_red_button]: ")
+     printcr(o_red_button.d_exa)
+     printbold("\n[o_green_button]: ")
+     printcr(o_green_button.d_exa)
+     printbold("\n[o_blue_button]: ")
+     printcr(o_blue_button.d_exa)
+     printbold("\n[o_black_button]: ")
+     printcr(o_black_button.d_exa)
+
+    t_ask
+      printcr(d_ask)
+    
+   t_individual
+     if not(equal(%action, examine)) then
+       printcr("In order to [action] [the] [o_engravings], you must address /
+                them individually.")
+     disagree()
+
+END_OBJ
+#-------------------------------------------------------------------------------
+
+#-------------------------------------------------------------------------------
+$OBJECT o_door
+=======
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
  DESCRIPTIONS
    d_sys "the engravings"
 
@@ -4983,7 +5391,10 @@ ATTRIBUTES
      endif
      if owns(o_npc, %this) then
        printcr(d_no_time)
+<<<<<<< HEAD
+=======
        disagree()
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
      else
        if testflag(f_dangling) then
          printcr(d_take)
@@ -4992,6 +5403,19 @@ ATTRIBUTES
 
    t_drop
      if equal(o_subject, o_rope) then
+<<<<<<< HEAD
+       # check if something is tied to the rope
+       if not(equal(r_tied_to, %none)) then
+         if owns(o_player, r_tied_to) then
+           move(o_subject, owner(o_player))
+           move(r_tied_to, owner(o_player))
+           printcr("As the rope is tied to [the] [r_tied_to], you drop /
+                    [the] [r_tied_to] as well.")
+         else
+           # player does not own the object the rope is tied to
+           nomatch()
+         endif
+=======
        if runverb() then
          # check if something is tied to the rope
          if not(equal(r_tied_to, %none)) then
@@ -5003,6 +5427,7 @@ ATTRIBUTES
          endif
        else
          disagree()
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
        endif
      else
        # check if the rope is tied to the object to be dropped
@@ -5040,6 +5465,19 @@ ATTRIBUTES
          disagree()
        endif
      endif
+<<<<<<< HEAD
+     agree()
+
+   t_pull
+     if equal(r_tied_to, o_ladder) then
+       if trigger(o_ladder.t_pull) then
+         agree()
+       else
+         disagree()
+       endif
+     endif
+=======
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
      if equal(r_tied_to, o_lever) then
        nomatch()
      endif
@@ -5079,11 +5517,15 @@ ATTRIBUTES
      disagree()
 
    t_tie_spec
+<<<<<<< HEAD
+     if equal(o_spec, o_lever) or equal(o_spec, o_ladder) then
+=======
      if equal(o_spec, o_npc) then
        printcr("\"I'm not into that kinky stuff\".")
        disagree()
      endif
      if equal(o_spec, o_lever) or equal(o_spec, o_ladder) or equal(o_spec, o_ring) then
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
        # will be handled by the objects themselves
        nomatch()
      endif
@@ -5097,6 +5539,19 @@ ATTRIBUTES
      if not(owns(o_player, o_rope)) then
        printcr("(taking the rope first).\n")
        if not(try(l_location, 0, 0, "take [o_rope]")) then
+<<<<<<< HEAD
+         disagree()
+       endif
+     endif
+     if testflag(o_spec.f_takeable) then
+       if not(owns(o_player, o_spec)) then
+         printcr("(taking [the] [o_spec] first).\n")
+         if not(try(l_location, 0, 0, "take [o_spec]")) then
+           disagree()
+         endif
+       endif
+     endif
+=======
          disagree()
        endif
      endif
@@ -5106,6 +5561,7 @@ ATTRIBUTES
          disagree()
        endif
      endif
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
      if not(equal(r_tied_to, %none)) then
        printcr("You must untie the rope from [the] [r_tied_to] first.")
          disagree()
@@ -5132,6 +5588,12 @@ ATTRIBUTES
          o_rope.r_tied_to = %none
 
    t_untie_from
+<<<<<<< HEAD
+     if not(equal(o_rope.r_tied_to, o_spec)) then
+       printcr("But the [o_rope] is not tied to [the] [o_spec].")
+     else
+       if trigger(t_untie) then endif
+=======
      if equal(o_spec, o_ladder) then
        # ladder will handle this
        nomatch()
@@ -5141,6 +5603,7 @@ ATTRIBUTES
          disagree()
        else
          if trigger(t_untie) then endif
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 
    t_no_tied_to
      r_tied_to = %none
@@ -5222,8 +5685,11 @@ $OBJECT o_hook
    d_exa         "This is a metal hook, about two feet long. The long side /
                   ends in an open eye.\n"
 
+<<<<<<< HEAD
+=======
    d_ask         "\"Like the rope, this item is also crucial for your quest\"."
 
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
    d_take_drop   "You [action] the [o_rope] as well, since it's tied to the /
                   [o_hook]."
 
@@ -5233,9 +5699,14 @@ $OBJECT o_hook
    d_throw_1     "\"Don't throw that [o_hook]! If it gets lost you'll never /
                   escape!\""
 
+<<<<<<< HEAD
+   d_throw_2     "[the] [o_npc] holds your arm... \"I wouldn't do that if /
+                  I were you. You really need that hook to get out of here.\""
+=======
    d_throw_2     "Fred holds your arm... \"I wouldn't do that if I were you. /
                   The hook might go through the hole and you really need that /
                   hook to get out of here.\""
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 
    d_throw_3     "You throw the [o_hook] but the [o_spec] is way out of /
                   your reach. The hook doesn't even get halfway and falls on /
@@ -5257,12 +5728,19 @@ $OBJECT o_hook
 
  TRIGGERS
    "i"                                       -> t_i
+<<<<<<< HEAD
+   "take [o_hook]"                           -> t_take_drop
+   "drop [o_hook]"                           -> t_take_drop
+   "throw [o_hook]"                          -> t_more_specific
+   "throw [o_hook] [prepos] [o_escape_hole]" -> t_throw
+=======
    "ask [o_npc] about [o_hook]"              -> t_ask
    "take [o_hook]"                           -> t_take_drop
 #   "drop [o_hook]"                           -> t_take_drop
    "throw [o_hook]"                          -> t_more_specific
    "throw [o_hook] [prepos] [o_escape_hole]" -> t_throw
    "throw [o_hook] [prepos] [o_ring]"        -> t_throw
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 
    t_take_drop
      if owns(o_npc, %this) then
@@ -5323,6 +5801,11 @@ $OBJECT o_ladder
 
    d_entr_grating "\nClamped to the floor is a [o_ladder]."
 
+<<<<<<< HEAD
+   d_exa          "The ladder is about 10 ft long and made of wood. The /
+                   sides are 3 inch wide. There are scratches on the sides /
+                   of the ladder where the wood is splintered."
+=======
    d_exa          "The ladder is about 10 ft (3 meters) long and made of wood. The /
                    sides are 3 inch (8 cm) wide. There are scratches on the sides /
                    of the ladder where the wood is splintered."
@@ -5334,12 +5817,20 @@ $OBJECT o_ladder
 
    d_ask_3        "\"Well, it's not long enough to reach the hole in the /
                    escape room ceiling, for sure\"."
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 
    d_locked       "The [o_ladder] is firmly attached to the "
 
    d_pit          "You reach into the pit so you can get a hold of the top /
                    rung of the ladder to pull it out."
 
+<<<<<<< HEAD
+   d_pit          "You reach into the pit, but the distance to the /
+                   [o_ladder] is too far."
+
+   d_pull_pit     "You manage to lift the ladder a little bit but it's not /
+                   enough to pull it out of the pit." 
+=======
    d_floor        "The ladder lies on the floor. If it would be up against /
                    the wall you could have reached it."
 
@@ -5348,6 +5839,7 @@ $OBJECT o_ladder
 
    d_nowhere      "The [o_ladder] is put against [the] [r_put_against] but /
                    it leads to nothing."
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 
  CONTAINED in l_alcove
 
@@ -5355,13 +5847,29 @@ $OBJECT o_ladder
    f_takeable = 1
    f_fixed    = 1
    f_tieable  = 1
+<<<<<<< HEAD
+   f_floor    = 1   # for when it falls into the pit
+=======
    f_floor    = 0   # for when it falls into the pit
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
    f_needed   = 1
 
  ATTRIBUTES
    r_put_against = %none
 
  TRIGGERS
+<<<<<<< HEAD
+   "inventory"                      -> t_i
+   "examine [o_ladder]"             -> t_exa
+   "get [o_ladder]"                 -> t_take
+   "climb [o_ladder]"               -> t_climb
+   "climb [o_south_wall]"           -> t_climb
+   "tie [o_rope] to [o_ladder]"     -> t_tie
+   "tie [o_ladder] to [o_rope]"     -> t_tie
+   "untie [o_rope]"                 -> t_untie
+   "untie [o_rope] from [o_ladder]" -> t_untie
+   "go up"                          -> t_climb
+=======
    "inventory"                              -> t_i
    "examine [o_ladder]"                     -> t_exa
    "ask [o_npc] about [o_ladder]"           -> t_ask
@@ -5375,6 +5883,7 @@ $OBJECT o_ladder
    "tie [o_ladder] to [o_rope]"             -> t_tie
    "untie [o_rope]"                         -> t_untie
    "untie [o_rope] from [o_ladder]"         -> t_untie
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 
    t_entrance
      if equal(owner(o_ladder), l_alcove) then
@@ -5509,6 +6018,54 @@ $OBJECT o_ladder
          else
            printcr("Nothing happens.")
 
+   t_tie
+     if equal(o_rope.r_tied_to, o_ladder) then
+       printcr("The rope is already tied to the ladder.")
+       disagree()
+     endif
+     if owns(o_pit, o_ladder) and owns(l_location, o_player) then
+       printcr(d_pit)
+       disagree()
+     endif
+     if not(equal(o_rope.r_tied_to, %none)) then
+       printcr("(untying the rope from [the] [o_rope.r_tied_to] first).")
+     endif
+     printcr("The rope is now tied to the ladder.")
+     o_rope.r_tied_to = o_ladder
+
+   t_untie
+     if equal(o_subject, %none) then
+       if not(equal(o_rope.r_tied_to, o_ladder)) then
+         # they entered "untie rope" and it's not tied to the ladder
+         nomatch()
+       endif
+     endif
+     if not(equal(o_rope.r_tied_to, o_ladder)) then
+       printcr("But the rope is not tied to the ladder.")
+     else
+       if owns(o_pit, o_ladder) and owns(l_location, o_player) then
+         printcr(d_pit)
+         disagree()
+       else
+         printcr("You untie the rope from the ladder.")
+         o_rope.r_tied_to = %none
+         disagree()
+
+   t_pull  # will be called by the rope when the rope is attached to the ladder
+     if owns(l_alcove, o_ladder) or (owns(l_east_of_grating, o_ladder) and 
+                                not(testflag(o_clamp.f_open))) then
+       print("Nothing happens. ")
+       if trigger(t_clamped) then endif
+     else
+       if owns(o_pit, o_ladder) and owns(l_circular_room, o_player) then
+         printcr(d_pull_pit)
+       else
+         if not(owns(o_player, o_ladder)) then
+           printcr("You pull the ladder towards you and take it.")
+           move(o_ladder, o_player)
+         else
+           printcr("Nothing happens.")
+
 END_OBJ
 #-------------------------------------------------------------------------------
 
@@ -5593,12 +6150,22 @@ $OBJECT o_lever
                  in the ceiling, moving the ladder and the clamp out of /
                  sight. You hear a click above you, probably from the clamp."
 
+<<<<<<< HEAD
+   d_close      "The alcove's south wall swings up and covers the opening /
+                 in the ceiling, moving the ladder and the clamp out of /
+                 sight. You hear a click above you, probably from the clamp."
+
+   d_open       "Again, you hear a click above you and the ceiling swings /
+                 down and covers the [o_south_wall] again, bringing the /
+                 ladder and clamp back in sight."
+=======
    d_open       "Again, you hear a click above you and the ceiling swings /
                  down and covers the [o_south_wall] again, bringing the /
                  ladder and clamp back in sight."
 
    d_reach      "You cannot reach the lever from here. You must go back /
                  to the alcove."
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 
  CONTAINED in l_alcove
 
@@ -5611,6 +6178,18 @@ $OBJECT o_lever
    r_position = down
 
  TRIGGERS
+<<<<<<< HEAD
+   "pull [o_lever]"                -> t_switch
+   "pull [o_lever] [dir]"          -> t_switch_dir
+   "push [o_lever]"                -> t_switch
+   "push [o_lever] [dir]"          -> t_switch_dir
+   "switch [o_lever]"              -> t_switch
+   "switch [o_lever] [dir]"        -> t_switch_dir
+   "pull [o_rope]"                 -> t_switch
+   "tie [o_rope] to [o_lever]"     -> t_tie
+   "tie [o_lever] to [o_rope]"     -> t_tie
+   "put [o_rope] around [o_lever]" ->t_tie
+=======
    "x [o_lever]"                          -> t_exa
    "ask [o_npc] about [o_lever]"          -> t_ask
    "pull [o_lever]"                       -> t_switch
@@ -5643,6 +6222,7 @@ $OBJECT o_lever
        disagree()
      endif
      nomatch()
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 
    t_switch
      if equal(o_subject, o_rope) then 
@@ -5767,13 +6347,27 @@ $OBJECT o_x_button
    d_sys   "the X button", "the left button", "the x engraving",
            "the left engraving"
 
+<<<<<<< HEAD
+   d_exa   "The button has a diameter of about 2 inches. In the button is an /
+            engraving that says: \"Tom was here.\"\n"
+=======
    d_exa  "The button has a diameter of about 2 inches. Engraved in the /
            button is an 'X' character.\n"
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 
  CONTAINED in o_xyz_buttons
 
+<<<<<<< HEAD
+   d_retry "\nFred is here. He looks at you and shakes his head. \"You /
+            really should have checked out those photos better, buddy\". /
+            He pulls out his tablet and starts typing. \"I'll put you /
+            back on your feet, but it'll cost you 30 points. Try to be /
+            more careful now, will you?\n\n"
+            "\"Happy adventuring!\"\n"  
+=======
  FLAGS
    f_pressable = 1
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 
  TRIGGERS
    "x [o_xyz_buttons]"  -> t_exa_xyz
@@ -5833,8 +6427,13 @@ $OBJECT o_z_button
    d_sys   "the Z button", "the right button", "the z engraving",
            "the right engraving"
 
+<<<<<<< HEAD
+   d_exa   "The button has a diameter of about 2 inches. In the button is an /
+            engraving that says: \"Jessica was here.\"\n"
+=======
    d_exa  "The button has a diameter of about 2 inches. Engraved in the /
            button is a 'Z' character.\n"
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 
  CONTAINED in o_xyz_buttons
 
@@ -5971,6 +6570,17 @@ END_OBJ
 #-------------------------------------------------------------------------------
 
 #-------------------------------------------------------------------------------
+<<<<<<< HEAD
+$OBJECT o_safe
+ DESCRIPTIONS
+   d_sys        "the metal safe"
+
+   d_entr       "There is a [o_safe] here, which is "
+
+   d_exa        "A metal safe, six cubic feet maybe. The safe looks pretty /
+                 new and very heavy.\n"
+                "\nOn the [o_safe] is a [o_keypad]."
+=======
 $OBJECT o_screen
  DESCRIPTIONS
    d_sys        "the computer screen", "the text output"
@@ -6175,6 +6785,7 @@ $OBJECT o_safe
 
    d_ask_2      "\"I found this fine watch in it. There was some other stuff /
                  in there, but I forgot what it was already\"."
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 
    d_guess      "You are either a very lucky guesser or cheating. For the /
                  latter, don't expect to find a watch now.\n"
@@ -6198,7 +6809,10 @@ $OBJECT o_safe
 
  TRIGGERS
    "examine [o_safe]"                  -> t_exa
+<<<<<<< HEAD
+=======
    "ask [o_npc] about [o_safe]"        -> t_ask
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
    "look in the [o_safe]"              -> t_exa
    "put [o_subject] [prepos] [o_safe]" -> t_put
    "unlock [o_safe]"                   -> t_unlock
@@ -6416,8 +7030,13 @@ $OBJECT o_lamp
    d_donthave "You don't have [the] [o_lamp]."
 
    d_lit      "[the] [o_lamp] is lit. It has power for [m_battery] more /
+<<<<<<< HEAD
+               moves. Because this is a sample story you may recharge the /
+               lamp with the \"charge\" command."
+=======
                moves. Because there are no batteries here, you can recharge /
                the lamp with the \"charge\" command."
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 
    d_empty    "The lamp just went off (use charge to reset it.)"
 
@@ -6742,7 +7361,11 @@ $OBJECT o_red_dial
 
    d_exa "A red circular plate, fixed to the wall. It looks like a clock dial /
           with one hand, with the numbers 0 through 9 printed at equal /
+<<<<<<< HEAD
+          distances around the edge. The number 8 is highlighted. There is a/
+=======
           distances around the edge. The number 8 is highlighted. There is a /
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
           [o_red_hand] on the dial, pointing towards the number [m_red_dial].\n"
 
  CONTAINED in l_dial_room
@@ -6777,11 +7400,19 @@ END_OBJ
 $OBJECT o_red_button
  DESCRIPTIONS
    d_sys     "the red button", "the red engraving"
+<<<<<<< HEAD
 
    d_exa     "the red button has a diameter of about 2 inches. It is /
               positioned under the [o_red_dial]. "
              "In the button is an engraving that says: delta = 1.\n"
 
+=======
+
+   d_exa     "the red button has a diameter of about 2 inches. It is /
+              positioned under the [o_red_dial]. "
+             "In the button is an engraving that says: delta = 1.\n"
+
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
    d_no_stop "Nothing happens. The hand keeps moving. Apparently, the button /
               can only be used to start the hand moving."
 
@@ -6922,11 +7553,19 @@ END_OBJ
 $OBJECT o_green_button
  DESCRIPTIONS
    d_sys     "the green button", "the green engraving"
+<<<<<<< HEAD
 
    d_exa     "the green button has a diameter of about 2 inches. It is /
               positioned under the [o_green_dial]. "
              "In the button is an engraving that says: delta = 2.\n"
 
+=======
+
+   d_exa     "the green button has a diameter of about 2 inches. It is /
+              positioned under the [o_green_dial]. "
+             "In the button is an engraving that says: delta = 2.\n"
+
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
    d_no_stop "Nothing happens. The hand keeps moving. Apparently, the button /
               can only be used to start the hand moving."
 
@@ -6955,7 +7594,11 @@ $OBJECT o_green_button
         else
        if testflag(f_pressed) then
          # They may not stop the hand once it's noving
+<<<<<<< HEAD
+         printcr("d_no_stop")
+=======
          printcr(d_no_stop)
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
        else
          o_dial_puzzle.r_times_pressed += 1   # for offering help
          setflag(f_pressed)
@@ -6995,7 +7638,11 @@ $OBJECT o_green_hand
    "turn [o_green_hand] to [value]" -> t_turn
    "set  [o_green_hand] to [value]" -> t_turn
    "move [o_green_hand] to [value]" -> t_turn
+<<<<<<< HEAD
+   "press [o_black_button]"       -> t_reset
+=======
    "press [o_black_button]"         -> t_reset
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 
    t_entrance
      setflag(f_seenbefore)
@@ -7099,7 +7746,11 @@ $OBJECT o_blue_button
      else
        if testflag(f_pressed) then
          # They may not stop the hand once it's noving
+<<<<<<< HEAD
+         printcr("d_no_stop")
+=======
          printcr(d_no_stop)
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
        else
          o_dial_puzzle.r_times_pressed += 1   # for offering help
          setflag(f_pressed)
@@ -7231,7 +7882,11 @@ $OBJECT o_pit
 
    d_enter      "You climb down the [o_ladder] into the pit.\n"
 
+<<<<<<< HEAD
+   d_no_enter   "But how? It's 15 feet deep, and there's no ladder or /
+=======
    d_no_enter   "But how? It's 12 feet (4 m) deep, and there's no ladder or /
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
                  other way to get down without hurting yourself."
 
    d_on_floor   "Technically, there is a [o_ladder] in the [o_pit], /
@@ -7380,7 +8035,11 @@ $OBJECT o_pit
        printcr("[the] [o_subject] is already in the [o_pit].")
        disagree()
      endif
+<<<<<<< HEAD
+     if equal(o_subject, o_ladder) then
+=======
      if equal(o_subject, o_ladder) and owns(l_circular_room, o_snake) then
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
        printcr(d_no_ladder)
        agree()
      endif
@@ -7389,6 +8048,7 @@ $OBJECT o_pit
        printcr(d_no_rope)
        agree()
      endif
+
      if owns(o_pit, o_player) then
        printcr("As you are in the o_pit yourself, you just drop [the] [o_subject].")
        if try(o_actor, 0, 0, "drop [o_subject]") then endif
@@ -7477,7 +8137,11 @@ $OBJECT o_snake
  DESCRIPTIONS
    d_sys        "the giant snake", "the giant python"
 
+<<<<<<< HEAD
+   d_exa        "The snake is huge! It's a python, 8 feet long. /
+=======
    d_exa        "The snake is huge! It's a python, 8 feet (2.5 m) long. /
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
                  It seems well fed. However, it looks like it doesn't want to /
                  be disturbed. Better leave it alone."
 
@@ -7588,11 +8252,19 @@ $OBJECT o_disk
                   "In the middle of the disk is a [o_groove] with some /
                    [o_splinters] in it.\n"
 
+<<<<<<< HEAD
+   d_ask1           "\"The [o_disk] can be rotated. If you could somehow /
+                     reach it.\""
+
+   d_ask2           "\"It is no longer important, now that you got rid of /
+                     that snake.\""
+=======
    d_ask1          "\"The [o_disk] can be rotated. If you could somehow /
                     reach it.\""
 
    d_ask2          "\"It is no longer important, now that you got rid of /
                     that snake.\""
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 
    d_more_specific "You have to be more specific about which way to turn: /
                     clockwise or counterclockwise."
@@ -7609,7 +8281,11 @@ $OBJECT o_disk
                    "You push harder when the ladder reaches the snake. With /
                     tremendous effort you push the snake towards the edge of /
                     the [o_pit]. The snake winds itself around the ladder, /
+<<<<<<< HEAD
+                    and both ladder and snake tumble into the [o_pit]!\n"
+=======
                     and both ladder and snake tumble into the [o_pit]!"
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
                    
    d_turn_prepos   "Use clockwise or counterclockwise to indicate in which /
                     direction to turn."
@@ -7624,12 +8300,23 @@ $OBJECT o_disk
    "ask [o_npc] about [o_groove]" -> t_ask
    "get [o_disk]"                 -> t_get_disk
    "turn [o_disk]"                -> t_turn
+<<<<<<< HEAD
+   "turn [o_groove]"              -> t_turn
+=======
    "push [o_disk]"                -> t_turn
    "turn [o_groove]"              -> t_turn
    "push [o_groove]"              -> t_turn
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
    "turn [o_ladder]"              -> t_turn
    "push [o_ladder]"              -> t_turn
    "turn [o_disk] [dir]"          -> t_turn_err
+<<<<<<< HEAD
+   "turn [o_groove] [dir]"        -> t_turn_err
+   "turn [o_ladder] [dir]"        -> t_turn_err
+   "turn [o_disk] [prepos]"       -> t_turn_prepos
+   "turn [o_groove] [prepos]"     -> t_turn_prepos
+   "turn [o_ladder] [prepos]"     -> t_turn_prepos
+=======
    "push [o_disk] [dir]"          -> t_turn_err
    "turn [o_groove] [dir]"        -> t_turn_err
    "push [o_groove] [dir]"        -> t_turn_err
@@ -7640,6 +8327,7 @@ $OBJECT o_disk
    "push [o_groove] [prepos]"     -> t_turn_prepos
    "turn [o_ladder] [prepos]"     -> t_turn_prepos
    "push [o_ladder] [prepos]"     -> t_turn_prepos
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 
    t_ask
      if owns(l_circular_room, o_snake) then
@@ -7693,9 +8381,13 @@ $OBJECT o_disk
            printcr(d_clockwise)
            move(o_ladder, o_pit)
            move(o_snake, o_pit)
+<<<<<<< HEAD
+           if equal(o_rope.r_tied_to, o_ladder) then
+=======
            setflag(o_ladder.f_floor)
            if equal(o_rope.r_tied_to, o_ladder) then
              printcr("The rope follows the ladder into the pit.")
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
              move(o_rope, o_pit)
            endif
            starttimer(m_snake)
@@ -7752,11 +8444,15 @@ $OBJECT o_groove
            disagree()
          endif
        endif
+<<<<<<< HEAD
+       printcr(d_slide)
+=======
        if owns(l_circular_room, o_snake) then
          printcr(d_slide)
        else
          printcr("Ok, the ladder is now in the groove.")
        endif
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
        move(o_ladder, o_groove, in)
 
    t_throw
@@ -7802,8 +8498,13 @@ $OBJECT o_escape_hole
    d_exa        "[the] [o_escape_hole] seems large enough to climb through. /
                  if only you could reach it...\n"
 
+<<<<<<< HEAD
+   d_ask        "Fred looks up at the ceiling. It's a large hole. I think /
+                 you will fit through it. If ... you can reach it."
+=======
    d_ask        "Fred looks up at the ceiling. \"It's a large hole. I think /
                  you will fit through it. If you can reach it\"."
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 
  CONTAINED in l_escape_room
 
@@ -8097,8 +8798,12 @@ $OBJECT o_generic_ceiling
 
    t_exa
      if owns(l_escape_room, %this, 0) then
+<<<<<<< HEAD
+       printcr("There's [o_escape_hole] in the ceiling.")
+=======
        printcr("There's a [o_escape_hole] in the ceiling, with /
                 a [o_ring] next to it.")
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
      else
        r_examine = rnd(1,3)
        if equal(r_examine, 1) then

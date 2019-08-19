@@ -72,6 +72,8 @@ int32_t IsDigit(char digit)
 }
 
 
+<<<<<<< HEAD
+=======
 void ResetKVPair(kvPair *kv)
 {
   kv->key                 = ResetString(kv->key);
@@ -84,6 +86,7 @@ void ResetKVPair(kvPair *kv)
 }
 
 
+>>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 void GetDigitString(char *source, char *dest, int *index, int max_len)
 {
   int start = *index;
