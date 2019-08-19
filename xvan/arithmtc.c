@@ -39,9 +39,6 @@
 /* Function declarations */
 /*************************/
 
-int32_t XeqEqual(int32_t**);
-int32_t XeqLtGt(int32_t, int32_t**);
-
 int32_t      XeqEqual(int32_t**);
 int32_t      XeqLtGt(int32_t, int32_t**);
 resultStruct XeqBasicOperator(int32_t, int32_t**);
@@ -191,6 +188,7 @@ int32_t XeqLtGt(int32_t operation, int32_t **trigger)
   else
     return(QUIT);
 }
+
 
 /*******************************/
 /* Internal action definitions */

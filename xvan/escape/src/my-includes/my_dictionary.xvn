@@ -1,9 +1,5 @@
 
-<<<<<<< HEAD
-# my dictionary for esca[pe.xvn
-=======
 # my dictionary for escape.xvn
->>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 
 #===================
 # Directions section
@@ -17,17 +13,10 @@ in, out
 #=============
 
 $NOUNS
-<<<<<<< HEAD
-alcove, bars, buttons, clamp, dial, dials, edges, engraving, engravings, faucet, flames, 
-fred, grating, groove, guy, hacksaw, halfway, hedges, inscription, keyhole, keypad, lever, 
-nails, notch, notches, photos, python, saw, shard, shed, splinter, splinters, stairs, 
-toaster, trapdoor, upstairs, vault, you SYNONYM me
-=======
 alcove, axle, bars, buttons, clamp, dial, dials, edges, engraving, engravings, faucet, 
 flames, fred, gloves, grate, grating, groove, guy, hacksaw, halfway, hedges, inscription, 
 keyhole, keypad, lever, mural, nails, notch, notches, opening, photos, python, saw, shard, shed, 
 splinter, splinters, stairs, toaster, trapdoor, upstairs, vault, verb, you SYNONYM me SYNONYM I
->>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 
 #==================
 # Adjective section

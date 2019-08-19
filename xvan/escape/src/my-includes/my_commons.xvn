@@ -11,5 +11,6 @@ $COMMON_FLAGS
  f_moveable   = 0
  f_tieable    = 0
  f_pressable  = 0
+ f_drinkable  = 0
  f_needed     = 0 # tells if an object is needed to finish the game
  f_sk_puzzle  = 0

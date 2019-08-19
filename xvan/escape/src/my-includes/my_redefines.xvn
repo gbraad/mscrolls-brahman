@@ -1,55 +1,5 @@
 
-<<<<<<< HEAD
-$REDEFINE_VERB ask
- SCOPE all_locs
-
- PROLOGUE
-   if not(testflag(o_actor.f_alive)) then
-     printcr("Do you realize that you are talking to [a] [o_actor]?.")
-     disagree()
-   endif
-
-   if equal(o_spec, o_nst) then
-     printcr("I don't know what you're talking about.")
-     disagree()
-   endif
-
- "ask [o_subject] about [o_spec]"
-   DISAMBIGUATION_RULES
-    if equal(o_subject, o_nst) then score(-15) endif  # make nst always lose
-    if testflag(o_spec.f_seenbefore) then score(5) endif
-    if isobject(o_subject) then
-      if owns(l_exit, o_subject) then
-        if owns(l_exit, o_player) then 
-          score(5)
-        else
-          score(-5)          
-   END_RULES
-
-   if equal(o_subject, o_actor) then
-     printcr("Talking to yourself is a sign of pending mental collapse.")
-   else
-     if not(testflag(o_spec.f_seenbefore)) then
-       printcr("We haven't found that yet.")
-     else
-       printcr("Just [a] [o_spec].")
-
-  DEFAULT
-    printcr("I only understood you as far as wanting to ask something.")
-    if testflag(o_player.f_verb_help) then
-      printcr("")
-      Printcr("An example of the syntax I understand is:")
-      printcr("  'ask Fred about the old wooden chest'")
-      printcr("(to turn off these help messages, type 'help')")
-
-ENDVERB
-
-
-$REDEFINE_VERB is
- SCOPE all_locs
-=======
 $REDEFINE_TRIGGERS
->>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 
 t_entrance
   if not(islit(o_player)) then
