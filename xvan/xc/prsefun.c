@@ -686,7 +686,7 @@ int32_t CheckPars(int32_t *fun_string)
 
       par = NextPar(fun_string, &index);
       if (!(IsType(par, TRIGGERS) || IsType(par, COMMON_TRIGGERS))) {
-        TypeErr(1, "trigger()", "local trigger id");
+        TypeErr(1, "trigger()", "local or common trigger id");
         return(ERROR);
       }
       break;
@@ -921,7 +921,7 @@ int32_t CheckPars(int32_t *fun_string)
       }
       break;
 
-    case ADDJSON:  /* addjson("string") */
+    case ADDJSON:  /* addjson("string [, loc/obj]") */
       if (nr_of_pars != 1 && nr_of_pars != 2) {
         NrErr("addjson()", "1 or 2");
         return(ERROR);
@@ -1152,21 +1152,23 @@ int32_t CheckPars(int32_t *fun_string)
       break;
 
     case BACKGROUND:  /* background(string) */
-	  if (fun_name[0] == '\0')
-		strncpy(fun_name, "background()", MAX_WORD_LEN);
+      if (fun_name[0] == '\0')
+        strncpy(fun_name, "background()", MAX_WORD_LEN);
     case TEXT:
-	  if (fun_name[0] == '\0')
-		strncpy(fun_name, "text()", MAX_WORD_LEN);
+      if (fun_name[0] == '\0')
+        strncpy(fun_name, "text()", MAX_WORD_LEN);
     case BOLD:
-	  if (fun_name[0] == '\0')
-		strncpy(fun_name, "bold()", MAX_WORD_LEN);
+      if (fun_name[0] == '\0')
+        strncpy(fun_name, "bold()", MAX_WORD_LEN);
     case ITALIC:
-	  if (fun_name[0] == '\0')
-		strncpy(fun_name, "italic()", MAX_WORD_LEN);
+      if (fun_name[0] == '\0')
+        strncpy(fun_name, "italic()", MAX_WORD_LEN);
     case UNDERLINE:
-	  if (fun_name[0] == '\0')
-		strncpy(fun_name, "underline()", MAX_WORD_LEN);
-
+      if (fun_name[0] == '\0')
+        strncpy(fun_name, "underline()", MAX_WORD_LEN);
+    case PLAYMODE:
+      if (fun_name[0] == '\0')
+        strncpy(fun_name, "playmode()", MAX_WORD_LEN);
       if (nr_of_pars != 1) {
         NrErr(fun_name, "1");
         return(ERROR);
@@ -1188,10 +1190,31 @@ int32_t CheckPars(int32_t *fun_string)
       /* strings are not allowed */
       for (i=0; i<nr_of_pars; i++) {
         par = NextPar(fun_string, &index);
+
         if (IsType(par, STRING)) {
           TypeErr(i+1, "pickone()", "anything but a string");
           return(ERROR);
         }
+      }
+      break;
+
+    case ADDCHOICE:   /* addchoice(string, string) */
+      if (nr_of_pars != 2) {
+        NrErr("addchoice()", "2");
+        return(ERROR);
+      }
+
+      par = NextPar(fun_string, &index);
+
+      if (!IsType(par, STRING)) {
+        TypeErr(1, "addchoice()", "string");
+        return(ERROR);
+      }
+
+      par = NextPar(fun_string, &index);
+      if (!IsType(par, STRING)) {
+        TypeErr(1, "addchoice()", "string");
+        return(ERROR);
       }
       break;
 

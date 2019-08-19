@@ -175,6 +175,11 @@ const char *NL_errors[] = {
   "\n(146) Meer dan 1 vervangende definitie van flag:"
   "\n(146) Meer dan 1 vervangende definitie van attribuut:",
   "\n(148) Dynamische system beschrijvingen mogen alleen attribuut parameters hebben"
+  "\n...de GUI sidebar wordt aangezet voor keuze/hybridemodus..",
+  "\n...het GUI kompas wordt aangezet voor keuzemodus..",
+  "\n...NO_SIDEBAR optie genegeerd (niet in interpreter speelmodus)..",
+  "\n...NO_TEXTINPUT optie genegeerd vanwege interpreter speelmodus..",
+  "\n...NO_COMPASS optie genegeerd vanwege keuze speelmodus.."
 };
 
 #endif

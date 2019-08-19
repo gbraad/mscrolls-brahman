@@ -25,10 +25,6 @@
 /* this file tells for which OS the sources must be compiled */
 /* comment out the lines which are not your operating system */
 
-/**************************************************/
-/* FOR macOS, ENABLE BOTH __linux_os AND __osx_os */
-/**************************************************/
-
 /* this file is best be excluded from git */
 
 #if !defined(__which_os)
@@ -37,6 +33,6 @@
 #define __windows_os
 
 /* #define __linux_os */
-/* #define __osx_os   */
+/* #define __osx_os */
 
 #endif

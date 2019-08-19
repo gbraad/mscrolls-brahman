@@ -137,5 +137,8 @@ int32_t ENG_PreDefs(void)
   if (GetTriggerId("default", 0, &id, COMMON_TRIGGERS, 1).tag == ERROR)
     return(ERROR);
 
+  if (GetTriggerId("choice", 0, &id, COMMON_TRIGGERS, 1).tag == ERROR)
+    return(ERROR);
+
   return(OK);
 }

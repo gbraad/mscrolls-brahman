@@ -116,6 +116,14 @@ int32_t NL_CheckIfKeyword(char *word_lwr)
     return(PRIMARY_COLOR);
   if (strncmp(word_lwr, "hoofdkleur", MAX_WORD_LEN) == 0)
     return(PRIMARY_COLOR);
+  if (strncmp(word_lwr, "choice_mode", MAX_WORD_LEN) == 0)
+    return(CHOICE_MODE);
+  if (strncmp(word_lwr, "keuzemodus", MAX_WORD_LEN) == 0)
+    return(CHOICE_MODE);
+  if (strncmp(word_lwr, "hybrid_mode", MAX_WORD_LEN) == 0)
+    return(HYBRID_MODE);
+  if (strncmp(word_lwr, "hybridemodus", MAX_WORD_LEN) == 0)
+    return(HYBRID_MODE);
 
   /* end of story info keywords */
 
@@ -250,7 +258,11 @@ int32_t NL_CheckIfKeyword(char *word_lwr)
   if (strncmp(word_lwr, "herstart", MAX_WORD_LEN) == 0)
     return(RESTART);
   if (strncmp(word_lwr, "eenvan", MAX_WORD_LEN) == 0)
-    return(RESTART);
+    return(PICKONE);
+  if (strncmp(word_lwr, "nieuwekeus", MAX_WORD_LEN) == 0)
+    return(ADDCHOICE);
+  if (strncmp(word_lwr, "speelmodus", MAX_WORD_LEN) == 0)
+    return(PLAYMODE);
   if (strncmp(word_lwr, "(", MAX_WORD_LEN) == 0)
     return(LEFT_PAR);
   if (strncmp(word_lwr, ")", MAX_WORD_LEN) == 0)

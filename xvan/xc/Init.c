@@ -45,7 +45,7 @@
 int16_t  xvan_language  = ENG;
 int16_t  story_language = ENG;
 
-int16_t  debug = 0;
+int16_t  debug = 0;  /* do not generate debug info */
 
 char     current_filename[PATH_MAX + MAX_FILENAME_LEN + 1];
 FILE     *source_file;
@@ -134,7 +134,7 @@ int32_t GetFullPath(char *full_path)
   /* there's enough room, copy real_path to full_path */
   strncpy(full_path, real_path, index+1);
   /* do not try to free() real_path */
-  return_path[index+1] = '\0';
+  full_path[index+1] = '\0';
 
   return(OK);
 }
@@ -266,6 +266,7 @@ int32_t main(int argc, char **argv)
     return(ERROR);
   }
   /* open the storyfile */
+  /* PATH_MAX is equivalent to windows' MAX_PATH defined in stdlib.h */
   strncpy(current_filename, storyfile, PATH_MAX + MAX_FILENAME_LEN + 1);
   if ((source_file = fopen_path(file_path, storyfile, "rb")) == NULL) {
     /* error opening file */

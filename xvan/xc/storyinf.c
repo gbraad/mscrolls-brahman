@@ -73,6 +73,7 @@ int32_t ReadStoryInfo(info, filename, file_list)
   strcpy(info->compiler_version, "2.4");
   info->xvan_language  = ENG;
   info->story_language = ENG;
+  info->play_mode      = INTERPRETER_MODE;
 
   /* debugging mode was entered from the command */
   /* line with "-d"                              */
@@ -174,13 +175,66 @@ int32_t ReadStoryInfo(info, filename, file_list)
         word = GetNextWord(&keyword, NO_ID, 0, &source_file, file_list);
         break;
 
+      case CHOICE_MODE:
+        /* switch off text input */
+        info->ui_textinput = 0;
+        if (!info->ui_compass) {
+          PrintError(150, NULL, NULL);
+          info->ui_compass = 1;
+        }
+        /* no break, continue with next case */
+      case HYBRID_MODE:
+        if (!info->ui_sidebar) {
+          PrintError(149, NULL, NULL);
+          info->ui_sidebar = 1;
+        }
+        switch (state) {
+          case 1:
+            if (info->play_mode != INTERPRETER_MODE) {
+              /* double definition of the play_mode parameter */
+              ErrHdr();
+              PrintError(144, NULL, "Play Mode");
+              return(ERROR);
+            }
+            else {
+              /* state remains the same */
+              info->play_mode = keyword;
+            }
+            break;
+          default:
+            ErrHdr();
+            PrintError(48, NULL, TranslateKeyword(word));
+            return(ERROR);
+        }
+        free(word);
+        word = GetNextWord(&keyword, NO_ID, 0, &source_file, file_list);
+        break;
+
       case NO_SIDEBAR:
+        if (info->play_mode != INTERPRETER_MODE) {
+          PrintError(151, NULL, NULL);
+          free(word);
+          word = GetNextWord(&keyword, NO_ID, 0, &source_file, file_list);
+          break;
+        }
         if (!ui_par)
           ui_par = &(info->ui_sidebar);
       case NO_TEXTINPUT:
+        if (info->play_mode != CHOICE_MODE && keyword == NO_TEXTINPUT) {
+          PrintError(152, NULL, NULL);
+          free(word);
+          word = GetNextWord(&keyword, NO_ID, 0, &source_file, file_list);
+          break;
+        }
         if (!ui_par)
           ui_par = &(info->ui_textinput);
       case NO_COMPASS:
+        if (info->play_mode == CHOICE_MODE && keyword == NO_COMPASS) {
+          PrintError(153, NULL, NULL);
+          free(word);
+          word = GetNextWord(&keyword, NO_ID, 0, &source_file, file_list);
+          break;
+        }
         if (!ui_par)
           ui_par = &(info->ui_compass);
         switch (state) {

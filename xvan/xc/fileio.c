@@ -1660,6 +1660,12 @@ int32_t StoreStoryInfo(storyInfo *info)
     return(ERROR);
   }
 
+  if (!StoreInt16(info->play_mode)) {
+    ErrHdr();
+    PrintError(33, NULL, NULL);
+    return(ERROR);
+  }
+
   if (!StoreInt16(debug)) {
     ErrHdr();
     PrintError(33, NULL, NULL);
