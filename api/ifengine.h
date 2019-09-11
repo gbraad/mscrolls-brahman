@@ -34,6 +34,7 @@
 #pragma once
 
 #include <string>
+#include <functional>
 #include "ifmap.h"
 #include "ifroster.h"
 
@@ -48,6 +49,7 @@ public:
     typedef std::string string;
     typedef void charEmitFn(void*, char);
     typedef void segmentInfoFn(void*, char);
+    typedef std::function<void(void)> Pump;
 
     struct CommandResultI
     {
@@ -92,6 +94,7 @@ public:
     virtual bool updateRosterInfo(RosterInfo&) { return false; }
     virtual bool getProductInfo(ProductInfo&) { return false; }
     virtual string currentVersion() const { return "1"; } // default
+    virtual void setPump(Pump) {}
 
     // options is now used to pass various things to the engine
     // a `VarSet` is used (rather than, say JSON) to pass in, because

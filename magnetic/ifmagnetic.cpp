@@ -232,6 +232,8 @@ bool IFMagnetic::_sync()
                 LOG3("_sync, too long ", cc2*500);
                 cc1 = 0;
             }
+
+            if (_pump) _pump();
             std::this_thread::sleep_for(std::chrono::milliseconds(20));
         }
     }

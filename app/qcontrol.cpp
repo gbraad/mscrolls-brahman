@@ -433,6 +433,8 @@ bool QControl::loadEngine()
     bool res = false;
     if (_app && !_pluginLoader && _engineName.size() > 0)
     {
+        Pump p = std::bind(&QControl::_pumpGUI, this);
+        
 #ifdef Q_OS_IOS
         QObject *plugin = QPluginLoader::staticInstances().first();
         if (plugin)
@@ -441,7 +443,7 @@ bool QControl::loadEngine()
                 qobject_cast<IFEngineInterface*>(plugin);
             if (be)
             {
-                parentT::loadEngine(be);
+                parentT::loadEngine(be, p);
                 LOG("engine loaded, magnetic static","");
                 res = true;
             }
@@ -482,7 +484,7 @@ bool QControl::loadEngine()
                         qobject_cast<IFEngineInterface*>(plugin);
                     if (be)
                     {
-                        bool v = parentT::loadEngine(be);
+                        bool v = parentT::loadEngine(be, p);
                         if (v)
                         {
                             LOG("engine loaded, ", fname);
@@ -507,7 +509,7 @@ bool QControl::loadEngine()
     {
         LOG4("QControl, ", "loading IFI");
 
-        Pump p = std::bind(QControl::_pumpGUI, this);
+        Pump p = std::bind(&QControl::_pumpGUI, this);
         
         // fallback to IFI
         res = parentT::loadIFI(p);
