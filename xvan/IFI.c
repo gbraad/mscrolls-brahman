@@ -56,8 +56,6 @@ void    SendIFIerror(char*, char*);
 /* Function definitions */
 /************************/
 
-<<<<<<< HEAD
-=======
 char *CreateLocObjJson(int32_t id)
 {
   char      *loc_obj      = NULL;
@@ -108,7 +106,6 @@ char *CreateLocObjJson(int32_t id)
 }
 
 
->>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 char *CreateJsonObjectMap(void)
 {
   int       i             = 0;

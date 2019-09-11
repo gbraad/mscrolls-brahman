@@ -63,11 +63,7 @@ char *xv_strlwr(char* str)
 }
 
 
-<<<<<<< HEAD
-int32_t    ScanWordTable(char *word, wordTable *wt_rec, int32_t lower, int32_t upper)
-=======
 int32_t ScanWordTable(char *word, wordTable *wt_rec, int32_t lower, int32_t upper)
->>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
  /* word is word to look for in word_table */
  /* wt_rec is struct to copy info into       */
 {
@@ -241,10 +237,7 @@ void InitParsedInput(parsedInput *parsed_input)
   parsed_input->direction                           = NO_ID;
 
   for (i=0; i<MAX_SUBJECTS; i++) {
-<<<<<<< HEAD
-=======
     (parsed_input->subject[i]).dynamic                = NULL;
->>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
     (parsed_input->subject[i]).part1.article          = NO_ID;
     (parsed_input->subject[i]).part1.nr_of_adjectives = 0;
     (parsed_input->subject[i]).part1.noun             = NO_ID;

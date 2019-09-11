@@ -45,11 +45,7 @@ int32_t ProcessInput(char[]);
 /* Function definitions */
 /************************/
 
-<<<<<<< HEAD
-void GetAddtlInput(char *addtl_input, char *prompt)
-=======
 void GetAddtlInput(kvPair *kv, char prompt[], int32_t ifi_tag, int block)
->>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
  /* addtl_input must have size INPUT_LINE_LEN */
 {
   /* this function is used when we need extra input from the user to  */
@@ -148,11 +144,7 @@ void GetAddtlInput(kvPair *kv, char prompt[], int32_t ifi_tag, int block)
 }
 
 
-<<<<<<< HEAD
-int32_t ProcessInput(char *prompt)
-=======
 int32_t ProcessInput(char prompt[])
->>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 {
   char    *ifi_get_result = NULL;
   char    *json_string    = NULL;

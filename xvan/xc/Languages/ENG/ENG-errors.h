@@ -174,7 +174,12 @@ const char *ENG_errors[] = {
   "\n(145) Owner missing for flag:",
   "\n(146) Multiple redefinition of flag:",
   "\n(147) Multiple redefinition of attribute:",
-  "\n(148) Dynamic system descriptions may only have attribute parameters"
+  "\n(148) Dynamic system descriptions may only have attribute parameters",
+  "\n...switching on GUI sidebar for choice/hybrid mode..",
+  "\n...switching on GUI compass for choice mode..",
+  "\n...ignoring NO_SIDEBAR option (not in interpreter mode)..",
+  "\n...ignoring NO_TEXTINPUT option for interpreter mode..",
+  "\n...ignoring NO_COMPASS option for choice mode.."
 };
 
 #endif

@@ -51,6 +51,7 @@ typedef struct {
           int16_t xvan_language;
           int16_t story_language;
           int16_t debug;
+          int16_t play_mode;
         } storyInfo;
 
 /*************************************************************/

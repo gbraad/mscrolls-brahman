@@ -172,8 +172,6 @@ int32_t HasType(int32_t word_id, int32_t type)
 }
 
 
-<<<<<<< HEAD
-=======
 int32_t ConvertDynamicDSys(char *dyn_text, extendedSysDescr *descr)
 {
   char    *descr_text;
@@ -244,7 +242,6 @@ int32_t ConvertDynamicDSys(char *dyn_text, extendedSysDescr *descr)
 }
 
 
->>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 int32_t FlipNoun(sysDescr *descr)
 {
   int i = 0;
@@ -488,8 +485,6 @@ int32_t MatchSysDescr(extendedSysDescr source, extendedSysDescr target)
   /* this could lead to strange situations (new things in scope,    */
   /* based on only the adjective).                                  */
 
-<<<<<<< HEAD
-=======
   /* 14may2019: function will now also handle dynamic system        */
   /* descriptions.                                                  */
 
@@ -503,7 +498,6 @@ int32_t MatchSysDescr(extendedSysDescr source, extendedSysDescr target)
 
   /* ok, now we have a 'normal' d_sys */
 
->>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
   /* Check for empty target. */
   if (target.part1.noun == NO_ID)
     return(ERROR);
@@ -904,19 +898,13 @@ int32_t SearchHits(extendedSysDescr *descr, int32_t scope, int32_t *id, match *s
 
 
 int32_t Find(extendedSysDescr *descr, int32_t scope, char *line_buf, match *hits)
-<<<<<<< HEAD
-=======
 
   /* IN CASE OF A SUSPECTED MEMORY LEAK: CHECK THE */
   /* MALLOCs AND FREEs FOR hits->matched_objs      */
 
->>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 {
   int32_t i     = 0;
   int32_t ready = 0;
-
-  /* IN CASE OF A SUSPECTED MEMORY LEAK: CHECK THE */
-  /* MALLOCs AND FREEs FOR hits->matched_objs      */
 
   /* malloc space for hits. Theoretically - with scope ALL_LOCS - */
   /* each object and location may be a hit, therefore malloc      */

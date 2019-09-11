@@ -30,10 +30,10 @@
 
 #include "errors.h"
 
-#include "NL-kwtable.h"
+#include "./Languages/NL/NL-kwtable.h"
 
-#include "ENG-errors.h"
-#include "NL-errors.h"
+#include "./Languages/ENG/ENG-errors.h"
+#include "./Languages/NL/NL-errors.h"
 
 
 /*************************/

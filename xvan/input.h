@@ -28,16 +28,7 @@
 /* External declarations */
 /*************************/
 
-<<<<<<< HEAD
-extern FILE *transcriptfile;                             /* init.c     */
-
-extern short testmode;                                   /* letsplay.c */
-extern short transcript;                                 /* letsplay.c */
-extern char  *outputline;                                /* output.c   */
-extern FILE  *testfile;                                  /* init.c     */
-=======
 extern FILE      *transcriptfile;                             /* init.c     */
->>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
 
 extern short      testmode;                                   /* letsplay.c */
 extern short      transcript;                                 /* letsplay.c */

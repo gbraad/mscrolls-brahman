@@ -320,11 +320,7 @@ int32_t main(int argc, char **argv)
   story_info.story_language = ENG;
   story_info.play_mode      = INTERPRETER_MODE;  /* @!@ */
 
-<<<<<<< HEAD
-  /* malloc space for stack            */
-=======
   /* malloc space for stack  */
->>>>>>> 72d7449e33257b77bc124b16a988a408eddcf5b1
   if ((stack = (int32_t *) malloc(STACK_SIZE*sizeof(int32_t))) == NULL) {
     PrintError(15, NULL, "main()");
     ExitProgram();

@@ -31,6 +31,7 @@
 
 kwTable kw_table[] =  {
   {.keyword_eng = "ACTOR_ONLY", .keyword_nl = "ALLEEN_ACTEUR"},
+  {.keyword_eng = "ADDCHOICE", .keyword_nl = "NIEUWEKEUS"},
   {.keyword_eng = "ADDJSON", .keyword_nl = "ADDJSON"},
   {.keyword_eng = "ADJECTIVES", .keyword_nl = "BVNW"},
   {.keyword_eng = "ADVERBS", .keyword_nl = "BIJWOORDEN"},
@@ -45,6 +46,7 @@ kwTable kw_table[] =  {
   {.keyword_eng = "BLOCK_EXIT", .keyword_nl = "VERWIJDERUITGANG"},
   {.keyword_eng = "BOLD", .keyword_nl = "VET"},
   {.keyword_eng = "CANSEE", .keyword_nl = "KANZIEN"},
+  {.keyword_eng = "CHOICE_MODE", .keyword_nl = "KEUZEMODUS"},
   {.keyword_eng = "CLEARFLAG", .keyword_nl = "MAAKONWAAR"},
   {.keyword_eng = "CLEARJSON", .keyword_nl = "CLEARJSON"},
   {.keyword_eng = "CLEARSCREEN", .keyword_nl = "WISSCHERM"},
@@ -92,6 +94,7 @@ kwTable kw_table[] =  {
   {.keyword_eng = "GO_TO", .keyword_nl = "GANAAR"},
   {.keyword_eng = "GREATER_THAN", .keyword_nl = "GROTER"},
   {.keyword_eng = "HITANYKEY", .keyword_nl = "TOETS"},
+  {.keyword_eng = "HYBRID_MODE", .keyword_nl = "HYBRIDEMODUS"},
   {.keyword_eng = "IF", .keyword_nl = "ALS"},
   {.keyword_eng = "INDENT", .keyword_nl = "INSPRINGEN"},
   {.keyword_eng = "INIT", .keyword_nl = "STARTWAARDE"},
