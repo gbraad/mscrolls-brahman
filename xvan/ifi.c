@@ -29,7 +29,7 @@
 #include "keyword.h"
 #include "typedefs.h"
 #include "json.h"
-#include "IFI.h"
+#include "ifi.h"
 
 /***************************************************/
 /* NOTE: because xvan is serving as a back-end, in */

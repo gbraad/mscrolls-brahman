@@ -33,6 +33,6 @@
 /* #define __windows_os */
 
 #define __linux_os
-#define __osx_os
+/* #define __osx_os */
 
 #endif
