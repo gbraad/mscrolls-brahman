@@ -16,19 +16,19 @@ $NOUNS
 alcove, axle, bars, buttons, clamp, dial, dials, edges, engraving, engravings, faucet, 
 flames, fred, gloves, grate, grating, groove, guy, hacksaw, halfway, hedges, inscription, 
 keyhole, keypad, lever, mural, nails, notch, notches, opening, photos, python, saw, shard, shed, 
-splinter, splinters, stairs, toaster, trapdoor, upstairs, vault, verb, you SYNONYM me SYNONYM I
+splinter, splinters, stairs, toaster, trapdoor, upstairs, vault, verb
 
 #==================
 # Adjective section
 #==================
 
 $ADJECTIVES
-brass, carved, chest, closet, colored, computer, cotton, counter, dial, down, drain, east SYNONYM e, 
+carved, chest, closet, colored, computer, cotton, counter, dial, down, drain, east SYNONYM e, 
 escape, garden, giant, glass, golden, halfway, kitchen, living, metal, middle, nondescript, 
-north SYNONYM n, northern, red, reset, rusty, scroll, shed, shiny, south SYNONYM s, southern, tiny, 
+north SYNONYM n, northern, reset, rusty, scroll, shed, shiny, south SYNONYM s, southern, tiny, 
 text, trap, up, vault, water, west SYNONYM w, wood, wooden, x, y, z
 
 $PREPOSITIONS
-against, around, clockwise, counterclockwise, for, into, of
+against, around, clockwise, counterclockwise, for, into
 
 
