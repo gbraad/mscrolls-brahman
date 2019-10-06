@@ -1,89 +1,95 @@
 
+#========================================================#
+#               XVAN Library version 1.3                 #
+#========================================================#
 
-###########################################
-# Table of Contents                       #
-###########################################
-#  Section                      Line number
-#  Common descriptions .....
-#  Common Flags ............
-#  Common attributes .......
-#  Common triggers .........
-#  Timers ..................
-#  Predefined objects ......
-#    o_all .................
-#    o_nst .................
-#    o_it ..................
-#    o_status_window .......
-# Predefined actions .......
-#    ask ...................
-#    be  ...................
-#    break .................
-#    close .................
-#    cry ...................
-#    debug .................
-#    do ....................
-#    drop ..................
-#    examine ...............
-#    exits .................
-#    get ...................
-#    give ..................
-#    go ....................
-#    goto ..................
-#    hang ..................
-#    have ..................
-#    help ..................
-#    inventory .............
-#    jump ..................
-#    kick ..................
-#    kill ..................
-#    knock .................
-#    listen ................
-#    lock ..................
-#    look ..................
-#    move ..................
-#    open ..................
-#    poke ..................
-#    put ...................
-#    quit ..................
-#    read ..................
-#    remember ..............
-#    restart ...............
-#    restore ...............
-#    save ..................
-#    say ...................
-#    score .................
-#    sing ..................
-#    sit ...................
-#    smell .................
-#    tell ..................
-#    testmode ..............
-#    thank .................
-#    throw .................
-#    tie ...................
-#    touch .................
-#    transcript ............
-#    turn ..................
-#    undo ..................
-#    unlock ................
-#    untie .................
-#    unuse .................
-#    use ...................
-#    verbose ...............
-#    wait ..................
-#    wear ..................
-#    xyzzy .................
-#    yell ..................
-# Dictionary ...............
-#    directions ............
-#    nouns .................
-#    adjectives ............
-#    prepositions ..........
-#    adverbs ...............
-#    articles ..............
-#    Q-words ...............
-#    Conjunctions ..........
-###########################################
-
+#========================================================#
+# Table of Contents                                      #
+#========================================================#
+#  Section                                     Line number
+#  Common descriptions .................................95
+#  Common Flags ........................................99
+#  Common attributes ..................................116
+#  Common triggers ....................................123
+#  Timers .............................................252
+#  Objects ............................................288
+#    o_all ............................................293
+#    o_nst ............................................349
+#    o_it .............................................365
+#    o_status_window ..................................402
+# Verbs ...............................................432
+#    am ...............................................437
+#    are ..............................................441
+#    ask ..............................................445
+#    break (smash, attack, hit) .......................488
+#    close ............................................529
+#    cry ..............................................575
+#    debug ............................................589
+#    do ...............................................602
+#    does..............................................606
+#    drop .............................................610
+#    examine (x, investigate) .........................683
+#    exits ............................................713
+#    get (take, grab) .................................842
+#    give .............................................923
+#    go ...............................................978
+#    goto .............................................996
+#    hang ............................................1016
+#    has .............................................1074
+#    have ............................................1096
+#    help ............................................1100
+#    inventory (i) ...................................1118
+#    is ..............................................1136
+#    jump ............................................1182
+#    kick ............................................1202
+#    kill ............................................1223
+#    knock ...........................................1265
+#    listen ..........................................1287
+#    lock ............................................1307
+#    look (l) ........................................1378
+#    move ............................................1412
+#    open ............................................1468
+#    poke ............................................1533
+#    put .............................................1555
+#    quit (q) ........................................1634
+#    read ............................................1648
+#    remember ........................................1669
+#    restart .........................................1702
+#    restore .........................................1714
+#    save ............................................1739
+#    say .............................................1757
+#    score ...........................................1774
+#    sing ............................................1788
+#    sit .............................................1802
+#    smell ...........................................1825
+#    tell ............................................1845
+#    testmode ........................................1921
+#    thank (thanks) ..................................1932
+#    throw ...........................................1951
+#    tie .............................................1994
+#    touch ...........................................2034
+#    transcript ......................................2055
+#    turn (rotate) ...................................2065
+#    undo ............................................2117
+#    unlock ..........................................2124
+#    untie ...........................................2184
+#    unuse ...........................................2219
+#    use .............................................2234
+#    verbose (v) .....................................2288
+#    wait (z) ........................................2304
+#    wear ............................................2330
+#    xyzzy ...........................................2383
+#    yell (shout) ....................................2390
+# Dictionary .........................................2405
+#    directions ......................................2404
+#    nouns ...........................................2420
+#    adjectives ......................................2462
+#    prepositions ....................................2475
+#    adverbs .........................................2480
+#    articles ........................................2484
+#    Q-words .........................................2488
+#    Conjunctions ....................................2492
+#========================================================#
 
 $COMMON_DESCRS
   d_entr_long, d_entr_short, d_exa, d_remember
@@ -103,6 +109,8 @@ $COMMON_FLAGS
   f_alive      = 0
   f_fixed      = 1
   f_any        = 1
+  f_examined   = 0  # for 'use' verb
+  f_key        = 0  # for 'use' verb
 
 
 $COMMON_ATTRIBUTES
@@ -112,212 +120,238 @@ $COMMON_ATTRIBUTES
   r_key  = %none
 
 
+##########################
+# COMMON TRIGGER SECTION #
+##########################
+
 $COMMON_TRIGGERS
-t_entrance
-  if not(islit(o_player)) then
-    printcr("It is pitch black.")
-    disagree()
-  endif
-  # part for location
-  if equal(%this, l_location) then
-    printcrbold(%this)
-    if not(testflag(%this.f_seenbefore)) or testflag(o_player.f_verbose) then
-      print(%this.d_entr_long)
-      setflag(f_seenbefore)
-    else
-      print(%this.d_entr_short)
+  t_entrance
+    if not(islit(o_player)) then
+      printcr("It is pitch black.")
+      disagree()
+    endif
+    # part for location
+    if equal(%this, l_location) then
+      printcrbold(%this)
+      if not(testflag(%this.f_seenbefore)) or testflag(o_player.f_verbose) then
+        print(%this.d_entr_long)
+        setflag(f_seenbefore)
+      else
+        print(%this.d_entr_short)
+      endif
+      agree()
+    endif
+    # part for objects
+    if cansee(o_player, %this) then
+      if equal(owner(%this), owner(o_player)) then
+        # same containment level
+        if testflag(%this.f_seenbefore) then
+          print(%this.d_entr_short)
+        else
+          print(%this.d_entr_long)
+          setflag(%this.f_seenbefore)
+      else
+        if not(owns(o_player, %this, 0)) then
+          print("\n[this.r_preposition] [the] ")
+          print(owner(%this))
+          printcr(" is [a] [this].")
+        endif
+      endif
+      setflag(%this.f_seenbefore)
     endif
     agree()
-  endif
-  # part for objects
-  if cansee(o_player, %this) then
-    if equal(owner(%this), owner(o_player)) then
-      # same containment level
-      if testflag(%this.f_seenbefore) then
-        print(%this.d_entr_short)
-      else
-        print(%this.d_entr_long)
-        setflag(%this.f_seenbefore)
+
+  t_i
+    if owns(o_player, %this, 1) then
+      indent()
+      printcr("[a] [this]")
     else
-      if not(owns(o_player, %this, 0)) then
-        print("\n[this.r_preposition] [the] ")
+      if owns(o_player, %this, 0) and cansee(o_player, %this) then
+        indent(2)
+        print("[this.r_preposition] [the] ")
         print(owner(%this))
-        printcr(" is [a] [this].")
+        printcr(" is [a] [this]")
+        indent(-2)
+      else
+        nomatch()
       endif
     endif
-    setflag(%this.f_seenbefore)
-  endif
-  agree()
 
-t_i
-  if owns(o_player, %this, 1) then
-    indent()
-    printcr("[a] [this]")
-  else
-    if owns(o_player, %this, 0) and cansee(o_player, %this) then
-      indent(2)
-      print("[this.r_preposition] [the] ")
-      print(owner(%this))
-      printcr(" is [a] [this]")
-      indent(-2)
+  t_reveal
+    o_player.r_nr_to_reveal -= 1
+    if cansee(o_player, %this) then
+      setflag(%this.f_seenbefore)
+      if testflag(o_player.f_first) then
+        clearflag(o_player.f_first)
+        if equal(o_player.r_nr_to_reveal, 0) then
+          printcr("[a] [this].")
+        else
+          print("[a] [this]")
+        endif
+      else
+        # not the first to reply
+        if equal(o_player.r_nr_to_reveal, 0) then
+          printcr(" and [a] [this].")
+        else
+          print(", [a] [this]")
+        endif
+      endif
+    endif
+
+  t_talk_to_dead
+    o_player.r_random = rnd(1,3)
+    if equal(o_player.r_random, 1) then
+      printcr("Do you realize that you are talking to [a] [o_actor]?")
     else
+      if equal(o_player.r_random, 2) then
+        printcr("Do you often talk to liveless objects?")
+      else
+        printcr("You don't really expect [the] [o_actor] to react, do you?")
+      endif
+    endif
+    agree()
+
+  # next common triggers are for object o_all
+  t_sk_drop
+    if owns(o_actor, %this) and not(testflag(f_hidden)) then
+      # also o_all which otherwise will cause an endless loop
+      if try(l_location, 0, 1, "drop [this]") then endif
+    else
+      notimers() # do not count this one as a move
       nomatch()
-    endif
-  endif
 
-t_reveal
-  o_player.r_nr_to_reveal -= 1
-  if cansee(o_player, %this) then
-    setflag(%this.f_seenbefore)
-    if testflag(o_player.f_first) then
-      clearflag(o_player.f_first)
-      if equal(o_player.r_nr_to_reveal, 0) then
-        printcr("[a] [this].")
-      else
-        print("[a] [this]")
-      endif
+  t_sk_drop_prepos
+    if owns(o_actor, %this) and not(testflag(f_hidden)) then
+      # also o_all which otherwise will cause an endless loop
+      if try(l_location, 0, 1, "drop [this] [prepos] [o_spec]") then endif
     else
-      # not the first to reply
-      if equal(o_player.r_nr_to_reveal, 0) then
-        printcr(" and [a] [this].")
-      else
-        print(", [a] [this]")
-      endif
-    endif
-  endif
+      notimers() # do not count this one as a move
+      nomatch()
 
-t_talk_to_dead
-  o_player.r_random = rnd(1,3)
-  if equal(o_player.r_random, 1) then
-    printcr("Do you realize that you are talking to [a] [o_actor]?")
-  else
-    if equal(o_player.r_random, 2) then
-      printcr("Do you often talk to liveless objects?")
+  t_sk_take
+    if not(owns(o_actor, %this, 0)) and 
+      (cansee(o_actor, %this) or testflag(%this.f_bypass)) and
+      testflag(%this.f_seenbefore) then
+      # also excludes o_all which otherwise will cause an endless loop
+      if try(l_location, 0, 1, "take [this]") then endif
     else
-      printcr("You don't really expect [the] [o_actor] to react, do you?")
-    endif
-  endif
-  agree()
+      notimers() # do not count this one as a move
+      nomatch()
 
+  t_sk_take_prepos
+    if not(owns(o_actor, %this, 0)) and 
+      (cansee(o_actor, %this) or testflag(%this.f_bypass)) and
+      testflag(%this.f_seenbefore) then
+      # also excludes o_all which otherwise will cause an endless loop
+      if try(l_location, 0, 1, "take [this] [prepos] [o_spec]") then endif
+    else
+      notimers() # do not count this one as a move
+      nomatch()
+
+
+#################
+# TIMER SECTION #
+#################
 
 $TIMERS
- # Timer m_init is used to start the game and keep track
- # of the number of moves
+  # Timer m_init is used to start the game and keep track
+  # of the number of moves
 
- m_init
-  init       0
-  step       1
-  direction  up
-  interval   1
-  state      go
-  trigger_at 1
-  execute    o_player.t_init
+  m_init
+    init       0
+    step       1
+    direction  up
+    interval   1
+    state      go
+    trigger_at 1
+    execute    o_player.t_init
 
-###########################################################
-# PREDEFINED OBJECTS                                      #
-###########################################################
+ m_update_it
+   init       -1
+   step       1
+   direction  up
+   interval   1
+   state      go
+   trigger_at 1
+   execute    o_it.t_update_it
 
-###########################################################
+ m_status_window
+   init       0
+   step       0
+   direction  up
+   interval   1
+   state      go
+   trigger_at 0
+   execute    o_status_window.t_update
+
+
+##################
+# OBJECT SECTION #
+##################
+
+#---------------------------------------------------------
 $OBJECT o_all
  DESCRIPTIONS
-  d_sys "all", "everything"
+   d_sys "all", "everything"
 
  CONTAINED in o_player
 
  FLAGS
-  f_hidden   = 1
-  f_bypass   = 1
-  f_takeable = 1
-  f_openable = 1  # to get through prologues
-  f_lockable = 1
-  f_wearable = 1
-  f_alive    = 1
-  f_fixed    = 0
-  f_any      = 0  # to not participate in synchronize()
+   f_hidden   = 1
+   f_bypass   = 1
+   f_takeable = 1
+   f_openable = 1  # to get through prologues
+   f_lockable = 1
+   f_wearable = 1
+   f_alive    = 1
+   f_fixed    = 0
+   f_any      = 0  # to not participate in synchronize()
 
  TRIGGERS
-  "drop [o_all]"                   -> t_sk_drop_all
-  "drop [o_all] [prepos] [o_spec]" -> t_sk_drop_all_prepos
-  "take [o_all]"                   -> t_sk_take_all
-  "take [o_all] [prepos] [o_spec]" -> t_sk_take_all_prepos
+   "drop [o_all]"                   -> t_sk_drop_all
+   "drop [o_all] [prepos] [o_spec]" -> t_sk_drop_all_prepos
+   "take [o_all]"                   -> t_sk_take_all
+   "take [o_all] [prepos] [o_spec]" -> t_sk_take_all_prepos
 
-  t_ifi_items
-    # o_all should not be listed as a contained item
-    agree()
+   t_ifi_items
+     # o_all should not be listed as a contained item
+     agree()
 
-  t_sk_drop_all
-    if equal(synchronize(o_actor, t_sk_drop, f_takeable, 1), 0) then
-      printcr("There is nothing to drop.")
-    else
-      notimers()  # each 'drop' will fire the timers.
+   t_sk_drop_all
+     if equal(synchronize(o_actor, t_sk_drop, f_takeable, 1), 0) then
+       printcr("There is nothing to drop.")
+     else
+       notimers()  # each 'drop' will fire the timers.
 
-  t_sk_drop_all_prepos
-    if equal(synchronize(o_actor, t_sk_drop_prepos, f_takeable, 1), 0) then
-      printcr("There is nothing to drop [prepos] [the] [o_spec].")
+   t_sk_drop_all_prepos
+     if equal(synchronize(o_actor, t_sk_drop_prepos, f_takeable, 1), 0) then
+       printcr("There is nothing to drop [prepos] [the] [o_spec].")
 
-  t_sk_take_all
-    if equal(synchronize(owner(o_actor), t_sk_take, f_takeable, 1, 0), 0) then
-      printcr("There is nothing to take.")
+   t_sk_take_all
+     if equal(synchronize(owner(o_actor), t_sk_take, f_takeable, 1, 0), 0) then
+       printcr("There is nothing to take.")
 
-  t_sk_take_all_prepos
-    if equal(synchronize(o_spec, t_sk_take_prepos, f_takeable, 1, 0), 0) then
-      printcr("There is nothing to take [prepos] [the] [o_spec].")
+   t_sk_take_all_prepos
+     if equal(synchronize(o_spec, t_sk_take_prepos, f_takeable, 1, 0), 0) then
+       printcr("There is nothing to take [prepos] [the] [o_spec].")
 
-  t_default
-    if equal(o_actor, %this) or equal(o_subject, %this) or equal(o_spec, %this) then
-      printcr("For [action] you must address objects individually, or separated /
-               by commas.")
-      disagree()
-    else
-      nomatch()
+   t_default
+     if equal(o_actor, %this) or equal(o_subject, %this) or equal(o_spec, %this) then
+       printcr("For [action] you must address objects individually, or separated /
+                by commas.")
+       disagree()
+     else
+       nomatch()
 END_OBJ
+#---------------------------------------------------------
 
-$COMMON_TRIGGERS # for object o_all
- t_sk_drop
-   if owns(o_actor, %this) and not(testflag(f_hidden)) then
-     # also o_all which otherwise will cause an endless loop
-     if try(l_location, 0, 1, "drop [this]") then endif
-   else
-     notimers() # do not count this one as a move
-     nomatch()
-
- t_sk_drop_prepos
-   if owns(o_actor, %this) and not(testflag(f_hidden)) then
-     # also o_all which otherwise will cause an endless loop
-     if try(l_location, 0, 1, "drop [this] [prepos] [o_spec]") then endif
-   else
-     notimers() # do not count this one as a move
-     nomatch()
-
- t_sk_take
-   if not(owns(o_actor, %this, 0)) and 
-      (cansee(o_actor, %this) or testflag(%this.f_bypass)) and
-      testflag(%this.f_seenbefore) then
-     # also excludes o_all which otherwise will cause an endless loop
-     if try(l_location, 0, 1, "take [this]") then endif
-   else
-     notimers() # do not count this one as a move
-     nomatch()
-
- t_sk_take_prepos
-   if not(owns(o_actor, %this, 0)) and 
-      (cansee(o_actor, %this) or testflag(%this.f_bypass)) and
-      testflag(%this.f_seenbefore) then
-     # also excludes o_all which otherwise will cause an endless loop
-     if try(l_location, 0, 1, "take [this] [prepos] [o_spec]") then endif
-   else
-     notimers() # do not count this one as a move
-     nomatch()
-###########################################################
-
-
-###########################################################
+#---------------------------------------------------------
 $OBJECT o_nst
-  # this object must always be present
-  # it may be modified but removal will cause a compiler error
+ # this object must always be present
+ # it may be modified but removal will cause a compiler error
  DESCRIPTIONS
-  d_no  "no such thing"
-  d_any "any such thing"
+   d_no  "no such thing"
+   d_any "any such thing"
 
  CONTAINED in o_player
 
@@ -325,13 +359,14 @@ $OBJECT o_nst
    t_entrance
      agree()
 END_OBJ
-###########################################################
+#---------------------------------------------------------
 
-
-###########################################################
+#---------------------------------------------------------
 $OBJECT o_it
+ # this object must always be present
+ # it may be modified but removal will cause a compiler error
  DESCRIPTIONS
-  d_sys "it"
+   d_sys "it"
 
  CONTAINED in o_player
 
@@ -345,41 +380,25 @@ $OBJECT o_it
   r_last_loc = l_location
 
  TRIGGERS
-  t_update_it
-    if not(equal(r_last_loc, l_location)) then
-      # they went to a new location, cancel. Erase 'it' object
-      # because it will otherwise not be reparsed
-      r_it = %none
-    else
-      if testflag(f_update_it) then
-        if not(equal(o_subject, o_it) or equal(o_subject, %none)) then
-          r_it = o_subject
-        endif
-      endif
-    endif
-    r_last_loc = l_location
-    setflag(f_update_it)
-    m_update_it = 0
-
+   t_update_it
+     if not(equal(r_last_loc, l_location)) then
+       # they went to a new location, cancel. Erase 'it' object
+       # because it will otherwise not be reparsed
+       r_it = %none
+     else
+       if testflag(f_update_it) then
+         if not(equal(o_subject, o_it) or equal(o_subject, %none)) then
+           r_it = o_subject
+         endif
+       endif
+     endif
+     r_last_loc = l_location
+     setflag(f_update_it)
+     m_update_it = 0
 END_OBJ
+#---------------------------------------------------------
 
-$TIMERS # for object o_it
- # timer m_update_it is fired at the end of every move.
- # It calls t_update_it that will update the value of
- # the it-object
-
- m_update_it
-  init       -1
-  step       1
-  direction  up
-  interval   1
-  state      go
-  trigger_at 1
-  execute    o_it.t_update_it
-###########################################################
-
-
-###########################################################
+#---------------------------------------------------------
 $OBJECT o_status_window
  DESCRIPTIONS
    d_nodescr  ""
@@ -407,25 +426,22 @@ $OBJECT o_status_window
       printstatus("Darkness")
     endif
 END_OBJ
-
-$TIMERS
- m_status_window
-   init       0
-   step       0
-   direction  up
-   interval   1
-   state      go
-   trigger_at 0
-   execute    o_status_window.t_update
-###########################################################
+#---------------------------------------------------------
 
 
-###########################################################
-# PREDEFINED ACTIONS                                      #
-###########################################################
+################
+# VERB SECTION #
+################
 
-###########################################################
+#---------------------------------------------------------
+$VERB am ENDVERB
+#---------------------------------------------------------
 
+#---------------------------------------------------------
+$VERB are ENDVERB
+#---------------------------------------------------------
+
+#---------------------------------------------------------
 $VERB ask
  SCOPE all_locs
 
@@ -434,12 +450,10 @@ $VERB ask
      printcr("Do you realize that you are talking to [a] [o_actor]?.")
      disagree()
    endif
-
    if not(cansee(o_actor, o_subject)) then
      printcr("[the] [o_subject] is not here.")
      disagree()
    endif
-
    if equal(o_spec, o_nst) then
      printcr("I don't know what you're talking about.")
      disagree()
@@ -468,57 +482,9 @@ $VERB ask
       printcr("  'ask Fred about the old wooden chest'")
       printcr("(to turn off these help messages, type 'help 1')")
 ENDVERB
+#---------------------------------------------------------
 
-###########################################################
-
-$VERB am ENDVERB
-$VERB are ENDVERB
-$VERB is
- SCOPE all_locs
-
- "where is [o_subject]"
-   DISAMBIGUATION_RULES
-     if testflag(o_subject.f_seenbefore)then score(5)
-   END_RULES
-   
-   if cansee(o_actor, o_subject) and not(equal(o_subject, o_nst)) then
-     printcr("Right here!")
-     disagree()
-   endif
-
-   if not(isobject(o_subject)) then
-     if testflag(o_subject.f_seenbefore) then
-       printcr("You've been to [the] [o_subject], so it is somewhere on the map /
-                that you must have drawn.")
-       disagree()
-     else
-       printcr("You haven't been there yet.")
-       disagree()
-     endif
-   endif
-
-   if testflag(o_subject.f_seenbefore) then
-     if testflag(o_subject.f_alive) then
-       printcr("[the] [o_subject] is a living creature. Could have gone /
-                anywhere since your last encounter.")
-     else
-       print("[the] [o_subject] [o_subject.r_is] [o_subject.r_preposition] [the]")
-       print(owner(o_subject))
-       printcr(".")
-   else
-     printcr("I have no knowledge of that.")
-
- DEFAULT
-   printcr("I didn't understand that sentence.")
-   if testflag(o_player.f_verb_help) then
-     printcr("")
-     Printcr("An examples of the syntax I understand is:")
-     printcr("  'where is the ball'")
-     printcr("(to turn off these help messages, type 'help 1')")
-ENDVERB
-
-###########################################################
-
+#---------------------------------------------------------
 $VERB break SYNONYM smash SYNONYM attack SYNONYM hit
  PROLOGUE
    if not(testflag(o_actor.f_alive)) then
@@ -526,7 +492,6 @@ $VERB break SYNONYM smash SYNONYM attack SYNONYM hit
        disagree()
      endif
    endif
-
    if not(equal(o_spec, %none)) then
      if not(owns(o_actor, o_spec)) then
        printcr("(taking [the] [o_spec]).")
@@ -558,9 +523,9 @@ $VERB break SYNONYM smash SYNONYM attack SYNONYM hit
       printcr("  'break the window with the brick'")
       printcr("(to turn off these help messages, type 'help 1')")
 ENDVERB
+#---------------------------------------------------------
 
-###########################################################
-
+#---------------------------------------------------------
 $VERB close
  PROLOGUE
    if not(testflag(o_actor.f_alive)) then
@@ -568,7 +533,6 @@ $VERB close
        disagree()
      endif
    endif
-
    if not(equal(o_subject, %none)) then
      if not(testflag(o_subject.f_openable)) then
        printcr("[the] [o_subject] is not something that can be closed.")
@@ -605,9 +569,9 @@ $VERB close
  DEFAULT
    printcr("I only understood you as far as willing to close something.")
 ENDVERB
+#---------------------------------------------------------
 
-###########################################################
-
+#---------------------------------------------------------
 $VERB cry
  PROLOGUE
    if not(testflag(o_actor.f_alive)) then
@@ -619,9 +583,9 @@ $VERB cry
  DEFAULT
    printcr("[the] [o_actor] [o_actor.r_is] not a crybaby.")
 ENDVERB
+#---------------------------------------------------------
 
-###########################################################
-
+#---------------------------------------------------------
 $VERB debug
  "debug [value]"
    if gt(%value, -1) and lt(%value, 3) then
@@ -632,14 +596,17 @@ $VERB debug
  DEFAULT
    printcr("The debug command requires a numerical parameter.")
 ENDVERB
+#---------------------------------------------------------
 
-###########################################################
-
+#---------------------------------------------------------
 $VERB do ENDVERB
+#---------------------------------------------------------
+
+#---------------------------------------------------------
 $VERB does ENDVERB
+#---------------------------------------------------------
 
-###########################################################
-
+#---------------------------------------------------------
 $VERB drop
  PROLOGUE
    if not(testflag(o_actor.f_alive)) then
@@ -647,11 +614,9 @@ $VERB drop
        disagree()
      endif
    endif
-
   if equal(o_subject, %none) then
     agree()
   endif
-
   if equal(o_actor, o_nst) then       # no such thing
     print("No one is holding ")
     if equal(o_subject, o_nst) then
@@ -712,9 +677,9 @@ $VERB drop
  DEFAULT
    printcr("I only understood you as far as willing to drop something.")
 ENDVERB
+#---------------------------------------------------------
 
-###########################################################
-
+#---------------------------------------------------------
 $VERB examine SYNONYM x SYNONYM investigate
  PROLOGUE
    if not(testflag(o_actor.f_alive)) then
@@ -742,9 +707,9 @@ $VERB examine SYNONYM x SYNONYM investigate
  DEFAULT
    printcr("I only understood you as far as willing to examine something.")
 ENDVERB
+#---------------------------------------------------------
 
-###########################################################
-
+#---------------------------------------------------------
 $VERB exits
  "exits"
    indent(2)
@@ -871,9 +836,9 @@ $VERB exits
  DEFAULT
    printcr("If you want to know the available exits, just type 'exits'.")
 ENDVERB
+#---------------------------------------------------------
 
-###########################################################
-
+#---------------------------------------------------------
 $VERB get SYNONYM take SYNONYM grab
  PROLOGUE
    if not(testflag(o_actor.f_alive)) then
@@ -881,11 +846,9 @@ $VERB get SYNONYM take SYNONYM grab
        disagree()
      endif
    endif
-
   if equal(o_subject, %none) then
     agree()
   endif
-
   if equal(o_actor, o_nst) then       # no such thing
     print("There is no one to take ")
     if equal(o_subject, o_nst) then
@@ -954,9 +917,9 @@ $VERB get SYNONYM take SYNONYM grab
  DEFAULT
    printcr("I only understood you as far as willing to get something.")
 ENDVERB
+#---------------------------------------------------------
 
-###########################################################
-
+#---------------------------------------------------------
 $VERB give
  PROLOGUE
    if not(testflag(o_actor.f_alive)) then
@@ -964,11 +927,9 @@ $VERB give
        disagree()
      endif
    endif
-
   if equal(o_subject, %none) then
     agree()
   endif
-
   if equal(o_actor, o_nst) then       # no such thing
     print("No one is holding ")
     if equal(o_subject, o_nst) then
@@ -1011,9 +972,9 @@ $VERB give
      printcr("  'give the ball to Fred'")
      printcr("(to turn off these help messages, type 'help 1')")
 ENDVERB
+#---------------------------------------------------------
 
-###########################################################
-
+#---------------------------------------------------------
 $verb go
  PROLOGUE
    if not(testflag(o_actor.f_alive)) then
@@ -1029,9 +990,9 @@ $verb go
   DEFAULT
     printcr("I only understood you as far as wanting to go somewhere.")
 ENDVERB
+#---------------------------------------------------------
 
-###########################################################
-
+#---------------------------------------------------------
 $VERB goto
  SCOPE ALL_LOCS
  PROLOGUE
@@ -1049,9 +1010,9 @@ $VERB goto
  DEFAULT
    printcr("I only understood you as far as willing to go somewehere.")
 ENDVERB
+#---------------------------------------------------------
 
-###########################################################
-
+#---------------------------------------------------------
 $VERB hang
  PROLOGUE
    if not(testflag(o_actor.f_alive)) then
@@ -1059,7 +1020,6 @@ $VERB hang
        disagree()
      endif
    endif
-
    if not(equal(o_subject, %none)) then
      if not(equal(o_spec, %none)) then
        if owns(o_spec, o_subject, %prepos) then
@@ -1073,7 +1033,6 @@ $VERB hang
        endif
      endif
    endif
-
   if equal(o_actor, o_nst) then       # no such thing
     print("No one is holding ")
     if equal(o_subject, o_nst) then
@@ -1108,12 +1067,10 @@ $VERB hang
      Printcr("An example of the syntax I understand is:")
      printcr("  'hang the cloak on the hook'")
      printcr("(to turn off these help messages, type 'help 1')")
-
 ENDVERB
+#---------------------------------------------------------
 
-###########################################################
-
-$VERB have ENDVERB
+#---------------------------------------------------------
 $VERB has
  SCOPE all_locs
 
@@ -1133,9 +1090,13 @@ $VERB has
      printcr("  'who has the ball'")
      printcr("(to turn off these help messages, type 'help 1')")
 ENDVERB
+#---------------------------------------------------------
 
-###########################################################
+#---------------------------------------------------------
+$VERB have ENDVERB
+#---------------------------------------------------------
 
+#---------------------------------------------------------
 $VERB help
  EPILOGUE
   notimers()
@@ -1151,16 +1112,15 @@ $VERB help
  DEFAULT
    printcr("I don't understand that sentence.")
 ENDVERB
+#---------------------------------------------------------
 
-###########################################################
-
+#---------------------------------------------------------
 $VERB inventory SYNONYM i
  PROLOGUE
    if not(equal(o_actor, o_player)) then
      printcr("The inventory command works only for the player.")
      disagree()
    endif
-
    printcr("You are carrying:")
    indent(2)
 
@@ -1169,11 +1129,56 @@ $VERB inventory SYNONYM i
 
  DEFAULT
    printcr("Nothing, you are empty-handed.")
-
 ENDVERB
-  
-###########################################################
+#---------------------------------------------------------
 
+#---------------------------------------------------------
+$VERB is
+ SCOPE all_locs
+
+ "where is [o_subject]"
+   DISAMBIGUATION_RULES
+     if testflag(o_subject.f_seenbefore)then score(5)
+   END_RULES
+   
+   if cansee(o_actor, o_subject) and not(equal(o_subject, o_nst)) then
+     printcr("Right here!")
+     disagree()
+   endif
+
+   if not(isobject(o_subject)) then
+     if testflag(o_subject.f_seenbefore) then
+       printcr("You've been to [the] [o_subject], so it is somewhere on the map /
+                that you must have drawn.")
+       disagree()
+     else
+       printcr("You haven't been there yet.")
+       disagree()
+     endif
+   endif
+
+   if testflag(o_subject.f_seenbefore) then
+     if testflag(o_subject.f_alive) then
+       printcr("[the] [o_subject] is a living creature. Could have gone /
+                anywhere since your last encounter.")
+     else
+       print("[the] [o_subject] [o_subject.r_is] [o_subject.r_preposition] [the]")
+       print(owner(o_subject))
+       printcr(".")
+   else
+     printcr("I have no knowledge of that.")
+
+ DEFAULT
+   printcr("I didn't understand that sentence.")
+   if testflag(o_player.f_verb_help) then
+     printcr("")
+     Printcr("An examples of the syntax I understand is:")
+     printcr("  'where is the ball'")
+     printcr("(to turn off these help messages, type 'help 1')")
+ENDVERB
+#---------------------------------------------------------
+
+#---------------------------------------------------------
 $VERB jump
  PROLOGUE
    if not(testflag(o_actor.f_alive)) then
@@ -1191,9 +1196,9 @@ $VERB jump
  DEFAULT
    printcr("I only understood you as far as willing to jump.")
 ENDVERB
+#---------------------------------------------------------
 
-###########################################################
-
+#---------------------------------------------------------
 $VERB kick
  PROLOGUE
    if not(testflag(o_actor.f_alive)) then
@@ -1212,9 +1217,9 @@ $VERB kick
  DEFAULT
    printcr("I only understood you as far as wanting to kick something.")
 ENDVERB
+#---------------------------------------------------------
 
-###########################################################
-
+#---------------------------------------------------------
 $VERB kill
  PROLOGUE
    if not(testflag(o_actor.f_alive)) then
@@ -1254,9 +1259,9 @@ $VERB kill
  DEFAULT
    printcr("I only understood you as far as willing to kill something.")
 ENDVERB
+#---------------------------------------------------------
 
-###########################################################
-
+#---------------------------------------------------------
 $VERB knock
  PROLOGUE
    if not(testflag(o_actor.f_alive)) then
@@ -1276,9 +1281,9 @@ $VERB knock
  DEFAULT
    printcr("I only understood you as far as wanting to knock.")
 ENDVERB
+#---------------------------------------------------------
 
-###########################################################
-
+#---------------------------------------------------------
 $VERB listen
  PROLOGUE
    if not(testflag(o_actor.f_alive)) then
@@ -1296,9 +1301,9 @@ $VERB listen
  DEFAULT
    printcr("I only understood you as far as wanting to listen.")
 ENDVERB
+#---------------------------------------------------------
 
-###########################################################
-
+#---------------------------------------------------------
 $VERB lock
  PROLOGUE
    if not(testflag(o_actor.f_alive)) then
@@ -1306,7 +1311,6 @@ $VERB lock
        disagree()
      endif
    endif
-
    if not(equal(o_subject, %none)) then
      if not(testflag(o_subject.f_lockable)) then
        printcr("[the] [o_subject] is not something that can be locked.")
@@ -1368,9 +1372,9 @@ $VERB lock
    else
      printcr("Apparently, [the] [o_spec] is not the key for [the] [o_subject].")
 ENDVERB
+#---------------------------------------------------------
 
-###########################################################
-
+#---------------------------------------------------------
 $VERB look SYNONYM l
  PROLOGUE
    if not(testflag(o_actor.f_alive)) then
@@ -1378,7 +1382,6 @@ $VERB look SYNONYM l
        disagree()
      endif
    endif
-
   if not(islit(o_player)) then
     printcr("It is pitch black.")
     disagree()
@@ -1403,9 +1406,9 @@ $VERB look SYNONYM l
  DEFAULT
    printcr("I only understood you as far as willing to look.")
 ENDVERB
+#---------------------------------------------------------
 
-###########################################################
-
+#---------------------------------------------------------
 $VERB move
  PROLOGUE
    if not(testflag(o_actor.f_alive)) then
@@ -1413,7 +1416,6 @@ $VERB move
        disagree()
      endif
    endif
-
    if not(equal(o_subject, %none)) then
      if testflag(o_subject.f_fixed) then
        printcr("[the] [o_subject] [o_subject.r_is] fixed in place.")
@@ -1460,9 +1462,9 @@ $VERB move
     printcr("  'move the crate to the north'")
     printcr("(to turn off these help messages, type 'help 1')")
 ENDVERB
+#---------------------------------------------------------
 
-###########################################################
-
+#---------------------------------------------------------
 $VERB open
  PROLOGUE
    if not(testflag(o_actor.f_alive)) then
@@ -1470,12 +1472,10 @@ $VERB open
        disagree()
      endif
    endif
-
    if not(equal(o_subject, %none)) then
      if not(testflag(o_subject.f_openable)) then
        printcr("[the] [o_subject] is not something that can be opened.")
        disagree()
-
 
  "open"
    if equal(o_actor, o_player) then
@@ -1527,9 +1527,9 @@ $VERB open
  DEFAULT
    printcr("I only understood you as far as willing to open something.")
 ENDVERB
+#---------------------------------------------------------
 
-###########################################################
-
+#---------------------------------------------------------
 $VERB poke
  PROLOGUE
    if not(testflag(o_actor.f_alive)) then
@@ -1549,9 +1549,9 @@ $VERB poke
  DEFAULT
    printcr("I only understood you as far as wanting to poke something.")
 ENDVERB
+#---------------------------------------------------------
 
-###########################################################
-
+#---------------------------------------------------------
 $VERB put
  PROLOGUE
    if not(testflag(o_actor.f_alive)) then
@@ -1559,7 +1559,6 @@ $VERB put
        disagree()
      endif
    endif
-
   if equal(o_subject, %none) then
     agree()
   endif
@@ -1629,11 +1628,10 @@ $VERB put
  DEFAULT
    printcr("I only understood you as far as willing to put something.")
 ENDVERB
+#---------------------------------------------------------
 
-###########################################################
-
+#---------------------------------------------------------
 $VERB quit SYNONYM q
-
  "[o_player], quit"
    print("Do you really want to quit? ")
    if yesno() then
@@ -1644,9 +1642,9 @@ $VERB quit SYNONYM q
  DEFAULT
    printcr("If you want to quit the game, just type 'quit'.")
 ENDVERB
+#---------------------------------------------------------
 
-###########################################################
-
+#---------------------------------------------------------
 $VERB read
  PROLOGUE
    if not(testflag(o_actor.f_alive)) then
@@ -1665,9 +1663,9 @@ $VERB read
  DEFAULT
    printcr("I only understood you as far as willing to read something.")
 ENDVERB
+#---------------------------------------------------------
 
-###########################################################
-
+#---------------------------------------------------------
 $VERB remember
  SCOPE all_locs
 
@@ -1698,9 +1696,9 @@ $VERB remember
  DEFAULT
    printcr("I only understood you as far as wanting to remember something.")
 ENDVERB
+#---------------------------------------------------------
 
-###########################################################
-
+#---------------------------------------------------------
 $VERB restart
  "restart"
    printcr("Are you sure you want to restart the game (y//n)?")
@@ -1710,9 +1708,9 @@ $VERB restart
  DEFAULT
    printcr("To restart the game from the beginning, enter \"restart\".")
 ENDVERB
+#---------------------------------------------------------
 
-###########################################################
-
+#---------------------------------------------------------
 $VERB restore
  EPILOGUE
   notimers()
@@ -1735,9 +1733,9 @@ $VERB restore
    # return disagree, in case they came here thru runverb()
    disagree()
 ENDVERB
+#---------------------------------------------------------
 
-###########################################################
-
+#---------------------------------------------------------
 $VERB save
  EPILOGUE
   notimers()
@@ -1753,9 +1751,9 @@ $VERB save
  DEFAULT
    printcr("If you want to save your progress, type 'save'.")
 ENDVERB
+#---------------------------------------------------------
 
-###########################################################
-
+#---------------------------------------------------------
 $VERB say
  PROLOGUE
    if not(testflag(o_actor.f_alive)) then
@@ -1770,9 +1768,9 @@ $VERB say
    printcr("Tell <someone> about <something>.")
    printcr("<Someone>, tell me about <something>.")
 ENDVERB
+#---------------------------------------------------------
 
-###########################################################
-
+#---------------------------------------------------------
 $VERB score
  EPILOGUE
   notimers()
@@ -1784,9 +1782,9 @@ $VERB score
  DEFAULT
    printcr("To get your current score, just type 'score'.")
 ENDVERB
+#---------------------------------------------------------
 
-###########################################################
-
+#---------------------------------------------------------
 $VERB sing
  PROLOGUE
    if not(testflag(o_actor.f_alive)) then
@@ -1798,9 +1796,9 @@ $VERB sing
  DEFAULT
    printcr("[the] [o_actor] [o_actor.r_is] not in the mood for singing.")
 ENDVERB
+#---------------------------------------------------------
 
-###########################################################
-
+#---------------------------------------------------------
 $VERB sit
  PROLOGUE
    if not(testflag(o_actor.f_alive)) then
@@ -1821,9 +1819,9 @@ $VERB sit
  DEFAULT
    printcr("I only understood you as far as wanting to sit")
 ENDVERB
+#---------------------------------------------------------
 
-###########################################################
-
+#---------------------------------------------------------
 $VERB smell
  PROLOGUE
    if not(testflag(o_actor.f_alive)) then
@@ -1841,9 +1839,9 @@ $VERB smell
  DEFAULT
    printcr("I only understood you as far as wanting to smell.")
 ENDVERB
+#---------------------------------------------------------
 
-###########################################################
-
+#---------------------------------------------------------
 $VERB tell
  SCOPE all_locs
 
@@ -1853,16 +1851,13 @@ $VERB tell
        disagree()
      endif
    endif
-
    if equal(o_subject, %none) then
      agree()
    endif
-
    if not(cansee(o_player, o_actor)) then
      printcr("[the] [o_actor] is not here.")
      disagree()
    endif
-
    if not(cansee(o_actor, o_subject)) then
      printcr("[the] [o_subject] is not here.")
      disagree()
@@ -1920,9 +1915,9 @@ $VERB tell
       printcr("  'Fred, tell me about the brass key'")
       printcr("(to turn off these help messages, type 'help 1')")
 ENDVERB
+#---------------------------------------------------------
 
-###########################################################
-
+#---------------------------------------------------------
 $VERB testmode
  # read input from a file
   "[o_player], testmode"
@@ -1931,9 +1926,9 @@ $VERB testmode
  DEFAULT
    printcr("To invoke test mode, enter 'testmode' from the prompt.")
 ENDVERB
+#---------------------------------------------------------
 
-###########################################################
-
+#---------------------------------------------------------
 $VERB thank SYNONYM thanks
  PROLOGUE
    if not(testflag(o_actor.f_alive)) then
@@ -1950,9 +1945,9 @@ $VERB thank SYNONYM thanks
  DEFAULT
    printcr("I only understood you as far as willing to thank someone.")
 ENDVERB
+#---------------------------------------------------------
 
-###########################################################
-
+#---------------------------------------------------------
 $VERB throw
  PROLOGUE
    if not(testflag(o_actor.f_alive)) then
@@ -1960,7 +1955,6 @@ $VERB throw
        disagree()
      endif
    endif
-
    if not(equal(o_subject, %none)) then
      if not(owns(o_actor, o_subject)) then
        printcr("[the] [o_actor] [o_actor.r_is] not holding [the] [o_subject].")
@@ -1994,9 +1988,9 @@ $VERB throw
      printcr("  'throw the ball at//on//behind//under the desk'")
      printcr("(to turn off these help messages, type 'help 1')")
 ENDVERB
+#---------------------------------------------------------
 
-###########################################################
-
+#---------------------------------------------------------
 $VERB tie
  PROLOGUE
    if not(testflag(o_actor.f_alive)) then
@@ -2034,9 +2028,9 @@ $VERB tie
        printcr("  'tie the rope to the hook'")
        printcr("(to turn off these help messages, type 'help 1')")
 ENDVERB
+#---------------------------------------------------------
 
-###########################################################
-
+#---------------------------------------------------------
 $VERB touch
  PROLOGUE
    if not(testflag(o_actor.f_alive)) then
@@ -2055,9 +2049,9 @@ $VERB touch
  DEFAULT
    printcr("Nothing happens.")
 ENDVERB
+#---------------------------------------------------------
 
-###########################################################
-
+#---------------------------------------------------------
 $VERB transcript
  EPILOGUE
   notimers()
@@ -2065,9 +2059,9 @@ $VERB transcript
  DEFAULT
   transcript()
 ENDVERB
+#---------------------------------------------------------
 
-###########################################################
-
+#---------------------------------------------------------
 $VERB turn SYNONYM rotate
  PROLOGUE
    if not(testflag(o_actor.f_alive)) then
@@ -2117,16 +2111,16 @@ $VERB turn SYNONYM rotate
      printcr("  'turn the machine off'")
      printcr("(to turn off these help messages, type 'help 1')")
 ENDVERB
+#---------------------------------------------------------
 
-###########################################################
-
+#---------------------------------------------------------
 $VERB undo
  DEFAULT
    printcr("We don't support undo. You made the decision, now live with it.")
 ENDVERB
+#---------------------------------------------------------
 
-###########################################################
-
+#---------------------------------------------------------
 $VERB unlock
  PROLOGUE
    if not(testflag(o_actor.f_alive)) then
@@ -2134,7 +2128,6 @@ $VERB unlock
        disagree()
      endif
    endif
-
    if not(equal(o_subject, %none)) then
      if not(testflag(o_subject.f_lockable)) then
        printcr("[the] [o_subject] is not something that can be unlocked.")
@@ -2185,9 +2178,9 @@ $VERB unlock
      printcr("Apparently, [the] [o_spec] is not the key for [the] [o_subject].")
      disagree()
 ENDVERB
+#---------------------------------------------------------
 
-###########################################################
-
+#---------------------------------------------------------
 $VERB untie
  PROLOGUE
    if not(testflag(o_actor.f_alive)) then
@@ -2220,9 +2213,9 @@ $VERB untie
        printcr("  'untie the rope from the hook'")
        printcr("(to turn off these help messages, type 'help 1')")
 ENDVERB
+#---------------------------------------------------------
 
-###########################################################
-
+#---------------------------------------------------------
 $VERB unuse
  "unuse [o_subject]"
    if owns(o_player,o_subject) then
@@ -2235,13 +2228,9 @@ $VERB unuse
  DEFAULT
    agree() # do nothing
 ENDVERB
+#---------------------------------------------------------
 
-###########################################################
-
-$COMMON_FLAGS
- f_examined = 0
- f_key      = 0
-
+#---------------------------------------------------------
 $VERB use
  "use [o_subject]"
    if testflag(o_subject.f_examined) and testflag(o_subject.f_takeable) then
@@ -2293,9 +2282,9 @@ $VERB use
    printcr("You must be more specific about the action you want to perform.")
    agree() # do nothing
 ENDVERB
+#---------------------------------------------------------
 
-###########################################################
-
+#---------------------------------------------------------
 $VERB verbose SYNONYM v
  EPILOGUE
   notimers()
@@ -2309,9 +2298,9 @@ $VERB verbose SYNONYM v
  DEFAULT
    printcr("I don't understand that sentence.")
 ENDVERB
+#---------------------------------------------------------
 
-###########################################################
-
+#---------------------------------------------------------
 $VERB wait SYNONYM z
  PROLOGUE
    if gt(%value, 10) then
@@ -2335,9 +2324,9 @@ $VERB wait SYNONYM z
      printcr("  'wait 5'")
      printcr("(to turn off these help messages, type 'help 1')")
 ENDVERB
+#---------------------------------------------------------
 
-###########################################################
-
+#---------------------------------------------------------
 $VERB wear
  PROLOGUE
    if not(testflag(o_actor.f_alive)) then
@@ -2345,7 +2334,6 @@ $VERB wear
        disagree()
      endif
    endif
-
    if not(equal(o_subject, %none)) then
      if not(testflag(o_subject.f_wearable)) then
        printcr("[the] [o_subject] [o_subject.r_is] not something that can be worn.")
@@ -2389,16 +2377,16 @@ $VERB wear
  DEFAULT
    printcr("I only understood you as far as willing to wear something.")
 ENDVERB
+#---------------------------------------------------------
 
-###########################################################
-
+#---------------------------------------------------------
 $VERB xyzzy
  DEFAULT
    printcr("This is not Colossal Cave adventure.")
 ENDVERB
+#---------------------------------------------------------
 
-###########################################################
-
+#---------------------------------------------------------
 $VERB yell SYNONYM shout
  PROLOGUE
    if not(testflag(o_actor.f_alive)) then
@@ -2410,13 +2398,12 @@ $VERB yell SYNONYM shout
  DEFAULT
    printcr("Aaaargh.")
 ENDVERB
+#---------------------------------------------------------
 
-###########################################################
 
-
-###########################################################
-# DICTIONARY                                              #
-###########################################################
+######################
+# DICTIONARY SECTION #
+######################
 
 $DIRECTIONS
 north     SYNONYM n,
@@ -2431,23 +2418,29 @@ up        SYNONYM u,
 down      SYNONYM d
 
 $NOUNS
-abbey, abdomen, abidance, ability, abode, abortion, absence, absorption, abstract, abuse, academy, accelerator, accent, acceptance, access, accession, accident, accomplishment, accord, account, accountant, accounting, accretion, accumulation, accusation, ace, achievement, acid, acknowledgment, acme, acquaintance, acquisition, act, action, activeness, activity, actor, actors, ad, adaptation, addiction, addition, address, adeptness, adhesive, administration, administrator, admiration, admission, admittance, admonition, adolescent, adoption, adroitness, adult, advance, advancement, advantage, adventure, adversary, adversity, advertisement, advertising, advice, adviser, advisor, advocate, aeroplane, affair, affaire, affection, affiliation, affinity, affirmation, afternoon, age, agency, agenda, agent, aggregation, aggression, agitation, agony, agreement, agriculture, aid, aim, air, aircraft, airline, airplane, airport, aisle, alarm, album, albumen, alcohol, alibi, alien, alignment, alimony, all, allegiance, alleviation, alliance, allocation, allotment, allowance, ally, aloofness, altar, alteration, alternate, alternative, altitude, alum, aluminium, aluminum, alumna, alumnus, amateur, ambiance, ambience, ambiguity, ambition, ambitiousness, ambulance, amendment, ammunition, amnesty, amount, amphetamine, amusement, analog, analogue, analogy, analysis, analyst, ancestor, angel, anger, angle, animal, ankle, annex, anniversary, annotation, announcement, answer, ant, antagonism, antagonist, anticipation, anxiety, anxiousness, apartment, apathy, apex, apology, apoplexy, apparatus, apparel, appeal, appealingness, appearance, appendix, appetite, apple, appliance, applicant, application, appointment, appraisal, approval, approximation, aquarium, arachnid, arch, architect, architecture, archive, archives, archway, ardor, area, arena, argument, argumentation, arm, armchair, army, aroma, arrangement, arrow, art, article, artisan, artist, artwork, ash, aspect, aspiration, assault, assemblage, assembly, assertion, assessment, asset, assignment, assist, assistance, assistant, association, assumption, assurance, asterisk, asylum, athlete, athletics, atmosphere, atom, attachment, attack, attempt, attention, attic, attitude, attorney, attraction, attractiveness, attribute, Au, auction, audience, auditor, augury, aunt, auntie, aurora, author, authorities, authority, auto, autobus, automaton, automobile, automobilist, autonomy, autumn, avenue, average, aviation, award, axis, babe, baby, back, backdown, background, backlog, bacon, bag, bail, bait, balance, balcony, ball, ballet, balloon, ballot, balloting, balm, bam, ban, banana, band, bandage, banding, bang, bank, banknote, bankruptcy, banner, banquet, bar, barbell, bargain, bark, baron, barrel, barrier, barroom, barter, base, baseball, basement, basin, basis, basket, basketball, bat, bath, bathroom, bathtub, battery, battle, battlefield, battlefront, battleground, bay, beach, bead, beak, beam, bean, bear, beard, bearing, beast, beat, bed, bedlam, bedroom, bee, beef, beer, beginning, behavior, beholder, beleaguering, belief, believability, bell, belly, belongings, beloved, belt, bench, bend, beneficiary, benefit, bereavement, berm, berry, besieging, bet, betrothal, beverage, bias, Bible, bicycle, biff, bike, bill, billet, billing, bin, biography, biology, bird, birdcall, birdsong, birth, birthday, biscuit, bishop, bit, bitch, bite, blackmail, blackness, blade, blank, blanket, blast, blessing, blighter, block, blood, bloodshed, blot, blow, blowup, blueness, board, boat, body, bodyguard, boiler, boldness, bolt, bomb, bomber, bond, bone, bonus, Book, boom, boot, booth, booty, border, borderline, bosom, boss, botany, bottle, bottom, boulevard, boundary, bounty, bovine, bow, bowel, bowl, box, boy, bracket, braid, brain, brainstorm, brake, branch, brand, brass, braveness, bravery, bread, breadstuff, breadth, break, breakdown, breakfast, breakthrough, breast, breeze, brewery, bribery, brick, bride, bridge, brightness, brilliance, brim, brink, broadcast, broadside, broccoli, brochure, brokenheartedness, bronze, brother, brow, brush, brushup, brute, bubble, buck, bucket, budget, buff, buffet, building, bulb, bull, bullet, bulletin, bum, bun, bunch, bundle, bungalow, bunk, burden, bureau, bureaucracy, burial, burn, bus, bush, business, businessman, businessperson, bustle, butt, butter, butterfly, buttocks, button, buzzer, cab, cabal, cabaret, cabin, cabinet, cable, cadaver, cafe, cage, cake, calamity, calculation, calendar, calf, call, calling, calorie, camera, camp, campaign, campaigner, can, canal, cancer, candidate, candle, cane, canvas, canvass, cap, capacity, capital, capitalism, caprice, captain, caption, captive, car, carbon, card, care, career, carnival, carpet, carpeting, carpus, carriage, carrot, cart, carte, cartel, cartoon, cascade, case, cash, cask, casket, cassette, cast, castle, casualty, cat, catalog, catalogue, catastrophe, catch, catchword, category, cathedral, cattle, causa, cause, caution, cave, cavity, ceiling, celebration, celebrity, cell, cellar, cellulose, cemetery, censorship, census, cent, center, century, cereal, cerebration, ceremony, certificate, cervix, chaff, chain, chair, chairman, chairwoman, chalk, challenge, champ, champagne, champion, championship, chance, change, chandeliers, changeover, channel, chaos, chapter, character, characteristic, charge, charity, charm, chart, charter, chauvinist, check, cheek, cheese, chemical, chemistry, cheque, cherry, chessman, chest, chicken, chief, child, childhood, chimney, chimpanzee, chin, chip, chocolate, choice, choir, chopper, chord, chore, chorus, chronicle, chronograph, chunk, church, chute, cigarette, cinema, circle, circular, circulation, circumstance, citation, citizen, city, civilian, civilisation, civilization, claim, clan, clap, clash, class, classroom, clay, clayware, clearance, cleft, clemency, clergyman, clerk, client, cliff, climate, clime, clinic, clipping, clique, cloak, cloakroom, clock, clod, close, closet, closing, cloth, clothes, clothing, cloud, clown, club, clue, clump, cluster, coach, coal, coalescence, coalition, coast, coat, coating, code, coeval, coevals, coffee, coffin, cognition, coin, coincidence, cold, coldness, collaboration, collapse, collar, collation, colleague, collection, college, colon, colony, color, column, coma, combat, combination, combine, comedy, comet, comfort, comfortableness, command, commander, commemoration, commencement, comment, commerce, commercialism, commission, commitment, committee, commodity, common, commons, commotion, communication, communist, community, compact, companionship, company, comparison, compartment, compass, compassion, compatibility, compeer, compensation, competence, competency, competition, complainant, compliance, complication, component, comportment, composer, composition, compound, compromise, comptroller, computation, computer, computing, comrade, concealment, concentration, concept, conception, conceptus, concern, concert, concession, conclusion, concord, concrete, condition, conduct, conductor, confederacy, confederation, conference, confession, confidence, confirmation, conflict, conformity, confrontation, confusion, conglomerate, conglutination, congratulations, congress, congressman, conjecture, connectedness, connection, conniption, conscience, consciousness, conscription, consensus, consequence, conservation, consideration, consolation, conspiracy, constellation, consternation, constituency, constituent, constitution, constraint, construct, construction, consultant, consultation, consumer, consumption, contact, contagion, container, contamination, contemporaries, contemporary, contempt, content, contention, contentment, contest, context, continent, continuation, contract, contraction, contradiction, contraption, contrary, contrast, contribution, control, controller, convalescence, convenience, convention, conversation, conversion, conveyance, conviction, convulsion, cook, cookie, coop, cooperation, cop, copper, copy, copyright, cord, corduroy, core, corn, corner, corpse, correction, correlation, correspondence, corridor, corruption, cosmetics, cosmos, cost, costume, coterie, cottage, cotton, couch, council, counsel, counter, counterspy, country, countryside, coup, couple, coupon, courage, course, court, courtesy, courting, courtship, courtyard, cousin, couturier, cover, coverage, cow, cows, crack, crackpot, craft, craftiness, craftsman, craftsmanship, crank, cranny, crash, craving, cream, crease, creation, credibility, credibleness, credit, credo, creed, crest, crevice, crew, crewman, cricket, crime, criminal, crimp, crisis, crisp, criterion, critic, criticism, critique, crook, crop, cross, crossing, crossover, crossroad, crosswalk, crowd, crown, cruelty, cruise, crusade, crutch, cry, crybaby, crystal, Cu, cube, cubicle, cucumber, cue, cuke, culture, cunning, cup, cupboard, cupful, curative, cure, curl, currency, current, curriculum, curtain, curve, cushion, cuss, custody, custom, customer, cut, cutis, cutlery, cutting, cyberspace, cycle, cylinder, dad, dada, daddy, dairy, damage, dance, danger, dark, darkness, darling, dash, date, daub, daughter, dawn, dawning, day, daybreak, daylight, daze, deadline, deal, dealer, dealership, dear, dearest, dearth, death, debate, debauchery, debt, decade, decay, decease, decennary, decennium, deck, declaration, decline, declivity, decomposition, decoration, decrease, decree, dedication, deduction, deed, deer, default, defeat, defect, defendant, deficiency, deficit, definition, deflection, defrayal, deftness, degree, deity, delay, delegate, delegation, deliberation, delight, delimitation, delivery, demand, demarcation, demo, democracy, demolition, demonstration, demonstrator, denial, denizen, denseness, density, dentist, departure, dependence, deportation, deposit, depression, deprivation, deputation, deputy, descent, desegregation, desert, deservingness, design, designer, desire, desk, despair, despite, dessert, destination, destiny, destruction, detachment, detail, detainment, detective, detector, detention, detonation, development, deviation, device, devotee, diadem, diagnosis, diagram, dialect, dialog, dialogue, diameter, diamond, diary, dictionary, diet, dieting, difference, difficultness, difficulty, dig, dignity, digression, dilemma, diligence, dimension, diminution, dinner, diplomat, direction, directions, director, directory, dirt, disability, disablement, disadvantage, disaffirmation, disagreement, disappointment, disassociation, disaster, disc, discharge, discipline, disco, discord, discotheque, discount, discourse, discourtesy, discovery, discrimination, discussion, disdain, disease, disgrace, disguise, dish, dishonor, disinclination, disk, dismay, dismissal, disorder, disorderliness, display, disposition, disputation, dispute, disregard, disruption, dissension, dissent, dissertation, dissonance, distance, distortion, distributor, district, distrust, disturbance, ditch, diverseness, diversion, diversity, dividend, divinity, division, divorce, doc, doctor, doctrine, document, documentation, dog, doll, dollar, dolphin, dome, domicile, dominance, domination, dominion, donation, donor, door, doorbell, doorsill, doorstep, dope, dorm, dormitory, dose, dot, double, doubt, doubtfulness, dough, downfall, dozen, draft, dragon, drain, drainpipe, drama, dramatics, dramaturgy, drape, draught, draw, drawer, drawing, dream, dreaming, dress, dresser, dressing, drift, drill, drink, drinkable, drive, driver, driveway, drop, drug, drum, drunkenness, dubiety, dubiousness, duck, duet, duke, duo, dupery, duration, dusk, dust, duty, dweller, dwelling, eagle, ear, earnings, earth, earthquake, ease, easiness, east, echo, economics, economist, economy, ecstasy, edge, edict, edifice, edition, education, effect, effort, egg, eggs, eggshell, ego, egotism, elan, elbow, election, elector, electorate, electricity, electron, electronics, element, elephant, elevator, elite, embarrassment, embassy, emblem, embryo, emcee, emergency, emollient, emotion, emphasis, empire, employee, employer, employment, emptiness, encephalon, enchantress, encounter, encroachment, encumbrance, end, endeavor, ending, endurance, enemy, energy, engagement, engine, engineer, engineering, engrossment, enigma, enlargement, enmity, enrollment, enrolment, enterprise, entertainment, enthusiasm, enticement, entitlement, entombment, entrance, entranceway, entree, entry, entryway, envelope, environment, environmentalist, environs, episode, epoch, equal, equation, equilibrium, equipment, equivocalness, era, erosion, error, eruption, escapade, escape, escort, espousal, essay, essence, essential, establishment, estate, esteem, estimate, estimation, ethics, Europe, evaluation, eve, evening, event, everything, evidence, evolution, exam, examination, examiner, example, excavation, exception, excerpt, excerption, excess, exchange, excitation, excitement, exculpation, excuse, execution, executive, exemplar, exemption, exercise, exercising, exhibit, exhibition, exigency, exile, existence, exit, exits, exoneration, expanse, expansion, expatriation, expectancy, expectation, expedition, expenditure, experience, experiment, experimentation, expert, expertise, expertness, expiry, explanation, exploration, explosion, expo, exposition, exposure, expression, expressway, expulsion, extension, extent, exterior, extortion, extract, extraction, extraterrestrial, extreme, eye, eyebrow, eyeglasses, eyelid, fable, fabric, fabrication, facade, face, facet, facility, facsimile, fact, factor, factory, fad, faerie, faery, fag, failing, failure, fair, fairy, faith, fake, faker, fall, fame, familiarity, family, famine, fan, fancy, fantasy, fare, farewell, farm, farmer, farming, fashion, fastener, fat, fate, father, fault, favor, favorite, favour, favourite, fax, fear, fearfulness, feast, feather, feature, federation, fee, feedback, feel, feeling, feline, fellowship, felon, feminist, fen, fence, fenland, ferry, ferryboat, fertilization, fervency, fervidness, fervor, festival, festivity, fever, few, fib, fiber, fibre, fiction, field, fig, fight, fighting, figure, figuring, file, film, filter, final, finance, find, finger, finish, fire, firearm, firefighter, fireman, fireplace, firm, first, fish, fisher, fisherman, fissure, fist, fit, fitness, fix, fixture, flack, flag, flair, flak, flake, flame, flare, flash, flashbulb, flashlight, flat, flatware, flavor, flaw, fleck, fleet, flesh, flight, flock, flood, floor, flooring, flora, flour, flower, flowerpot, flu, fluctuation, flue, fluid, flurry, fly, foe, fog, fold, folder, foliage, folk, folklore, folks, fondness, font, food, fool, foot, football, footprint, footstep, footwear, foray, forbearance, force, forcefulness, forecast, forefinger, forehead, foreigner, foreman, forenoon, forest, forestry, forethought, foretoken, fork, form, format, formation, formatting, formula, forte, fortuity, fortune, forum, fossil, foundation, fountain, fox, foyer, fraction, fracture, fragment, frame, framework, franchise, frankfurter, fraud, fraudulence, freak, freckle, freedom, freeway, freeze, freight, freighter, frequence, frequency, freshman, friction, fridge, friend, friendship, fright, frog, front, frontage, frontal, frugality, fruit, fruitcake, frustration, ft, fuel, fumes, fun, function, functionary, functioning, fund, fundament, funeral, funfair, fungus, fur, furniture, furrow, fury, fuss, future, futurity, gadget, gaffe, gag, gain, gal, galaxy, gallery, gallon, game, gameboard, gap, garage, garbage, garden, garlic, garment, garret, gas, gash, gasoline, gate, gaze, gear, gem, gemstone, gender, gene, general, generation, genius, gentleman, geography, gesture, getup, ghost, ghostwriter, giant, gift, gild, girl, girlfriend, gizmo, glacier, glance, glass, glasses, glasshouse, glimpse, globe, gloom, gloominess, glory, glove, glow, glue, glumness, goal, goalie, goalkeeper, goaltender, goat, gob, god, gold, golf, goo, goober, good, goodness, gore, gossip, government, governor, gown, grace, grad, gradation, grade, gradient, graduate, grain, grammar, gramps, grandad, grandfather, grandma, grandmother, grant, graph, grapheme, graphics, grasp, grass, gratuity, grave, gravel, graveness, graveyard, gravitation, gravity, greenhouse, greenness, greens, greeting, grief, grievance, grimace, grin, grinder, grinning, grip, grocery, grooming, ground, groundbreaker, grounds, growing, grownup, growth, grudge, guarantee, guard, guerrilla, guess, guest, guidance, guide, guidebook, guideline, guidepost, guild, guile, guilt, guiltiness, guitar, gun, gunk, gust, gustation, gut, gutter, gyration, H2O, habit, habitant, habitat, habitation, hack, hair, haircut, hairdo, hairstyle, half, hall, hallway, halt, ham, hammer, hamper, hand, handbasket, handbill, handbook, handcart, handicap, handling, handwear, haphazardness, happenstance, harbor, hardship, hardware, harm, harmoniousness, harmony, harness, harvest, haste, hat, hay, hayfield, hazard, haze, head, headdress, headgear, heading, headline, headquarters, headroom, healer, health, heap, hearsay, heart, heartache, heartbeat, heartbreak, heat, heaven, hedge, heel, height, heir, helicopter, hell, helmet, help, helper, helping, hemisphere, hen, herb, herd, hereafter, heritor, hero, heroin, hesitancy, hesitation, hide, hideaway, hierarchy, highlight, highway, hike, hill, hindrance, hint, hip, historian, history, hitch, hoax, hobby, hog, hokum, hold, holding, holdup, hole, holiday, home, homecoming, homemaker, homo, honey, honor, honorableness, hook, hoop, hoops, hope, horizon, horn, horoscope, horror, horse, horseshoe, hosiery, hospital, hospitality, host, hostage, hostel, hostelry, hostility, hotdog, hotel, hour, house, household, housemaid, houseplant, housewife, housing, hovel, hr, hubby, hue, hulk, hullabaloo, human, humanity, humanness, humor, hunch, hunt, hunter, hunting, huntsman, hurry, hurt, husband, husbandry, husk, hustle, hut, hutch, hybrid, hypothesis, ice, icon, idea, ideal, identicalness, identification, identity, ideology, idiom, igniter, ignominy, ignorance, illness, illusion, illustration, image, imagination, immersion, immigrant, immigration, immunity, impact, impairment, imperativeness, impertinence, implement, implication, import, importance, importation, imposter, impression, improvement, improver, impudence, impulse, in, inadequacy, incentive, incertitude, inch, incident, inclination, incline, income, increase, increment, indemnity, index, indication, indicator, indigence, individual, individuality, inducement, industriousness, industry, inebriant, infant, infection, infirmary, inflation, influence, influenza, info, informant, information, infraction, infrastructure, infringement, ingestion, ingredient, ingroup, inhabitant, inheritor, inhibition, inhumation, initial, initiative, injection, injury, inn, innovation, innovator, inquest, inquiry, insect, inside, insider, insight, insistence, insistency, inspector, inspiration, instability, installation, installment, instance, instant, instinct, institution, instruction, instructor, instrument, instrumentalists, insufficiency, insult, insurance, insurgent, insurrection, insurrectionist, integration, integrity, intellect, intelligence, intensity, intent, intention, interaction, interest, interface, interference, interior, interment, intermission, Internet, interpreter, interrogation, interruption, intersection, intervention, interview, intestine, intimacy, intoxicant, intro, introduction, intrusion, intuition, inundation, invasion, invention, inventory, investigation, investigator, investment, invitation, invitee, inviter, involvement, ire, iron, irony, island, isolation, issue, it, item, iteration, itinerary, ivory, jacket, jam, jar, jaw, jazz, jeans, jelly, jest, jester, jet, jewel, jewelry, jiffy, job, jock, jockey, joint, joke, journal, journalist, journey, joy, joyfulness, joyousness, joystick, judge, judgement, judgment, judicature, judiciousness, juice, jump, junction, jungle, jurisdiction, jurisprudence, jurist, jury, justice, justification, justness, keep, kettle, key, kick, kid, kidney, killer, kilocalorie, kin, kindness, kinfolk, king, kingdom, kinsfolk, kinship, kit, kitchen, kite, knee, knife, knight, knot, knowledge, Koran, kudos, lab, label, laboratory, laborer, labour, labyrinth, lace, lack, ladder, lady, lake, lamb, lamp, land, landholder, landlord, landowner, landscape, lane, language, lap, larceny, laser, laugh, laundry, laurels, lavatory, law, lawmaking, lawn, lawsuit, lawyer, layer, layout, layover, lb, lead, leader, leadership, leading, leaf, leafage, leaflet, leap, learner, learning, lease, leash, leather, leave, lecture, left, leftovers, leg, legend, legislating, legislation, legislature, leisure, lemon, length, lengthiness, leniency, lesion, lessening, lesson, letdown, letter, level, lexicon, liability, liaison, liberty, library, licence, license, lick, lid, lie, life, lifestyle, lift, light, lighter, likeness, lily, limb, limit, limitation, line, lineage, lineation, linen, link, lion, lip, liquid, list, listeners, listing, literacy, literature, litigation, livelihood, liver, livestock, living, load, loan, lobby, location, lock, locomotive, locution, lodge, lodging, loft, log, logarithm, logic, look, looker, lookout, loop, loot, looting, lorry, loser, loss, lot, lottery, loudness, loudspeaker, lounge, love, lover, low, loyalty, lozenge, luck, luggage, lumber, luminance, luminosity, lump, lunch, luncheon, lung, lure, machine, machinery, machines, macrocosm, madness, maestro, magazine, magistrate, magnitude, maid, maidservant, mail, mailman, mainstream, maintenance, majority, make, makeup, malady, male, malefactor, malice, maliciousness, maltreatment, man, management, manager, maneuver, manner, manual, manufactory, manufacture, manufacturer, manus, manuscript, map, marathon, marble, march, margin, mark, market, marketer, marketing, marriage, Mars, marsh, marshland, marvel, Marxist, mask, mass, master, mastermind, mastery, match, mate, material, materials, math, mathematics, maths, matrimony, matrix, matter, maturation, maximum, mayor, maze, MD, meadow, meal, meaning, means, measure, meat, mechanism, medal, medallion, medicament, medication, medicine, medium, meeting, melody, member, membership, memo, memorandum, memorial, memory, menace, menage, mentality, menu, mercantilism, merchandise, merchandiser, merchant, mercifulness, mercilessness, mercy, merit, meritoriousness, merriment, mess, message, metal, method, methodology, metro, metropolis, microchip, microphone, middle, middleman, midnight, midpoint, might, migration, mike, mile, milk, mill, min, mind, mindset, mine, miner, mineral, mineworker, minimum, minister, ministry, minority, minute, miracle, mirror, miscarriage, misdemeanor, miserableness, misery, misgiving, mishap, misrepresenting, missile, missive, mist, mistake, mistrust, mitt, mix, mixture, model, modification, module, mold, mole, molecule, moment, momentum, monarch, monarchy, monastery, money, monk, monkey, monopoly, monster, month, monument, mood, moon, morale, morn, morning, moron, morsel, mortgage, mosaic, mosque, mosquito, mother, motif, motion, motivation, motivator, motive, motor, motorbike, motorcar, motorcycle, motorist, motortruck, motto, mould, mound, mount, mountain, mourning, mouse, mouth, move, movement, movie, muck, mud, mug, multimedia, murder, muscle, museum, mushroom, music, musician, mutation, mystery, myth, Na, nail, name, narration, narrative, nation, nationalism, nationalist, nationality, nature, naught, nausea, navy, necessity, neck, necklace, necktie, need, neediness, needle, neglect, negligence, negotiation, neighbor, neighborhood, neighbour, neoplasm, nephew, nerve, nest, net, netherworld, network, newcomer, news, newspaper, newsperson, nicety, niche, night, nightclub, nightfall, nightmare, nightspot, nighttime, nobleman, node, noise, nomenclature, nomination, nominee, noncitizen, nonpayment, nonremittal, nonsense, nonstarter, norm, north, nose, note, notebook, notice, notion, noun, novel, nowadays, nuance, nuisance, number, numeral, nun, nuptials, nurse, nursery, nut, nutcase, nutrient, oak, object, objection, objective, obligation, observation, observer, obstacle, occasion, Occident, occupant, occupation, ocean, oculus, odor, odour, oeuvre, offence, offender, offense, offensive, offer, offering, office, officer, official, offspring, oftenness, oil, ointment, olfaction, omission, onion, onslaught, opera, operation, opinion, opponent, opportunity, opposite, opposition, optic, optimism, option, opus, orange, orangeness, orb, orbit, orbiter, orchestra, order, orderliness, organ, organisation, orgy, Orient, orientation, origin, ornament, ornamentation, outcome, outcry, outfit, outgo, outlaw, outlay, outlet, outline, outlook, output, outrage, outside, oven, overall, overhaul, overview, owl, owner, ownership, oxygen, pace, pachyderm, pack, package, packet, pact, page, pail, pain, painfulness, paint, painter, painting, pair, palace, palm, pamphlet, pan, panache, pandemonium, panel, panic, pants, paper, papers, parade, paradise, paradox, paragon, paragraph, parallel, parameter, parcel, pardon, parent, park, parking, parliament, parole, paroxysm, part, participant, particle, particular, parting, partner, partnership, party, pass, passage, passageway, passenger, passing, passion, passionateness, passport, password, past, paste, pastel, pastime, pastor, pasture, pastureland, patch, patent, path, patience, patient, patio, patriot, patriotism, patrol, patron, pattern, pause, pavement, paw, pay, payment, Pb, peace, peacefulness, peak, peanut, pearl, peasant, pectus, pedagogy, pedestal, pedestrian, pee, peel, peer, pelt, pen, penalty, penchant, pencil, penny, pension, pensioner, penury, people, pepper, perambulator, perceiver, percent, percentage, perception, perceptiveness, performance, performer, perfume, peril, period, periodical, permission, permit, person, personality, personnel, perspective, perspiration, pest, pesterer, pet, petition, petrol, phantasy, pharynx, phase, phenomenon, philosopher, philosophy, phone, photo, photoflash, photograph, photographer, photography, phrasing, phylogenesis, phylogeny, physician, physics, piano, picture, piddle, pie, piece, pier, pig, pigeon, pile, pill, pillage, pillar, pillow, pilot, pin, pinch, pioneer, pipe, piss, pit, pitch, pitfall, pitilessness, pity, place, placement, plaintiff, plait, plan, plane, planet, plank, planning, plant, plaster, plastic, plate, platform, play, player, playfulness, playpen, plaything, plaza, pleasure, plot, plumage, plume, plunder, plundering, plus, pneumonia, pocket, poem, poesy, poetry, point, pointer, poison, pole, police, policeman, policy, polish, politician, politics, poll, pollution, polyhedron, pony, pool, pop, populace, population, pork, porter, portion, portrait, portrayal, position, possession, possibility, post, postcard, postman, posture, pot, potable, potato, potential, potentiality, pottery, pound, powder, power, practice, pragmatism, praise, pram, prayer, preaching, precariousness, precaution, precedence, precedent, precis, preciseness, precision, preconception, precondition, predator, predecessor, prediction, predilection, predisposition, preference, preindication, prejudice, premise, premiss, premium, preoccupation, preparation, preparedness, preponderance, prescription, presence, present, presentation, preservation, preserve, presidency, president, presidentship, press, pressure, prestige, prestigiousness, pretender, prevalence, prevarication, preventive, prey, price, prickle, pride, primary, primate, prince, princess, principle, print, printer, priority, prison, prisoner, privacy, privateness, privilege, prize, probability, probe, problem, procedure, process, proclamation, produce, producer, product, production, prof, profession, professional, professor, professorship, proficiency, profile, profit, profits, progeny, prognosis, program, progress, prohibition, project, projectile, projection, proletariat, prolongation, promise, promotion, proof, propaganda, property, proponent, proportion, proportionality, proposal, proposition, proscription, prosecution, prospect, prosperity, protection, protein, protest, protester, provenance, province, provision, psyche, psychoanalysis, psychoanalyst, psychologist, psychology, pub, public, publication, publicity, publisher, pudding, puddle, pulp, pulsation, pulse, pump, pumpkin, punch, punishment, pupil, purport, purpose, pursuit, pushcart, putsch, puzzle, pyramid, quake, qualification, quality, quandary, quantity, quarrel, quarter, quartz, queen, query, quest, question, questionnaire, queue, quickness, quiet, quietness, quip, quota, quotation, quote, quotient, Quran, rabbit, race, racecourse, racetrack, raceway, racism, rack, radiation, radical, radio, radioactivity, radiocommunication, radiogram, rage, raid, railcar, railroad, rain, rainbow, rainfall, raise, rally, ranch, randomness, range, rank, rap, rape, rapture, rat, rate, ratio, rationality, ravishment, ray, reach, reaction, reactor, reader, readiness, realism, reality, realm, realness, rear, reason, rebel, rebellion, recap, recapitulation, receipt, reception, recess, recession, recipient, recitation, reckoning, recognition, recommendation, recompense, record, recording, recovery, recreation, rectification, rector, recuperation, redness, reduction, redundance, redundancy, referee, reference, referral, refinement, reflection, reflector, reflexion, reform, refrigerator, refuge, refugee, refurbishment, refusal, refuse, regaining, regard, regime, region, register, registration, registry, regret, regulation, rehabilitation, rehearsal, reign, rejection, relation, relationship, relative, relaxation, release, relevance, relevancy, reliance, relief, religion, relocation, reluctance, remainder, remains, remark, remedy, remembrance, remuneration, renovation, renown, rent, renter, repast, repeat, repetition, replacement, replica, replication, reply, report, reportage, reporter, reporting, repose, repositing, representation, representative, reproduction, reptile, reptilian, republic, repugnance, repulsion, reputation, request, requirement, requisite, research, researcher, reservation, reserve, reservoir, residence, resident, residual, residue, resignation, resistance, resolution, resort, resource, respect, respite, response, responsibility, rest, restaurant, restitution, restoration, restraint, restriction, result, resultant, resume, resurgence, retailer, retaliation, reticence, retiree, retirement, retraction, retreat, retrieval, return, revenge, reverberation, reversal, reverse, reversion, review, reviewer, revitalization, revival, revolt, revolution, revulsion, reward, rhetoric, rhythm, rib, ribbon, rice, riches, ride, rider, ridge, rifle, right, rightfulness, rim, ring, ringlet, riot, rise, rising, risk, rite, ritual, rivalry, river, road, robbery, robot, rock, rocket, rod, rodent, role, roll, roof, room, rooms, root, rope, rose, roster, rotation, rotting, round, route, routine, row, royalty, rubbish, rue, ruefulness, rug, rugby, ruin, ruination, rule, ruler, rumor, rung, runner, rush, rushing, ruthlessness, sacrifice, safari, safe, safety, sail, sailor, salad, salary, sale, salesclerk, salesperson, salmon, salon, saloon, salt, salutation, salvation, sample, sanctuary, sand, sandal, sandwich, sarcasm, satellite, satire, satisfaction, saturnalia, sauce, sausage, savor, sawdust, saying, scab, scale, scandal, scar, scenario, scene, scenery, scent, schedule, scheme, schism, scholar, scholarship, school, schoolbook, schoolchild, schoolhouse, schoolroom, science, scientist, scope, score, scorn, scrap, scrape, scratch, screen, screw, script, scruples, sculpture, scuttlebutt, sea, seacoast, seal, seaport, search, seashore, season, seat, sec, seclusion, second, secrecy, secret, secretary, secretion, secretiveness, section, sector, security, sediment, seed, seeking, segment, seism, selection, self, seller, seminar, senior, sensation, sense, sensitiveness, sensitivity, sensor, sentence, sentience, sentiency, sentiment, sentinel, sentry, separation, sequence, serenity, serial, series, sermon, serpent, servant, server, service, serving, session, set, setback, setting, settlement, setup, sewing, sex, sexuality, shack, shackle, shade, shadow, shaft, shame, shape, share, shareholder, shares, shark, sheaf, sheep, sheet, shelf, shell, shelter, shield, shift, shipping, shirt, shock, shoe, shooting, shop, shopping, shore, short, shortage, shortfall, shorts, shot, shoulder, show, showcase, shower, showing, shrub, shuck, sibling, sickness, side, sidewalk, siege, sieve, sight, sign, signal, signature, signboard, significance, signification, signified, silence, silk, silver, silverware, similarity, simpleness, simplicity, simulation, sin, singer, sink, sinning, sis, sister, site, situation, size, skeleton, sketch, ski, skill, skin, skip, skipper, skirt, skull, sky, skyline, slab, slant, slash, slave, slayer, slaying, sleep, sleeve, slice, slide, slime, slip, slob, slogan, slope, slot, sloven, sludge, slug, slumber, slump, slyness, smack, smear, smell, smile, smiling, smoke, smudge, snack, snail, snake, snare, snow, snowfall, snub, soap, soberness, sobriety, soccer, society, sociology, sock, soda, sodium, sofa, software, soil, solace, soldier, solicitation, solidarity, solo, solution, somberness, song, soprano, sorceress, sorrow, soul, sound, soup, source, south, sovereign, space, span, speaker, specialist, specialty, species, specimen, spectacles, spectator, spectators, spectrum, speculation, speech, speed, spell, sphere, spice, spider, spigot, spinach, spine, spirit, spiritualist, spirt, spite, spitefulness, split, spoken, spokesman, spokesperson, spoon, sport, spot, spouse, spray, spread, spring, springtime, sprite, spurt, spy, squad, square, squirt, stable, stadium, staff, stage, stair, staircase, stairway, stake, stakes, stalk, stall, stalls, stamp, stance, stand, standard, standoff, standpoint, star, start, state, statement, station, statistics, statue, status, stave, steak, stealing, steam, steel, stem, step, steps, steward, stick, stillbirth, stimulation, sting, stipulation, stir, stitch, stock, stockholder, stocking, stockpile, stomach, stone, stool, stop, stopover, storage, store, storey, storm, story, stove, strain, strap, stratum, straw, strawberry, stream, streamer, street, streetcar, strength, stress, stride, strike, strikebreaker, string, strip, stripe, stroke, stroller, structure, struggle, student, studio, study, stuff, stupor, style, subject, submission, subscriber, substance, substitute, subtlety, suburb, suburbia, subway, success, suffering, suffrage, sugar, suggestion, suicide, suit, suitcase, suite, sulfur, sulphur, sum, summary, summation, summer, summertime, summit, summons, sun, sunburn, Sunday, sunlight, sunrise, sunshine, suntan, super, superfluousness, superintendent, supermarket, superpower, supervisor, supper, supplication, supply, supplying, support, supporter, suppression, surface, surgeon, surgery, surmise, surplus, surprise, surrender, surrogate, surroundings, survey, survival, survivor, suspect, suspension, suspicion, swap, sweat, sweater, sweet, sweetener, swine, swing, switch, swop, sword, syllable, symbol, symmetry, sympathy, symptom, syndrome, system, tab, table, tablet, tactic, tactics, tail, takeover, talk, talker, talking, talks, tan, tang, tank, tantrum, tap, tape, taper, target, tariff, task, taste, tautness, tavern, tax, taxation, taxi, taxicab, taxpayer, tea, teacher, teaching, team, tear, teardrop, technique, technologist, technology, teenager, telephone, television, temper, temperament, temperature, temple, tempo, temptation, tenant, tendency, tending, tennis, tenseness, tension, tent, term, terminal, terminology, terms, terrace, territory, terror, terrorist, test, testament, testimonial, tether, text, textbook, textile, texture, thanks, theater, theatre, theft, theme, theology, theoretician, theorist, theorizer, theory, therapist, therapy, thesis, thievery, thigh, thinker, thinking, thorax, thorn, thought, thoughtfulness, thread, threat, threshold, thriftiness, thriftlessness, throat, throne, thumb, thunderbolt, tick, ticket, tide, tidings, tie, tier, tiger, tile, tilt, timber, timberland, time, timepiece, timetable, tin, tip, tire, tissue, tit, title, toad, toast, toe, toil, toilet, token, toll, tomato, tomb, ton, tonality, tone, tongue, tool, tooth, top, topic, torch, torment, torso, torture, torturing, touch, touchstone, tourism, tourist, tournament, tourney, towel, tower, town, toy, trace, track, tract, traction, trade, trader, tradition, traffic, tragedy, trail, trailblazer, train, trainer, training, trait, tram, trance, transaction, transfer, transferral, transgression, transition, transmission, transport, transportation, trap, trash, trauma, tray, treasure, treasurer, treat, treatment, treaty, tree, trench, trend, tress, trial, triangle, tribe, tribulation, tribunal, tribute, trick, trilateral, triumph, trolley, troop, trophy, trouble, trough, troupe, trouser, truck, trueness, trunk, trust, trustee, truth, tryout, tub, tube, tum, tummy, tumor, tumour, tune, tunnel, turkey, turmoil, turn, turnabout, turnaround, tush, tusk, tutor, twelve, twelvemonth, twilight, twin, twine, twist, twosome, tycoon, tympan, ulcer, umbrella, uncertainness, uncertainty, uncle, uncomplicatedness, underground, underside, understanding, undersurface, undertaking, unemployment, uniform, union, unit, unity, universe, university, unrest, unwellness, upgrade, upheaval, upkeep, upper, uprising, upside, urge, urgency, urine, usage, use, user, utterer, vacancy, vacation, vacillation, vacuum, vale, valley, value, van, vanguard, variable, variant, variation, variety, vat, vector, vegetable, vegetarian, vegetation, veggie, vehicle, veil, vein, velocity, velvet, vender, vendor, venom, venture, Venus, verdict, verge, verification, verity, verse, version, vertex, vessel, vestibule, veteran, vicinity, victim, victor, victory, video, view, viewer, viewing, viewpoint, vigor, villa, village, villager, violation, violence, virgin, viridity, virtue, virtuoso, virus, vision, visit, visitor, vitamin, vitrine, vocalist, vocation, voice, void, volcano, volition, volume, volunteer, vote, voter, voting, voucher, voyage, wage, wager, wagon, waist, waistline, waiter, waiver, wake, walker, wall, walls, want, war, ward, wardrobe, ware, warehousing, warfare, warning, warrant, warrantee, warrior, wash, washables, washbasin, washbowl, washstand, waste, wastefulness, watch, watcher, watchman, watchword, water, watercourse, watercraft, waterfall, wave, wavering, way, weakness, wealth, weapon, weather, web, website, wedding, wedlock, weed, week, weekend, weight, welcome, welfare, well, wellbeing, wellness, west, whale, wheat, wheel, whim, whip, whiskey, wholeness, whorl, widow, width, wife, wild, wilderness, wildlife, wiliness, will, willpower, wimp, win, wind, window, wine, wing, winner, winnings, winter, wintertime, wipeout, wire, wireless, wiretap, wisecrack, wish, witch, withdrawal, witness, wolf, woman, wonder, wood, woodland, wooing, wool, word, wording, words, work, workbench, worker, workmanship, workplace, workshop, world, worm, worry, worth, wound, wrangle, wreck, wrench, wretchedness, wrinkle, wrist, writer, written, wrongdoer, wurst, yacht, yard, year, years, yell, yesteryear, yield, you SYNONYM me SYNONYM i, young, youth, yr, zephyr, zero, zone
+abbey, abdomen, abidance, ability, abode, abortion, absence, absorption, abstract, abuse, academy, accelerator, accent, acceptance, access, accession, accident, accomplishment, accord, account, accountant, accounting, accretion, accumulation, accusation, ace, achievement, acid, acknowledgment, acme, acquaintance, acquisition, act, action, activeness, activity, actor, actors, ad, adaptation, addiction, addition, address, adeptness, adhesive, administration, administrator, admiration, admission, admittance, admonition, adolescent, adoption, adroitness, adult, advance, advancement, advantage, adventure, adversary, adversity, advertisement, advertising, advice, adviser, advisor, advocate, aeroplane, affair, affaire, affection, affiliation, affinity, affirmation, afternoon, age, agency, agenda, agent, aggregation, aggression, agitation, agony, agreement, agriculture, aid, aim, air, aircraft, airline, airplane, airport, aisle, alarm, album, albumen, alcohol, alcove, alibi, alien, alignment, alimony, all, allegiance, alleviation, alliance, allocation, allotment, allowance, ally, aloofness, altar, alteration, alternate, alternative, altitude, alum, aluminium, aluminum, alumna, alumnus, amateur, ambiance, ambience, ambiguity, ambition, ambitiousness, ambulance, amendment, ammunition, amnesty, amount, amphetamine, amusement, analog, analogue, analogy, analysis, analyst, ancestor, angel, anger, angle, animal, ankle, annex, anniversary, annotation, announcement, answer, ant, antagonism, antagonist, anticipation, anxiety, anxiousness, apartment, apathy, apex, apology, apoplexy, apparatus, apparel, appeal, appealingness, appearance, appendix, appetite, apple, appliance, applicant, application, appointment, appraisal, approval, approximation, aquarium, arachnid, arch, architect, architecture, archive, archives, archway, ardor, area, arena, argument, argumentation, arm, armchair, army, aroma, arrangement, arrow, art, article, artisan, artist, artwork, ash, aspect, aspiration, assault, assemblage, assembly, assertion, assessment, asset, assignment, assist, assistance, assistant, association, assumption, assurance, asterisk, asylum, athlete, athletics, atmosphere, atom, attachment, attack, attempt, attention, attic, attitude, attorney, attraction, attractiveness, attribute, Au, auction, audience, auditor, augury, aunt, auntie, aurora, author, authorities, authority, auto, autobus, automaton, automobile, automobilist, autonomy, autumn, avenue, average, aviation, award, axis, axle, babe, baby, back, backdown, background, backlog, bacon, bag, bail, bait, balance, balcony, ball, ballet, balloon, ballot, balloting, balm, bam, ban, banana, band, bandage, banding, bang, bank, banknote, bankruptcy, banner, banquet, bar, barbell, bargain, bark, baron, barrel, barrier, barroom, barter, base, baseball, basement, basin, basis, basket, basketball, bat, bath, bathroom, bathtub, battery, battle, battlefield, battlefront, battleground, bay, beach, bead, beak, beam, bean, bear, beard, bearing, beast, beat, bed, bedlam, bedroom, bee, beef, beer, beginning, behavior, beholder, beleaguering, belief, believability, bell, belly, belongings, beloved, belt, bench, bend, beneficiary, benefit, bereavement, berm, berry, besieging, bet, betrothal, beverage, bias, Bible, bicycle, biff, bike, bill, billet, billing, bin, biography, biology, bird, birdcall, birdsong, birth, birthday, biscuit, bishop, bit, bitch, bite, blackmail, blackness, blade, blank, blanket, blast, blessing, blighter, block, blood, bloodshed, blot, blow, blowup, blueness, board, boat, body, bodyguard, boiler, boldness, bolt, bomb, bomber, bond, bone, bonus, Book, boom, boot, booth, booty, border, borderline, bosom, boss, botany, bottle, bottom, boulevard, boundary, bounty, bovine, bow, bowel, bowl, box, boy, bracket, braid, brain, brainstorm, brake, branch, brand, brass, braveness, bravery, bread, breadstuff, breadth, break, breakdown, breakfast, breakthrough, breast, breeze, brewery, bribery, brick, bride, bridge, brightness, brilliance, brim, brink, broadcast, broadside, broccoli, brochure, brokenheartedness, bronze, brother, brow, brush, brushup, brute, bubble, buck, bucket, budget, buff, buffet, building, bulb, bull, bullet, bulletin, bum, bun, bunch, bundle, bungalow, bunk, burden, bureau, bureaucracy, burial, burn, bus, bush, business, businessman, businessperson, bustle, butt, butter, butterfly, buttocks, button, buzzer, cab, cabal, cabaret, cabin, cabinet, cable, cadaver, cafe, cage, cake, calamity, calculation, calendar, calf, call, calling, calorie, camera, camp, campaign, campaigner, can, canal, cancer, candidate, candle, cane, canvas, canvass, cap, capacity, capital, capitalism, caprice, captain, caption, captive, car, carbon, card, care, career, carnival, carpet, carpeting, carpus, carriage, carrot, cart, carte, cartel, cartoon, cascade, case, cash, cask, casket, cassette, cast, castle, casualty, cat, catalog, catalogue, catastrophe, catch, catchword, category, cathedral, cattle, causa, cause, caution, cave, cavity, ceiling, celebration, celebrity, cell, cellar, cellulose, cemetery, censorship, census, cent, center, century, cereal, cerebration, ceremony, certificate, cervix, chaff, chain, chair, chairman, chairwoman, chalk, challenge, champ, champagne, champion, championship, chance, change, chandeliers, changeover, channel, chaos, chapter, character, characteristic, charge, charity, charm, chart, charter, chauvinist, check, cheek, cheese, chemical, chemistry, cheque, cherry, chessman, chest, chicken, chief, child, childhood, chimney, chimpanzee, chin, chip, chocolate, choice, choir, chopper, chord, chore, chorus, chronicle, chronograph, chunk, church, chute, cigarette, cinema, circle, circular, circulation, circumstance, citation, citizen, city, civilian, civilisation, civilization, claim, clamp, clan, clap, clash, class, classroom, clay, clayware, clearance, cleft, clemency, clergyman, clerk, client, cliff, climate, clime, clinic, clipping, clique, cloak, cloakroom, clock, clod, close, closet, closing, cloth, clothes, clothing, cloud, clown, club, clue, clump, cluster, coach, coal, coalescence, coalition, coast, coat, coating, code, coeval, coevals, coffee, coffin, cognition, coin, coincidence, cold, coldness, collaboration, collapse, collar, collation, colleague, collection, college, colon, colony, color, column, coma, combat, combination, combine, comedy, comet, comfort, comfortableness, command, commander, commemoration, commencement, comment, commerce, commercialism, commission, commitment, committee, commodity, common, commons, commotion, communication, communist, community, compact, companionship, company, comparison, compartment, compass, compassion, compatibility, compeer, compensation, competence, competency, competition, complainant, compliance, complication, component, comportment, composer, composition, compound, compromise, comptroller, computation, computer, computing, comrade, concealment, concentration, concept, conception, conceptus, concern, concert, concession, conclusion, concord, concrete, condition, conduct, conductor, confederacy, confederation, conference, confession, confidence, confirmation, conflict, conformity, confrontation, confusion, conglomerate, conglutination, congratulations, congress, congressman, conjecture, connectedness, connection, conniption, conscience, consciousness, conscription, consensus, consequence, conservation, consideration, consolation, conspiracy, constellation, consternation, constituency, constituent, constitution, constraint, construct, construction, consultant, consultation, consumer, consumption, contact, contagion, container, contamination, contemporaries, contemporary, contempt, content, contention, contentment, contest, context, continent, continuation, contract, contraction, contradiction, contraption, contrary, contrast, contribution, control, controller, convalescence, convenience, convention, conversation, conversion, conveyance, conviction, convulsion, cook, cookie, coop, cooperation, cop, copper, copy, copyright, cord, corduroy, core, corn, corner, corpse, correction, correlation, correspondence, corridor, corruption, cosmetics, cosmos, cost, costume, coterie, cottage, cotton, couch, council, counsel, counter, counterspy, country, countryside, coup, couple, coupon, courage, course, court, courtesy, courting, courtship, courtyard, cousin, couturier, cover, coverage, cow, cows, crack, crackpot, craft, craftiness, craftsman, craftsmanship, crank, cranny, crash, craving, cream, crease, creation, credibility, credibleness, credit, credo, creed, crest, crevice, crew, crewman, cricket, crime, criminal, crimp, crisis, crisp, criterion, critic, criticism, critique, crook, crop, cross, crossing, crossover, crossroad, crosswalk, crowd, crown, cruelty, cruise, crusade, crutch, cry, crybaby, crystal, Cu, cube, cubicle, cucumber, cue, cuke, culture, cunning, cup, cupboard, cupful, curative, cure, curl, currency, current, curriculum, curtain, curve, cushion, cuss, custody, custom, customer, cut, cutis, cutlery, cutting, cyberspace, cycle, cylinder, dad, dada, daddy, dairy, damage, dance, danger, dark, darkness, darling, dash, date, daub, daughter, dawn, dawning, day, daybreak, daylight, daze, deadline, deal, dealer, dealership, dear, dearest, dearth, death, debate, debauchery, debt, decade, decay, decease, decennary, decennium, deck, declaration, decline, declivity, decomposition, decoration, decrease, decree, dedication, deduction, deed, deer, default, defeat, defect, defendant, deficiency, deficit, definition, deflection, defrayal, deftness, degree, deity, delay, delegate, delegation, deliberation, delight, delimitation, delivery, demand, demarcation, demo, democracy, demolition, demonstration, demonstrator, denial, denizen, denseness, density, dentist, departure, dependence, deportation, deposit, depression, deprivation, deputation, deputy, descent, desegregation, desert, deservingness, design, designer, desire, desk, despair, despite, dessert, destination, destiny, destruction, detachment, detail, detainment, detective, detector, detention, detonation, development, deviation, device, devotee, diadem, diagnosis, diagram, dial, dialect, dialog, dialogue, diameter, diamond, diary, dictionary, diet, dieting, difference, difficultness, difficulty, dig, dignity, digression, dilemma, diligence, dimension, diminution, dinner, diplomat, direction, directions, director, directory, dirt, disability, disablement, disadvantage, disaffirmation, disagreement, disappointment, disassociation, disaster, disc, discharge, discipline, disco, discord, discotheque, discount, discourse, discourtesy, discovery, discrimination, discussion, disdain, disease, disgrace, disguise, dish, dishonor, disinclination, disk, dismay, dismissal, disorder, disorderliness, display, disposition, disputation, dispute, disregard, disruption, dissension, dissent, dissertation, dissonance, distance, distortion, distributor, district, distrust, disturbance, ditch, diverseness, diversion, diversity, dividend, divinity, division, divorce, doc, doctor, doctrine, document, documentation, dog, doll, dollar, dolphin, dome, domicile, dominance, domination, dominion, donation, donor, door, doorbell, doorsill, doorstep, dope, dorm, dormitory, dose, dot, double, doubt, doubtfulness, dough, downfall, dozen, draft, dragon, drain, drainpipe, drama, dramatics, dramaturgy, drape, draught, draw, drawer, drawing, dream, dreaming, dress, dresser, dressing, drift, drill, drink, drinkable, drive, driver, driveway, drop, drug, drum, drunkenness, dubiety, dubiousness, duck, duet, duke, duo, dupery, duration, dusk, dust, duty, dweller, dwelling, eagle, ear, earnings, earth, earthquake, ease, easiness, east, echo, economics, economist, economy, ecstasy, edge, edict, edifice, edition, education, effect, effort, egg, eggs, eggshell, ego, egotism, elan, elbow, election, elector, electorate, electricity, electron, electronics, element, elephant, elevator, elite, embarrassment, embassy, emblem, embryo, emcee, emergency, emollient, emotion, emphasis, empire, employee, employer, employment, emptiness, encephalon, enchantress, encounter, encroachment, encumbrance, end, endeavor, ending, endurance, enemy, energy, engagement, engine, engineer, engineering, engraving, engrossment, enigma, enlargement, enmity, enrollment, enrolment, enterprise, entertainment, enthusiasm, enticement, entitlement, entombment, entrance, entranceway, entree, entry, entryway, envelope, environment, environmentalist, environs, episode, epoch, equal, equation, equilibrium, equipment, equivocalness, era, erosion, error, eruption, escapade, escape, escort, espousal, essay, essence, essential, establishment, estate, esteem, estimate, estimation, ethics, Europe, evaluation, eve, evening, event, everything, evidence, evolution, exam, examination, examiner, example, excavation, exception, excerpt, excerption, excess, exchange, excitation, excitement, exculpation, excuse, execution, executive, exemplar, exemption, exercise, exercising, exhibit, exhibition, exigency, exile, existence, exit, exits, exoneration, expanse, expansion, expatriation, expectancy, expectation, expedition, expenditure, experience, experiment, experimentation, expert, expertise, expertness, expiry, explanation, exploration, explosion, expo, exposition, exposure, expression, expressway, expulsion, extension, extent, exterior, extortion, extract, extraction, extraterrestrial, extreme, eye, eyebrow, eyeglasses, eyelid, fable, fabric, fabrication, facade, face, facet, facility, facsimile, fact, factor, factory, fad, faerie, faery, fag, failing, failure, fair, fairy, faith, fake, faker, fall, fame, familiarity, family, famine, fan, fancy, fantasy, fare, farewell, farm, farmer, farming, fashion, fastener, fat, fate, father, faucet, fault, favor, favorite, favour, favourite, fax, fear, fearfulness, feast, feather, feature, federation, fee, feedback, feel, feeling, feline, fellowship, felon, feminist, fen, fence, fenland, ferry, ferryboat, fertilization, fervency, fervidness, fervor, festival, festivity, fever, few, fib, fiber, fibre, fiction, field, fig, fight, fighting, figure, figuring, file, film, filter, final, finance, find, finger, finish, fire, firearm, firefighter, fireman, fireplace, firm, first, fish, fisher, fisherman, fissure, fist, fit, fitness, fix, fixture, flack, flag, flair, flak, flake, flame, flare, flash, flashbulb, flashlight, flat, flatware, flavor, flaw, fleck, fleet, flesh, flight, flock, flood, floor, flooring, flora, flour, flower, flowerpot, flu, fluctuation, flue, fluid, flurry, fly, foe, fog, fold, folder, foliage, folk, folklore, folks, fondness, font, food, fool, foot, football, footprint, footstep, footwear, foray, forbearance, force, forcefulness, forecast, forefinger, forehead, foreigner, foreman, forenoon, forest, forestry, forethought, foretoken, fork, form, format, formation, formatting, formula, forte, fortuity, fortune, forum, fossil, foundation, fountain, fox, foyer, fraction, fracture, fragment, frame, framework, franchise, frankfurter, fraud, fraudulence, freak, freckle, freedom, freeway, freeze, freight, freighter, frequence, frequency, freshman, friction, fridge, friend, friendship, fright, frog, front, frontage, frontal, frugality, fruit, fruitcake, frustration, ft, fuel, fumes, fun, function, functionary, functioning, fund, fundament, funeral, funfair, fungus, fur, furniture, furrow, fury, fuss, future, futurity, gadget, gaffe, gag, gain, gal, galaxy, gallery, gallon, game, gameboard, gap, garage, garbage, garden, garlic, garment, garret, gas, gash, gasoline, gate, gaze, gear, gem, gemstone, gender, gene, general, generation, genius, gentleman, geography, gesture, getup, ghost, ghostwriter, giant, gift, gild, girl, girlfriend, gizmo, glacier, glance, glass, glasses, glasshouse, glimpse, globe, gloom, gloominess, glory, glove, glow, glue, glumness, goal, goalie, goalkeeper, goaltender, goat, gob, god, gold, golf, goo, goober, good, goodness, gore, gossip, government, governor, gown, grace, grad, gradation, grade, gradient, graduate, grain, grammar, gramps, grandad, grandfather, grandma, grandmother, grant, graph, grapheme, graphics, grasp, grass, grate, grating, gratuity, grave, gravel, graveness, graveyard, gravitation, gravity, greenhouse, greenness, greens, greeting, grief, grievance, grimace, grin, grinder, grinning, grip, grocery, grooming, groove, ground, groundbreaker, grounds, growing, grownup, growth, grudge, guarantee, guard, guerrilla, guess, guest, guidance, guide, guidebook, guideline, guidepost, guild, guile, guilt, guiltiness, guitar, gun, gunk, gust, gustation, gut, gutter, guy, gyration, H2O, habit, habitant, habitat, habitation, hack, hacksaw, hair, haircut, hairdo, hairstyle, half, halfway, hall, hallway, halt, ham, hammer, hamper, hand, handbasket, handbill, handbook, handcart, handicap, handling, handwear, haphazardness, happenstance, harbor, hardship, hardware, harm, harmoniousness, harmony, harness, harvest, haste, hat, hay, hayfield, hazard, haze, head, headdress, headgear, heading, headline, headquarters, headroom, healer, health, heap, hearsay, heart, heartache, heartbeat, heartbreak, heat, heaven, hedge, heel, height, heir, helicopter, hell, helmet, help, helper, helping, hemisphere, hen, herb, herd, hereafter, heritor, hero, heroin, hesitancy, hesitation, hide, hideaway, hierarchy, highlight, highway, hike, hill, hindrance, hint, hip, historian, history, hitch, hoax, hobby, hog, hokum, hold, holding, holdup, hole, holiday, home, homecoming, homemaker, homo, honey, honor, honorableness, hook, hoop, hoops, hope, horizon, horn, horoscope, horror, horse, horseshoe, hosiery, hospital, hospitality, host, hostage, hostel, hostelry, hostility, hotdog, hotel, hour, house, household, housemaid, houseplant, housewife, housing, hovel, hr, hubby, hue, hulk, hullabaloo, human, humanity, humanness, humor, hunch, hunt, hunter, hunting, huntsman, hurry, hurt, husband, husbandry, husk, hustle, hut, hutch, hybrid, hypothesis, ice, icon, idea, ideal, identicalness, identification, identity, ideology, idiom, igniter, ignominy, ignorance, illness, illusion, illustration, image, imagination, immersion, immigrant, immigration, immunity, impact, impairment, imperativeness, impertinence, implement, implication, import, importance, importation, imposter, impression, improvement, improver, impudence, impulse, in, inadequacy, incentive, incertitude, inch, incident, inclination, incline, income, increase, increment, indemnity, index, indication, indicator, indigence, individual, individuality, inducement, industriousness, industry, inebriant, infant, infection, infirmary, inflation, influence, influenza, info, informant, information, infraction, infrastructure, infringement, ingestion, ingredient, ingroup, inhabitant, inheritor, inhibition, inhumation, initial, initiative, injection, injury, inn, innovation, innovator, inquest, inquiry, inscription, insect, inside, insider, insight, insistence, insistency, inspector, inspiration, instability, installation, installment, instance, instant, instinct, institution, instruction, instructor, instrument, instrumentalists, insufficiency, insult, insurance, insurgent, insurrection, insurrectionist, integration, integrity, intellect, intelligence, intensity, intent, intention, interaction, interest, interface, interference, interior, interment, intermission, Internet, interpreter, interrogation, interruption, intersection, intervention, interview, intestine, intimacy, intoxicant, intro, introduction, intrusion, intuition, inundation, invasion, invention, inventory, investigation, investigator, investment, invitation, invitee, inviter, involvement, ire, iron, irony, island, isolation, issue, it, item, iteration, itinerary, ivory, jacket, jam, jar, jaw, jazz, jeans, jelly, jest, jester, jet, jewel, jewelry, jiffy, job, jock, jockey, joint, joke, journal, journalist, journey, joy, joyfulness, joyousness, joystick, judge, judgement, judgment, judicature, judiciousness, juice, jump, junction, jungle, jurisdiction, jurisprudence, jurist, jury, justice, justification, justness, keep, kettle, key, keyhole, keypad, kick, kid, kidney, killer, kilocalorie, kin, kindness, kinfolk, king, kingdom, kinsfolk, kinship, kit, kitchen, kite, knee, knife, knight, knot, knowledge, Koran, kudos, lab, label, laboratory, laborer, labour, labyrinth, lace, lack, ladder, lady, lake, lamb, lamp, land, landholder, landlord, landowner, landscape, lane, language, lap, larceny, laser, laugh, laundry, laurels, lavatory, law, lawmaking, lawn, lawsuit, lawyer, layer, layout, layover, lb, lead, leader, leadership, leading, leaf, leafage, leaflet, leap, learner, learning, lease, leash, leather, leave, lecture, left, leftovers, leg, legend, legislating, legislation, legislature, leisure, lemon, length, lengthiness, leniency, lesion, lessening, lesson, letdown, letter, level, lever, lexicon, liability, liaison, liberty, library, licence, license, lick, lid, lie, life, lifestyle, lift, light, lighter, likeness, lily, limb, limit, limitation, line, lineage, lineation, linen, link, lion, lip, liquid, list, listeners, listing, literacy, literature, litigation, livelihood, liver, livestock, living, load, loan, lobby, location, lock, locomotive, locution, lodge, lodging, loft, log, logarithm, logic, look, looker, lookout, loop, loot, looting, lorry, loser, loss, lot, lottery, loudness, loudspeaker, lounge, love, lover, low, loyalty, lozenge, luck, luggage, lumber, luminance, luminosity, lump, lunch, luncheon, lung, lure, machine, machinery, machines, macrocosm, madness, maestro, magazine, magistrate, magnitude, maid, maidservant, mail, mailman, mainstream, maintenance, majority, make, makeup, malady, male, malefactor, malice, maliciousness, maltreatment, man, management, manager, maneuver, manner, manual, manufactory, manufacture, manufacturer, manus, manuscript, map, marathon, marble, march, margin, mark, market, marketer, marketing, marriage, Mars, marsh, marshland, marvel, Marxist, mask, mass, master, mastermind, mastery, match, mate, material, materials, math, mathematics, maths, matrimony, matrix, matter, maturation, maximum, mayor, maze, MD, meadow, meal, meaning, means, measure, meat, mechanism, medal, medallion, medicament, medication, medicine, medium, meeting, melody, member, membership, memo, memorandum, memorial, memory, menace, menage, mentality, menu, mercantilism, merchandise, merchandiser, merchant, mercifulness, mercilessness, mercy, merit, meritoriousness, merriment, mess, message, metal, method, methodology, metro, metropolis, microchip, microphone, middle, middleman, midnight, midpoint, might, migration, mike, mile, milk, mill, min, mind, mindset, mine, miner, mineral, mineworker, minimum, minister, ministry, minority, minute, miracle, mirror, miscarriage, misdemeanor, miserableness, misery, misgiving, mishap, misrepresenting, missile, missive, mist, mistake, mistrust, mitt, mix, mixture, model, modification, module, mold, mole, molecule, moment, momentum, monarch, monarchy, monastery, money, monk, monkey, monopoly, monster, month, monument, mood, moon, morale, morn, morning, moron, morsel, mortgage, mosaic, mosque, mosquito, mother, motif, motion, motivation, motivator, motive, motor, motorbike, motorcar, motorcycle, motorist, motortruck, motto, mould, mound, mount, mountain, mourning, mouse, mouth, move, movement, movie, muck, mud, mug, multimedia, mural, murder, muscle, museum, mushroom, music, musician, mutation, mystery, myth, Na, nail, name, narration, narrative, nation, nationalism, nationalist, nationality, nature, naught, nausea, navy, necessity, neck, necklace, necktie, need, neediness, needle, neglect, negligence, negotiation, neighbor, neighborhood, neighbour, neoplasm, nephew, nerve, nest, net, netherworld, network, newcomer, news, newspaper, newsperson, nicety, niche, night, nightclub, nightfall, nightmare, nightspot, nighttime, nobleman, node, noise, nomenclature, nomination, nominee, noncitizen, nonpayment, nonremittal, nonsense, nonstarter, norm, north, nose, notch, note, notebook, notice, notion, noun, novel, nowadays, nuance, nuisance, number, numeral, nun, nuptials, nurse, nursery, nut, nutcase, nutrient, oak, object, objection, objective, obligation, observation, observer, obstacle, occasion, Occident, occupant, occupation, ocean, oculus, odor, odour, oeuvre, offence, offender, offense, offensive, offer, offering, office, officer, official, offspring, oftenness, oil, ointment, olfaction, omission, onion, onslaught, opening, opera, operation, opinion, opponent, opportunity, opposite, opposition, optic, optimism, option, opus, orange, orangeness, orb, orbit, orbiter, orchestra, order, orderliness, organ, organisation, orgy, Orient, orientation, origin, ornament, ornamentation, outcome, outcry, outfit, outgo, outlaw, outlay, outlet, outline, outlook, output, outrage, outside, oven, overall, overhaul, overview, owl, owner, ownership, oxygen, pace, pachyderm, pack, package, packet, pact, page, pail, pain, painfulness, paint, painter, painting, pair, palace, palm, pamphlet, pan, panache, pandemonium, panel, panic, pants, paper, papers, parade, paradise, paradox, paragon, paragraph, parallel, parameter, parcel, pardon, parent, park, parking, parliament, parole, paroxysm, part, participant, particle, particular, parting, partner, partnership, party, pass, passage, passageway, passenger, passing, passion, passionateness, passport, password, past, paste, pastel, pastime, pastor, pasture, pastureland, patch, patent, path, patience, patient, patio, patriot, patriotism, patrol, patron, pattern, pause, pavement, paw, pay, payment, Pb, peace, peacefulness, peak, peanut, pearl, peasant, pectus, pedagogy, pedestal, pedestrian, pee, peel, peer, pelt, pen, penalty, penchant, pencil, penny, pension, pensioner, penury, people, pepper, perambulator, perceiver, percent, percentage, perception, perceptiveness, performance, performer, perfume, peril, period, periodical, permission, permit, person, personality, personnel, perspective, perspiration, pest, pesterer, pet, petition, petrol, phantasy, pharynx, phase, phenomenon, philosopher, philosophy, phone, photo, photoflash, photograph, photographer, photography, phrasing, phylogenesis, phylogeny, physician, physics, piano, picture, piddle, pie, piece, pier, pig, pigeon, pile, pill, pillage, pillar, pillow, pilot, pin, pinch, pioneer, pipe, piss, pit, pitch, pitfall, pitilessness, pity, place, placement, plaintiff, plait, plan, plane, planet, plank, planning, plant, plaster, plastic, plate, platform, play, player, playfulness, playpen, plaything, plaza, pleasure, plot, plumage, plume, plunder, plundering, plus, pneumonia, pocket, poem, poesy, poetry, point, pointer, poison, pole, police, policeman, policy, polish, politician, politics, poll, pollution, polyhedron, pony, pool, pop, populace, population, pork, porter, portion, portrait, portrayal, position, possession, possibility, post, postcard, postman, posture, pot, potable, potato, potential, potentiality, pottery, pound, powder, power, practice, pragmatism, praise, pram, prayer, preaching, precariousness, precaution, precedence, precedent, precis, preciseness, precision, preconception, precondition, predator, predecessor, prediction, predilection, predisposition, preference, preindication, prejudice, premise, premiss, premium, preoccupation, preparation, preparedness, preponderance, prescription, presence, present, presentation, preservation, preserve, presidency, president, presidentship, press, pressure, prestige, prestigiousness, pretender, prevalence, prevarication, preventive, prey, price, prickle, pride, primary, primate, prince, princess, principle, print, printer, priority, prison, prisoner, privacy, privateness, privilege, prize, probability, probe, problem, procedure, process, proclamation, produce, producer, product, production, prof, profession, professional, professor, professorship, proficiency, profile, profit, profits, progeny, prognosis, program, progress, prohibition, project, projectile, projection, proletariat, prolongation, promise, promotion, proof, propaganda, property, proponent, proportion, proportionality, proposal, proposition, proscription, prosecution, prospect, prosperity, protection, protein, protest, protester, provenance, province, provision, psyche, psychoanalysis, psychoanalyst, psychologist, psychology, pub, public, publication, publicity, publisher, pudding, puddle, pulp, pulsation, pulse, pump, pumpkin, punch, punishment, pupil, purport, purpose, pursuit, pushcart, putsch, puzzle, pyramid, python, quake, qualification, quality, quandary, quantity, quarrel, quarter, quartz, queen, query, quest, question, questionnaire, queue, quickness, quiet, quietness, quip, quota, quotation, quote, quotient, Quran, rabbit, race, racecourse, racetrack, raceway, racism, rack, radiation, radical, radio, radioactivity, radiocommunication, radiogram, rage, raid, railcar, railroad, rain, rainbow, rainfall, raise, rally, ranch, randomness, range, rank, rap, rape, rapture, rat, rate, ratio, rationality, ravishment, ray, reach, reaction, reactor, reader, readiness, realism, reality, realm, realness, rear, reason, rebel, rebellion, recap, recapitulation, receipt, reception, recess, recession, recipient, recitation, reckoning, recognition, recommendation, recompense, record, recording, recovery, recreation, rectification, rector, recuperation, redness, reduction, redundance, redundancy, referee, reference, referral, refinement, reflection, reflector, reflexion, reform, refrigerator, refuge, refugee, refurbishment, refusal, refuse, regaining, regard, regime, region, register, registration, registry, regret, regulation, rehabilitation, rehearsal, reign, rejection, relation, relationship, relative, relaxation, release, relevance, relevancy, reliance, relief, religion, relocation, reluctance, remainder, remains, remark, remedy, remembrance, remuneration, renovation, renown, rent, renter, repast, repeat, repetition, replacement, replica, replication, reply, report, reportage, reporter, reporting, repose, repositing, representation, representative, reproduction, reptile, reptilian, republic, repugnance, repulsion, reputation, request, requirement, requisite, research, researcher, reservation, reserve, reservoir, residence, resident, residual, residue, resignation, resistance, resolution, resort, resource, respect, respite, response, responsibility, rest, restaurant, restitution, restoration, restraint, restriction, result, resultant, resume, resurgence, retailer, retaliation, reticence, retiree, retirement, retraction, retreat, retrieval, return, revenge, reverberation, reversal, reverse, reversion, review, reviewer, revitalization, revival, revolt, revolution, revulsion, reward, rhetoric, rhythm, rib, ribbon, rice, riches, ride, rider, ridge, rifle, right, rightfulness, rim, ring, ringlet, riot, rise, rising, risk, rite, ritual, rivalry, river, road, robbery, robot, rock, rocket, rod, rodent, role, roll, roof, room, rooms, root, rope, rose, roster, rotation, rotting, round, route, routine, row, royalty, rubbish, rue, ruefulness, rug, rugby, ruin, ruination, rule, ruler, rumor, rung, runner, rush, rushing, ruthlessness, sacrifice, safari, safe, safety, sail, sailor, salad, salary, sale, salesclerk, salesperson, salmon, salon, saloon, salt, salutation, salvation, sample, sanctuary, sand, sandal, sandwich, sarcasm, satellite, satire, satisfaction, saturnalia, sauce, sausage, savor, saw, sawdust, saying, scab, scale, scandal, scar, scenario, scene, scenery, scent, schedule, scheme, schism, scholar, scholarship, school, schoolbook, schoolchild, schoolhouse, schoolroom, science, scientist, scope, score, scorn, scrap, scrape, scratch, screen, screw, script, scruples, sculpture, scuttlebutt, sea, seacoast, seal, seaport, search, seashore, season, seat, sec, seclusion, second, secrecy, secret, secretary, secretion, secretiveness, section, sector, security, sediment, seed, seeking, segment, seism, selection, self, seller, seminar, senior, sensation, sense, sensitiveness, sensitivity, sensor, sentence, sentience, sentiency, sentiment, sentinel, sentry, separation, sequence, serenity, serial, series, sermon, serpent, servant, server, service, serving, session, set, setback, setting, settlement, setup, sewing, sex, sexuality, shack, shackle, shade, shadow, shaft, shame, shape, shard, share, shareholder, shares, shark, sheaf, shed, sheep, sheet, shelf, shell, shelter, shield, shift, shipping, shirt, shock, shoe, shooting, shop, shopping, shore, short, shortage, shortfall, shorts, shot, shoulder, show, showcase, shower, showing, shrub, shuck, sibling, sickness, side, sidewalk, siege, sieve, sight, sign, signal, signature, signboard, significance, signification, signified, silence, silk, silver, silverware, similarity, simpleness, simplicity, simulation, sin, singer, sink, sinning, sis, sister, site, situation, size, skeleton, sketch, ski, skill, skin, skip, skipper, skirt, skull, sky, skyline, slab, slant, slash, slave, slayer, slaying, sleep, sleeve, slice, slide, slime, slip, slob, slogan, slope, slot, sloven, sludge, slug, slumber, slump, slyness, smack, smear, smell, smile, smiling, smoke, smudge, snack, snail, snake, snare, snow, snowfall, snub, soap, soberness, sobriety, soccer, society, sociology, sock, soda, sodium, sofa, software, soil, solace, soldier, solicitation, solidarity, solo, solution, somberness, song, soprano, sorceress, sorrow, soul, sound, soup, source, south, sovereign, space, span, speaker, specialist, specialty, species, specimen, spectacles, spectator, spectators, spectrum, speculation, speech, speed, spell, sphere, spice, spider, spigot, spinach, spine, spirit, spiritualist, spirt, spite, spitefulness, splinter, split, spoken, spokesman, spokesperson, spoon, sport, spot, spouse, spray, spread, spring, springtime, sprite, spurt, spy, squad, square, squirt, stable, stadium, staff, stage, stair, staircase, stairs, stairway, stake, stakes, stalk, stall, stalls, stamp, stance, stand, standard, standoff, standpoint, star, start, state, statement, station, statistics, statue, status, stave, steak, stealing, steam, steel, stem, step, steps, steward, stick, stillbirth, stimulation, sting, stipulation, stir, stitch, stock, stockholder, stocking, stockpile, stomach, stone, stool, stop, stopover, storage, store, storey, storm, story, stove, strain, strap, stratum, straw, strawberry, stream, streamer, street, streetcar, strength, stress, stride, strike, strikebreaker, string, strip, stripe, stroke, stroller, structure, struggle, student, studio, study, stuff, stupor, style, subject, submission, subscriber, substance, substitute, subtlety, suburb, suburbia, subway, success, suffering, suffrage, sugar, suggestion, suicide, suit, suitcase, suite, sulfur, sulphur, sum, summary, summation, summer, summertime, summit, summons, sun, sunburn, Sunday, sunlight, sunrise, sunshine, suntan, super, superfluousness, superintendent, supermarket, superpower, supervisor, supper, supplication, supply, supplying, support, supporter, suppression, surface, surgeon, surgery, surmise, surplus, surprise, surrender, surrogate, surroundings, survey, survival, survivor, suspect, suspension, suspicion, swap, sweat, sweater, sweet, sweetener, swine, swing, switch, swop, sword, syllable, symbol, symmetry, sympathy, symptom, syndrome, system, tab, table, tablet, tactic, tactics, tail, takeover, talk, talker, talking, talks, tan, tang, tank, tantrum, tap, tape, taper, target, tariff, task, taste, tautness, tavern, tax, taxation, taxi, taxicab, taxpayer, tea, teacher, teaching, team, tear, teardrop, technique, technologist, technology, teenager, telephone, television, temper, temperament, temperature, temple, tempo, temptation, tenant, tendency, tending, tennis, tenseness, tension, tent, term, terminal, terminology, terms, terrace, territory, terror, terrorist, test, testament, testimonial, tether, text, textbook, textile, texture, thanks, theater, theatre, theft, theme, theology, theoretician, theorist, theorizer, theory, therapist, therapy, thesis, thievery, thigh, thinker, thinking, thorax, thorn, thought, thoughtfulness, thread, threat, threshold, thriftiness, thriftlessness, throat, throne, thumb, thunderbolt, tick, ticket, tide, tidings, tie, tier, tiger, tile, tilt, timber, timberland, time, timepiece, timetable, tin, tip, tire, tissue, tit, title, toad, toast, toaster, toe, toil, toilet, token, toll, tomato, tomb, ton, tonality, tone, tongue, tool, tooth, top, topic, torch, torment, torso, torture, torturing, touch, touchstone, tourism, tourist, tournament, tourney, towel, tower, town, toy, trace, track, tract, traction, trade, trader, tradition, traffic, tragedy, trail, trailblazer, train, trainer, training, trait, tram, trance, transaction, transfer, transferral, transgression, transition, transmission, transport, transportation, trap, trapdoor, trash, trauma, tray, treasure, treasurer, treat, treatment, treaty, tree, trench, trend, tress, trial, triangle, tribe, tribulation, tribunal, tribute, trick, trilateral, triumph, trolley, troop, trophy, trouble, trough, troupe, trouser, truck, trueness, trunk, trust, trustee, truth, tryout, tub, tube, tum, tummy, tumor, tumour, tune, tunnel, turkey, turmoil, turn, turnabout, turnaround, tush, tusk, tutor, twelve, twelvemonth, twilight, twin, twine, twist, twosome, tycoon, tympan, ulcer, umbrella, uncertainness, uncertainty, uncle, uncomplicatedness, underground, underside, understanding, undersurface, undertaking, unemployment, uniform, union, unit, unity, universe, university, unrest, unwellness, upgrade, upheaval, upkeep, upper, uprising, upside, upstairs, urge, urgency, urine, usage, use, user, utterer, vacancy, vacation, vacillation, vacuum, vale, valley, value, van, vanguard, variable, variant, variation, variety, vat, vault, vector, vegetable, vegetarian, vegetation, veggie, vehicle, veil, vein, velocity, velvet, vender, vendor, venom, venture, Venus, verb, verdict, verge, verification, verity, verse, version, vertex, vessel, vestibule, veteran, vicinity, victim, victor, victory, video, view, viewer, viewing, viewpoint, vigor, villa, village, villager, violation, violence, virgin, viridity, virtue, virtuoso, virus, vision, visit, visitor, vitamin, vitrine, vocalist, vocation, voice, void, volcano, volition, volume, volunteer, vote, voter, voting, voucher, voyage, wage, wager, wagon, waist, waistline, waiter, waiver, wake, walker, wall, walls, want, war, ward, wardrobe, ware, warehousing, warfare, warning, warrant, warrantee, warrior, wash, washables, washbasin, washbowl, washstand, waste, wastefulness, watch, watcher, watchman, watchword, water, watercourse, watercraft, waterfall, wave, wavering, way, weakness, wealth, weapon, weather, web, website, wedding, wedlock, weed, week, weekend, weight, welcome, welfare, well, wellbeing, wellness, west, whale, wheat, wheel, whim, whip, whiskey, wholeness, whorl, widow, width, wife, wild, wilderness, wildlife, wiliness, will, willpower, wimp, win, wind, window, wine, wing, winner, winnings, winter, wintertime, wipeout, wire, wireless, wiretap, wisecrack, wish, witch, withdrawal, witness, wolf, woman, wonder, wood, woodland, wooing, wool, word, wording, words, work, workbench, worker, workmanship, workplace, workshop, world, worm, worry, worth, wound, wrangle, wreck, wrench, wretchedness, wrinkle, wrist, writer, written, wrongdoer, wurst, yacht, yard, year, years, yell, yesteryear, yield, you SYNONYM me SYNONYM i, young, youth, yr, zephyr, zero, zone
+
 
 $ADJECTIVES
-abject, able, abnormal, absent, absolute, abstract, abundant, academic, acceptable, accepting, accessible, accurate, achromatic, acrimonious, active, actual, acute, addicted, adequate, aesthetic, afraid, aggressive, agile, agricultural, alert, alien, alike, alive, alone, aloof, amatory, amber, ambiguous, ambitious, amorous, ample, amusing, angry, annual, anonymous, antsy, appealing, applied, appropriate, approval, approving, arbitrary, archaeological, arrogant, articulate, artificial, artistic, ashamed, asleep, assertive, astonishing, astounding, atomic, atrocious, attractive, automatic, auxiliary, available, awake, aware, awful, awkward, bad, balanced, bald, banal, barbarous, bare, basic, beautiful, belated, bendable, beneficial, biased, big, bitter, black, bland, blank, blemished, blind, blonde, bloody, blue, blunt, bold, boring, brass, brave, bright, broken, brown, brutal, bureaucratic, busy, candid, capable, capacious, careful, caucasian, cautious, central, certain, characteristic, charismatic, chatty, cheap, cheerful, chief, childish, chronic, circular, civic, civilian, classical, clean, clear, clever, close, closed, coarse, cold, colorful, comfortable, comfy, commercial, common, commonplace, comparable, compatible, competent, competitive, complete, complex, complicated, complimentary, comprehensive, concluding, concrete, confident, confirming, conscious, conservative, considerable, considerate, consistent, constant, constitutional, constrained, constricted, constricting, constructive, contemptible, content, contented, continental, continuous, controversial, convenient, conventional, cool, cooperative, corporate, correct, cosmetic, costless, courageous, courteous, covetous, crappy, critical, crude, cruel, cultural, curious, current, cute, daily, dangerous, dark, dead, deadly, deaf, decayed, decent, decisive, decorative, deep, defective, definite, delicate, delicious, delightful, democratic, dependable, dependent, depressed, descriptive, desirable, determining, different, difficult, diffident, digital, diplomatic, diplomatical, direct, dirty, disagreeable, disconfirming, discreet, discrepant, discrete, dissimilar, distant, distinct, domestic, dominant, dramatic, dreadful, dry, due, dull, dynamic, dynamical, eager, early, easy, economic, educational, effective, effectual, efficacious, efficient, elderly, electronic, elegant, eligible, eloquent, emotional, empiric, empirical, empty, encouraging, endmost, enjoyable, enthusiastic, envious, environmental, equal, equitable, equivalent, equivocal, essential, established, eternal, ethical, ethnic, even, everlasting, evil, exact, excited, exciting, exclusive, existent, exotic, expected, expensive, experienced, experimental, explicit, express, expressed, external, extinct, extraordinary, fair, faithful, FALSE, familiar, far, fashionable, fast, fastidious, fat, fatigued, faulty, favorable, fearless, feasible, federal, feeling, feminine, fidgety, final, financial, fine, finicky, finished, firm, first, fiscal, fit, flat, flavorless, flawed, flexible, flush, foolhardy, foolish, foreign, formal, forthright, forward, foyer, fragile, fragrant, frail, frank, free, frequent, fresh, friendly, frozen, full, functional, funny, fussy, gabby, garrulous, gay, general, generative, generous, genetic, genetical, gentle, genuine, geological, gifted, glad, glittering, global, glorious, gluey, glutinous, gold, good, gradual, grand, graphic, grateful, gratis, great, green, gregarious, grotesque, guiltless, gummy, handy, happy, hard, harmful, harsh, healthy, heavy, heinous, helpful, helpless, high, hilarious, historical, holy, homosexual, honest, honorable, hooked, horizontal, hostile, hot, huge, human, hungry, ignorant, ill, illegal, illegitimate, illicit, immense, immoral, immune, impartial, imperfect, imperial, impermanent, impertinent, implicit, important, impossible, impressive, improbable, impudent, inactive, inadequate, inanimate, inappropriate, incapable, incapacitated, incessant, incompetent, incongruous, incredible, indecent, independent, indigenous, indirect, individual, indolent, indoor, industrial, inevitable, inexpensive, inexplicit, infamous, infantile, infinite, influential, informal, infrequent, initial, inner, innocent, inside, insipid, insolent, insufficient, integrated, intellectual, intense, interactive, interesting, intermediate, internal, international, invisible, irrelevant, itchy, jealous, joint, judicial, junior, juridic, juridical, just, kind, knowledgeable, laic, large, last, lasting, late, latest, laughable, lay, lazy, lean, left, legal, legislative, lethal, level, liberal, lifelike, light, like, likeable, likely, limited, linear, liquid, literary, little, live, lively, logical, lone, lonely, long, loose, lost, loud, lousy, low, loyal, lucky, luxurious, magnetic, main, major, manual, marine, maritime, married, material, mathematical, mature, maximal, maximum, meaningful, mechanical, medieval, memorable, mental, mild, military, mindful, minimal, minimum, minor, miserable, mobile, moderate, modern, modest, molecular, monstrous, monthly, moral, motionless, moving, muggy, multiple, municipal, musical, mutual, naive, narrow, national, native, nautical, near, neat, necessary, negative, nervous, neural, neutral, new, newest, nice, nimble, noble, noisy, nonalcoholic, nonindulgent, nonsubjective, normal, notorious, noxious, nuclear, obese, objective, obscene, obscure, obstinate, obtainable, obvious, occupational, ocular, odd, offensive, official, old, open, opera, operational, opposed, optic, optical, optimistic, optional, opulent, oral, orderly, ordinary, organic, original, ornamental, orthodox, other, otiose, outdoor, outer, outside, outstanding, overt, overweight, owed, painful, parallel, paralytic, paralyzed, parental, partial, particular, passion, passionate, passive, past, patient, peaceful, peculiar, perfect, permanent, perpendicular, perpetual, persistent, personal, petty, philosophical, physical, pictorial, plain, plausible, pleasant, plentiful, polite, political, poor, popular, portable, positive, possible, potent, potential, powerful, practicable, practical, precise, predictable, pregnant, premature, prepared, present, presidential, primary, primitive, principal, private, privileged, probable, produced, productive, professional, profound, progressive, prolonged, proper, proportional, protected, proud, provincial, prudent, public, pure, qualified, quantitative, quenched, quick, quiescent, quiet, racial, random, rare, rational, raw, ready, real, realistic, reasonable, reciprocal, reckless, red, refined, regional, regular, related, relative, relevant, reliable, religious, replete, representative, resentful, resident, residential, resistant, respectable, responsible, restless, restrained, restricted, retired, revolutionary, rich, right, rigid, ripe, romantic, rotted, rotten, rough, round, ruined, rural, sacred, sad, safe, salutary, same, sassy, satisfactory, satisfied, scientific, scrawled, scummy, seasonal, secondary, secular, secure, seeable, senior, sensible, sensitive, separate, serious, severe, sexual, shallow, sharp, sheer, shitty, short, shut, shy, sick, significant, silent, similar, simple, sincere, single, sinless, sizable, skilled, skillful, skittish, slaked, slippery, slippy, slothful, slow, small, smart, smooth, sober, sociable, social, socialist, socialistic, soft, soiled, solar, solid, solitary, sophisticated, sound, sour, spacious, spatial, special, specified, spoiled, spoilt, spontaneous, spry, square, stable, staggering, standard, static, statistical, steadfast, steady, steamy, steep, sticky, still, straight, strange, strategic, strategical, strict, strong, structural, stubborn, stunning, stupid, stylish, suave, subjective, subsequent, subsidiary, successful, sudden, sufficient, suitable, sumptuous, superior, supplementary, sure, surprised, surprising, sweet, sympathetic, synergistic, systematic, talented, talkative, tall, tardy, tasteful, tasteless, tasty, taut, technical, temporary, tender, tense, terminal, terrible, thankful, thick, thin, thirsty, thoughtful, tidy, tight, timid, tired, tolerant, tough, toxic, traditional, transparent, trivial, tropical, TRUE, typical, ugly, ultimate, unanimous, unattackable, unaware, unbelievable, unclean, uncomfortable, uncommon, undefined, uneasy, unemployed, unending, unenthusiastic, unequal, unequaled, unexpected, unfair, unfamiliar, unfortunate, unfriendly, uniform, uninterrupted, unique, universal, unknown, unlawful, unlike, unlikely, unmarried, unnatural, unopen, unparalleled, unpleasant, unprocessed, unreal, unrecorded, unrefined, unresponsive, unripe, unripened, unsafe, unseeable, unsighted, unsmooth, unsophisticated, untamed, unthawed, untimely, unusual, unvarying, unwavering, unwitting, upright, uproarious, urban, useful, useless, usual, utile, vacant, vague, vain, valid, valuable, varied, vast, vehemence, velvet, verbal, vertical, viable, vicious, vigorous, violent, virtuous, visible, visual, vivid, vocational, voluntary, vulnerable, warm, weak, weekly, welcome, well, wet, white, whole, wild, wise, womanly, workable, worldwide, written, wrong, yearly, yellowish, young, youthful
+abject, able, abnormal, absent, absolute, abstract, abundant, academic, acceptable, accepting, accessible, accurate, achromatic, acrimonious, active, actual, acute, addicted, adequate, aesthetic, afraid, aggressive, agile, agricultural, alert, alien, alike, alive, alone, aloof, amatory, amber, ambiguous, ambitious, amorous, ample, amusing, angry, annual, anonymous, antsy, appealing, applied, appropriate, approval, approving, arbitrary, archaeological, arrogant, articulate, artificial, artistic, ashamed, asleep, assertive, astonishing, astounding, atomic, atrocious, attractive, automatic, auxiliary, available, awake, aware, awful, awkward, bad, balanced, bald, banal, barbarous, bare, basic, beautiful, belated, bendable, beneficial, biased, big, bitter, black, bland, blank, blemished, blind, blonde, bloody, blue, blunt, bold, boring, brass, brave, bright, broken, brown, brutal, bureaucratic, busy, candid, capable, capacious, careful, carved, caucasian, cautious, central, certain, characteristic, charismatic, chatty, cheap, cheerful, chest, chief, childish, chronic, circular, civic, civilian, classical, clean, clear, clever, close, closed, closet, coarse, cold, colored, coloured, colorful, comfortable, comfy, commercial, common, commonplace, comparable, compatible, competent, competitive, complete, complex, complicated, complimentary, comprehensive, computer, concluding, concrete, confident, confirming, conscious, conservative, considerable, considerate, consistent, constant, constitutional, constrained, constricted, constricting, constructive, contemptible, content, contented, continental, continuous, controversial, convenient, conventional, cool, cooperative, corporate, correct, cosmetic, costless, cotton, counter, courageous, courteous, covetous, crappy, critical, crude, cruel, cultural, curious, current, cute, daily, dangerous, dark, dead, deadly, deaf, decayed, decent, decisive, decorative, deep, defective, definite, delicate, delicious, delightful, democratic, dependable, dependent, depressed, descriptive, desirable, determining, dial, different, difficult, diffident, digital, diplomatic, diplomatical, direct, dirty, disagreeable, disconfirming, discreet, discrepant, discrete, dissimilar, distant, distinct, domestic, dominant, down, drain, dramatic, dreadful, dry, due, dull, dynamic, dynamical, eager, early, easy, economic, educational, effective, effectual, efficacious, efficient, elderly, electronic, elegant, eligible, eloquent, emotional, empiric, empirical, empty, encouraging, endmost, enjoyable, enthusiastic, envious, environmental, equal, equitable, equivalent, equivocal, escape, essential, established, eternal, ethical, ethnic, even, everlasting, evil, exact, excited, exciting, exclusive, existent, exotic, expected, expensive, experienced, experimental, explicit, express, expressed, external, extinct, extraordinary, fair, faithful, FALSE, familiar, far, fashionable, fast, fastidious, fat, fatigued, faulty, favorable, fearless, feasible, federal, feeling, feminine, fidgety, final, financial, fine, finicky, finished, firm, first, fiscal, fit, flat, flavorless, flawed, flexible, flush, foolhardy, foolish, foreign, formal, forthright, forward, foyer, fragile, fragrant, frail, frank, free, frequent, fresh, friendly, frozen, full, functional, funny, fussy, gabby, garrulous, gay, general, generative, generous, genetic, genetical, gentle, genuine, geological, giant, gifted, glad, glass, glittering, global, glorious, gluey, glutinous, gold, golden, good, gradual, grand, graphic, grateful, gratis, great, green, gregarious, grotesque, guiltless, gummy, halfway, handy, happy, hard, harmful, harsh, healthy, heavy, heinous, helpful, helpless, high, hilarious, historical, holy, honest, honorable, hooked, horizontal, hostile, hot, huge, human, hungry, ignorant, ill, illegal, illegitimate, illicit, immense, immoral, immune, impartial, imperfect, imperial, impermanent, impertinent, implicit, important, impossible, impressive, improbable, impudent, inactive, inadequate, inanimate, inappropriate, incapable, incapacitated, incessant, incompetent, incongruous, incredible, indecent, independent, indigenous, indirect, individual, indolent, indoor, industrial, inevitable, inexpensive, inexplicit, infamous, infantile, infinite, influential, informal, infrequent, initial, inner, innocent, inside, insipid, insolent, insufficient, integrated, intellectual, intense, interactive, interesting, intermediate, internal, international, invisible, irrelevant, itchy, jealous, joint, judicial, junior, juridic, juridical, just, kind, kitchen, knowledgeable, laic, large, last, lasting, late, latest, laughable, lay, lazy, lean, left, legal, legislative, lethal, level, liberal, lifelike, light, like, likeable, likely, limited, linear, liquid, literary, little, live, lively, living, logical, lone, lonely, long, loose, lost, loud, lousy, low, loyal, lucky, luxurious, magnetic, main, major, manual, marine, maritime, married, material, mathematical, mature, maximal, maximum, meaningful, mechanical, medieval, memorable, mental, metal, middle, mild, military, mindful, minimal, minimum, minor, miserable, mobile, moderate, modern, modest, molecular, monstrous, monthly, moral, motionless, moving, muggy, multiple, municipal, musical, mutual, naive, narrow, national, native, nautical, near, neat, necessary, negative, nervous, neural, neutral, new, newest, nice, nimble, noble, noisy, nonalcoholic, nonindulgent, nonsubjective, normal, northern, notorious, noxious, nuclear, obese, objective, obscene, obscure, obstinate, obtainable, obvious, occupational, ocular, odd, offensive, official, old, open, opera, operational, opposed, optic, optical, optimistic, optional, opulent, oral, orderly, ordinary, organic, original, ornamental, orthodox, other, otiose, outdoor, outer, outside, outstanding, overt, overweight, owed, painful, parallel, paralytic, paralyzed, parental, partial, particular, passion, passionate, passive, past, patient, peaceful, peculiar, perfect, permanent, perpendicular, perpetual, persistent, personal, petty, philosophical, physical, pictorial, plain, plausible, pleasant, plentiful, polite, political, poor, popular, portable, positive, possible, potent, potential, powerful, practicable, practical, precise, predictable, pregnant, premature, prepared, present, presidential, primary, primitive, principal, private, privileged, probable, produced, productive, professional, profound, progressive, prolonged, proper, proportional, protected, proud, provincial, prudent, public, pure, qualified, quantitative, quenched, quick, quiescent, quiet, racial, random, rare, rational, raw, ready, real, realistic, reasonable, reciprocal, reckless, red, refined, regional, regular, related, relative, relevant, reliable, religious, replete, representative, resentful, resident, residential, resistant, respectable, responsible, restless, restrained, restricted, retired, revolutionary, rich, right, rigid, ripe, romantic, rotted, rotten, rough, round, ruined, rural, rusty, sacred, sad, safe, salutary, same, sassy, satisfactory, satisfied, scientific, scrawled, scummy, seasonal, secondary, secular, secure, seeable, senior, sensible, sensitive, separate, serious, severe, sexual, shallow, sharp, sheer, shiny, shitty, short, shut, shy, sick, significant, silent, similar, simple, sincere, single, sinless, sizable, skilled, skillful, skittish, slaked, slippery, slippy, slothful, slow, small, smart, smooth, sober, sociable, social, socialist, socialistic, soft, soiled, solar, solid, solitary, sophisticated, sound, sour, southern, spacious, spatial, special, specified, spoiled, spoilt, spontaneous, spry, square, stable, staggering, standard, static, statistical, steadfast, steady, steamy, steep, sticky, still, straight, strange, strategic, strategical, strict, strong, structural, stubborn, stunning, stupid, stylish, suave, subjective, subsequent, subsidiary, successful, sudden, sufficient, suitable, sumptuous, superior, supplementary, sure, surprised, surprising, sweet, sympathetic, synergistic, systematic, talented, talkative, tall, tardy, tasteful, tasteless, tasty, taut, technical, temporary, tender, tense, terminal, terrible, text, thankful, thick, thin, thirsty, thoughtful, tidy, tight, timid, tiny, tired, tolerant, tough, toxic, traditional, transparent, trap, trivial, tropical, TRUE, typical, ugly, ultimate, unanimous, unattackable, unaware, unbelievable, unclean, uncomfortable, uncommon, undefined, uneasy, unemployed, unending, unenthusiastic, unequal, unequaled, unexpected, unfair, unfamiliar, unfortunate, unfriendly, uniform, uninterrupted, unique, universal, unknown, unlawful, unlike, unlikely, unmarried, unnatural, unopen, unparalleled, unpleasant, unprocessed, unreal, unrecorded, unrefined, unresponsive, unripe, unripened, unsafe, unseeable, unsighted, unsmooth, unsophisticated, untamed, unthawed, untimely, unusual, unvarying, unwavering, unwitting, upright, uproarious, urban, useful, useless, usual, utile, vacant, vague, vain, valid, valuable, varied, vast, vehemence, velvet, verbal, vertical, viable, vicious, vigorous, violent, virtuous, visible, visual, vivid, vocational, voluntary, vulnerable, warm, weak, weekly, welcome, well, wet, white, whole, wild, wise, womanly, wood, wooden, workable, worldwide, written, wrong, yearly, yellowish, young, youthful
+
 
 $PREPOSITIONS
-about, at, behind, below, from, in, of, off, on, out, over, 
+about, against, around, at, behind, below, clockwise, counterclockwise, for, from, in, into, of, off, on, out, over, 
 through, to, under, with
+
 
 $ADVERBS
 here, slowly
 
+
 $ARTICLES
 a, an, the
 
+
 $Q_WORDS
 how, what, where, which, who, why
+
 
 $CONJUNCTION
 and
