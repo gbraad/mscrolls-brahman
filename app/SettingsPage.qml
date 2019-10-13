@@ -316,6 +316,24 @@ Page
                 }
                 onClicked: musicSwitch.checked = !musicSwitch.checked
             }
+
+            ListItem.Subtitled
+            {
+                text: "Sound Level"
+                subText: "Volume of sounds and title music"
+                secondaryItem:  Slider
+                {
+                    property bool ready: false
+                    
+                    tickmarksEnabled: false
+                    numericValueLabel: true
+                    minimumValue: 0
+                    maximumValue: 100
+                    value: QControl.prefs.soundVol
+                    onValueChanged: if (ready) QControl.prefs.soundVol = value
+                    Component.onCompleted: ready = true
+                }
+            }
             
             ListItem.Subtitled
             {

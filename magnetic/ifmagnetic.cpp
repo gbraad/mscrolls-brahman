@@ -110,15 +110,16 @@ bool IFMagnetic::start(const char* configDir,
     // save game directory
     _undos.setup(_dataDir);
 
+    bool ignoreOutput = false;
+
     if (_undos.size())
     {
         LOG4("Undos ", _undos);
+
+        ignoreOutput = true;
         
         // if we have an autosave, throw all initial output away.
-        // see comment in `initialCommands`
         (_segmentInfoEmit)(_sictx, BRA_SEGMENT_NULL);
-
-        _ignoreOutput = true;
     }
 
     // cause game to restart on quit
@@ -126,18 +127,33 @@ bool IFMagnetic::start(const char* configDir,
 
     // interval between starting thread and it running
     _starting = true;
+
+    // start KL before we load the game so it's there for InfoTrap
+    _puzzles.setHost(this);
+    _puzzles.initKL();
     
     _msTask = std::thread(&IFMagnetic::runMsTask, this);
 
     // let the game start before issuing commands
     emitScene(); // sync, flush etc.
 
-    // send initial setup commands to game
-    initialCommands();
+    if (ignoreOutput)
+    {
+        // switch back transcript from NULL
+        (_segmentInfoEmit)(_sictx, 0);  // to default
+    }
+
+    if (_undos.size())
+    {
+        //LOG3("MS, ", "restoring previous game");
+        autoLoad(0, false); // load latest, force "look".
+    }
+
+    restartCommands(); // issue "verbose" etc.
 
     // load puzzles after initial commands. this is to ensure game
     // has started. assume puzzles solving isn't needed by initial commands!
-    _puzzles.start(this);
+    _puzzles.start();
 
     // game ready to play
     _initialising = false;
@@ -244,13 +260,16 @@ void IFMagnetic::emitScene()
 {
     if (_sync())
     {
+        /* also update KL room hooks (ambient sounds)
+         * after sync & before flush, this will emit extra to be 
+         * flushed.
+         * Don't do this during initialisation because we might loading a save
+         */
+        if (!_initialising) _puzzles.handleRoomsKL();
+
         bool r = flush();
         _syncLock.unlock();
-
-        if (r)
-        {
-            updateAutoSave();
-        }
+        if (r) updateAutoSave();
     }
 }
 
@@ -505,6 +524,14 @@ std::string IFMagnetic::_decodePicture(const PicRequest* pr,
 
                                 // clip against background 
                                 img.clip(px, py, bgimg._width, bgimg._height);
+
+                                if (img._width == 0 || img._height == 0)
+                                    continue;
+
+                                if (px < 0)
+                                    px=0;
+                                if (py < 0)
+                                    py=0;
 
                                 Rect ri(px, py, img._width, img._height);
                                 rframe = rframe.combine(ri);
@@ -859,11 +886,11 @@ std::string IFMagnetic::transformCommand(const char* cmd) const
                 words[0] = "examine"; 
                 cw = true;
             }
-            else if (verb == "quit")
+            else if (verb == "quit") // TODO: Fish! has ingame command "quit"! Needs to be fixed
             {
                 // prevent quit being entered
-                words[0] = "restart";
-                cw = true;
+                //words[0] = "restart";
+                //cw = true;
             }
             
             if (cw) si = unsplit(words);
@@ -999,7 +1026,6 @@ bool IFMagnetic::_evalCommandSpecial(const char* cmd, CommandResultI* cres)
     else if (!u_stricmp(cmd, "resetgame"))
     {
         restartGame();
-
         return true;
     }
 
@@ -1079,6 +1105,11 @@ bool IFMagnetic::_evalCommandSpecial(const char* cmd, CommandResultI* cres)
         
         res = true;
         
+    }
+    else if (n == 2 && equalsIgnoreCase(words[0], "seed"))
+    {
+        ms_seed(std::atoi(words[1].c_str()));
+        res = true;
     }
     else if (n == 2 && equalsIgnoreCase(words[0], "script"))
     {
@@ -1700,97 +1731,12 @@ void IFMagnetic::restartCommands()
 
     // prog_mode can set internal state directly, if not, we have to issue
     // game command manually
-    bool v = set_OUTMODE(1) != 0;
-
-    if (v)
-    {
-        LOG3("MS, ", "enabled verbose mode directly");
-    }
+    int v = set_OUTMODE(1);
 
     if (!v)
     {
-        UndoState::SuspendSave ss(_undos);
-    
-        CommandResult* cr = (CommandResult*)makeResult();
-
-        cr->_op = CommandResultI::op_capture;    
-
-        static const char* setupCommands[] = 
-            {
-                "verbose",
-            };
-    
-        for (size_t i = 0; i < DIM(setupCommands); ++i)
-        {
-            _evalCommand(setupCommands[i], cr);
-            LOG4("MS, command: ", setupCommands[i] << ",  '" << cr->toString() << "'");
-        }
-
-        delete cr;
+        LOG1("MS, ", "Failed to enable verbose mode");
     }
-}
-
-void IFMagnetic::initialCommands()
-{
-    // issue commands to the game on first start
-    
-    // No need for dummy load if we already have the save game area
-    // (ie prog_format)
-    if (!_gameSaveMemory)
-    {
-        CommandResult* cr = (CommandResult*)makeResult();
-
-        cr->_op = CommandResultI::op_capture;    
-
-        /* if we start with an autosave, a "load" command doesn't refresh
-         * the screen, furthermore, we also get the initial game spiel.
-         * 
-         * as a workaround, we gag the output (by sending it to NULL) in
-         * setup, then here we perform the load, then we un-gag the output
-         * and perform a "look". this generates current output, title and
-         * picture.
-         *
-         * if there was no autosave, we still perform the "load", but it
-         * fails silently. This operation is important because it serves
-         * to initialise the save game area, which is used to automatically
-         * write out save files, without having to pass commands to the game
-         * 
-         * but the saves are encoded. that's another story...
-         */
-
-        static const char* setupCommands[] = 
-            {
-                // try loading a non-existent file
-                "load",
-                "dummyfile",
-                "y",
-            };
-    
-        for (size_t i = 0; i < DIM(setupCommands); ++i)
-        {
-            _evalCommand(setupCommands[i], cr);
-            LOG4("MS, command: ", setupCommands[i] << ",  '" << cr->toString() << "'");
-        }
-
-        delete cr;
-    }
-
-
-    if (_ignoreOutput)
-    {
-        _ignoreOutput = false;
-        
-        // switch back transcript from NULL
-        (_segmentInfoEmit)(_sictx, 0);  // to default
-    }
-
-    if (_undos.size())
-    {
-        //LOG3("MS, ", "restoring previous game");
-        autoLoad(0, false); // load latest, force "look".
-    }
-
-    restartCommands(); // issue "verbose" etc.
 }
 
 void IFMagnetic::updateGameSaveArea(uchar* ptr, size_t size, uint addr)

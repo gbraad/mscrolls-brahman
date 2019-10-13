@@ -378,11 +378,15 @@ struct PuzzleManager: public PuzzleBase
 
     ~PuzzleManager() { purge(_puzzles); }
 
-    void start(IFMagnetic* host);
+    void setHost(IFMagnetic* host)
+    {
+        _host = host;
+    }
+    
+    void start();
     void enabled(bool v);
     void setRemaster(bool v);
-
-    void _initKL();
+    void initKL();
 
     Puzzle* find(const char* name) const
     {
@@ -434,9 +438,8 @@ struct PuzzleManager: public PuzzleBase
     void applyGameFixes();
     void buildProductInfoJSON(GrowString&, const string& credits);
 
-    void handleEvent(int quiet);
-    void handleEventPawn(int quiet);
-    void handleEventJinxter(int quiet);
+    void handleEventKL(int quiet);
+    void handleRoomsKL();
     void evalKL(const char* s, bool cr = false);
 };
 

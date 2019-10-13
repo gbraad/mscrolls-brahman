@@ -179,7 +179,6 @@ public:
                charEmitFn* consoleEmit, void* cctx,
                segmentInfoFn* sfn, void* sctx) override;
 
-    void initialCommands();
     void restartCommands();
     void gameStarting();
     void gameRestarting();
@@ -263,7 +262,9 @@ public:
     {
         if (_soundJSONBuf)
         {
-            // there's an image waiting
+            //LOG3("MS, flushing JSON audio ", _soundJSONBuf);
+            
+            // there's audio waiting
             (_segmentInfoEmit)(_sictx, BRA_SEGMENT_SOUND);
 
             _emits(_transcriptEmit, _tctx, _soundJSONBuf);
@@ -400,7 +401,6 @@ public:
         _gameSaveAddr = 0;
         
         _useXBR4 = true;
-        _ignoreOutput = false;
         _modernMode = true;
     }
 
@@ -514,7 +514,7 @@ public:
     void _showNewVersionPic(PicRequest* pr);
     void _playSound(SoundRequest*);
     void _playSoundJSON(GrowString&);
-    void _handleEvent(int quiet) { _puzzles.handleEvent(quiet); }
+    void _handleEvent(int quiet) { _puzzles.handleEventKL(quiet); }
 
     void updateGameSaveArea(uchar* ptr, size_t size, uint addr);
     bool saveGame(const char* name, SaveGameHeader&, SaveContext&);

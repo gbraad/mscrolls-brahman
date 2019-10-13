@@ -408,7 +408,7 @@ void init_syms(FILE* fp)
     int c = syms.load_syms(fp);
     if (c)
     {
-        LOG4("MS, loaded symbols ", (int)syms.size());
+        LOG3("MS, loaded symbols ", (int)syms.size());
     }
     else
     {
@@ -421,7 +421,7 @@ int get_sym_value(const char* s)
     int addr = syms.get_value(s);
     if (!addr) 
     {
-        LOG3("MS WARNING: unable to locate symbol, ", s);
+        LOG2("MS WARNING: unable to locate symbol, ", s);
     }
     return addr;
 }

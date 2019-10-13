@@ -268,7 +268,7 @@ Byte #11, Data4
       |           |        0,   Can't be worn
       |           |        1,   clothing (normal)
       |           |            For rooms this is no_article
-          |           |        2-3, magical protection
+      |           |        2-3, magical protection
       |           |
       |          Combustibility
       |           0,   non-flammable

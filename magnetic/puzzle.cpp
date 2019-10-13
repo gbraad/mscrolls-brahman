@@ -47,15 +47,14 @@
 // puzzles for Jinxter
 #include "puzjinxter.h"
 
+// puzzles for Fish
+#include "puzfish.h"
+
 // PuzzleManager functions that are ifmagnetic independent
 // see also puzman.cpp
 
-void PuzzleManager::start(IFMagnetic* host)
+void PuzzleManager::start()
 {
-    _host = host;
-
-    _initKL();
-
     switch (get_game())
     {
     case 1: // the pawn
@@ -207,7 +206,11 @@ std::string PuzzleManager::messageHook(int m, const char* msg)
     // NB: game thread
 
     string cmd;
-                
+
+    // XXXX this is a diabolical hack until i make the code below part
+    // of the actual game...
+    //if (m > 330) m -= 49;
+    
     //LOG3("msg# ", m << " \"" << msg << "\"\n");
     
     switch (get_game())
@@ -641,10 +644,10 @@ void PuzzleManager::applyGameFixes()
         {
             LOG3("Puzzman, ", "applying game fixes");
 
-            IItem("wooden workbench").setMoveable(); // so auto look under works
+            //IItem("wooden workbench").setMoveable(); // so auto look under works
 
             // you could get the fridge!!
-            IItem("fridge").setWeight(15);
+            //IItem("fridge").setWeight(15);
 
             // exits from the void
             IItem::getRoom(4).setExit(IItem::dir_n, 3);
@@ -1367,49 +1370,35 @@ void PuzzleManager::evalKL(const char* expr, bool cr)
 #endif
 }
 
-void PuzzleManager::handleEventPawn(int quiet)
+void PuzzleManager::handleEventKL(int quiet)
 {
-    //LOG3("MS, ", "quiet");
-
 #ifdef USE_KL
-    // alert if our KL takes longer than 5ms
-    TimeAlert qtime("quiet-handler", 5);
-
-    char cmdbuf[128];
-    sprintf(cmdbuf, "(event-hook-handler %d)", quiet);
-    evalKL(cmdbuf);
-#endif
-}
-
-void PuzzleManager::handleEventJinxter(int quiet)
-{
-    //LOG3("MS, ", "quiet");
-
-#ifdef USE_KL
-    // alert if our KL takes longer than 5ms
-    TimeAlert qtime("quiet-handler", 5);
-
-    char cmdbuf[128];
-    sprintf(cmdbuf, "(event-hook-handler %d)", quiet);
-    evalKL(cmdbuf);
-#endif
-}
-
-void PuzzleManager::handleEvent(int quiet)
-{
-
-    switch (get_game())
+    if (_enabled) 
     {
-    case 1: // pawn
-        if (_enabled) handleEventPawn(quiet);
-        break;
-    case 3: // jinxter
-        if (_enabled) handleEventJinxter(quiet);
-        break;
+        //LOG3("MS, ", "quiet");
+
+        // alert if our KL takes longer than 5ms
+        TimeAlert qtime("quiet-handler", 5);
+
+        char cmdbuf[128];
+        sprintf(cmdbuf, "(event-hook-handler %d)", quiet);
+        evalKL(cmdbuf);
     }
+#endif 
 }
 
-void PuzzleManager::_initKL()
+void PuzzleManager::handleRoomsKL()
+{
+#ifdef USE_KL
+    if (_enabled)
+    {
+        //LOG3("MS, ", "handleRooms");
+        evalKL("(handle-rooms");
+    }
+#endif
+}
+
+void PuzzleManager::initKL()
 {
 #ifdef USE_KL
 

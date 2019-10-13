@@ -59,7 +59,8 @@ TabbedPage
 
     function showSettings()
     {
-        pageStack.push(Qt.resolvedUrl("SettingsPage.qml"))
+        if (!pageStack.busy)
+            pageStack.push(Qt.resolvedUrl("SettingsPage.qml"))
     }
 
     function finishOperation()

@@ -87,6 +87,8 @@ macx: !android {
         #plugin2.files += $$PROJ/app/$$BUILDT/libpng.1.0.0.dylib
         INSTALLS += plugin2
 
+        QMAKE_INFO_PLIST = macos/Info.plist
+
         QMAKE_LFLAGS_SONAME  = -Wl,-install_name,@executable_path/../Frameworks/
 }
 
