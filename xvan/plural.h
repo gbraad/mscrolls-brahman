@@ -1,5 +1,4 @@
 
-
 /************************************************************************/
 /* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
 /*                                                                      */
@@ -22,17 +21,18 @@
 /************************************************************************/
 
 
-/* this file tells for which OS the sources must be compiled */
-/* comment out the lines which are not your operating system */
+#if !defined(__plural)
+#define __plural
 
-/* this file is best be excluded from git */
+/*************************/
+/* External declarations */
+/*************************/
 
-#if !defined(__which_os)
-#define __which_os
+extern storyInfo story_info;                 /* init.c       */
 
-#define __windows_os
-
-/* #define __linux_os */
-/* #define __osx_os */
+extern int32_t   LookUpId(char*);            /* syntax.c     */
+extern int32_t   HasType(int32_t, int32_t);  /* trnslate.c   */
+extern int32_t   ENG_CheckPlural(char*);     /* ENG-plural.c */
+extern int32_t   NL_CheckPlural(char*);      /* NL-plural.c  */
 
 #endif

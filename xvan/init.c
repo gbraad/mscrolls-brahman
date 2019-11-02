@@ -76,7 +76,7 @@ int32_t CompilerVersionOK(void)
   if (!ReadStoryInfo(&story_info))
     return(ERROR);
 
-  if (strcmp(story_info.compiler_version, "2.4") != 0) {
+  if (strcmp(story_info.compiler_version, "2.5") != 0) {
     PrintError(37, NULL, NULL);
     PrintError(38, NULL, story_info.compiler_version);
     Output();

@@ -38,7 +38,7 @@
 char     *xv_strlwr(char*);
 int32_t  ScanWordTable(char*, wordTable*, int32_t, int32_t);
 int32_t  LookUpId(char*);
-int32_t  NextWordId(char**, int32_t*, int32_t*);
+int32_t  NextWordId(char**, int32_t*, int32_t*, int32_t*);  /* @!@ */
 void     InitParsedInput(parsedInput*);
 int32_t  ParseInput(char*, parsedInput*, int32_t);
 int32_t  CheckSyntax(char*, int32_t, int32_t, int32_t*, int32_t, int32_t, int32_t, parsedInput*);
@@ -71,13 +71,14 @@ int32_t ScanWordTable(char *word, wordTable *wt_rec, int32_t lower, int32_t uppe
   int32_t  i;
   int32_t  j;
   int32_t  result;
-  char look_for[MAX_WORD_LEN];
+  char look_for[MAX_WORD_LEN+1];  /* +1 for '\0' */  /* @!@ */
 
   /* check for NULL word must be done by caller */
 
   /* convert to lowercase, but keep the original word       */
   /* word is max MAX_WORD_LEN chars, no need to check again */
   strncpy(look_for, word, MAX_WORD_LEN);
+  look_for[MAX_WORD_LEN] = '\0';
   xv_strlwr(look_for);
 
   /* Check for numberstring. */
@@ -94,11 +95,12 @@ int32_t ScanWordTable(char *word, wordTable *wt_rec, int32_t lower, int32_t uppe
     return(NO_ID);
 
   i = (lower+upper)/2;
-  if ( (result = strcmp(look_for, word_table[i].word)) == 0) {
+  if ( (result = strcmp(look_for, word_table[i].word)) == 0) {  /* @!@ */
     /* found it */
-
     strncpy(wt_rec->word, word_table[i].word, MAX_WORD_LEN);
+    strncpy(wt_rec->print_word, word_table[i].print_word, MAX_WORD_LEN);
     wt_rec->id = word_table[i].id;
+    wt_rec->single_id = word_table[i].single_id;
     for (j=0; j<MAX_TYPES; j++)
       wt_rec->types[j] = word_table[i].types[j];
 
@@ -126,21 +128,42 @@ int32_t LookUpId(char *word)
 }
 
 
-int32_t NextWordId(char **line_buf, int32_t *nr_of_types, int32_t *types)
+int32_t NextWordId(char **line_buf, int32_t *nr_of_types, int32_t *types, int32_t *single_id)  /* @!@ */
 {
   char      *start = *line_buf;   /* remember start of line_buf     */
-  int32_t   i      = 0;           /* counter to go through line_buf */
+  int32_t   i = 0;                /* counter to go through line_buf */
   char      word[MAX_WORD_LEN+1]; /* include a NULL char            */
+  short     plural = 0;           /* to remember plurality          */
   int32_t   len;                  /* word length                    */
   int32_t   result = NO_ID;
   wordTable wt_rec;               /* returned by ScanWordTable      */
+
+  /* 01oct2019: we introduced plurality. Words with regular plural  */  /* @!@ */
+  /* (e, es in english) are not defined as such, only as their      */
+  /* single form.                                                   */
+  /* Words with irregular plurality are defined as single and       */
+  /* plural.                                                        */
+  /* Samples of what this function may return:                      */
+  /* regular plural:                                                */
+  /*     word to look for: jewels (not found, we do have jewel)     */
+  /*     function returns: id from jewel                            */
+  /*     types[0]: PLURAL                                           */
+  /*     nr_of_types: 1                                             */
+  /*     single id: id from jewel.                                  */
+  /* irregular plural:                                              */
+  /*     word to look for: oxen (found, with types PLURAL and ADJ)  */
+  /*     function returns: id from oxen                             */
+  /*     types[0]: PLURAL, types[1]: ADJECTIVES                     */
+  /*     nr_of_types: 2                                             */
+  /*     single id: id from ox.                                     */
 
   /* Test for comma. Comma needs special treatment since it is not  */
   /* recognized as a word by ScanWordTable().                       */
   if (**line_buf == ',') {
     result = COMMA; /* Not a word id. May cause error when printed. */
-    types[0] = COMMA;
-    types[1] = NO_TYPE;
+    *single_id   = COMMA;  /* @!@ */
+    types[0]     = COMMA;
+    types[1]     = NO_TYPE;
     *nr_of_types = 1;
     (*line_buf)++;
     return(result);
@@ -170,12 +193,25 @@ int32_t NextWordId(char **line_buf, int32_t *nr_of_types, int32_t *types)
   /* 0, nr_of_words-1 denote first and last element of word_table */
   result = ScanWordTable(word, &wt_rec, 0, nr_of_words-1);
 
-  if (result == NO_ID) {
-    /* This msg must be printed here, because in main(), */
-    /* we don't know word anymore.                       */
+  if (result == NO_ID) {   /* @!@ */
+    /* not found, check if it's a plural from a word we know */
+    if ( (result = CheckPlural(word)) == NO_ID) {
+      /* not a plural */
+      /* This msg must be printed here, because in main(), */
+      /* we don't have word anymore.                       */
 
-    /* I don't know the word */
-    PrintError(58, NULL, word);
+      /* I don't know the word */
+      PrintError(58, NULL, word);
+    }
+    else {
+      /* it's a plural from a word we know */
+      *single_id = result;
+      plural     = 1;
+    }
+  }
+  else {  /* @!@ */
+    /* we know the word, it may be an irregular plural */
+    *single_id = wt_rec.single_id;
   }
 
   /* Set line_buf to remainder of string.                */
@@ -201,33 +237,42 @@ int32_t NextWordId(char **line_buf, int32_t *nr_of_types, int32_t *types)
   if (result == NO_ID)
     return(NO_ID);
 
-  /* copy types array and set nr_of_types */
-  i = 0;
-  for (i=0; i<MAX_TYPES; i++)
-    types[i] = wt_rec.types[i];
+  if (plural) {    /* @!@ */
+    /* plural can only be of type NOUNS  */
+    /* to tell it from a single noun, we */
+    /* introduced the type PLURAL        */
+    types[0] = PLURAL;
+    for (i=1; i<MAX_TYPES; i++) {
+      types[i] = NO_TYPE;
+    }
+    *nr_of_types = 1;
+  }
+  else {
+    /* copy types array and set nr_of_types */
+    i = 0;
+    for (i=0; i<MAX_TYPES; i++) {
+      types[i] = wt_rec.types[i];
+    }
 
-  /* find nr_of_types */
-  i = 0;
-  while (i<MAX_TYPES && types[i] != NO_TYPE)
-    i++;
-  *nr_of_types = i;
-
+    /* find nr_of_types */
+    i = 0;
+    while (i<MAX_TYPES && types[i] != NO_TYPE) {
+      i++;
+    }
+    *nr_of_types = i;
+  }
   return(result);  /* result is the word id */
 }
 
 
 void InitParsedInput(parsedInput *parsed_input)
 {
-  int32_t i = 0;
+  int i = 0;
 
   (parsed_input->actor).dynamic                     = NULL;
-  (parsed_input->actor).part1.article               = NO_ID;
-  (parsed_input->actor).part1.nr_of_adjectives      = 0;
-  (parsed_input->actor).part1.noun                  = NO_ID;
+  InitSysDescr(&((parsed_input->actor).part1));
   (parsed_input->actor).connect_prepos              = NO_ID;
-  (parsed_input->actor).part2.article               = NO_ID;
-  (parsed_input->actor).part2.nr_of_adjectives      = 0;
-  (parsed_input->actor).part2.noun                  = NO_ID;
+  InitSysDescr(&((parsed_input->actor).part2));
 
   parsed_input->action1                             = NO_ID;
   parsed_input->action2                             = NO_ID;
@@ -238,23 +283,16 @@ void InitParsedInput(parsedInput *parsed_input)
 
   for (i=0; i<MAX_SUBJECTS; i++) {
     (parsed_input->subject[i]).dynamic                = NULL;
-    (parsed_input->subject[i]).part1.article          = NO_ID;
-    (parsed_input->subject[i]).part1.nr_of_adjectives = 0;
-    (parsed_input->subject[i]).part1.noun             = NO_ID;
+    parsed_input->single[i]                        = NO_ID;    /* @!@ */
+    InitSysDescr(&((parsed_input->subject[i]).part1));
     (parsed_input->subject[i]).connect_prepos         = NO_ID;
-    (parsed_input->subject[i]).part2.article          = NO_ID;
-    (parsed_input->subject[i]).part2.nr_of_adjectives = 0;
-    (parsed_input->subject[i]).part2.noun             = NO_ID;
+    InitSysDescr(&((parsed_input->subject[i]).part2));
   }
 
   (parsed_input->specifier).dynamic                 = NULL;
-  (parsed_input->specifier).part1.article           = NO_ID;
-  (parsed_input->specifier).part1.nr_of_adjectives  = 0;
-  (parsed_input->specifier).part1.noun              = NO_ID;
+  InitSysDescr(&((parsed_input->specifier).part1));
   (parsed_input->specifier).connect_prepos          = NO_ID;
-  (parsed_input->specifier).part2.article           = NO_ID;
-  (parsed_input->specifier).part2.nr_of_adjectives  = 0;
-  (parsed_input->specifier).part2.noun              = NO_ID;
+  InitSysDescr(&((parsed_input->specifier).part2));
 
   parsed_input->prepositions.nr_of_prepositions     = 0;
   parsed_input->value                               = 0;
@@ -330,6 +368,7 @@ resultStruct MakeSysDescr(char *line_buf, char **rest_of_line_buf, int32_t id, i
   /* descr must be set to default values by caller. */
 
   int32_t      i      = 0;
+  int32_t dummy_single_id;   /* @!@ */
   resultStruct result = {OK, NONE, OK};
   int32_t old_state   = state;    /* Remember state for retry in case of  */
                                   /* a type clash.                        */
@@ -356,7 +395,7 @@ resultStruct MakeSysDescr(char *line_buf, char **rest_of_line_buf, int32_t id, i
     /* Get the next word from the user input               */
     /* NextWordId() also returns the remainder of line_buf */
 
-    if ( (id = NextWordId(&line_buf, &nr_of_types, types)) == NO_ID) {
+    if ( (id = NextWordId(&line_buf, &nr_of_types, types, &dummy_single_id)) == NO_ID) {
       /* unknown word; caller must stop recursive calls */
       result.tag = UNKNOWN_WORD;
       return(result);
@@ -412,7 +451,7 @@ resultStruct MakeSysDescr(char *line_buf, char **rest_of_line_buf, int32_t id, i
       if (result.tag == OK || result.tag == PREPOSITIONS) {
         /* articles in user input must be ignored ?? */
         /* 2019May21 turned on again for dynamic d_sys */
-        descr->article = id;
+        descr->article = id;  /* @!@ */
         return(result);
       }
       else if (result.tag == UNKNOWN_WORD) {

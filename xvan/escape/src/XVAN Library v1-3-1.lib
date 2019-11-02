@@ -1,6 +1,6 @@
 
 #========================================================#
-#               XVAN Library version 1.3                 #
+#               XVAN Library version 1.3.1               #
 #========================================================#
 
 #========================================================#
@@ -1588,7 +1588,7 @@ $VERB put
  "put [o_subject] [prepos] [o_spec]"
    DISAMBIGUATION_RULES
     if owns(o_actor, o_subject) then score(5) endif
-    if testflag(o_subject.f_takeable) then score(5) endif  # make o_nst loose
+    if testflag(o_subject.f_takeable) then score(10) endif  # make o_nst loose
     if not(owns(o_actor, o_spec)) then score(5) endif
     if equal(o_spec, o_nst) then score(-5) endif
     if testflag(o_spec.f_container) and equal(%prepos, in) then score(5) endif

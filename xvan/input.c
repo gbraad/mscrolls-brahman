@@ -235,15 +235,11 @@ int32_t ProcessInput(char prompt[])
       /*<CR> at the end of the input string.   */
 
       if (transcript) {
-        if (fprintf(transcriptfile, "%s", line_buf) < 0) {
-          PrintError(44, NULL, NULL);
-          /* not a severe error, continue but turn off transcript mode */
-          transcript = 0;
-        }
+        WriteTranscript(line_buf);
         /* add <CR>. */
         /* we should check fprintf() again for errors, but we don't */
         /* the last one went ok, so assume this one will as well.   */
-        fprintf(transcriptfile, "\n");
+        WriteTranscript("\n");
       }
     }
   }  /* ValidateJson() */

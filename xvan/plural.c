@@ -1,5 +1,4 @@
 
-
 /************************************************************************/
 /* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
 /*                                                                      */
@@ -22,17 +21,62 @@
 /************************************************************************/
 
 
-/* this file tells for which OS the sources must be compiled */
-/* comment out the lines which are not your operating system */
+#include <stdio.h>
+#include <string.h>
+#include <stdint.h>
+#include <ctype.h>
 
-/* this file is best be excluded from git */
+#include "keyword.h"
+#include "typedefs.h"
+#include "plural.h"
 
-#if !defined(__which_os)
-#define __which_os
+/*************************/
+/* Function declarations */
+/*************************/
 
-#define __windows_os
+int32_t GetSingularId(char*);
+int32_t CheckPlural(char*);
 
-/* #define __linux_os */
-/* #define __osx_os */
+/************************/
+/* Function definitions */
+/************************/
 
-#endif
+int32_t GetSingularId(char *word)
+{
+  int32_t id = NO_ID;
+
+  /* this routine checks if we know */
+  /* word and if it has type NOUNS  */
+
+  if ( (id = LookUpId(word)) != NO_ID) {
+    if (HasType(id, NOUNS)) {
+      return(id);
+    }
+  }
+
+  return(NO_ID);
+}
+
+
+int32_t CheckPlural(char *word)
+{
+  int32_t id = NO_ID;
+
+  /* check if it is plural           */
+  /* this part is language dependent */
+
+  switch (story_info.story_language) {
+    case NL:
+      id = NL_CheckPlural(word);
+      break;
+    case ENG:
+      id = ENG_CheckPlural(word);
+      break;
+    default:
+      /* unknown language, use English */
+      id = ENG_CheckPlural(word);
+      break;
+  }
+
+  return(id);
+}

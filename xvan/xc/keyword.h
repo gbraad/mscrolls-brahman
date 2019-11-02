@@ -316,7 +316,7 @@
 #define DIRECTIONS                   710
 #define ARTICLES                     711
 #define CONJUNCTION                  712
-#define MAX_VALID_VOC_KEYWORD        713  /* 4sep2017 for detecting errors */
+#define MAX_VALID_VOC_KEYWORD        713  /* 4sep2017 for detecting errors   */
 #define CONNECT_PREPOSITIONS         714  /* for extended system description */
 #define SYNONYM                      715
 #define SCOPE                        716
@@ -351,6 +351,7 @@
 #define SPECIFIER_ERROR              815 /* errors        */
 #define NEXT_SENTENCE                816
 #define DYN_DSYS                     817 /* dynamic d_sys 10may2019 */
+#define PLURAL                       818 /* for plurality           */
 
 
 /***********************************************/

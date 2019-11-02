@@ -167,7 +167,7 @@ const char *NL_errors[] = {
   "\n(138) Meer dan 1 vervangende definitie van actie:",
   "\n(139) Onverwachte waarde in switch statement in functie",
   "\n(140) Meer dan 1 vervangende definitie van trigger:",
-  "\n(141) Onverwachte komma",
+  "\n(141) Onverwachte",
   "\n(142) de quote aan het einde van de tekst ontbreekt",
   "\n(143) Onbekende escape code \\",
   "\n(144) Dubbele definitie van:",
@@ -179,7 +179,9 @@ const char *NL_errors[] = {
   "\n...het GUI kompas wordt aangezet voor keuzemodus..",
   "\n...NO_SIDEBAR optie genegeerd (niet in interpreter speelmodus)..",
   "\n...NO_TEXTINPUT optie genegeerd vanwege interpreter speelmodus..",
-  "\n...NO_COMPASS optie genegeerd vanwege keuze speelmodus.."
+  "\n...NO_COMPASS optie genegeerd vanwege keuze speelmodus..",
+  "\n(154) Meervoud is alleen toegestaan voor zelfstandige naamwoorden",
+  "\n(155) Onverwachte meervoud-definitie (syntax error of meer dan 1 definitie)"
 };
 
 #endif

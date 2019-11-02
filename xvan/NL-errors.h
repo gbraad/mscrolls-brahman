@@ -64,7 +64,7 @@ const char *NL_errors[] = {
   "initialization error (034): ReadSysDescr(): fout bij het lezen van",
   "initialization error (035): ReadContData(): fout bij het lezen van",
   "initialization error (036): load(): fout bij het lezen van",
-  "\n\nVersie 2.4 van de interpreter kan alleen bestanden van compiler versie 2.4 lezen.",
+  "\n\nVersie 2.5 van de interpreter kan alleen bestanden van compiler versie 2.5 lezen.",
   "\nDit bestand is gecompileerd met versie",
   "Druk een willekeurige toets...",
   "initialization error (040): fout bij het openen van bestand:",
@@ -134,7 +134,8 @@ const char *NL_errors[] = {
   "runtime error (103): Nieuwe systeembeschrijving is te lang",
   "runtime error (104): debug inspring fout",
   "runtime error (105): XeqVerbDefault(): ongeldige actie, mogelijke aanroep vanuit t_choice",
-  "runtime error (106): Het maximum aantal keuzes is overschreden"
+  "runtime error (106): Het maximum aantal keuzes is overschreden",
+  "runtime error (107): WriteTranscript(): transcript mode staat uit"
 };
 
 #endif

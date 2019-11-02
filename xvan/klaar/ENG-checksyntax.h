@@ -1,5 +1,4 @@
 
-
 /************************************************************************/
 /* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
 /*                                                                      */
@@ -22,17 +21,21 @@
 /************************************************************************/
 
 
-/* this file tells for which OS the sources must be compiled */
-/* comment out the lines which are not your operating system */
+#if !defined(__ENG_checksyntax)
+#define __ENG_checksyntax
 
-/* this file is best be excluded from git */
+/*************************/
+/* External declarations */
+/*************************/
 
-#if !defined(__which_os)
-#define __which_os
+extern verbDir *verb_dir;                                         /* fileio.c    */
+extern char    *outputline;                                       /* init.c      */
 
-#define __windows_os
-
-/* #define __linux_os */
-/* #define __osx_os */
+extern void    Output(void);                                      /* output.c    */
+extern void    PrintString(char*, int);                           /* output.c    */
+extern int32_t LookUpId(char*);                                   /* syntax.c    */
+extern int32_t NextWordId(char**, int32_t*, int32_t*, int32_t*);  /* syntax.c */  /* @!@ */
+extern void    PrintParsedInput(parsedInput*);                    /* debug.c     */
+extern void    PrintUsrActionRec(usrActionRec*);                  /* debug.c     */
 
 #endif

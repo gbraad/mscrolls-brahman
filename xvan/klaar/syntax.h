@@ -1,5 +1,4 @@
 
-
 /************************************************************************/
 /* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
 /*                                                                      */
@@ -22,17 +21,32 @@
 /************************************************************************/
 
 
-/* this file tells for which OS the sources must be compiled */
-/* comment out the lines which are not your operating system */
+#if !defined(__syntax)
+#define __syntax
 
-/* this file is best be excluded from git */
+/*************************/
+/* External declarations */
+/*************************/
 
-#if !defined(__which_os)
-#define __which_os
+extern storyInfo story_info;                                /* init.c   */
 
-#define __windows_os
+extern int32_t   nr_of_words;                               /* fileio.c */
+extern wordTable *word_table;                               /* dirs.c   */
+extern verbDir   *verb_dir;                                 /* fileio.c */
+extern dirInfo   *loc_dir;                                  /* dirs.c   */
+extern dirInfo   *obj_dir;                                  /* dirs.c   */
 
-/* #define __linux_os */
-/* #define __osx_os */
+extern int32_t   ENG_CheckSyntax(char*, int32_t, int32_t, int32_t*, int32_t, int32_t, int32_t, parsedInput*);
+extern int32_t   NL_CheckSyntax(char*, int32_t, int32_t, int32_t*, int32_t, int32_t, int32_t, parsedInput*);
+
+extern void      PrintError(int16_t, resultStruct*, char*); /* errors.c   */
+extern int32_t   StringToNum(char*, int32_t*);              /* trnslate.c */
+extern int32_t   IsLocId(int32_t);                          /* execute.c  */
+extern int32_t   IsObjId(int32_t);                          /* execute.c  */
+extern void      PrintWord(int32_t, int);                   /* output.c   */
+extern void      InitSysDescr(sysDescr*);                    /* fileio.c   */   /* @!@ */
+extern void      PrintSysDescr(sysDescr*, int);             /* output.c   */
+extern void      PrintParsedInput(parsedInput*);            /* debug.c    */
+extern void      PrintUsrActionRec(usrActionRec*);          /* debug.c    */
 
 #endif

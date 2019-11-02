@@ -47,11 +47,14 @@ DEFINES += IFI_BUILD
 ### //////////////////  ///////////////////////////////////////////
 
 SOURCES = \
+    ENG-plural.c \
+    NL-plural.c \
 arithmtc.c checkpar.c cleanup.c dirs.c disambig.c endian.c execute.c fileio.c init.c input.c letsplay.c lets-try.c output.c readfun.c readloc.c readobj.c readtrig.c readverb.c restore.c save.c spanTree.c syntax.c sysfunc.c timers.c trnslate.c xeqfun.c errors.c ENG-checksyntax.c ENG-moreinfo.c ENG-xeqfun.c ENG-article.c NL-checksyntax.c NL-moreinfo.c NL-xeqfun.c NL-article.c json.c IFI.c play.c jsonbld.c descr2str.c base64.c resglobs.c restart.c \
     choices.c \
     debugcmd.c \
     debugdev.c \
-ifixvan.cpp
+ifixvan.cpp \
+    plural.c
 
 ### //////////////////  ///////////////////////////////////////////
 
@@ -74,6 +77,7 @@ HEADERS += \
     ENG-checksyntax.h \
     ENG-errors.h \
     ENG-moreinfo.h \
+    ENG-plural.h \
     ENG-xeqfun.h \
     IFI.h \
     NL-article.h \
@@ -81,6 +85,7 @@ HEADERS += \
     NL-errors.h \
     NL-kwtable.h \
     NL-moreinfo.h \
+    NL-plural.h \
     NL-xeqfun.h \
     arithmtc.h \
     base64.h \
@@ -104,6 +109,7 @@ HEADERS += \
     letsplay.h \
     output.h \
     play.h \
+    plural.h \
     readfun.h \
     readloc.h \
     readobj.h \

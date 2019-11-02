@@ -39,6 +39,7 @@ extern storyInfo  story_info;                                 /* init.c     */  
 extern void       Output(void);                               /* init.c      */
 extern void       PrintError(int16_t, resultStruct*, char*);  /* errors.c    */
 extern void       PrintString(char*, int);                    /* output.c    */
+extern void       WriteTranscript(char*);                     /* output.c   */
 extern char       *ResetString(char*);                        /* jsonbld.c   */
 extern char       *AddToString(char*, char*);                 /* descr2str.c */
 extern char       *ResetString(char*);                        /* descr2str.c */

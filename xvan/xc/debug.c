@@ -225,7 +225,7 @@ void PrintWTable(void)
   printf("\n\n*** Word Table ***\n");
 
   for (i=0; i<nr_of_words; i++) {
-    printf("\n%d: %s | ", word_table[i].id, word_table[i].word);
+    printf("\n%d: %s %d| ", word_table[i].id, word_table[i].word, word_table[i].single_id);  /* @!@ */
     for (j=0; j<MAX_TYPES; j++) {
       printf("%d ", word_table[i].types[j]);
     }
@@ -245,6 +245,7 @@ void PrintWList(void)
     printf("word: %s\n", wp->word);
     printf("print_word: %s\n", wp->print_word);
     printf("id: %d\n", wp->id);
+    printf("single id: %d\n", wp->single_id);  /* @!@ */
     for (i=0; i<MAX_TYPES; i++)
       printf("types[%d]: %d\n", i, wp->types[i]);
     printf("\n\n");

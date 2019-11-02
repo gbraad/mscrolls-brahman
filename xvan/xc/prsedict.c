@@ -50,7 +50,7 @@ int32_t first_direction_id = 0; /* Tells where in the word_id range the  */
 /*************************/
 
 int32_t ParseWordGroup(char**, int32_t*, int32_t, FILE**, fileList**);
-int32_t AddWord(char*, char*, int32_t, int32_t, int32_t*, int32_t);
+int32_t AddWord(char*, char*, int32_t, int32_t, int32_t, int32_t*, int32_t);
 
 
 /************************/
@@ -59,10 +59,12 @@ int32_t AddWord(char*, char*, int32_t, int32_t, int32_t*, int32_t);
 
 int32_t ParseWordGroup(char **word, int32_t *keyword, int32_t word_type, FILE **source, fileList **file_list)
 {
-  int32_t state   = 1;
+  int32_t state       = 1;
+  int32_t singular_id = NO_ID;
+  int32_t last_id     = -1;     /* holds id of last parsed word, in case it */
+                                /* is a synonym for the next word           */
   char    print_word[MAX_WORD_LEN+1];
-  int32_t last_id = -1; /* holds id of last parsed word, in case it */
-                        /* is a synonym for the next word           */
+
   free(*word);
   *word = GetNextWord(keyword, NO_ID, 0, source, file_list);
 
@@ -82,7 +84,8 @@ int32_t ParseWordGroup(char **word, int32_t *keyword, int32_t word_type, FILE **
         return(OK);
       case COMMA:
         switch (state) {
-          case 2:
+          case 2: ;
+          case 8:       /* plural */
             state = 3;
             break;
           default:
@@ -96,9 +99,40 @@ int32_t ParseWordGroup(char **word, int32_t *keyword, int32_t word_type, FILE **
           case 2:
             state = 4;
             break;
+          case 6:     /* plural */
+            state = 7;
+            break;
           default:
             ErrHdr();
             PrintError(48, NULL, TranslateKeyword("SYNONYM"));
+            return(ERROR);
+        }
+        break;
+      case LEFT_PAR:
+        if (word_type != NOUNS) {
+          ErrHdr();
+          PrintError(154, NULL, NULL);  /* plural may be only defined for nouns */
+          return(ERROR);
+        }
+        switch (state) {
+          case 2:
+            state = 5;
+            break;
+          default:
+            ErrHdr();
+            PrintError(155, NULL, NULL);  /* unexpected plural (only 1 per noun) */
+            return(ERROR);
+        }
+        break;
+      case RIGHT_PAR:
+        switch (state) {
+          case 6: ;
+          case 7:
+            state = 8;
+            break;
+          default:
+            ErrHdr();
+            PrintError(141, NULL, "')'");
             return(ERROR);
         }
         break;
@@ -115,32 +149,60 @@ int32_t ParseWordGroup(char **word, int32_t *keyword, int32_t word_type, FILE **
             /* identify prepositions that are used to connect two parts */
             /* of a System Description.                                 */
             if (word_type == PREPOSITIONS) {
-              if (!AddWord(*word, print_word, CONNECT_PREPOSITIONS, -1, &last_id, 0)) {
+              if (!AddWord(*word, print_word, CONNECT_PREPOSITIONS, -1, NO_ID, &last_id, 0)) {
               free(word);
               return(ERROR);
               }
             }
-            if (!AddWord(*word, print_word, word_type, -1, &last_id, 0)) {
+            if (!AddWord(*word, print_word, word_type, -1, NO_ID, &last_id, 0)) {
+              free(word);
+              return(ERROR);
+            }
+
+            /* set singular_id for plural definitions */
+            if (word_type == NOUNS) {
+              singular_id = last_id;
+            }
+
+            state = 2;
+            break;
+          case 4:  /* it's a synonym        */
+            /* Prepositions get two types, because we must be able to   */
+            /* identify prepositions that are used to connect two parts */
+            /* of a System Description.                                 */
+            if (word_type == PREPOSITIONS) {
+              if (!AddWord(*word, print_word, CONNECT_PREPOSITIONS, last_id, NO_ID, &last_id, 0)) {
+              free(word);
+              return(ERROR);
+              }
+            }
+            if (!AddWord(*word, print_word, word_type, last_id, singular_id, &last_id, 0)) {
               free(word);
               return(ERROR);
             }
             state = 2;
             break;
-          case 4:  /* it's a synonym  */
-            /* Prepositions get two types, because we must be able to   */
-            /* identify prepositions that are used to connect two parts */
-            /* of a System Description.                                 */
-            if (word_type == PREPOSITIONS) {
-              if (!AddWord(*word, print_word, CONNECT_PREPOSITIONS, last_id, &last_id, 0)) {
+          case 5:  /* it's a plural definition     */
+            /* store the word with type PLURAL and */
+            /* fill the reference to the singular. */
+            /* The word type can only be NOUNS     */
+
+            /* make sure any synonyms get this word as print_word */
+            strncpy(print_word, *word, MAX_WORD_LEN);
+            print_word[MAX_WORD_LEN] = '\0';
+
+            if (!AddWord(*word, print_word, PLURAL, -1, singular_id, &last_id, 0)) {
               free(word);
               return(ERROR);
-              }
             }
-            if (!AddWord(*word, print_word, word_type, last_id, &last_id, 0)) {
+            state = 6;
+            break;
+          case 7:  /* it's a plural synonym */
+            if (!AddWord(*word, print_word, PLURAL, last_id, singular_id, &last_id, 0)) {
               free(word);
               return(ERROR);
             }
-            state = 2;
+            state = 6;
             break;
           default:
             /* a word group can only end with the next valid keyword */
@@ -162,7 +224,7 @@ int32_t ParseWordGroup(char **word, int32_t *keyword, int32_t word_type, FILE **
 }
 
 
-int32_t AddWord(char *word, char *print_word, int32_t type, int32_t syn_id, int32_t *word_id, int32_t redefine)
+int32_t AddWord(char *word, char *print_word, int32_t type, int32_t syn_id, int32_t singular_id, int32_t *word_id, int32_t redefine)
  /* word is word that must be added                            */
  /* print_word is word that must be printed by the interpreter */
  /* type of word                                               */
@@ -182,6 +244,15 @@ int32_t AddWord(char *word, char *print_word, int32_t type, int32_t syn_id, int3
   /* must be printed by the interpreter when it is        */
   /* referred to by its id.                               */
 
+  /* if ProcWordInfo() finds that there alreay was an     */
+  /* existing struct with a different type for this word, */
+  /* it will add the new word's type to the existing      */
+  /* struct. It will also change *word_id to the id of    */
+  /* the existing struct, so any plural definitions       */
+  /* hereafter will not point to an unused word id (SEE   */
+  /* ALSO THE REMARK OF 22NOV2016.                        */
+
+  /* malloc() beause info will be added to a chain        */
   if ((info = (wordInfo *) malloc(sizeof(wordInfo))) == NULL) {
     PrintError(1, NULL, "AddWord()");
     return(ERROR);
@@ -194,7 +265,7 @@ int32_t AddWord(char *word, char *print_word, int32_t type, int32_t syn_id, int3
 
   /* 21nov2016: words with multiple types will cause    */
   /* gaps in the word id numbering. The word gets a new */
-  /* and when it is inserted into the word table we     */
+  /* id and when it is inserted into the word table we  */
   /* will find out it already exists with another type  */
   /* and the new word id would not be used.             */
   /* LEAVE IT IT FOR NOW, MUST FIX LATER  (note to self:*/
@@ -207,17 +278,17 @@ int32_t AddWord(char *word, char *print_word, int32_t type, int32_t syn_id, int3
   else
     switch (type) {
       case VERB:
-        if (!GetNewVerbId(word_id)) /* in case redefine = 1, we must    */
-          return(ERROR);            /* still issue a verb id, because   */
-        break;                      /* we don't know if the verb id has */
-      default:                      /* already been issued.             */
+        if (!GetNewVerbId(word_id))   /* in case redefine = 1, we must    */
+          return(ERROR);              /* still issue a verb id, because   */
+        break;                        /* we don't know if the verb id has */
+      default:                        /* already been issued.             */
         if (!GetNewWordId(word_id))   /* get new id */
-          return(ERROR);              /* word_id is needed by caller,   */
-        break;                        /* in case synonyms are defined.  */
-                                      /* If the word is already known   */
-                                      /* with a different type, the new */
-                                      /* word id will not be used.      */
-                                      /* MUST FIX LATER, LEAVE FOR NOW  */
+          return(ERROR);              /* word_id is needed by caller,     */
+        break;                        /* in case synonyms are defined.    */
+                                      /* If the word is already known     */
+                                      /* with a different type, the new   */
+                                      /* word id will not be used.        */
+                                      /* MUST FIX LATER, LEAVE FOR NOW    */
     }
 
   /* Test for verb_id. Verbs have their own id range, since  */
@@ -248,9 +319,20 @@ int32_t AddWord(char *word, char *print_word, int32_t type, int32_t syn_id, int3
   info->redefine = redefine;
   info->next     = NULL;
 
+  info->single_id = singular_id;
+
   /* process the wordInfo struct */
-  if (!ProcWordInfo(info))
+  if (!ProcWordInfo(info)) {
+    /* info->id may will have changed in case the word */
+    /* to add already existed with a different type    */
+    /* set *word_id to info->id                        */
     return(ERROR);
+  }
+
+  /* info->id may will have changed in case the word */
+  /* to add already existed with a different type    */
+  /* set *word_id to info->id                        */
+  *word_id = info->id;
 
   return(OK);
 }
@@ -271,7 +353,6 @@ int32_t AddWord(char *word, char *print_word, int32_t type, int32_t syn_id, int3
   /* attributes will be parsed as local). We therefore          */
   /* introduce the voc_pass1 variable to denote to tell         */
   /* GetNextWord() to not parse strings but just skip them.     */
-
 
   /* comments from former Pass2Voc() (function is no longer there)  */
   /* In Pass2Voc(), the default verb code is parsed and written to  */

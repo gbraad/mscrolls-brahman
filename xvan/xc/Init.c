@@ -231,7 +231,7 @@ int32_t main(int argc, char **argv)
 
   printf("                     *******************************************************\n");
   printf("                                           XVAN COMPILER\n");
-  printf("                                            version 2.4\n");
+  printf("                                            version 2.5\n");
   printf("                       Copyright 2016, 2017, 2018, 2019 Marnix van den Bos\n");
   printf("                     *******************************************************\n\n");
 
@@ -306,7 +306,7 @@ int32_t main(int argc, char **argv)
   story_language = story_info.story_language;
 
   /* add compiler version to story info */
-  strncpy(story_info.compiler_version, "2.4", MAX_COMPILER_LEN);
+  strncpy(story_info.compiler_version, "2.5", MAX_COMPILER_LEN);
 
   printf("\n%s %s\n\n", story_info.title, story_info.version);
 

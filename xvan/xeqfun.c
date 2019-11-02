@@ -1395,7 +1395,7 @@ resultStruct XeqDest(int32_t **trigger)
       DebugLevel_2_pars("dest()", par_list, 2);
     }
 
-    return(result);
+    /* return(result); */   /* @!@ */
 
     /* SHOULD WE USE VALUE OR LOC_ID HERE? */
     return(result.value == NO_ID ? (resultStruct) {LOC_ID, NONE, NONE} : result);
@@ -1478,6 +1478,16 @@ resultStruct XeqDistance(int32_t **trigger, int32_t return_value)
   if (!GetPar(&owner, &to, &type2, &str, trigger))
     return( (resultStruct) {QUIT, NONE, 0} );
 
+  if (debug_level == 2) {
+    par_list[0].tag   = type1;
+    par_list[0].owner = NO_ID;  /* only for common flags */
+    par_list[0].value = from;
+    par_list[1].tag   = type2;
+    par_list[1].owner = NO_ID;  /* only for common flags */
+    par_list[1].value = to;
+    DebugLevel_2_pars(fun_name, par_list, 2);
+  }
+
   /* check for NONE parameters */
   /* will not be caught by CheckPars() because type */
   /* may be correct type for NONE-parameter.        */
@@ -1552,15 +1562,7 @@ resultStruct XeqDistance(int32_t **trigger, int32_t return_value)
     /* no route found, so no distance or first direction*/
     result = return_value == DISTANCE ? (resultStruct) {VALUE, NONE, -1} : (resultStruct) {NONE, NONE, 0};
 
-  if (debug_level == 2) {
-    par_list[0].tag   = type1;
-    par_list[0].owner = NO_ID;  /* only for common flags */
-    par_list[0].value = from;
-    par_list[1].tag   = type2;
-    par_list[1].owner = NO_ID;  /* only for common flags */
-    par_list[1].value = to;
-    DebugLevel_2_pars(fun_name, par_list, 2);
-  }
+  DebugLevel_2_result(result);
 
   /* Free the spanning tree and route. */
   free(tree);
@@ -2073,6 +2075,8 @@ resultStruct XeqMove(int32_t **trigger)
     result = (resultStruct) {QUIT, NONE, 0};
   }
 
+  DebugLevel_2_result( (resultStruct) {DISAGREE, NONE, 0});  /* @!@ */
+
   return(result);
 }
 
@@ -2159,6 +2163,9 @@ resultStruct XeqNewExit(int32_t **trigger)
   int32_t par[3];
   int32_t type[3];
   int32_t i;
+  resultStruct result;  /* @!@ */
+
+  resultStruct par_list[3];  /* for debugging */  /* @!@ */
 
   for (i=0; i<3; i++)
     type[i] = NO_TYPE;
@@ -2172,15 +2179,33 @@ resultStruct XeqNewExit(int32_t **trigger)
       return( (resultStruct) {QUIT, NONE, 0} );
   }
 
+  if (debug_level == 2) {  /* @!@ */
+    par_list[0].tag   = type[0];
+    par_list[0].owner = NO_ID;  /* only for common flags */
+    par_list[0].value = par[0];
+    par_list[1].tag   = type[1];
+    par_list[1].owner = NO_ID;
+    par_list[1].value = par[1];
+    par_list[2].tag   = type[2];
+    par_list[2].owner = NO_ID;
+    par_list[2].value = par[2];
+    DebugLevel_2_pars("newexit()", par_list, 3);
+  }
+
   if (CheckPars(NEW_EXIT, type[0], type[1], type[2], NO_TYPE, NO_TYPE)) {
     /* Now create the new exit. */
     exit_data[(par[0]-FIRST_LOCATION_ID)*nr_of_directions +
               par[1]-first_direction_id] = par[2];
 
-    return( (resultStruct) {CONTINUE, NONE, 0} );
+    result = (resultStruct) {CONTINUE, NONE, 0};  /* @!@ */
   }
-  else
-    return( (resultStruct) {QUIT, NONE, 0} );
+  else {
+    result = (resultStruct) {QUIT, NONE, 0};  /* @!@ */
+  }
+
+  DebugLevel_2_result(result);  /* @!@ */
+
+  return(result);
 }
 
 
@@ -2242,6 +2267,13 @@ resultStruct XeqOwner(int32_t **trigger)
   if (!GetPar(&owner, &par, &type, &str, trigger))
     return( (resultStruct) {QUIT, NONE, 0} );
 
+  if (debug_level == 2) {  /* @!@ */
+    par_list.tag = type;
+    par_list.owner = owner;  /* only for common flags */
+    par_list.value = par;
+    DebugLevel_2_pars("owner()", &par_list, 1);
+  }
+
   if (CheckPars(OWNER, type, NO_TYPE, NO_TYPE, NO_TYPE, NO_TYPE)) {
     /* Test for none-parameter. */
     if (par == NONE) {
@@ -2258,12 +2290,9 @@ resultStruct XeqOwner(int32_t **trigger)
         result.tag = IsObjId(result.value) ? OBJ_ID : LOC_ID;
       }
     }
-    if (debug_level == 2) {
-      par_list.tag = type;
-      par_list.owner = owner;  /* only for common flags */
-      par_list.value = par;
-      DebugLevel_2_pars("owner()", &par_list, 1);
-    }
+
+    DebugLevel_2_result(result);
+
     return(result);
   }
   else
@@ -3120,21 +3149,25 @@ resultStruct XeqTranscript(int32_t **trigger)
     return( (resultStruct) {CONTINUE, NONE, 0} );
   }
   /* Open the transcript output file */
-  if ((transcriptfile = fopen(TRANSCRIPTFILE, "w")) == NULL) {
+  /* add to end of file              */
+  if ((transcriptfile = fopen(TRANSCRIPTFILE, "a")) == NULL) {
     /* not a severe error */
     PrintError(40, NULL, TRANSCRIPTFILE);
     return( (resultStruct) {CONTINUE, NONE, 0} );
   }
+
+  transcript = 1;
+
   /* write headers to transcript file */
-  fprintf(transcriptfile, "%s", "\n=====================================\n");
-  fprintf(transcriptfile, "%s", "XVAN transcript for: ");
-  fprintf(transcriptfile, "%s\n", story_info.title);
-  fprintf(transcriptfile, "%s", "version: ");
-  fprintf(transcriptfile, "%s\n", story_info.version);
-  fprintf(transcriptfile, "%s", "\n=====================================\n");
+  WriteTranscript("\n=====================================\n"
+                  "XVAN transcript for: ");
+  WriteTranscript(story_info.title);
+  WriteTranscript("version ");
+  WriteTranscript(story_info.version);
+  WriteTranscript("=====================================\n");
 
   PrintError (92, NULL, NULL);  /* not an error */
-  transcript = 1;
+
   return( (resultStruct) {CONTINUE, NONE, 0} );
 }
 

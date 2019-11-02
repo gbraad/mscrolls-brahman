@@ -1,5 +1,4 @@
 
-
 /************************************************************************/
 /* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
 /*                                                                      */
@@ -22,17 +21,13 @@
 /************************************************************************/
 
 
-/* this file tells for which OS the sources must be compiled */
-/* comment out the lines which are not your operating system */
+#if !defined(__NL_plural)
+#define __NL_plural
 
-/* this file is best be excluded from git */
+/*************************/
+/* External declarations */
+/*************************/
 
-#if !defined(__which_os)
-#define __which_os
-
-#define __windows_os
-
-/* #define __linux_os */
-/* #define __osx_os */
+extern int32_t GetSingularId(char*);  /* plural.c */
 
 #endif

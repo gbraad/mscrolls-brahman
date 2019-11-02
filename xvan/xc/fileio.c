@@ -1713,6 +1713,11 @@ int32_t StoreWordTable(void)
       PrintError(34, NULL, NULL);
       return(ERROR);
     }
+    if (!StoreInt32(word_table[i].single_id)) {  /* @!@ */
+      ErrHdr();
+      PrintError(34, NULL, NULL);
+      return(ERROR);
+    }
     for (j=0; j<MAX_TYPES; j++) {
       if (!StoreInt32(word_table[i].types[j])) {
         ErrHdr();

@@ -20,7 +20,7 @@ PRIMARY_COLOR "orange"
 # Use the XVAN and IFI Libraries
 #===============================
 
-$insert "XVAN Library v1-3.lib"
+$insert "XVAN Library v1-3-1.lib"
 $insert "IFI Library.lib"
 
 #==========================
