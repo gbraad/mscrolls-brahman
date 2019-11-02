@@ -69,6 +69,15 @@ public:
     virtual qint64 writeData(const char *data, qint64 len) { return 0; }
     virtual qint64 bytesAvailable() const  = 0;
     virtual bool playing() const = 0;
+    virtual void setVolume(double v)
+    {
+        if (v < 0) v = 0;
+        else if (v > 1.0) v = 1.0;
+        if (_audioOutput)
+        {
+            _audioOutput->setVolume(v);
+        }
+    }
 
     bool setSource(const string& filename)
     {

@@ -72,6 +72,7 @@ public:
         QSoundPlayer*   _host;
         PlayerSource*   _s[2];
         int             _current;
+        double          _vol = 1.0;
 
         SourcePair()
         {
@@ -107,6 +108,13 @@ public:
                     _s[_current]->fade(-_host->_fade);
                 }
             }
+        }
+        
+        void setVolume(double v)
+        {
+            _vol = v;
+            if (_s[0]) _s[0]->setVolume(_vol);
+            if (_s[1]) _s[1]->setVolume(_vol);
         }
 
         void _bind(PlayerSource* s)
@@ -146,6 +154,7 @@ public:
             _drop(_current);
             
             // becomes current
+            s->setVolume(_vol);
             _s[_current] = s;
             
             //LOG3("bind soundplayer to ", _current);
@@ -238,6 +247,14 @@ public:
             r = true;
         }
         return r;
+    }
+
+    Q_INVOKABLE void setVolume(int chan, qreal v)
+    {
+        if (chan < _maxPairs)
+        {
+            _pairs[chan].setVolume((double)v);
+        }
     }
 
     /*

@@ -35,7 +35,7 @@ CONFIG += c++11
 gcc:QMAKE_CXXFLAGS_WARN_ON = -Wall -Wno-unknown-pragmas -Wno-switch -Wno-unused-parameter
 gcc:QMAKE_CFLAGS_WARN_ON = -Wall -Wno-unknown-pragmas -Wno-switch -Wno-unused-parameter
 
-QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.8
+QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.12
 
 LIBPNG = $$PROJ/tools/apng/libpng_apng/libpng
 LIBZ = $$PROJ/tools/zlib

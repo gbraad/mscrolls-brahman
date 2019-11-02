@@ -77,6 +77,7 @@ ApplicationWindow
 
     property string soundJSON: QControl.soundJSON
     property int force: QControl.force
+    property real soundVol: QControl.prefs.soundVol/100
 
     readonly property int dialogWidth: width*3/4
     readonly property int dialogHeight: height*8/10
@@ -225,6 +226,13 @@ ApplicationWindow
         // this is to play ogg ambience and loops
         id: soundplayer1
     }
+
+    onSoundVolChanged:
+    {
+        //console.log("sound voume", soundVol)
+        soundplayer1.setVolume(0, soundVol)
+        soundplayer1.setVolume(1, soundVol)
+    }            
 
     function playTitleMusic()
     {

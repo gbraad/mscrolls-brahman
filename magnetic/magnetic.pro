@@ -115,5 +115,7 @@ HEADERS =  \
        puzguild.h \
     roomsguild.h \
     roomsjinxter.h \
-    puzjinxter.h
+    puzjinxter.h \
+    roomsfish.h \
+    puzfish.h
 

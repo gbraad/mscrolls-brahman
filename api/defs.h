@@ -86,6 +86,9 @@
 #define PREFS_TEXTMOVE_ENABLED  "text_move_enabled"
 #define DEFAULT_TEXTMOVE_ENABLE 0
 
+#define PREFS_SOUND_VOL  "sound_vol"
+#define DEFAULT_SOUND_VOL 100
+
 
 #ifdef _WIN32
 #define DLLX   __declspec( dllexport )

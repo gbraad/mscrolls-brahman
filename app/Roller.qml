@@ -54,6 +54,7 @@ Item
 
     // height of drawer open 
     property int rollHeightShown: Math.max(yPos - flick.contentY, 0)
+    property bool started: false
 
     Timer
     {
@@ -66,12 +67,13 @@ Item
     {
         if (visible)
         {
-            if (height == 0)
+            if (!started)
             {
                 // the first picture change comes here, but we are not
                 // ready. why? who knows. something to do with QML not
                 // being set up all at once. 
                 // anyhow, if this is the case, we wait a short time then try again
+                started = true
                 delayer.running = true
             }
             else if (rollHeightShown < 2*thumbHeight) bump_anim.start();

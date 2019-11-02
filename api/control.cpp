@@ -1576,11 +1576,10 @@ struct Control::Imp :
                             &EmitterBase::emit,                            
                             (void*)&_semit
                             );
-            if (r)
-            {
-                // initial update of scene
-                postEval();
-            }
+
+            // do not call `postEval` here, because emitScene
+            // is not needed. Only update sidebar/compass etc.
+            if (r) updateAfterCommand();
         }
         
         if (!r)
@@ -1592,15 +1591,26 @@ struct Control::Imp :
 
     void coverPageClosed()
     {
-        if (_ifi && !_coverPageClosed)
+        if (!_coverPageClosed)
         {
             // only send begin code once!
             _coverPageClosed = true;
-            
-            // send additional {begin:true}
-            const char* js = "{\"" IFI_BEGIN "\":true}";
-            LOG4("Sending ifi begin, ", js);
-            if (_ifiHost.eval(js)) _ifiHost.syncRelease();
+
+            if (_be)
+            {
+                // perform an additional update once we start.
+                // this is mainly to call `handleRoomsKL` which will update
+                // the ambience.
+                _be->emitScene();
+            }
+
+            if (_ifi)
+            {
+                // send additional {begin:true}
+                const char* js = "{\"" IFI_BEGIN "\":true}";
+                LOG4("Sending ifi begin, ", js);
+                if (_ifiHost.eval(js)) _ifiHost.syncRelease();
+            }
         }
     }
 

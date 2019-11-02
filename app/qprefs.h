@@ -85,6 +85,21 @@ void setGame ## _name ## String(const string& v)                    \
     }                                                           \
 }
 
+#define DPREF_INT(_name, _setname, _def)                        \
+int _name() const                                               \
+{                                                               \
+    return _prefs->getInt(PREFS_ ## _def, DEFAULT_ ## _def);    \
+}       \
+void set ## _setname(int v)                                     \
+{                                                               \
+    if (v != _name())                                           \
+    {                                                           \
+        qDebug() << "prefs " #_name  << v;                      \
+        _prefs->set(PREFS_ ## _def, v);                         \
+        emit _name ## Changed();                                \
+    }                                                           \
+}
+
 #define DPREF_QSTRING(_name, _def)                                          \
 DPREF_STRING(_name, _def)                                                   \
 QString game ## _name() const { return QSTR(game ## _name ## String()); }   \
@@ -125,6 +140,7 @@ public:
 
     Q_PROPERTY(bool textmoveEnabled READ textmoveEnabled WRITE setTextmoveEnabled NOTIFY textmoveEnabledChanged);
 
+    Q_PROPERTY(int soundVol READ soundVol WRITE setSoundVol NOTIFY soundVolChanged);
 
     
 public:
@@ -222,6 +238,8 @@ public:
     DPREF_QSTRING(BackgroundColor, BACKGROUND_COLOR);
     DPREF_QSTRING(PrimaryColor, PRIMARY_COLOR);
     DPREF_QSTRING(ContrastColor, CONTRAST_COLOR);
+
+    DPREF_INT(soundVol, SoundVol, SOUND_VOL);
 
     Q_INVOKABLE QString gameBackgroundColorOR(const QString& def) const
     {
@@ -402,6 +420,7 @@ signals:
     void gameContrastColorChanged();
     void consoleechoEnabledChanged();
     void textmoveEnabledChanged();
+    void soundVolChanged();
 };
 
 #undef DPREF_BOOL

@@ -748,6 +748,12 @@ public slots:
     void uiInitialised()
     {
         //qDebug() << "main window initialised";
+
+        // XX 
+        // we're about to play the title music so any cached soundJSON 
+        // is invalid.
+        soundChanged("{}");
+
         if (_updater) _updater->start();
     }
 
