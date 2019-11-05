@@ -1660,6 +1660,12 @@ int32_t StoreStoryInfo(storyInfo *info)
     return(ERROR);
   }
 
+  if (!StoreInt16(info->play_mode)) {
+    ErrHdr();
+    PrintError(33, NULL, NULL);
+    return(ERROR);
+  }
+
   if (!StoreInt16(debug)) {
     ErrHdr();
     PrintError(33, NULL, NULL);
@@ -1703,6 +1709,11 @@ int32_t StoreWordTable(void)
       return(ERROR);
     }
     if (!StoreInt32(word_table[i].id)) {
+      ErrHdr();
+      PrintError(34, NULL, NULL);
+      return(ERROR);
+    }
+    if (!StoreInt32(word_table[i].single_id)) {  /* @!@ */
       ErrHdr();
       PrintError(34, NULL, NULL);
       return(ERROR);

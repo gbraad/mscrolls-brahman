@@ -44,7 +44,7 @@ int32_t ENG_CheckIfKeyword(char *word_lwr)
   /* In ReadStoryInfo() the languages are read. But */
   /* we don't know where the languages are changed  */
   /* in the story info section. Therefore,          */
-  /* ENG_ChekIfKeyword() must know the story info   */
+  /* ENG_CheckIfKeyword() must know the story info  */
   /* keywords in both languages.                    */
 
   /* story info keywords */
@@ -120,6 +120,14 @@ int32_t ENG_CheckIfKeyword(char *word_lwr)
     return(PRIMARY_COLOR);
   if (strncmp(word_lwr, "hoofdkleur", MAX_WORD_LEN) == 0)
     return(PRIMARY_COLOR);
+  if (strncmp(word_lwr, "choice_mode", MAX_WORD_LEN) == 0)
+    return(CHOICE_MODE);
+  if (strncmp(word_lwr, "keuzemodus", MAX_WORD_LEN) == 0)
+    return(CHOICE_MODE);
+  if (strncmp(word_lwr, "hybrid_mode", MAX_WORD_LEN) == 0)
+    return(HYBRID_MODE);
+  if (strncmp(word_lwr, "hybridemodus", MAX_WORD_LEN) == 0)
+    return(HYBRID_MODE);
 
   /* end of story info keywords */
 
@@ -255,6 +263,10 @@ int32_t ENG_CheckIfKeyword(char *word_lwr)
     return(RESTART);
   if (strncmp(word_lwr, "pickone", MAX_WORD_LEN) == 0)
     return(PICKONE);
+  if (strncmp(word_lwr, "addchoice", MAX_WORD_LEN) == 0)
+    return(ADDCHOICE);
+  if (strncmp(word_lwr, "playmode", MAX_WORD_LEN) == 0)
+    return(PLAYMODE);
   if (strncmp(word_lwr, "(", MAX_WORD_LEN) == 0)
     return(LEFT_PAR);
   if (strncmp(word_lwr, ")", MAX_WORD_LEN) == 0)

@@ -247,7 +247,7 @@ int32_t ParseVerb(int64_t offset, int32_t redefined, FILE **source, fileList **f
             break;
           default:
             ErrHdr();
-            PrintError(141, NULL, NULL);
+            PrintError(141, NULL, "comma");
             return(ERROR);
         }
         free(word);

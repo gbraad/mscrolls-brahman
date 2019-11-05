@@ -84,6 +84,7 @@ extern int32_t  CheckIFI(char*);
 
 extern char     *ReadJsonString(char*, int*);
 
+extern void     WriteTranscript(char*);                                          /* output.c   */
 extern char     *TranslateKeyword(char*);                                        /* errors.c     */
 extern void     PrintError(int16_t, resultStruct*, char*);                       /* errors.c     */
 extern void     Output(void);                                                    /* output.c     */

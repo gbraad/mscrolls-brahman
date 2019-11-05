@@ -61,9 +61,11 @@
                                  /* 4 adverbs per verb.            */
 #define MAX_PARSE_PREPOS       4
 #define MAX_CONTAINED_OBJECTS 50
-#define MAX_HITS               6 /* Max number of matching locs or  */
+#define MAX_HITS               5 /* Max number of matching locs or  */  /* @!@ */
                                  /* objects when translating sys    */
                                  /* descrs to ids.                  */
+                                 /* Must be equal to MAX_SUBJECTS   */  /* @!@ */
+                                 /* WHY NOT USE ONLY 1 IF THEY MUST BE EQUAL */  /* @!@ */
 
 #define MAX_SUBJECTS           5 /* Maximum number of subjects in   */
                                  /* user input (used only by        */
@@ -75,6 +77,9 @@
                                  /* than 100 possibilities for      */
                                  /* mapping objects                 */
 #define MAX_CHOICES            5 /* for choice and hybrid mode      */
+
+#define PLAYER_COMMENT       '*' /* user input starting with '*'    */
+                                 /* will be ignored.                */
 
 /***********************/
 /* keyword definitions */
@@ -316,7 +321,7 @@
 #define DIRECTIONS                   710
 #define ARTICLES                     711
 #define CONJUNCTION                  712
-#define MAX_VALID_VOC_KEYWORD        713  /* 4sep2017 for detecting errors */
+#define MAX_VALID_VOC_KEYWORD        713  /* 4sep2017 for detecting errors   */
 #define CONNECT_PREPOSITIONS         714  /* for extended system description */
 #define SYNONYM                      715
 #define SCOPE                        716
@@ -351,6 +356,7 @@
 #define SPECIFIER_ERROR              815 /* errors        */
 #define NEXT_SENTENCE                816
 #define DYN_DSYS                     817 /* dynamic d_sys 10may2019 */
+#define PLURAL                       818 /* for plurality           */
 
 
 /***********************************************/

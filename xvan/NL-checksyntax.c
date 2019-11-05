@@ -54,6 +54,7 @@ int32_t NL_CheckSyntax(char *line_buf, int32_t id, int32_t nr_of_types, int32_t 
 {
   int32_t  result;               /* needed to test for unknown words and */
                                  /* stop recursive calling               */
+  int32_t  single_id;  /* @!@ */
   int32_t  i         = 0;
   int32_t  old_state = state;    /* Remember state to retry in case of   */
                                  /* a syntax clash.                      */
@@ -85,7 +86,7 @@ int32_t NL_CheckSyntax(char *line_buf, int32_t id, int32_t nr_of_types, int32_t 
   if (id == NO_ID) {
     /* Get the next word from the user input               */
     /* NextWordId() also returns the remainder of line_buf */
-    if ( (id = NextWordId(&line_buf, &nr_of_types, types)) == NO_ID)
+    if ( (id = NextWordId(&line_buf, &nr_of_types, types, &single_id)) == NO_ID)
       /* unknown word */
       return(UNKNOWN_WORD);
     type_index = 0;
@@ -773,8 +774,65 @@ int32_t NL_CheckSyntax(char *line_buf, int32_t id, int32_t nr_of_types, int32_t 
         /* Oops! it wasn't a noun after all; try again */
         return(NL_CheckSyntax(line_buf, id, nr_of_types, types,
                              ++type_index, subject_index, old_state,
-                             parsed_input));}
-
+                             parsed_input));
+      }
+    case PLURAL:   /* @!@ */
+      /* plural is only allowed for subject part 1 */
+      switch (state) {
+        case  2: ;    /* subject part 1 */
+        case  3: ;
+        case  5: ;
+        case 22: ;
+        case 23: ;
+        case 33:
+          state = 4;
+          break;
+        default:
+          /* wrong syntax; try again with next type */
+          return(NL_CheckSyntax(line_buf, id, nr_of_types, types,
+                             ++type_index, subject_index, state,
+                             parsed_input));
+      }
+      /* assume it's a plural noun */
+      result = NL_CheckSyntax(line_buf, NO_ID, nr_of_types, new_types,
+                           -1, subject_index, state, parsed_input);
+      if (result == OK) {
+        /* fill parsed_input, depending on old_state */
+        switch (old_state) {
+          case  2: ;    /* subject part 1 noun */
+          case  3: ;
+          case  5: ;
+          case 22: ;
+          case 23: ;
+          case 33: ;
+          case 13: ;
+          case 15: ;
+          case 26: ;
+          case 27: ;
+          case 20: ;
+          case 30: ;
+          case 31:
+            (parsed_input->subject[subject_index]).part1.noun = id;
+            parsed_input->single[subject_index]               = single_id;  /* @!@ */
+            break;
+          default:
+            /* we should never get here */
+            PrintString("INTERNAL ERROR. unknown old_state for plural noun.\n", 0);
+            Output();
+            return(ERROR);
+            break;
+        } /* switch */
+        return(OK);
+      }
+      else if (result == UNKNOWN_WORD)
+        return(UNKNOWN_WORD);
+      else /* error */ {
+        /* Oops! it wasn't a plural noun after all; try again */
+        parsed_input->single[subject_index] = NO_ID;  /* @!@ */
+        return(NL_CheckSyntax(line_buf, id, nr_of_types, types,
+                             ++type_index, subject_index, old_state,
+                             parsed_input));
+      }
     case ADJECTIVES:
       switch (state) {
         case  2: ;     /* subject part 1 */

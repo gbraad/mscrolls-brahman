@@ -74,6 +74,7 @@
 #define MAX_AMBIGUITY        100 /* do not try to resolve if more   */
                                  /* than 100 possibilities for      */
                                  /* mapping objects                 */
+#define MAX_CHOICES            5 /* for choice and hybrid mode      */
 
 /***********************/
 /* keyword definitions */
@@ -88,41 +89,44 @@
 /* by the compiler and interpreter.  */
 /*************************************/
 
-#define ERROR           0   /* do not change the OK and ERROR values */
-#define OK              1
-#define NO_KEYWORD      2
-#define VALUE           4
-#define ARROW           5
-#define KEYWORD_TAG     6
-#define PAR_LIST_TAG    7
-#define LOC_ID          8
-#define OBJ_ID          9
-#define TRIGG_ID        10
-#define FLAG_ID         11
-#define ATTR_ID         12  /* added on July 1st 2015, for change to prefix attributes with r_ */
-#define STRING          13
-#define NUMBER          14  /* e.g. 'take 3 pebbles, set dial to 123' */
-#define TIM_ID          15
-#define DESCR_ID        16
-#define FLAG_VALUES     17
-#define LOC_DIR         18
-#define OBJ_DIR         19
-#define NO_TYPE         20
-#define VOCABULARY      21
-#define ACTION_REC      22
-#define WORD_ID         23  /* For parameter typechecking. */
-#define XVAN_LANGUAGE   24
-#define STORY_LANGUAGE  25
-#define ENG             26
-#define NL              27
-#define PRIMARY_COLOR   28
+#define ERROR            0   /* do not change the OK and ERROR values */
+#define OK               1
+#define NO_KEYWORD       2
+#define VALUE            4
+#define ARROW            5
+#define KEYWORD_TAG      6
+#define PAR_LIST_TAG     7
+#define LOC_ID           8
+#define OBJ_ID           9
+#define TRIGG_ID         10
+#define FLAG_ID          11
+#define ATTR_ID          12  /* added on July 1st 2015, for change to prefix attributes with r_ */
+#define STRING           13
+#define NUMBER           14  /* e.g. 'take 3 pebbles, set dial to 123' */
+#define TIM_ID           15
+#define DESCR_ID         16
+#define FLAG_VALUES      17
+#define LOC_DIR          18
+#define OBJ_DIR          19
+#define NO_TYPE          20
+#define VOCABULARY       21
+#define ACTION_REC       22
+#define WORD_ID          23  /* For parameter typechecking. */
+#define XVAN_LANGUAGE    24
+#define STORY_LANGUAGE   25
+#define ENG              26
+#define NL               27
+#define PRIMARY_COLOR    28
+#define INTERPRETER_MODE 29
+#define CHOICE_MODE      30
+#define HYBRID_MODE      31
 
 
 /*******************************************/
 /* keywords that are used in the inputfile */
 /*******************************************/
 
-#define LOWER_BOUND_TESTFUN         100  /* @!@ */
+#define LOWER_BOUND_TESTFUN         100
 #define CANSEE           101
 #define OWNS             102
 #define ISLIT            103
@@ -138,9 +142,9 @@
 #define RUNCOMMON        113
 #define TRY              114
 #define ISOBJECT         115
-#define UPPER_BOUND_TESTFUN         200  /* @!@ */
+#define UPPER_BOUND_TESTFUN         200
 
-#define LOWER_BOUND_INT_ACT	    201  /* @!@ */
+#define LOWER_BOUND_INT_ACT	    201
 #define MOVE            202
 #define OWNER           203
 #define PRINT           204
@@ -205,11 +209,13 @@
 #define SENDJSON        263
 #define NOTIMERS        264
 #define RESTART         265
-#define PICKONE         266   /* @!@ */
-#define NEWDSYS         267   /* @!@ */
-#define UPPER_BOUND_INT_ACT         400  /* @!@ */
+#define PICKONE         266
+#define NEWDSYS         267
+#define ADDCHOICE       268
+#define PLAYMODE        269
+#define UPPER_BOUND_INT_ACT         400
 
-#define LOWER_BOUND_SPECIAL_CHAR    401  /* @!@ */
+#define LOWER_BOUND_SPECIAL_CHAR    401
 #define LEFT_PAR        402
 #define RIGHT_PAR       403
 #define EQUAL_SIGN	    404
@@ -218,9 +224,9 @@
 #define COMMA		    407
 #define DOT             408
 #define PAR_DELIMITER   409
-#define UPPER_BOUND_SPECIAL_CHAR     500  /* @!@ */
+#define UPPER_BOUND_SPECIAL_CHAR     500
 
-#define LOWER_BOUND_COMPILER_KEYWORD 501  /* @!@ */
+#define LOWER_BOUND_COMPILER_KEYWORD 501
 #define MIN_VALID_COMPILER_KEYWORD 502  /* 4sep2017 for detecting errors */
 #define LOCATION          502
 #define OBJECT            503
@@ -290,14 +296,14 @@
 #define NO_TEXTINPUT    566
 #define NO_COMPASS      567
 #define AUTOLINK        568
-#define UPPER_BOUND_COMPILER_KEYWORD 700  /* @!@ */
+#define UPPER_BOUND_COMPILER_KEYWORD 700
 
 
 /**************************************************/
 /* Keywords that are used in the vocabulary file  */
 /**************************************************/
 
-#define LOWER_BOUND_VOC_KEYWORD      701  /* @!@ */
+#define LOWER_BOUND_VOC_KEYWORD      701
 #define MIN_VALID_VOC_KEYWORD        702  /* 4sep2017 for detecting errors */
 #define VERB                         702
 #define REDEFINE_VERB                703
@@ -310,7 +316,7 @@
 #define DIRECTIONS                   710
 #define ARTICLES                     711
 #define CONJUNCTION                  712
-#define MAX_VALID_VOC_KEYWORD        713  /* 4sep2017 for detecting errors */
+#define MAX_VALID_VOC_KEYWORD        713  /* 4sep2017 for detecting errors   */
 #define CONNECT_PREPOSITIONS         714  /* for extended system description */
 #define SYNONYM                      715
 #define SCOPE                        716
@@ -320,14 +326,14 @@
 #define DEFAULT                      720
 #define PROLOGUE                     721
 #define EPILOGUE                     722
-#define UPPER_BOUND_VOC_KEYWORD      800  /* @!@ */
+#define UPPER_BOUND_VOC_KEYWORD      800
 
 /*************************************/
 /* keywords that are used internally */
 /* by the compiler and interpreter.  */
 /*************************************/
 
-#define XEQ                          801  /* @!@ */
+#define XEQ                          801
 #define NO_XEQ                       802
 #define SKIP                         803
 #define END_OF_CODE                  804
@@ -345,6 +351,7 @@
 #define SPECIFIER_ERROR              815 /* errors        */
 #define NEXT_SENTENCE                816
 #define DYN_DSYS                     817 /* dynamic d_sys 10may2019 */
+#define PLURAL                       818 /* for plurality           */
 
 
 /***********************************************/
@@ -382,6 +389,7 @@
                                      /* defined trigger.            */
 #define EXITT                   5401 /* same for t_exit.            */
 #define DEFAULT_TRIGG           5402 /* and for t_default           */  /* added on sep 3rd 2015 for Cloak of Darkness */
+#define CHOICE                  5403 /* and for t_choice            */  /* added on jul 17th 2019 for choice IF        */
 #define LAST_COMMON_TRIGGER_ID  5508 /* 100 common triggers.        */
 #define FIRST_LOCAL_TRIGGER_ID  5509
 #define LAST_LOCAL_TRIGGER_ID   6198 /* 689 local triggers.         */

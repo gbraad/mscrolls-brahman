@@ -28,14 +28,14 @@
 /* External declarations */
 /*************************/
 
-extern verbDir *verb_dir;                               /* fileio.c    */
-extern char    *outputline;                             /* init.c      */
+extern verbDir *verb_dir;                                         /* fileio.c    */
+extern char    *outputline;                                       /* init.c      */
 
-extern void    Output(void);                            /* output.c    */
-extern void    PrintString(char*, int);                 /* output.c    */
-extern int32_t LookUpId(char*);                         /* syntax.c    */
-extern int32_t NextWordId(char**, int32_t*, int32_t*);  /* syntax.c    */
-extern void    PrintParsedInput(parsedInput*);          /* debug.c     */
-extern void    PrintUsrActionRec(usrActionRec*);        /* debug.c     */
+extern void    Output(void);                                      /* output.c    */
+extern void    PrintString(char*, int);                           /* output.c    */
+extern int32_t LookUpId(char*);                                   /* syntax.c    */
+extern int32_t NextWordId(char**, int32_t*, int32_t*, int32_t*);  /* syntax.c */  /* @!@ */
+extern void    PrintParsedInput(parsedInput*);                    /* debug.c     */
+extern void    PrintUsrActionRec(usrActionRec*);                  /* debug.c     */
 
 #endif

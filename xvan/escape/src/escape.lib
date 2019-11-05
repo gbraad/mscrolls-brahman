@@ -1,0 +1,734 @@
+
+# include file for Escape!
+
+#========================================================#
+# Table of Contents                                      #
+#========================================================#
+#  Section                                     Line number
+#  Common descriptions .................................52
+#  Common Flags ........................................55
+#  Redefined triggers ..................................66
+#  Timers .............................................112
+#  Verbs ..............................................257
+#    apply ............................................262
+#    burn .............................................277
+#    charge ...........................................295
+#    climb ............................................309
+#    count ............................................319
+#    credits ..........................................332
+#    cut (saw) ........................................343
+#    drink ............................................382
+#    enter ............................................399
+#    extinguish .......................................410
+#    feed .............................................429
+#    getmeout .........................................435
+#    hint .............................................439
+#    info (about) .....................................458
+#    lift .............................................471
+#    light ............................................482
+#    pull .............................................489
+#    press (push) .....................................503
+#    remove ...........................................526
+#    scroll ...........................................543
+#    set ..............................................553
+#    shake ............................................568
+#    slide ............................................582
+#    solution .........................................602
+#    stay .............................................621
+#    switch ...........................................628
+#    talk .............................................635
+#    unwrap ...........................................643
+#    wrap .............................................654
+#    zwoosh ...........................................669
+# Redefined Verbs .....................................673
+#    goto .............................................677
+# Dictionary ..........................................719
+#    directions .......................................723
+#    nouns ............................................727
+#    adjectives .......................................731
+#========================================================#
+
+
+$COMMON_DESCRS
+ d_ask
+
+$COMMON_FLAGS
+  f_heavy      = 0  # needed for breaking things
+  f_cuttable   = 0
+  f_cutter     = 0
+  f_moveable   = 0
+  f_tieable    = 0
+  f_pressable  = 0
+  f_drinkable  = 0
+  f_needed     = 0 # tells if an object is needed to finish the game
+  f_sk_puzzle  = 0 # for hint system
+
+######################
+# REDEFINED TRIGGERS #
+######################
+
+$REDEFINE_TRIGGERS
+  t_entrance
+   if not(islit(o_player)) then
+     printcr("It is pitch black.")
+     disagree()
+   endif
+
+   # part for location
+   if equal(%this, l_location) then
+     printcrbold(%this)
+     if not(testflag(%this.f_seenbefore)) or testflag(o_player.f_verbose) then
+       print(%this.d_entr_long)
+       setflag(f_seenbefore)
+     else
+       print(%this.d_entr_short)
+     endif
+     agree()
+   endif
+   # part for objects
+   if cansee(o_player, %this) then
+     if equal(owner(%this), owner(o_player)) then
+       # same containment level
+       if testflag(%this.f_seenbefore) then
+         print(%this.d_entr_short)
+       else
+         print(%this.d_entr_long)
+         setflag(%this.f_seenbefore)
+     else
+       if not(owns(o_player, %this, 0)) and not(owns(o_npc, %this, 0)) then
+         print("\n[this.r_preposition] [the] ")
+         print(owner(%this))
+         printcr(" is [a] [this].")
+       endif
+     endif
+     setflag(%this.f_seenbefore)
+   endif
+   agree()
+
+  t_ask
+   printcr(%this.d_ask)
+
+
+#################
+# TIMER SECTION #
+#################
+
+$TIMERS
+  m_moves
+   init      0
+   step      1
+   direction up
+   interval  1
+   state     go
+
+  m_npc
+   init       0
+   step       1
+   direction  up
+   interval   1
+   state      stop
+   trigger_at 1 OR_MORE
+   execute    o_npc.t_move
+
+  m_housekeeping
+   init          0
+   step          1
+   direction    up
+   interval      1
+   state      stop
+   trigger_at    1 OR_MORE
+   execute       o_npc.t_housekeeping
+
+  m_heat
+   init          3
+   step          1
+   direction  down
+   interval      1
+   state      stop
+   trigger_at    0
+   execute       l_closet.t_leave
+
+  m_quenched
+   init          5
+   step          1
+   direction  down
+   interval      1
+   state      stop
+   trigger_at    0
+   execute       o_water_bathroom.t_may_drink
+
+ m_carpet
+   init         10
+   step          1
+   direction  down
+   interval      1
+   state      stop
+   trigger_at    0
+   execute       o_carpet.t_dry
+
+  m_snake
+    init       1
+    step       1
+    direction  up
+    interval   1
+    state      stop
+    trigger_at 1 or_more
+    execute    o_snake.t_crawl
+
+  m_battery
+    init       250
+    step       1
+    direction  down
+    interval   1
+    state      stop
+    trigger_at 0
+    execute    o_lamp.t_empty
+
+  m_gloves
+    init       5
+    step       1
+    direction  down
+    interval   1
+    state      stop
+    trigger_at 0
+    execute    o_gloves.t_take_off
+
+# The following timers are used in the dial puzzle.
+# All three dials must be set to 8 at the same time.
+
+  m_red_dial
+    init      0
+    step      1
+    direction up
+    interval  1
+    state     stop
+
+  m_red_hand
+    init       0
+    step       1
+    direction  up
+    interval   1
+    state      go
+    trigger_at 1
+    execute    o_red_hand.t_print_value
+
+  m_green_dial
+    init      0
+    step      2
+    direction up
+    interval  1
+    state     stop
+
+  m_green_hand
+    init       0
+    step       1
+    direction  up
+    interval   1
+    state      go
+    trigger_at 1
+    execute    o_green_hand.t_print_value
+
+  m_blue_dial
+    init      0
+    step      3
+    direction up
+    interval  1
+    state     stop
+
+  m_blue_hand
+    init       0
+    step       1
+    direction  up
+    interval   1
+    state      go
+    trigger_at 1
+    execute    o_blue_hand.t_print_value
+
+  m_check_dials
+    init       0
+    step       1
+    direction  up
+    interval   1
+    state      go
+    trigger_at 1
+    execute    l_dial_room.t_check_dials
+
+
+################
+# VERB SECTION #
+################
+
+#--------------------------------------------------------------------
+$VERB apply
+ "apply"
+   printcr("What do you want to apply?")
+   getsubject()
+
+ "apply [o_subject]"
+   printcr("What do you want to apply [the] [o_subject] to?")
+   getspec(to)
+
+ DEFAULT
+   printcr("I only understood you as far as wanting to apply something.")
+ENDVERB
+#--------------------------------------------------------------------
+
+#--------------------------------------------------------------------
+$VERB burn
+ PROLOGUE
+  if not(equal(o_subject, %none)) then
+    if equal(o_subject, o_player) then
+      print("Suicide is not the answer...\n")
+      disagree()
+    endif
+
+ "burn"
+   print("What do you want to burn?\n")
+   getsubject()
+
+  DEFAULT
+    printcr("I only understood you as far as willing to burn something.")
+ENDVERB
+#--------------------------------------------------------------------
+
+#--------------------------------------------------------------------
+$VERB charge
+ "charge [o_all]"
+   printcr("You cannot use all in combination with charge.")
+
+ "charge"
+   printcr("What do you want to charge?")
+   getsubject()
+
+ DEFAULT
+   printcr("[the] [o_actor] cannot charge that.")
+ENDVERB
+#--------------------------------------------------------------------
+
+#--------------------------------------------------------------------
+$VERB climb
+ "climb [prepos] [o_subject]"
+   printcr("Climbing [prepos] [the] [o_subject] is not going to work.")
+
+  DEFAULT
+    printcr("I only understood you as far as willing to climb.")
+ENDVERB
+#--------------------------------------------------------------------
+
+#--------------------------------------------------------------------
+$VERB count
+ "count"
+       printcr("one, two, three...")
+
+ "count [o_subject]"
+   printcr("I see one [o_subject] here.")
+
+  DEFAULT
+    printcr("I only understood you as far as wanting to count something.")
+ENDVERB
+#--------------------------------------------------------------------
+
+#--------------------------------------------------------------------
+$VERB credits
+ DEFAULT
+   printcr("I owe big to Mathbrush, Andrew Schultz, Marco /
+            Innocenti, Nils Fagerburg, Giannis G. Georgiou and /
+            Chris Selmys for thoroughly testing Escape!\nAny errors /
+            that you may (will) find I've no doubt introduced by /
+            changing the story after their testing.")
+ENDVERB
+#--------------------------------------------------------------------
+
+#--------------------------------------------------------------------
+$VERB cut SYNONYM saw
+ PROLOGUE
+  if equal(o_subject, %none) then
+    agree()
+  else
+    if not(testflag(o_subject.f_cuttable) or testflag(o_subject.f_alive)) then
+      printcr("[the] [o_subject] [o_subject.r_is] not something that can be cut.")
+      disagree()
+    endif
+  endif
+  if not(equal(o_spec, %none)) then
+    if not(testflag(o_spec.f_cutter)) then
+      printcr("[the] [o_spec] is not something that you can cut with.")
+      disagree()
+    endif
+    if not(owns(o_actor, o_spec)) then
+      printcr("(Picking up [the] [o_spec] first).")
+      if try(l_location, 0, 0, "[o_actor], get [o_spec]") then
+        agree()
+      else
+        disagree()
+
+ "cut"
+   printcr("What do you want to cut?")
+   getsubject()
+
+ "cut [o_subject]"
+   printcr("with what?")
+   getspec(with)
+
+ "cut [o_subject] with [o_spec]"
+   printcr("Cutting [the] [o_subject] with [the] [o_spec] won't help.")
+
+ DEFAULT
+   printcr("I only understood you as far as wanting to cut something.")
+ENDVERB
+#--------------------------------------------------------------------
+
+#-------------------------------------------------------------------------------
+$VERB drink
+  "drink"
+    printcr("What do you want to drink?")
+    getsubject()
+
+  "drink [o_subject]"
+    DISAMBIGUATION_RULES
+      if testflag(o_subject.f_drinkable) then score(5) endif
+    END_RULES
+    printcr("[the] [o_actor] cannot drink [the] [o_subject].")
+
+  DEFAULT
+    printcr("I only understood you as far as wanting to drink something.")
+ENDVERB
+#-------------------------------------------------------------------------------
+
+#--------------------------------------------------------------------
+$VERB enter
+ "enter"
+   printcr("What do you want to enter?")
+   getsubject()
+
+ DEFAULT
+   printcr("[the] [o_subject] is not something that can be entered.")
+ENDVERB
+#--------------------------------------------------------------------
+
+#--------------------------------------------------------------------
+$VERB extinguish
+  "extinguish"
+    printcr("What do you want to extinguish?")
+    getsubject()
+
+  "extinguish [o_subject]"
+    printcr("How do you want to extingiush [the] [o_subject]?")
+    getspec()
+
+  "extinguish [o_subject] [prepos] [o_spec]"
+    printcr("[the] [o_actor] cannot extinguish [the] [o_subject] [prepos] [the] [o_spec].")
+
+  DEFAULT
+    printcr("I only understood you as far as wanting to extinguish something.")
+ENDVERB
+#--------------------------------------------------------------------
+
+#--------------------------------------------------------------------
+$VERB feed
+ DEFAULT
+   printcr("I only understood you as far as wanting to feed something.")
+ENDVERB
+#--------------------------------------------------------------------
+
+#--------------------------------------------------------------------
+$VERB getmeout ENDVERB
+#--------------------------------------------------------------------
+
+#--------------------------------------------------------------------
+$VERB hint
+ SCOPE all_locs
+ "hint for [o_subject]",
+ "hint [o_subject]"
+   DISAMBIGUATION_RULES
+    if testflag(o_subject.f_sk_puzzle) then score(5) endif
+    if testflag(o_subject.f_seenbefore) then score(5) endif
+   END_RULES
+   if testflag(o_subject.f_sk_puzzle) then
+     printcr("You have to ask that to someone from the staff.")
+   else
+     printcr("That is not a puzzle.")
+
+ DEFAULT
+   printcr("You must specify a valid puzzle, like \"hint dial puzzle\"")
+ENDVERB
+#--------------------------------------------------------------------
+
+#--------------------------------------------------------------------
+$VERB info SYNONYM about
+ DEFAULT
+   print("\n  This is a story for XVAN 2.3.4.\n\n"
+         "  It has 28 locations and 85 objects, including the player /
+         and one NPC named\n"
+         "  Fred. The story contains several puzzles, and you need /
+          to interact with\n"
+         "  Fred to solve some of them. Your goal is: escape!\n\n")
+   printitalic("  In Escape! you cannot end up in an unwinnable situation.\n")
+ENDVERB
+#--------------------------------------------------------------------
+
+#--------------------------------------------------------------------
+$VERB lift
+  "lift"
+    printcr("What do you want to lift?")
+    getsubject()
+
+  "lift [o_subject]"
+    printcr("You cannot lift [the] [o_subject].")
+ENDVERB
+#--------------------------------------------------------------------
+
+#--------------------------------------------------------------------
+$VERB light
+  DEFAULT
+    printcr("[o_actor] can't light that")
+ENDVERB
+#--------------------------------------------------------------------
+
+#--------------------------------------------------------------------
+$VERB pull
+  "pull"
+    printcr("What do you want to [action]?")
+    getsubject()
+
+  "pull [o_subject]"
+    printcr("[o_actor] cannot pull [the] [o_subject].")
+
+  DEFAULT
+    printcr("That's not going to accomplish anything.")
+ENDVERB
+#--------------------------------------------------------------------
+
+#-------------------------------------------------------------------------------
+$VERB press SYNONYM push
+  "press"
+    printcr("What do you want to press?")
+    getsubject()
+
+  "press [o_subject]"
+    DISAMBIGUATION_RULES
+      if testflag(o_subject.f_pressable) then score(5) endif
+    END_RULES
+    if testflag(o_subject.f_pressable) then
+      printcr("Nothing happens.")
+    else
+      if equal(o_subject, o_nst) then
+        printcr("There is [o_nst.d_no] that can be pressed here.")
+      else
+        printcr("[the] [o_subject] does not give in.")
+
+  DEFAULT
+    printcr("I only understood you as far as wanting to press something.")
+ENDVERB
+#-------------------------------------------------------------------------------
+
+#--------------------------------------------------------------------
+$VERB remove
+ PROLOGUE
+   if equal(o_subject, %none) then
+     agree()
+   else
+     if not(testflag(o_subject.f_moveable)) then
+       printcr("[the] [o_subject] is not something that can be removed.")
+       disagree()
+     endif
+   endif
+
+ DEFAULT
+   printcr("I only understood you as far as wanting to remove something.")
+ENDVERB
+#--------------------------------------------------------------------
+
+#--------------------------------------------------------------------
+$VERB scroll
+ "scroll"
+   printcr("Please enter \"scroll up\" or \"scroll down\".")
+
+ DEFAULT
+   printcr("You can only scroll up or down.")
+ENDVERB
+#--------------------------------------------------------------------
+
+#--------------------------------------------------------------------
+$VERB set
+  "set"
+    printcr("What do you want to [action]?")
+    getsubject()
+
+  "set [o_subject]"
+    printcr("What do you want to [action] [the] [o_subject] to?")
+    getspec()
+
+ DEFAULT
+   printcr("I only understood you as far as wanting to set something.")
+ENDVERB
+#--------------------------------------------------------------------
+
+#--------------------------------------------------------------------
+$VERB shake
+ "shake"
+   printcr("What do you want to shake?")
+   getsubject()
+
+ "shake [o_subject]"
+   printcr("Nothing happens.")
+
+ DEFAULT
+   printcr("I only understood you as far as wanting to shake something.")
+ENDVERB
+#--------------------------------------------------------------------
+
+#--------------------------------------------------------------------
+$VERB slide
+ "slide"
+   print("What do you want to slide\n")
+   getsubject()
+
+ "slide [o_subject]"
+   printcr("Where do you want to slide [the] [o_subject]?")
+   getspec()
+
+ "slide [o_subject] in [o_spec]",
+ "slide [o_subject] into [o_spec]"
+   printcr("You cannot slide [the] [o_subject] into [the] [o_spec].")
+   disagree()
+
+  DEFAULT
+    printcr("I only understood you as far as willing to slide something.")
+ENDVERB
+#--------------------------------------------------------------------
+
+#--------------------------------------------------------------------
+$VERB solution
+ SCOPE all_locs
+ "solution for [o_subject]",
+ "solution [o_subject]"
+   DISAMBIGUATION_RULES
+    if testflag(o_subject.f_sk_puzzle) then score(5) endif
+    if testflag(o_subject.f_seenbefore) then score(5) endif
+   END_RULES
+   if testflag(o_subject.f_sk_puzzle) then
+     printcr("You have to ask that to someone from the staff.")
+   else
+     printcr("That is not a puzzle.")
+
+ DEFAULT
+   printcr("You must specify a valid puzzle, like \"solution dial puzzle\"")
+ENDVERB
+#--------------------------------------------------------------------
+
+#--------------------------------------------------------------------
+$VERB stay
+ DEFAULT
+   printcr("I only understood you as far as willing to stay.")
+ENDVERB
+#--------------------------------------------------------------------
+
+#--------------------------------------------------------------------
+$VERB switch
+ DEFAULT
+   printcr("I only understood you so far as willing to switch something.")
+ENDVERB
+#--------------------------------------------------------------------
+
+#--------------------------------------------------------------------
+$VERB talk
+ DEFAULT
+   printcr("To talk to someone say \"ask someone about something\" or /
+            \"someone, tell me about something\".")
+ENDVERB
+#--------------------------------------------------------------------
+
+#--------------------------------------------------------------------
+$VERB unwrap
+ "unwrap"
+   printcr("What do you want to unwrap?")
+   getsubject()
+
+ DEFAULT
+   printcr("I only understood you as far as wanting to unwrap something.")
+ENDVERB
+#--------------------------------------------------------------------
+
+#--------------------------------------------------------------------
+$VERB wrap
+ "wrap"
+   printcr("What do you want to wrap?")
+   getsubject()
+
+ "wrap [o_subject]"
+   printcr("What do you want to wrap [the] [o_subject] around?")
+   getspec(around)
+
+ DEFAULT
+   printcr("I only understood you as far as wanting to wrap something.")
+ENDVERB
+#--------------------------------------------------------------------
+
+#--------------------------------------------------------------------
+$verb zwoosh endverb  # used for debugging when I need a verb to start a trigger
+#--------------------------------------------------------------------
+
+
+######################
+# REDEFINED VERBS    #
+######################
+
+$REDEFINE_VERB goto
+ SCOPE ALL_LOCS
+ PROLOGUE
+   if not(equal(o_actor, o_player)) then
+     printcr("The 'goto' action only works for the player.")
+     disagree()
+   endif
+   if equal(o_subject, %none) then
+     agree()
+   else
+     if isobject(o_subject) then
+       if equal(o_subject, o_nst) then
+         printcr("I don't know any such location.")
+       else
+         printcr("Goto can only be used with locations.")
+       endif
+       disagree()
+     else
+       if not(testflag(o_subject.f_seenbefore)) then
+         printcr("At this point in the game I have no recollection /
+                  of that location.")
+         disagree()
+
+ "goto [o_subject]"
+   DISAMBIGUATION_RULES
+    if testflag(o_subject.f_seenbefore) then score(5) endif
+     if owns(l_exit, o_subject) then
+        if owns(l_exit, o_player) then 
+          score(5)
+        else
+          score(-5)          
+   END_RULES
+
+   # we should never get here, because the player object has
+   # a trigger for "goto [o_subject]"
+   printcr("You have to find the way to [the] [o_subject] by yourself.")
+
+ DEFAULT
+   printcr("I only understood you as far as willing to go somewehere.")
+ENDVERB
+
+
+######################
+# DICTIONARY SECTION #
+######################
+
+$DIRECTIONS
+in, out
+
+
+$NOUNS
+bars, buttons, dials, edges, engravings, flames, fred, gloves, hedges, nails, notches, 
+ox (oxen SYNONYM test_cattle), photos, splinters
+
+
+$ADJECTIVES
+east SYNONYM e, garden, nondescript, north SYNONYM n, reset, scroll, shed, 
+south SYNONYM s, up, vault, water, west SYNONYM w, x, y, z

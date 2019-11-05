@@ -167,14 +167,21 @@ const char *ENG_errors[] = {
   "\n(138) Multiple redefinition of verb:",
   "\n(139) Unexpected value in switch statement in function",
   "\n(140) Multiple redefinition of trigger:",
-  "\n(141) Unexpected comma",
+  "\n(141) Unexpected",
   "\n(142) Missing end quote",
   "\n(143) Unknown escape sequence \\",
   "\n(144) Double definition of:",
   "\n(145) Owner missing for flag:",
   "\n(146) Multiple redefinition of flag:",
   "\n(147) Multiple redefinition of attribute:",
-  "\n(148) Dynamic system descriptions may only have attribute parameters"
+  "\n(148) Dynamic system descriptions may only have attribute parameters",
+  "\n...switching on GUI sidebar for choice/hybrid mode..",
+  "\n...switching on GUI compass for choice mode..",
+  "\n...ignoring NO_SIDEBAR option (not in interpreter mode)..",
+  "\n...ignoring NO_TEXTINPUT option for interpreter mode..",
+  "\n...ignoring NO_COMPASS option for choice mode..",
+  "\n(154) Plural definition is only allowed for nouns",
+  "\n(155) Unexpected plural definition (syntax error or more than 1 definition)"
 };
 
 #endif

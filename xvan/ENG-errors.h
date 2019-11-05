@@ -64,7 +64,7 @@ const char *ENG_errors[] = {
   "initialization error (034): ReadSysDescr(): error reading",
   "initialization error (035): ReadContData(): error reading",
   "initialization error (036): load(): error reading",
-  "\n\nThis interpreter version 2.4 needs compiler version 2.4 stories",
+  "\n\nThis interpreter version 2.5 needs compiler version 2.5 stories",
   "\nThis story was compiled with XVAN compiler version",
   "Hit a key...",
   "initialization error (040): error opening file:",
@@ -134,7 +134,8 @@ const char *ENG_errors[] = {
   "runtime error (103): New system description too long",
   "runtime error (104): debug indent error",
   "runtime error (105): XeqVerbDefault(): invalid action, probably called from t_choice",
-  "runtime error (106): Max number of choices exceeded"
+  "runtime error (106): Max number of choices exceeded",
+  "runtime error (107): WriteTranscript(): transcript mode not turned on"
 };
 
 #endif

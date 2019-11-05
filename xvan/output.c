@@ -45,6 +45,7 @@
 /*************************/
 
 void    Log(char*, char*, char*);
+void    WriteTranscript(char*);
 void    Output(void);
 void    BuildOutputJson(char*, char*);
 void    PrintString(char*, int);
@@ -81,6 +82,26 @@ void Log(char *info1, char *info2, char *info3)
 }
 
 
+void WriteTranscript(char *text)
+{
+  if (transcript) {
+    if (fprintf(transcriptfile, text) < 0) {
+      PrintError(44, NULL, NULL);
+      /* not a severe error, continue but turn off transcript mode */
+      transcript = 0;
+    }
+    /* add <CR>. */
+    /* we should check fprintf() again for errors, but we don't */
+    /* the last one went ok, so assume this one will as well.   */
+    fprintf(transcriptfile, "\n");
+  }
+  else {
+    /* transcript mode is not turned on */
+    PrintError(107, NULL, NULL);
+  }
+}
+
+
 void Output(void)
 {
   char *json_text;
@@ -103,11 +124,7 @@ void Output(void)
   ifi_emitResponse(json_text);
 
   if (transcript) {
-    if (fprintf(transcriptfile, "%s", outputline) < 0) {
-      PrintError(44, NULL, NULL);
-      /* not a severe error, continue but turn off transcript mode */
-      transcript = 0;
-    }
+    WriteTranscript(outputline);
   }
 
   outputline = ResetString(outputline);

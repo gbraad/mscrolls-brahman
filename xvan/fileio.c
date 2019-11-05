@@ -92,6 +92,7 @@ int32_t  InitObjects(void);
 int32_t  InitAttributes(void);
 int32_t  RdTrigOwners(int64_t);
 int32_t  RdDescOwners(int64_t);
+void     InitSysDescr(sysDescr*);   /* @!@ */
 int32_t  ReadExtendedSysDescr(extendedSysDescr*);
 int32_t  ReadSysDescr(sysDescr*);
 int32_t  ReadContData(contData*);
@@ -809,6 +810,10 @@ int32_t ReadWordTable(int64_t offset)
     }
     if (!GetNextCode32(&word_table[i].id)) {
       PrintError(25, NULL, "word identifier");
+      return(ERROR);
+    }
+    if (!GetNextCode32(&word_table[i].single_id)) {  /* @!@ */
+      PrintError(25, NULL, "single identifier");
       return(ERROR);
     }
     for (j=0; j<MAX_TYPES; j++) {

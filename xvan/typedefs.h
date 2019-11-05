@@ -138,6 +138,7 @@ typedef struct wt {
           char word[MAX_WORD_LEN+1];
           char print_word[MAX_WORD_LEN+1];
           int32_t id;
+          int32_t single_id;   /* @!@ */
           int32_t types[MAX_TYPES];
         } wordTable;
 
@@ -188,6 +189,11 @@ typedef struct {
 
 
 typedef struct pi {
+          /* 26sep19 we've added plurality. with plural[] we  */   /* @!@ */
+          /* denote for each subject's par 1 nounn whether    */
+          /* it must be matched as plural or single. We need  */
+          /* this because for regular plurality, NextWordId() */
+          /* will return the single form with type PLURAL.    */
           extendedSysDescr actor;
           int32_t          action1;
           int32_t          action2;
@@ -196,6 +202,7 @@ typedef struct pi {
           int32_t          q_word;
           int32_t          direction;
           extendedSysDescr subject[MAX_SUBJECTS];
+          int32_t          single[MAX_SUBJECTS]; /* single id for plural noun */  /* @!@ */
           extendedSysDescr specifier;
           preposInfo       prepositions;
           int32_t          value;         /* make this a long. */
@@ -205,9 +212,9 @@ typedef struct pi {
 
 
 typedef struct ar3 {
-    /* used to create action records by the interpreter       */
-    /* these action records are matched against compActionrec */
-    /* but they also contain a score field.                   */
+    /* used to create action records by the interpreter        */
+    /* these action records are matched against compActionrec  */
+    /* but they also contain a score field for disambiguation. */  /* @!@ */
           int32_t    actor;
           int32_t    action1;
           int32_t    action2;
@@ -245,8 +252,14 @@ typedef struct ar1 {
 
 
 typedef struct ar2 {
-   /* Used to store action records generated from user input */
+   /* Used to store action records generated from user input */  /* @!@ */
    /* These action records may have more than one subject.   */
+   /* 26sep2019 we introduced plurality. A subject can be    */
+   /* plural as denoted by PLURAL keyword in the subject     */
+   /* In that case the plural_subjects field contains the    */
+   /* relevant object ids. The max number of object ids is   */
+   /* equal to MAX_SUBJECTS because we wil copy them to an   */
+   /* action record for execution.                           */
           int32_t    actor;
           int32_t    action1;
           int32_t    action2;
@@ -254,6 +267,7 @@ typedef struct ar2 {
           int32_t    q_word;
           int32_t    direction;
           int32_t    subject[MAX_SUBJECTS];
+          int32_t    plural_subjects[MAX_SUBJECTS];  /* @!@ */
           int32_t    specifier;
           preposInfo prepositions;
           int32_t    value;    /* make this a long. */

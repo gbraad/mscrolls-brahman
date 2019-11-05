@@ -38,7 +38,7 @@ extern int32_t IsValidKeyword(int32_t);                                         
 extern int32_t ChangeInputFile(char**, int32_t*, int32_t, int32_t, FILE**, fileList**);  /* fileio.c  */
 extern int32_t InitVerbDir(void);
 extern int32_t InitExits(void);    /* tables.c */
-extern int32_t AddWord(char*, char*, int32_t, int32_t, int32_t*, int32_t);
+extern int32_t AddWord(char*, char*, int32_t, int32_t, int32_t, int32_t*, int32_t);
 extern int32_t ParseWordGroup(char**, int32_t*, int32_t, FILE**, fileList**);
 extern int32_t CreateWordTable(void);
 extern int32_t ParseLoc(int64_t, FILE**, fileList**);

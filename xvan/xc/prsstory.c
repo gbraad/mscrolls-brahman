@@ -195,7 +195,7 @@ int32_t ParseStory(source, file_list)
             /* make sure any synonyms get this word as print_word */
             strncpy(print_word, word, MAX_WORD_LEN);
             print_word[MAX_WORD_LEN] = '\0';
-            if (!AddWord(word, print_word, VERB, -1, &last_id, redefine)) {
+            if (!AddWord(word, print_word, VERB, -1, NO_ID, &last_id, redefine)) {
               free(word);
               return(ERROR);
             }
@@ -243,7 +243,7 @@ int32_t ParseStory(source, file_list)
             }
           default:
             /* it's a synonym verb */
-            if (!AddWord(word, print_word, VERB, last_id, &last_id, redefine)) {
+            if (!AddWord(word, print_word, VERB, last_id, NO_ID, &last_id, redefine)) {
             /* if (!AddWord(word, print_word, VERB, -1, &last_id, redefine)) {*/
               free(word);
               return(ERROR);      /* &last_id unused by AddWord() */

@@ -45,7 +45,7 @@
 int16_t  xvan_language  = ENG;
 int16_t  story_language = ENG;
 
-int16_t  debug = 0;
+int16_t  debug = 0;  /* do not generate debug info */
 
 char     current_filename[PATH_MAX + MAX_FILENAME_LEN + 1];
 FILE     *source_file;
@@ -134,7 +134,7 @@ int32_t GetFullPath(char *full_path)
   /* there's enough room, copy real_path to full_path */
   strncpy(full_path, real_path, index+1);
   /* do not try to free() real_path */
-  return_path[index+1] = '\0';
+  full_path[index+1] = '\0';
 
   return(OK);
 }
@@ -231,7 +231,7 @@ int32_t main(int argc, char **argv)
 
   printf("                     *******************************************************\n");
   printf("                                           XVAN COMPILER\n");
-  printf("                                            version 2.4\n");
+  printf("                                            version 2.5\n");
   printf("                       Copyright 2016, 2017, 2018, 2019 Marnix van den Bos\n");
   printf("                     *******************************************************\n\n");
 
@@ -266,6 +266,7 @@ int32_t main(int argc, char **argv)
     return(ERROR);
   }
   /* open the storyfile */
+  /* PATH_MAX is equivalent to windows' MAX_PATH defined in stdlib.h */
   strncpy(current_filename, storyfile, PATH_MAX + MAX_FILENAME_LEN + 1);
   if ((source_file = fopen_path(file_path, storyfile, "rb")) == NULL) {
     /* error opening file */
@@ -305,7 +306,7 @@ int32_t main(int argc, char **argv)
   story_language = story_info.story_language;
 
   /* add compiler version to story info */
-  strncpy(story_info.compiler_version, "2.4", MAX_COMPILER_LEN);
+  strncpy(story_info.compiler_version, "2.5", MAX_COMPILER_LEN);
 
   printf("\n%s %s\n\n", story_info.title, story_info.version);
 

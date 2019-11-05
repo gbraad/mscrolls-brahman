@@ -39,11 +39,13 @@ extern dirInfo   *obj_dir;                                  /* dirs.c   */
 extern int32_t   ENG_CheckSyntax(char*, int32_t, int32_t, int32_t*, int32_t, int32_t, int32_t, parsedInput*);
 extern int32_t   NL_CheckSyntax(char*, int32_t, int32_t, int32_t*, int32_t, int32_t, int32_t, parsedInput*);
 
+extern int32_t   CheckPlural(char*);                        /* plural.c   */
 extern void      PrintError(int16_t, resultStruct*, char*); /* errors.c   */
 extern int32_t   StringToNum(char*, int32_t*);              /* trnslate.c */
 extern int32_t   IsLocId(int32_t);                          /* execute.c  */
 extern int32_t   IsObjId(int32_t);                          /* execute.c  */
 extern void      PrintWord(int32_t, int);                   /* output.c   */
+extern void      InitSysDescr(sysDescr*);                    /* fileio.c   */   /* @!@ */
 extern void      PrintSysDescr(sysDescr*, int);             /* output.c   */
 extern void      PrintParsedInput(parsedInput*);            /* debug.c    */
 extern void      PrintUsrActionRec(usrActionRec*);          /* debug.c    */

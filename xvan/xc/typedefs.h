@@ -51,6 +51,7 @@ typedef struct {
           int16_t xvan_language;
           int16_t story_language;
           int16_t debug;
+          int16_t play_mode;
         } storyInfo;
 
 /*************************************************************/
@@ -229,6 +230,7 @@ typedef struct wi {
           char    word[MAX_WORD_LEN+1]; /* include the '\0' char */
           char    print_word[MAX_WORD_LEN+1];
           int32_t id;
+          int32_t single_id;  /* @!@ */
           int32_t types[MAX_TYPES];
           int32_t redefine;
           struct  wi *next;
@@ -238,6 +240,7 @@ typedef struct wt {
           char     word[MAX_WORD_LEN+1];
           char     print_word[MAX_WORD_LEN+1];
           int32_t  id;
+          int32_t  single_id;  /* @!@ */
           int32_t  types[MAX_TYPES];
           int32_t  redefine;
         } wordTable;

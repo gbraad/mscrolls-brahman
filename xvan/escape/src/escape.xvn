@@ -4,10 +4,6 @@
 #======================================
 
 #======================================
-# Story for XVAN 2.3.4
-#======================================
-
-#======================================
 # Story info 
 #======================================
 
@@ -20,17 +16,18 @@ COVERTEXT     "An XVAN story"
 BACKIMAGE     "images\\\\coverimage.jpg"  # need '\\' in json string
 PRIMARY_COLOR "orange"
 
-#==========================
-# Use the XVAN starter kit 
-#==========================
+#===============================
+# Use the XVAN and IFI Libraries
+#===============================
 
-$insert ".\\ENG-starterkit\\starterkit.xvn"
+$insert "XVAN Library v1-3-1.lib"
+$insert "IFI Library.lib"
 
 #==========================
 # Story specific includes 
 #==========================
 
-$insert "my-includes\\my-includes.xvn"
+$insert ".\\escape.lib"
 
 #==========================
 # Locations part
@@ -1712,8 +1709,6 @@ $OBJECT o_player
    r_max_score    = 250  # 5 times 50
    r_key_blocked  = 0
 
-   r_test = %none
-
  TRIGGERS
    "why am [o_player] here"          -> t_why
    "where am [o_player]"             -> t_where
@@ -1725,13 +1720,6 @@ $OBJECT o_player
    "cut [o_player] with [o_spec]"    -> t_cut
    "help"                            -> t_help
    "save"                            -> t_save
-   "zwoosh" -> t_zwoosh
-
-   t_zwoosh
-     if owns(l_location, o_player, in) then endif
-     if owns(l_location, o_player) then endif
-     if owns(l_location, o_player, 2) then endif
-     disagree()
 
    t_entrance
      agree()

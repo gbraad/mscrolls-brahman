@@ -43,15 +43,15 @@ int32_t      ConvertDynamicDSys(char*, extendedSysDescr*);
 int32_t      FlipNoun(sysDescr*);
 int32_t      SplitSubject(parsedInput*, int32_t);
 int32_t      SplitSubjectAndSpecifier(parsedInput*, int32_t);
-int32_t      CompareNounsAndAdjectives(sysDescr, sysDescr);
-int32_t      MatchSysDescr(extendedSysDescr, extendedSysDescr);
+int32_t      CompareNounsAndAdjectives(sysDescr, int32_t, sysDescr);  /* @!@ */
+resultStruct MatchSysDescr(extendedSysDescr, int32_t, extendedSysDescr);   /* @!@ */
 void         SwapSysDescr(extendedSysDescr*, extendedSysDescr*);
-int32_t      HasMatchingSysDescr(int32_t, extendedSysDescr);
-int32_t      Search(int32_t, extendedSysDescr*, int32_t, int32_t, match*);
+resultStruct HasMatchingSysDescr(int32_t, extendedSysDescr, int32_t);   /* @!@ */
+int32_t      Search(int32_t, extendedSysDescr*, int32_t, int32_t, int32_t, match*);  /* @!@ */
 int32_t      ArrangeVisible(match*);
 void         MoreInfo(extendedSysDescr*, match*, char*);
-int32_t      SearchHits(extendedSysDescr*, int32_t, int32_t*, match*, char*);
-int32_t      Find(extendedSysDescr*, int32_t, char*, match*);
+int32_t      SearchHits(extendedSysDescr*, int32_t, int32_t, int32_t*, match*, char*);
+int32_t      Find(extendedSysDescr*, int32_t, int32_t, char*, match*);  /* @!@ */
 void         PrintNotFound(extendedSysDescr*);
 resultStruct Translate(parsedInput*, int32_t, usrActionRec*, char*);
 
@@ -107,8 +107,10 @@ void InitUsrActionRec(usrActionRec *usr_action_rec)
   usr_action_rec->q_word                          = NO_ID;
   usr_action_rec->direction                       = NO_ID;
 
-  for (i=0; i<MAX_SUBJECTS; i++)
-    usr_action_rec->subject[i] = NO_ID;
+  for (i=0; i<MAX_SUBJECTS; i++) {   /* @!@ */
+    usr_action_rec->subject[i]         = NO_ID;
+    usr_action_rec->plural_subjects[i] = NO_ID;
+  }
 
   usr_action_rec->specifier                       = NO_ID;
   usr_action_rec->prepositions.nr_of_prepositions = 0;
@@ -398,16 +400,44 @@ int32_t SplitSubjectAndSpecifier(parsedInput *p_i, int32_t index)
 }
 
 
-int32_t CompareNounsAndAdjectives(sysDescr source, sysDescr target)
+int32_t CompareNounsAndAdjectives(sysDescr source, int32_t single_id, sysDescr target)  /* @!@ */
 {
+  /* source comes from user input            */  /* @!@ */
+  /* single id is single form of source noun */  /* @!@ */
+
+  /* 01oct2019 if single_id has value NO_ID then the source   */  /* @!@ */
+  /* sysDescr is in singular form. If single_id has another   */
+  /* value (can be the same value as the source descr noun),  */
+  /* then source is in plural form and we must check with the */
+  /* single_id and not the source descr noun                  */
+
+  /* why can single_id have the same value as the descr noun? */  /* @!@ */
+  /* with a regular plural we will not know the plural word   */
+  /* e.g. 'jewels' will not be in the dictionary, but 'jewel' */
+  /* will. So we will use the word id for 'jewel' in the      */
+  /* sysDescr, but to denote that it is a plural (and thus    */
+  /* should not be 'which jewel do you mean'-ed we will enter */
+  /* the jewel word id in single_id as well.                  */
+
+  /* irregular plural will be in the word list, as it can     */
+  /* also have other types (e.g. 'oxen' and 'oxen barn')      */
+  /* here the oxen word-id will be in the sysDescr noun, but  */
+  /* we must match with the single_id to match each           */
+  /* individual ox.                                           */
+
   int32_t i     = 0;
   int32_t j     = 0;
   int32_t found = 0;    /* Initially not found. */
+  int32_t source_noun      = NO_ID;  /* @!@ */
+
+  /* check for plurality */
+  source_noun = (single_id == NO_ID) ? source.noun : single_id;  /* @!@ */
 
   /* Compare nouns. */
-  /* If source.noun is NO_ID, it might be an incomplete system     */
+
+  /* If source_noun is NO_ID, it might be an incomplete system     */
   /* description. Therefore, don't exit yet, but check adjectives. */
-  if (source.noun != NO_ID && source.noun != target.noun)
+  if (source_noun != NO_ID && source_noun != target.noun)
     /* No match */
     return(ERROR);
 
@@ -441,7 +471,7 @@ int32_t CompareNounsAndAdjectives(sysDescr source, sysDescr target)
 }
 
 
-int32_t MatchSysDescr(extendedSysDescr source, extendedSysDescr target)
+resultStruct MatchSysDescr(extendedSysDescr source, int32_t single_id, extendedSysDescr target)   /* @!@ */
  /* source is grabbed from user input */
  /* target is in compiled story       */
 {
@@ -492,7 +522,7 @@ int32_t MatchSysDescr(extendedSysDescr source, extendedSysDescr target)
   if (target.dynamic != NULL) {
     /* dynamic system description */
     if (!ConvertDynamicDSys(target.dynamic, &target)) {
-      return(ERROR);
+      return( (resultStruct) {ERROR, NONE, ERROR} );  /* @!@ */
     }
   }
 
@@ -500,43 +530,59 @@ int32_t MatchSysDescr(extendedSysDescr source, extendedSysDescr target)
 
   /* Check for empty target. */
   if (target.part1.noun == NO_ID)
-    return(ERROR);
+    return( (resultStruct) {ERROR, NONE, ERROR} );  /* @!@ */
 
   /* Check for empty source. */
   if (source.part1.noun == NO_ID && source.part1.nr_of_adjectives == 0)
-    return(ERROR);
+    return( (resultStruct) {ERROR, NONE, ERROR} );  /* @!@ */
 
   /* Check for different part 2 */
   if (source.connect_prepos != target.connect_prepos && source.connect_prepos != NO_ID)
-    return(ERROR);
+    return( (resultStruct) {ERROR, NONE, ERROR} );  /* @!@ */
 
   /* Compare part 1 nouns and adjectives */
-  if (!CompareNounsAndAdjectives(source.part1, target.part1)) {
-    if (!FlipNoun(&source.part1)) {
-      return(ERROR);
+  if (!CompareNounsAndAdjectives(source.part1, single_id, target.part1)) {  /* @!@ */
+
+    /* 01oct2019: now that we have plural, only flip the noun if     */  /* @!@ */
+    /* single_id = NO_ID or part1 noun and single_id are different.  */
+    /* If they are the same, part 1 noun must be considered plural   */
+    /* and thus may only have type NOUN. e.g. input 'jewels' will    */
+    /* lead to part1 noun 'jewel' but this jewel may not trigger     */
+    /* 'jewel box'. where input 'oxen' will lead to part1 noun 'ox', */
+    /* but may also trigger 'oxen barn'                              */
+
+    if (single_id == NO_ID || single_id != source.part1.noun) {  /* @!@ */
+      if (!FlipNoun(&source.part1)) {
+        return( (resultStruct) {ERROR, NONE, ERROR} );  /* @!@ */
+      }
+      else {
+        if (!CompareNounsAndAdjectives(source.part1, single_id, target.part1)) {  /* @!@ */
+          return( (resultStruct) {ERROR, NONE, ERROR} );  /* @!@ */
+        }
+      }
     }
     else {
-      if (!CompareNounsAndAdjectives(source.part1, target.part1)) {
-        return(ERROR);
-      }
+      /* not a match for part 1, so not a match at all */
+      return( (resultStruct) {ERROR, NONE, ERROR} );  /* @!@ */
     }
   }
 
   /* Compare part 2 nouns and adjectives */
-  if (!CompareNounsAndAdjectives(source.part2, target.part2)) {
+  /* with part 2 we allow no plural, so pass NO_ID for single_id par */
+  if (!CompareNounsAndAdjectives(source.part2, NO_ID, target.part2)) {  /* @!@ */
     if (!FlipNoun(&source.part2)) {
-      return(ERROR);
+      return( (resultStruct) {ERROR, NONE, ERROR} );  /* @!@ */
     }
     else {
-      if (!CompareNounsAndAdjectives(source.part2, target.part2)) {
-        return(ERROR);
+      if (!CompareNounsAndAdjectives(source.part2, single_id, target.part2)) {  /* @!@ */
+        return( (resultStruct) {ERROR, NONE, ERROR} );  /* @!@ */
       }
     }
   }
 
   /* We made it to here; this definitely is a match!          */
 
-  return(OK);
+  return( (resultStruct) {OK, NONE, OK} );  /* @!@ */
 }
 
 
@@ -607,7 +653,7 @@ void SwapSysDescr(extendedSysDescr *sd1, extendedSysDescr *sd2)
 }
 
 
-int32_t HasMatchingSysDescr(int32_t id, extendedSysDescr descr)
+resultStruct HasMatchingSysDescr(int32_t id, extendedSysDescr descr, int32_t single_id)   /* @!@ */
 {
   /* A location or object can have more than one System Description. */
   /* In this function we determine of any one of these matches with  */
@@ -642,7 +688,7 @@ int32_t HasMatchingSysDescr(int32_t id, extendedSysDescr descr)
 
   /* search through system descriptions */
   while (i<id_nr_of_dsys && !match)
-    if (MatchSysDescr(descr, id_descrs[i++]))
+    if (MatchSysDescr(descr, single_id, id_descrs[i++]).tag == OK)  /* @!@ */
       match = 1;
 
   if (match) {
@@ -652,19 +698,20 @@ int32_t HasMatchingSysDescr(int32_t id, extendedSysDescr descr)
     if (i != 0 && TestCFlag(id, SWAP_SYS_DESCR)) {
       SwapSysDescr(&(id_descrs[0]), &(id_descrs[i-1]));
     }
-    return(OK);
+    return( (resultStruct) {OK, NONE, OK} );  /* @!@ */
   }
   else
-    return(ERROR);
+    return( (resultStruct) {ERROR, NONE, ERROR} );  /* @!@ */
 }
 
 
-int32_t Search(int32_t id, extendedSysDescr *descr, int32_t visible, int32_t depth, match *hits)
- /* is tells which loc/obj to search through.        */
- /* visible 0 means scope is ALL_LOCS.               */
+int32_t Search(int32_t id, extendedSysDescr *descr, int32_t single_id, int32_t visible, int32_t depth, match *hits)  /* @!@ */
+ /* id tells which loc/obj to search through.        */
+ /* single_id is single form of descr                */  /* @!@ */
+ /* visible = 0 means scope is ALL_LOCS.             */
  /* depth tells the containment level of the search. */
- /* Value -1 means unlimited depth.                  */
- /* hits are bject ids that match descr.             */
+ /* depth -1 means unlimited depth.                  */
+ /* match holds Object ids that match descr.         */
 {
   /* This function first determines whether the `id' matches     */
   /* with descr. Next it searches objects that are contained in  */
@@ -709,21 +756,25 @@ int32_t Search(int32_t id, extendedSysDescr *descr, int32_t visible, int32_t dep
   /* all_locs), we must also consider f_hidden. If           */
   /* visibility = 0 and f_hidden = 1, the loc/obj must be    */
   /* excluded anyway.                                        */
-  if (TestCFlag(id, BYPASS) || CanSee(actor, id) ||
-      (!visible && !TestCFlag(id, HIDDEN)))
+
+  if (TestCFlag(id, BYPASS) || CanSee(actor, id) || (!visible && !TestCFlag(id, HIDDEN))) {  /* @!@ */
     /* id_descr can have multiple System Descriptions */
-    if (HasMatchingSysDescr(id, *descr)) {
+    if (HasMatchingSysDescr(id, *descr, single_id).tag == OK) {     /* @!@ */
       /* 07dec2016: changed '>=' to '>' because  */
       /* of autoincrement in else branche below. */
-      if (hits->nr_of_hits > MAX_HITS && visible != 0)
+      if (hits->nr_of_hits > MAX_HITS && visible != 0) {
         /* visible = 0 means scope ALL_LOCS. Here we will */
         /* allow more than MAX_HITS hits because we will  */
         /* limit it to visible objects later on.          */
         /* Too many hits. */
         return(OVERFLOW);
-      else
+      }
+      else {
         hits->matched_objs[hits->nr_of_hits++] = id;
+      }
     }
+  }
+
   if (depth == 0)
     /* Reached max containment level. */
     return(OK);
@@ -731,8 +782,7 @@ int32_t Search(int32_t id, extendedSysDescr *descr, int32_t visible, int32_t dep
   /* Now, find all objects that match descr.             */
   /* Scan through all objects that are contained in loc. */
   for (i=0; i<objs->nr_of_objects; i++)
-    if (Search(objs->object_ids[i], descr, visible, --depth, hits) ==
-                                                             OVERFLOW)
+    if (Search(objs->object_ids[i], descr, single_id, visible, --depth, hits) == OVERFLOW)  /* @!@ */
       /* Too many hits. */
       return(OVERFLOW);
   /* Ready */
@@ -800,11 +850,11 @@ void MoreInfo(extendedSysDescr *descr, match *hits, char *line_buf)
 }
 
 
-int32_t SearchHits(extendedSysDescr *descr, int32_t scope, int32_t *id, match *search_set, char *line_buf)
- /* descr is description that must be matched.             */
- /* scope is needed in case we need to refresh search set. */
- /* id is id of matching loc/obj (if only one).            */
- /* search_set is set of objs locs to compare with descr.  */
+int32_t SearchHits(extendedSysDescr *descr, int32_t single_id, int32_t scope, int32_t *id, match *search_set, char *line_buf)  /* @!@ */
+ /* descr is description that must be matched.            */
+ /* scope is for in case we need to refresh search set    */
+ /* Id is of matching loc/obj (if only one).              */
+ /* search_set is set of objs locs to compare with descr. */
 {
   /* This function is similar to Find(), in the way that it tries   */
   /* to find an object or location whose description matches descr. */
@@ -826,7 +876,7 @@ int32_t SearchHits(extendedSysDescr *descr, int32_t scope, int32_t *id, match *s
   /* added 19dec07 - end */
 
   for (i=0; i<search_set->nr_of_hits; i++) {
-      if (HasMatchingSysDescr(search_set->matched_objs[i], *descr))
+      if (HasMatchingSysDescr(search_set->matched_objs[i], *descr, single_id).tag == OK)    /* @!@ */
         hits.matched_objs[hits.nr_of_hits++] =
                                          search_set->matched_objs[i];
   } /* for */
@@ -855,13 +905,13 @@ int32_t SearchHits(extendedSysDescr *descr, int32_t scope, int32_t *id, match *s
         case OK:
           /* line_buf[0] = '\0'; */ /* moved down below */
           /* Try again with new descr. */
-          result = SearchHits(descr, scope, id, &hits, line_buf);
+          result = SearchHits(descr, single_id, scope, id, &hits, line_buf);  /* @!@ */
           if (result == NO_MATCH) {
             /* they did enter a valid d_sys, so recreate the search set */
             /* free matched_objs because Find() will malloc new space   */
             free(hits.matched_objs);
-            Find(descr, scope, line_buf, &hits);
-            result = SearchHits(descr, scope, id, &hits, line_buf);
+            Find(descr, single_id, scope, line_buf, &hits);  /* @!@ */
+            result = SearchHits(descr, single_id, scope, id, &hits, line_buf);
           }
           free(hits.matched_objs);
           /* next if-clause added on 23mar19. If the player types a new */
@@ -897,7 +947,7 @@ int32_t SearchHits(extendedSysDescr *descr, int32_t scope, int32_t *id, match *s
 }
 
 
-int32_t Find(extendedSysDescr *descr, int32_t scope, char *line_buf, match *hits)
+int32_t Find(extendedSysDescr *descr, int32_t single_id, int32_t scope, char *line_buf, match *hits)  /* @!@ */
 
   /* IN CASE OF A SUSPECTED MEMORY LEAK: CHECK THE */
   /* MALLOCs AND FREEs FOR hits->matched_objs      */
@@ -926,7 +976,7 @@ int32_t Find(extendedSysDescr *descr, int32_t scope, char *line_buf, match *hits
         /* 0 means locs/objs need not be visible to the player. */
         /* -1 means unlimited search depth.                     */
 
-          if (Search(i, descr, 0, -1, hits) == OVERFLOW) {
+          if (Search(i, descr, single_id, 0, -1, hits) == OVERFLOW) {  /* @!@ */
             free(hits->matched_objs);
             return(OVERFLOW);
           }
@@ -934,7 +984,7 @@ int32_t Find(extendedSysDescr *descr, int32_t scope, char *line_buf, match *hits
       case CURR_LOC_ONLY:
         /* 1 means locs/objs must be visible to the player. */
         /* -1 means unlimited search depth.                 */
-        if (Search(curr_loc, descr, 1, -1, hits) == OVERFLOW) {
+        if (Search(curr_loc, descr, single_id, 1, -1, hits) == OVERFLOW) {  /* @!@ */
           free(hits->matched_objs);
           return(OVERFLOW);
         }
@@ -943,7 +993,7 @@ int32_t Find(extendedSysDescr *descr, int32_t scope, char *line_buf, match *hits
         /* -1 means unlimited search depth.                          */
         /* 1 means locs/objs must be visible to the player.          */
         /* Check if there is light first, since SearchObj() doesn't. */
-        if (Search(actor, descr, 1, -1, hits) == OVERFLOW) {
+        if (Search(actor, descr, single_id, 1, -1, hits) == OVERFLOW) {  /* @!@ */
           free(hits->matched_objs);
           return(OVERFLOW);
         }
@@ -956,13 +1006,15 @@ int32_t Find(extendedSysDescr *descr, int32_t scope, char *line_buf, match *hits
 
     if (hits->nr_of_hits == 0 && descr->connect_prepos == NO_ID && !ready) {
       if (!FlipNoun(&(descr->part1))) {
+        /* do we really need this? FlipNoun() is also in MatchSysDescr() already */  /* @!@ */
         ready = 1;
       }
     }
     else {
       ready = 1;
     }
-  }
+  }  /* while */  /* @!@ */
+
   return(OK);
 }
 
@@ -987,6 +1039,7 @@ void PrintNotFound(extendedSysDescr *descr)
 resultStruct Translate(parsedInput *parsed_input, int32_t index, usrActionRec *usr_action_rec, char *line_buf)
  /* index tells which subject to use from parsed_input */
 {
+  int          i           = 0;
   int32_t      try_to_find = 0;
   int32_t      tries       = 3;  /* actor, subject and specifier */
   int32_t      winners     = 0;
@@ -1012,7 +1065,7 @@ resultStruct Translate(parsedInput *parsed_input, int32_t index, usrActionRec *u
 
   /* find possible hits for actor */
   if (FilledOut(&(parsed_input->actor))) {
-    switch(Find(&(parsed_input->actor), parsed_input->scope, line_buf, &actor_hits)) {
+    switch(Find(&(parsed_input->actor), NO_ID, parsed_input->scope, line_buf, &actor_hits)) {  /* @!@ */
       case ERROR:
         result.tag = ERROR;
         free(actor_hits.matched_objs);
@@ -1051,19 +1104,22 @@ resultStruct Translate(parsedInput *parsed_input, int32_t index, usrActionRec *u
   }
 
   /* find possible hits for subject */
-  /* There may be multiple subjects (i.e. 'take lamp, knife'), */
-  /* but after we implemented NarrowDownHits(), iterating      */
-  /* through subjects was moved to LatsPlay().                 */
+  /* There may be multiple subjects (i.e. 'take lamp, knife'), */  /* @!@ */
+  /* but after we introduced parse rules, iterating through    */
+  /* subjects was moved to LetsPlay() because of possible      */
+  /* parse dependencies between subject and specifier.         */
 
   /* We do NOT set the subject global var here.                */
   /* This is done by Letsplay().                               */
+
+  /* 30sep2019 subject can now also be plural                  */
 
   if (FilledOut(&(parsed_input->subject[index]))) {
     do {
       try_to_find = 0; /* will be set to 1 if we have 0 hits and can split subject  */
 
-      switch(Find(&(parsed_input->subject[index]),
-                  parsed_input->scope, line_buf, &subject_hits)) {
+      switch(Find(&(parsed_input->subject[index]), parsed_input->single[index],
+                  parsed_input->scope, line_buf, &subject_hits)) {  /* @!@ */
         case ERROR:
           result.tag = ERROR;
           /* load value with index of subject that caused the error */
@@ -1128,8 +1184,7 @@ resultStruct Translate(parsedInput *parsed_input, int32_t index, usrActionRec *u
 
   /* find possible hits for specifier */
   if (FilledOut(&(parsed_input->specifier))) {
-    switch(Find(&(parsed_input->specifier),
-                parsed_input->scope, line_buf, &specifier_hits)) {
+    switch(Find(&(parsed_input->specifier), NO_ID, parsed_input->scope, line_buf, &specifier_hits)) {  /* @!@ */
       case ERROR:
         result.tag = ERROR;
         free(specifier_hits.matched_objs);
@@ -1164,8 +1219,10 @@ resultStruct Translate(parsedInput *parsed_input, int32_t index, usrActionRec *u
     specifier_hits.nr_of_hits = -1;
   }
 
+  /******************************************************************/  /* @!@ */
   /* At this point we have all possible hits for actor, subject and */
   /* specifier. If all matches are unique, then tries will be 0.    */
+  /******************************************************************/
 
   while (tries != 0) {
     winners = ApplyParserRules(parsed_input, &actor_hits, &subject_hits, &specifier_hits);
@@ -1185,7 +1242,7 @@ resultStruct Translate(parsedInput *parsed_input, int32_t index, usrActionRec *u
 
       /* try actor */
       if (actor_hits.nr_of_hits > 1) {
-        switch(SearchHits(&(parsed_input->actor), parsed_input->scope, &(usr_action_rec->actor),
+        switch(SearchHits(&(parsed_input->actor), NO_ID, parsed_input->scope, &(usr_action_rec->actor),
                           &actor_hits, line_buf)) {
           case NO_MATCH:
             free(actor_hits.matched_objs);
@@ -1221,43 +1278,61 @@ resultStruct Translate(parsedInput *parsed_input, int32_t index, usrActionRec *u
       else {
         /* try subject */
         if (subject_hits.nr_of_hits > 1) {
-          switch(SearchHits(&(parsed_input->subject[index]), parsed_input->scope,
-                            &(usr_action_rec->subject[index]), &subject_hits, line_buf)) {
-            case NO_MATCH:
-              free(subject_hits.matched_objs);
-              result.tag = SUBJECT_ERROR;
-              return(result);
-              break;
-            case OK:
-              /* There was exactly 1 match.     */
-              /* Update subject_hits in case we */
-              /* need to resolve more objects   */
-              subject_hits.nr_of_hits = 1;
-              subject_hits.matched_objs[0] = usr_action_rec->subject[index];
-              break;
-            case UNKNOWN_WORD:
-              /* unknown word in user input */
-              free(actor_hits.matched_objs);
-              result.tag = UNKNOWN_WORD;
-              return(result);
-              break;
-            case ERROR:
-              free(subject_hits.matched_objs);
-              result.tag = ERROR;
-              return(result);
-              break;
-            case NEXT_SENTENCE:
-              free(subject_hits.matched_objs);
-              result.tag = NEXT_SENTENCE;
-              return(result);
-              break;
-          } /* switch SearchHits() */
-          tries--;
-        } /* if */
+          /* 02oct2019: if it was a plural, do not SearchHits(). All  */
+          /* hits remaining after the disambiguation rules are valid. */  /* @!@ */
+          if (parsed_input->single[index] == NO_ID) {
+            /* not a plural */
+            switch(SearchHits(&(parsed_input->subject[index]), parsed_input->single[index],
+                              parsed_input->scope, &(usr_action_rec->subject[index]), &subject_hits, line_buf)) {
+              case NO_MATCH:
+                free(subject_hits.matched_objs);
+                result.tag = SUBJECT_ERROR;
+                return(result);
+                break;
+              case OK:
+                /* There was exactly 1 match.     */
+                /* Update subject_hits in case we */
+                /* need to resolve more objects   */
+                subject_hits.nr_of_hits = 1;
+                subject_hits.matched_objs[0] = usr_action_rec->subject[index];
+                break;
+              case UNKNOWN_WORD:
+                /* unknown word in user input */
+                free(actor_hits.matched_objs);
+                result.tag = UNKNOWN_WORD;
+                return(result);
+                break;
+              case ERROR:
+                free(subject_hits.matched_objs);
+                result.tag = ERROR;
+                return(result);
+                break;
+              case NEXT_SENTENCE:
+                free(subject_hits.matched_objs);
+                result.tag = NEXT_SENTENCE;
+                return(result);
+                break;
+            } /* switch SearchHits() */
+            tries--;
+          } /* if */
+          else {
+            /* it was a plural. All ids in subject_hits are */
+            /* valid and must be returned to caller         */
+
+            /* first, indicate that the subject is plural   */
+            usr_action_rec->subject[index] = PLURAL;
+
+            /* next, copy the hits */
+            for (i=0; i<subject_hits.nr_of_hits; i++) {
+              usr_action_rec->plural_subjects[i] = subject_hits.matched_objs[i];
+            }
+            tries--;
+          }
+        }
         else {
           /* try specifier */
           if (specifier_hits.nr_of_hits > 1) {
-            switch(SearchHits(&(parsed_input->specifier), parsed_input->scope,
+            switch(SearchHits(&(parsed_input->specifier), NO_ID, parsed_input->scope,
                               &(usr_action_rec->specifier), &specifier_hits, line_buf)) {
               case NO_MATCH:
                 free(specifier_hits.matched_objs);

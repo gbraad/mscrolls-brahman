@@ -1,7 +1,0 @@
-
-$VERB undo
- DEFAULT
-   printcr("We don't support undo. You made the decision, now live with it.")
-
-ENDVERB
-

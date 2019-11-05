@@ -1652,6 +1652,8 @@ int32_t ProcWordInfo(info)
   /* is added to the existing struct.                         */
   /* The info parameter will always only have type[0] filled  */
 
+  /* info must be malloc-ed */
+
   wordInfo *wp1;
   wordInfo *wp2;
   int32_t  result;
@@ -1742,6 +1744,13 @@ int32_t ProcWordInfo(info)
       /* ok, same word, not a redefined verb, different type */
       /* add new type to existing wordInfo struct            */
       wp2->types[i] = info->types[0];
+
+      /* set info->id to id of the existing wordInfo struct, */
+      /* so any plural definitions will point to the right   */
+      /* single                                              */
+      info->id = wp2->id;
+
+      /* we will not use the info struct */
       free(info);
 
       /* don't increase nr_of_words                  */
@@ -1798,7 +1807,8 @@ int32_t CreateWordTable()
   while (wp != NULL) {
     strncpy(word_table[i].word, wp->word, MAX_WORD_LEN);
     strncpy(word_table[i].print_word, wp->print_word, MAX_WORD_LEN);
-    word_table[i].id = wp->id;
+    word_table[i].id        = wp->id;
+    word_table[i].single_id = wp->single_id;
     for (j=0; j<MAX_TYPES; j++) {
       word_table[i].types[j] = wp->types[j];
     }
