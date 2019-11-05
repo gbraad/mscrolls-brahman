@@ -42,6 +42,8 @@
 #include "playsource.h"
 #include "vorbis.h"
 
+#define USE_QAUDIO_VOLUMExx
+
 class PlayerSourceOgg : public PlayerSource
 {
 public:
@@ -59,8 +61,9 @@ public:
     // play for loops times, -1 to repeat
     int         _loops = 1; 
 
-    float       _gain = 1.0f;
-    float       _dgain = 0;
+    float       _gain;
+    float       _dgain;
+    bool        _over;
 
     QIODevice*  _pushOut = 0;
     thread      _task;
@@ -75,7 +78,10 @@ public:
     uint        _bytesWritten;
 
     PlayerSourceOgg(QObject* parent, QAudioOutput* out) 
-        : PlayerSource(parent, out) {}
+        : PlayerSource(parent, out)
+    {
+        _resetGain();
+    }
 
     ~PlayerSourceOgg()
     {
@@ -105,6 +111,29 @@ public:
         return r;
     }
 
+    void setVolume(double v) override
+    {
+        if (v < 0) v = 0;
+        else if (v > 1.0) v = 1.0;
+
+        double lv = QAudio::convertVolume(v,
+                                          QAudio::LogarithmicVolumeScale,
+                                          QAudio::LinearVolumeScale);
+        
+        if (lv < 0) lv = 0;
+        else if (lv > 1.0) lv = 1.0;
+
+        //LOG3("Vol convert from ", v << " to " << lv);
+
+#ifdef USE_QAUDIO_VOLUME
+        if (_audioOutput) _audioOutput->setVolume(lv);
+#else
+        _volume = lv;
+        _resetGain();
+#endif        
+    }
+
+
     void fade(int ms) override
     {
         if (ms)
@@ -112,19 +141,19 @@ public:
             // samples over which to fade < 0 => fade out
             int n = (_sampleRate * ms)/1000;
         
-            // gain per sample
-            _dgain = 1.0f/n;
+            // gain per sample (up or down)
+            _dgain = _volume/n;
 
-            // leave gain alone if already changing
             if (_dgain > 0)
             {
-                if (_gain == 1.0f) _gain = 0;
+                // fade in
+                _gain = 0;
             }
             else 
             {
-                if (_gain == 0.0f) _gain = 1.0f;
+                // fade out
+                _gain = _volume;
             }
-
         }
     }
 
@@ -156,6 +185,7 @@ public:
         return true;
     }
 
+
     void stop() override
     {
         if (_pushOut)
@@ -164,9 +194,7 @@ public:
             stopPushing();
             _purge();
 
-            // reset any gains
-            _gain = 1.0f;
-            _dgain = 0;
+            _resetGain();
             _pushOut = 0;
         }
     }
@@ -272,7 +300,7 @@ public:
 
             while (res && len > 0)
             {
-                if (!_gain && !_dgain)
+                if (_over)
                 {
                     // can stop now
                     //LOG3("sourceogg, ", "fade to zero");
@@ -353,6 +381,14 @@ public:
     }
 
 private:
+
+    void _resetGain()
+    {
+        // reset any gains
+        _gain = _volume;
+        _dgain = 0;
+        _over = false;
+    }
 
     void _fill()
     {
@@ -474,17 +510,29 @@ private:
                                     // fading in or out
                                     _gain += _dgain;
 
-                                    if (_gain > 1.0f)
+                                    if (_gain >= _volume)
                                     {
-                                        _gain = 1.0f;
-                                        _dgain = 0; // over
+                                        // fade in over
+                                        _gain = _volume;
+                                        _dgain = 0; 
                                     }
                                     else if (_gain < 0.0f)
                                     {
+                                        // fade out over
                                         _gain = 0.0f;
-                                        _dgain = 0; // over
-                                    }
+                                        _dgain = 0;
 
+                                        // signal that we can stop playing
+                                        _over = true;
+                                    }
+                                }
+
+#ifdef USE_QAUDIO_VOLUME
+                                // volume is always 1.0 and we change gain
+                                // using qaudio.
+                                // only need multiply here when fading
+                                if (_dgain)
+                                {
                                     v *= _gain;
                                 }
                                 else
@@ -492,6 +540,10 @@ private:
                                     // if not fading then gain is 1 or 0
                                     if (!_gain) v = 0;
                                 }
+#else
+                                // otherwise perform our own gain
+                                v *= _gain;
+#endif
 
                                 // clamp
                                 if (v > 1.0f) v = 1.0f;

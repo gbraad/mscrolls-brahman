@@ -1,2 +1,1 @@
-        include "equates.i"
-        
+	include "equates.i"

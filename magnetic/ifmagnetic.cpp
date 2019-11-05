@@ -889,8 +889,8 @@ std::string IFMagnetic::transformCommand(const char* cmd) const
             else if (verb == "quit") // TODO: Fish! has ingame command "quit"! Needs to be fixed
             {
                 // prevent quit being entered
-                //words[0] = "restart";
-                //cw = true;
+                words[0] = "restart";
+                cw = true;
             }
             
             if (cw) si = unsplit(words);
@@ -1770,7 +1770,9 @@ bool IFMagnetic::saveGame(const char* name,
         assert(sctx._size);
         assert(sctx._addr);
 
-        string path = _undos.makeSavePath(name);
+        // Beware for IOS: do not covert the full path to lowercase! ios conrainer IDs are uppercase.
+        string path = _undos.makeSavePath(toLower(name));
+
 
         shead._gameid = get_game();
 
@@ -1833,7 +1835,9 @@ bool IFMagnetic::loadGame(const char* name,
         assert(sctx._size);
         assert(sctx._addr);
 
-        string path = _undos.makeSavePath(name);        
+        // Beware for IOS: do not covert the full path to lowercase! ios conrainer IDs are uppercase.
+
+        string path = _undos.makeSavePath(toLower(name));
 
         FD file;
         res = file.open(path.c_str(), FD::fd_read);

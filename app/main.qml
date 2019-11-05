@@ -226,19 +226,28 @@ ApplicationWindow
         // this is to play ogg ambience and loops
         id: soundplayer1
     }
+            
+    function setSoundVol(v)
+    {
+        soundplayer1.setVolume(0, v)
+        soundplayer1.setVolume(1, v)
+    }
 
     onSoundVolChanged:
     {
         //console.log("sound voume", soundVol)
-        soundplayer1.setVolume(0, soundVol)
-        soundplayer1.setVolume(1, soundVol)
+        setSoundVol(soundVol)
     }            
 
     function playTitleMusic()
     {
         if (!QControl.prefs.musicEnabled) return;        
         var mf = QControl.resolveAsset(QControl.getMusicFile())
-        if (mf.length > 0) playSound(mf, 0);
+        if (mf.length > 0)
+        {
+            setSoundVol(1.0)  // always play max
+            playSound(mf, 0);
+        }
     }
 
     function stopTitleMusic()
@@ -277,7 +286,11 @@ ApplicationWindow
             else
             {
                 var v = QControl.resolveAsset(js["name"])
-                if (v.length > 0) playSound(v, ch)
+                if (v.length > 0)
+                {
+                    setSoundVol(soundVol)
+                    playSound(v, ch)
+                }
             }
         }
         else stopSound(ch)

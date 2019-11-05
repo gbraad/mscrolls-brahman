@@ -1,0 +1,526 @@
+#get all from castle including chalice,luck,fly-jam
+#get lute from miller
+#end in scrub outside gatehouse
+
+seed 12345
+restart
+y
+seed 12345
+jump to jetty
+w
+look man
+help man
+n
+w
+look bucket
+break coal
+get fossil
+s
+look paintings
+get oil painting
+s
+look settee
+get cushion
+open it
+look in it
+#drop cusion
+#drop foam
+n
+n
+e
+e
+look cage
+look chalice
+look bear
+s
+open cupboard
+get poison and jar
+s
+open cabinet
+get gold key
+s
+look under bed
+get tub
+n
+n
+n
+w
+up
+#in corridor 29
+w
+look desk
+get box
+e
+e
+n
+get cue
+hit white ball towards red ball with cue
+get red ball
+open it
+e
+open stool
+get plastic bag
+s
+s
+open wardrobe
+get dress
+look under bed
+get china pot
+get sewing box
+n
+w
+w
+s
+s
+get mirror
+n
+n
+down
+z
+z
+#in entrance hall 18
+#ready for rat race
+s
+look rats
+bet five ferg note on grey rat
+get cage
+n
+e
+s
+e
+open swag bag and light lamp
+open door
+n
+open stopcock
+pull pipe
+get pipe
+close stopcock
+down
+get red bottle
+get champagne bottle
+open red bottle and look in it
+s
+s
+s
+get cube
+move junk
+s
+#by the moat
+open safe then put treasure in safe and close safe
+open safe then put treasure in safe and close safe
+open safe then put treasure in safe and close safe
+#drop red bottle
+#drop red ball
+n
+n
+w
+n
+w
+s
+s
+s
+#script ready for fishing
+open sewing box
+get cotton
+tie it to cue
+open tub
+get maggot
+put it on needle
+put needle in moat
+#drop tub
+#drop sewing box
+#have dead fish
+put poison on fish
+n
+n
+n
+e
+give fish to bear
+open cubic cage with golden key
+get chalice
+s
+e
+s
+s
+open safe then put treasure in safe and close safe
+n
+n
+w
+n
+w
+n
+#outside the stable
+#look door
+rub horseshoe
+e
+#get straw
+open jar
+w
+s
+s
+s
+s
+#outside gatehouse again, but with jar & luck, done chalice
+#now get the lute
+se
+shout to miller, stop mill
+s
+chew gum
+z
+z
+z
+buy lute with cheque
+carefully go north
+nw
+#now do junction from scrub outside gatehouse
+#get gem,coin,untie ladder,finger bone,chest
+#ends at scrub outside gateout
+w
+w
+w
+break bars
+sw
+get finger bone and chest
+open chest
+s
+w
+untie ladder
+#what if you do the temple first. can you get back up wo ladder? A:no.
+e
+n
+ne
+nw
+sw
+#muddy room
+put mirror in beam
+shine mirror at wax
+catch gem
+ne
+se
+se
+open gate
+se
+look tree
+get berries
+nw
+s
+look door
+break window
+s
+look counter
+open flap
+s
+press till button
+get coin
+n
+n
+n
+nw
+#junction chamber
+e
+e
+e
+#drop mirror
+#scrub
+#from scrub outside gatehouse
+#do temple, get; broach. requires finger bone, ladder untied
+sw
+s
+s
+s
+look altar
+get burner
+sw
+up
+e
+#organ room
+look organ
+get ebony key and ivory key
+w
+down
+ne
+s
+look hive
+get gloves and wear them
+n
+se
+up
+get rhinoceros
+down
+nw
+nw
+down
+#bottom of stair WOBNIAR
+se
+se
+n
+e
+e
+se
+s
+sw
+e
+se
+#crypt
+open sarcophagus with finger bone
+get skull
+e
+get statuette
+open door with ebony key
+e
+get pamphlet
+w
+w
+nw
+nw
+n
+nw
+e
+sw
+sw
+nw
+n
+nw
+#back to bottom of stairway
+up
+se
+n
+open safe then put treasure in safe and close safe
+open safe then put treasure in safe and close safe
+#drop ebony key
+s
+#ready to do temple statue
+move statue
+drop statue
+d
+n
+n
+n
+#sandy bank
+get brooch
+dig in sand
+get boots and wear them
+d
+d
+#crabwalk
+s
+e
+get pick
+w
+w
+hit mineral with pick
+get mineral chips
+#drop pick
+e
+s
+up
+e
+n
+ne
+#junction chamber
+e
+e
+e
+#scrub
+# from scrub outside gatehouse
+# do avary. requres ivory key, coin
+# gets anticube, plastic die
+w
+w
+w
+ne
+put coin in slot
+e
+s
+open door with ivory key
+e
+get food
+get spade
+open drawer
+read magazine
+get grotty key
+open white door
+ne
+open small door with grotty key
+nw
+open cage
+put mynah bird in cage
+close cage
+se
+sw
+w
+w
+get skin
+e
+n
+n
+w
+#hot house kills snake
+shake tree
+hit coconut with spade
+get coconut
+drop jam
+get succulents
+e
+e
+give coconut to macaw
+#aviary
+#now get the plastic die from the boathouse
+w
+s
+w
+sw
+nw
+nw
+#hot coals
+rub succulents on feet
+w
+up
+#boathouse
+se
+get yellow die
+se
+ne
+get blue die
+sw
+se
+get red die
+nw
+sw
+get green die
+ne
+roll red die
+five
+roll blue die
+five
+roll green die
+five
+roll yellow die
+five
+#look slots
+put red die in first slot
+put green die in second slot
+put blue die in third slot
+put yellow die in fourth slot
+get plastic die
+nw
+nw
+down
+rub succulents on feet
+e
+#need to go back to the castle to make the potion
+se
+se
+e
+e
+e
+#scrub outside gatehouse
+n
+n
+n
+up
+s
+s
+#look abstract painting
+move abstract painting
+open cabinet
+read plaque
+look buttons
+sit on bed
+press top button with cue
+#secret lab
+#read diary
+#look cauldron
+get sachet
+put heart,snake skin,berries and eye in cauldron
+put cube in cauldron
+open sachet
+put powder in cauldron
+get anticube
+w
+n
+n
+down
+s
+s
+s
+#scrub
+# from scrub outside gatehouse
+# requre: anticube, plastic die
+# do bank
+w
+w
+w
+se
+s
+w
+open safe then put treasure in safe and close safe
+z
+z
+#bank shoud now be open
+open door
+s
+say to mynah bird, hooray
+join longer queue
+show plastic card to teller
+shake champagne bottle
+drop champagne bottle
+drop bird cage
+chew gum
+put gum in keyhole
+#bank should explode
+drop plastic card
+put plastic die in pocket
+put succulents in pocket
+open wooden box and look in it
+#now remember the missing card
+# from in the bank after explosion
+# require: you know the missing card
+
+play lute and sing Urfanore Pendra
+s
+e
+roll plastic die
+two
+down
+roll plastic die
+one
+northwest
+roll plastic die
+six
+down
+roll plastic die
+five
+west
+roll plastic die
+four
+down
+get all and white
+#look pillar
+#look machine
+put anticube and plastic die on machine
+get anticube and ivory cube
+look signpost
+#now you have to exit according to the joker card
+nw
+# from white room after exit the correct signpost
+# require: lute
+# this version floats over coals then retrieves the treasure
+# from white room after exit the correct signpost
+# require: lute
+# this version uses succulents in pocket
+nw
+nw
+down
+#hot coals
+rub succulents on feet
+e
+se
+se
+e
+e
+e
+e
+e
+pull rope
+e

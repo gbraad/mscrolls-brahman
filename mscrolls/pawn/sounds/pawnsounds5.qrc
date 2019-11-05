@@ -1,0 +1,5 @@
+<RCC>
+	<qresource prefix="/sounds">
+		<file alias="printer.ogg">printer.ogg</file>
+	</qresource>
+</RCC>

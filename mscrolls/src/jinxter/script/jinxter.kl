@@ -127,8 +127,7 @@
           (
            (inc move-count)
            ;;(log 3 "KL: event-hook-handler" move-count)
-           (handle-rooms)
-           (handle-sounds)
+           ;;(handle-rooms)
            (if quiet
                (local
                 (setq t (gen))
@@ -148,9 +147,6 @@
 
 ;; keep our own move count
 (setq move-count 0)
-
-;; the last room we've seen
-(setq current-room 0)
 
 ;; move count of last time we did something
 (setq last-event 0)
@@ -176,7 +172,6 @@
 (setq prequote (fn (a b) (cat "\"" (catss a) "\" " b)))
 (setq postquote (fn (a b) (cat a ",\"" (catss b) "\"")))
 
-(setq sound-channel-0 0)
 (setq sound-channel-1 0)
 
 (setq play-sound
@@ -196,16 +191,13 @@
 (setq play-sound-0
       ;; play on channel 0
       (fn (p d)
-          (if (!= p sound-channel-0)
-              (set! 'sound-channel-0 p)
-              (play-sound p d 0)
-            )
+          (play-sound p d 0)
           ))
 
 (setq stop-sound-0
       ;; stop channel 0
       (fn ()
-          (if sound-channel-0 (set! 'sound-channel-0 0) (stop-sound 0))
+          (stop-sound 0)
           ))
 
 (setq play-sound-1
@@ -691,11 +683,11 @@
 
 (setq handle-rooms
       (fn ()
-          (if (!= (player-room) current-room)
-              (set! 'current-room (player-room))
-            ;;(log 3 "KL new room " current-room)
-            (play-room-sound current-room)
-            )
+          ;; always sent, if playing will be ignored later
+          (
+           (play-room-sound (player-room))
+           (handle-sounds)
+           )
           ))
 
 (setq handle-sound-v

@@ -93,12 +93,12 @@ FocusScope
             height: Math.min(consoleinput.height - wbh, maxTHeight)
 
             placeholderText: "type here"
-            focus: true
+            //focus: true
 	    
 	    // Having EnterKeyReturn breaks some Android devices
 	    // So in theory this test will work, but does iOS actually need the EnterKeyReturn
 	    // or is it just a cosmetic display thing.
-            // EnterKey.type: M.Device.isIOS() ? Qt.EnterKeyReturn : Qt.EnterKeyDefault
+            EnterKey.type: M.Device.isIOS() ? Qt.EnterKeyReturn : Qt.EnterKeyDefault
 
             fontSize: height*6/10
             showBorder: false
@@ -172,8 +172,6 @@ FocusScope
         
         width: dialogWidth
         height: dialogHeight
-
-        Keys.onPressed: accepted();
 
         text: "The game has ended and the application will now terminate"
         onAccepted: Qt.quit()

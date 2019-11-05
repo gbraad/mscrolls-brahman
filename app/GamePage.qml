@@ -76,12 +76,7 @@ Page
         enabled: app.canSaveLoad
         hoverAnimation: true
         visible: !Device.isMobile && app.enableSaveLoad
-        onTriggered:
-        {
-            saveselectorLoader.asynchronous = false
-            saveselectorLoader.item.open()
-        }
-
+        onTriggered: saveSelector.open();
     },
     Action
     {
@@ -90,11 +85,7 @@ Page
         enabled: app.canSaveLoad
         hoverAnimation: true
         visible: !Device.isMobile && app.enableSaveLoad
-        onTriggered:
-        {
-            loadselectorLoader.asynchronous = false
-            loadselectorLoader.item.open()
-        }
+        onTriggered: loadSelector.open()
     },
     Action
     {
@@ -396,31 +387,21 @@ Page
         }
     }
 
-    Loader
+    SaveLoadSelector
     {
-        id: saveselectorLoader
-        asynchronous: true
-
-        sourceComponent: SaveLoadSelector 
-        {
-            maxWidth: app.dialogWidth
-            maxHeight: app.dialogHeight
-            onAccepted: snackbar.open(QControl.saveGame(filename) ? "OK" : "Save FAILED!")
-        }
+        id: saveSelector
+        maxWidth: app.dialogWidth
+        maxHeight: app.dialogHeight
+        onAccepted: snackbar.open(QControl.saveGame(filename) ? "OK" : "Save FAILED!")
     }
 
-    Loader
+    SaveLoadSelector
     {
-        id: loadselectorLoader
-        asynchronous: true
-
-        sourceComponent: SaveLoadSelector
-        {
-            maxWidth: app.dialogWidth
-            maxHeight: app.dialogHeight
-            saveMode: false
-            onAccepted: snackbar.open(QControl.loadGame(filename) ? "OK" : "Load Failed")
-        }
+        id: loadSelector
+        maxWidth: app.dialogWidth
+        maxHeight: app.dialogHeight
+        saveMode: false
+        onAccepted: snackbar.open(QControl.loadGame(filename) ? "OK" : "Load Failed")
     }
 
     QTranscript

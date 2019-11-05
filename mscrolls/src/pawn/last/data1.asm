@@ -178,7 +178,7 @@ CANTSAVE        DC.W    0       ; suspend autosave
 CHEAT                 DC.W    0
 CHEAT2                DC.W    0     ;DOESN'T NOBBLE VALID
 CHEAT.LI              DC.W    0     ;LET THERE BE LIGHT..
-DBUG.ON               DC.W    -1    ;0 = NO CHEAT OR DEBUGBITS!
+DBUG.ON               DC.W    0     ;0 = NO CHEAT OR DEBUGBITS!
 CHEATNUM              DC.W    0     ;NE => print message numbers at FMSG
        
        ENDC

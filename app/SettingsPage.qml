@@ -74,11 +74,7 @@ Page
                 text: "Save"
                 subText: "Save game to file"
                 enabled: app.canSaveLoad
-                onClicked:
-                {
-                    saveselectorLoader.asynchronous = false
-                    saveselectorLoader.item.open()
-                }
+                onClicked: saveSelector.open()
                 visible: app.enableSaveLoad
             }
 
@@ -87,11 +83,7 @@ Page
                 text: "Load"
                 subText: "Load game from file"
                 enabled: app.canSaveLoad
-                onClicked:
-                {
-                    loadselectorLoader.asynchronous = false
-                    loadselectorLoader.item.open()
-                }
+                onClicked: loadSelector.open()
                 visible: app.enableSaveLoad
             }
 
@@ -320,8 +312,8 @@ Page
             ListItem.Subtitled
             {
                 text: "Sound Level"
-                subText: "Volume of sounds and title music"
-                secondaryItem:  Slider
+                subText: "Volume of ambient sounds"
+                secondaryItem: Slider
                 {
                     property bool ready: false
                     
@@ -493,31 +485,21 @@ Page
         }
     }
 
-    Loader
+    SaveLoadSelector
     {
-        id: saveselectorLoader
-        asynchronous: true
-
-        sourceComponent: SaveLoadSelector 
-        {
-            maxWidth: app.dialogWidth
-            maxHeight: app.dialogHeight
-            onAccepted: settingsSnackbar.open(QControl.saveGame(filename) ? "OK" : "Save FAILED!")
-        }
+        id: saveSelector
+        maxWidth: app.dialogWidth
+        maxHeight: app.dialogHeight
+        onAccepted: settingsSnackbar.open(QControl.saveGame(filename) ? "OK" : "Save FAILED!")
     }
 
-    Loader
+    SaveLoadSelector
     {
-        id: loadselectorLoader
-        asynchronous: true
-
-        sourceComponent: SaveLoadSelector
-        {
-            maxWidth: app.dialogWidth
-            maxHeight: app.dialogHeight
-            saveMode: false
-            onAccepted: settingsSnackbar.open(QControl.loadGame(filename) ? "OK" : "Load Failed")
-        }
+        id: loadSelector
+        maxWidth: app.dialogWidth
+        maxHeight: app.dialogHeight
+        saveMode: false
+        onAccepted: settingsSnackbar.open(QControl.loadGame(filename) ? "OK" : "Load Failed")
     }
 
     Loader

@@ -1,0 +1,5 @@
+<RCC>
+	<qresource prefix="/sounds">
+		<file alias="forestfire2.ogg">forestfire2.ogg</file>
+	</qresource>
+</RCC>

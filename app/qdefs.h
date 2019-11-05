@@ -49,7 +49,8 @@
 #define QCHARS(_s) QString::fromUtf8(_s)
 #define QSTR(_s) QString::fromUtf8((_s).c_str())
 #define QSTRC(_s) QString::fromUtf8(_s)
-#define STRQ(_s) std::string((_s).toUtf8().constData())
+//#define STRQ(_s) std::string((_s).toUtf8().constData())
+#define STRQ(_s) (_s).toStdString()
 #define STRQC(_s) ((const char*)((_s).toUtf8().constData()))
 
 #define OWN(_v) \

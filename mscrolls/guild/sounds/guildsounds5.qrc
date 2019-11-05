@@ -1,0 +1,5 @@
+<RCC>
+	<qresource prefix="/sounds">
+		<file alias="dripping.ogg">dripping.ogg</file>
+	</qresource>
+</RCC>

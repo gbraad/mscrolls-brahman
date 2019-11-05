@@ -1,0 +1,266 @@
+;;;; System ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(setq c
+      ;; random choice function, choose randomly from (c 1 2 3 4 .. )
+      (def args
+           (at args (random (size args)))
+           ))
+
+(setq nran
+      ;; non-random number order 2
+      (fn (n s)
+          (nrandom n (+ n 2) s)
+          ))
+
+(setq cn
+      ;; non-random choice function, choose (cn 1 2 3 4 ...)
+      (def args
+           (at args (+ 1 (nran (- (size args) 1) (first args))))
+           ))
+
+(setq co
+      ;; single choice
+      (def (a)
+           (if (random 2) (a))
+           ))
+
+(setq c2
+      ;; choice of 2
+      (def (a b)
+           (if (random 2) (a) (b))
+           ))
+
+
+;; word formation
+
+
+;; flags:
+;; inf = infinitive
+;; ing = ing form
+;; party; 1=i, 2=you, 3=him,her, 4=they
+;; mf = true => male
+;; pl = plural noun
+
+;; verb
+
+(setq inf 0)
+(setq ing 0)
+(setq party 1)
+
+(setq vform
+      ;; verb forms
+      (fn (v)
+          (cat (if inf "to ") v (if ing "ing" (if (= party 3) "s")))
+          ))
+
+(setq infof
+      ;; infinitive
+      (def (v)
+           (local
+            (setq inf 1)
+            (v)
+            )
+           ))
+
+(setq ingof
+      ;; verb-ing
+      (def (v)
+           (local
+            (setq ing 1)
+            (v)
+            )
+           ))
+
+(setq pof
+      ;; party of/male
+      (def (n e)
+           (local
+            (setq party n)
+            (setq mf 1)
+            (e)
+            )
+           ))
+
+(setq poff
+      ;; party of/female
+      (def (n e)
+           (local
+            (setq party n)
+            (setq mf 0)
+            (e)
+            )
+           ))
+
+;; noun
+
+(setq adj
+      ;; form adjective noun
+      (def (a n)
+           (cats (a) (n))
+           ))
+
+(setq nform
+      ;; noun form
+      (fn (n)
+          (cat n (if (> party 3) "s"))
+          ))
+
+;; pronouns
+
+(setq my
+      (fn ()
+          (if (= party 1) "my"
+            (if (= party 2) "your"
+              (if (= party 3)
+                  (if mf "his" "her")
+                "their")))
+          ))
+
+;;; Handlers ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(setq event-hook-handler
+      ;; called every move from game with `quiet`
+      ;; quiet is true if this turn the game has no printed anything specific
+      (fn (quiet)
+          (
+           (inc move-count)
+           ;;(log 3 "KL: event-hook-handler" move-count)
+           ;;(handle-rooms)
+           )
+          ))
+
+;;;; Game Generic ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; keep our own move count
+(setq move-count 0)
+
+;; move count of last time we did something
+(setq last-event 0)
+
+;; stuff we change, keep here as might want to add to save game
+(setq state {})
+
+(setq player-room
+      (fn ()
+          (room-of (second (player-location)))
+          ))
+
+;; Some notes for `cat` functions
+;; (cat a b ..) => stringify and concatentate a and b etc.
+;; (cats a b) => same as `cat` but insert spaces between a & b if needed.
+;; (catss a b) => same as `cats` but make sentence by uppercasing start of
+;; a (if needed) and adding full stop on end (if needed).
+;; handles putting full stop inside quotes.
+;; eg he says, "hello" -> He says, "hello."
+
+
+(setq aquote (fn (a) (cat "\"" a "\"")))
+(setq prequote (fn (a b) (cat "\"" (catss a) "\" " b)))
+(setq postquote (fn (a b) (cat a ",\"" (catss b) "\"")))
+
+(setq sound-channel-1 0)
+
+(setq play-sound
+      ;; play name duration on channel
+      (fn (p d c)
+          (ifisend (tree (list 'name (cat "sounds/" p))
+                         (list 'duration d)
+                         (list 'channel c)))
+          ))
+
+(setq stop-sound
+      ;; stop channel c
+      (fn (c)
+          (ifisend (tree '(duration 0) (list 'channel c)))
+          ))
+
+(setq play-sound-0
+      ;; play on channel 0
+      (fn (p d)
+          (play-sound p d 0)
+          ))
+
+(setq stop-sound-0
+      ;; stop channel 0
+      (fn ()
+          (stop-sound 0)
+          ))
+
+(setq play-sound-1
+      ;; play on channel 1
+      (fn (p d)
+          (if (!= p sound-channel-1)
+              (set! 'sound-channel-1 p)
+              (play-sound p d 1)
+            )
+          ))
+
+(setq stop-sound-1
+      ;; stop channel 1
+      (fn ()
+          (if sound-channel-1 (set! 'sound-channel-1 0) (stop-sound 1))
+          ))
+
+(setq get-state
+      (fn (s)
+          (or (eval-in state s) -100)
+          ))
+
+(setq set-state
+      (fn (s v)
+          (local
+           (setq s1 s)
+           (setq v1 v)
+           (eval-in state '(set s1 v1))
+           )
+          ))
+
+;;;; Game ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(setq get-room-no
+      (fn (s)
+          (eval s rooms)
+          ))
+
+(setq room-ambiences
+      {
+      (1 "boat.ogg")  ;; river
+      (10 "wheatfield.ogg") ;; golden wheatfield
+      (21 "fly.ogg") ;; stable
+      (34 "dripping.ogg") ;; bathroom
+      (41 "garden.ogg") ;; temple garden
+      (67 "watercave.ogg") ;; cave entrance
+      (68 "pond.ogg") ;; by the moat
+      (75 "birds.ogg") ;;aviary
+      (90 "lava.ogg") ;; hot coals
+      (127 "bank.ogg") ;; in the bank
+      })
+      
+(setq room-sound
+      ;; return the filename of room sound of `r`, if any
+      (fn (r)
+          (local
+           (setq r1 r)
+           (first (map (fn (x) (if (= r1 (first x)) (second x))) room-ambiences))
+           )
+          ))
+
+(setq play-room-sound
+      (fn (r)
+          (local
+           (setq s (room-sound r))
+           (ife s
+                (
+                 ;;(log 3 "play room sound" s)
+                 (play-sound-0 s -1)
+                 )
+               (stop-sound-0))
+           )
+          ))
+
+(setq handle-rooms
+      (fn ()
+          ;; always sent, if playing will be ignored later
+          (play-room-sound (player-room))
+          ))
+
