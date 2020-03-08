@@ -1,8 +1,8 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
+/* Copyright (c) 2016 - 2020 Marnix van den Bos.                        */
 /*                                                                      */
-/* <marnix.home@gmail.com>                                              */
+/* <marnix@xvan.nl>                                                     */
 /*                                                                      */
 /* This file is part of XVAN, an Interactive Fiction authoring system.  */
 /*                                                                      */
@@ -31,55 +31,54 @@
 /* On aug 26 15 increased MAX_CONTAINED_OBJECTS from 10 to 25 */
 /* On jan 21 16 increased MAX_WORD_LEN from 15 to 20          */
 
-#define WORD_LEN              16 /* needed to address flagbits     */
-#define MAX_ID_LENGTH         20 /* identifiers will be truncated  */
-                                 /* after 20 chars                 */
-#define MAX_WORD_LEN          20 /* words will be truncated after  */
-                                 /* 15 chars                       */
-#define MAX_TITLE_LEN        100 /* must be the same as input_line_len */
-#define MAX_VERSION_LEN      100 /* must be the same as input_line_len */
-#define MAX_FILENAME_LEN     100 /* must be the same as input_line_len */
-#define MAX_COMPILER_LEN     100 /* must be the same as input_line_len */
-#define MAX_TRIGG_LEN       1000
-#define MAX_PROMPT_LEN        10
-#define INPUT_LINE_LEN       100 /* for interpreter 08mrt2018:     */
-                                 /* changed to 100 for IFI-version */
-#define OUTPUT_LINE_LEN       79 /* for interpreter                */
-                                 /* 79 in case a line ends with a  */
-                                 /* special character.             */
-                                 /* a special character            */
-#define MAX_DSYS              10 /* Max 5 system descriptions per  */
-                                 /* location or object.            */
-#define MAX_TYPES              4 /* a word can be of max 3 types   */
-                                 /* 21nov2016: set to 4 because of */
-                                 /* CONNECT_PREPOSi type. Max nr   */
-                                 /* of types perceived by user is  */
-                                 /* still 3.                       */
-#define MAX_PARSE_ADJ          4 /* The interpreter will parse max */
-                                 /* 4 adjectives per noun.         */
-#define MAX_PARSE_ADVERBS      4 /* The interpreter will parse max */
-                                 /* 4 adverbs per verb.            */
-#define MAX_PARSE_PREPOS       4
-#define MAX_CONTAINED_OBJECTS 50
-#define MAX_HITS               5 /* Max number of matching locs or  */  /* @!@ */
-                                 /* objects when translating sys    */
-                                 /* descrs to ids.                  */
-                                 /* Must be equal to MAX_SUBJECTS   */  /* @!@ */
-                                 /* WHY NOT USE ONLY 1 IF THEY MUST BE EQUAL */  /* @!@ */
+#define WORD_LEN               16 /* needed to address flagbits     */
+#define MAX_ID_LENGTH          20 /* identifiers will be truncated  */
+                                  /* after 20 chars                 */
+#define MAX_WORD_LEN           20 /* words will be truncated after  */
+                                  /* 15 chars                       */
+#define MAX_TITLE_LEN         100 /* must be the same as input_line_len */
+#define MAX_VERSION_LEN       100 /* must be the same as input_line_len */
+#define MAX_FILENAME_LEN      100 /* must be the same as input_line_len */
+#define MAX_COMPILER_LEN      100 /* must be the same as input_line_len */
+#define MAX_TRIGG_LEN        1000
+#define MAX_PROMPT_LEN         10
+#define INPUT_LINE_LEN        100 /* for interpreter 08mrt2018:     */
+                                  /* changed to 100 for IFI-version */
+#define OUTPUT_LINE_LEN        79 /* for interpreter                */
+                                  /* 79 in case a line ends with a  */
+                                  /* special character.             */
+                                  /* a special character            */
+#define MAX_DSYS               10 /* Max 5 system descriptions per  */
+                                  /* location or object.            */
+#define MAX_TYPES               4 /* a word can be of max 3 types   */
+                                  /* 21nov2016: set to 4 because of */
+                                  /* CONNECT_PREPOSi type. Max nr   */
+                                  /* of types perceived by user is  */
+                                  /* still 3.                       */
+#define MAX_PARSE_ADJ           4 /* The interpreter will parse max */
+                                  /* 4 adjectives per noun.         */
+#define MAX_PARSE_ADVERBS       4 /* The interpreter will parse max */
+                                  /* 4 adverbs per verb.            */
+#define MAX_PARSE_PREPOS        4
+#define MAX_CONTAINED_OBJECTS  50
+#define MAX_HITS                6 /* Max number of matching locs or  */
+                                  /* objects when translating sys    */
+                                  /* descrs to ids.                  */
 
-#define MAX_SUBJECTS           5 /* Maximum number of subjects in   */
-                                 /* user input (used only by        */
-                                 /* the interpreter).               */
+#define MAX_SUBJECTS            5 /* Maximum number of subjects in   */
+                                  /* user input (used only by        */
+                                  /* the interpreter).               */
 
-#define NR_OF_SPECIAL_IDS     10 /* For save.c and restore.c        */
-#define DEFAULT_PARSER_SCORE   0 /* For parserActionRec type        */
-#define MAX_AMBIGUITY        100 /* do not try to resolve if more   */
-                                 /* than 100 possibilities for      */
-                                 /* mapping objects                 */
-#define MAX_CHOICES            5 /* for choice and hybrid mode      */
+#define NR_OF_SPECIAL_IDS     10  /* For save.c and restore.c        */
+#define DEFAULT_PARSER_SCORE   0  /* For parserActionRec type        */
+#define MAX_AMBIGUITY        100  /* do not try to resolve if more   */
+                                  /* than 100 possibilities for      */
+                                  /* mapping objects                 */
+#define MAX_CHOICES             5 /* for choice and hybrid mode      */
 
-#define PLAYER_COMMENT       '*' /* user input starting with '*'    */
-                                 /* will be ignored.                */
+#define MAX_UNDO_STACK_SIZE  5000  /* @!@ */
+
+#define PLAYER_COMMENT         '*'  /* @!@ */
 
 /***********************/
 /* keyword definitions */
@@ -218,6 +217,7 @@
 #define NEWDSYS         267
 #define ADDCHOICE       268
 #define PLAYMODE        269
+#define UNDO            270  /* @!@ */
 #define UPPER_BOUND_INT_ACT         400
 
 #define LOWER_BOUND_SPECIAL_CHAR    401
@@ -256,7 +256,7 @@
 #define ELSE            521
 #define ENDIF           522
 #define UP              523
-#define DOWN            524
+#define DOWN            524item3-FIRST_TIMER_ID
 #define TITLE           525
 #define VERSION         526
 #define VOCAB           527
@@ -357,6 +357,7 @@
 #define NEXT_SENTENCE                816
 #define DYN_DSYS                     817 /* dynamic d_sys 10may2019 */
 #define PLURAL                       818 /* for plurality           */
+#define EOU                          819 /* End Of Undo */  /* @!@ */
 
 
 /***********************************************/
