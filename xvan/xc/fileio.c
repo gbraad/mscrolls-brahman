@@ -1,8 +1,8 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
+/* Copyright (c) 2016 - 2020 Marnix van den Bos.                        */
 /*                                                                      */
-/* <marnix.home@gmail.com>                                              */
+/* <marnix@xvan.nl>                                                     */
 /*                                                                      */
 /* This file is part of XVAN, an Interactive Fiction authoring system.  */
 /*                                                                      */
@@ -1713,7 +1713,7 @@ int32_t StoreWordTable(void)
       PrintError(34, NULL, NULL);
       return(ERROR);
     }
-    if (!StoreInt32(word_table[i].single_id)) {  /* @!@ */
+    if (!StoreInt32(word_table[i].single_id)) {
       ErrHdr();
       PrintError(34, NULL, NULL);
       return(ERROR);
