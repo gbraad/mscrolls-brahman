@@ -1,6 +1,6 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
+/* Copyright (c) 2016 - 2020 Marnix van den Bos.                        */
 /*                                                                      */
 /* <marnix.home@gmail.com>                                              */
 /*                                                                      */
@@ -268,7 +268,7 @@ int8_t ConvertBase64Value(char value)
 }
 
 
-int32_t Base64ToBytes(char *base64_string, int *byte_index, int nr_of_bytes, 
+int32_t Base64ToBytes(char *base64_string, int *byte_index, int nr_of_bytes,
                       int8_t *result, int *leader_len, int8_t *leader)
 {
   /* some explanation about the parameter list */

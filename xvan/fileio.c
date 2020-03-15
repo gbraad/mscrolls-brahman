@@ -1,6 +1,6 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
+/* Copyright (c) 2016 - 2020 Marnix van den Bos.                        */
 /*                                                                      */
 /* <marnix.home@gmail.com>                                              */
 /*                                                                      */
@@ -92,7 +92,7 @@ int32_t  InitObjects(void);
 int32_t  InitAttributes(void);
 int32_t  RdTrigOwners(int64_t);
 int32_t  RdDescOwners(int64_t);
-void     InitSysDescr(sysDescr*);   /* @!@ */
+void     InitSysDescr(sysDescr*);
 int32_t  ReadExtendedSysDescr(extendedSysDescr*);
 int32_t  ReadSysDescr(sysDescr*);
 int32_t  ReadContData(contData*);
@@ -812,7 +812,7 @@ int32_t ReadWordTable(int64_t offset)
       PrintError(25, NULL, "word identifier");
       return(ERROR);
     }
-    if (!GetNextCode32(&word_table[i].single_id)) {  /* @!@ */
+    if (!GetNextCode32(&word_table[i].single_id)) {
       PrintError(25, NULL, "single identifier");
       return(ERROR);
     }

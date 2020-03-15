@@ -1,6 +1,6 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
+/* Copyright (c) 2016 - 2020 Marnix van den Bos.                        */
 /*                                                                      */
 /* <marnix.home@gmail.com>                                              */
 /*                                                                      */
@@ -135,7 +135,12 @@ const char *NL_errors[] = {
   "runtime error (104): debug inspring fout",
   "runtime error (105): XeqVerbDefault(): ongeldige actie, mogelijke aanroep vanuit t_choice",
   "runtime error (106): Het maximum aantal keuzes is overschreden",
-  "runtime error (107): WriteTranscript(): transcript mode staat uit"
+  "runtime error (107): WriteTranscript(): transcript mode staat uit",
+  "runtime error (108): PushUndoItem(): de herstelbuffer is vol, herstelbuffer wordt gewist",  /* @!@ */
+  "runtime error (109): PushUndoItem(): geen input, herstelbuffer wordt gewist",  /* @!@ */
+  "Er is geen herstelinformatie",  /* @!@ */
+  "runtime error (111): De herstelbuffer is corrupt, hetstelbuffer wordt gewist",  /* @!@ */
+  "runtime error (112): Onbekende herstelcode, herstelbuffer wordt gewist" /* @!@ */
 };
 
 #endif

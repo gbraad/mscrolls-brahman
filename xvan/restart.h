@@ -1,6 +1,6 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
+/* Copyright (c) 2016 - 2020 Marnix van den Bos.                        */
 /*                                                                      */
 /* <marnix.home@gmail.com>                                              */
 /*                                                                      */
@@ -59,5 +59,7 @@ extern int32_t  ReadObjDir(int64_t);             /* fileio.c   */
 extern int32_t  ReadMapData(int64_t);            /* fileio.c   */
 extern int32_t  ReadFlags(int64_t);              /* fileio.c   */
 extern int32_t  ReadTimers(int64_t);             /* fileio.c   */
+extern void     InitUndoStack(void);             /* undo.c     */  /* @!@ */
+extern int32_t  write_undo;                      /* undo.c     */  /* @!@ */
 
 #endif

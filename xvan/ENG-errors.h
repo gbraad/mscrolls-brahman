@@ -1,6 +1,6 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
+/* Copyright (c) 2016 - 2020 Marnix van den Bos.                        */
 /*                                                                      */
 /* <marnix.home@gmail.com>                                              */
 /*                                                                      */
@@ -135,7 +135,12 @@ const char *ENG_errors[] = {
   "runtime error (104): debug indent error",
   "runtime error (105): XeqVerbDefault(): invalid action, probably called from t_choice",
   "runtime error (106): Max number of choices exceeded",
-  "runtime error (107): WriteTranscript(): transcript mode not turned on"
+  "runtime error (107): WriteTranscript(): transcript mode not turned on",
+  "runtime error (108): PushUndoItem(): undo-buffer overflow, clearing undo-history",  /* @!@ */
+  "runtime error (109): PushUndoItem(): empty input, clearing undo-buffer",  /* @!@ */
+  "There is no undo information available",  /* @!@ */
+  "runtime error (111): corrupted undo-buffer, clearing undo-history",  /* @!@ */
+  "runtime error (112): unknown undo item, clearing undo-history"  /* @!@ */
 };
 
 #endif

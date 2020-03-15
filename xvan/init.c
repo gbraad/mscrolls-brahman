@@ -1,6 +1,6 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
+/* Copyright (c) 2016 - 2020 Marnix van den Bos.                        */
 /*                                                                      */
 /* <marnix.home@gmail.com>                                              */
 /*                                                                      */
@@ -318,7 +318,7 @@ int32_t main(int argc, char **argv)
   story_info.autolink       = 0;
   story_info.xvan_language  = ENG;
   story_info.story_language = ENG;
-  story_info.play_mode      = INTERPRETER_MODE;  /* @!@ */
+  story_info.play_mode      = INTERPRETER_MODE;
 
   /* malloc space for stack  */
   if ((stack = (int32_t *) malloc(STACK_SIZE*sizeof(int32_t))) == NULL) {
@@ -379,6 +379,12 @@ int32_t main(int argc, char **argv)
   /* Can only do this AFTER InitDirs(), */
   /* InitLocations() and InitObjects(). */
   if (!InitAttributes()) {
+    ExitProgram();
+    return(OK);
+  }
+
+  /* initialize the undo stack  */  /* @!@ */
+  if (!InitUndoStack()) {
     ExitProgram();
     return(OK);
   }

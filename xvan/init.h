@@ -1,6 +1,6 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
+/* Copyright (c) 2016 - 2020 Marnix van den Bos.                        */
 /*                                                                      */
 /* <marnix.home@gmail.com>                                              */
 /*                                                                      */
@@ -40,6 +40,7 @@ extern void Log(char*, char*, char*);
 
 extern short    transcript;                                 /* letsplay.c */
 
+extern int32_t  InitUndoStack(void);                        /* undo.c      */  /* @!@ */
 extern void     PrintError(int16_t, resultStruct*, char*);  /* errors.c    */
 extern void     *Output(void);                              /* output.c    */
 extern char     *ResetString(char*);                        /* jsonbld.c   */

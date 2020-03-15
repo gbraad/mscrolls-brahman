@@ -1,6 +1,6 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
+/* Copyright (c) 2016 - 2020 Marnix van den Bos.                        */
 /*                                                                      */
 /* <marnix.home@gmail.com>                                              */
 /*                                                                      */
@@ -198,7 +198,7 @@ int32_t RestoreSpecialIds(char *base64_string, int *byte_index, int *leader_len,
 }
 
 
-int32_t RestoreExtendedSysDescr(extendedSysDescr *extended_system_description, char *base64_string, 
+int32_t RestoreExtendedSysDescr(extendedSysDescr *extended_system_description, char *base64_string,
                                 int *byte_index, int *leader_len, int8_t *leader)
 {
   int32_t code;

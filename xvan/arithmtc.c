@@ -1,6 +1,6 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
+/* Copyright (c) 2016 - 2020 Marnix van den Bos.                        */
 /*                                                                      */
 /* <marnix.home@gmail.com>                                              */
 /*                                                                      */
@@ -241,20 +241,20 @@ resultStruct XeqBasicOperator(int32_t opr, int32_t **trigger)
   /*  value and not the attribute or timer itself.         */
 
   if (!GetLvaluePar(&owner1, &par1, &type1, &str, trigger))
-    return( (resultStruct) {QUIT, 0} );
+    return( (resultStruct) {QUIT, NONE, 0} );
 
   /* par1 is an attribute id or a timer id, checked by the    */
   /* compiler. If it is an attribute id, We must get the type */
   /* of par1's content. For the CheckPars() function.         */
   if (type1 == COMMON_ATTRS || type1 == ATTRIBUTES) {
     if (!GetAttributeInfo(par1, owner1, &attributes, &attribute_index))
-      return( (resultStruct) {QUIT, 0} );
+      return( (resultStruct) {QUIT, NONE, 0} );
   }
 
   /* Read second parameter, which will resolve to a */
   /* value in case it is an attribute.              */
   if (!GetPar(&owner2, &par2, &type2, &str, trigger))
-    return( (resultStruct) {QUIT, 0} );
+    return( (resultStruct) {QUIT, NONE, 0} );
 
   if (type2 == TIM_ID) {
     /* resolve timer to a value */
@@ -266,7 +266,7 @@ resultStruct XeqBasicOperator(int32_t opr, int32_t **trigger)
     /* par2 must get the same type and value as par1 */
     if (type1 == COMMON_ATTRS || type1 == ATTRIBUTES) {
       if (!GetAttributeInfo(par1, owner1, &attributes, &attribute_index))
-        return( (resultStruct) {QUIT, 0} );
+        return( (resultStruct) {QUIT, NONE, 0} );
 
       par2   = attributes[attribute_index].value;
       type2  = attributes[attribute_index].type;
@@ -282,7 +282,7 @@ resultStruct XeqBasicOperator(int32_t opr, int32_t **trigger)
       else {
         /* serious trouble */
         PrintError(1, NULL, NULL);
-        return( (resultStruct) {ERROR, 0} );
+        return( (resultStruct) {ERROR, NONE, 0} );
       }
     }
   }
@@ -290,7 +290,7 @@ resultStruct XeqBasicOperator(int32_t opr, int32_t **trigger)
   /* Read third parameter, which will resolve to a */
   /* value in case it is an attribute.             */
   if (!GetPar(&owner3, &par3, &type3, &str, trigger))
-    return( (resultStruct) {QUIT, 0} );
+    return( (resultStruct) {QUIT, NONE, 0} );
 
   if (type3 == TIM_ID) {
     /* resolve timer to a value */
@@ -305,59 +305,69 @@ resultStruct XeqBasicOperator(int32_t opr, int32_t **trigger)
   switch (opr) {
     case ADD:
       if (!CheckPars(ADD, type1, type2, type3, NO_TYPE, NO_TYPE))
-        return( (resultStruct) {QUIT, 0} );
+        return( (resultStruct) {QUIT, NONE, 0} );
       result = par2 + par3;
       break;
     case SUB:
       if (!CheckPars(SUB, type1, type2, type3, NO_TYPE, NO_TYPE))
-        return( (resultStruct) {QUIT, 0} );
+        return( (resultStruct) {QUIT, NONE, 0} );
       result = par2 - par3;
       break;
     case ASTERIX:
       if (!CheckPars(ASTERIX, type1, type2, type3, NO_TYPE, NO_TYPE))
-        return( (resultStruct) {QUIT, 0} );
+        return( (resultStruct) {QUIT, NONE, 0} );
       result = par2 * par3;
       break;
     case QUOT:
       if (!CheckPars(QUOT, type1, type2, type3, NO_TYPE, NO_TYPE))
-        return( (resultStruct) {QUIT, 0} );
+        return( (resultStruct) {QUIT, NONE, 0} );
       if (par3 == 0) {
         PrintError(2, NULL, NULL);
-        return( (resultStruct) {QUIT, 0} );
+        return( (resultStruct) {QUIT, NONE, 0} );
       }
       div_result = div(par2, par3);
       result = div_result.quot;
       break;
     case REM:
       if (!CheckPars(REM, type1, type2, type3, NO_TYPE, NO_TYPE))
-        return( (resultStruct) {QUIT, 0} );
+        return( (resultStruct) {QUIT, NONE, 0} );
       if (par3 == 0) {
         PrintError(2, NULL, NULL);
-        return( (resultStruct) {QUIT, 0} );
+        return( (resultStruct) {QUIT, NONE, 0} );
       }
       div_result = div(par2, par3);
       result = div_result.rem;
       break;
     default:
-      PrintError(3, &((resultStruct) {VALUE, opr}), NULL);
-      return( (resultStruct) {ERROR, 0} );
+      PrintError(3, &((resultStruct) {VALUE, NONE, opr}), NULL);
+      return( (resultStruct) {ERROR, NONE, 0} );
   } /* switch */
 
   if (type1 == COMMON_ATTRS || type1 == ATTRIBUTES) {
+    /* write undo info */
+    PushUndoItem(ATTRIBUTES,
+                 par1,
+                 owner1,
+                 attributes[attribute_index].value_owner,
+                 attributes[attribute_index].type,
+                 attributes[attribute_index].value);  /* @!@ */
     attributes[attribute_index].type  = NUMBER;
     attributes[attribute_index].value = result;
   }
   else {
-    if (type1 == TIM_ID)
+    if (type1 == TIM_ID) { /* @!@ */
       /* par 1 is a timer */
+      /* write undo info */  /* @!@ */
+      PushUndoItem(TIMERS, INIT, par1-FIRST_TIMER_ID, NO_ID, NO_ID, timers[par1-FIRST_TIMER_ID].value);
       timers[par1-FIRST_TIMER_ID].value = result;
+    }
     else {
       /* serious trouble */
       PrintError(1, NULL, NULL);
-      return( (resultStruct) {ERROR, 0} );
+      return( (resultStruct) {ERROR, NONE, 0} );
     }
   }
-  return( (resultStruct) {CONTINUE, 0} );
+  return( (resultStruct) {CONTINUE, NONE, 0} );
 }
 
 
@@ -383,7 +393,7 @@ resultStruct XeqRnd(int32_t **trigger)
   /* For attribute parameters, GetPar() returns the  */
   /* attribute's type and value.                     */
   if (!GetPar(&owner, &par1, &type1, &str, trigger))
-    return( (resultStruct) {QUIT, 0} );
+    return( (resultStruct) {QUIT, NONE, 0} );
     /*return(QUIT);*/  /* march 23 2016: won't work, QUIT is also a number */
                        /* jan 21 2019: fixed with resultStruct type        */
   /* It may be a timer id */
@@ -395,7 +405,7 @@ resultStruct XeqRnd(int32_t **trigger)
 
   /* Read second parameter. */
   if (!GetPar(&owner, &par2, &type2, &str, trigger))
-    return( (resultStruct) {QUIT, 0} );
+    return( (resultStruct) {QUIT, NONE, 0} );
     /*return(QUIT);*/  /* march 23 2016: won't work, QUIT is also a number */
                        /* jan 21 2019: fixed with resultStruct type        */
 
@@ -419,16 +429,16 @@ resultStruct XeqRnd(int32_t **trigger)
     /* value between par1 and par2, borders inclusive */
     result = rand();
     result = (par1-1) + result%(par2-par1+1)+1;
-    return( (resultStruct) {NUMBER, result} );
+    return( (resultStruct) {NUMBER, NONE, result} );
   }
   else
-    return( (resultStruct) {QUIT, 0} );
+    return( (resultStruct) {QUIT, NONE, 0} );
     /*return(QUIT);*/  /* march 23 2016: won't work, QUIT is also a number */
                        /* jan 21 2019: fixed with resultStruct type        */
 }
 
 
-resultStruct XeqSetTimer(int32_t **trigger)
+resultStruct XeqSetTimer(int32_t **trigger)  /* @!@ */
 {
   /* Always has two parameters. */
   /* settimer(ctr_id, value/ctr_id). */
@@ -446,10 +456,10 @@ resultStruct XeqSetTimer(int32_t **trigger)
 
   /* Get Parameter 1. */
   if (!GetPar(&owner, &par1, &type1, &str, trigger))
-    return( (resultStruct) {QUIT, 0} );
+    return( (resultStruct) {QUIT, NONE, 0} );
 
   if (!GetPar(&owner, &par2, &type2, &str, trigger))
-    return( (resultStruct) {QUIT, 0} );
+    return( (resultStruct) {QUIT, NONE, 0} );
 
   /* check if par2 is a timer id */
   if (IsTimerId(par2)) {
@@ -461,10 +471,13 @@ resultStruct XeqSetTimer(int32_t **trigger)
 
   if (CheckPars(SETTIMER, type1, type2, NO_TYPE, NO_TYPE, NO_TYPE)) {
     index = par1-FIRST_TIMER_ID;
+    /* write undo info */
+    PushUndoItem(TIMERS, INIT, index+FIRST_TIMER_ID, NO_ID, NO_ID, timers[index].value);
+
     timers[index].value = par2;
 
-    return( (resultStruct) {CONTINUE, 0} );
+    return( (resultStruct) {CONTINUE, NONE,0} );
   }
   else
-    return( (resultStruct) {QUIT, 0} );
+    return( (resultStruct) {QUIT, NONE, 0} );
 }

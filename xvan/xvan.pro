@@ -54,7 +54,8 @@ arithmtc.c checkpar.c cleanup.c dirs.c disambig.c endian.c execute.c fileio.c in
     debugcmd.c \
     debugdev.c \
 ifixvan.cpp \
-    plural.c
+    plural.c \
+    undo.c
 
 ### //////////////////  ///////////////////////////////////////////
 
@@ -125,6 +126,7 @@ HEADERS += \
     timers.h \
     trnslate.h \
     typedefs.h \
+    undo.h \
     xeqfun.h
 
 target.path = $$PROJ/app/$$BUILDT

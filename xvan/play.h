@@ -1,6 +1,6 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
+/* Copyright (c) 2016 - 2020 Marnix van den Bos.                        */
 /*                                                                      */
 /* <marnix.home@gmail.com>                                              */
 /*                                                                      */
@@ -39,7 +39,13 @@ extern int32_t      curr_loc;                                                /* 
 
 extern char         *outputline;                                             /* init.c     */
 
+extern int32_t      write_undo;                                              /* undo.c   */  /* @!@ */
+extern int32_t      undo_record_counter;                                     /* undo.c   */  /* @!@ */
+
 extern void         ifi_emitResponse(const char*);
+
+extern void         PushUndoItem(int32_t, int32_t, int32_t,
+                                 int32_t, int32_t, int32_t);                 /* undo.c     */  /* @!@ */
 
 extern void         Output(void);                                            /* output.c   */
 extern void         Log(char*, char*, char*);                                /* output.c   */

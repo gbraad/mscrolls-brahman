@@ -1,6 +1,6 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
+/* Copyright (c) 2016 - 2020 Marnix van den Bos.                        */
 /*                                                                      */
 /* <marnix.home@gmail.com>                                              */
 /*                                                                      */
@@ -585,7 +585,7 @@ int32_t GetActionRecPar(usrActionRec *action_rec, int32_t **trigger)
 int32_t GetAttributeInfo(int32_t id, int32_t owner, attrInfo **attributes, int32_t *attribute_index)
 {
   /* This function searches the attrInfo for the attribute identified by */
-  /* id and owner parameters. It returna a pointer to the right attrInfo */
+  /* id and owner parameters. It returns a pointer to the right attrInfo */
   /* array ( c_loc_attrs, c_obj_attrs or local_attrs) and the index in   */
   /* array for the attribute.                                            */
   /* We need this function in case we do not need an attribute parameter */

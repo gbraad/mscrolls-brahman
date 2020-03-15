@@ -1,6 +1,6 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
+/* Copyright (c) 2016 - 2020 Marnix van den Bos.                        */
 /*                                                                      */
 /* <marnix.home@gmail.com>                                              */
 /*                                                                      */
@@ -81,6 +81,12 @@ int32_t HandleTimers(usrActionRec *action_rec, int32_t subject_index)
   for (i=0; i<nr_of_timers; i++) {
     if (timers[i].state == GO) {
       /* This is an active timer. */
+      /* write undo info */    /* @!@ */
+      /* too lazy to define new keywords, so INTERVAL means */
+      /* the update field and INIT means the current value  */
+      PushUndoItem(TIMERS, INTERVAL, i+FIRST_TIMER_ID, NO_ID, NO_ID, timers[i].update);
+      PushUndoItem(TIMERS, INIT, i+FIRST_TIMER_ID, NO_ID, NO_ID, timers[i].value);
+
       if (--(timers[i].update) == 0) {
         /* Timer must have an update.       */
         /* But first reset the update time. */

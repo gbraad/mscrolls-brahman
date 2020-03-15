@@ -1,6 +1,6 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
+/* Copyright (c) 2016 - 2020 Marnix van den Bos.                        */
 /*                                                                      */
 /* <marnix.home@gmail.com>                                              */
 /*                                                                      */
@@ -84,7 +84,7 @@ char *GetDescr(int32_t owner, int32_t id)
 
   /* Check owner; must either be location or object id.  */
   if (!(IsLocId(owner) || IsObjId(owner))) {
-    PrintError(7, &((resultStruct) {VALUE, owner}), NULL);
+    PrintError(7, &((resultStruct) {VALUE, NONE, owner}), NULL);
     return(NULL);
   }
 
@@ -238,7 +238,7 @@ int32_t EvalCond(int32_t **trigger, int32_t *opcode, usrActionRec *action_rec, i
           break;
         }
         else {
-          PrintError(10, &((resultStruct) {VALUE, *opcode}), "EvalCond()");
+          PrintError(10, &((resultStruct) {VALUE, NONE, *opcode}), "EvalCond()");
           return(ERROR);
         } /* else */
     } /* switch */
@@ -268,7 +268,7 @@ int32_t SkipCond(int32_t **trigger)
         if (IsTestFun(opcode) || IsCAttrId(opcode) || IsLAttrId(opcode))
           SkipFun(trigger);
         else {
-          PrintError(10, &((resultStruct) {VALUE, opcode}), "SkipCond()");
+          PrintError(10, &((resultStruct) {VALUE, NONE, opcode}), "SkipCond()");
           return(ERROR);
         }
         break;
@@ -320,7 +320,7 @@ resultStruct Ite(int32_t **trigger, int32_t state, int32_t *opcode, usrActionRec
             break;
           default:
             PrintError(13, NULL, "Ite()");
-            return( (resultStruct) {ERROR, 0} );
+            return( (resultStruct) {ERROR, NONE, 0} );
         } /* switch */
 
         result = Ite(trigger, new_state, opcode, action_rec, subject_index, com_trig);
@@ -350,7 +350,7 @@ resultStruct Ite(int32_t **trigger, int32_t state, int32_t *opcode, usrActionRec
           *opcode = NextOpcode(trigger);
         } /* if */
         else {
-          return( (resultStruct) {CONTINUE, 0} );  /* Don't read new opcode. */}
+          return( (resultStruct) {CONTINUE, NONE, 0} );  /* Don't read new opcode. */}
       break;
       case ENDIF:
         *opcode = NextOpcode(trigger);
@@ -359,10 +359,10 @@ resultStruct Ite(int32_t **trigger, int32_t state, int32_t *opcode, usrActionRec
         /* It should be an internal action or an attribute.     */
         if (!(IsIntAct(*opcode) || IsCAttrId(*opcode) ||
                                    IsLAttrId(*opcode))) {
-          PrintError(10, &((resultStruct) {VALUE, *opcode}), "Ite()");
+          PrintError(10, &((resultStruct) {VALUE, NONE, *opcode}), "Ite()");
           /* Although there is an error, the show must go on. */
           /* We might also return QUIT here.                  */
-          return( (resultStruct) {DISAGREE, 0} );
+          return( (resultStruct) {DISAGREE, NONE, 0} );
         }
 
         /* It's an internal action.               */
@@ -601,7 +601,7 @@ resultStruct XeqActionRec(usrActionRec *action_rec, int32_t *xeq_list, int32_t s
 
     else {
       PrintError(11, NULL, NULL);
-      return( (resultStruct) {DISAGREE, 0} );
+      return( (resultStruct) {DISAGREE, NONE, 0} );
     }
 
     while (arec != NULL && !found) {
@@ -657,7 +657,7 @@ resultStruct XeqPrologue(int32_t verb_id)
   if (!InMem(verb_id))
     switch (Load(verb_id)) {
       case ERROR:
-        PrintError(12, &((resultStruct) {VALUE, verb_id}), "XeqPrologue()");
+        PrintError(12, &((resultStruct) {VALUE, NONE, verb_id}), "XeqPrologue()");
         return( (resultStruct) {QUIT, NONE, 0} );
       case NO_MATCH:
         return( (resultStruct) {NO_MATCH, NONE, 0} );
@@ -706,7 +706,7 @@ resultStruct XeqEpilogue(int32_t verb_id)
   if (!InMem(verb_id))
     switch (Load(verb_id)) {
       case ERROR:
-        PrintError(12, &((resultStruct) {VALUE, verb_id}), "XeqEpilogue()");
+        PrintError(12, &((resultStruct) {VALUE, NONE, verb_id}), "XeqEpilogue()");
         return( (resultStruct) {QUIT, NONE, 0} );
       case NO_MATCH:
         return( (resultStruct) {NO_MATCH, NONE, 0} );
@@ -775,7 +775,7 @@ resultStruct XeqVerbDefault(usrActionRec *action_rec, int32_t subject_index)
   resultStruct  result = {NO_MATCH, NONE, 0};
   compActionRec *arec  = NULL;
 
-  /* when called from t_choice there will not be a valid */  /* @!@ */
+  /* when called from t_choice there will not be a valid */
   /* action record. We must check the action1.           */
   if (!IsVerbId(action_rec->action1)) {
     PrintError(105, NULL, NULL);
@@ -785,7 +785,7 @@ resultStruct XeqVerbDefault(usrActionRec *action_rec, int32_t subject_index)
   if (!InMem(action_rec->action1))
     switch (Load(action_rec->action1)) {
       case ERROR:
-        PrintError(12, &((resultStruct) {VALUE, action_rec->action1}), "XeqVerbDefault()");
+        PrintError(12, &((resultStruct) {VALUE, NONE, action_rec->action1}), "XeqVerbDefault()");
         return( (resultStruct) {QUIT, NONE, 0} );
       case NO_MATCH: /* printf("Load geeft no_match\n"); */
         return( (resultStruct) {NO_MATCH, NONE, 0} );

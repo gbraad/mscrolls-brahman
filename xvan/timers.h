@@ -1,6 +1,6 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
+/* Copyright (c) 2016 - 2020 Marnix van den Bos.                        */
 /*                                                                      */
 /* <marnix.home@gmail.com>                                              */
 /*                                                                      */
@@ -28,14 +28,15 @@
 /* External declarations */
 /*************************/
 
-extern int32_t      nr_of_timers;                                          /* fileio.c */
-extern timerInfo    *timers;                                               /* fileio.c */
+extern int32_t      nr_of_timers;                                                        /* fileio.c  */
+extern timerInfo    *timers;                                                             /* fileio.c  */
 
-extern void         Log(char*, char*, char*);                              /* output.c  */
-extern void         Output(void);                                          /* output.c  */
-extern void         PrintError(int16_t, resultStruct*, char*);             /* errors.c  */
-extern char         *TranslateKeyword(char*);                              /* errors.c  */
-extern resultStruct XeqTrigger(int32_t, int32_t, usrActionRec*, int32_t);  /* execute.c */
-extern int32_t      LookUpId(char*);                                       /* syntax.c  */
+extern void         Log(char*, char*, char*);                                            /* output.c  */
+extern void         PushUndoItem(int32_t, int32_t, int32_t, int32_t, int32_t, int32_t);  /* undo.c    */  /* @!@ */
+extern void         Output(void);                                                        /* output.c  */
+extern void         PrintError(int16_t, resultStruct*, char*);                           /* errors.c  */
+extern char         *TranslateKeyword(char*);                                            /* errors.c  */
+extern resultStruct XeqTrigger(int32_t, int32_t, usrActionRec*, int32_t);                /* execute.c */
+extern int32_t      LookUpId(char*);                                                     /* syntax.c  */
 
 #endif

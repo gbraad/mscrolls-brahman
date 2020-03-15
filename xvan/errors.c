@@ -1,6 +1,6 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
+/* Copyright (c) 2016 - 2020 Marnix van den Bos.                        */
 /*                                                                      */
 /* <marnix.home@gmail.com>                                              */
 /*                                                                      */
@@ -71,7 +71,7 @@ void PrintError(int16_t err_num, resultStruct *par1, char *par2)
   /* flush the outputline */
   Output();
 
-  sprintf(text_to_print, "%s", errors[err_num]);
+  sprintf(text_to_print, "\n%s", errors[err_num]);  /* @!@ */
   PrintString(text_to_print, 0);
 
 
@@ -88,7 +88,7 @@ void PrintError(int16_t err_num, resultStruct *par1, char *par2)
     PrintString(text_to_print, 0);
     Output();
   }
-  PrintString(".\n", 0);
+  PrintString(".\n\n", 0);  /* @!@ */
   Output();
 }
 

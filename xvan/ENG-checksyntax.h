@@ -1,6 +1,6 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
+/* Copyright (c) 2016 - 2020 Marnix van den Bos.                        */
 /*                                                                      */
 /* <marnix.home@gmail.com>                                              */
 /*                                                                      */
@@ -34,7 +34,7 @@ extern char    *outputline;                                       /* init.c     
 extern void    Output(void);                                      /* output.c    */
 extern void    PrintString(char*, int);                           /* output.c    */
 extern int32_t LookUpId(char*);                                   /* syntax.c    */
-extern int32_t NextWordId(char**, int32_t*, int32_t*, int32_t*);  /* syntax.c */  /* @!@ */
+extern int32_t NextWordId(char**, int32_t*, int32_t*, int32_t*);  /* syntax.c    */
 extern void    PrintParsedInput(parsedInput*);                    /* debug.c     */
 extern void    PrintUsrActionRec(usrActionRec*);                  /* debug.c     */
 

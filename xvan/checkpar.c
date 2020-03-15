@@ -908,6 +908,18 @@ int32_t CheckPars(int32_t fun_code, int32_t type1, int32_t type2, int32_t type3,
       return(OK);
       break;
 
+    case UNDO:               /* @!@ */
+      /*******************/
+      /* undo(word) */
+      /*******************/
+
+      if (type1 != WORD_ID) {
+        TypeErr(1, "UNDO", "word");
+        return(ERROR);
+      }
+      return(OK);
+      break;
+
     case WAIT:
       /***************/
       /* wait(value) */

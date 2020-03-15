@@ -1,6 +1,6 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
+/* Copyright (c) 2016 - 2020 Marnix van den Bos.                        */
 /*                                                                      */
 /* <marnix.home@gmail.com>                                              */
 /*                                                                      */
@@ -135,7 +135,9 @@ int32_t LetsPlay(void)
       /* 06oct2017 added action_rec and subject_index, but in */
       /* this first call of HandleTimers() they have no valid */
       /* values yet                                           */
+      /* Make sure no undo info is written                    */  /* @!@ */
 
+      write_undo = 0;
       if (HandleTimers(dummy_action_rec, dummy_subject_index) == QUIT) {
         return(OK);
       }

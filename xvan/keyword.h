@@ -256,7 +256,7 @@
 #define ELSE            521
 #define ENDIF           522
 #define UP              523
-#define DOWN            524item3-FIRST_TIMER_ID
+#define DOWN            524
 #define TITLE           525
 #define VERSION         526
 #define VOCAB           527

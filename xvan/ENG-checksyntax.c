@@ -1,6 +1,6 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
+/* Copyright (c) 2016 - 2020 Marnix van den Bos.                        */
 /*                                                                      */
 /* <marnix.home@gmail.com>                                              */
 /*                                                                      */
@@ -54,7 +54,7 @@ int32_t ENG_CheckSyntax(char *line_buf, int32_t id, int32_t nr_of_types, int32_t
 {
   int32_t  result;               /* needed to test for unknown words and */
                                  /* stop recursive calling               */
-  int32_t  single_id;  /* @!@ */
+  int32_t  single_id;
   int32_t  i = 0;
   int32_t  old_state = state;    /* Remember state to retry in case of   */
                                  /* a syntax clash.                      */
@@ -727,7 +727,7 @@ int32_t ENG_CheckSyntax(char *line_buf, int32_t id, int32_t nr_of_types, int32_t
                              ++type_index, subject_index, old_state,
                              parsed_input));
       }
-    case PLURAL:   /* @!@ */
+    case PLURAL:
       /* plural is only allowed for subject part 1 */
       switch (state) {
         case  2: ;    /* subject part 1 */
@@ -764,7 +764,7 @@ int32_t ENG_CheckSyntax(char *line_buf, int32_t id, int32_t nr_of_types, int32_t
           case 30: ;
           case 31:
             (parsed_input->subject[subject_index]).part1.noun = id;
-            parsed_input->single[subject_index]               = single_id;  /* @!@ */
+            parsed_input->single[subject_index]               = single_id;
             break;
           default:
             /* we should never get here */
@@ -779,7 +779,7 @@ int32_t ENG_CheckSyntax(char *line_buf, int32_t id, int32_t nr_of_types, int32_t
         return(UNKNOWN_WORD);
       else /* error */ {
         /* Oops! it wasn't a plural noun after all; try again */
-        parsed_input->single[subject_index] = NO_ID;  /* @!@ */
+        parsed_input->single[subject_index] = NO_ID;
         return(ENG_CheckSyntax(line_buf, id, nr_of_types, types,
                              ++type_index, subject_index, old_state,
                              parsed_input));
