@@ -232,7 +232,7 @@ int32_t main(int argc, char **argv)
   printf("                     *******************************************************\n");
   printf("                                           XVAN COMPILER\n");
   printf("                                            version 2.5\n");
-  printf("                       Copyright 2016, 2017, 2018, 2019 Marnix van den Bos\n");
+  printf("                       Copyright (c) 2016 - 2020 Marnix van den Bos\n");
   printf("                     *******************************************************\n\n");
 
 
