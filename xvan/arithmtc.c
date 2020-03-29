@@ -358,7 +358,7 @@ resultStruct XeqBasicOperator(int32_t opr, int32_t **trigger)
     if (type1 == TIM_ID) { /* @!@ */
       /* par 1 is a timer */
       /* write undo info */  /* @!@ */
-      PushUndoItem(TIMERS, INIT, par1-FIRST_TIMER_ID, NO_ID, NO_ID, timers[par1-FIRST_TIMER_ID].value);
+      PushUndoItem(TIMERS, INIT, par1, NO_ID, NO_ID, timers[par1-FIRST_TIMER_ID].value);
       timers[par1-FIRST_TIMER_ID].value = result;
     }
     else {
@@ -472,7 +472,7 @@ resultStruct XeqSetTimer(int32_t **trigger)  /* @!@ */
   if (CheckPars(SETTIMER, type1, type2, NO_TYPE, NO_TYPE, NO_TYPE)) {
     index = par1-FIRST_TIMER_ID;
     /* write undo info */
-    PushUndoItem(TIMERS, INIT, index+FIRST_TIMER_ID, NO_ID, NO_ID, timers[index].value);
+    PushUndoItem(TIMERS, INIT, par1, NO_ID, NO_ID, timers[index].value);
 
     timers[index].value = par2;
 
