@@ -30,7 +30,7 @@
 #include "typedefs.h"
 #include "letsplay.h"
 #include "json.h"      /* for ifi.h    */
-#include "IFI.h"       /* IFI_REQ_META */
+#include "ifi.h"       /* IFI_REQ_META */
 #include "defs.h"
 
 /***********/

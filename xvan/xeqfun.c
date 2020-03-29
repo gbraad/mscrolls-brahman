@@ -40,7 +40,7 @@
 #include "keyword.h"
 #include "json.h"      /* for key length definition */
 #include "typedefs.h"
-#include "IFI.h"
+#include "ifi.h"
 #include "xeqfun.h"
 
 /*************************/
@@ -3243,7 +3243,7 @@ resultStruct XeqUnderline(int32_t **trigger)
 }
 
 
-resultStruct XeqUndo(int32_t **trigger)  /* @!@ */
+resultStruct XeqUndo(int32_t **trigger)
 {
   /* this function pops the undo stack until it reaches an */
   /* EOU (End Of Undo) or NO_ID value in the item member   */
@@ -3273,6 +3273,9 @@ resultStruct XeqUndo(int32_t **trigger)  /* @!@ */
 
   /* Read nr of parameters. */
   nr_of_pars = NextOpcode(trigger);
+
+  /* don't write undo information */
+  write_undo = 0;
 
   if (nr_of_pars == 1) {
     /* Read parameter. */
@@ -3384,6 +3387,15 @@ resultStruct XeqUndo(int32_t **trigger)  /* @!@ */
         return( (resultStruct) {CONTINUE, NONE, 0} );
     }
     PopUndoItem(&item1, &item2, &item3, &item4, &item5, &value);
+  }
+
+  /* if we ended with an EOU, push it back onto the stack  */
+  /* because we set write_undo = 0, we will loose the EOU  */
+  /* and the next undo will undo 2 turns or throw an error */
+  if (item1 == EOU) {
+    write_undo = 1;
+    PushUndoItem(EOU, NO_ID, NO_ID, NO_ID, NO_ID, 0);
+    write_undo = 0;
   }
 
   return( (resultStruct) {CONTINUE, NONE, 0} );

@@ -29,7 +29,7 @@
 #include "keyword.h"
 #include "typedefs.h"
 #include "json.h"
-#include "IFI.h"
+#include "ifi.h"
 #include "input.h"
 
 #include "ifiglue.h"

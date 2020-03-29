@@ -33,7 +33,7 @@
 #include "defs.h"
 
 #include "json.h"
-#include "IFI.h"
+#include "ifi.h"
 
 #include "ifiglue.h"
 #include "ifischema.h"

@@ -237,7 +237,6 @@ void PopUndoItem(int32_t *item1, int32_t *item2, int32_t *item3, int32_t *item4,
   /* undo_sp points to the last written item. Unless */
   /* the undo stack is empty (in which case undo_sp  */
   /* will be -1                                      */
-
   if (undo_sp == -1) {
     /* tell caller that stack is empty */
     *item1 = NO_ID;
