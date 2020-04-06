@@ -106,12 +106,6 @@ C1.SplitView
 
                 function ensureVisible(r)
                 {
-                    /*
-                    if (contentY >= r.y) contentY = r.y;
-                    else if (contentY+height < r.y+r.height)
-                    contentY = r.y+r.height-height;
-                    */
-                    // snap!
                     contentY = Math.max(area.implicitHeight - height,0)
                 }
 
@@ -161,7 +155,11 @@ C1.SplitView
                             textflick.interactive = false
                         }
                         onPositionChanged: area.select(start, area.positionAt(mouseX, mouseY))
-                        onReleased: textflick.interactive = true
+                        onReleased:
+                        {
+                            area.copy();
+                            textflick.interactive = true
+                        }
                     }
                 }
                     
@@ -220,7 +218,7 @@ C1.SplitView
         Layout.minimumHeight: normalTHeight
         Layout.maximumHeight: splitview.height*2/3
 
-        onVisibleChanged: if (visible) forceActiveFocus();
+        onVisibleChanged: if (visible && !M.Device.isIOS()) forceActiveFocus();
         
         onWbhChanged:
         {

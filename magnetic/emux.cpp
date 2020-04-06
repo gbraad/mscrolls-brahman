@@ -486,7 +486,7 @@ int handle_test_commands(const char* cmd)
 {
     int res = 0;
 
-    if ((res = !strncmp("seed", cmd, 4) != 0))
+    if (!strncmp("seed", cmd, 4))
     {
         ms_seed(atoi(cmd+5));
         return 1;
@@ -549,19 +549,19 @@ int handle_test_commands(const char* cmd)
         }
         else cout << "unknown location '" <<  place << "'\n";
     }
-    else if ((res = !strncmp("goto", cmd, 4) != 0))
+    else if ((res = !strncmp("goto", cmd, 4)) != 0)
     {
         int target = atoi(cmd+5);
         cout << GameMap::theMap.find_path(get_current_room(),target);
     }
-    else if ((res = !strcmp("gettables", cmd) != 0))
+    else if ((res = !strcmp("gettables", cmd)) != 0)
     {
         IItem::IItems items;
         IItem::getCarryableItems(items);
         cout << items << "\n";
     }
 #ifdef DISASM
-    else if ((res = !strncmp("dasm", cmd, 4) != 0))
+    else if ((res = !strncmp("dasm", cmd, 4)) != 0)
     {
         DisAssembly* d = reinterpret_cast<DisAssembly*> (disassem);
         if (strlen(cmd)>5)
@@ -569,7 +569,7 @@ int handle_test_commands(const char* cmd)
         else
             d->dump_dasm(0);
     }
-    else if ((res = !strncmp("dgaps", cmd, 5) != 0))
+    else if ((res = !strncmp("dgaps", cmd, 5)) != 0)
     {
         DisAssembly* d = reinterpret_cast<DisAssembly*> (disassem);
         d->get_absaddrlist();

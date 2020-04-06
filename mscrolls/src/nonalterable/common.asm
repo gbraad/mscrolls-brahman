@@ -194,27 +194,19 @@ MU     ALIGN
 *--------------------------------
 
 SYNMACRO      MACRO
-
 	       DC.W        (\1)*$20+\2
-
 	       ENDM
 
-	IFNE	YCHEAT&VAX
-
+	IFNE	YCHEATMORE&VAX
 SYNMACRO2     MACRO
-
 	       DC.W        (\1)*$20+\2
-
 	       ENDM
 	
 	ENDC
 
-	IFEQ	YCHEAT&VAX
-
+	IFEQ	YCHEATMORE&VAX
 SYNMACRO2	MACRO
-
 		ENDM
-
 	ENDC
 
 	ALIGN

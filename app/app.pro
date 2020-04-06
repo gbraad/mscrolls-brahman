@@ -53,8 +53,6 @@ android {
   #message("android plugins live in " $$[QT_INSTALL_PLUGINS])
 }
 
-LIBZ = $$PROJ/tools/zlib
-LIBPNG = $$PROJ/tools/apng/libpng_apng/libpng
 INCLUDEPATH += $$PROJ/api $$RJSONDIR/include $$LIBPNG $$LIBZ
 
 macx: !android {

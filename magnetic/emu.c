@@ -2726,7 +2726,7 @@ void _char_out(type8 c, outfn fn)
     if (c == '\\')
     {
         // set escape mode. This inhibits all processing until the next
-        // newline
+        // newline or next backslash
         lastchar = c;
         escape = !escape;
         return;
@@ -3906,6 +3906,41 @@ type16 get_stopron()
     return obj;
 }
 
+type16 get_ptn()
+{
+    int obj = 0;
+    if (prog_format)
+    {
+        static int s_ptn;
+        if (!s_ptn) s_ptn = get_sym_value("P.TN");
+        assert(s_ptn);
+        obj = s_ptn;
+    }
+    return obj;
+}
+
+type8 emu_emit_stopron()
+{
+    // call P.TN with the noun# in STOPRON
+    // return 1 if OK
+    type16 obj = get_stopron();
+    obj &= 0x3fff;
+    if (obj)
+    {
+        // execute
+        // D0 = STOPRON
+        // JSR P.TN
+        
+        type16 ptn = get_ptn();
+        assert(ptn);
+        write_reg(0, 1, obj);
+        push(pc);
+        pc = ptn;
+        return 1;
+    }
+    return 0;
+}
+
 type16 get_cantsave()
 {
     // GUILD remastered onward has a symbol "CANTSAVE" which contains
@@ -4826,10 +4861,12 @@ void do_line_a(void)
                 break;
             case InfoAtCommand:
                 // called before a command is parsed
+#ifndef STANDALONE                
                 {
                     int d = ScnMsgCount - lastScnMsgCount;
                     ms_event_hook(!d);
                 }
+#endif                
                 break;
             case InfoDump:
                 {
@@ -5186,9 +5223,8 @@ void do_line_a(void)
                 pos = read_reg(8 + 1, 1); // A1.L
                 size = (type16)read_reg(1, 1); // D1.W
 
-                //printf("save at %x, size %d (%x)\n", pos, (int)size, (int)size);
-                write_reg(7, 0,
-                          ms_save_file(str, effective(pos), size, pos));
+                //printf("save at %x, size %d (%x) into %s\n", pos, (int)size, (int)size, (char*)str);
+                write_reg(7, 0, ms_save_file(str, effective(pos), size, pos));
             }
             break;
 
@@ -5501,6 +5537,8 @@ void do_line_a(void)
    }
 #endif
 
+
+
 /* emulate an instruction [1b7e] */
 
 type8 ms_rungame(void)
@@ -5527,8 +5565,7 @@ type8 ms_rungame(void)
     }
 
 #ifdef LOGEMU
-    if (pc == 0x0000)
-        stat = 0;
+    if (pc == 0x0000) stat = 0;
     if (stat)
     {
         log_status();
@@ -5587,10 +5624,11 @@ type8 ms_rungame(void)
     }
     push_msg(DASM_ADDR,"%u", pc);
     ins_addr=pc;
-#endif
+#endif // DISASSEM
 
     i_count++;
     read_word();
+    
 #ifdef LOGDIS
     // skip 0x0000 words
     if (no_branch)
@@ -5613,10 +5651,10 @@ type8 ms_rungame(void)
             read_word();
         }
 
-#endif
+#endif // LOGDIS
+    
     switch (byte1 >> 1)
     {
-
         /* 00-0F */
     case 0x00:
         if (byte1 == 0x00)
@@ -5625,11 +5663,13 @@ type8 ms_rungame(void)
             {
                 /* OR immediate to CCR (30D9) */
                 read_word();
+                
 #if defined(LOGEMU) || defined (DISASM)
                 push_msg(DASM_OP,"ori");
                 push_msg(DASM_ARG1,"#$%.2x",byte2);
                 push_msg(DASM_ARG2,"CCR");
 #endif
+                
                 if (byte2 & 0x01)
                     cflag = 0xff;
                 if (byte2 & 0x02)
@@ -6140,11 +6180,12 @@ type8 ms_rungame(void)
             }
             else if ((byte2 & 0xc0) == 0x80)
             {
+                
 #ifdef LOGDIS
                 push_msg(DASM_OP,"jsr");
-                if (no_branch)
-                    nextjmp=1;
+                if (no_branch) nextjmp=1;
 #endif
+                
                 set_info((type8)(byte2 | 0xc0));                /* indir JSR */
                 set_arg1();
                 push(pc);
@@ -6978,9 +7019,11 @@ type8 ms_rungame(void)
         ms_fatal("Constants aren't and variables don't");
         break;
     }
+    
 #ifdef LOGEMU
     push_msg_end();
 #endif
+    
 #ifdef DISASM
     push_msg(DASM_SIZE,"%d",op_words);
     push_msg(DASM_SCODE,"%.2X%.2X",effective(ins_addr)[0],effective(ins_addr)[1]);
@@ -6997,6 +7040,7 @@ type8 ms_rungame(void)
     else
         push_msg(DASM_ACODE,"     ");
     dasm_addins(disassem,curr_ins);
-#endif
+#endif // DISASEM
+    
     return running;
 }

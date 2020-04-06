@@ -1,0 +1,5 @@
+<RCC>
+	<qresource prefix="/sounds">
+		<file alias="whippywind.ogg">whippywind.ogg</file>
+	</qresource>
+</RCC>

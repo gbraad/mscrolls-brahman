@@ -1,0 +1,11 @@
+RESOURCES += ../mscrolls/guild/sounds/guildsounds1.qrc
+RESOURCES += ../mscrolls/guild/sounds/guildsounds2.qrc
+RESOURCES += ../mscrolls/guild/sounds/guildsounds3.qrc
+RESOURCES += ../mscrolls/guild/sounds/guildsounds4.qrc
+RESOURCES += ../mscrolls/guild/sounds/guildsounds5.qrc
+RESOURCES += ../mscrolls/guild/sounds/guildsounds6.qrc
+RESOURCES += ../mscrolls/guild/sounds/guildsounds7.qrc
+RESOURCES += ../mscrolls/guild/sounds/guildsounds8.qrc
+RESOURCES += ../mscrolls/guild/sounds/guildsounds9.qrc
+RESOURCES += ../mscrolls/guild/sounds/guildsounds10.qrc
+RESOURCES += ../mscrolls/guild/sounds/guildsounds11.qrc

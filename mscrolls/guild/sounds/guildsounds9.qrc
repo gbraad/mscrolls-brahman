@@ -1,0 +1,5 @@
+<RCC>
+	<qresource prefix="/sounds">
+		<file alias="pond.ogg">pond.ogg</file>
+	</qresource>
+</RCC>

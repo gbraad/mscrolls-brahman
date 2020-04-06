@@ -94,7 +94,6 @@ void set ## _setname(int v)                                     \
 {                                                               \
     if (v != _name())                                           \
     {                                                           \
-        qDebug() << "prefs " #_name  << v;                      \
         _prefs->set(PREFS_ ## _def, v);                         \
         emit _name ## Changed();                                \
     }                                                           \

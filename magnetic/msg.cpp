@@ -62,12 +62,59 @@ bool Messages::start(const char* filename)
     return res;
 }
 
+#if 0
+// old version
+void Messages::emitStoprn(const char* msg, outfn fn)
+{
+    int obj = get_stopron();
+    if (obj)
+    {
+        //bool notrailingspace = (obj & 0x4000);
+        obj &= 0x3fff;
+        IItem ii(find_item(obj));
+        if (ii)
+        {
+            string tn = ii.tnWord();
+            emitChars(tn.c_str(), fn);
+        }
+        else
+        {
+            LOG1("MS, failed to decode msg obj ", obj << " for " << msg);
+        }
+    }
+    else
+    {
+        LOG1("MS, warning missing object for @ in ;", msg);
+    }
+}
+#endif    
+
+
 void Messages::emitChars(const char* msg, outfn fn)
 {
     char last = 0;
     char c;
-    const char* s = msg;
+    const char* s;
+    
+    static const char* stoprnContinuation;
+    static int instoprn;
 
+    if (instoprn)
+    {
+        // wait for the countdown to hit zero
+        // then, if there is a continuation, emit it.
+        if (!--instoprn)
+        {
+            s = stoprnContinuation;
+            if (s)
+            {
+                stoprnContinuation = 0;
+                while (*s) (fn)(*s++);
+            }
+        }
+    }
+    
+    s = msg;
     for (;;)
     {
         c = *s++;
@@ -75,27 +122,27 @@ void Messages::emitChars(const char* msg, outfn fn)
 
         if (c == '@' && last == ' ')
         {
-            int obj = get_stopron();
-            if (obj)
+            /* when we encounter " *" we must print;
+             * "THE" ITEM
+             * where item is in STOPRON
+             * then continue the message.
+             * 
+             * What we do is store any message continuation
+             * set a message countdown to 2 
+             * call emu to execute a virtual JSR P.TN
+             *
+             * countdown of 2 will cause "the" to be handled normally
+             * then, when the next message is emitted, it will 
+             * trigger the continuation to be printed FIRST.
+             */
+            if (emu_emit_stopron())
             {
-                //bool notrailingspace = (obj & 0x4000);
-                obj &= 0x3fff;
-                IItem ii(find_item(obj));
-                if (ii)
-                {
-                    string tn = ii.tnWord();
-                    emitChars(tn.c_str(), fn);
-                }
-                else
-                {
-                    LOG1("MS, failed to decode msg obj ", obj << " for " << msg);
-                }
-            }
-            else
-            {
-                LOG1("MS, warning missing object for @ in ;", msg);
+                instoprn = 2;
+                if (*s) stoprnContinuation = s;
+                return;
             }
         }
+        
         else (*fn)(c);
 
         last = c;

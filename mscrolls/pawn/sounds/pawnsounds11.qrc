@@ -1,0 +1,5 @@
+<RCC>
+	<qresource prefix="/sounds">
+		<file alias="tube_buzz.ogg">tube_buzz.ogg</file>
+	</qresource>
+</RCC>

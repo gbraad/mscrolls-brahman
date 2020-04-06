@@ -32,9 +32,9 @@
 #include "puzzle.h"
 #include "logged.h"
 #include "matcol.h"
-#include "ifmagnetic.h"
 
 #ifndef STANDALONE
+#include "ifmagnetic.h"
 #include "ifproduct.h"
 #endif
 

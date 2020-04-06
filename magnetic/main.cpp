@@ -314,7 +314,7 @@ type8 ms_getchar(type8 trans)
     return (type8)c;
 }
 
-void ms_showpic(type32 c, type32 picAddr, type8 mode, type8 ver, float* profile)
+void ms_showpic(type32 c, type32 picAddr, type8 mode, type8 ver, float* profile, int picVer)
 {
     /* Insert your favourite picture viewing code here
        mode: 0 gfx off, 1 gfx on (thumbnails), 2 gfx on (normal) */

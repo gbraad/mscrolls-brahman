@@ -69,15 +69,7 @@ public:
     virtual qint64 writeData(const char *data, qint64 len) { return 0; }
     virtual qint64 bytesAvailable() const  = 0;
     virtual bool playing() const = 0;
-    virtual void setVolume(double v)
-    {
-        if (v < 0) v = 0;
-        else if (v > 1.0) v = 1.0;
-        if (_audioOutput)
-        {
-            _audioOutput->setVolume(v);
-        }
-    }
+    virtual void setVolume(double v) {}
 
     bool setSource(const string& filename)
     {
@@ -104,7 +96,14 @@ public:
             r = _source.open(QIODevice::ReadOnly); 
             if (!r)
             {
-                LOG1("PlayerSource, can't open '", _sourceFile << "'");
+                if (!_source.exists())
+                {
+                    LOG1("PlayerSource, file '", _sourceFile << "' does not exist\n");
+                }
+                else
+                {
+                    LOG1("PlayerSource, can't open '", _sourceFile << "'");
+                }
             }
             else
             {
@@ -120,6 +119,7 @@ protected:
     QAudioOutput*   _audioOutput = 0;
     string          _sourceFile;
     QFile           _source;
+    double          _volume = 1.0;
 
 };
 

@@ -551,6 +551,7 @@ extern type8* getcode();
 extern type16 get_stopron();
 extern type16 get_cantsave();
 extern void ms_restart_request();
+extern type8 emu_emit_stopron();
 
 extern type8 get_OUTMODE();
 extern int set_OUTMODE(int v);

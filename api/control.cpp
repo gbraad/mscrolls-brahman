@@ -56,7 +56,7 @@
 // 1.1.X pre ifi
 // 1.2.X post ifi
 // 1.3.X move to Qt5.12.X
-#define VERSION_STRING  "1.3.1"
+#define VERSION_STRING  "1.3.3"
 
 struct ControlImpBase
 {
@@ -990,7 +990,7 @@ struct Control::Imp :
 
         char id = tf._id;
 
-        if (id == -1)
+        if (id == (char)-1)
         {
             // code to clear text
             id = BRA_SEGMENT_CLEAR;

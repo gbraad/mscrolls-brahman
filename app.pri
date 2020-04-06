@@ -63,10 +63,12 @@ CONFIG(release, debug|release) {
    }
 
 linux: {
+    DEFINES += applec
     LIBDIR = $$BUILDT
 }
    
 unix:!android {
+    DEFINES += applec
     DESTDIR=$$BUILDT
     OBJECTS_DIR = $$BUILDT
     MOC_DIR = $$BUILDT
@@ -74,19 +76,37 @@ unix:!android {
 }
 
 win32 {
+
+#windows 64 bit goes into "debug" and "release"
+#windows 32 bit goes into "debug32" and "release32"
+   contains(QT_ARCH, i386) {
+      message("windows 32 bit")
+      BUILDT=$${BUILDT}32
+      DESTDIR=$$BUILDT
+      OBJECTS_DIR = $$DESTDIR
+      MOC_DIR = $$DESTDIR
+      RCC_DIR = $$DESTDIR
+      UI_DIR = $$DESTDIR
+   }
+
    LIBDIR = $$BUILDT
 }
 
 ios {
-   LIBDIR = build-ios/$$BUILDT
+   DEFINES += applec
+   LIBDIR = $$BUILDT
    QMAKE_SONAME_PREFIX = @rpath
 }
 
 macx {
+   DEFINES += applec
    LIBDIR = $$BUILDT
 }
 
 android {
+    equals(ANDROID_TARGET_ARCH, arm64-v8a) { 
+        LIBDIR = build-android-arm8-$$BUILDT
+    }
     equals(ANDROID_TARGET_ARCH, armeabi-v7a) { 
         LIBDIR = build-android-arm-$$BUILDT
     }

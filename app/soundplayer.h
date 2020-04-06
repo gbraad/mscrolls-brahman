@@ -178,7 +178,6 @@ public:
                 if (!s) return false;
                 
                 _bind(s);
-
                 s->loops(_host->_loops);
                 s->fade(_host->_fade);
                 QIODevice* out = aout->start();

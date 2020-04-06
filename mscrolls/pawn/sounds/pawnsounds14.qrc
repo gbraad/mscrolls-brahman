@@ -1,0 +1,5 @@
+<RCC>
+	<qresource prefix="/sounds">
+		<file alias="windintrees.ogg">windintrees.ogg</file>
+	</qresource>
+</RCC>
