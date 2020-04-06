@@ -1,6 +1,6 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
+/* Copyright (c) 2016 - 2020 Marnix van den Bos.                        */
 /*                                                                      */
 /* <marnix.home@gmail.com>                                              */
 /*                                                                      */
@@ -43,13 +43,13 @@
 /* Function declarations */
 /*************************/
 
-int32_t Play(char*);
+int32_t Play(char*, int32_t);  /* @!@ */
 
 /************************/
 /* Function definitions */
 /************************/
 
-int32_t Play(char *user_input)
+int32_t Play(char *user_input, int32_t undo)  /* @!@ */
 {
   static parsedInput  parsed_input;
   static usrActionRec action_rec;
@@ -64,7 +64,7 @@ int32_t Play(char *user_input)
   static resultStruct arec_result;
   static resultStruct prologue_result;
   static resultStruct verb_def_result;
-  int32_t             i = 0;  /* @!@ */
+  int32_t             i = 0;
 
   /* 17dec2016: added nr_of_subjects because introducing the parser  */
   /* rules makes it no longer possible to match all subjects at once */
@@ -73,6 +73,17 @@ int32_t Play(char *user_input)
   /* individually now under control of letsplay().                   */
 
   int32_t nr_of_subjects = 0;
+
+  /* check if an end of undo for the previous turn must be written */  /* @!@ */
+  if (write_undo) {
+    PushUndoItem(EOU, NO_ID, NO_ID, NO_ID, NO_ID, 0);
+  }
+
+  /* enable writing undo information if requested by undo parameter */
+  write_undo = undo;
+
+  /* start the turn with 0 undo records */  /* @!@ */
+  undo_record_counter = 0;
 
   /* flush outputline */
   Output();
@@ -120,7 +131,7 @@ int32_t Play(char *user_input)
     /* individually because we have introduced the parser rules */
     /* where a subject may be checked against the specifier     */
 
-    /* nr_of_subjects is the numer of subjects that were in the */  /* @!@ */
+    /* nr_of_subjects is the numer of subjects that were in the */
     /* command line. Subjects that result from a plural subject */
     /* are counted separately in the OK: branch from Translate() */
 
@@ -131,7 +142,7 @@ int32_t Play(char *user_input)
     /* e.g. give rope, bone to fred won't work if we don't     */
     /* start with 'bone to fred' as the first subject          */
 
-    subject_index = (nr_of_subjects == 0 ? 0 : nr_of_subjects-1);  /* @!@ */
+    subject_index = (nr_of_subjects == 0 ? 0 : nr_of_subjects-1);
 
     /* 17dec2016: added iteration through subjects (in case more */
     /* more than 1 subject was entered by the player). Iteration */
@@ -155,9 +166,9 @@ int32_t Play(char *user_input)
 
       switch (translate_result.tag) {
         case OK:
-          /* Successful translation.                             */  /* @!@ */
+          /* Successful translation.                             */
 
-          /* if the subject was plural, Translate() may have     */  /* @!@ */
+          /* if the subject was plural, Translate() may have     */
           /* returned more than 1 matching subject id. If this   */
           /* is the case, we must execute this "case OK:" clause */
           /* for all returned ids.                               */
@@ -166,9 +177,9 @@ int32_t Play(char *user_input)
           /* the loop if the first subject equals NO_ID. If one  */
           /* of the other subjects equals NO_ID, we must stop.   */
 
-          i = 0;  /* @!@ */
+          i = 0;
 
-          do {  /* @!@ */
+          do {
             /* Set the global subject variable. */
             if (action_rec.subject[subject_index] == PLURAL) {
               subject = action_rec.plural_subjects[i++];
@@ -353,7 +364,7 @@ int32_t Play(char *user_input)
               break;
             } /* switch XeqPrologue() */
           } while (action_rec.subject[subject_index] == PLURAL &&
-                   action_rec.plural_subjects[i] != NO_ID);  /* @!@ */
+                   action_rec.plural_subjects[i] != NO_ID);
           break; /* Translate() OK */
 
         case OVERFLOW:
@@ -373,7 +384,7 @@ int32_t Play(char *user_input)
           /* check for QUIT in case of second call of Play() */
           /* (if not Play() will return to this same point   */
           /* and do nothing with the yes/no answer to quit() */
-          if (Play(user_input) == QUIT) {
+          if (Play(user_input, 1) == QUIT) {
             return(QUIT);
           }
           break;

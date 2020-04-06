@@ -1,6 +1,6 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
+/* Copyright (c) 2016 - 2020 Marnix van den Bos.                        */
 /*                                                                      */
 /* <marnix.home@gmail.com>                                              */
 /*                                                                      */
@@ -51,6 +51,7 @@ extern attrInfo     *local_attrs;        /* fileio.c */
 extern int32_t      *trigg_owners;       /* fileio.c */
 extern int32_t      *descr_owners;       /* fileio.c */
 extern int32_t      *stack;              /* init.c   */
+extern undoItem     *undo_stack;         /* undo.c   */  /* @!@ */
 
 extern char         *outputline;         /* init.c   */
 

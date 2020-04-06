@@ -1,6 +1,6 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
+/* Copyright (c) 2016 - 2020 Marnix van den Bos.                        */
 /*                                                                      */
 /* <marnix.home@gmail.com>                                              */
 /*                                                                      */
@@ -70,6 +70,8 @@ extern char      *outputline;          /* init.c     */
 extern char      *json_msg_from_story; /* init.c     */
 
 extern int32_t   disambig_score;       /* disambig.c */
+
+extern int32_t   write_undo;           /* undo.c     */  /* @!@ */
 
 extern int32_t  nr_of_locs;            /* fileio.c   */
 extern int32_t  nr_of_directions;      /* fileio.c   */
@@ -159,6 +161,12 @@ extern void          PrintId(int32_t, int);                                     
 extern int32_t       LookUpId(char*);                                            /* syntax.c   */
 
 extern char          *Base64Save(char*);
+
+/* undo functions */
+extern void    PopUndoItem(int32_t*, int32_t*, int32_t*, int32_t*, int32_t*, int32_t*);  /* undo.c */  /* @!@ */
+extern void    PushUndoItem(int32_t, int32_t, int32_t, int32_t, int32_t, int32_t);       /* undo.c */  /* @!@ */
+extern int32_t InitUndoStack(void);                                                      /* undo.c */  /* @!@ */
+/* end of undo functions */
 
 /* Debug functions */
 extern void          DebugLevel_2_pars(char*, resultStruct*, int);

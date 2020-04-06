@@ -1,6 +1,6 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
+/* Copyright (c) 2016 - 2020 Marnix van den Bos.                        */
 /*                                                                      */
 /* <marnix.home@gmail.com>                                              */
 /*                                                                      */
@@ -261,7 +261,7 @@ int32_t XeqIFIrequest(int32_t request, jsonValue *value)
       /* otherwise MoreInfo() calls will go wrong       */
 
       strcpy(interpreter_input, value->textstring);
-      result = Play(interpreter_input);
+      result = Play(interpreter_input, 1);  /* @!@ */
       break;
 
     case IFI_REQ_CONFIGDIR:
@@ -277,9 +277,11 @@ int32_t XeqIFIrequest(int32_t request, jsonValue *value)
       ifi_stats.items = (value->type == JSON_VAL_TRUE ? 1 : 0);
       if (ifi_stats.items) {
         strcpy(interpreter_input, "ifi_items");
+
         /* prevent timers from being fired */
         fire_timers = 0;
-        Play(interpreter_input);
+
+        Play(interpreter_input, 0);  /* @!@ */
       }
       break;
 
@@ -294,9 +296,11 @@ int32_t XeqIFIrequest(int32_t request, jsonValue *value)
       }
       /* now, tell the front-end the new location */
       strcpy(interpreter_input, "ifi_update_gui");
+
       /* prevent timers from being fired */
       fire_timers = 0;
-      Play(interpreter_input);
+
+      Play(interpreter_input, 0);  /* @!@ */
 
       value->textstring = ResetString(value->textstring);
       break;
@@ -306,9 +310,11 @@ int32_t XeqIFIrequest(int32_t request, jsonValue *value)
       ifi_stats.location = (value->type == JSON_VAL_TRUE ? 1 : 0);
       if (ifi_stats.location) {
         strcpy(interpreter_input, "ifi_loc");
+
         /* prevent timers from being fired */
         fire_timers = 0;
-        Play(interpreter_input);
+
+        Play(interpreter_input, 0);  /* @!@ */
       }
       break;
 #endif
@@ -317,9 +323,11 @@ int32_t XeqIFIrequest(int32_t request, jsonValue *value)
       ifi_stats.map = (value->type == JSON_VAL_TRUE ? 1 : 0);
       if (ifi_stats.map) {
         strcpy(interpreter_input, "ifi_map");
+
         /* prevent timers from being fired */
         fire_timers = 0;
-        Play(interpreter_input);
+
+        Play(interpreter_input, 0);  /* @!@ */
       }
       break;
 

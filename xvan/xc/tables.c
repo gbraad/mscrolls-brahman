@@ -1,8 +1,8 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
+/* Copyright (c) 2016 - 2020 Marnix van den Bos.                        */
 /*                                                                      */
-/* <marnix.home@gmail.com>                                              */
+/* <marnix@xvan.nl>                                                     */
 /*                                                                      */
 /* This file is part of XVAN, an Interactive Fiction authoring system.  */
 /*                                                                      */
@@ -2119,7 +2119,7 @@ int32_t CheckTables()
   lp = loc_table;
   while (strcmp(lp->l_word, TERMINATOR) != 0) {
     if (!(lp->exists)) {
-      printf("%s ", lp->l_word);
+      printf("\n\n l_%s:", lp->l_word);
       PrintError(90, NULL, "location");
       status = ERROR;
     }
@@ -2130,7 +2130,7 @@ int32_t CheckTables()
   op = obj_table;
   while (strcmp(op->o_word, TERMINATOR) != 0) {
     if (!(op->exists)) {
-      printf("%s: ", op->o_word);
+      printf("\n\n o_%s:", op->o_word);
       PrintError(90, NULL, "object");
       status = ERROR;
     }

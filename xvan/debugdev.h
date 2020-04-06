@@ -1,6 +1,6 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
+/* Copyright (c) 2016 - 2020 Marnix van den Bos.                        */
 /*                                                                      */
 /* <marnix.home@gmail.com>                                              */
 /*                                                                      */
@@ -52,6 +52,9 @@ extern int32_t    nr_of_cattrs;              /* fileio.c   */
 extern int32_t    nr_of_lattrs;              /* fileio.c   */
 extern int32_t    nr_of_timers;              /* fileio.c   */
 extern wordTable  *word_table;               /* dirs.c     */
+extern int32_t    undo_sp;                   /* undo.c     */  /* @!@ */
+extern undoItem   *undo_stack;               /* undo.c     */  /* @!@ */
+extern int32_t    undo_stack_size;           /* undo.c     */  /* @!@ */
 
 extern int32_t    curr_loc;                  /* letsplay.c */
 extern int32_t    direction;                 /* letsplay.c */

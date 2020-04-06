@@ -1,8 +1,8 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
+/* Copyright (c) 2016 - 2020 Marnix van den Bos.                        */
 /*                                                                      */
-/* <marnix.home@gmail.com>                                              */
+/* <marnix@xvan.nl>                                                     */
 /*                                                                      */
 /* This file is part of XVAN, an Interactive Fiction authoring system.  */
 /*                                                                      */
@@ -21,21 +21,19 @@
 /************************************************************************/
 
 
-#if !defined(__ENG_checksyntax)
-#define __ENG_checksyntax
+#if !defined(__undo)
+#define __undo
 
 /*************************/
 /* External declarations */
 /*************************/
 
-extern verbDir *verb_dir;                                         /* fileio.c    */
-extern char    *outputline;                                       /* init.c      */
+extern void Log(char*, char*, char*);
 
-extern void    Output(void);                                      /* output.c    */
-extern void    PrintString(char*, int);                           /* output.c    */
-extern int32_t LookUpId(char*);                                   /* syntax.c    */
-extern int32_t NextWordId(char**, int32_t*, int32_t*, int32_t*);  /* syntax.c */  /* @!@ */
-extern void    PrintParsedInput(parsedInput*);                    /* debug.c     */
-extern void    PrintUsrActionRec(usrActionRec*);                  /* debug.c     */
+extern int32_t  nr_of_locs;                             /* fileio.c */
+extern int32_t  nr_of_objs;                             /* fileio.c */
+extern int32_t  nr_of_timers;                           /* fileio.c */
+
+extern void PrintError(int16_t, resultStruct*, char*);  /* errors.c */
 
 #endif

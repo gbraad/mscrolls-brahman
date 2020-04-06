@@ -1,6 +1,6 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
+/* Copyright (c) 2016 - 2020 Marnix van den Bos.                        */
 /*                                                                      */
 /* <marnix.home@gmail.com>                                              */
 /*                                                                      */
@@ -58,6 +58,7 @@ void    PrintAllTimers(void);
 void    PrintTimer(timerInfo*);
 void    PrintSpanTree(spanTree*);
 void    PrintRoute(int32_t*);
+void    PrintUndoStack(void);  /* @!@ */
 
 /************************/
 /* Function definitions */
@@ -1335,4 +1336,62 @@ void PrintRoute(int32_t *route)
      }
      PrintString("\n", 0);
   PrintString("*******************\n\n", 0);
+}
+
+
+void PrintUndoStack()  /* @!@ */
+{
+  int  i = undo_sp;
+  char text_to_print[OUTPUT_LINE_LEN];
+
+  PrintString("\n***** undo stack *****\n", 0);
+  if (undo_stack == NULL) {
+    PrintString("   uninitialized undo stack\n********\n", 0);
+    return;
+  }
+
+  if (undo_sp == -1) {
+    PrintString("   empty undo stack\n********\n", 0);
+    return;
+  }
+
+  sprintf(text_to_print, "position\titem1\titem2\titem3\titem4\tvalue\t(sp = %d)\n", undo_sp);
+  PrintString(text_to_print, 0);
+
+  for (i=0; i<undo_stack_size; i++) {
+    sprintf(text_to_print, "%d\t\t%d\t%d\t%d\t%d\t%d\n",
+                           i,
+                           undo_stack[i].item1,
+                           undo_stack[i].item2,
+                           undo_stack[i].item3,
+                           undo_stack[i].item4,
+                           undo_stack[i].value);
+    PrintString(text_to_print, 0);
+  }
+  return;
+  /* undo_stack runs from 0 to undo_stack_size-1 */
+  while (1) {
+    sprintf(text_to_print, "%d\t\t%d\t%d\t%d\t%d\t%d\n",
+                           i,
+                           undo_stack[i].item1,
+                           undo_stack[i].item2,
+                           undo_stack[i].item3,
+                           undo_stack[i].item4,
+                           undo_stack[i].value);
+    PrintString(text_to_print, 0);
+    if (i == undo_stack_size - 1) {
+      /* roll over */
+      i = 0;
+    }
+    else {
+      i++;
+    }
+
+    if (i == undo_sp) {
+      /* second time i equals undo_sp, means */
+      /* that we printed the whole stack     */
+      PrintString("**********************\n", 0);
+      return;
+    }
+  }
 }

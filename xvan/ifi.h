@@ -1,6 +1,6 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
+/* Copyright (c) 2016 - 2020 Marnix van den Bos.                        */
 /*                                                                      */
 /* <marnix.home@gmail.com>                                              */
 /*                                                                      */
@@ -96,7 +96,7 @@ extern int32_t   nr_of_objs;
 extern int32_t   GetNextKVpair(char*, int*, kvPair*);
 extern char      *AddToString(char*, char*);
 extern char      *ResetString(char*);
-extern int32_t   Play(char*);
+extern int32_t   Play(char*, int32_t);  /* @!@ */
 extern short     fire_timers;
 extern void      ifi_emitResponse(const char*);
 extern char      *AddKV(char*, char*, jsonValue*);

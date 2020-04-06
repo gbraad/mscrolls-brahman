@@ -1,6 +1,6 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
+/* Copyright (c) 2016 - 2020 Marnix van den Bos.                        */
 /*                                                                      */
 /* <marnix.home@gmail.com>                                              */
 /*                                                                      */
@@ -328,5 +328,15 @@ typedef struct {
           int32_t owner; /* 02may19, for descriptions */
           int32_t value;
         } resultStruct;
+
+
+typedef struct {  /* @!@ */
+          int32_t item1;
+          int32_t item2;
+          int32_t item3;
+          int32_t item4;
+          int32_t item5;
+          int32_t value;
+        } undoItem;
 
 #endif

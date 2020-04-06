@@ -1,8 +1,8 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
+/* Copyright (c) 2016 - 2020 Marnix van den Bos.                        */
 /*                                                                      */
-/* <marnix.home@gmail.com>                                              */
+/* <marnix@xvan.nl>                                                     */
 /*                                                                      */
 /* This file is part of XVAN, an Interactive Fiction authoring system.  */
 /*                                                                      */
@@ -230,7 +230,7 @@ typedef struct wi {
           char    word[MAX_WORD_LEN+1]; /* include the '\0' char */
           char    print_word[MAX_WORD_LEN+1];
           int32_t id;
-          int32_t single_id;  /* @!@ */
+          int32_t single_id;
           int32_t types[MAX_TYPES];
           int32_t redefine;
           struct  wi *next;
@@ -240,7 +240,7 @@ typedef struct wt {
           char     word[MAX_WORD_LEN+1];
           char     print_word[MAX_WORD_LEN+1];
           int32_t  id;
-          int32_t  single_id;  /* @!@ */
+          int32_t  single_id;
           int32_t  types[MAX_TYPES];
           int32_t  redefine;
         } wordTable;

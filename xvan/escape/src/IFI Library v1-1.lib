@@ -142,6 +142,27 @@ $VERB ifi_picture
 ENDVERB
 
 
+# undo verb in XVAN library does not fire the triggers and we
+# need l_json.t_ifi to be executed after undo to update the GUI
+
+$REDEFINE_VERB undo
+ "undo"
+   if not(testflag(o_player.f_may_undo)) then
+     printcr("At this point, undo is not allowed.")
+     disagree()
+   else
+     notimers()
+     undo()
+     #update the Glk status window
+     if trigger(o_status_window.t_update) then endif
+     # update the IFI-GUI
+     if trigger(l_json.t_ifi) then endif
+
+ DEFAULT
+   printcr("To undo your last move, type \"undo\".")
+ENDVERB
+
+
 $COMMON_TRIGGERS
  t_ifi_items
    if owns(o_player, %this) and (cansee(o_player, %this) or testflag(%this.f_bypass)) then

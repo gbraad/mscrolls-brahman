@@ -1,6 +1,6 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
+/* Copyright (c) 2016 - 2020 Marnix van den Bos.                        */
 /*                                                                      */
 /* <marnix.home@gmail.com>                                              */
 /*                                                                      */
@@ -38,7 +38,7 @@
 char     *xv_strlwr(char*);
 int32_t  ScanWordTable(char*, wordTable*, int32_t, int32_t);
 int32_t  LookUpId(char*);
-int32_t  NextWordId(char**, int32_t*, int32_t*, int32_t*);  /* @!@ */
+int32_t  NextWordId(char**, int32_t*, int32_t*, int32_t*);
 void     InitParsedInput(parsedInput*);
 int32_t  ParseInput(char*, parsedInput*, int32_t);
 int32_t  CheckSyntax(char*, int32_t, int32_t, int32_t*, int32_t, int32_t, int32_t, parsedInput*);
@@ -71,7 +71,7 @@ int32_t ScanWordTable(char *word, wordTable *wt_rec, int32_t lower, int32_t uppe
   int32_t  i;
   int32_t  j;
   int32_t  result;
-  char look_for[MAX_WORD_LEN+1];  /* +1 for '\0' */  /* @!@ */
+  char look_for[MAX_WORD_LEN+1];  /* +1 for '\0' */
 
   /* check for NULL word must be done by caller */
 
@@ -95,7 +95,7 @@ int32_t ScanWordTable(char *word, wordTable *wt_rec, int32_t lower, int32_t uppe
     return(NO_ID);
 
   i = (lower+upper)/2;
-  if ( (result = strcmp(look_for, word_table[i].word)) == 0) {  /* @!@ */
+  if ( (result = strcmp(look_for, word_table[i].word)) == 0) {
     /* found it */
     strncpy(wt_rec->word, word_table[i].word, MAX_WORD_LEN);
     strncpy(wt_rec->print_word, word_table[i].print_word, MAX_WORD_LEN);
@@ -128,7 +128,7 @@ int32_t LookUpId(char *word)
 }
 
 
-int32_t NextWordId(char **line_buf, int32_t *nr_of_types, int32_t *types, int32_t *single_id)  /* @!@ */
+int32_t NextWordId(char **line_buf, int32_t *nr_of_types, int32_t *types, int32_t *single_id)
 {
   char      *start = *line_buf;   /* remember start of line_buf     */
   int32_t   i = 0;                /* counter to go through line_buf */
@@ -138,7 +138,7 @@ int32_t NextWordId(char **line_buf, int32_t *nr_of_types, int32_t *types, int32_
   int32_t   result = NO_ID;
   wordTable wt_rec;               /* returned by ScanWordTable      */
 
-  /* 01oct2019: we introduced plurality. Words with regular plural  */  /* @!@ */
+  /* 01oct2019: we introduced plurality. Words with regular plural  */
   /* (e, es in english) are not defined as such, only as their      */
   /* single form.                                                   */
   /* Words with irregular plurality are defined as single and       */
@@ -161,7 +161,7 @@ int32_t NextWordId(char **line_buf, int32_t *nr_of_types, int32_t *types, int32_
   /* recognized as a word by ScanWordTable().                       */
   if (**line_buf == ',') {
     result = COMMA; /* Not a word id. May cause error when printed. */
-    *single_id   = COMMA;  /* @!@ */
+    *single_id   = COMMA;
     types[0]     = COMMA;
     types[1]     = NO_TYPE;
     *nr_of_types = 1;
@@ -193,7 +193,7 @@ int32_t NextWordId(char **line_buf, int32_t *nr_of_types, int32_t *types, int32_
   /* 0, nr_of_words-1 denote first and last element of word_table */
   result = ScanWordTable(word, &wt_rec, 0, nr_of_words-1);
 
-  if (result == NO_ID) {   /* @!@ */
+  if (result == NO_ID) {
     /* not found, check if it's a plural from a word we know */
     if ( (result = CheckPlural(word)) == NO_ID) {
       /* not a plural */
@@ -209,7 +209,7 @@ int32_t NextWordId(char **line_buf, int32_t *nr_of_types, int32_t *types, int32_
       plural     = 1;
     }
   }
-  else {  /* @!@ */
+  else {
     /* we know the word, it may be an irregular plural */
     *single_id = wt_rec.single_id;
   }
@@ -237,7 +237,7 @@ int32_t NextWordId(char **line_buf, int32_t *nr_of_types, int32_t *types, int32_
   if (result == NO_ID)
     return(NO_ID);
 
-  if (plural) {    /* @!@ */
+  if (plural) {
     /* plural can only be of type NOUNS  */
     /* to tell it from a single noun, we */
     /* introduced the type PLURAL        */
@@ -283,7 +283,7 @@ void InitParsedInput(parsedInput *parsed_input)
 
   for (i=0; i<MAX_SUBJECTS; i++) {
     (parsed_input->subject[i]).dynamic                = NULL;
-    parsed_input->single[i]                        = NO_ID;    /* @!@ */
+    parsed_input->single[i]                           = NO_ID;
     InitSysDescr(&((parsed_input->subject[i]).part1));
     (parsed_input->subject[i]).connect_prepos         = NO_ID;
     InitSysDescr(&((parsed_input->subject[i]).part2));
@@ -368,7 +368,7 @@ resultStruct MakeSysDescr(char *line_buf, char **rest_of_line_buf, int32_t id, i
   /* descr must be set to default values by caller. */
 
   int32_t      i      = 0;
-  int32_t dummy_single_id;   /* @!@ */
+  int32_t dummy_single_id;
   resultStruct result = {OK, NONE, OK};
   int32_t old_state   = state;    /* Remember state for retry in case of  */
                                   /* a type clash.                        */
@@ -451,7 +451,7 @@ resultStruct MakeSysDescr(char *line_buf, char **rest_of_line_buf, int32_t id, i
       if (result.tag == OK || result.tag == PREPOSITIONS) {
         /* articles in user input must be ignored ?? */
         /* 2019May21 turned on again for dynamic d_sys */
-        descr->article = id;  /* @!@ */
+        descr->article = id;
         return(result);
       }
       else if (result.tag == UNKNOWN_WORD) {

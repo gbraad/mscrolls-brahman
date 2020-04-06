@@ -1,6 +1,6 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
+/* Copyright (c) 2016 - 2020 Marnix van den Bos.                        */
 /*                                                                      */
 /* <marnix.home@gmail.com>                                              */
 /*                                                                      */
@@ -31,6 +31,8 @@
 extern short        debug_info;  /* init.c   */
 extern dirInfo      *obj_dir;                                       /* fileio.c */
 extern storyInfo    story_info;                                     /* init.c   */
+
+extern int32_t      write_undo;                                     /* undo.c   */  /* @!@ */
 
 extern char         *outputline;                                    /* init.c   */
 

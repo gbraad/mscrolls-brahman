@@ -1,8 +1,8 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
+/* Copyright (c) 2016 - 2020 Marnix van den Bos.                        */
 /*                                                                      */
-/* <marnix.home@gmail.com>                                              */
+/* <marnix@xvan.nl>                                                     */
 /*                                                                      */
 /* This file is part of XVAN, an Interactive Fiction authoring system.  */
 /*                                                                      */
@@ -619,7 +619,7 @@ int32_t CheckPars(int32_t *fun_string)
       }
       break;
 
-    case SETATTRIBUTE:            /* setattribute([loc/obj].commonattribute, loc/obj/attribute/description/direction/value/word) */
+    case SETATTRIBUTE:   /* setattribute([loc/obj].commonattribute, loc/obj/attribute/description/direction/value/word) */
       if (nr_of_pars != 2) {
         NrErr("setattribute()", "2");
         return(ERROR);
@@ -942,6 +942,23 @@ int32_t CheckPars(int32_t *fun_string)
       }
       break;
 
+    case UNDO:             /* undo([word]) */
+      if (nr_of_pars != 0 && nr_of_pars != 1) {
+        NrErr("undo()", "0 or 1");
+        return(ERROR);
+      }
+      if (nr_of_pars == 0)
+        return(OK);
+
+      /* nr_of_pars is 1. */
+      par = NextPar(fun_string, &index);
+
+      if (!IsType(par, WORD_ID)) {
+        TypeErr(1, "undo()", "word");
+        return(ERROR);
+      }
+      break;
+
     case PRINTCR:          /* same as PRINT           */
       if (fun_name[0] == '\0')
         strncpy(fun_name, "printcr()", MAX_WORD_LEN);
@@ -1151,7 +1168,7 @@ int32_t CheckPars(int32_t *fun_string)
       }
       break;
 
-    case BACKGROUND:  /* background(string) */
+    case BACKGROUND:  /* background(word) */
       if (fun_name[0] == '\0')
         strncpy(fun_name, "background()", MAX_WORD_LEN);
     case TEXT:

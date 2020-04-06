@@ -1,6 +1,6 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
+/* Copyright (c) 2016 - 2020 Marnix van den Bos.                        */
 /*                                                                      */
 /* <marnix.home@gmail.com>                                              */
 /*                                                                      */
@@ -76,7 +76,7 @@ void ENG_PrintArticle(sysDescr *descr, int32_t type, int use_json)
           i++;
         if (i == nr_of_words) {
           /* Internal error; this shouldn't happen. */
-          PrintError(50, &((resultStruct) {VALUE,id}), NULL);
+          PrintError(50, &((resultStruct) {VALUE, NONE, id}), NULL);
         }
         else {
           /* clear article or else the white space will */

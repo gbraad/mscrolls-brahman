@@ -8,7 +8,7 @@
 #======================================
 
 TITLE         "Escape!"
-VERSION       "1.19"
+VERSION       "1.2"
 AUTHOR        "Marnix van den Bos"
 CREDITS       "type 'credits' on command line."
 ORGANIZATION  "XVAN"
@@ -20,8 +20,8 @@ PRIMARY_COLOR "orange"
 # Use the XVAN and IFI Libraries
 #===============================
 
-$insert "XVAN Library v1-3-1.lib"
-$insert "IFI Library.lib"
+$insert "XVAN Library v1-4.lib"
+$insert "IFI Library v1-1.lib"
 
 #==========================
 # Story specific includes 
@@ -1690,6 +1690,7 @@ $OBJECT o_player
    f_alive       = 1
    f_quenched    = 0
    f_may_save    = 1
+   f_may_undo    = 1
    f_verbose     = 0
    f_first       = 1
    f_fixed       = 0

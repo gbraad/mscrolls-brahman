@@ -1,8 +1,8 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
+/* Copyright (c) 2016 - 2020 Marnix van den Bos.                        */
 /*                                                                      */
-/* <marnix.home@gmail.com>                                              */
+/* <marnix@xvan.nl>                                                     */
 /*                                                                      */
 /* This file is part of XVAN, an Interactive Fiction authoring system.  */
 /*                                                                      */
@@ -263,6 +263,8 @@ int32_t NL_CheckIfKeyword(char *word_lwr)
     return(ADDCHOICE);
   if (strncmp(word_lwr, "speelmodus", MAX_WORD_LEN) == 0)
     return(PLAYMODE);
+  if (strncmp(word_lwr, "herstel", MAX_WORD_LEN) == 0)  /* @!@ */
+    return(UNDO);
   if (strncmp(word_lwr, "(", MAX_WORD_LEN) == 0)
     return(LEFT_PAR);
   if (strncmp(word_lwr, ")", MAX_WORD_LEN) == 0)

@@ -1,6 +1,6 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
+/* Copyright (c) 2016 - 2020 Marnix van den Bos.                        */
 /*                                                                      */
 /* <marnix.home@gmail.com>                                              */
 /*                                                                      */
@@ -40,7 +40,7 @@
 #include "keyword.h"
 #include "json.h"      /* for key length definition */
 #include "typedefs.h"
-#include "IFI.h"
+#include "ifi.h"
 #include "xeqfun.h"
 
 /*************************/
@@ -110,6 +110,7 @@ resultStruct XeqTestmode(int32_t**);
 resultStruct XeqText(int32_t**);
 resultStruct XeqTranscript(int32_t**);
 resultStruct XeqUnderline(int32_t**);
+resultStruct XeqUndo(int32_t**);  /* @!@ */
 resultStruct XeqWait(int32_t**, usrActionRec*, int32_t);
 resultStruct XeqIntAct(int32_t, int32_t**, usrActionRec*, int32_t);
 
@@ -740,7 +741,7 @@ int32_t XeqTry(int32_t **trigger)
     case QUIT:
       return(QUIT);
     default:
-      PrintError(79, &((resultStruct) {VALUE,result}), "XeqTry()");
+      PrintError(79, &((resultStruct) {VALUE, NONE, result}), "XeqTry()");
       return(QUIT);
   }
 }
@@ -854,7 +855,7 @@ int32_t XeqTestFun(int32_t opcode, int32_t **trigger, usrActionRec *action_rec, 
     case TRY:
       return(XeqTry(trigger));
     default:
-      PrintError(81, &((resultStruct) {VALUE,opcode}), NULL);
+      PrintError(81, &((resultStruct) {VALUE, NONE, opcode}), NULL);
       return(ERROR);
    } /* switch */
 }
@@ -909,7 +910,7 @@ resultStruct XeqAddChoice(int32_t **trigger)
     par_list[1].value = par2;
     DebugLevel_2_pars("addchoice()", par_list, 2);
   }
-    
+
   if (!(CheckPars(ADDCHOICE, type1, type2, NO_TYPE, NO_TYPE, NO_TYPE))) {
     return( (resultStruct) {QUIT, NONE, 0} );
   }
@@ -973,7 +974,7 @@ resultStruct XeqAddJson(int32_t **trigger)
     }
     DebugLevel_2_pars("addjson()", par_list, nr_of_pars);
   }
-    
+
   if (!(CheckPars(ADDJSON, type1, type2, NO_TYPE, NO_TYPE, NO_TYPE))) {
     return( (resultStruct) {QUIT, NONE, 0} );
   }
@@ -1026,7 +1027,7 @@ resultStruct XeqBackground(int32_t **trigger)
 
   /* Read parameter. */
   if (!GetPar(&owner, &par, &type, &str, trigger))
-    return( (resultStruct) {QUIT, 0} );
+    return( (resultStruct) {QUIT, NONE, 0} );
 
   if (CheckPars(BACKGROUND, type, NO_TYPE, NO_TYPE, NO_TYPE, NO_TYPE)) {
     if (par == LookUpId(TranslateKeyword("BLUE"))) {
@@ -1633,13 +1634,20 @@ resultStruct XeqFlagVal(int32_t **trigger, int32_t value)
     DebugLevel_2_pars("setflag()", &par_list, 1);
   }
 
+  /* clearflag() has same syntax as setflag */
   if (CheckPars(SETFLAG, type, NO_TYPE, NO_TYPE, NO_TYPE, NO_TYPE)) {
     if (IsCFlagId(par)) {
+      /* write undo info */
+      PushUndoItem(FLAGS, par, owner, NO_ID, NO_ID, TestCFlag(owner, par));  /* @!@ */
+
       /* Set the value of the flag to `value'.   */
       ProcCFlagVal(owner, par, value);
     }
     else {
       /* Local flag. */
+      /* write undo info */
+      PushUndoItem(FLAGS, par, owner, NO_ID, NO_ID, TestLFlag(par));  /* @!@ */
+
       /* Set the value of the flag to `value'. */
       ProcLFlagVal(par, value);
     }
@@ -1811,6 +1819,11 @@ resultStruct XeqGoTo(int32_t **trigger)
     else {
       /* There is a route, move par1.             */
       /* par3 denotes max nr of moves, stop if 0. */
+
+      /* first, write undo info                   */
+      PushUndoItem(MOVE, par1, NO_ID, NO_ID, NO_ID, obj_dir[par1-FIRST_OBJECT_ID].held_by);  /* @!@ */
+      PushUndoItem(CURR_LOC, NO_ID, NO_ID, NO_ID, NO_ID, curr_loc);  /* @!@ */
+
       while (i >= 0 && par3 != 0 && !stop) {
         /* printf("%d Moving ", i);PrintId(par1);printf(" to ");PrintId(route[level-2]);printf("\n"); */
         if (!Move(par1, route[level-2-i]))
@@ -1887,7 +1900,7 @@ resultStruct XeqIndent(int32_t **trigger)
   switch (NextOpcode(trigger)) {
     case 0:
       if (indent > OUTPUT_LINE_LEN-1) {
-        PrintError(86, &((resultStruct) {VALUE,indent}), NULL);
+        PrintError(86, &((resultStruct) {VALUE, NONE, indent}), NULL);
         return( (resultStruct) {ERROR, NONE, 0} );
       }
       else {
@@ -1956,7 +1969,7 @@ resultStruct XeqItalic(int32_t **trigger)
 }
 
 
-resultStruct XeqMove(int32_t **trigger)
+resultStruct XeqMove(int32_t **trigger)  /* @!@ */
 {
   /* Syntax: move(obj, loc/obj/direction [, preposition]) */
 
@@ -1965,9 +1978,9 @@ resultStruct XeqMove(int32_t **trigger)
   int          nr_of_pars = 0;
   int          index      = -1;
   int32_t      dest;
-  int32_t      par1;
-  int32_t      par2;
-  int32_t      par3;
+  int32_t      par1  = NO_ID;
+  int32_t      par2  = NO_ID;
+  int32_t      par3  = NO_ID;
   int32_t      type1 = NO_TYPE;
   int32_t      type2 = NO_TYPE;
   int32_t      type3 = NO_TYPE;
@@ -2040,15 +2053,24 @@ resultStruct XeqMove(int32_t **trigger)
         return( (resultStruct) {QUIT, NONE, 0} );
       }
 
-    /* Par1 must be moved into par2.     */
+     /* first, write undo info */
+     /* par1 must be moved back to its original owner */
+     PushUndoItem(MOVE, par1, NO_ID, NO_ID, NO_ID, obj_dir[par1-FIRST_OBJECT_ID].held_by);
+
+    /* Par1 (obj) must be moved into par2 (obj or loc). */
     if (!Move(par1, par2))
       return( (resultStruct) {QUIT, NONE, 0} );
 
     /* Check if preposition of par1 must be updated */
-    /* r_preposotion has id FIRST_COMMON_ATTR_ID.   */
+    /* r_preposition has id FIRST_COMMON_ATTR_ID.   */
     /* This is set at compile time.                 */
     if (nr_of_pars == 3) {
       index = (par1-FIRST_OBJECT_ID)*nr_of_cattrs;
+
+      /* first, write undo info */
+      /* action type, attr id, owner, value_owver, type, value */
+      PushUndoItem(ATTRIBUTES, FIRST_COMMON_ATTR_ID, par1, NO_ID, WORD_ID, c_obj_attrs[index].value);
+
       c_obj_attrs[index].value = par3;
     }
 
@@ -2059,13 +2081,16 @@ resultStruct XeqMove(int32_t **trigger)
     /*   location                                      */
     /* - player is moved to an object in another       */
     /*   location                                      */
-    /* - object with the player in it ids moved to an  */
+    /* - object with the player in it is moved to an   */
     /*   object in another location                    */
     dest = par2;
     if (par1 == PLAYER || Owns(par1, PLAYER, -1)) {
       while (!IsLocId(dest)) {
         dest = obj_dir[dest-FIRST_OBJECT_ID].held_by;
       }
+      /* first, write undo info */
+      PushUndoItem(CURR_LOC, NO_ID, NO_ID, NO_ID, NO_ID, curr_loc);
+
       curr_loc = dest;
     }
 
@@ -2335,7 +2360,7 @@ resultStruct XeqPickOne(int32_t **trigger)
     PrintError(15, NULL, "pickone()");
     return( (resultStruct) {QUIT, NONE, 0} );
   }
-     
+
   /* Read all parameters and store the one we need. */
   for (i=0; i<nr_of_pars; i++) {
     if (!GetPar(&owner, &par, &type, &str, trigger)) {
@@ -2370,7 +2395,7 @@ resultStruct XeqPlayMode(int32_t **trigger)
 
   int32_t owner; /* dummy */
   char    *str;  /* dummy */
-  int32_t par;   
+  int32_t par;
   int32_t type = NO_TYPE;
 
   /* Skip nr of parameters (which will be 1). */
@@ -2796,6 +2821,14 @@ resultStruct XeqSetAttribute(int32_t **trigger)
     return( (resultStruct) {QUIT, NONE, 0} );
 
   if (CheckPars(SETATTRIBUTE, type1, type2, NO_TYPE, NO_TYPE, NO_TYPE)) {
+    /* write undo info */
+    PushUndoItem(ATTRIBUTES,
+                 par1,
+                 owner1,
+                 attributes[attribute_index].value_owner,
+                 attributes[attribute_index].type,
+                 attributes[attribute_index].value);  /* @!@ */
+
     /* Store par2 in attribute for par1. */
     /* 10 march2017: also set owner in case it is a description id */
     attributes[attribute_index].value_owner = owner2;
@@ -2913,15 +2946,15 @@ resultStruct XeqShuffle(int32_t **trigger)
 }
 
 
-resultStruct XeqStartTimer(int32_t **trigger)
+resultStruct XeqStartTimer(int32_t **trigger)  /* @!@ */
 {
   /* Always has one parameter. */
 
-  int32_t      owner;   /* dummy */
-  char         *str;    /* dummy */
-  int32_t      par;     /* counter id. */
+  int32_t      owner;           /* dummy */
+  char         *str;            /* dummy */
+  int32_t      par  = NO_ID;    /* counter id. */
   int32_t      type = NO_TYPE;
-  int32_t      index;  /* To correct a compiler bug. */
+  int32_t      index;           /* To correct a compiler bug. */
   resultStruct result;
 
   resultStruct par_list;  /* for debugging */
@@ -2942,9 +2975,12 @@ resultStruct XeqStartTimer(int32_t **trigger)
 
   if (CheckPars(STARTTIMER, type, NO_TYPE, NO_TYPE, NO_TYPE, NO_TYPE)) {
     index = par-FIRST_TIMER_ID;
-    timers[index].state = GO;
     /* compiler chokes on timers[par-FIRST_TIMER_ID]. */
 
+    /* write undo info */
+    PushUndoItem(TIMERS, STATE, par, NO_ID, NO_ID, timers[index].state);
+
+    timers[index].state = GO;
     result = (resultStruct) {CONTINUE, NONE, 0};
   }
   else {
@@ -2957,15 +2993,15 @@ resultStruct XeqStartTimer(int32_t **trigger)
 }
 
 
-resultStruct XeqStopTimer(int32_t **trigger)
+resultStruct XeqStopTimer(int32_t **trigger)  /* @!@ */
 {
   /* Always has one parameter. */
 
-  int32_t      owner;   /* dummy */
-  char         *str;    /* dummy */
-  int32_t      par;     /* counter id. */
+  int32_t      owner;          /* dummy */
+  char         *str;           /* dummy */
+  int32_t      par  = NO_ID;   /* counter id. */
   int32_t      type = NO_TYPE;
-  int32_t      index;   /* To correct a compiler bug. */
+  int32_t      index;          /* To correct a compiler bug. */
   resultStruct result;
 
   resultStruct par_list;  /* for debugging */
@@ -2986,9 +3022,12 @@ resultStruct XeqStopTimer(int32_t **trigger)
 
   if (CheckPars(STOPTIMER, type, NO_TYPE, NO_TYPE, NO_TYPE, NO_TYPE)) {
     index = par-FIRST_TIMER_ID;
-    timers[index].state = STOP;
     /* compiler chokes on timers[par-FIRST_TIMER_ID]. */
 
+    /* write undo info */
+    PushUndoItem(TIMERS, STATE, par, NO_ID, NO_ID, timers[index].state);
+
+    timers[index].state = STOP;
     result = (resultStruct) {CONTINUE, NONE, 0};
   }
   else {
@@ -2997,7 +3036,7 @@ resultStruct XeqStopTimer(int32_t **trigger)
 
   DebugLevel_2_result(result);
 
-  return(result);  
+  return(result);
 }
 
 
@@ -3204,6 +3243,165 @@ resultStruct XeqUnderline(int32_t **trigger)
 }
 
 
+resultStruct XeqUndo(int32_t **trigger)
+{
+  /* this function pops the undo stack until it reaches an */
+  /* EOU (End Of Undo) or NO_ID value in the item member   */
+  /* (EOU reached will be the EOU of the next undo)        */
+  /* The last thing that is written for a move's undo is   */
+  /* the EOU record                                        */
+
+  /* Syntax: undo([clear])  */
+
+  int32_t nr_of_pars = 0;
+  int32_t owner;          /* dummy */
+  char    *str;           /* dummy */
+  int32_t par;            /* color */
+  int32_t type = NO_TYPE;
+
+  int32_t item1 = NO_ID;
+  int32_t item2 = NO_ID;
+  int32_t item3 = NO_ID;
+  int32_t item4 = NO_ID;
+  int32_t item5 = NO_ID;
+  int32_t value = 0;
+
+  attrInfo *attributes     = NULL;
+  int32_t  attribute_index = 0;
+
+  resultStruct par_list;  /* for debugging */
+
+  /* Read nr of parameters. */
+  nr_of_pars = NextOpcode(trigger);
+
+  /* don't write undo information */
+  write_undo = 0;
+
+  if (nr_of_pars == 1) {
+    /* Read parameter. */
+    if (!GetPar(&owner, &par, &type, &str, trigger)) {
+      return( (resultStruct) {QUIT, NONE, 0} );
+    }
+
+    if (debug_level == 2) {
+      par_list.tag   = WORD_ID;
+      par_list.owner = NONE;
+      par_list.value = par;
+      DebugLevel_2_pars("undo()", &par_list, 1);
+    }
+
+    if (par == LookUpId(TranslateKeyword("CLEAR"))) {
+      /* reset the undo stack */
+      InitUndoStack();
+      write_undo = 0;
+      return( (resultStruct) {CONTINUE, NONE, 0} );
+    }
+    else {
+      /* error in parameter */
+      PrintError(83, NULL, "XeqUndo()");
+      return( (resultStruct) {CONTINUE, NONE, 0} );  /* not a severe error */
+    }
+  }
+
+  if (debug_level == 2) {
+    DebugLevel_2_pars("undo()", NULL, 0);
+  }
+
+  PopUndoItem(&item1, &item2, &item3, &item4, &item5, &value);
+
+  /* check if there is data on the undo stack */
+  if (item1 == NO_ID) {
+    /* it was an empty stack */
+    PrintError(110, NULL, NULL);
+    return( (resultStruct) {CONTINUE, NONE, 0} );
+  }
+
+  /* ok, there is data on the stack. now check if we are  */
+  /* at the beginning of an undo sequence                 */
+
+  if (item1 != EOU) {
+    /* error, corrupted stack */
+    PrintError(111, NULL, NULL);
+
+    /* reset the undo stack */
+    InitUndoStack();
+
+    DebugLevel_2_result( (resultStruct) {CONTINUE, NONE, 0});
+    return( (resultStruct) {CONTINUE, NONE, 0} );
+  }
+
+  /* ok, valid stack with undo data */
+  /* we have popped the EOU, now    */
+  /* pop the first undo item        */
+  PopUndoItem(&item1, &item2, &item3, &item4, &item5, &value);
+
+  while (item1 != EOU && item1 != NO_ID) {
+    switch (item1) {
+      case MOVE:
+        /* move item2 to value */
+        if (!Move(item2, value)) {
+          return( (resultStruct) {QUIT, NONE, 0} );
+        }
+        break;
+      case CURR_LOC:
+        /* set curr_loc to value */
+        curr_loc = value;
+        break;
+      case FLAGS:
+        /* item 2: flag id, item3: owner, value: value */
+        if (IsCFlagId(item2)) {
+          ProcCFlagVal(item3, item2, value);
+        }
+        else {
+          ProcLFlagVal(item2, value);
+        }
+        break;
+      case ATTRIBUTES:
+        /* item2: id, item3 owner, item4: value owner, item5: type, value: value */
+        /* Retrieve the par1 attribute info struct */
+        if (!GetAttributeInfo(item2, item3, &attributes, &attribute_index)) {
+          return( (resultStruct) {QUIT, NONE, 0} );
+        }
+        attributes[attribute_index].value_owner = item4;
+        attributes[attribute_index].type        = item5;
+        attributes[attribute_index].value       = value;
+        break;
+      case TIMERS:
+        /* item2: action type, item3: id, item4,item5: NO_ID, value: value */
+        switch (item2) {
+          case STATE:
+            timers[item3-FIRST_TIMER_ID].state = value;
+            break;
+          case INTERVAL:
+            timers[item3-FIRST_TIMER_ID].update = value;
+            break;
+          case INIT:
+            timers[item3-FIRST_TIMER_ID].value = value;
+            break;
+        }
+        break;
+      default:
+        /* unknown undo code */
+        PrintError(112, NULL, NULL);
+        InitUndoStack();
+        return( (resultStruct) {CONTINUE, NONE, 0} );
+    }
+    PopUndoItem(&item1, &item2, &item3, &item4, &item5, &value);
+  }
+
+  /* if we ended with an EOU, push it back onto the stack  */
+  /* because we set write_undo = 0, we will loose the EOU  */
+  /* and the next undo will undo 2 turns or throw an error */
+  if (item1 == EOU) {
+    write_undo = 1;
+    PushUndoItem(EOU, NO_ID, NO_ID, NO_ID, NO_ID, 0);
+    write_undo = 0;
+  }
+
+  return( (resultStruct) {CONTINUE, NONE, 0} );
+}
+
+
 resultStruct XeqWait(int32_t **trigger, usrActionRec *action_rec, int32_t subject_index)
 {
   int32_t      owner;   /* dummy */
@@ -3384,6 +3582,8 @@ resultStruct XeqIntAct(int32_t opcode, int32_t **trigger, usrActionRec *action_r
       return(XeqTranscript(trigger));
     case UNDERLINE:
       return(XeqUnderline(trigger));
+    case UNDO:  /* @!@ */
+      return(XeqUndo(trigger));
     case WAIT:
       return(XeqWait(trigger, action_rec, subject_index));
 	case SAVE:					/* dec 21 07 */

@@ -1,6 +1,6 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
+/* Copyright (c) 2016 - 2020 Marnix van den Bos.                        */
 /*                                                                      */
 /* <marnix.home@gmail.com>                                              */
 /*                                                                      */
@@ -28,22 +28,22 @@
 /* External declarations */
 /*************************/
 
-extern FILE      *transcriptfile;                             /* init.c     */
+extern FILE      *transcriptfile;                             /* init.c      */
 
-extern short      testmode;                                   /* letsplay.c */
-extern short      transcript;                                 /* letsplay.c */
-extern FILE       *testfile;                                  /* init.c     */
+extern short      testmode;                                   /* letsplay.c  */
+extern short      transcript;                                 /* letsplay.c  */
+extern FILE       *testfile;                                  /* init.c      */
 
-extern storyInfo  story_info;                                 /* init.c     */   /* @!@ */
+extern storyInfo  story_info;                                 /* init.c      */
 
 extern void       Output(void);                               /* init.c      */
 extern void       PrintError(int16_t, resultStruct*, char*);  /* errors.c    */
 extern void       PrintString(char*, int);                    /* output.c    */
-extern void       WriteTranscript(char*);                     /* output.c   */
+extern void       WriteTranscript(char*);                     /* output.c    */
 extern char       *ResetString(char*);                        /* jsonbld.c   */
 extern char       *AddToString(char*, char*);                 /* descr2str.c */
 extern char       *ResetString(char*);                        /* descr2str.c */
-extern int32_t    UpdateChoicesMenu(char*);                   /* choices.c   */   /* @!@ */
+extern int32_t    UpdateChoicesMenu(char*);                   /* choices.c   */
 
 /* IFI and JSON stuff */
 extern int32_t    ValidateJson(char*);

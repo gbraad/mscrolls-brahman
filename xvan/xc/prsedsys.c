@@ -1,8 +1,8 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
+/* Copyright (c) 2016 - 2020 Marnix van den Bos.                        */
 /*                                                                      */
-/* <marnix.home@gmail.com>                                              */
+/* <marnix@xvan.nl>                                                     */
 /*                                                                      */
 /* This file is part of XVAN, an Interactive Fiction authoring system.  */
 /*                                                                      */
@@ -424,7 +424,7 @@ int32_t ParseDSys(char *descr_text, extendedSysDescr *descr)
 {
   int32_t      nr_of_types = 0;
   int32_t      types[MAX_TYPES];
-  int          len = 0;                 /* for dynamic description */ /* @!@ */
+  int          len = 0;                 /* for dynamic description */
   char         **descr_text_2 = NULL;;  /* for parsing descr.part2 */
   resultStruct result;
 
@@ -433,7 +433,7 @@ int32_t ParseDSys(char *descr_text, extendedSysDescr *descr)
   result.tag   = OK;
   result.value = OK;
 
-  /* if we have a dynamic system description (with attributes), don't */  /* @!@ */
+  /* if we have a dynamic system description (with attributes), don't */
   /* parse it, because it will change at runtime. Just store the text */
   /* string, so the interpreter can fill in the values and parse it   */
   /* at runtime. 10may2019                                            */

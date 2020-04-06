@@ -1,6 +1,6 @@
 
 /************************************************************************/
-/* Copyright (c) 2016, 2017, 2018, 2019 Marnix van den Bos.             */
+/* Copyright (c) 2016 - 2020 Marnix van den Bos.                        */
 /*                                                                      */
 /* <marnix.home@gmail.com>                                              */
 /*                                                                      */
@@ -29,18 +29,19 @@
 /*************************/
 
 extern timerInfo *timers;
-extern short     debug_level;  /* debugcmd.c */
+extern short     debug_level;                                                       /* debugcmd.c */
 
-extern void     Output(char*);                                                   /* output.c   */
-extern void     PrintError(int16_t, resultStruct*, char*);                       /* errors.c   */
-extern int32_t  GetPar(int32_t*, int32_t*, int32_t*, char**, int32_t**);         /* sysfunc.c  */
-extern int32_t  GetLvaluePar(int32_t*, int32_t*, int32_t*, char**, int32_t**);   /* sysfunc.c  */
-extern int32_t  GetAttributeInfo(int32_t, int32_t, attrInfo**, int32_t*);        /* sysfunc.c  */
-extern int32_t  CheckPars(int32_t, int32_t, int32_t, int32_t, int32_t, int32_t); /* checkpar.c */
+extern void     PushUndoItem(int32_t, int32_t, int32_t, int32_t, int32_t, int32_t); /* undo.c     */  /* @!@ */
+extern void     Output(char*);                                                      /* output.c   */
+extern void     PrintError(int16_t, resultStruct*, char*);                          /* errors.c   */
+extern int32_t  GetPar(int32_t*, int32_t*, int32_t*, char**, int32_t**);            /* sysfunc.c  */
+extern int32_t  GetLvaluePar(int32_t*, int32_t*, int32_t*, char**, int32_t**);      /* sysfunc.c  */
+extern int32_t  GetAttributeInfo(int32_t, int32_t, attrInfo**, int32_t*);           /* sysfunc.c  */
+extern int32_t  CheckPars(int32_t, int32_t, int32_t, int32_t, int32_t, int32_t);    /* checkpar.c */
 extern int32_t  NextOpcode(int32_t**);
-extern void     ConvSpecId(int32_t*, int32_t*);                                  /* sysfunc.c  */
-extern void     DebugLevel_2_pars(char*, resultStruct*, int);                    /* debugcmd.c  */
-extern void     DebugLevel_2_result(resultStruct);                               /* debugcmd.c  */
+extern void     ConvSpecId(int32_t*, int32_t*);                                     /* sysfunc.c  */
+extern void     DebugLevel_2_pars(char*, resultStruct*, int);                       /* debugcmd.c  */
+extern void     DebugLevel_2_result(resultStruct);                                  /* debugcmd.c  */
 extern int32_t  IsTimerId(int32_t);
 
 #endif
