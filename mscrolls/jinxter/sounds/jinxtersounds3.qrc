@@ -1,0 +1,5 @@
+<RCC>
+	<qresource prefix="/sounds">
+		<file alias="beepmon.ogg">beepmon.ogg</file>
+	</qresource>
+</RCC>

@@ -1,0 +1,5 @@
+<RCC>
+	<qresource prefix="/sounds">
+		<file alias="pubgarden.ogg">pubgarden.ogg</file>
+	</qresource>
+</RCC>

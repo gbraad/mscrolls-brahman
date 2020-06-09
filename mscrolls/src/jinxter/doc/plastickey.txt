@@ -1,0 +1,14 @@
+plastickey
+
+you have to heat the plastic key twice so it starts melting, but if you heat it further it gets destroyed -> dead end, because you cannot pick up the charm from the mailbox anymore.
+
+Idea: Prevent a third heating attempt
+
+in specialsw.asm
+
+	IFNE Remastered
+		SCN	824
+		BRA.S 80$
+	ENDC	
+
+### needs testing, added a new message 824, need to check that this didn't mess up anything

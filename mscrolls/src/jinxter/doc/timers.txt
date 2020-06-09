@@ -1,0 +1,5 @@
+There are several timers which do not play well with the touch version, lead to dead ends, or that are quite annoying to the player. So far the following timers have been changed in setmode.asm
+
+Bakery: from 15 to 18 (line 847p)
+Train departure: from 30 to 40 (line 1531p)
+Witch chamber: from 4 to 5 (line 1722p)

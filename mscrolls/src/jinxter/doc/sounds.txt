@@ -1,0 +1,38 @@
+
+
+onthebus = bus interior
+bead fly wood = fly buzzing?
+
+
+orchard/grassy field/bolly land = hedgerow/hedgerow2
+clocktower = grandfather clock?
+
+* spring = brook
+* grassy field = skylarks
+* on bridge = rope creak 1
+* canoe mooring = riverside
+* pub = pub1
+* beer garden = pub garden 
+* holly lane = hedgerow2
+* back garden = garden2/herb garden/front garden?
+* your kitchen = kitchen loop (fridge)
+* sacristy = errie room
+* sanctum/vestible etc = eerie room, eerie wind
+* sanctum = synth loop2
+* tetragam = synth 3
+* jewel room = synth4
+* messy kitchen = taps
+* underwater1 = uwater1
+* underwater2 = uwater2
+* lagoon = waterlap
+* orchard = woodland
+* village green = city park
+* conifer wood = forest
+* operating theatre = beep monitor
+* bathroom = bathroom loop
+
+events:
+
+* phone ring = bell-phone
+
+

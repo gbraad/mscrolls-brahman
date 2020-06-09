@@ -1,0 +1,5 @@
+<RCC>
+	<qresource prefix="/sounds">
+		<file alias="hedgerow.ogg">hedgerow.ogg</file>
+	</qresource>
+</RCC>

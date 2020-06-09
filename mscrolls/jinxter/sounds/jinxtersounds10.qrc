@@ -1,0 +1,5 @@
+<RCC>
+	<qresource prefix="/sounds">
+		<file alias="kitchen.ogg">kitchen.ogg</file>
+	</qresource>
+</RCC>

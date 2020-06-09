@@ -1,0 +1,5 @@
+<RCC>
+	<qresource prefix="/sounds">
+		<file alias="uwater1.ogg">uwater1.ogg</file>
+	</qresource>
+</RCC>

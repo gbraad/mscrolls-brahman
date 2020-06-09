@@ -1,0 +1,5 @@
+<RCC>
+	<qresource prefix="/sounds">
+		<file alias="clock.ogg">clock.ogg</file>
+	</qresource>
+</RCC>

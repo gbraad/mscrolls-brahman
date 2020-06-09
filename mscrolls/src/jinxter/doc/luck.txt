@@ -1,0 +1,23 @@
+Luck
+
+If you lose some of your luck during the game, you can't win anymore, but won't notice until the endgame.
+
+Idea:
+Decrement the luck, but use it only as additional scoring. If you have scored all points and kept all your luck -> different ending where you survive. The access to the endgame is allowed regardless of the „luck“ - you always choose the right door
+
+### different ending has to be added
+
+setmode.asm:
+
+EnterWitchChamber
+
+	MOVE.W	D1,D2				; d1 => target room.
+	CALL	DoExploredRoom			; ne => been here.
+	BNE.S	25$				; tut tut shouldn't come
+->	IFNE Remastered
+->		BRA.S	10$		; in remaster mode always select the right door
+->	ENDC 
+	CMP.W	#4,LUCK_(A4)			;Got all you're luck?
+	BEQ.S	10$				;=> yep
+	SCN	755
+	

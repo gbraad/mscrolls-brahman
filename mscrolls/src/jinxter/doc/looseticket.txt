@@ -1,0 +1,12 @@
+Loosing ticket
+
+After you bought a ticket from the stationmaster with one-ferg, the wind keeps blowing the ticket away. Because of the train timer, we need to shortcut the puzzle assistant to do a "get ticket" directly while hunting for it. To recognize the scene in the puzzle assistant, we keep the looseticketstate (originally it is cleared)
+
+in specialsp.asm (1043p)
+
+08$
+                                ;End of special! 
+	TEST_B  REMASTER(A4)
+    BNE.S   07$
+	CLR.B	LoseTicketState(A4)		;for remaster, we keep the state for the puzzle assistant
+07$

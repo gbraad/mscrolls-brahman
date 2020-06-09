@@ -1,0 +1,5 @@
+<RCC>
+	<qresource prefix="/sounds">
+		<file alias="synth2.ogg">synth2.ogg</file>
+	</qresource>
+</RCC>

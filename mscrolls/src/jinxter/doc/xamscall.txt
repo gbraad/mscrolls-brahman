@@ -1,0 +1,34 @@
+XAM phone call:
+
+is triggered when you enter the conservatory. If you don't pick up the phone while being in the Librayr, the Guardian jumps in and picks it up. If you are not in the Library, you miss the call.
+
+Idea: let the timer run again if the phone wasn't answered.
+
+in the classic version, PhoneAsnwered is set after the ringing stops regardless of whether you picked up the phone
+
+now, phoneanswered is only set when picked up and the timer checks for this flag
+
+setmode.asm (1261p)
+
+StartPhone
+	IFNE Remastered
+		TEST_B  PhoneAnswered(A4)
+		BEQ.S	90$
+		BRA.S	99$
+	ENDC
+	
+	
+timer.asm (480p)
+
+PhoneCall
+	IFNE Remastered
+		TEST_B  PhoneAnswered(A4)
+		BEQ.S	05$
+		BRA.S	90$
+	ENDC
+	
+and (498p)
+	IFNE Remastered
+	    CLR.B	TelephoneRung(A4)
+		BRA.S	20$		;for remaster, we do not mark the phone answered, so timer6 is triggered again
+	ENDC

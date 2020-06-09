@@ -1,0 +1,5 @@
+<RCC>
+	<qresource prefix="/sounds">
+		<file alias="scuba.ogg">scuba.ogg</file>
+	</qresource>
+</RCC>
