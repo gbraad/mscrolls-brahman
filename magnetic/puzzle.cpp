@@ -1208,6 +1208,7 @@ void PuzzleManager::buildProductInfoJSON(GrowString& buf,
                 "<ul>"
                 "<li>Hugh Steers</li>"
                 "<li>Stefan Meier</li>"
+                "<li>Stefan Bylund</li>"
                 "</ul>"
 
                 "<h4>Emulator Team</h4>"

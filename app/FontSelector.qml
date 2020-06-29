@@ -105,6 +105,7 @@ Dialog
             {
                 top: sizeselector.bottom
                 topMargin: Units.dp*16
+                bottomMargin: Units.dp*16
                 right: parent.right
                 left: parent.left
                 bottom: parent.bottom
@@ -138,6 +139,8 @@ Dialog
             }
 
             Component.onCompleted: fontselector.update();
+
+            ScrollBar.vertical: ScrollBar {}
         }
     }
 }

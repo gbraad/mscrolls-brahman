@@ -267,8 +267,21 @@ ApplicationWindow
 
     function stopSound(ch)
     {
-        soundplayer1.stop(ch);
+        soundplayer1.stop(ch)
     }          
+           
+    function pauseSound()
+    {
+        //console.log("pauseSound");
+        soundplayer1.pause()
+    }
+
+    function resumeSound()
+    {
+        if (!QControl.prefs.musicEnabled) return;
+        //console.log("resumeSound");
+        soundplayer1.resume()
+    }
 
     function updateSound()
     {

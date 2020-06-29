@@ -132,6 +132,7 @@ SOURCES += main.cpp qlog.cpp qcontrol.cpp \
     apngreader.cpp \
     playsourceogg.cpp \
     vorbis.cpp \
+    soundplayer.cpp \
     iosshare.mm
     
 RESOURCES += qml.qrc

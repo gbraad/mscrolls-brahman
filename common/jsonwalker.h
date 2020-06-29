@@ -425,7 +425,7 @@ struct JSONWalker
             }
             else
             {
-                r.parse(&st);
+                r._parse(&st);
             }
         }
         return r;
@@ -612,7 +612,7 @@ struct JSONWalker
     static void toAdd(GrowString& gs)
     {
         char c = gs.last();
-        if (c && c != ',' && c != '{' && c != '[') gs.add(',');
+        if (c && c != ',' && c != '{' && c != '[' && c != ':') gs.add(',');
     }
 
     static bool reopenJSON(GrowString& js, const string& oldjs)

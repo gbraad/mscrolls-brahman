@@ -151,7 +151,7 @@ GRAPHICS	DC.B	-1       ; hugh2017, graphics in cheat mode now...
 GRAPHICS   	DC.B	-1  ;EQ => NO GRAPHICS, NE => GRAPHICS ON
 		ENDC	
 
-REMASTER        DC.B    0      ; remaster/modern mode
+REMASTER    DC.B    -1     ; remaster/modern mode
 
 			ALIGN
 M_STACK		DC.L	0   ;MSGWRITE PUTS RETURN ADDRESS HERE

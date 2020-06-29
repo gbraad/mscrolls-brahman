@@ -89,6 +89,9 @@ Item
     {
         id: flick
         width: parent.width
+
+        // the flick height is kept to the visible portion below the
+        // roller so that the scroll thumb scrolls within this area
         height: (moving || ok) ? item.height : item.height - contentY
 
         contentWidth: item.width
@@ -97,7 +100,8 @@ Item
         contentY: yPos
         z:1
 
-        property bool ok
+        // ok means OK to scroll the picture not the text
+        property bool ok: false
         
         flickableDirection: Flickable.VerticalFlick
         boundsBehavior: Flickable.StopAtBounds

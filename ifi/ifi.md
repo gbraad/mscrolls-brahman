@@ -424,7 +424,7 @@ Same meanings as `item`.
 * `channel: int`
    _Optional_. Specify audio channel, default to 0.
 
-## Choices<a name="choices"></a>
+## Choices
 
 The back-end can require the player to make decisions before continuing. In this circumstance, it will want to issue the player with a "choice".
 

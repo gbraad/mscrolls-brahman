@@ -46,6 +46,7 @@
 
 #include "qdefs.h"
 #include "playsource.h"
+#include "utils.h"
 #include "logged.h"
 
 #define QREGISTER_SOUNDPLAYER  QREGISTER(QSoundPlayer)
@@ -192,6 +193,18 @@ public:
             return false;
         }
 
+        void pause() 
+        {
+            if (_s[0]) _s[0]->pause();
+            if (_s[1]) _s[1]->pause();
+        }
+
+        void resume() 
+        {
+            if (_s[0]) _s[0]->resume();
+            if (_s[1]) _s[1]->resume();
+        }
+
     };
 
 
@@ -200,6 +213,7 @@ public:
     int                  _state = QAudio::StoppedState;
 
     QSoundPlayer() { _init(); }
+    ~QSoundPlayer() { _purge(); }
 
     int state() const { return _state; }
     int loops() const { return _loops; }
@@ -222,6 +236,8 @@ public:
         if (chan < _maxPairs)
         {
             QAudioOutput* aout = new QAudioOutput(_device, _format, this);
+
+            connect(aout,SIGNAL(stateChanged(QAudio::State)),this, SLOT(updateState(QAudio::State)));
             
             r = _pairs[chan].play(name, aout); // aout consumed
             if (r)
@@ -256,42 +272,32 @@ public:
         }
     }
 
-    /*
-    Q_INVOKABLE bool start()
-    {
-        LOG4("SoundPLayer, ", "start");
-        
-        bool r = false;
-        
-        int s = state();
-
-        if (s == QAudio::ActiveState || _out) return true; // already playing
-        
-        if (s == QAudio::SuspendedState)
-        {
-            _audioOutput->resume();
-            r = true;
-        }
-        else
-        {
-        // push mode
-            _audioOutput->setBufferSize(100*1024);
-            _out = _audioOutput->start();
-                
-            r = _out != 0;
-            
-        }
-        return r;
-    }
 
     Q_INVOKABLE void pause()
     {
-        if (state() == QAudio::ActiveState)
-        {
-            _audioOutput->suspend();
-        }
+        LOG3("Sound, ", "pausing");
+        for (int i = 0; i < _maxPairs; ++i) _pairs[i].pause();
     }
 
+    Q_INVOKABLE void resume()
+    {
+        LOG3("Sound, ", "resuming");
+        for (int i = 0; i < _maxPairs; ++i) _pairs[i].resume();
+    }
+
+    static void pauseAllPlayers()
+    {
+        LOG3("Sound, ", "pausing All");        
+        for (auto* i : _allPlayers) i->pause();
+    }
+
+    static void resumeAllPlayers()
+    {
+        LOG3("Sound, ", "resuming All");        
+        for (auto* i : _allPlayers) i->resume();
+    }
+
+    /*
     Q_INVOKABLE void stop()
     {
         LOG4("SoundPLayer, ", "stop");
@@ -309,10 +315,6 @@ public slots:
         if (_state != s)
         {
             _state = s;
-            if (_state == QAudio::StoppedState)
-            {
-                //if (_playerSource) _playerSource->stop();
-            }
             emit stateChanged();
         }
     }
@@ -329,10 +331,19 @@ private:
     static const int    _maxPairs = 2;
     SourcePair          _pairs[_maxPairs];
 
+    static std::vector<QSoundPlayer*> _allPlayers;
+
     void _init()
     {
+        _allPlayers.push_back(this);
+
         _initAudio();
         for (int i = 0; i < _maxPairs; ++i) _pairs[i]._host = this;
+    }
+
+    void _purge()
+    {
+        ::erase(_allPlayers, this);
     }
 
     void _initAudio()
@@ -354,9 +365,6 @@ private:
             LOG2("SoundPLayer, Default format not supported - trying to use nearest", "");
             _format = info.nearestFormat(_format);
         }
-
-        //_audioOutput = new QAudioOutput(_device, _format, this);
-        //connect(_audioOutput,SIGNAL(stateChanged(QAudio::State)),this, SLOT(updateState(QAudio::State)));
 
     }
 

@@ -51,6 +51,7 @@
 #include "ifroster.h"
 #include "ifproduct.h"
 #include "autolink.h"
+#include "osrandom.h"
 
 
 // 1.1.X pre ifi

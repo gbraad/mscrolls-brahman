@@ -43,8 +43,7 @@
 int DLLX getScreenDPI();
 bool DLLX createUniqueInstance(const char* name = 0);
 void DLLX destroyUniqueInstance();
-
 bool DLLX getlocaltime(struct tm*);
-uint64 DLLX makeRandomSeed();
+
 
 

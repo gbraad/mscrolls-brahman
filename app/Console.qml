@@ -93,19 +93,17 @@ FocusScope
             height: Math.min(consoleinput.height - wbh, maxTHeight)
 
             placeholderText: "type here"
-            //focus: true
+            //focus: true  // makes android keyboard popup
 	    
-	    // Having EnterKeyReturn breaks some Android devices
-	    // So in theory this test will work, but does iOS actually need the EnterKeyReturn
-	    // or is it just a cosmetic display thing.
+	        // Having EnterKeyReturn breaks some Android devices
             EnterKey.type: M.Device.isIOS() ? Qt.EnterKeyReturn : Qt.EnterKeyDefault
-
+  
             fontSize: height*6/10
             showBorder: false
             inputMethodHints: Qt.ImhNoPredictiveText
 
-            onTextChanged: wordsModel.seedText(text)
-
+            onDisplayTextChanged: wordsModel.seedText(text)
+            
             Keys.onTabPressed: text = wordsModel.addBestSuggestion(text)
 
             // When not handled by `onReturnPressed`

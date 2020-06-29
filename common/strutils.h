@@ -278,13 +278,13 @@ inline bool sameWithUnderscore(const char* s1, const char* s2)
 inline void split(std::vector<std::string>& list, const char* p, char c = ' ')
 {
     while (*p && *p == c) ++p;
-    do
+    while (*p)
     {
         const char* start = p;
         while (*p && *p != c) ++p;
         list.emplace_back(std::string(start, p));
         while (*p && *p == c) ++p;
-    } while (*p);
+    }
 }
 
 
@@ -484,9 +484,11 @@ static inline std::string makePath(const std::string& prefix,
     {
         // windows style or linux style absolute path given
         // then do not apply prefix
-        if (name.find(':') != std::string::npos || name.at(0) == '/')
+        if (name.find(':') != std::string::npos || 
+            name.at(0) == '/' ||
+            name.at(0) == '~')
         {
-            // if we have a prefix like C: or https:// or "/" then
+            // if we have a prefix like C: or https:// or "/" or ~ then
             // assume `name` is an absolute path.
             path = name;
         }

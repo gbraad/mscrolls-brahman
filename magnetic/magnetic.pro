@@ -46,19 +46,19 @@ include($$PROJ/app.pri)
 gcc:QMAKE_CFLAGS_WARN_ON = -Wall -Wno-unused-parameter -Wno-unknown-pragmas -Wno-unused-result -Wno-switch -Wno-parentheses -Wno-pointer-sign 
 LIBKL = $$PWD/kl
          
-INCLUDEPATH += $$PROJ/common $$PROJ/api $$PROJ/app $$LIBPNG $$LIBKL
-DEFINES += LOG_MT USE_KL USE_KLMAG
+INCLUDEPATH += $$PROJ/common $$PROJ/api $$PROJ/app $$LIBPNG $$LIBZ 
+DEFINES += LOG_MT 
 
 ios {
     CONFIG += static
     #CONFIG += shared
 }
 
-PRE_TARGETDEPS += $$LIBKL/$$LIBDIR/libkl.a
+#PRE_TARGETDEPS += $$LIBKL/$$LIBDIR/libkl.a
 
 LIBS += -L$$LIBPNG/$$LIBDIR -lpng
 LIBS += -L$$LIBZ/$$LIBDIR -lz
-LIBS += -L$$LIBKL/$$LIBDIR -lkl
+#LIBS += -L$$LIBKL/$$LIBDIR -lkl
 
 unix:!android {
     DESTDIR=$$BUILDT

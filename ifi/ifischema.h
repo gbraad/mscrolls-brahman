@@ -120,6 +120,7 @@
 // soundobj
 //#define IFI_NAME        "name"
 #define IFI_DURATION    "duration"
+#define IFI_CHANNEL     "channel"
 
 // masks for directions
 #define IFI_DIR_N       1

@@ -30,7 +30,6 @@
  *
  */
 
-
 #pragma once
 
 #define QSPACE  "com.voidware.brahman"

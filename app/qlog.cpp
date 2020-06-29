@@ -30,7 +30,6 @@
  *
  */
 
-
 #include "qlog.h"
 #include <iostream>
 

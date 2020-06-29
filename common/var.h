@@ -42,12 +42,22 @@
 
 struct var
 {
+    struct Blob
+    {
+        virtual ~Blob() {}
+        virtual Blob* copy() const = 0;
+        virtual void destroy() = 0;
+        virtual bool operator==(const Blob& b) const = 0;
+        virtual std::string toString() const = 0;
+    };
+    
     enum type
     {
         var_null = 0,
         var_string,
         var_double,
         var_int,
+        var_blob,
         var_count
     };
 
@@ -66,6 +76,7 @@ struct var
         _type = v ? var_int : var_null;
         _i = (int)v;
     }
+    var(Blob* b) : _type(var_blob), _b(b) {}
     
     var(const var& v) { _dub(v); }
     ~var() { purge(); }
@@ -95,6 +106,17 @@ struct var
         case var_int:
             _i = v._i;
             break;
+        case var_blob:
+            // donate semantics
+            {
+                var* vp = (var*)&v; // XX const cast
+                _b = vp->_b;
+
+                // drop
+                vp->_b = 0;
+                vp->_type = var_null;
+            }
+            break;
         default:
             break;
         }
@@ -114,6 +136,9 @@ struct var
             break;
         case var_int:
             v._i = _i;
+            break;
+        case var_blob:
+            v._b = _b->copy();
             break;
         default:
             break;
@@ -138,6 +163,9 @@ struct var
                 break;
             case var_int:
                 res = _i == v._i;
+                break;
+            case var_blob:
+                res = *_b == *v._b;
                 break;
             default:
                 break;
@@ -190,6 +218,7 @@ struct var
     bool isString() const { return _type == var_string; }
     bool isDouble() const { return _type == var_double; }
     bool isInt() const { return _type == var_int; }
+    bool isBlob() const { return _type == var_blob; }
     bool isNumber() const { return isDouble() || isInt(); }
     
     // true if not void
@@ -232,8 +261,6 @@ struct var
         case var_int:
             val = (double)_i;
             break;
-        default:
-            break;
         }
         return val;
     }
@@ -267,9 +294,12 @@ struct var
         case var_int:
             {
                 char buf[32];
-		sprintf(buf, "%" _PRId64, _i);
+                sprintf(buf, "%" _PRId64, _i);
                 return buf;
             }
+            break;
+        case var_blob:
+            return _b->toString();
             break;
         default:
             break;
@@ -285,7 +315,7 @@ struct var
             const char* s = _s;
             
             // if not numeric string, v is void
-            v.parse(&s);
+            v._parse(&s);
             return v;
         }
         else return *this;
@@ -332,7 +362,7 @@ struct var
         return !isVoid() && !isZero();
     }
 
-    bool parse(const char** s)
+    bool _parse(const char** s)
     {
         purge();
         
@@ -353,6 +383,19 @@ struct var
         return res;
     }
 
+    void parse(const char* s)
+    {
+        if (s && *s)
+        {
+            const char* p = s;
+            if (!_parse(&p))
+            {
+                _type = var_string;
+                _enstring(s);
+            }
+        }
+    }
+
     void purge()
     {
         if (isString())
@@ -360,14 +403,24 @@ struct var
             delete [] _s;        
             _s = 0;
         }
+        else if (isBlob())
+        {
+            _b->destroy();
+            _b = 0;
+        }
         _type = var_null;
     }
 
     void _enstring(const char* s)
     {
-        return _enstring(s, strlen(s));
+        _enstring(s, strlen(s));
     }
 
+    void _enstring(const std::string& s)
+    {
+        _enstring(s.c_str(), s.size());
+    }
+    
     void _enstring(const char* s, size_t sz)
     {
         _s = new char[sz + 1];
@@ -564,6 +617,7 @@ struct var
         char*           _s;
         double          _d;
         int64           _i;
+        Blob*           _b;
     };
 
     friend std::ostream& operator<<(std::ostream& os, const var& v)

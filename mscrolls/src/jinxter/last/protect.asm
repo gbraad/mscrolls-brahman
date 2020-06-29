@@ -56,18 +56,14 @@ PROTECT2:
 
 15$:
 	IFNE	M68000
-
 	CALL     RNDGEN                   ;returns random in d0
 	AND.W	 #$3FF,D0
 	CMP.W	 #ProtSize,D0		  ; is it still too big?
 	BGE	 15$			  ; Yes, so retry.
-
 	ENDC
 
 	IFEQ	M68000
-
 	LEA	ProtData(A4),A0		;point at our fake long word
-
 	ENDC
 
 	CALL_S   PRINTLINE                ;print the question..

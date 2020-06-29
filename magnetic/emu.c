@@ -812,26 +812,19 @@ static INLINE type16 read_w2(type8 * ptr)
 
 /* Standard rand - for equal cross-platform behaviour */
 
-
-#if 0
 static type32 rseed;
 void ms_seed(type32 seed)
 {
     rseed = seed;
 }
 
-/* this doesn't work well with subsequent modulo, nor for a sequence
- * of random numbers. for example when r(4)==0, r(2) is never 0.
- *
- * see numerical recipes in C (2nd edition) page 276-277
- */
 type32 rand_emu(void)
 {
     rseed = 1103515245L * rseed + 12345L;
-    return rseed & 0x7fffffffL;
+    return (rseed >> 16);
 }
-#else
 
+#if 0 // 64 bit random
 /* from numerical recipes (3rd edition) page 351 */
 static uint64_t rand_val = 4101842887655102017LL;
 
@@ -853,9 +846,8 @@ type32 rand_emu()
     uint32_t v = (uint32_t)rand_gen64();
     return v;
 }
-
-
 #endif
+
 
 static void _freeWord(Word* word)
 {
@@ -5461,7 +5453,7 @@ void do_line_a(void)
             if (version > 2)
             {
                 fp_tab = (type16)read_reg(8 + 6, 1); // A6
-                fp_size = (type16)read_reg(6, 1); // D1
+                fp_size = (type16)read_reg(6, 1); // D6
             }
             //printf("Sub: %x",fl_sub);
             //printf("Tab: %x",fl_tab);
@@ -5487,14 +5479,14 @@ void do_line_a(void)
                 update_game_save_area(effective(savearea), savesize, savearea);
 
                 // only defined when game has  `wanted_CLONES`
-                CloneData = read_reg(8 + 2, 1);
+                CloneData = read_reg(8 + 2, 1); // A2
 
                 // maxnoun itself is a valid item. real items <= maxnoun
-                MaxNoun = read_reg(4, 1);
+                MaxNoun = read_reg(4, 1); // D4
 
                 if (CloneData && MaxNoun && !itemCount)
                 {
-                    printf("Game has clones; MaxNoun=%d\n", MaxNoun);
+                    //printf("Game has clones; MaxNoun=%d\n", MaxNoun);
 
                     //assert(!itemCount);
                     itemCount = MaxNoun;

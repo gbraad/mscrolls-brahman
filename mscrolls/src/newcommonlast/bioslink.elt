@@ -28,40 +28,30 @@
 
 
      IFNE      BookProtection
-
          XDEF        PROT_FLG
-
      ENDC
 
      IFD	wantPassWordProtection
-
 	XDEF	FlagProtectionDone
 FlagProtectionDone	DC.W	0
-
      ENDC	;wantPassWordProtection
 
 
          XREF       COUT,GETLINE
 
       IFNE     QL128
-
          XDEF       CURSX,CURSY
-
       ENDC
 
          XDEF       BIOS.COU,BIOS.INP,BIOSQUIT,RND.CHIN
 
       IFNE     Wimp
-
          XDEF       VOLDBUF
-
       ENDC
 
       IFEQ     DosPresent
-
          XDEF       DEST,DRIVE
          XDEF       FILESIZE,READIT,WRITEIT
-
       ENDC
 
 
@@ -69,46 +59,32 @@ FlagProtectionDone	DC.W	0
          XDEF       DISPTYPE
 
       IFNE     FunctionKeys
-
          XDEF       FUNCTNO,FUNCPNTR
-
       ENDC
 
 
       IFNE     Graphics
-
          XDEF        PICTNUM
          XDEF        OLDPICTNUM
-
       ENDC
 
 
       IFNE     SpoolLen
-
          XDEF        PRINTER
-
       ENDC
 
 
       IFNE      BookProtection
-
 PROT_FLG:   DC.W  0
-
 	IFEQ	M68000
-
 	XDEF	ProtData
-
 ProtData	DC.L	0
-
 	ENDC
-
       ENDC
 
       IFNE	GENERIC
-
 	XDEF	SessionStart
 SessionStart
-
       ENDC
 
 

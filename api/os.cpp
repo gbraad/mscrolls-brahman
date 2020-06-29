@@ -170,32 +170,3 @@ bool getlocaltime(struct tm* t)
     return res;
 }
 
-#ifdef _WIN32
-# define RtlGenRandom SystemFunction036
-extern "C"
-BOOLEAN NTAPI RtlGenRandom(PVOID RandomBuffer, ULONG RandomBufferLength);
-#endif
-
-uint64 makeRandomSeed()
-{
-    uint64 s = 0U;
-    
-#ifdef _WIN32
-    if (!RtlGenRandom((PVOID) &s, (ULONG) sizeof(s)))
-    {
-        LOG1("WARNING: windows RtlGenRandom failed", 0);
-        s = 0U;
-    }
-#else
-
-    // XX use the time. 
-    struct timeval tv;
-    gettimeofday(&tv, 0);
-    s = tv.tv_usec;
-    s <<= 32;
-    s |= tv.tv_sec;
-    
-#endif
-    
-    return s;
-}

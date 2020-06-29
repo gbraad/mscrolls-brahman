@@ -199,7 +199,7 @@ struct IFIClient: public IFI, public Worker
                 break;
             }
 
-            // only block is we didn't fill from `getRequest`
+            // only block if we didn't fill from `getRequest`
             if (_madeRequest) break;
             waitForSignal();
         }

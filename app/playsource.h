@@ -70,6 +70,23 @@ public:
     virtual qint64 bytesAvailable() const  = 0;
     virtual bool playing() const = 0;
     virtual void setVolume(double v) {}
+    virtual void pause()
+    {
+        if (_audioOutput && !_suspended)
+        {
+            _suspended = true;
+            _audioOutput->suspend();
+        }
+    }
+
+    virtual void resume()
+    {
+        if (_audioOutput && _suspended)
+        {
+            _audioOutput->resume();
+            _suspended = false;
+        }
+    }
 
     bool setSource(const string& filename)
     {
@@ -120,6 +137,7 @@ protected:
     string          _sourceFile;
     QFile           _source;
     double          _volume = 1.0;
+    bool            _suspended = false;
 
 };
 

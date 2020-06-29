@@ -19,6 +19,7 @@
     include "nounequ1.i"
     include "linemacros.i"
 
+	include "nounequ2.i"
 
     XDEF    INIT
 
@@ -88,7 +89,7 @@ INIT
     MOVE.L  #MsgSCNBASE,D5
 
     ;; These are now used to pass clonedata and maxnoun
-    ;;  used to be A6 and D5.
+    ;;  used to be A6 and D6.
     SUB.L   A2,A2               ;clear
 
     ;; pass anyway!

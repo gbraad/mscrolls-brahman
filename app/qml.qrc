@@ -53,5 +53,7 @@
         <file>fonts/AtariST8x16SystemFont.ttf</file>
         <file>fonts/Merriweather-Light.ttf</file>
         <file>fonts/Merriweather-LightItalic.ttf</file>
+        <file>fonts/AtariST8s.ttf</file>
+        <file>fonts/AtariST12.ttf</file>
     </qresource>
 </RCC>

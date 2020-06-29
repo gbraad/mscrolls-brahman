@@ -62,6 +62,13 @@ template<class T> struct AP
 
     T*          get() const { return _p; }
 
+    void        purge()
+    {
+        // drop and invalidate
+        delete _p;
+        _p = 0;
+    }
+
 protected:
 
     T*          _p;

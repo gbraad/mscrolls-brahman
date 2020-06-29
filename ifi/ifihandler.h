@@ -39,6 +39,7 @@
 #include "logged.h"
 #include "ifischema.h"
 #include "varset.h"
+#include "osrandom.h"
 
 #define TAG "IFIHandler, "
 
@@ -189,7 +190,7 @@ struct IFIHandler
 
             if (!_startDone)
             {
-                LOG3(TAG "WARNING, IFI received response before started: ", p);
+                LOG3(TAG "WARNING, IFI received response before started: ", json)
             }
 
             if (!isObject)
@@ -309,6 +310,7 @@ struct IFIHandler
         else if (key == IFI_DATADIR) r = ifiDataDir(v.toString());
         else if (key == IFI_STORY) r = ifiStory(v.toString());
         else if (key == IFI_TEXT) r = ifiText(v.toString());
+        else if (key == IFI_BEGIN) r = ifiBeginGame();
         else if (key == IFI_MOVES)
         {
             int n;
@@ -376,6 +378,7 @@ struct IFIHandler
     virtual bool ifiPicture(bool v) { return false; }
     virtual bool ifiPictureResponse(const string&) { return false; }
     virtual bool ifiRestartResponse() { return false; }
+    virtual bool ifiBeginGame() { return false; }
     virtual bool ifiSaveData()
     {
         // request
@@ -715,8 +718,10 @@ struct IFIHandler
         // signal we want move count updates
         //JSONWalker::addBoolValue(*_js, IFI_MOVES, true);
 
+        int64 r = makeRandomSeed();
+        
         // include random number
-        JSONWalker::addKeyValue(*_js, IFI_RANDOMSEED, var(0));
+        JSONWalker::addKeyValue(*_js, IFI_RANDOMSEED, r);
 
     }
 

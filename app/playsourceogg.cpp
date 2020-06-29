@@ -245,10 +245,22 @@ public:
 
         for (;;)
         {
-            _running = !_shutdown && pushData();
+            int p;
+            
+            _running = !_shutdown;
+            
+            if (_running)
+            {
+                p = pushData();
+                _running = p >= 0; // ok or paused
+            }
+
             if (!_running) break;
 
             int t = 10;
+
+            // wait for longer if paused
+            if (p > 0) t = 100;
 
             if (_bytesWritten)
             {
@@ -270,20 +282,31 @@ public:
         LOG4("PlayerSource pushing over, ", (_shutdown ? "shutdown" : ""));
     }
 
-    bool pushData()
+    int pushData()
     {
+        // return 0 if OK, 
+        // return -1 if stop
+        // return 1 if pause
+
         _bytesWritten = 0;
 
-        bool res = _pushOut && _audioOutput
-            && (_audioOutput->state() == QAudio::ActiveState 
-                || _audioOutput->state() == QAudio::IdleState);
+        bool res = _pushOut && _audioOutput;
+
+        if (res && _audioOutput->state() == QAudio::SuspendedState)
+        {
+            // we are paused, do not return false, otherwise will stop
+            return 1;
+        }
+
+        res = res && (_audioOutput->state() == QAudio::ActiveState 
+                      || _audioOutput->state() == QAudio::IdleState);
 
         if (res)
         {
             int bz = _audioOutput->bytesFree();
             int pz = _audioOutput->periodSize();
 
-            if (!bz || !pz) return res; // bail
+            if (!bz || !pz) return 0; // nothing to do
 
             int ms = bytesToMS(bz);
             if (ms > 200)
@@ -366,13 +389,14 @@ public:
                             //LOG3("Playersource push full ", a << " from " << pz);
                             
                             // do not fail, but fall out and wait
-                            return true;
+                            return 0;
                         }
                     }
                 }
             }
         }
-        return res;
+        
+        return res ? 0 : -1;
     }
 
     qint64 bytesAvailable() const override

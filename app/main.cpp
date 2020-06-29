@@ -68,6 +68,16 @@
 #include "updateritch.h"
 #endif
 
+void systemPause()
+{
+    QSoundPlayer::pauseAllPlayers();
+}
+
+void systemResume()
+{
+    QSoundPlayer::resumeAllPlayers();
+}
+
 int main(int argc, char *_argv[])
 {
     Logged initLog;

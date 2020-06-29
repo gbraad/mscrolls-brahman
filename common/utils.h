@@ -73,6 +73,12 @@ bool contains(const std::vector<T>& l, const T& v)
     return std::find(l.cbegin(), l.cend(), v) != l.cend();
 }
 
+template<typename T> inline
+bool contains(const std::list<T>& l, const T& v)
+{
+    return std::find(l.cbegin(), l.cend(), v) != l.cend();
+}
+
 template<typename T> inline bool erase(std::vector<T*>& l, T* v)
 {
     for (typename std::vector<T*>::iterator it = l.begin(); it != l.end(); ++it)
