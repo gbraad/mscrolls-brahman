@@ -1,0 +1,15 @@
+#! /bin/sh
+
+# Usage :
+# makeboot64 <title file> <6502 code file>
+# output in result
+
+PATH=/usr/adv/advdir/c64bits/bin:/usr/adv/advdir/6502bits/bin
+OBJ=/usr/adv/advdir/c64bits/asm
+
+donybbles $2 ${OBJ}/reloc.o > nybbles$$
+hufnybbles nybbles$$ > huffed$$
+dotitle64 $1 > title$$
+roundup 256 ${OBJ}/undo.o > temp$$
+/bin/cat ${OBJ}/boot64 title$$ temp$$ huffed$$ > result
+/bin/rm -f nybbles$$ huffed$$ title$$ temp$$

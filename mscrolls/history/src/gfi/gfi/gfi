@@ -1,0 +1,18 @@
+#! /bin/csh
+
+set path = ( /usr/local/src/gfi )
+
+set verbose
+
+decap < $1 | spacefilter > t1$$
+tokenise t1$$ t2$$
+rmspace < t2$$ > t3$$
+if ( $#argv == 2 && $2 == '-s' ) then
+	echo "file before huffing is called "$1".tok"
+	/bin/mv t3$$ $1.tok
+	exit 0
+endif
+huf t3$$
+convert
+mkobj text.raw MSGPNTR text.o
+/bin/rm t1$$ t2$$ t3$$

@@ -1,0 +1,69 @@
+
+1.	compress pictures by logging in as 'graphics',
+	going to game/c64 and typing 'piccom64 *.c64'
+	move .fin files into working directory
+
+2.	make cameos.
+	cat cameos together in picture order into file
+	cameos in working directory
+
+3.	make text
+	log in as common, go to working directory and
+	type 'dotext64 ~game/text/game.text'
+	'mv treepage.i ~elthamr/common'
+
+4.	Assemble eltham with C64 set to TRUE.
+	type 'lf prog code > /dev/null' to extract the code section
+	move 'code' to working directory
+	go there and type :
+		ecomp NN code > ~elthamr/common/numperm.i
+	where NN is the number of pages of eltham which must be
+	permanent (in hex).
+	Type 'ecrypt code.perm code.rest'
+
+5.	Go to wherever the 6502 hangs out & type 'make'
+	copy xeq to the working directory
+	create a text file with what you want to appear on the screen
+	as it is loading
+	type 'makeboot64 title xeq' where title is the text file
+	'mv result GAME'
+
+6.	Create a file in the working directory called 'files'
+	the first lines of 'files' should be :
+		/usr/adv/advdir/c64bits/asm/fdisk.o,0
+		code.rest.cr,1
+		text,1
+		tree,1
+		cameos,1
+		code.perm.cr,2,34
+	and the rest of the lines should be the names of the .fin
+	compressed picture files in the order which the game expects them.
+	finally add lines onto the end of the file :
+		GAME,dos
+		GCOPY,dos
+		GMC,dos
+	type 'mkdisk64 files DISK1 DISK2'
+
+7.	Switch on the BEEB and C128 and connect the two with the
+	really dodgy looking cable.
+	Take 2 blank disks and format them on the C128 with the
+	ID bytes for disk one and disk two of the game resp.
+	insert the disk label C64 UTILS into the C128 drive
+	and type 'DLOAD"LOADIMAGE"' then 'RUN'
+	insert the disk formatted to be disk one.
+	log in as common on the BEEB and cd to the working directory.
+	type CTRL-BREAK then 'BASIC'
+	type 'CH."RELAYIM"'
+	type 'DISK1'
+	press a key on the beeb and c128.
+	wait.
+	type RUN on the beeb
+	insert the C64 UTILS disk into the C128 and type RUN
+	insert the disk formatted to be disk two into the C128
+	type 'DISK2' on the beeb
+	press a key on the beeb and c128.
+	wait.
+	hold down the commodore key on the C128 and press reset.
+	type 'LOAD"GAME",8,1'
+
+8.	Hope.

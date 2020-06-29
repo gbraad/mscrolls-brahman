@@ -1,0 +1,52 @@
+#! /bin/sh
+
+optimise="-O"
+options=""
+link="link"
+
+while true ; do
+	case $1 in
+	-g)
+		optimise=""
+		options="${options} $1"
+		shift
+		continue
+		;;
+	-c)
+		link="nolink"
+		shift
+		continue
+		;;
+	esac
+	break
+done
+
+compile="cc ${optimise} ${options}"
+
+if test ${link} = "link" -a $# -eq 1 ; then
+	base=`basename $1`
+	echo ${compile} ${base}.c -o ${base}
+	${compile} ${base}.c -o ${base}
+	exit 0
+fi
+
+# compile each file
+a=''
+echo $*
+for i in $* ; do
+	base=`basename $i`
+	if test -r ${base}.c ; then
+		echo ${compile} -c ${base}.c
+		if ${compile} -c ${base}.c ; then
+			a="$a ${base}.o"
+		else
+			exit 1
+		fi
+	fi
+done
+
+# link it
+if test ${link} ; then
+	echo cc $a -o `basename $1`
+	${compile} $a -o `basename $1`
+fi

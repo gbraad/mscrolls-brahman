@@ -1,0 +1,7 @@
+To compress the text. just type :
+	gfi file
+
+Output is in the files :
+	huff.lef / huff.rig		Tree
+	huff.ind			16 bit indexes
+	huff.out			Crunched output

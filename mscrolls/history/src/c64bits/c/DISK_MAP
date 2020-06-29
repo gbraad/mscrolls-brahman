@@ -1,0 +1,62 @@
+Disk Map of the C64 versions
+============================
+
+Sectors per track :
+1-17	20
+18-24	18
+25-30	17
+31-35	16
+
+dos directory on track 18
+
+game directory on track 1 sector 2 (the 3rd sector)
+disk boot on track 1 sector 0-1
+
+format of game directory :
+max 64 files
+for each file, 4 consecutive bytes :
+byte 1 = start track
+byte 2 = start sector
+byte 3 = num sectors
+byte 4 = which disks (0->on both?, 1 or 2 -> on disk 1 or 2 only)
+
+dos directory format :
+header (track 18 sector 0)
+	byte 0 = 18
+	byte 1 = 1
+	byte 2 = 'A'
+	byte 3 ignored (DS flag)
+	bytes 4-7 = sectors available on track 1
+	bytes 8-11 = sectors available on track 2
+	...
+	bytes 144-159 = disk name padded with 160s
+	byte 160 = 160
+	byte 161 = 160
+	bytes 162-163 = disk id
+	byte 164 = 160
+	bytes 165-166 = "2A"
+	bytes 167-170 = 160
+	bytes 171-255 = 0
+
+directory (track 18, sectors 1-19), each sector :
+	bytes 0,1 = track, sector of next directory block
+	bytes 2-31 = file entry 1
+	bytes 66-63 = file entry 2
+	...
+	bytes 226-255 = file entry 8
+
+	file entry :
+		byte 0 = 128 + type for closed file,
+			   = $c0 + type for locked file,
+			   type 1 = DELeted
+			   type 2 = SEQuential
+			   type 3 = PROGram
+			   type 4 = USER
+			   type 5 = RELative
+		bytes 1-2 = track,sector of first data block
+		bytes 3-18 = filename padded with 160s
+		bytes 19-20 = track,sector of first side sector (REL only)
+		byte 21 = record length (REL only)
+		byte 22-25 unused
+		bytes 26-27 = track,sector of replacement file in @SAVE, @LOAD
+		bytes 28-29 = number of blocks (lo,hi)

@@ -1,0 +1,9 @@
+# makes a 'result' file from given runtime file + reloc.asm + undo.asm
+as6502 -o nreloc.asm >nreloc.list
+mv 6502.out reloc.o
+as6502 -o nundo.asm >nundo.list
+mv 6502.out undo.o
+makerun < $1
+hufS run4
+nicer6502 <run4.H >nicer4
+splodge

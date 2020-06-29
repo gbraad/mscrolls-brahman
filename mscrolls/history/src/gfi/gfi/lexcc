@@ -1,0 +1,5 @@
+#! /bin/sh
+
+lex $1.l
+cc -O lex.yy.c -o $1 -ll
+

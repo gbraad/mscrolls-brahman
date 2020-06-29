@@ -1,0 +1,4 @@
+#! /bin/sh
+
+as6502 -o $1.asm > /dev/null
+mv 6502.out $1.o

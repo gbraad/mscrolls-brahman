@@ -1,0 +1,32 @@
+#! /bin/sh
+
+if [ $# = 0 -or $# -gt 2 ]
+then
+	echo "Usage: dotextapple <text file> [ <wrap point (hex)> ]"
+	exit 1
+fi
+
+PATH=/usr/adv/advdir/c64bits/bin:/usr/adv/advdir/6502bits/bin:/usr/local:/bin
+
+if [ $# = 1 ]
+then
+	gfi8 $1
+else
+	gfi8 $1 $2     # huf the text with the specified wrap point
+fi
+roundup 128 huff.lef > lef.pad
+roundup 128 huff.rig > rig.pad
+cat lef.pad rig.pad huff.ind > tree
+mv huff.out text
+if [ $# = 2 ]
+then
+	divide $2 text text1 text2.tmp
+	roundup 256 text2.tmp > text2
+	rm -f text2.tmp
+	maketreepage text2 > treepage.i
+	cat tree >> text2
+	rm -f text tree
+else
+	maketreepage text > treepage.i
+fi
+rm -f huff.lef huff.rig lef.pad rig.pad huff.ind
