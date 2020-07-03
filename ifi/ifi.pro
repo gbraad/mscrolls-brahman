@@ -42,6 +42,10 @@ include($$PROJ/app.pri)
 
 ### ////////////////// BASE ///////////////////////////////////////////
 
+ios {
+    CONFIG += static
+}
+
 INCLUDEPATH += $$IFIDIR
 DEFINES += IFI_BUILD
 
