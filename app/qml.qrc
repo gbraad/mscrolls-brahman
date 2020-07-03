@@ -6,6 +6,7 @@
         <file>GamePage.qml</file>
         <file>Game.qml</file>
         <file>Roller.qml</file>
+        <file>GameRoller.qml</file>
         <file>MapPage.qml</file>
         <file>MapBox.qml</file>
         <file>Arrow.qml</file>
@@ -28,6 +29,7 @@
         <file>ImportMessage.qml</file>
         <file>ScaleSelector.qml</file>
         <file>FontLoad.qml</file>
+        <file>UCanvas.qml</file>
     </qresource>
 
     <qresource prefix="/">
@@ -55,5 +57,13 @@
         <file>fonts/Merriweather-LightItalic.ttf</file>
         <file>fonts/AtariST8s.ttf</file>
         <file>fonts/AtariST12.ttf</file>
+        <file>fonts/JetBrainsMono-Regular.ttf</file>
+        <file>fonts/JetBrainsMono-Medium.ttf</file>
+        <file>fonts/JetBrainsMono-Medium-Italic.ttf</file>
+        <file>fonts/JetBrainsMono-Italic.ttf</file>
+        <file>fonts/JetBrainsMono-ExtraBold.ttf</file>
+        <file>fonts/JetBrainsMono-Bold.ttf</file>
+        <file>fonts/JetBrainsMono-ExtraBold-Italic.ttf</file>
+        <file>fonts/JetBrainsMono-Bold-Italic.ttf</file>        
     </qresource>
 </RCC>

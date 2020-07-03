@@ -53,6 +53,7 @@
 #define IFI_DATA        "data"
 #define IFI_BEGIN       "begin"
 #define IFI_RESTART     "restart"
+#define IFI_ANIMATE     "animate"
 
 // reply only
 
@@ -61,11 +62,6 @@
 #define IFI_EXITS       "exits"
 #define IFI_PROMPT      "prompt"
 #define IFI_NAME        "name"
-#define IFI_BRIGHTNESS  "brightness"
-#define IFI_CONTRAST    "contrast"
-#define IFI_SATURATION  "saturation"
-#define IFI_LIGHTNESS   "lightness"
-#define IFI_GAMMA       "gamma"
 #define IFI_ID          "id"
 #define IFI_WORN        "worn"
 #define IFI_ICON        "icon"
@@ -101,6 +97,7 @@
 #define IFI_UI_SIDEBAR  "ui_sidebar"
 #define IFI_UI_TEXTINPUT "ui_textinput"
 #define IFI_UI_COMPASS  "ui_compass"
+#define IFI_UI_UCANVAS  "ui_ucanvas"
 //#define IFI_BACKIMAGE   "backimage"
 #define IFI_PRIME_COL   "primary_color"
 #define IFI_CONTRAST_COL "contrast_color"
@@ -121,6 +118,22 @@
 //#define IFI_NAME        "name"
 #define IFI_DURATION    "duration"
 #define IFI_CHANNEL     "channel"
+
+// pictureobj
+//#define IFI_NAME        "name"
+#define IFI_BRIGHTNESS  "brightness"
+#define IFI_CONTRAST    "contrast"
+#define IFI_SATURATION  "saturation"
+#define IFI_LIGHTNESS   "lightness"
+#define IFI_GAMMA       "gamma"
+
+// animobj
+//#define IFI_NAME        "name"
+#define IFI_ATLAS         "atlas"
+#define IFI_PLAY          "play"
+#define IFI_TRACK         "track"
+#define IFI_LOOP          "loop"
+#define IFI_DELAY         "delay"
 
 // masks for directions
 #define IFI_DIR_N       1

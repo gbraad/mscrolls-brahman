@@ -42,6 +42,7 @@ LIBZ = $$PROJ/tools/zlib
 RJSONDIR = $$PROJ/rapidjson
 IFIDIR = $$PROJ/ifi
 KLIFDIR = $$PROJ/klif
+SPINE = $$PROJ/spine
 
 INCLUDEPATH += $$PROJ/common
 DEFINES += LOG_MT

@@ -41,6 +41,7 @@ struct VarSet: public std::map<std::string, var>
     
     void add(const string& key, const var& val)
     {
+        // NB: consumes `val` !
         insert(std::make_pair(key, val));
     }
 

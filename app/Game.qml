@@ -52,7 +52,7 @@ C1.SplitView
     property alias contenty: textflick.contentY
     property alias drawerypos: rdrawer.dypos
     property int texttopmargin: 0
-    property bool choiceActive: choicebox.active
+    property alias choiceActive: choicebox.active
 
     readonly property int compassSize: 200*M.Units.dp
 

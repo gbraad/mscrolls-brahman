@@ -383,15 +383,25 @@ struct var
         return res;
     }
 
-    void parse(const char* s)
+    void parse(const char* s, bool mapBoolNames = false)
     {
         if (s && *s)
         {
             const char* p = s;
             if (!_parse(&p))
             {
-                _type = var_string;
-                _enstring(s);
+                if (mapBoolNames)
+                {
+                    // detect names of bool and map to values
+                    if (!strcmp(s, "true")) { _type = var_int; _i = 1; }
+                    else if (!strcmp(s, "false")) { _type = var_int; _i = 0; }
+                }
+
+                if (!_type)
+                {
+                    _type = var_string;
+                    _enstring(s);
+                }
             }
         }
     }

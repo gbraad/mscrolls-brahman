@@ -46,9 +46,9 @@ FocusScope
     property int lineHeight: 48*Units.dp
     
     property string ifiChoiceJSON: QControl.ifiChoiceJSON
-    property int hmargin: 16*Units.dp
     property var jchoicemodel
     property bool active: false
+    property int idealHeight: jchoicemodel ? jchoicemodel.count*lineHeight + header.aheight : 0
 
     visible: ifiChoiceJSON.length > 0
 
@@ -61,10 +61,8 @@ FocusScope
         }
     }
 
-    height: jchoicemodel ? jchoicemodel.count*lineHeight + header.aheight : 0
 
     onVisibleChanged: if (visible) choices.forceActiveFocus()
-    
 
     function updateJSONModel(js) 
     {
@@ -105,26 +103,37 @@ FocusScope
 
     Rectangle
     {
+        id: cpane
         anchors.fill: parent
+        anchors.margins: 8*Units.dp
         color: theme.backgroundShade
         
         ChoiceText
         {
             id: header
             visible: aheight > 0
+            color: theme.backgroundShade
+
+            gradient: Gradient {
+                GradientStop { position: 0.0; color: header.color }
+                GradientStop { position: 0.3; color: Theme.primaryColor }
+                GradientStop { position: 0.7; color: Theme.primaryColor }
+                GradientStop { position: 1.0; color: header.color }
+            }
         }
 
         ListView
         {
             id: choices
-            width: parent.wdith
-            height: choicearea.height - header.aheight
+            width: parent.width
+            height: parent.height - header.aheight
             anchors.top: header.bottom
+            clip: true
             
             delegate: ChoiceText
             {
                 height: lineHeight
-                width: choicearea.width
+                width: cpane.width
                 selected: ListView.isCurrentItem
                 onAccept: acceptChoice(choice)
 
@@ -138,7 +147,7 @@ FocusScope
             
             highlight: Rectangle { color: "#e0e0e0"; radius: 5 }
 
-            //keyNavigationWraps: true
+            //keyNavigationWraps: true // doesnt work
             focus: true
             Keys.onReturnPressed:  acceptChoice(currentItem.chosen)
         }

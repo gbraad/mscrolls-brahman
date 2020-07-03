@@ -49,18 +49,12 @@ Page
     function selected() {}
 
     property string droplink
-    property string currentImage
-    property bool picValid
 
     // does the text move with the image or go behind it
     property bool textFollowScrollMode: QControl.prefs.textmoveEnabled
-
-    onCurrentImageChanged:
-    {
-        pic.play(currentImage)
-        if (picValid) gamearea.bump();
-        else gamearea.unbump(); 
-    }
+    
+    // valid for GameRoller and UCanvas
+    property bool choiceActive: gamearea.item.choiceActive
 
     function setDroplink(s)
     {
@@ -92,14 +86,14 @@ Page
         iconName: "navigation/refresh"
         name: "Refresh"
         hoverAnimation: true
-        enabled: !game.choiceActive
+        enabled: !choiceActive
         onTriggered: QControl.refreshCommand()
     },
     Action
     {
         iconName: "content/undo"
         name: "Undo"
-        enabled: !game.choiceActive
+        enabled: !choiceActive
         onTriggered: snackbar.open(QControl.undoredo(true))
         visible: QControl.gameEnableUndoRedo()
     },
@@ -108,14 +102,14 @@ Page
         iconName: "maps/my_location"
         name: "Compass"
         hoverAnimation: true
-        onTriggered: game.dtoggle()
+        onTriggered: gamearea.item.agame.dtoggle() // invalid for uicanvas
         visible: app.enableCompass
     },
     Action
     {
         iconName: "content/redo"
         name: "Redo"
-        enabled: !game.choiceActive
+        enabled: !choiceActive
         onTriggered: snackbar.open(QControl.undoredo(false))
         visible: QControl.gameEnableUndoRedo()
     },
@@ -212,8 +206,10 @@ Page
             }
         }
 
-        Roller
+        Loader
         {
+            // load one or the other to prevent both being active 
+            // even when invisible
             id: gamearea
             anchors
             {
@@ -222,168 +218,7 @@ Page
                 top: parent.top
                 bottom: parent.bottom
             }
-
-            thumbColor: Theme.primaryColor
-
-            DropArea
-            {
-                id: droparea
-                anchors.fill: parent
-
-                onPositionChanged:
-                setDroplink(QControl.tailWords(game.textarea.linkAt(drag.x, drag.y + game.contenty - gamearea.thumbHeight)))
-            }
-            
-            content: Game
-            {
-                // where the game text lives
-                id: game 
-                anchors.fill: parent
-                drawerypos: QControl.prefs.compassmoveEnabled ? gamearea.rollHeightShown + Units.dp*16 : 0
-
-                texttopmargin: textFollowScrollMode ? gamearea.rollHeightShown : 0
-            }
-            
-            thumbcontent: RowLayout
-            {
-                anchors
-                {
-                    fill: parent
-                    leftMargin: Units.dp*16
-                    rightMargin: Units.dp*16
-                }
-                
-                Text
-                {
-                    // host the game status bar here. show the score etc.
-                    readonly property int fsize: Units.dp*16
-                    height: parent.height
-                    font.pixelSize: fsize
-                    font.family: Theme.fontFamily
-                    text: QControl.titleText
-                    color: Theme.isDarkColor(gamearea.thumbColor) ? "white" : "black"
-                    Layout.alignment: Qt.AlignRight
-                }
-            }
-
-            rollcontentheight: picValid ? picarea.height : 0
-
-            rollcontent: Rectangle
-            {
-                id: picarea
-
-                width: parent.width
-                height: pic.aspect * width + pic.hadj*2
-
-                anchors.bottom: parent.bottom
-                color: QControl.colorContrast(theme.backgroundShade, 0.05)
-
-                property string currentImageJSON: QControl.currentImageJSON
-                property real imgBrightness: 0.0
-                property real imgContrast: 0.0
-                property real imgSaturation: 0.0
-                property real imgLightness: 0.0
-                property real imgGamma: 1.0
-
-                onCurrentImageJSONChanged:
-                {
-                    //console.log("current image JSON ", currentImageJSON);
-                    var js = JSON.parse(currentImageJSON);
-                    var pname = js["name"]
-                    var iname = ""
-                    if (pname)
-                    {
-                        iname = QControl.resolveAsset(pname)
-                        var v;
-                        v = js["brightness"]
-                        imgBrightness = v ? v : 0.0
-                        v = js["contrast"]
-                        imgContrast = v ? v : 0.0
-                        v = js["saturation"]
-                        imgSaturation = v ? v : 0.0
-                        v = js["lightness"];
-                        imgLightness = v ? v : 0.0
-                        v = js["gamma"]
-                        imgGamma = v ? v : 1.0
-                    }
-                    
-                    picValid = iname.length > 0
-                    currentImage = iname
-                }
-
-                AnimatedImage2
-                {
-                    id: pic
-
-                    // do not use pixel blending unless new scaling selected
-                    smooth: QControl.prefs.imagepixscaleEnabled
-
-                    property int m1: (QControl.lowMargins ? 6 : 16)*Units.dp
-                    property int m: scaleMode ? Math.max(4*Units.dp, m1*gamearea.rollHeightShown/sourceSize.height) : m1
-                    property real aspect: sourceSize.width ? sourceSize.height/sourceSize.width : 0
-                    property int hadj: Math.max(m1*(1 - aspect), 0)
-
-                    property bool scaleMode: QControl.prefs.imagescaleEnabled
-
-                    width: picValid ? parent.width - m*2 : 0
-                    height: picValid ? (scaleMode ? Math.max(gamearea.rollHeightShown - m*2, 0): parent.height) : 0
-
-                    anchors
-                    {
-                        bottom: parent.bottom
-                        bottomMargin: scaleMode ? m : 0
-                        horizontalCenter: parent.horizontalCenter
-                    }
-
-                    fillMode: Image.PreserveAspectFit
-                    
-                    // these make drawings blurred!
-                    //mipmap: true
-                    //antialiasing: true
-
-                    visible: false
-                    paused: gamearea.rollHeightShown <= 0 || !gamepage.visible
-                }
-
-                BrightnessContrast
-                {
-                    id: effect1
-                    anchors.fill: pic
-                    source: pic
-                    brightness: QControl.prefs.imageadjEnabled ? picarea.imgBrightness : 0.0
-                    contrast: QControl.prefs.imageadjEnabled ? picarea.imgContrast : 0.0
-                    visible: false
-                }
-
-                HueSaturation {
-                    id: effect2
-                    anchors.fill: effect1
-                    source: effect1
-                    saturation: QControl.prefs.imageadjEnabled ? picarea.imgSaturation : 0.0
-                    lightness: QControl.prefs.imageadjEnabled ? picarea.imgLightness : 0.0
-                    visible: false
-                }
-
-                GammaAdjust {
-                    id: effect3
-                    anchors.fill: effect2
-                    source: effect2
-                    gamma:  QControl.prefs.imageadjEnabled ? picarea.imgGamma : 1.0;
-
-                    visible: picValid
-                    layer.enabled: Theme.isDark == false
-                    layer.effect: DropShadow
-                    {
-                        transparentBorder: true
-                        verticalOffset: 4*Units.dp
-                        horizontalOffset: 4*Units.dp
-                        radius: 6*Units.dp
-                        samples: 1+radius*2
-                        color: "#80000000"
-
-                    }
-                }
-            }
+            source: app.enableUCanvas ? "UCanvas.qml" : "GameRoller.qml"
         }
     }
 

@@ -58,6 +58,7 @@ struct DLLX Transcript: public API<Transcript>
     string              textHTML() const;
     string              customJSON() const;
     void                resetCustomJSON();
+    void                clear();
 
     string              styleHTML() const;
 

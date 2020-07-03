@@ -147,7 +147,7 @@ public:
 
     DL() { _init(); }
 
-    ~DL() { remove(); }
+    virtual ~DL() { remove(); }
 
     /// insert in front of `r'
     void        insert(DL* r)

@@ -169,6 +169,9 @@ The _reply_ json, sent from the back-end to the front-end, can have these terms 
 * `sound: {soundobj}`  
    Play a sound.
 
+* `animate: {animobj}`
+   Play animation.
+
 * `objects: [{object}...]`  
    The objects in the game. This is primarily the _invariant_ mapping between ID and game name.
 
@@ -234,7 +237,7 @@ The _reply_ json, sent from the back-end to the front-end, can have these terms 
    _Optional_.  Choice is displayed but cannot be selected.
 
 * `chosen:"some text"` or `chosen:{some json}`  
-   _Optional_. If this is chosen, then either the given `json` is sent to the back-end as `{some json}`, or if `text` is given; `{"command":"some text"}` is sent. 
+   _Optional_. If this is chosen, then either the given `json` is sent to the back-end as `{some json}`, or if text is given; `{"command":"some text"}` is sent. 
     If omitted and chosen, `{"command":"a choice"}` will be sent, where the command text is the same as the `text` field.
 
 ### pictureobj
@@ -256,6 +259,26 @@ The _reply_ json, sent from the back-end to the front-end, can have these terms 
   
 * `gamma: 1.0`  
   _Optional_. Applied to picture dynamically.
+
+### animobj
+
+* `name: "filepath"`  
+  Path relative to `configDir` for animation file, normally a `.json` file.
+
+* `atlas: "filepath"`
+  Path to `.atlas` file.
+
+* `play: "animation name"`
+  _Optional_. Start named animation.
+
+* `track: int`
+  _Optional_. Track for animation. If not supplied track 0 is used.
+
+* `loop: true`
+  _Optional_. Loop animation.
+
+* `delay: int`
+  _Optional_. schedule animation to start `delay` seconds after the end of the current animation.
 
 ### object
 
@@ -364,6 +387,9 @@ Same meanings as `item`.
 
 * `ui_compass: true`  
   _Optional_. Enable UI compass. Default is false.
+
+* `ui_ucanvas: true`
+  _Optional_. Enable UI Canvas mode.
 
 * `primary_color: "deep orange"`  
   _Optional_. Set theme primary colour from Material Design palette. See section on "Themes and Colours".
@@ -670,9 +696,15 @@ The command string generate for an `unuse` event may be changed, see `unuse` rep
 
 When an item `X` is dragged from the sidebar menu onto item `Y` in the text. See `usewith` reply for details of how the command is built.
 
+## UCanvas Mode
 
+This mode is enabled once in the `meta` reply, and instructs the GUI to use the _unified canvas_.
 
+The _unified canvas_ dispenses with the classic picture roller and combines both the text and graphics into a _single_ space.
 
+In this mode, the text overlays the graphics so that when text is displayed, the graphic is faded with the text shown overlaid. The text is then dismissed by clicking, whereupon the graphic is made visible again.
+
+There is no text scrolling in this mode and whenever text is displayed and then dismissed, that text is cleared so that only new text is seen thereafter.
 
 
 

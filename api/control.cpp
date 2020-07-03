@@ -212,7 +212,7 @@ struct ImpIFI: public IFIHandler, public ControlImpBase
 
     bool evalJSON(const string& js)
     {
-        LOG3("Control, evalJSON ", js);
+        //LOG3("ControlIMP, evalJSON ", js);
         return _ifiHost.eval(js.c_str());
     }
     
@@ -230,13 +230,14 @@ struct ImpIFI: public IFIHandler, public ControlImpBase
         if (echo)
         {
             const char* p = scmd.c_str();
-            while (*p)
+            for (;;)
             {
                 // XX need to feed input also to common text channel
-                allEmitterHandler(*p, 2);
+                // emit 0 as well to flush
+                allEmitterHandler(*p, 2);  // emit_console
+                if (!*p) break;
                 ++p;
             }
-            allEmitterHandler(0, 2); // flush
         }
         
         if (buildCmdJSON(scmd.c_str()))
@@ -875,12 +876,10 @@ struct Control::Imp :
                                                    BRA_CONSOLE_ECHO_STYLE);
                             const char* p = s.c_str();
 
-                            for (;;)
-                            {
-                                _temit.send(*p); // send 0 as well.
-                                if (!*p) break; 
-                                ++p;
-                            }
+                            // NB: do not send zero to flush transcript
+                            // as we expect more to follow and this would
+                            // otherwise cause a second redraw
+                            while (*p) _temit.send(*p++); 
                             _cemitBuf.clear();
                         }
 
@@ -1178,6 +1177,17 @@ struct Control::Imp :
                 LOG3("API picture js ", js);
                 _host->imageChanged(js);
             }
+            
+        }
+        return true;
+    }
+
+    bool ifiAnimateResponse(const string& js) override
+    {
+        if (!js.empty())
+        {
+            LOG3("API animate js ", js);            
+            _host->imageChanged(js);  // put anim json through image pathway
             
         }
         return true;
@@ -1832,7 +1842,7 @@ struct Control::Imp :
             r = _ifiHost.syncRelease();
         }
         
-        // refresh sidebar & map
+        // refresh sidebar & map (only for non-ifi)
         if (r) updateAfterCommand();
         return r;
     }

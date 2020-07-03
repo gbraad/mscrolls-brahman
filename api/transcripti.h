@@ -119,6 +119,13 @@ struct Transcript::Imp : public ImpType<Transcript>
         return gs.start();
     }
 
+    void clear()
+    {
+        _currentSegmentId = 0;
+        _segmentText.clear();
+        _page.clear();
+    }
+
     void finish()
     {
         bool changed = false;
@@ -200,9 +207,7 @@ struct Transcript::Imp : public ImpType<Transcript>
             
         if (_currentSegmentId == BRA_SEGMENT_CLEAR)
         {
-            _currentSegmentId = 0;
-            _page.clear();
-                
+            clear();
             changed = true;
         }
 
@@ -230,7 +235,7 @@ struct Transcript::Imp : public ImpType<Transcript>
             _segmentText.clear();
         }
             
-        // emit changed event
+        // emit changed event, handled in qtranscript::changed
         if (changed && _host->_notifier)
             _host->_notifier->changed(_currentSegmentId);
     }

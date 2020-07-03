@@ -224,6 +224,8 @@ struct IFIHandler
                         r = ifiMapResponse(subjs);
                     else if (p == IFI_PICTURE) // picture as object
                         r = ifiPictureResponse(subjs);
+                    else if (p == IFI_ANIMATE) 
+                        r = ifiAnimateResponse(subjs);
                     else if (p == IFI_SAVEDATA)
                         r = ifiSaveDataResponse(subjs);
                     else if (p == IFI_TEXT)
@@ -377,6 +379,7 @@ struct IFIHandler
     virtual bool ifiTitleTextResponse(const string&) { return false; }
     virtual bool ifiPicture(bool v) { return false; }
     virtual bool ifiPictureResponse(const string&) { return false; }
+    virtual bool ifiAnimateResponse(const string&) { return false; }
     virtual bool ifiRestartResponse() { return false; }
     virtual bool ifiBeginGame() { return false; }
     virtual bool ifiSaveData()

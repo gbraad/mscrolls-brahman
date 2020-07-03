@@ -160,6 +160,12 @@ public:
         }
     }
 
+    Q_INVOKABLE void clear()
+    {
+        // this does not emit a textchanged
+        _transcript->clear();
+    }
+
     Transcript::Ref     _transcript;
 
 signals:

@@ -36,7 +36,7 @@ import QtQuick 2.12
 
 import Material 0.3 
 
-Item
+Rectangle
 {
     id: ctext
     property string chosen
@@ -44,6 +44,9 @@ Item
     property bool selected: false
     property alias text: label.text
     property int normalSize: 16*Units.dp
+
+    color: "transparent"
+
     
     property int aheight: text.length > 0 ? 48*Units.dp : 0
 

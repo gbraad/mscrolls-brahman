@@ -48,6 +48,7 @@ string Transcript::text() const { return _imp->_page.toString(); }
 string Transcript::textHTML() const { return _imp->textHTML(); }
 string Transcript::customJSON() const { return _imp->_customJSON; }
 void Transcript::resetCustomJSON() { _imp->_customJSON.clear(); }
+void Transcript::clear() { _imp->clear(); }
 
 int Transcript:: width() const { return _imp->_page._width; }
 void Transcript::setWidth(int w) { _imp->_page._width = w; }

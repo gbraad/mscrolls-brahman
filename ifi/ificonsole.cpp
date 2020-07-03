@@ -244,7 +244,7 @@ int main(int argc, char** argv)
     while (!done)
     {
         std::string cmd;
-        std::cout << h.getProp(IFI_PROMPT); std::cout.flush();
+        std::cout << '\n' << h.getProp(IFI_PROMPT); std::cout.flush();
         std::getline(std::cin, cmd);
         if (cmd == "quit") break;
 

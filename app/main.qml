@@ -67,6 +67,7 @@ ApplicationWindow
     property bool enableSaveLoad: QControl.gameEnableSaveLoad()
     property bool enableClassic: QControl.gameEnableClassic()
     property string privacyPolicy: QControl.gamePrivacyPolicy()
+    property bool enableUCanvas: false // IFI only
 
     // whether save & load can happen within a choice
     property bool enableSaveLoadChoice: false
@@ -107,6 +108,17 @@ ApplicationWindow
         }
     }
 
+    function setGameFontDefault(fs)
+    {
+        if (Device.isLargeMobile) fs *= 5/4; // tablet
+        QControl.prefs.setGameFontDefault(fontobj.afont, fs*Units.dp, true)
+    }
+
+    onEnableUCanvasChanged:
+    {
+        setGameFontDefault(24);
+    }
+
     onCurrentMetaJSONChanged:
     {
         //console.log("current meta JSON ", currentMetaJSON)
@@ -126,6 +138,8 @@ ApplicationWindow
         if (v) enableSidebar = true
         v = js["ui_compass"]
         if (v) enableCompass = true
+        v = js["ui_ucanvas"]
+        if (v) enableUCanvas = true
         v = js["credits"]
         if (v) gameCredits = v
         v = js["covertext"]
@@ -182,6 +196,8 @@ ApplicationWindow
         FontLoad { source: "fonts/PxPlus_IBM_EGA9.ttf" }
         FontLoad { source: "fonts/PxPlus_IBM_VGA9.ttf" }
         FontLoad { source: "fonts/AtariST8x16SystemFont.ttf" }
+        FontLoad { source: "fonts/AtariST8s.ttf" }
+        FontLoad { source: "fonts/AtariST12.ttf" }
         }
     }
 
@@ -343,18 +359,10 @@ ApplicationWindow
 
         // ui option provides a point size
         var fs = QControl.appUIFontSize();
-        if (fs)
-        {
-            // fs is point size
-            QControl.prefs.setGameFontDefault(fontobj.afont, fs*Units.dp, false);
-        }
-        else
-        {
-            // fs is pixel size
-            fs = 16;
-            if (Device.isLargeMobile) fs = 20 // tablet+
-            QControl.prefs.setGameFontDefault(fontobj.afont, fs*Units.dp, true)
-        }
+        if (!fs) fs = 16;
+
+        // fs is point size
+        setGameFontDefault(fs);
 
         // signal that we've started up
         QControl.uiInitialised()
