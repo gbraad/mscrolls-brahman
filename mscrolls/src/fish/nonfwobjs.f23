@@ -63,7 +63,7 @@ item castle "plastic castle" {
 	desc {
 Colours are sprayed on this tacky castle in a random fashion, as if it had been
 visited by a medieval graffiti artist with a belly full of mead and a nasty
-case of clinical depression. A large gateway leads inside
+case of clinical depression. A large [gateway](enter gateway) leads inside
 	}
 	scen_noun_e 	colours
 	scen_noun_e 	colors

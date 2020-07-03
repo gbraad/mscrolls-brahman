@@ -36,7 +36,7 @@
 
 room bowl1 "goldfish bowl" {
 	desc {
-Swimming upside down is good fun, but difficult, even for someone as highly
+Swimming [upside down](do upsidedown) is good fun, but difficult, even for someone as highly
 trained as yourself. It looks like the pondweed is dangling from the gravel
 above your head. And the ant eggs, wow! Upside down they look, so, so much
 like, well, like exactly the same as if you were the right way up actually.
@@ -92,7 +92,7 @@ interrupted your vacation
 
 room castle1 "plastic featureless castle" {
 	desc {
-Inside, the castle is exactly what you expected - tacky and featureless with
+Inside, the [castle](look) is exactly what you expected - tacky and featureless with
 ant eggs near the top and gravel at the bottom. To anyone else, the colours
 sprayed randomly on the wall would just be colours sprayed randomly on the
 wall. To a daring inter-dimensional espionage operative like yourself,
