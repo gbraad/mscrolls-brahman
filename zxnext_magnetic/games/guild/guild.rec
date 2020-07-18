@@ -1,0 +1,363 @@
+#seed
+12345
+restart
+y
+#seed
+12345
+jump to the jetty
+w
+say "can i help you?"
+n, w
+examine the bucket
+break the coal
+take the fossil
+s
+examine the paintings
+take the oil painting
+s
+examine the settee
+open the cushion
+look inside the cushion
+take the note
+examine it
+n, n, e, u, s, s
+look at the cabinet
+take the mirror
+n, n, e, n
+look at the cue rack
+take the cue
+look at the table
+cue the cue ball with the cue
+cue the red ball with the cue
+open the red ball
+look inside the red ball
+take the ring
+e
+look at the stool
+open it then look inside it
+take the plastic bag then look inside it
+read the music
+s, s
+examine the bed
+open the box
+look inside it
+take all that is in the box
+open the wardrobe
+look inside it
+take the dress
+n, w, w, d
+s
+z
+use the note to bet on the grey rat
+take the cage
+n, u, w
+open box
+examine it
+e, d
+e, s
+i
+open the swag bag
+look inside it
+turn on the lamp
+e, s
+move the junk
+take the cube
+s
+open the safe
+put the ring, painting and fossil in the safe
+close the safe
+open the safe
+put the plastic bag in the safe
+close the safe
+open the safe
+put the dress in the safe
+close the safe
+drop cue and cotton and needle
+put the mirror and the cage in the swag bag
+n, n, w, n, w, s, s, s, se
+look at the windmill
+shout "please stop the windmill!"
+quietly walk into the mill
+buy the lute with the cheque
+examine the lute
+get all from the bag
+put the lute in the bag
+n, nw, n, n, n, e, s, s
+open the cabinet
+look inside the cabinet
+take the key
+s
+look under the bed
+open the tub and look inside it
+take the maggot
+n, n, e, s, s
+tie the cotton to the cue
+put the maggot on the needle
+hold the cue and put the needle in the moat
+untie the cue from the cotton
+drop the needle and the cotton
+n, n, w
+open the cupboard
+look inside it
+take contents of the cupboard
+n
+look inside the cubic cage
+smear the poison onto the fish
+rub the poison onto the fish
+smear the fish with the poison
+give the fish to the bear
+open the cubic cage with the key
+take the chalice
+w, n
+examine the door
+rub the horseshoe
+e
+open the jar
+w, s, u, s, s
+look at the bed
+examine the abstract painting
+move it
+open the cabinet
+drop the cue
+n, n, d, e, s, e
+open the door
+n
+examine the drainage system
+take the pipe
+open the stopcock
+wait
+close the stopcock
+n
+look at all bottles
+take the champagne bottle
+open the red bottle
+look inside it
+take the ruby
+s, s, s, s
+open the safe
+put the ruby, plectrum and chalice in the safe
+close the safe
+n, n, w, n, w, s, s, s, sw, s, s
+read the notice board
+s
+examine the altar
+take the burner
+s
+examine the hive
+take the gloves
+n, se, u
+take the rhino
+d, nw, sw, u, e
+examine the organ
+take the keys
+w, d, ne, n
+open the safe
+put the rhino and the burner in the safe
+close the safe
+n, n, n, w, w, se
+examine the gate
+open it
+se
+examine the tree
+take the berries
+nw, s
+examine the door
+break the window
+s
+examine the counter
+lift the flap
+s
+examine the till
+push the button
+look inside the till
+take the coin and examine it
+n, n, n, nw, ne
+examine the gate
+insert coin the the slot
+insert coin in the slot
+e, s, w
+take the snake skin
+e, n, n, w
+examine the tree
+shake the tree
+take the coconut
+drop the jar
+take the succulents
+e, e
+ask macaw about food
+w, s, s
+open the door with the ivory key
+e
+examine the desk
+open the drawer and look inside it
+read the magazine and take the grotty key
+w, n, n, e
+hit the large cage with the coconut
+give the coconut to the macaw
+w, s, s, e
+open the white door
+ne
+open the small door with the grotty key
+open the cage
+nw
+put the mynah bird in the cage
+close the cage
+say "hello"
+say "hello"
+se, sw, w, n, w, sw, nw, nw
+examine the coals
+rub succulents on feet
+w, u, se
+take the yellow die
+se, sw
+take the green die
+ne, ne
+take the blue die
+sw, se
+take the red die
+nw
+examine the case
+examine the slots
+roll the dice
+five
+five
+five
+five
+put the red die in the first slot
+put the green die in the second slot
+put the blue die in the third slot
+put the yellow die in the fourth slot
+examine the case
+take the plastic die
+nw, nw, d
+rub succulents on feet
+e, se, sw
+examine the wax
+use the mirror to shine the beam at the wax
+take the gem
+ne, se, sw
+examine the bars
+break them
+sw
+examine the skeleton
+take the bone
+open the chest
+look inside it
+take heart
+s, w
+examine the ladder
+untie it
+e, n, ne, e, e, s, s, s
+open the safe then put the gem in it
+close the safe
+s, nw, d, se, se, n, e, e, se, s, sw, e, se
+examine the sarcophagus
+open it with the bone
+look inside the sarcophagus
+examine the skull
+take the eye
+e
+examine the statuette
+take it
+open the black door with the ebony key
+e
+read the pamphlet
+w, w, nw, nw, n, nw, e, sw, sw, nw, n, nw, u, se, n
+open the safe
+put the statuette in the safe
+close the safe
+s
+move the statue
+drop it
+d, n, n, n
+take the brooch
+dig in the sand
+wear the boots
+d, d
+wear the gloves
+s, e
+drop the mirror, keys, and bone
+take a pick
+w, w
+hit the minerals with the pick
+drop the pick and get the chips
+e, s, u, e, n, ne, se, s, w
+open the safe
+put the brooch and chips in the safe
+close the safe
+e, n, nw, e, e, e, n, n, n, u, s, s
+examine the cabinet
+read the plaque
+examine the buttons
+take the cue
+sit on the bed
+push the top button with the cue
+examine the cauldron
+put the cube, heart, eye, berries, and snake skin in the cauldron
+open the sachet
+look inside the cauldron
+take the anticube
+w, n, n, e, e, s
+look under the bed
+take the china pot
+n, w, w, d, e, s, e, s, s
+open the safe
+put the china pot in the safe
+close the safe
+n, n, w, n, w, s, s, s, w, w, w, se, s, w
+open the door
+examine the jeans
+look inside the pocket
+take the plastic card
+e, n, nw, nw, nw
+get the lute
+put the plastic die and anticube in the pocket
+rub succulents on feet
+w, u
+drop the cue, bag, lamp, and succulents
+d, e, se, se, se, s, w, s
+mynah, hooray
+mynah, hooray
+mynah, hooray
+join longer line
+show card to teller
+chew gum
+drop bottle and cage
+shake bottle
+wait
+put gum in keyhole
+play lute
+sing urfanore pendra
+s, e
+roll die
+six
+d
+roll die
+five
+w
+roll die
+two
+ne
+roll die
+one
+nw
+roll die
+four
+d
+take all
+examine the pillar
+examine the weighing machine
+examine the cube
+put the die and the anticube on the weighing machine
+take the cube and the anticube
+read the signpost
+sw
+nw, nw
+take all
+d
+rub succulents on feet
+e, se, se, e, e, e, e, e
+pull on the rope
+score
+#stack
+jump to the boat
