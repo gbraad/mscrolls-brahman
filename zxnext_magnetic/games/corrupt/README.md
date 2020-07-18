@@ -1,6 +1,6 @@
 # Corruption
 
-### [DOWNLOAD](raw/master/build/corrupt.zip)
+### [DOWNLOAD](build/corrupt.zip)
 
 This is a conversion of the text adventure game Corruption for Sinclair ZX
 Spectrum Next. Corruption was released by Magnetic Scrolls in 1988 and was their
@@ -12,7 +12,7 @@ finding your way around or want to read more about the game, please visit
 [Magnetic Scrolls Memorial](http://msmemorial.if-legends.org/games.htm/corrupt.php).
 
 The game is created using the Spectrum Next porting of the Magnetic Scrolls interpreter
-[Magnetic](https://gitlab.com/strandgames/brahman/tree/master/zxnext/zxnext_magnetic).
+[Magnetic](https://gitlab.com/strandgames/brahman/-/tree/master/zxnext_magnetic).
 
 The graphics is from the original Commodore Amiga version of the game. The
 Amiga version used the same graphics as the Atari ST version, which had 16-colour

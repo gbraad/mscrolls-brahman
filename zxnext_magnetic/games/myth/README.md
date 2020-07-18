@@ -1,6 +1,6 @@
 # Myth
 
-### [DOWNLOAD](raw/master/build/myth.zip)
+### [DOWNLOAD](build/myth.zip)
 
 This is a conversion of the text adventure game Myth for Sinclair ZX Spectrum
 Next. Myth was released by Magnetic Scrolls in 1989 and was their sixth game.
@@ -14,7 +14,7 @@ more about the game, please visit
 [Magnetic Scrolls Memorial](http://msmemorial.if-legends.org/games.htm/myth.php).
 
 The game is created using the Spectrum Next porting of the Magnetic Scrolls interpreter
-[Magnetic](https://gitlab.com/strandgames/brahman/tree/master/zxnext/zxnext_magnetic).
+[Magnetic](https://gitlab.com/strandgames/brahman/-/tree/master/zxnext_magnetic).
 
 The graphics is from the original Commodore Amiga version of the game. The
 Amiga version used the same graphics as the Atari ST version, which had 16-colour

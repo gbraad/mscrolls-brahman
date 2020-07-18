@@ -1,6 +1,6 @@
 # The Pawn
 
-### [DOWNLOAD](raw/master/build/pawn.zip)
+### [DOWNLOAD](build/pawn.zip)
 
 This is a conversion of the text adventure game The Pawn for Sinclair ZX Spectrum
 Next. The Pawn was first released by Magnetic Scrolls for Sinclair QL in 1985.
@@ -13,7 +13,7 @@ to read more about the game, please visit
 [Magnetic Scrolls Memorial](http://msmemorial.if-legends.org/games.htm/pawn.php).
 
 The game is created using the Spectrum Next porting of the Magnetic Scrolls interpreter
-[Magnetic](https://gitlab.com/strandgames/brahman/tree/master/zxnext/zxnext_magnetic)
+[Magnetic](https://gitlab.com/strandgames/brahman/-/tree/master/zxnext_magnetic)
 and the remastered version of the game by [Strand Games](https://strandgames.com/)
 containing bug fixes and playability improvements.
 

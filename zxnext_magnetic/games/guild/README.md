@@ -1,6 +1,6 @@
 # The Guild of Thieves
 
-### [DOWNLOAD](raw/master/build/guild.zip)
+### [DOWNLOAD](build/guild.zip)
 
 This is a conversion of the text adventure game The Guild of Thieves for Sinclair
 ZX Spectrum Next. The Guild of Thieves was released by Magnetic Scrolls in 1987
@@ -13,7 +13,7 @@ about the game, please visit
 [Magnetic Scrolls Memorial](http://msmemorial.if-legends.org/games.htm/guild.php).
 
 The game is created using the Spectrum Next porting of the Magnetic Scrolls interpreter
-[Magnetic](https://gitlab.com/strandgames/brahman/tree/master/zxnext/zxnext_magnetic)
+[Magnetic](https://gitlab.com/strandgames/brahman/-/tree/master/zxnext_magnetic)
 and the remastered version of the game by [Strand Games](https://strandgames.com/)
 containing bug fixes and playability improvements.
 

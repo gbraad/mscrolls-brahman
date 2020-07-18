@@ -1,6 +1,6 @@
 # Jinxter
 
-### [DOWNLOAD](raw/master/build/jinxter.zip)
+### [DOWNLOAD](build/jinxter.zip)
 
 This is a conversion of the text adventure game Jinxter for Sinclair ZX Spectrum
 Next. Jinxter was released by Magnetic Scrolls in 1987 and was their third game.
@@ -12,7 +12,7 @@ around or want to read more about the game, please visit
 [Magnetic Scrolls Memorial](http://msmemorial.if-legends.org/games.htm/jinxter.php).
 
 The game is created using the Spectrum Next porting of the Magnetic Scrolls interpreter
-[Magnetic](https://gitlab.com/strandgames/brahman/tree/master/zxnext/zxnext_magnetic)
+[Magnetic](https://gitlab.com/strandgames/brahman/-/tree/master/zxnext_magnetic)
 and the remastered version of the game by [Strand Games](https://strandgames.com/)
 containing bug fixes and playability improvements.
 
