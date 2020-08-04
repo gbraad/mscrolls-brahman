@@ -64,14 +64,23 @@ in the code, that bank and the next bank are switched in to the bottom 16 KB of
 the main memory before being referenced. Certain performance-critical parts of
 the interpreter code have been changed to minimize the amount of bank switching.
 
+In addition to the actual code and an optional dictionary, a .prg file also
+contains a symbol table (which is quite large) and relocation information
+(which is quite small). Only a handful of the symbols are used by the Magnetic
+interpreter and the relocation information is not used at all. To significantly
+reduce the loading time of a .prg file, it is trimmed so that all unused symbols
+and the relocation information is removed. The trimmed .prg file is generated
+using the [trim_prog](tools/trim_prog) tool from the original .prog file used in
+the desktop/mobile versions of the remastered games.
+
 The .prg file format does not contain the string sections (as in the .mag file
 format). The strings are instead placed in a separate .txt file. For Spectrum
 Next, there is also an .idx file containing an index for the .txt file for
 quickly looking up the offset of a string given its index. The .txt and .idx
 files are generated using the [convert_text](tools/convert_text) tool from the
-.text file used in the desktop/mobile versions of the remastered games. The
-.text file contains additional markup that is removed by this tool. The .txt and
-.idx files are loaded into a contiguous set of 8 KB banks by the interpreter.
+original .text file used in the desktop/mobile versions of the remastered games.
+The .text file contains additional markup that is removed by this tool. The .txt
+and .idx files are loaded into a contiguous set of 8 KB banks by the interpreter.
 
 The Magnetic port to Spectrum Next is done using the
 [z88dk](https://github.com/z88dk/z88dk) C compiler. In addition to modifying the

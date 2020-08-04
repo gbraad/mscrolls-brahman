@@ -85,9 +85,9 @@ emulators.
 
 ### Spectrum Next
 
-1. On your PC, unpack the downloaded ZIP file jinxter.zip in the root directory
-of an SD card containing the Spectrum Next firmware. The *.md and *.bat files
-are not needed and can be skipped.
+1. On your PC, unpack the downloaded ZIP file jinxter.zip on an SD card containing
+the Spectrum Next firmware. The *.md and *.bat files are not needed and can be
+skipped.
 
 2. Insert the SD card in your Spectrum Next computer and start it.
 
@@ -100,7 +100,7 @@ are not needed and can be skipped.
 2. Run the jinxter_512.nex or jinxter_256.nex file in the CSpect emulator:
 
 ```
-> CSpect.exe -w2 -tv -zxnext -mmc=<jinxter>/ <jinxter>/jinxter_512.nex
+> CSpect.exe -w4 -tv -zxnext -mmc=<jinxter>/ <jinxter>/jinxter_512.nex
 ```
 
 **Note:** The -mmc path must end with a / or \ character!
@@ -118,8 +118,8 @@ emulator.
 
 ```
 > zesarux.exe --noconfigfile --machine tbblue --enabletimexvideo
-  --tbblue-fast-boot-mode --quickexit --enable-esxdos-handler
-  --esxdos-root-dir <jinxter> <jinxter>/jinxter_512.nex
+  --enablekempstonmouse --tbblue-fast-boot-mode --quickexit
+  --enable-esxdos-handler --esxdos-root-dir <jinxter> <jinxter>/jinxter_512.nex
 ```
 
 **Tip:** For convenience, you can also run the included batch file
