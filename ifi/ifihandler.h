@@ -308,6 +308,7 @@ struct IFIHandler
         bool r = false;
 
         if (key == IFI_COMMAND) r = ifiCommand(v.toString());
+        else if (key == IFI_SUBCOMMAND) r = ifiSubcommand(v.toString());
         else if (key == IFI_CONFIGDIR) r = ifiConfigDir(v.toString());
         else if (key == IFI_DATADIR) r = ifiDataDir(v.toString());
         else if (key == IFI_STORY) r = ifiStory(v.toString());
@@ -369,6 +370,7 @@ struct IFIHandler
     }
     
     virtual bool ifiCommand(const string&) { return false; }
+    virtual bool ifiSubcommand(const string&) { return false; }
     virtual bool ifiConfigDir(const string&) { return false; }
     virtual bool ifiDataDir(const string&) { return false; }
     virtual bool ifiStory(const string&) { return false; }

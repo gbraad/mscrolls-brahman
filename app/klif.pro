@@ -73,6 +73,7 @@ ANDROID_PACKAGE_SOURCE_DIR = $$PWD/android-story
 DISTFILES += \
 ios-story/LaunchScreen.storyboard
 
+include(../spine/spineqml/spineqml.pri)
 
     
         

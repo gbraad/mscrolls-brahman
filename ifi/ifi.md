@@ -148,8 +148,9 @@ These are the json tags that may appear in a _request_. See the _Replies_ sectio
 * `people: true`  
    Reply current `people` if `true`. If `false`, unsolicited updates are not needed.
    
-* `meta: true`  
-   Reply the game meta info (eg title, author etc.).
+*  `subcommand: "foo"`
+  Special command sent from the UI to the backend, to be processed outside of normal flow. For example, asynchronous _term_ to be executed as a result of animation.
+
    
 ## Replies
 
@@ -464,7 +465,9 @@ A `choiceobj` is a json object containing the text to display, the response to s
 
 The simplest `choiceobj` contains just the text to display for the choice. If `chosen` is omitted, the choice text itself is used for the reply.
 
-### Example1: Two command choices
+A choice message can switch on and off the command line interface on the UI using the `ui_textinput` tag.
+
+### Example 1: Two command choices
 
 ```
 {"choice":[{"text":"Go North"},{"text":"Go South"}]}
@@ -477,11 +480,12 @@ The UI will display the menu,
 
 When, selected the same string will be sent back as a command, eg `{"command":"Go North"}`, this would be handled by the back-end as if it were entered normally.
 
-### Example2: Two choices with custom text and a Header
+### Example 2: Two choices with custom text and a Header
 
 ```
 {"choice":{
     "text":"What are you doing to do?",
+    "ui_textinput":true,
     "choice":[{"text":"Decide to go on","chosen":"go north"},
             {"text":"Give up and go back","chosen":"go south"}]
     }
@@ -489,10 +493,20 @@ When, selected the same string will be sent back as a command, eg `{"command":"G
 ```
 
 
-### Example3: Press to continue
+### Example 3: Press to continue
 
 ```
 {"choice":[{"text":"Press a key to continue","chosen":{"something":"true"}}]}
+```
+
+or
+
+```
+{"choice":{
+        "ui_textinput":false,
+        "choice":[{"text":"Press a key to continue","chosen":{"something":"true"}}]
+   }
+}
 ```
 
 ## Reply Text Merging

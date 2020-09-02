@@ -93,7 +93,7 @@ macx: !android {
 !ios {
     LIBS += -L$$PROJ/api/$$LIBDIR -lbrahmanapi
     LIBS += -L$$PROJ/ifi/$$LIBDIR -lifigame
-    LIBS += -L$$LIBPNG/$$LIBDIR -lpng
+    LIBS += -L$$LIBPNG/$$LIBDIR -l:libpng.a
     LIBS += -L$$LIBZ/$$LIBDIR -lz
 }
 

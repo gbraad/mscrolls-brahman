@@ -1,0 +1,7 @@
+Makefile
+debug
+release
+*.Debug
+*.Release
+example/Spine
+

@@ -37,6 +37,7 @@
 #define USE_ITCHxx
 #endif
 
+#define USE_SPINE
 
 #undef DEFAULT_ENGINE_NAME
 #define DEFAULT_ENGINE_NAME     ""

@@ -183,11 +183,14 @@ C1.SplitView
             {
                 id: choicebox
                 width: parent.width
+                height: idealHeight
                 z: 1
                 anchors
                 {
                     bottom: parent.bottom
                 }
+
+                onAccepted: QControl.evalJSON(cmd)
             }
         }
 

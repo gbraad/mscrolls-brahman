@@ -38,6 +38,7 @@
 #define IFI_DATADIR     "datadir"
 #define IFI_STORY       "story"
 #define IFI_OBJECTS     "objects"
+#define IFI_SUBCOMMAND  "subcommand"
 
 #define IFI_LOADDATA    "loaddata"
 #define IFI_SAVEDATA    "savedata"

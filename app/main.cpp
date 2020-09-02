@@ -64,6 +64,10 @@
 #include "opt.h"
 #include "soundplayer.h"
 
+#ifdef USE_SPINE
+#include "spineqml.h"
+#endif
+
 #ifdef USE_ITCH
 #include "updateritch.h"
 #endif
@@ -159,6 +163,10 @@ int main(int argc, char *_argv[])
     QREGISTER_MAPBOX;
     QREGISTER_SHAPE;
     QREGISTER_SOUNDPLAYER;
+
+#ifdef USE_SPINE
+    SpineRegisterTypes();  // from spineqml.cpp
+#endif    
 
     // load IF engine as plugin
     if (!qc->loadEngine())

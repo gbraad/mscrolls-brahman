@@ -106,6 +106,7 @@ bool ApngReader::init(const string& filename)
     _info = png_create_info_struct(_png);
     if(!_info)
     {
+        // destructor will release `_png`
         LOG3("apng, init failed ", _filename);
         return false;
     }

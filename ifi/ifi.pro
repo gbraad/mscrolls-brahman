@@ -51,6 +51,39 @@ DEFINES += IFI_BUILD
 
 macx {
     QMAKE_LFLAGS_SONAME  = -Wl,-install_name,@executable_path/../Frameworks/
+
+    QMAKE_POST_LINK += $$copyToDest($${OUT_PWD}/$${BUILDT}/lib$${TARGET}.dylib, $$PROJ/app/$$BUILDT)
+    QMAKE_POST_LINK += $$copyToDest($${OUT_PWD}/$${BUILDT}/lib$${TARGET}.1.dylib, $$PROJ/app/$$BUILDT)
+    QMAKE_POST_LINK += $$copyToDest($${OUT_PWD}/$${BUILDT}/lib$${TARGET}.1.0.dylib, $$PROJ/app/$$BUILDT)
+    QMAKE_POST_LINK += $$copyToDest($${OUT_PWD}/$${BUILDT}/lib$${TARGET}.1.0.0.dylib, $$PROJ/app/$$BUILDT)
+
+    export(QMAKE_POST_LINK)                   
+}
+
+unix:!android:!macx:!ios {
+
+defineTest(copyToDestdir) {
+    files = $$1
+
+    for(FILE, files) {
+        DDIR = $$PROJ/app/$$BUILDT
+        QMAKE_POST_LINK += $$QMAKE_COPY $$shell_quote($$FILE) $$shell_quote($$DDIR) $$escape_expand(\\n\\t)
+    }
+
+    export(QMAKE_POST_LINK)
+}
+
+   copyToDestdir($${OUT_PWD}/$${BUILDT}/lib$${TARGET}.so)
+   copyToDestdir($${OUT_PWD}/$${BUILDT}/lib$${TARGET}.so.1)
+   copyToDestdir($${OUT_PWD}/$${BUILDT}/lib$${TARGET}.so.1.0)
+   copyToDestdir($${OUT_PWD}/$${BUILDT}/lib$${TARGET}.so.1.0.0)
+}
+
+win32 {
+   
+    QMAKE_POST_LINK += $$copyToDest($${OUT_PWD}/$${BUILDT}/$${TARGET}.dll, $$PROJ/app/$$BUILDT)
+
+    export(QMAKE_POST_LINK)                   
 }
 
 ### //////////////////  ///////////////////////////////////////////

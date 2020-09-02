@@ -10,7 +10,7 @@ https://www1.qt.io/offline-installers/
 ### Windows
 
 Get Qt 5.12.X for Windows
-run the exe. install to eg `c:\qt\qt5.12.3`
+run the exe. install to eg `c:\qt\qt5.12.9`
 
 * select: MinGW 32 bit & 64 bit
 * Also select tools/mingGW if you do not already have a mingw environment.
@@ -19,7 +19,7 @@ add to `PATH` (adjust according to location)
 
 eg.
 ```
-PATH=c:\Qt\Qt5.12.3\5.12.3\mingw73_64\bin;c:\Qt\Qt5.12.3\Tools\mingw730_64\bin;c:\Qt\Qt5.12.3\Tools\QtCreator\bin;%PATH%
+PATH=c:\Qt\Qt5.12.9\5.12.9\mingw73_64\bin;c:\Qt\Qt5.12.9\Tools\mingw730_64\bin;c:\Qt\Qt5.12.9\Tools\QtCreator\bin;%PATH%
 ```
 
 ### Linux
@@ -28,13 +28,13 @@ Get Qt 5.12.X for Linux 64 bit.
 
 File is a ".run" file.
 
-install to (eg) `/opt/Qt5.12.3`
+install to (eg) `/opt/Qt5.12.9`
 select "desktop gcc 64bit"
 
 add to `~/.bashrc`
 
 ```
-export PATH=/opt/Qt5.12.3/5.12.3/gcc_64/bin:/opt/Qt5.12.3/Tools/QtCreator/bin:$PATH
+export PATH=/opt/Qt5.12.9/5.12.9/gcc_64/bin:/opt/Qt5.12.9/Tools/QtCreator/bin:$PATH
 ```
 
 ### MAC OSX
@@ -42,15 +42,15 @@ export PATH=/opt/Qt5.12.3/5.12.3/gcc_64/bin:/opt/Qt5.12.3/Tools/QtCreator/bin:$P
 Download Qt 5.9.X 
 
 eg.
-`open qt-opensource-mac-x64-5.12.3.dmg`
+`open qt-opensource-mac-x64-5.12.9.dmg`
 
-install to `/Developer/Qt5.12.3`
+install to `/Developer/Qt5.12.9`
 Select "mac os"
 
 Change `PATH` in `~/.bash_profile` to;
 
 ```
-export PATH=/Developer/Qt5.12.3/5.12.3/clang_64/bin:/Developer/Qt5.12.3:$PATH
+export PATH=/Developer/Qt5.12.9/5.12.9/clang_64/bin:/Developer/Qt5.12.9:$PATH
 ```
  
 ## Build Instructions (all platforms)
@@ -67,7 +67,9 @@ which will build:
 * tools/apng/libpng_apng/libpng
 * ifi
 * api
+* spine
 * app
+* strands
 * xvan & xvan/xc
 
 ### Build XVAN Escape Demo

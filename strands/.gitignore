@@ -1,0 +1,15 @@
+Makefile
+Makefile.*
+*.vcxproj
+*.vcxproj.*
+debug
+release
+object_script.*
+*.stash
+*.exe
+save
+*.bat
+b.sh
+/*.str
+/doc
+

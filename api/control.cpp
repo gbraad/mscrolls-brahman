@@ -248,6 +248,37 @@ struct ImpIFI: public IFIHandler, public ControlImpBase
         return r;
     }
 
+    bool evalClickCommand(const string& cmd)
+    {
+        // IFI
+        // handle picture clicks and dismiss
+        // return true if handled, false if we want to handle 
+        // as traditional text command
+        if (cmd.empty())
+        {
+            // text dismissed
+            LOG3("IFI, ", "text dimissed");
+            return true; // handled
+        }
+        return false;
+    }
+
+
+    bool evalSubcommand(const string& cmd)
+    {
+
+        // IFI
+        GrowString js;
+        
+        js.add('{');
+        JSONWalker::addStringValue(js, IFI_SUBCOMMAND, cmd);
+        js.add('}');
+        js.add(0);
+
+        LOG3("SUB command ", js.start());
+        return _ifiHost.eval(js.start());
+    }
+
     bool saveGame(const string& filename)
     {
         GrowString js;
@@ -1694,7 +1725,32 @@ struct Control::Imp :
     bool evalClickCommand(const string& cmd)
     {
         // called when a link in the text is clicked issuing a command
-        return evalCommandDirect(cmd, true);
+        // OR for IFI when something in the picture is clicked
+        // OR for IFI cmd is blank when text dismissed
+        bool v = true;
+        if (_ifi)
+        {
+            // handle picture click & dismiss
+            // Otherwise fall through to standard command
+            v = ImpIFI::evalClickCommand(cmd);
+        }
+
+        if (!v)
+            v = evalCommandDirect(cmd, true);
+        
+        return v;
+    }
+
+    bool evalSubcommand(const string& cmd)
+    {
+        // only IFI supports sub commands
+        bool r = false;
+        if (_ifi)
+        {
+            r = ImpIFI::evalSubcommand(cmd);
+            if (r) r = postEval();
+        }
+        return r;
     }
 
     bool refreshCommand()
@@ -2232,7 +2288,6 @@ struct Control::Imp :
         if (logfile)
             initLog.openFile("brahman.log");
 #endif
-
     }
 
     bool evalCommandDirect(const string& cmd, bool echo)
@@ -2321,6 +2376,8 @@ void Control::setLogLevel(int level) { _imp->setLogLevel(level); }
 int Control::getLogLevel() const { return _imp->getLogLevel(); }
 bool Control::evalCommand(const string& cmd, bool echo)
  { return _imp->evalCommand(cmd, echo); }
+bool Control::evalSubcommand(const string& cmd)
+ { return _imp->evalSubcommand(cmd); }
 bool Control::evalJSON(const string& js) { return _imp->evalJSON(js); }
 bool Control::evalClickCommand(const string& cmd) { return _imp->evalClickCommand(cmd); }
 bool Control::refreshCommand() { return _imp->refreshCommand(); }

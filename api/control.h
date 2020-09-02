@@ -129,6 +129,7 @@ struct DLLX Control: public APIType
     bool evalCommand(const string& cmd, bool echo = true);
     bool evalJSON(const string& js);
     bool evalClickCommand(const string& cmd);
+    bool evalSubcommand(const string& cmd);
     bool refreshCommand();
     bool evalCommandDirect(const string& cmd, bool echo);
     bool evalUseXwithY(const string& x, const string& y);

@@ -32,8 +32,6 @@
 
 
 import QtQuick 2.12
-//import QtQuick.Controls 2.2
-//import QtGraphicalEffects 1.0
 import QtQml 2.2
 
 import Material 0.3 
@@ -48,9 +46,13 @@ FocusScope
     property string ifiChoiceJSON: QControl.ifiChoiceJSON
     property var jchoicemodel
     property bool active: false
-    property int idealHeight: jchoicemodel ? jchoicemodel.count*lineHeight + header.aheight : 0
+    property int cmargin: 8*Units.dp
+    property int idealHeight: jchoicemodel ? jchoicemodel.count*lineHeight + header.aheight + cmargin*2 : 0
+    property bool uiTextAccepted: true
 
-    visible: ifiChoiceJSON.length > 0
+    visible: active // ifiChoiceJSON.length > 0
+
+    signal accepted(string cmd)
 
     Component
     {
@@ -61,51 +63,77 @@ FocusScope
         }
     }
 
-
+    onIfiChoiceJSONChanged: updateJSONModel(ifiChoiceJSON)
     onVisibleChanged: if (visible) choices.forceActiveFocus()
+
+    function singletonChoice()
+    {
+        var v
+        if (jchoicemodel && jchoicemodel.count == 1 && uiTextAccepted == false)
+        {
+            v = choices.currentItem.chosen
+        }
+        return v
+    }
 
     function updateJSONModel(js) 
     {
         // [{choiceobj}...]
         // {text:"heading",choice:[{choiceobj}...]}
-        // choiceobj = {"text":"whatever","chosen":"text","enabled":true}
+        // choiceobj = {"text":"whatever","chosen":"text"...}
+
+        //console.log("update choice JSON", js)
 
         header.setText(null)
-        jchoicemodel = jchoice.createObject()
+        active = false
+        jchoicemodel = null // drop
         if (js.length > 0)
         {
+            jchoicemodel = jchoice.createObject()
             var obj = JSON.parse(js);
             
             if (!Array.isArray(obj))
             {
                 // choice object
                 header.setText(obj["text"]);
+
+                var v = obj["ui_textinput"];
+                if (v)
+                {
+                    //console.log("choice text accepted")
+                    uiTextAccepted = true
+                }
+                else
+                {
+                    //console.log("choice text NOT accepted")
+                    uiTextAccepted = false
+                }
+                
                 obj = obj["choice"]
             }
 
             if (Array.isArray(obj))
             {
                 for (var c in obj) jchoicemodel.append(obj[c])
+                choicearea.active = true
             }
-            choicearea.active = true
         }
         choices.model = jchoicemodel
     }
 
-    onIfiChoiceJSONChanged: updateJSONModel(ifiChoiceJSON)
 
     function acceptChoice(t)
     {
         QControl.ifiChoiceJSON = "";
         choicearea.active = false
-        QControl.evalJSON(t)
+        accepted(t)
     }
 
     Rectangle
     {
         id: cpane
         anchors.fill: parent
-        anchors.margins: 8*Units.dp
+        anchors.margins: cmargin
         color: theme.backgroundShade
         
         ChoiceText

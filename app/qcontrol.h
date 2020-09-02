@@ -229,6 +229,11 @@ public:
         return Control::evalClickCommand(STRQ(cmd));
     }
 
+    Q_INVOKABLE bool evalSubcommand(const QString& cmd)
+    {
+        return Control::evalSubcommand(STRQ(cmd));
+    }
+
     Q_INVOKABLE bool refreshCommand()
     {
         // used to invoke "look"

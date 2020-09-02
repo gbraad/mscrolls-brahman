@@ -495,7 +495,11 @@ static inline std::string makePath(const std::string& prefix,
         else
         {
             path = prefix;
-            if (!path.empty()) path += '/';
+            if (!path.empty())
+            {
+                char c = path.back();
+                if (c != '/' && c != '\\') path += '/';
+            }
             path += name;
         }
 
@@ -504,6 +508,25 @@ static inline std::string makePath(const std::string& prefix,
     }
 
     return path;
+}
+
+static inline std::string filenameOf(const std::string& path)
+{
+    std::string name;
+
+    // look for last file separator or, eg, c:
+    size_t p = path.find_last_of("\\/:"); 
+    if (p != std::string::npos)
+    {
+        name = path.substr(p + 1);
+    }
+    else
+    {
+        // path is just a filename
+        name = path;
+    }
+
+    return name;
 }
 
 
