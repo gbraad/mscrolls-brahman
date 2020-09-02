@@ -90,39 +90,27 @@ void Messages::emitStoprn(const char* msg, outfn fn)
 #endif    
 
 
-void Messages::emitChars(const char* msg, outfn fn)
+struct SPContinuation
+{
+    SPContinuation*     _next;
+    const char*         _continuation;
+    int                 _instoprn;    
+};
+
+static SPContinuation* SPStack;
+
+void Messages::_emitChars(const char* s, outfn fn)
 {
     char last = 0;
-    char c;
-    const char* s;
     
-    static const char* stoprnContinuation;
-    static int instoprn;
-
-    if (instoprn)
-    {
-        // wait for the countdown to hit zero
-        // then, if there is a continuation, emit it.
-        if (!--instoprn)
-        {
-            s = stoprnContinuation;
-            if (s)
-            {
-                stoprnContinuation = 0;
-                while (*s) (fn)(*s++);
-            }
-        }
-    }
-    
-    s = msg;
     for (;;)
     {
-        c = *s++;
+        char c = *s++;
         if (!c) break;
 
         if (c == '@' && last == ' ')
         {
-            /* when we encounter " *" we must print;
+            /* when we encounter " @" we must print;
              * "THE" ITEM
              * where item is in STOPRON
              * then continue the message.
@@ -137,15 +125,53 @@ void Messages::emitChars(const char* msg, outfn fn)
              */
             if (emu_emit_stopron())
             {
-                instoprn = 2;
-                if (*s) stoprnContinuation = s;
+                if (*s)
+                {
+                    SPContinuation* spc = new SPContinuation;
+                    memset(spc, 0, sizeof(SPContinuation));
+
+                    spc->_instoprn = 2;
+                    spc->_continuation = s;
+                    
+                    spc->_next = SPStack;
+                    SPStack = spc;
+                }
                 return;
             }
         }
-        
         else (*fn)(c);
 
         last = c;
+    }
+}
+
+void Messages::emitChars(const char* msg, outfn fn)
+{
+    if (SPStack)
+    {
+        // wait for the countdown to hit zero
+        // then, if there is a continuation, emit it.
+        SPContinuation* spc = SPStack;
+        assert(spc->_instoprn);
+        if (!--spc->_instoprn)
+        {
+            const char* s = spc->_continuation;
+            spc->_continuation = msg;
+            msg = s;
+        }
+    }
+
+    _emitChars(msg, fn);
+
+    while (SPStack && !SPStack->_instoprn)
+    {
+        SPContinuation* spc = SPStack;
+        const char* s = spc->_continuation;
+        
+        SPStack = spc->_next;
+        delete spc;
+        
+        _emitChars(s, fn);
     }
 }
 

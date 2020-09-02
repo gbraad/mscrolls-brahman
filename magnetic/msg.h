@@ -65,6 +65,7 @@ struct Messages
     bool start(const char* filename);
     void emitMsg(int n, const char* s, outfn fn);
     void emitChars(const char* s, outfn fn);
+    void _emitChars(const char* msg, outfn fn);
     void emitStoprn(const char*, outfn fn);
     
     int                 _getc(FILE* fp)
