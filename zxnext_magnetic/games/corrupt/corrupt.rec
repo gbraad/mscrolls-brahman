@@ -1,0 +1,355 @@
+graphics on
+#seed
+12345
+examine david
+examine bookings
+follow david
+e
+n
+w
+tell david about the serious fraud office
+listen at wooden door
+s
+e
+s
+open cistern
+look in it
+get bag
+examine bag
+examine powder
+close cistern
+n
+w
+w
+s
+open cabinet
+look in it
+get ledger and certificate
+examine ledger
+read it
+examine certificate
+read it
+close cabinet
+i
+open briefcase
+look in it
+read organiser
+read times
+put ledger, certificate, bag in briefcase
+n
+get envelope
+ask margaret to call jenny
+e
+read envelope
+read cheque
+n
+e
+ask hughes about insider dealing
+examine red leather chair
+w
+s
+s
+d
+d
+n
+examine jarvis
+examine barbara
+s
+d
+examine volvo
+u
+u
+n
+w
+get letter
+open drawer
+get brass key
+close drawer
+open door with brass key
+w
+get tape
+e
+close door
+lock door with brass key
+e
+e
+w
+s
+d
+d
+open bmw with car key
+in
+read letter
+put tape in stereo
+get tape
+open glove compartment
+get screwdriver
+close glove compartment
+exit
+break window with screwdriver
+get folder
+open folder
+examine affidavit
+read it
+close volvo
+close bmw
+put all in briefcase
+u
+u
+u
+n
+w
+s
+wait until 10:40
+wait until 10:50
+wait until 11:00
+wait until 11:10
+wait until 11:20
+n
+wait
+wait
+wait
+get phone
+call jenny
+wait until 11:35
+wait until 11:45
+wait until 11:45
+e
+s
+d
+n
+w
+say hi to theresa
+wait until 12:00
+wait until 12:09
+get phone
+e
+s
+u
+ask david about jenny
+n
+w
+s
+drop briefcase
+n
+e
+s
+d
+d
+d
+w
+n
+wait
+wait
+wait
+wait
+wait
+wait
+wait
+wait
+wait
+w
+w
+n
+e
+n
+examine shelves
+buy razor, soap, film with credit card
+i
+s
+w
+s
+s
+s
+se
+examine tramp
+examine bench
+n
+n
+l
+wait
+wait
+wait
+wait
+wait
+e
+wait until 1:10
+wait until 1:20
+wait until 1:30
+wait until 1:40
+wait until 1:50
+wait until 2:00
+e
+wait
+wait
+wait
+wait
+wait
+wait
+wait
+wait
+wait
+wait
+ask jenny about the porsche
+wait
+wait
+wait
+wait
+wait
+wait
+wait
+wait
+wait
+wait
+wait
+wait
+wait
+wait
+wait
+wait
+s
+w
+wait
+wait
+wait
+examine cabinet
+examine empty bed
+examine pillow case
+wait
+wait
+wait
+wait
+get up
+get papers,pillow case, credit card,film,razor,watch,soap
+s
+s
+open locker
+put clothes, stethoscope in pillow case
+put all except papers and pillow case in pillow case
+n
+e
+s
+e
+n
+w
+w
+wear bandage
+lie on bed
+wait
+wait
+drop bandage, pyjamas
+wear shirt,trousers,tie,jacket
+get all from case
+get up
+open door
+wait
+wait
+exit
+s
+e
+u
+u
+u
+n
+w
+s
+get briefcase
+n
+e
+s
+d
+n
+w
+wait until 3:30
+wait
+open door with brass key
+w
+move tv
+wear stethoscope
+put stethoscope on dial
+turn dial
+turn dial
+turn dial
+turn dial
+look in safe
+get ledgers,receipts,chips
+examine receipts
+read receipts
+examine ledgers
+read ledgers
+examine chips
+e
+e
+s
+u
+n
+n
+wait until 4:00
+examine wooden door
+open wooden door with credit card
+e
+examine desk
+examine drawer
+open drawer with screwdriver
+examine drawer
+get document
+examine it
+read it
+read law magazine
+score
+w
+s
+e
+look in the mirror
+w
+s
+d
+d
+d
+w
+n
+e
+show chips to waiter
+knock on wooden door
+examine blackjack
+ask for credit
+s
+w
+w
+examine lights
+wait
+wait
+wait
+wait
+w
+w
+n
+n
+tell russell about david
+tell goddard about david
+tell goddard about affidavit
+tell goddard about tape
+tell goddard about certificate
+give certificate to goddard
+tell goddard about accounts
+tell goddard about receipts
+give ledgers to goddard
+give receipts to goddard
+give tape to goddard
+give affidavit to goddard
+give envelope to goddard
+tell goddard about charpontier
+say "yes"
+s
+e
+examine lights
+wait
+wait
+e
+e
+show chips to waiter
+knock on wooden door
+score
+wait
+wait
+wait

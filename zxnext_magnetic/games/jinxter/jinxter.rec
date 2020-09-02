@@ -1,0 +1,409 @@
+#seed
+12345
+restart
+y
+#seed
+12345
+inventory
+examine the keyring
+examine the bus ticket
+wait
+show inspector ticket
+read sign
+examine the button
+push button
+z, z, z, z
+exit
+take the ring
+z
+z
+read document
+drop ticket, document
+open gate
+n
+examine the chair
+unlock door with iron key
+open door
+n, nw
+open cello case
+look inside it
+take case
+open wardrobe and look inside it
+wear shoes
+look under the bed
+take sock and put it in the case
+ne
+examine the book
+read it
+examine the basin
+examine the dragon
+take it and put it in the case
+sw, n
+examine the table
+take opener and put it in the case
+open fridge
+look inside it
+take bottle and put it in the case
+close fridge
+e, s
+answer the phone
+dial 999
+examine the shelves
+n
+examine the table
+examine the chair
+examine the tablecloth
+take it
+unlock the back door with the iron key
+open it
+n
+examine the secateurs
+examine the gloves
+take all
+take the gloves
+put secateurs in case
+put gloves in case
+n
+examine the mailbox
+unlock it with plastic key
+l in it
+open it
+l in it
+close it
+e
+wave tablecloth
+drop it
+se, e
+examine the old bottle
+examine the fluid
+take plastic bottle and put it in the case
+w, nw, w, s, s, w
+open fridge
+put plastic bottle in fridge
+close fridge
+e, n, n, e, se, se, s
+take the mouse trap
+take the can of worms
+look inside the boat
+take the bung
+n, nw, s
+examine the path
+examine the door
+unlock it with rusty key
+open it
+sw, w
+examine the table
+take the candle and match box
+s
+examine the table
+sw, s
+listen to magpie
+n, ne, n, e
+open trapdoor
+d
+wear spectacles
+take the cheese
+up
+put cheese on mouse trap
+set trap
+drop it
+ne
+look inside mailbox
+take note and read it
+sw, w, s
+dial 300
+n, e
+wait
+ne
+unlock box with plastic key
+unlock mailbox with plastic key
+sw
+open matchbox
+take match and close matchbox
+light match
+light candle with match
+heat the plastic key with the candle
+heat the plastic key with the candle
+ne
+unlock mailbox with plastic key
+look inside mailbox
+take the parcel and open it
+look in it
+examine the charm
+read letter
+z, z, z, z, z
+z, z, z, z, z
+z, z, z, z, z
+sw
+examine the trap
+take the mouse
+ne, n, nw, w, s, s, w
+drink milk
+open can of worms with tin opener
+put worms in milk bottle
+open fridge and l inside it
+take the oil
+close fridge
+e, n, n, e, se, se, s
+examine the door
+put oil on the door
+open door
+s
+examine the sack
+take the amethyst charm
+examine it
+examine the canoe
+put bung in sock then put sock in hole then put canoe in water
+enter canoe
+take the paddle
+s, s
+get out
+d
+dig in the dirt
+empty the milk bottle on the dirt
+dig in the dirt
+e, e
+drop shoes, shirt, trousers
+drop all
+wear aqualung, mask, flippers, suit
+w, w, u, n, d, n, e, e, e, d
+search ruins
+take the cylinder
+u, w, w, w, w, n
+open hatch
+d
+close hatch
+examine the panel
+examine the buttons
+push left button
+examine the door
+turn wheel
+open door
+e, d
+examine the desk
+examine the notecase
+take the coin
+open red door
+e
+examine the chandelier
+w, u, w
+push right button
+e, d, e
+wait, wait
+look
+u
+examine the chandelier
+take the charm and l it
+d, w
+fix cylinder to aqualung
+u, w
+open hatch
+u, s, se, u, s, d, e, e
+remove aqualung
+drop aqualung, mask, flippers, suit
+wear shoes, shirt, trousers, gloves
+take the case, paddle, match box, candle, mouse
+take the charms
+w, w, u
+enter canoe
+n, sw
+drop paddle
+get out
+s, nw
+read notice
+ask baker for job
+d, e
+examine the flour sack
+open it
+take sieve
+sieve flour with sieve
+examine the sieve
+take the pelican charm
+w
+examine the table
+examine the tin
+put pelican charm in tin
+open oven
+put tin in oven
+close oven
+examine the oven
+examine the panel
+push green button twice
+push green button
+push green button
+open oven
+take the tin
+examine the tin
+show bread to the baker
+u
+show bread to the baker
+take the bread and eat it
+examine the pelican charm
+se
+examine the bar
+watchercallit coin
+buy beer with coin
+watchercallit glass
+examine the hearth
+oojimy fire
+take the ash
+n
+examine the well
+d
+take the coin
+u, s, nw, sw
+doofer unicorn
+take the saddle
+ne
+open door
+ne
+mail saddle to station
+give two-ferg coin to postmistress
+wait
+show mouse to postmistress
+examine the safe
+examine the handles
+turn bottom right handle
+turn top right handle
+turn bottom right handle
+turn bottom right handle
+turn top left handle
+open safe
+look in it
+take the dragon charm
+examine it
+open door
+sw, sw
+examine the door
+read notice
+examine the shop
+l inside the window
+knock on the door
+throw tin at oil lamp
+sw, e
+drop all but walrus charm
+w, ne
+examine the fire engine
+put ladder on shop
+take the ladder
+examine it
+sw
+oojimy stool
+take the stool
+e
+drop stool
+put ladder on girder
+take all but ladder and stool
+climb on the stool
+climb ladder
+jump north
+thingy
+examine rain weatherman
+get hat
+climb on the beam
+take all from case
+drop case
+doodah
+get on the cloud
+doofer the cloud
+examine the sign
+e, e, n, n
+open the door
+w
+take the saddle
+e, s, s, w
+put the coin in the hat
+drop the hat
+doofer the shoes
+play the harmonica
+take the hat and look inside it
+buy the ticket with the one ferg coin
+e
+wait
+w
+buy the ticket with the one ferg coin
+e
+take the ticket
+n
+take the ticket
+n
+take the ticket
+n
+take the ticket
+run after the train
+run after the train
+show the ticket to the guard
+wait
+w
+put the saddle on the unicorn
+mount unicorn
+doofer the unicorn
+dismount
+d
+e
+n
+e
+remove the shoes
+d
+open the door
+n
+look at xam
+wake him
+tie the rope to the manacle
+take the match then light it
+open matchbox
+take the match then light it
+light the candle with the match
+put the candle in the glass
+put the glass under the rope
+n
+wait
+n
+u
+ne
+open the door
+e
+e
+examine the dome
+examine the blocks
+slide 5
+slide 8
+slide 1
+slide 6
+slide 7
+slide 2
+slide 9
+slide 5
+slide 3
+slide 4
+take the bracelet
+put the charms on the bracelet
+w
+w
+sw
+nw
+u
+u
+open the left door
+n
+examine the table
+take the ball
+s
+d
+d
+se
+examine the fireplace
+examine the hearth
+u
+examine ball
+examine ball
+doofer ball
+drop the ash
+wait
+wait
+wait
+put the bracelet on claw
+i
+score
+#stack
+look

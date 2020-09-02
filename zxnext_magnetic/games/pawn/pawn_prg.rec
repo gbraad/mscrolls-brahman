@@ -1,0 +1,188 @@
+#seed
+12345
+e
+examine platform
+get note
+ask kronos about wristband
+get chest
+e, e, e, e
+show note to guards
+w
+look in fountain
+get chit
+lift mat
+get wooden key
+examine pocket
+unlock door with metal key, open it
+give chest to adventurer
+get adventurer
+put adventurer on horse
+sw
+examine workbench
+get hoe, rake and trowel
+look under workbench
+plant pot plant in plant pot with trowel
+ne
+mount horse
+w, w, w, w, n, n, nw, nw
+dismount horse
+remove shirt
+cover band with shirt
+u, e, e, ne
+remove shirt
+attach hoe to rake with shirt
+lever boulder with hoe and rake
+untie shirt, wear it
+drop rake and hoe
+u
+climb rocks
+u, u
+fill bowl with snow
+d, d, d, d, s, nw, nw, u
+give bowl to guru
+get rice
+e, se, s, s
+look in stump
+get pouch, open it
+get red, blue and green
+mix red, blue and green
+n, n, nw
+mount horse
+e, e, n, u
+climb rocks
+e, e, e, d, e, e
+dismount
+put pouch, trowel, rice, wooden key, chit, white on horse
+u, u
+hit wall
+e
+get all from horse but adventurer
+n
+move pedestal
+look in niche
+get blue key
+s
+remove shirt
+w, w, u, w, w, w, d, d, s, w, s, s, s, u
+unlock door with wooden key, open it
+e
+close door
+move planks
+d, d, e, n
+move rug
+unlock safe with blue key, open it, look under it
+get paper
+s, e
+put paper in large box
+w, w, w, sw
+open door
+w
+get hard hat, wear it
+examine settee
+move cushions
+get coin
+w
+look on stove
+get teapot
+look on worktop
+get carrot
+e, e, ne, nw
+press button
+wait
+wait
+wait
+wait
+slide door
+n
+get rope
+slide door
+press second button
+slide door
+s
+wear shirt
+get lumps with trowel
+n
+slide door
+press first button
+slide door
+s, se, e, u, u
+open door
+w, d, ne, ne, ne, n
+drop trowel, carrot, wooden key and teapot
+buy whisky bottle and beer bottle with coin
+nw, u
+climb rocks
+u, u, s, w
+melt snowman with white
+ne, w
+get boots, wear them
+get prism, put it in pouch
+e, sw
+get white
+n, e, d, d, e, e, e, d, n, n
+give rice to alchemists
+give lumps to alchemists
+ne
+get aerosoul
+sw, nw, w, n, n, n, ne, n
+cut paper wall with boots
+open cupboard, examine it
+tie rope to hook
+climb rope
+drop rope
+s
+put white in pouch
+knock on doors
+knock on doors
+knock on doors
+knock on doors
+knock on doors
+give whisky bottle to porter
+e, d, n
+give beer bottle to jerry
+s
+close pouch
+e, n, e
+ask devil about wristband
+get bottle
+n, n
+open pouch, get white
+nw
+look in shadows
+point at shadows
+shine white at shadows
+n
+throw bottle at kronos
+press nozzle
+examine rack
+get wands
+get pointy hat, wear it
+get cloak, wear it
+get wand
+s, se, ne, n
+get rope, climb it, drop it
+s
+put white in pouch, close pouch
+e, d, e, n, e
+give aerosoul to devil
+w, s, w, u
+open pouch, get white
+w, n
+get rope, climb it, drop it
+s, s, s, s, s, e, se, ne
+cast spell on tomes
+read tomes
+sw, s, s, s
+open doors
+s
+knock on door
+say "no"
+s
+debug
+n.n.n.e.e
+get on the horse
+w.w.u.w.w.w.d.d.s.s.s.s.s.s
+debug
+score
+look at the waterfall
+#stack
