@@ -4,7 +4,7 @@
 ;; Routines for calling the Vortex Tracker II (VT) player in PT3PROM.asm.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-SECTION BANK_14
+SECTION BANK_3
 ;SECTION code_user
 
 EXTERN VT_START

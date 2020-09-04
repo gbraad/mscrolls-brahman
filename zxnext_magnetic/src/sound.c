@@ -19,17 +19,17 @@ extern uint8_t music_module[];
 
 void play_music(void)
 {
-    // Place the vt_sound binary and music module (located in bank 14 with origin
+    // Place the vt_sound binary and music module (located in bank 3 with origin
     // address 0) in MMU slots 0 and 1 for execution.
     // Note: The vt_sound binary (~2.2 KB) and music module must fit within 16 KB.
-    ZXN_WRITE_MMU0(28);
-    ZXN_WRITE_MMU1(29);
+    ZXN_WRITE_MMU0(6);
+    ZXN_WRITE_MMU1(7);
 
     // Initialize vt_sound with the music module.
     vt_init(music_module);
 
     // Install the vt_play_isr() interrupt service routine. The music will now
-    // play in the background. Note: Pages 28 and 29 must remain in MMU slots
+    // play in the background. Note: Pages 6 and 7 must remain in MMU slots
     // 0 and 1 while music is playing and until stop_music() is called.
     intrinsic_di();
     z80_bpoke(0xFDFD, 0xC3); // jp

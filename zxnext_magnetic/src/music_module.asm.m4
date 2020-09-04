@@ -8,7 +8,7 @@ divert(-1)
 include(`zconfig.m4')
 divert
 
-SECTION BANK_14
+SECTION BANK_3
 
 PUBLIC _music_module
 

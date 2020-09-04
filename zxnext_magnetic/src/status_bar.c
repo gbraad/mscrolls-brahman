@@ -8,8 +8,12 @@
  * layer 2 memory area (256 * 16 pixels) in a separate MMU page using layer2_fzx.h
  * and then transferred to the sprite BRAM for the 16 sprites.
  *
- * Note: MMU slot 2 is temporarily used when accessing the layer 2 off-screen
- * memory area.
+ * MMU page 28 is used for holding the 4 KB off-screen layer 2 memory area and
+ * is temporarily paged in to MMU slot 2 when being accessed.
+ * In Timex hi-res mode, this data is followed by a standard resolution font
+ * (806 bytes) that is used when printing in the status bar. The font is located
+ * at offset 0x1000 in MMU page 28 and is temporarily paged in to MMU slot 0
+ * when being used.
  ******************************************************************************/
 
 #include <arch/zxn.h>
@@ -37,19 +41,27 @@
 
 #define STATUS_SCORE_COLUMN 208
 
+#if USE_TIMEX_HIRES
+extern uint8_t status_font[];
+#endif
+
 static void clear_sprite_ram(void);
 
 static void transfer_sprite_ram(void);
 
 static struct fzx_state fzx_state;
 
-void init_status_bar(struct fzx_font *status_font)
+void init_status_bar(struct fzx_font *font)
 {
     struct layer2_fzx_state l2_fzx_state;
 
+#if USE_TIMEX_HIRES
+    font = (struct fzx_font *) status_font;
+#endif
+
     fzx_state.jp = 195;
     fzx_state.fzx_draw = _layer2_fzx_draw;
-    fzx_state.font = status_font;
+    fzx_state.font = font;
     fzx_state.x = 0;
     fzx_state.y = 8;
     fzx_state.paper.x = 0;
@@ -73,31 +85,31 @@ void init_status_bar(struct fzx_font *status_font)
     {
         sprite_set_attributes(SPRITE_SLOT + i, 32 + 16 * i, 16, true);
     }
-
-    /*
-     * CSpect only supports 12 sprites per line (#CSpect does not have that limitation).
-     * When testing with CSpect, we have to make 4 of the 16 sprites in the status bar
-     * invisible. Sprites 8 to 11 in the status bar are almost never used and can be made
-     * invisible.
-     */
-#if USE_CSPECT
-    sprite_select_slot(SPRITE_SLOT + 8);
-    for (uint8_t i = 8; i != 12; ++i)
-    {
-        sprite_set_attributes(SPRITE_SLOT + i, 32 + 16 * i, 16, false);
-    }
-#endif
 }
 
 void print_status(uint8_t *room_name, uint8_t *score_turn)
 {
+#if USE_TIMEX_HIRES
+    uint8_t old_mmu0_page;
+#endif
+
     clear_sprite_ram();
+
+    // Before printing, page in the standard resolution font if Timex hi-res mode.
+#if USE_TIMEX_HIRES
+    old_mmu0_page = ZXN_READ_MMU0();
+    ZXN_WRITE_MMU0(SPRITE_RAM_PAGE);
+#endif
 
     fzx_state.x = 0;
     fzx_puts(&fzx_state, room_name);
 
     fzx_state.x = STATUS_SCORE_COLUMN;
     fzx_puts(&fzx_state, score_turn);
+
+#if USE_TIMEX_HIRES
+    ZXN_WRITE_MMU0(old_mmu0_page);
+#endif
 
     transfer_sprite_ram();
 }

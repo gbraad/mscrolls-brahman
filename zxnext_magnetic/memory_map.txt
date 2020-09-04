@@ -21,69 +21,69 @@ This is the memory map for the Magnetic interpreter:
  Timex hi-res graphics mode
  --------------------------
 
- |------------------------------------------------| 0xFFFF
- | Stack (grows downward) [max 255 bytes]         |
- |------------------------------------------------| 0xFF00
- | IM2 interrupt vector table and ISR [260 bytes] |
- |------------------------------------------------| 0xFDFD
- |                                                |
- |                                                |
- |                                                |
- |                                                |
- |                                                |
- | Main program (code, data, bss) [max ~33.5 KB]  |
- |                                                |
- |                                                |
- |                                                |
- |                                                |
- |                                                |
- |------------------------------------------------| 0x7800
- | Timex hi-res screen (odd columns) [6 KB]       |
- |------------------------------------------------| 0x6000
- | Free RAM used by main program [2 KB]           |
- |------------------------------------------------| 0x5800
- | Timex hi-res screen (even columns) [6 KB]      |
- |------------------------------------------------| 0x4000
- |                                                |
- |                                                |
- | Paging area for game story file [16 KB]        |
- |                                                |
- |                                                |
- |------------------------------------------------| 0x0000
+ |------------------------------------------------| 0xFFFF    |---- 0xFFFF
+ | Stack (grows downward) [max 255 bytes]         |           |
+ |------------------------------------------------| 0xFF00    |
+ | IM2 interrupt vector table and ISR [260 bytes] |           | MMU slot 7
+ |------------------------------------------------| 0xFDFD    |
+ |                                                |           |
+ |                                                |           |---- 0xE000
+ |                                                |           |
+ |                                                |           | MMU slot 6
+ |                                                |           |---- 0xC000
+ | Main program (code, data, bss) [max ~33.5 KB]  |           |
+ |                                                |           | MMU slot 5
+ |                                                |           |---- 0xA000
+ |                                                |           |
+ |                                                |           | MMU slot 4
+ |                                                |           |---- 0x8000
+ |------------------------------------------------| 0x7800    |
+ | Timex hi-res screen (odd columns) [6 KB]       |           | MMU slot 3
+ |------------------------------------------------| 0x6000    |---- 0x6000
+ | Free RAM used by main program [2 KB]           |           |
+ |------------------------------------------------| 0x5800    | MMU slot 2
+ | Timex hi-res screen (even columns) [6 KB]      |           |
+ |------------------------------------------------| 0x4000    |---- 0x4000
+ |                                                |           |
+ |                                                |           | MMU slot 1
+ | Paging area for game story file [16 KB]        |           |---- 0x2000
+ |                                                |           |
+ |                                                |           | MMU slot 0
+ |------------------------------------------------| 0x0000    |---- 0x0000
 
 
  ULA graphics mode
  -----------------
 
- |------------------------------------------------| 0xFFFF
- | Stack (grows downward) [max 255 bytes]         |
- |------------------------------------------------| 0xFF00
- | IM2 interrupt vector table and ISR [260 bytes] |
- |------------------------------------------------| 0xFDFD
- |                                                |
- |                                                |
- |                                                |
- |                                                |
- |                                                |
- |                                                |
- | Main program (code, data, bss) [max ~39.2 KB]  |
- |                                                |
- |                                                |
- |                                                |
- |                                                |
- |                                                |
- |                                                |
- |------------------------------------------------| 0x6100
- | Free RAM used by main program [1.5 KB]         |
- |------------------------------------------------| 0x5B00
- | ULA screen [6.75 KB]                           |
- |------------------------------------------------| 0x4000
- |                                                |
- |                                                |
- | Paging area for game story file [16 KB]        |
- |                                                |
- |                                                |
- |------------------------------------------------| 0x0000
+ |------------------------------------------------| 0xFFFF    |---- 0xFFFF
+ | Stack (grows downward) [max 255 bytes]         |           |
+ |------------------------------------------------| 0xFF00    |
+ | IM2 interrupt vector table and ISR [260 bytes] |           |
+ |------------------------------------------------| 0xFDFD    | MMU slot 7
+ |                                                |           |
+ |                                                |           |
+ |                                                |           |---- 0xE000
+ |                                                |           |
+ |                                                |           | MMU slot 6
+ |                                                |           |---- 0xC000
+ | Main program (code, data, bss) [max ~39.2 KB]  |           |
+ |                                                |           | MMU slot 5
+ |                                                |           |---- 0xA000
+ |                                                |           |
+ |                                                |           | MMU slot 4
+ |                                                |           |---- 0x8000
+ |                                                |           |
+ |------------------------------------------------| 0x6100    | MMU slot 3
+ | Free RAM used by main program [1.5 KB]         |           |---- 0x6000
+ |------------------------------------------------| 0x5B00    |
+ | ULA screen [6.75 KB]                           |           | MMU slot 2
+ |------------------------------------------------| 0x4000    |---- 0x4000
+ |                                                |           |
+ |                                                |           | MMU slot 1
+ | Paging area for game story file [16 KB]        |           |---- 0x2000
+ |                                                |           |
+ |                                                |           | MMU slot 0
+ |------------------------------------------------| 0x0000    |---- 0x0000
 
 
 MMU Pages
@@ -99,7 +99,7 @@ area when reading and writing files using ESXDOS.
   shadow screens and are loaded via MMU slot 2.
 
 * Vortex Tracker II player and intro music PT3 module:
-  MMU pages 28 and 29 (16 KB) initially contain the Vortex Tracker II player
+  MMU pages 6 and 7 (16 KB) initially contain the Vortex Tracker II player
   and the intro music PT3 module. They are paged in to MMU slots 0 and 1 for
   execution and then paged out and discarded when the intro music is over.
 
@@ -120,3 +120,48 @@ area when reading and writing files using ESXDOS.
 * Save/load game state:
   Saving/loading the game state (which is part of the loaded game story file)
   to/from a file is done via MMU slot 2.
+
+
+Below is a list of all MMU pages and their usage in the Magnetic interpreter.
+
+MMU page   Usage
+--------   -------------------------------
+00         Main program
+01         Main program
+02         String index file (if remaster)
+03         String index file (if remaster)
+04         Main program
+05         Main program
+06         Music module (only used initially)
+07         Music module (only used initially)
+08         <free>
+09         <free>
+10         ULA screen / Timex hi-res screen
+11         Timex hi-res screen
+12         <free>
+13         <free>
+14         <free>
+15         <free>
+16         Layer 2 main screen
+17         Layer 2 main screen
+18         Layer 2 main screen
+19         Layer 2 main screen
+20         Layer 2 main screen
+21         Layer 2 main screen
+22         Layer 2 shadow screen
+23         Layer 2 shadow screen
+24         Layer 2 shadow screen
+25         Layer 2 shadow screen
+26         Layer 2 shadow screen
+27         Layer 2 shadow screen
+28         Status bar
+29         <free>
+30         Game story file
+31         Game story file
+32         Game story file
+..         Game story file
+..         Game story file / String file (if remaster)
+..         Game story file / String file (if remaster)
+93         Game story file / String file (if remaster)
+94         Game story file / String file (if remaster)
+95         Game story file / String file (if remaster)

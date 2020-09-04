@@ -37,7 +37,7 @@
 ;Call MUTE or INIT one more time to mute sound after stopping
 ;playing 
 
-SECTION BANK_14
+SECTION BANK_3
 ;SECTION code_user
 ;	ORG $C000
 

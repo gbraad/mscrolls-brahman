@@ -202,6 +202,7 @@ defc `ASCII_CODE_UP' = ASCII_CODE_UP
 defc `ASCII_CODE_DOWN' = ASCII_CODE_DOWN
 defc `ASCII_CODE_BREAK' = ASCII_CODE_BREAK
 
+defc `USE_TIMEX_HIRES' = USE_TIMEX_HIRES
 defc `TEXT_WINDOW_HEIGHT' = TEXT_WINDOW_HEIGHT
 
 defc `USE_GFX' = USE_GFX
@@ -267,8 +268,11 @@ ifelse(USE_TIMEX_HIRES, 0,
 // Include crt_driver_instantiation.asm.m4 in driver instantiation section.
 `#pragma' output CRT_INCLUDE_DRIVER_INSTANTIATION = 1
 
-// Set origin address to 0 for bank 14 (vt_sound binary and music module).
-`#pragma' output CRT_ORG_BANK_14 = 0
+// Set origin address to 0 for bank 3 (vt_sound binary and music module).
+`#pragma' output CRT_ORG_BANK_3 = 0
+
+// Set origin address to 0x1000 for page 28 (status font in Timex hi-res mode).
+`#pragma' output CRT_ORG_BANK_14_L = 0x1000
 divert(-1)
 ')
 
@@ -300,6 +304,7 @@ src/zx_01_output_fzx_custom.asm
 ',
 `
 src/tshr_01_output_fzx_custom.asm
+src/status_font.asm
 ')dnl
 ifelse(USE_GFX, 0,,
 `

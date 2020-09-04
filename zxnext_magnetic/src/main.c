@@ -860,6 +860,9 @@ void ms_showpic(type8 c, type8 mode)
 #if USE_GFX
     if (mode)
     {
+        // Load and display the image.
+        show_location_image(c);
+
         // Turn on graphics if off.
         if (!gfx_on)
         {
@@ -870,9 +873,6 @@ void ms_showpic(type8 c, type8 mode)
             layer2_config(true);
             ioctl(FD_STDOUT, IOCTL_OTERM_SCROLL_LIMIT, (TEXT_WINDOW_HEIGHT - MAX_IMAGE_HEIGHT_IN_CHARS));
         }
-
-        // Load and display the image.
-        show_location_image(c);
     }
     else
     {

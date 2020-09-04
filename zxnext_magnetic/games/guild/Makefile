@@ -12,7 +12,7 @@ GAME_START_IMAGE := 3
 
 GAME_LAST_IMAGE := 28
 
-GAME_VERSION_STR := 'The Guild of Thieves for ZX Spectrum Next v1.1.0'
+GAME_VERSION_STR := 'The Guild of Thieves for ZX Spectrum Next v1.2.0'
 
 MAGNETIC := ../..
 

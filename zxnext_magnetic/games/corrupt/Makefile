@@ -12,7 +12,7 @@ GAME_START_IMAGE := 25
 
 GAME_LAST_IMAGE := 25
 
-GAME_VERSION_STR := 'Corruption for ZX Spectrum Next v1.0.0'
+GAME_VERSION_STR := 'Corruption for ZX Spectrum Next v1.1.0'
 
 MAGNETIC := ../..
 
