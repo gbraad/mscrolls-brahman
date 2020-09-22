@@ -209,6 +209,8 @@ static void wait_key(void)
 // Show title and credits images and optionally play intro music.
 static void show_intro(void)
 {
+    // Add "z80_delay_ms(20000);" here for a short pause before game startup when creating a video.
+
     // Load title and credits images and show title image.
     layer2_load_screen(MAIN_SCREEN, LAYER2_PALETTE_1, "gfx/title.nxi", 192, buf_256);
     layer2_load_screen(SHADOW_SCREEN, LAYER2_PALETTE_2, "gfx/credits.nxi", 192, buf_256);

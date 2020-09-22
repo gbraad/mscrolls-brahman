@@ -120,6 +120,7 @@ games:
 	$(MAKE) -C games/corrupt clean all
 	$(MAKE) -C games/fish    clean all
 	$(MAKE) -C games/myth    clean all
+	$(MAKE) -C games/compilation clean all
 
 .PHONY: clean
 clean:

@@ -140,6 +140,11 @@ Click on a game link to read about and download the game. Games marked as
 remastered use the remastered game story file by Strand Games while games
 marked as classic use the original game story file.
 
+The Magnetic Scrolls Compilation is a compilation of all currently available
+Magnetic Scrolls games for the Spectrum Next. This compilation is provided as a
+convenience if you want to download all the games in a bundle and, optionally,
+create your own physical edition of the compilation with a case and cover.
+
 * [The Pawn (remastered)](games/pawn)
 * [The Guild of Thieves (remastered)](games/guild)
 * [Jinxter (remastered)](games/jinxter)
@@ -147,6 +152,7 @@ marked as classic use the original game story file.
 * [Fish! (classic)](games/fish)
 * [Myth (classic)](games/myth)
 * Wonderland (classic)
+* [The Magnetic Scrolls Compilation](games/compilation)
 
 ## How to Build
 
