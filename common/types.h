@@ -96,5 +96,8 @@ typedef unsigned char uchar;
 typedef uint64_t uint64;
 typedef int64_t int64;
 
+typedef uint8_t uint8;
+typedef uint16_t uint16;
+typedef uint32_t uint32;
 
  

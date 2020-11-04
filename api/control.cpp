@@ -1727,7 +1727,7 @@ struct Control::Imp :
         // called when a link in the text is clicked issuing a command
         // OR for IFI when something in the picture is clicked
         // OR for IFI cmd is blank when text dismissed
-        bool v = true;
+        bool v = false;
         if (_ifi)
         {
             // handle picture click & dismiss

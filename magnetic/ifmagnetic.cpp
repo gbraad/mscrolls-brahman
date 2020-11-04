@@ -981,7 +981,7 @@ bool IFMagnetic::_handleTestCommands(const char* cmd)
         if (!handled) handle_test_commands(cmd + 1);
         std::cout.rdbuf(old);
         LOG3("test command ", cmd << ": " << buffer.str());
-        handled = true;
+        //handled = true;
 
     }
     return handled;

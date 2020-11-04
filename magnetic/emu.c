@@ -6532,7 +6532,7 @@ type8 ms_rungame(void)
 #endif
         break;
 
-    case 0x51:
+    case 0x51: // A200
 #ifdef LOGDIS
         push_msg(DASM_OP,"rts");
         if (no_branch)

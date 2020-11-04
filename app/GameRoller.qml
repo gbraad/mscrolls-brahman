@@ -59,6 +59,7 @@ Roller
     DropArea
     {
         id: droparea
+        objectName: "GRDrop"
         anchors.fill: parent
 
         onPositionChanged:
@@ -190,7 +191,7 @@ Roller
             id: effect2
             anchors.fill: effect1
             source: effect1
-            saturation: QControl.prefs.imageadjEnabled ? picarea.imgSaturation : 0.0
+            saturation: (QControl.prefs.imageadjEnabled && !Device.isIOS())? picarea.imgSaturation : 0.0
             lightness: QControl.prefs.imageadjEnabled ? picarea.imgLightness : 0.0
             visible: false
         }

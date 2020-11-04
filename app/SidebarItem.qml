@@ -76,7 +76,7 @@ Item
     Drag.active: dragarea.drag.active
     Drag.hotSpot: Qt.point(hotx, hoty)
 
-    MouseArea 
+    MouseArea
     {
         id: dragarea
         anchors.fill: parent
@@ -99,7 +99,7 @@ Item
             var dlink = gamepage.droplink
             setDroplink("");
 
-            if (item.Drag.target == droparea)
+            if (item.Drag.target && item.Drag.target.objectName == "GRDrop")
             {
                 if (dlink.length > 0 &&
                 QControl.evalUseXwithY("item" + listitem.itemid, dlink)) ;

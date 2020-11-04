@@ -51,7 +51,7 @@ public:
     ApngReader*  _reader = 0;
     uint         _index = 0;
     uint         _offset = 0;
-    string      _filename;
+    string       _filename;
 
     AnimImageProvider() : QQuickImageProvider(QQuickImageProvider::Image) {}
     ~AnimImageProvider() { drop(); }
@@ -77,10 +77,11 @@ public:
     QImage requestImage(const QString &name, QSize *size,
                         const QSize &requestedSize)
     {
+        // anim/ + count/name
+
         string reqName = STRQ(name);
-
+        
         char buf[32];
-
         const char* p = reqName.c_str();
         char* q = buf;
         while (u_isdigit(*p)) *q++ = *p++;

@@ -278,6 +278,14 @@ struct FD: public FDBase
         return sz;
     }
 
+    static Pos size(const char* fname)
+    {
+        Pos sz = 0;
+        FD fd;
+        if (fd.open(fname)) sz = fd.size();
+        return sz;
+    }
+
     bool seek(Pos pos)
     {
         bool res = isOpen();
