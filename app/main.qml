@@ -79,6 +79,7 @@ ApplicationWindow
     property string soundJSON: QControl.soundJSON
     property int force: QControl.force
     property real soundVol: QControl.prefs.soundVol/100
+    property string systemFontName: QControl.prefs.gameSystemFont
 
     readonly property int dialogWidth: width*3/4
     readonly property int dialogHeight: height*8/10
@@ -112,6 +113,12 @@ ApplicationWindow
     {
         if (Device.isLargeMobile) fs *= 5/4; // tablet
         QControl.prefs.setGameFontDefault(fontobj.afont, fs*Units.dp, true)
+    }
+
+    onSystemFontNameChanged:
+    {
+        //console.log("system font changed to", systemFontName)
+        app.theme.fontFamily = systemFontName
     }
 
     onEnableUCanvasChanged:

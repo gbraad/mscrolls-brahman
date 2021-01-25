@@ -119,6 +119,8 @@ public:
     Q_PROPERTY(qreal dpScale READ dpScale WRITE setDpScale NOTIFY dpScaleChanged);
     Q_PROPERTY(QFont gameFont READ gameFont WRITE setGameFont NOTIFY gameFontChanged);
 
+    Q_PROPERTY(QFont gameSystemFont READ gameSystemFont WRITE setGameSystemFont NOTIFY gameSystemFontChanged);
+
     Q_PROPERTY(qreal mapBoxSize READ mapBoxSize WRITE setMapBoxSize NOTIFY mapBoxSizeChanged);
 
     Q_PROPERTY(bool imageadjEnabled READ imageadjEnabled WRITE setImageadjEnabled NOTIFY imageadjEnabledChanged);
@@ -234,6 +236,7 @@ public:
     */
 
     DPREF_STRING(Font, FONT);
+    DPREF_STRING(SystemFont, SYSTEMFONT);
     DPREF_QSTRING(BackgroundColor, BACKGROUND_COLOR);
     DPREF_QSTRING(PrimaryColor, PRIMARY_COLOR);
     DPREF_QSTRING(ContrastColor, CONTRAST_COLOR);
@@ -293,6 +296,21 @@ public:
     void setGameFont(const QFont& f) 
     {
         setGameFontString(STRQ(f.toString()));
+    }
+
+    QFont gameSystemFont() const
+    {
+        string fn = gameSystemFontString();
+        QFont font;
+        if (!fn.empty())
+            font.fromString(QSTR(fn));
+        
+        return font;
+    }
+
+    void setGameSystemFont(const QFont& f) 
+    {
+        setGameSystemFontString(STRQ(f.toString()));
     }
 
     qreal mapBoxSize() const
@@ -409,6 +427,7 @@ signals:
     void modernEnabledChanged();
     void dpScaleChanged();
     void gameFontChanged();
+    void gameSystemFontChanged();
     void mapBoxSizeChanged();
     void imageadjEnabledChanged();
     void imagepixscaleEnabledChanged();

@@ -116,6 +116,7 @@ int main(int argc, char *_argv[])
     char** argv = Opt::copyArgs(argc, _argv);
     qc->handleOptions(argc, argv);
     Logged::_logLevel = qc->getLogLevel(); // from API DLL
+    Logged::_stream.consume(qc->getLogStream()); // same poo
     
     // NB: this must happen before the UI
     if (qc->_options._hiDpi)

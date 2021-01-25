@@ -52,6 +52,9 @@
 #define PREFS_GAME_FONT  "game_font"
 #define DEFAULT_GAME_FONT ""
 
+#define PREFS_GAME_SYSTEMFONT  "game_systemfont"
+#define DEFAULT_GAME_SYSTEMFONT ""
+
 #define PREFS_MAPBOXSIZE  "mapbox_size"
 #define DEFAULT_MAPBOXSIZE 10
 

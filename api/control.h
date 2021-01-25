@@ -124,7 +124,7 @@ struct DLLX Control: public APIType
     string currentVersion() const;
     virtual void setLogLevel(int level);
     virtual int getLogLevel() const;
-
+    virtual StdFStream* getLogStream() const;
 
     bool evalCommand(const string& cmd, bool echo = true);
     bool evalJSON(const string& js);

@@ -57,7 +57,7 @@
 // 1.1.X pre ifi
 // 1.2.X post ifi
 // 1.3.X move to Qt5.12.X
-#define VERSION_STRING  "1.3.3"
+#define VERSION_STRING  "1.3.5"
 
 struct ControlImpBase
 {
@@ -1681,7 +1681,12 @@ struct Control::Imp :
         // will be the one inside this DLL/shared lib.
         return Logged::_logLevel;
     }
-    
+
+    StdFStream* getLogStream() const
+    {
+        return &Logged::_stream;
+    }
+
     void setLogLevel(int level)
     {
         if (level >= 0 && level < 100)
@@ -2286,7 +2291,7 @@ struct Control::Imp :
 
 #ifdef _WIN32
         if (logfile)
-            initLog.openFile("brahman.log");
+            Logged::openFile("brahman.log");
 #endif
     }
 
@@ -2374,6 +2379,7 @@ typedef std::string string;
 string Control::currentVersion() const { return _imp->currentVersion(); }
 void Control::setLogLevel(int level) { _imp->setLogLevel(level); }
 int Control::getLogLevel() const { return _imp->getLogLevel(); }
+StdFStream* Control::getLogStream() const { return _imp->getLogStream(); }
 bool Control::evalCommand(const string& cmd, bool echo)
  { return _imp->evalCommand(cmd, echo); }
 bool Control::evalSubcommand(const string& cmd)

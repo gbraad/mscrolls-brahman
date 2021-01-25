@@ -286,6 +286,17 @@ Page
                 }
             }
 
+            ListItem.Subtitled
+            {
+                text: "System Font"
+                subText: "Select font for system window"
+                onClicked: 
+                {
+                    systemfontDialogLoader.asynchronous = false
+                    systemfontDialogLoader.item.open()
+                }
+            }
+
             ///////////////////
 
             ListItem.Standard
@@ -528,6 +539,21 @@ Page
             maxHeight: 0.2*app.dialogHeight
             currentScale: QControl.prefs.dpScale*100
             onAccepted: QControl.prefs.dpScale = currentScale/100
+        }
+    }
+
+    Loader
+    {
+        id: systemfontDialogLoader
+        asynchronous: true
+
+        // our version
+        sourceComponent: FontSelector
+        {
+            maxWidth: app.dialogWidth
+            maxHeight: app.dialogHeight
+            currentFont: QControl.prefs.gameSystemFont
+            onAccepted: QControl.prefs.gameSystemFont = font
         }
     }
 }
