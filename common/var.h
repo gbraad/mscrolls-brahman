@@ -110,7 +110,7 @@ struct var
             {
                 int sz = _space * 2;
                 var* v2 = new var[sz];
-                memcpy(v2, _vars, _size*sizeof(var));
+                memcpy((void*)v2, (void*)_vars, _size*sizeof(var));
 
                 // arrange for original array to not delete elements
                 for (int i = 0; i < _size; ++i) _vars[i]._type = var_null;

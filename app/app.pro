@@ -56,7 +56,6 @@ android {
 INCLUDEPATH += $$PROJ/api $$RJSONDIR/include $$LIBPNG $$LIBZ
 
 macx: !android {
-
         plugin.path = "$$PROJ/app/$$BUILDT/$$FTARGET/Contents/Frameworks"
         plugin.files = $$PROJ/app/$$BUILDT/libbrahmanapi.dylib
         plugin.files += $$PROJ/app/$$BUILDT/libbrahmanapi.1.dylib

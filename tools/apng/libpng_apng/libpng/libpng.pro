@@ -52,6 +52,15 @@ INCLUDEPATH += $$ZLIBDIR
 ios {
     QMAKE_SONAME_PREFIX = @rpath
 }
+
+android:contains(QT_ARCH, arm64) {
+   DEFINES += PNG_ARM_NEON_OPT=0
+}
+
+win32 {
+   DEFINES += PNG_INTEL_SSE
+}
+
     
 ### //////////////////  ///////////////////////////////////////////
 
@@ -71,6 +80,11 @@ SOURCES = \
     pngwrite.c \
     pngwtran.c \
     pngwutil.c
+
+win32 {
+   SOURCES += intel\intel_init.c \
+    intel\filter_sse2_intrinsics.c
+}
     
 HEADERS = \  
     png.h \

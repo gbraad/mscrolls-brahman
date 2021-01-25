@@ -180,7 +180,8 @@ public:
 #elif defined(Q_OS_WIN) && defined(Q_CC_MINGW)
         glPointSize(mSize);
 #else
-#error glPointSize        
+        // XX could be wrong for Linux #error glPointSize
+        glPointSize(mSize);        
 #endif
     }
 

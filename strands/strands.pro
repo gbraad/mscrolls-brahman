@@ -133,7 +133,8 @@ porter.h \
 strandi.h \
 strands.h \
 timeline.h  \
-cap.h
+cap.h \
+pexpr.h
 
 
 include($$IFIDIR/ificlient.pri)

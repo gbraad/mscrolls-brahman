@@ -34,6 +34,7 @@
 #include "fd.h"
 #include "strutils.h"
 #include "varset.h"
+#include "pexpr.h"
 
 #define SYM_STICKY      '!'
 
@@ -182,6 +183,14 @@ struct ParseStrands: public ParseBase
         assert(fname.size());
         //printf("adding file '%s'\n", fname.c_str());
         auto m = new Flow::EltMedia(fname, mt);
+        f._elts.push_back(m);
+        return m;
+    }
+
+    Flow::EltCond* _addCond(Flow& f, enode* e)
+    {
+        assert(e);
+        auto m = new Flow::EltCond(e);
         f._elts.push_back(m);
         return m;
     }
@@ -753,17 +762,13 @@ struct ParseStrands: public ParseBase
 
     void parseCondFlow(Selector* s)
     {
-        if (AT == SYM_SUBFLOW_START)
+        ParseExpr pe;
+        enode* en = pe.parse(POS, lineno);
+        SETPOS(pe.pos);
+        if (en)
         {
-            BUMP;
-            skipws();
-            parseFlow(s->_cond, SYM_SUBFLOW_END, Flow::t_text);
-            s->_condExpr = true;
-        }
-        else
-        {
-            // allow single name only
-            parseFlow(s->_cond, ' ', Flow::t_text);
+            //LOG1("parseCondFlow ", en->toString());
+            _addCond(s->_cond, en);
         }
     }
 
@@ -791,22 +796,8 @@ struct ParseStrands: public ParseBase
         {
             // selector conditional prefix
             BUMP;
-            skipws();
-            if (AT == SYM_NOT)
-            {
-                s->_negated = true; 
-                BUMP;
-                skipws();
-            }
-
-            parseCondFlow(s);
-
-            // NB: term is not yet bound, so first element is ok.
-            if (!s->_cond || !s->_cond.firstTermElt())
-            {
-                PERR1("selector condition expects term name", s->id());
-            }
             
+            parseCondFlow(s);
             skipws();
         }
 
@@ -939,6 +930,31 @@ struct ParseStrands: public ParseBase
         }
         return v;
     }
+
+    bool linkCond(Flow::EltCond* et, bool err)
+    {
+        assert(et->_cond);
+        bool v = true;
+        for (enode::It it(et->_cond); it; ++it)
+        {
+            enode* en = const_cast<enode*>(it._n);
+            if (en->isTermName())
+            {
+                en->_binding = Term::find(en->_name);
+                if (!en->_binding)
+                {
+                    v = false;
+                    if (err)
+                    {
+                        ERR0("missing cond term '" << en->_name << '\'');
+                    }
+                }
+
+            }
+        }
+
+        return v;
+    }
     
     bool linkFlow(Flow& f, FlowVisitor& fv)
     {
@@ -949,6 +965,11 @@ struct ParseStrands: public ParseBase
             {
                 Flow::EltTerm* et = (Flow::EltTerm*)e;
                 if (!linkTerm(et, fv._err)) v = false;
+            }
+            else if (e->_type == Flow::t_cond)
+            {
+                Flow::EltCond* et = (Flow::EltCond*)e;
+                if (!linkCond(et, fv._err)) v = false;
             }
         }
         return v;
@@ -961,6 +982,8 @@ struct ParseStrands: public ParseBase
         FlowVisitor ff(std::bind(&ParseStrands::linkFlow, this, _1, _2));
         ff._err = err; 
         bool v = true;
+
+        // all flows in all terms need to be resolved.
         for (auto t : Term::_allTerms)
             if (!t->visit(ff)) v = false;
 

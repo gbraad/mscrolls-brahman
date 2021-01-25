@@ -102,6 +102,17 @@ struct StdFStream: public StdStream
         return r;
     }
 
+    void consume(StdFStream* s)
+    {
+        if (s)
+        {
+			// copy fp if not already
+			// nomrmally this is a shared static, except for windows dll. yes i know.
+            if (!_fp)
+                _fp = s->_fp;
+        }
+    }
+
 protected:
 
 

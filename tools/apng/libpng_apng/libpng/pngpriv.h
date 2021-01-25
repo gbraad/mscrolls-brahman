@@ -1,10 +1,10 @@
 
 /* pngpriv.h - private declarations for use inside libpng
  *
- * Last changed in libpng 1.6.32 [August 24, 2017]
- * Copyright (c) 1998-2002,2004,2006-2017 Glenn Randers-Pehrson
- * (Version 0.96 Copyright (c) 1996, 1997 Andreas Dilger)
- * (Version 0.88 Copyright (c) 1995, 1996 Guy Eric Schalnat, Group 42, Inc.)
+ * Copyright (c) 2018-2019 Cosmin Truta
+ * Copyright (c) 1998-2002,2004,2006-2018 Glenn Randers-Pehrson
+ * Copyright (c) 1996-1997 Andreas Dilger
+ * Copyright (c) 1995-1996 Guy Eric Schalnat, Group 42, Inc.
  *
  * This code is released under the libpng license.
  * For conditions of distribution and use, see the disclaimer
@@ -174,7 +174,10 @@
 #     else /* !defined __ARM_NEON__ */
          /* The 'intrinsics' code simply won't compile without this -mfpu=neon:
           */
-#        define PNG_ARM_NEON_IMPLEMENTATION 2
+#        if !defined(__aarch64__)
+            /* The assembler code currently does not work on ARM64 */
+#          define PNG_ARM_NEON_IMPLEMENTATION 2
+#        endif /* __aarch64__ */
 #     endif /* __ARM_NEON__ */
 #  endif /* !PNG_ARM_NEON_IMPLEMENTATION */
 
@@ -210,7 +213,11 @@
        defined(__SSE2__) || defined(_M_X64) || defined(_M_AMD64) || \
        (defined(_M_IX86_FP) && _M_IX86_FP >= 2)
 #         define PNG_INTEL_SSE_OPT 1
+#      else
+#         define PNG_INTEL_SSE_OPT 0
 #      endif
+#   else
+#      define PNG_INTEL_SSE_OPT 0
 #   endif
 #endif
 
@@ -234,6 +241,8 @@
 #   if PNG_INTEL_SSE_IMPLEMENTATION > 0
 #      define PNG_FILTER_OPTIMIZATIONS png_init_filter_functions_sse2
 #   endif
+#else
+#   define PNG_INTEL_SSE_IMPLEMENTATION 0
 #endif
 
 #if PNG_MIPS_MSA_OPT > 0
@@ -508,24 +517,26 @@
     */
 #  include <float.h>
 
-#if (defined(__MWERKS__) && defined(macintosh)) || defined(applec) || \
-    defined(THINK_C) || defined(__SC__) || defined(TARGET_OS_MAC)
+//#if !defined(__MATH_H__) && !defined(__MATH_H) && !defined(__cmath__) && !(defined(macintosh) || defined(applec) || defined(TARGET_OS_MAC))
+
+#if 0 // dont use fp.h
+
    /* We need to check that <math.h> hasn't already been included earlier
     * as it seems it doesn't agree with <fp.h>, yet we should really use
     * <fp.h> if possible.
     */
-#if !defined(__MATH_H__) && !defined(__MATH_H) && !defined(__cmath__) && !(defined(macintosh) || defined(applec) || defined(TARGET_OS_MAC))
-#include <fp.h>
-#endif
-#else
-#include <math.h>
-#endif
-#if defined(_AMIGA) && defined(__SASC) && defined(_M68881)
+#    if !defined(__MATH_H__) && !defined(__MATH_H) && !defined(__cmath__)
+#      include <fp.h>
+#    endif
+#  else
+#    include <math.h>
+#  endif
+#  if defined(_AMIGA) && defined(__SASC) && defined(_M68881)
    /* Amiga SAS/C: We must include builtin FPU functions when compiling using
     * MATH=68881
     */
-#include <m68881.h>
-#endif
+#    include <m68881.h>
+#  endif
 #endif
 
 /* This provides the non-ANSI (far) memory allocation routines. */
@@ -732,8 +743,8 @@
 /* Added to libpng-1.2.6 JB */
 #define PNG_ROWBYTES(pixel_bits, width) \
     ((pixel_bits) >= 8 ? \
-    ((png_size_t)(width) * (((png_size_t)(pixel_bits)) >> 3)) : \
-    (( ((png_size_t)(width) * ((png_size_t)(pixel_bits))) + 7) >> 3) )
+    ((size_t)(width) * (((size_t)(pixel_bits)) >> 3)) : \
+    (( ((size_t)(width) * ((size_t)(pixel_bits))) + 7) >> 3) )
 
 /* This returns the number of trailing bits in the last byte of a row, 0 if the
  * last byte is completely full of pixels.  It is, in principle, (pixel_bits x
@@ -931,7 +942,7 @@
     * PNG files the -I directives must match.
     *
     * The most likely explanation is that you passed a -I in CFLAGS. This will
-    * not work; all the preprocessor directories and in particular all the -I
+    * not work; all the preprocessor directives and in particular all the -I
     * directives must be in CPPFLAGS.
     */
 #endif
@@ -1060,15 +1071,15 @@ PNG_INTERNAL_FUNCTION(void,png_zfree,(voidpf png_ptr, voidpf ptr),PNG_EMPTY);
  */
 
 PNG_INTERNAL_FUNCTION(void PNGCBAPI,png_default_read_data,(png_structp png_ptr,
-    png_bytep data, png_size_t length),PNG_EMPTY);
+    png_bytep data, size_t length),PNG_EMPTY);
 
 #ifdef PNG_PROGRESSIVE_READ_SUPPORTED
 PNG_INTERNAL_FUNCTION(void PNGCBAPI,png_push_fill_buffer,(png_structp png_ptr,
-    png_bytep buffer, png_size_t length),PNG_EMPTY);
+    png_bytep buffer, size_t length),PNG_EMPTY);
 #endif
 
 PNG_INTERNAL_FUNCTION(void PNGCBAPI,png_default_write_data,(png_structp png_ptr,
-    png_bytep data, png_size_t length),PNG_EMPTY);
+    png_bytep data, size_t length),PNG_EMPTY);
 
 #ifdef PNG_WRITE_FLUSH_SUPPORTED
 #  ifdef PNG_STDIO_SUPPORTED
@@ -1082,7 +1093,7 @@ PNG_INTERNAL_FUNCTION(void,png_reset_crc,(png_structrp png_ptr),PNG_EMPTY);
 
 /* Write the "data" buffer to whatever output you are using */
 PNG_INTERNAL_FUNCTION(void,png_write_data,(png_structrp png_ptr,
-    png_const_bytep data, png_size_t length),PNG_EMPTY);
+    png_const_bytep data, size_t length),PNG_EMPTY);
 
 /* Read and check the PNG file signature */
 PNG_INTERNAL_FUNCTION(void,png_read_sig,(png_structrp png_ptr,
@@ -1094,7 +1105,7 @@ PNG_INTERNAL_FUNCTION(png_uint_32,png_read_chunk_header,(png_structrp png_ptr),
 
 /* Read data from whatever input you are using into the "data" buffer */
 PNG_INTERNAL_FUNCTION(void,png_read_data,(png_structrp png_ptr, png_bytep data,
-    png_size_t length),PNG_EMPTY);
+    size_t length),PNG_EMPTY);
 
 /* Read bytes into buf, and update png_ptr->crc */
 PNG_INTERNAL_FUNCTION(void,png_crc_read,(png_structrp png_ptr, png_bytep buf,
@@ -1112,7 +1123,7 @@ PNG_INTERNAL_FUNCTION(int,png_crc_error,(png_structrp png_ptr),PNG_EMPTY);
  * since this is the maximum buffer size we can specify.
  */
 PNG_INTERNAL_FUNCTION(void,png_calculate_crc,(png_structrp png_ptr,
-   png_const_bytep ptr, png_size_t length),PNG_EMPTY);
+   png_const_bytep ptr, size_t length),PNG_EMPTY);
 
 #ifdef PNG_WRITE_FLUSH_SUPPORTED
 PNG_INTERNAL_FUNCTION(void,png_flush,(png_structrp png_ptr),PNG_EMPTY);
@@ -1195,7 +1206,7 @@ PNG_INTERNAL_FUNCTION(void,png_write_hIST,(png_structrp png_ptr,
 /* Chunks that have keywords */
 #ifdef PNG_WRITE_tEXt_SUPPORTED
 PNG_INTERNAL_FUNCTION(void,png_write_tEXt,(png_structrp png_ptr,
-   png_const_charp key, png_const_charp text, png_size_t text_len),PNG_EMPTY);
+   png_const_charp key, png_const_charp text, size_t text_len),PNG_EMPTY);
 #endif
 
 #ifdef PNG_WRITE_zTXt_SUPPORTED
@@ -1542,10 +1553,10 @@ PNG_INTERNAL_FUNCTION(void,png_handle_zTXt,(png_structrp png_ptr,
 #endif
 
 PNG_INTERNAL_FUNCTION(void,png_check_chunk_name,(png_const_structrp png_ptr,
-    const png_uint_32 chunk_name),PNG_EMPTY);
+    png_uint_32 chunk_name),PNG_EMPTY);
 
 PNG_INTERNAL_FUNCTION(void,png_check_chunk_length,(png_const_structrp png_ptr,
-    const png_uint_32 chunk_length),PNG_EMPTY);
+    png_uint_32 chunk_length),PNG_EMPTY);
 
 PNG_INTERNAL_FUNCTION(void,png_handle_unknown,(png_structrp png_ptr,
     png_inforp info_ptr, png_uint_32 length, int keep),PNG_EMPTY);
@@ -1588,10 +1599,10 @@ PNG_INTERNAL_FUNCTION(void,png_push_check_crc,(png_structrp png_ptr),PNG_EMPTY);
 PNG_INTERNAL_FUNCTION(void,png_push_save_buffer,(png_structrp png_ptr),
     PNG_EMPTY);
 PNG_INTERNAL_FUNCTION(void,png_push_restore_buffer,(png_structrp png_ptr,
-    png_bytep buffer, png_size_t buffer_length),PNG_EMPTY);
+    png_bytep buffer, size_t buffer_length),PNG_EMPTY);
 PNG_INTERNAL_FUNCTION(void,png_push_read_IDAT,(png_structrp png_ptr),PNG_EMPTY);
 PNG_INTERNAL_FUNCTION(void,png_process_IDAT_data,(png_structrp png_ptr,
-    png_bytep buffer, png_size_t buffer_length),PNG_EMPTY);
+    png_bytep buffer, size_t buffer_length),PNG_EMPTY);
 PNG_INTERNAL_FUNCTION(void,png_push_process_row,(png_structrp png_ptr),
     PNG_EMPTY);
 PNG_INTERNAL_FUNCTION(void,png_push_handle_unknown,(png_structrp png_ptr,
@@ -1902,13 +1913,13 @@ PNG_INTERNAL_FUNCTION(void,png_chunk_report,(png_const_structrp png_ptr,
 
 #ifdef PNG_FLOATING_POINT_SUPPORTED
 PNG_INTERNAL_FUNCTION(void,png_ascii_from_fp,(png_const_structrp png_ptr,
-   png_charp ascii, png_size_t size, double fp, unsigned int precision),
+   png_charp ascii, size_t size, double fp, unsigned int precision),
    PNG_EMPTY);
 #endif /* FLOATING_POINT */
 
 #ifdef PNG_FIXED_POINT_SUPPORTED
 PNG_INTERNAL_FUNCTION(void,png_ascii_from_fixed,(png_const_structrp png_ptr,
-   png_charp ascii, png_size_t size, png_fixed_point fp),PNG_EMPTY);
+   png_charp ascii, size_t size, png_fixed_point fp),PNG_EMPTY);
 #endif /* FIXED_POINT */
 #endif /* sCAL */
 
@@ -2001,7 +2012,7 @@ PNG_INTERNAL_FUNCTION(void,png_ascii_from_fixed,(png_const_structrp png_ptr,
  * the problem character.)  This has not been tested within libpng.
  */
 PNG_INTERNAL_FUNCTION(int,png_check_fp_number,(png_const_charp string,
-   png_size_t size, int *statep, png_size_tp whereami),PNG_EMPTY);
+   size_t size, int *statep, png_size_tp whereami),PNG_EMPTY);
 
 /* This is the same but it checks a complete string and returns true
  * only if it just contains a floating point number.  As of 1.5.4 this
@@ -2010,7 +2021,7 @@ PNG_INTERNAL_FUNCTION(int,png_check_fp_number,(png_const_charp string,
  * for negative or zero values using the sticky flag.
  */
 PNG_INTERNAL_FUNCTION(int,png_check_fp_string,(png_const_charp string,
-   png_size_t size),PNG_EMPTY);
+   size_t size),PNG_EMPTY);
 #endif /* pCAL || sCAL */
 
 #if defined(PNG_GAMMA_SUPPORTED) ||\
@@ -2085,7 +2096,7 @@ typedef struct png_control
    png_voidp   error_buf;           /* Always a jmp_buf at present. */
 
    png_const_bytep memory;          /* Memory buffer. */
-   png_size_t      size;            /* Size of the memory buffer. */
+   size_t          size;            /* Size of the memory buffer. */
 
    unsigned int for_write       :1; /* Otherwise it is a read structure */
    unsigned int owned_file      :1; /* We own the file in io_ptr */
@@ -2162,6 +2173,29 @@ PNG_INTERNAL_FUNCTION(void, png_init_filter_functions_sse2,
 
 PNG_INTERNAL_FUNCTION(png_uint_32, png_check_keyword, (png_structrp png_ptr,
    png_const_charp key, png_bytep new_key), PNG_EMPTY);
+
+#if PNG_ARM_NEON_IMPLEMENTATION == 1
+PNG_INTERNAL_FUNCTION(void,
+                      png_riffle_palette_neon,
+                      (png_structrp),
+                      PNG_EMPTY);
+PNG_INTERNAL_FUNCTION(int,
+                      png_do_expand_palette_rgba8_neon,
+                      (png_structrp,
+                       png_row_infop,
+                       png_const_bytep,
+                       const png_bytepp,
+                       const png_bytepp),
+                      PNG_EMPTY);
+PNG_INTERNAL_FUNCTION(int,
+                      png_do_expand_palette_rgb8_neon,
+                      (png_structrp,
+                       png_row_infop,
+                       png_const_bytep,
+                       const png_bytepp,
+                       const png_bytepp),
+                      PNG_EMPTY);
+#endif
 
 /* Maintainer: Put new private prototypes here ^ */
 

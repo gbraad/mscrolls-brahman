@@ -40,9 +40,10 @@
 #include <vector>
 #include <set>
 #include <functional>
-#include "pcom.h"
 #include "utils.h"
 #include "varset.h"
+#include "pcom.h"
+#include "pexpr.h"
 
 namespace ST
 {
@@ -61,6 +62,7 @@ struct Flow: public Traits
         t_command = 4,
         t_term = 8,
         t_media = 16,
+        t_cond = 32,
     };
     
     struct Elt
@@ -80,12 +82,14 @@ struct Flow: public Traits
                     "command",
                     "term",
                     "media",
+                    "cond",
                 };
 
             return stab[countBits(_type)];
         }
-
+        
         virtual string _toString(bool extra) const = 0;
+        virtual string _toBaseString() const { return _toString(false); }
         
         string toString() const
         {
@@ -94,7 +98,9 @@ struct Flow: public Traits
             s += _toString(true);
             return s;
         }
-        
+
+        bool isCond() const { return _type == t_cond; }
+
         friend std::ostream& operator<<(std::ostream& os, const Elt& e)
         { return os << e.toString(); }
     };
@@ -104,15 +110,18 @@ struct Flow: public Traits
         string      _text;
         EltText(const string& s) : Elt(t_text), _text(s) {}
         EltText(const char* s, int l) : Elt(t_text), _text(s, l) {}
+        
+        string _toBaseString() const override { return _text; }
 
         string _toString(bool x) const override
         {
             string s;
             s += '"';
-            s += _text;
+            s += addEscapes(_text);
             s += '"';
             return s;
         }
+        
     };
 
     struct EltCode: public Elt
@@ -174,10 +183,7 @@ struct Flow: public Traits
         EltMedia(const string& s, MediaType mt)
             : Elt(t_media), _filename(s), _mType(mt) {}
 
-        ~EltMedia()
-        {
-            delete _attr;
-        }
+        ~EltMedia() { delete _attr; }
         
         string _toString(bool x) const override
         {
@@ -186,6 +192,21 @@ struct Flow: public Traits
             s += _filename;
             s += '/';
             return s;
+        }
+    };
+    
+    struct EltCond: public Elt
+    {
+        enode*  _cond;
+        
+        EltCond(enode* e) : Elt(t_cond), _cond(e) {}
+        
+        ~EltCond() { delete _cond; }
+        
+        string _toString(bool x) const override
+        {
+            assert(_cond);
+            return _cond->toString();
         }
     };
 
@@ -207,12 +228,16 @@ struct Flow: public Traits
 
         operator bool() const { return _term != 0; }
 
+        string _toBaseString() const override
+        { return _name; }
+
         string _toString(bool x) const override
         {
             string s = "#";
-            s += _name;
+            s += _toBaseString();
             return s;
         };
+
     };
 
     std::list<Elt*>     _elts;
@@ -257,6 +282,14 @@ struct Flow: public Traits
         return s;
     }
 
+    Elt* firstElt() const
+    {
+        Elt* e = 0;
+        if (!_elts.empty()) e = _elts.front();
+        return e;
+    }
+
+    /*
     EltTerm* firstTermElt() const
     {
         // if the flow starts with a term, return it
@@ -269,12 +302,14 @@ struct Flow: public Traits
         return et;
     }
 
+
     Term* firstTerm() const
     {
         // if the flow starts with a term, return it
         EltTerm* et = firstTermElt();
         return et ? et->_term : 0;
     }
+    */
     
     string toString(bool listform = true) const
     {
@@ -293,10 +328,21 @@ struct Flow: public Traits
         return s;
     }
 
-    friend std::ostream& operator<<(std::ostream& os, const Flow& f)
+    string toBaseString() const
     {
-        return os << f.toString();
+        string s;
+        int cc = 0;
+        for (auto i : _elts)
+        {
+            if (cc++) s += ' ';
+            s += i->_toBaseString();
+        }
+
+        return s;
     }
+
+    friend std::ostream& operator<<(std::ostream& os, const Flow& f)
+    { return os << f.toString(); }
 
 private:
 
@@ -345,10 +391,8 @@ struct Selector: public Traits
     bool    _isReactor = false;
 
     // conditional term ref
-    bool    _negated = false;
-    bool    _condExpr = false; // is conditional an expression or simple term
-    Flow    _cond;
-
+    Flow      _cond;
+    
     bool hidden() const { return (_flags & c_hidden) != 0; }
     bool always() const { return (_flags & c_always) != 0; }
     bool once() const { return (_flags & c_once) != 0; }
@@ -372,12 +416,13 @@ struct Selector: public Traits
     string toString() const
     {
         string s = flagsString();
+
         if (_cond)
         {
             s += " ?";
-            if (_negated) s += '!';
             s += _cond.toString();
         }
+        
         s += '\n';
         if (_text) s += "Flow:" + _text.toString() + '\n';
         if (_action) s += "Action:" + _action.toString() + '\n';
@@ -572,7 +617,6 @@ struct Term: public Traits
                         w = p1->_word->_text;
                     }
                 }
-
             }
         }
         return w; // can be empty

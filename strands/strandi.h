@@ -106,6 +106,7 @@ struct Strandi: public Traits
     typedef std::function<void(char)> Emitter;
     typedef Term::TermList TermList;
     typedef pnode::nodeType nodeType;
+    typedef enode::nodeType enodeType;
     typedef Timeline::Strings Strings;
     typedef Timeline::Vars Vars;
 
@@ -916,7 +917,7 @@ struct Strandi: public Traits
                 bool v = buildChoiceJSON(gs, c);
 
                 // without choices, emit any headflow into the main text
-                if (!c.isEmpty())
+                if (c.isEmpty())
                 {
                     OUTP(c._headFlow);
                 }
@@ -1072,32 +1073,73 @@ struct Strandi: public Traits
         updateScope();
     }
 
+    bool evalENode(enode* e)
+    {
+        bool v = false;
+        assert(e);
+        switch (e->_type)
+        {
+        case enodeType::e_name:
+            {
+                Term* t = e->_binding;
+                if (t)
+                {
+                    // XX
+                    // since we're using the name to test, do we actually need
+                    // the binding?
+                    v = _state.test(t->_name);
+                }
+                else
+                {
+                    LOG1(TAG "WARNING unbound conditional ", e->_name);
+                }
+            }
+            break;
+        case enodeType::e_and:
+            {
+                enode* ei = e->_head;
+                while (ei)
+                {
+                    v = evalENode(ei);
+                    if (!v) break;
+                    ei = ei->_next;
+                }
+            }
+            break;
+        case enodeType::e_or:
+            {
+                enode* ei = e->_head;
+                while (ei)
+                {
+                    v = evalENode(ei);
+                    if (v) break;
+                    ei = ei->_next;
+                }
+            }
+            break;
+        }
+
+        if (e->_neg) v = !v;
+        
+        return v;
+    }
+
     bool checkSelectorCond(Selector* s)
     {
         bool v = true;
         if (s->_cond)
         {
-            // test whether we have visited or not visited a node
-            bool been = false; 
+            // test whether we have visited or not visited nodes
+            v = false;
 
-            if (s->_condExpr)
+            Flow::Elt* e = s->_cond.firstElt();
+            if (e && e->isCond())
             {
-                // XXX !
-                assert(0);
-            }
-            else
-            {
-                // conditional exprssion is a simple term ref
-                // do not run the flow, extract the term name and check it
-                Term* t = s->_cond.firstTerm();
-                assert(t);
-                been = _state.test(t->_name);
+                Flow::EltCond* ec = (Flow::EltCond*)e;
+                v = evalENode(ec->_cond);
             }
                 
-            if (!been) v = false;
-            if (s->_negated) v = !v;
-
-            //LOG3(TAG "conditional ", (s->_negated ? "!" : "") << s->_cond << " = " << v);
+            //LOG3(TAG "conditional ", s->_cond << " = " << v);
         }
 
         return v;

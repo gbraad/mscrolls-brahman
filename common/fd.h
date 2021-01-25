@@ -33,6 +33,7 @@
 
 #pragma once
 
+#include <string.h> // strlen
 #include <string>
 #include <vector>
 
@@ -248,6 +249,7 @@ struct FD: public FDBase
         {
             struct dirent *ep;
             while ((ep = readdir(dp)) != 0) files.push_back(ep->d_name);
+            closedir(dp);
         }
         return res;
     }

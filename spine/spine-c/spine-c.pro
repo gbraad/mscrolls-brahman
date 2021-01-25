@@ -6,6 +6,9 @@ CONFIG -= lib_bundle
 CONFIG -= qt
 CONFIG += staticlib
 
+PROJ = $$PWD/../..
+include($$PROJ/app.pri)
+
 CONFIG += no_keywords #since "slots" is used in spine-c source code. we have to use no_keywords to fix the compiling error
 
 INCLUDEPATH += include/

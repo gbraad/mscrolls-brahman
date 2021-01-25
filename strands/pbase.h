@@ -41,6 +41,10 @@
 namespace ST
 {
 
+// forward
+struct Term;
+
+
 struct Traits
 {
     typedef std::string string;
@@ -142,6 +146,35 @@ struct Traits
         }
         return s;
     }
+
+    static string addEscapes(const char* t)
+    {
+        // put escapes back into string 
+        string s;
+        for (;;)
+        {
+            char c = *t++;
+            if (!c) break;
+            if (c == '\n')
+            {
+                s += '\\';
+                s += 'n';
+            }
+            else if (c == '"' || c == '\\')
+            {
+                s += '\\';
+                s += c;
+            }
+            else
+            {
+                s += c;
+            }
+        }
+        return s;
+    }
+
+    static string addEscapes(const string& t)
+    { return addEscapes(t.c_str()); }
 
     static bool isUppercase(const char* s)
     {
@@ -379,8 +412,167 @@ struct ParseBase: public Traits
         else if (inTable(animSufTab, ASIZE(animSufTab), s)) m = m_animation;
         return m;
     }
+
+    struct PPoint
+    {
+        const char*     _pos;
+        PPoint*         _prev = 0;
+        int             _line;
+
+        PPoint(const char* p) : _pos(p) {}
+    };
+
+    PPoint*     _pstack = 0;
+
+    void _push()
+    {
+        PPoint* pp = new PPoint(POS);
+        pp->_prev = _pstack;
+        pp->_line = lineno;
+        _pstack = pp;
+    }
+
+    void _pop()
+    {
+        assert(_pstack);
+
+        PPoint* pp = _pstack;
+        _pstack = pp->_prev;
+
+        SETPOS(pp->_pos); // revert
+        lineno = pp->_line;
+        delete pp;
+    }
+
+    void _drop()
+    {
+        assert(_pstack);
+
+        PPoint* pp = _pstack;
+        _pstack = pp->_prev;
+        delete pp;
+    }
+
+    void _poppush()
+    {
+        //_pop();
+        //_push();
+
+        assert(_pstack);
+        SETPOS(_pstack->_pos);
+        lineno = _pstack->_line;
+    }
+
+    bool atLiteral(const char* w) const
+    {
+        return startsWithIgnoreCase(POS, w);
+    }
+
+    bool parseLiteral(const char* w)
+    {
+        skipws();
+        bool v = atLiteral(w);
+        if (v) SETPOS(POS + strlen(w));
+        return v;
+    }
     
 };
+
+template<typename T> struct node
+{
+    typedef std::string string;
+    
+    uint            _type;
+    T*              _head = 0;
+    T*              _next = 0;
+
+    node(int t = 0) : _type(t) {}
+    node(T* l, int t) : _type(t), _head(l) {}
+
+    virtual ~node() { _purge(); }
+
+    struct It
+    {
+        const T*        _n;
+        It*             _up;
+
+        It(const T* n) : _n(n), _up(0) { _down(); }
+
+        ~It() { _purge(); }
+        
+        operator bool() const { return _n != 0; }
+        uint type() const { return _n->_type; }
+
+        void _down()
+        {
+            while (_n && _n->_head)
+            {
+                It* i = new It;
+                i->_n = _n;
+                i->_up = _up;
+
+                _n = _n->_head;
+                _up = i;
+            }
+        }
+
+        void _purge()
+        {
+            delete _up; // recursive
+            _up = 0;
+        }
+
+        void _bump()
+        {
+            while (_n)
+            {
+                if (_n->_next)
+                {
+                    _n = _n->_next;
+                    _down();
+                    break;
+                }
+                else
+                {
+                    It* i = _up;
+                    if (i)
+                    {
+                        _n = i->_n;
+                        _up = i->_up;
+                        i->_up = 0; // prevent stack delete
+                        delete i;
+
+                        // repeat bump
+                    }
+                    else
+                    {
+                        _n = 0; // end
+                    }
+                }
+            }
+        }
+
+        It& operator++()
+        {
+            _bump();
+            return *this;
+        }
+
+    private:
+    
+        It() {}
+
+    };
+
+    void _purge()
+    {
+        delete _head; _head = 0;
+        delete _next; _next = 0;
+    }
+
+};
+
+    
 
 }; // ST
 

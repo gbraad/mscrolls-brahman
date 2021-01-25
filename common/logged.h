@@ -81,13 +81,12 @@ template<class T> struct LogFiler: public LogBase<T>
         _stream.setAlso(os);
     }
 
-    bool openFile(const char* name)
+    static bool openFile(const char* name)
     {
         // NB: non static method for that initialisation is performed
         // append to any existing log
         return _stream.open(name, "a");
     }
-    
 };
 
 template<class T> StdFStream LogFiler<T>::_stream;

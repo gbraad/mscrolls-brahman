@@ -64,8 +64,12 @@ CONFIG(release, debug|release) {
    }
 
 linux: {
-    DEFINES += applec
+#    DEFINES += applec
     LIBDIR = $$BUILDT
+    DESTDIR=$$BUILDT
+    OBJECTS_DIR = $$BUILDT
+    MOC_DIR = $$BUILDT
+    RCC_DIR = $$BUILDT
 }
    
 unix:!android {

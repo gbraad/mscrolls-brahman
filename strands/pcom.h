@@ -36,15 +36,11 @@
 #include <set>
 #include <list>
 #include "pbase.h"
-#include "strutils.h"
 #include "porter.h"
 #include "keywords.h"
 
 namespace ST
 {
-
-// forward
-struct Term;
 
 struct Word
 {
@@ -140,10 +136,8 @@ struct Word
     { return os << w._text; }
 };
 
-struct pnode
+struct pnode: public node<pnode>
 {
-    typedef std::string string;
-
     enum nodeType
     {
         p_void = 0,
@@ -170,98 +164,16 @@ struct pnode
         p_qs, // 21 query sentence
     };
     
-    uint            _type;
+
     const Word*     _word = 0;
-    pnode*          _head = 0;
-    pnode*          _next = 0;
     std::list<Term*>* _binding = 0;
 
-    pnode(const Word* wt, int t = 0) : _type(t), _word(wt) {}
-    pnode(pnode* l, int t) : _type(t), _head(l){}
-    ~pnode() { _purge(); }
+    pnode(const Word* wt, int t = 0) : node(t), _word(wt) {}
+    pnode(pnode* l, int t) : node(l, t) {}
+    
+    ~pnode() override { _purge(); }
 
     bool isNounPhrase() const { return _type >= p_noun && _type <= p_pronoun; }
-
-    struct It
-    {
-        const pnode*    _n;
-        It*             _up;
-
-        It(const pnode* n) : _n(n), _up(0) { _down(); }
-
-        ~It() { _purge(); }
-        
-        operator bool() const { return _n != 0; }
-        uint type() const { return _n->_type; }
-        const Word& operator*() const
-        {
-            assert(_n);
-            assert(_n->_word);
-            return *_n->_word;
-        }
-
-        void _down()
-        {
-            while (_n && _n->_head)
-            {
-                assert(!_n->_word);
-                
-                It* i = new It;
-                i->_n = _n;
-                i->_up = _up;
-
-                _n = _n->_head;
-                _up = i;
-            }
-        }
-
-        void _purge()
-        {
-            delete _up; // recursive
-            _up = 0;
-        }
-
-        void _bump()
-        {
-            while (_n)
-            {
-                if (_n->_next)
-                {
-                    _n = _n->_next;
-                    _down();
-                    break;
-                }
-                else
-                {
-                    It* i = _up;
-                    if (i)
-                    {
-                        _n = i->_n;
-                        _up = i->_up;
-                        i->_up = 0; // prevent stack delete
-                        delete i;
-
-                        // repeat bump
-                    }
-                    else
-                    {
-                        _n = 0; // end
-                    }
-                }
-            }
-        }
-
-        It& operator++()
-        {
-            _bump();
-            return *this;
-        }
-
-    private:
-    
-        It() {}
-
-    };
 
     // converting to string uses a helper which optionally can have
     // a hook function to resolve nodes externally.
@@ -388,8 +300,8 @@ struct pnode
     void _purge()
     {
         delete _binding; _binding = 0;
-        delete _head; _head = 0;
-        delete _next; _next = 0;
+        //delete _head; _head = 0;
+        //delete _next; _next = 0;
     }
 
 };
@@ -453,18 +365,6 @@ struct ParseCommand: public ParseBase
         return w;
     }
 
-    bool atLiteral(const char* w) const
-    {
-        return startsWithIgnoreCase(POS, w);
-    }
-
-    bool parseLiteral(const char* w)
-    {
-        skipws();
-        bool v = atLiteral(w);
-        if (v) SETPOS(POS + strlen(w));
-        return v;
-    }
 
     struct StdWord
     {
@@ -529,56 +429,6 @@ struct ParseCommand: public ParseBase
         _it = findWord("it");
     }
 
-    struct PPoint
-    {
-        const char*     _pos;
-        PPoint*         _prev = 0;
-        int             _line;
-
-        PPoint(const char* p) : _pos(p) {}
-    };
-
-    PPoint*     _pstack = 0;
-
-    void _push()
-    {
-        PPoint* pp = new PPoint(POS);
-        pp->_prev = _pstack;
-        pp->_line = lineno;
-        _pstack = pp;
-    }
-
-    void _pop()
-    {
-        assert(_pstack);
-
-        PPoint* pp = _pstack;
-        _pstack = pp->_prev;
-
-        SETPOS(pp->_pos); // revert
-        lineno = pp->_line;
-        delete pp;
-    }
-
-    void _drop()
-    {
-        assert(_pstack);
-
-        PPoint* pp = _pstack;
-        _pstack = pp->_prev;
-        delete pp;
-    }
-
-    void _poppush()
-    {
-        //_pop();
-        //_push();
-
-        assert(_pstack);
-        SETPOS(_pstack->_pos);
-        lineno = _pstack->_line;
-    }
-
     string word()
     {
         // get next word
@@ -612,7 +462,6 @@ struct ParseCommand: public ParseBase
             pn = new pnode(wt, t);
         return pn;
     }
-
 
     pnode* _parseAndList(Word::POS ps, uint type)
     {
