@@ -39,10 +39,6 @@
 
 #include "logged.h"
 
-
-ApngReader* ApngReader::_theReader;
-
-
 static void user_error_fn(png_structp png_ptr,
                           png_const_charp error_msg)
 {
@@ -77,7 +73,8 @@ bool ApngReader::init(const string& filename)
     }
 
     _data = new uchar[_dataSize];
-    if (file.read((char*)_data, _dataSize) != _dataSize)
+    
+    if (file.read((char*)_data, _dataSize) != (int)_dataSize)
     {
         LOG2("ApngReader, read error ", _filename);
         delete [] _data; _data = 0;
@@ -104,25 +101,34 @@ bool ApngReader::init(const string& filename)
     }
 
     _info = png_create_info_struct(_png);
-    if(!_info)
+    if (!_info)
     {
         // destructor will release `_png`
         LOG3("apng, init failed ", _filename);
         return false;
     }
 
-    png_set_progressive_read_fn(_png, NULL, &ApngReader::info_fn, &ApngReader::row_fn, &ApngReader::end_fn);
+    _levels.reset();
+
+    png_set_progressive_read_fn(_png,
+                                (png_voidp)this,
+                                &ApngReader::info_fn,
+                                &ApngReader::row_fn,
+                                &ApngReader::end_fn);
+
+    _infoRead = false;
 
     //set png jump position
-    if (setjmp(png_jmpbuf(_png)))
+    if (!setjmp(png_jmpbuf(_png)))
+    {
+        // read chunks until we get the info
+        bool valid = readChunk(8);
+        while(valid && !_infoRead) valid = readChunk();
+    }
+    else
     {
         _infoRead = false;
-        return false;
     }
-
-    //read image sig + header
-    bool valid = readChunk(8);
-    while(valid && !_infoRead) valid = readChunk();
     
     return _infoRead;
 }
@@ -135,10 +141,7 @@ bool ApngReader::readFrame(uint& index)
         return false;
 
     bool valid = true;
-    while(valid && _framesRead <= index)
-    {
-        valid = readChunk();
-    }
+    while(valid && _framesRead <= index) valid = readChunk();
 
     if (valid)
     {
@@ -153,8 +156,8 @@ bool ApngReader::readFrame(uint& index)
 
 void ApngReader::info_fn(png_structp png_ptr, png_infop info_ptr)
 {
-    ApngReader* reader = _theReader;
-    Frame &frame = reader->_frame;
+    ApngReader* reader = (ApngReader*)png_get_progressive_ptr(png_ptr);
+    assert(reader);
 
     //init png reading
     png_set_expand(png_ptr);
@@ -162,10 +165,11 @@ void ApngReader::info_fn(png_structp png_ptr, png_infop info_ptr)
     png_set_gray_to_rgb(png_ptr);
     png_set_add_alpha(png_ptr, 0xff, PNG_FILLER_AFTER);
     png_set_bgr(png_ptr);
-    (void)png_set_interlace_handling(png_ptr);
+    png_set_interlace_handling(png_ptr);
     png_read_update_info(png_ptr, info_ptr);
 
     //init read frame struct
+    Frame &frame = reader->_frame;
     frame.x = 0;
     frame.y = 0;
     frame.width = png_get_image_width(png_ptr, info_ptr);
@@ -185,77 +189,81 @@ void ApngReader::info_fn(png_structp png_ptr, png_infop info_ptr)
     }
     else
     {
+        LOG3("APNG, image already present ", reader->_filename);
         // if image already present, ensure correct size
-        assert(reader->_lastImg.width() == frame.width);
-        assert(reader->_lastImg.height() == frame.height);
+        assert(reader->_lastImg.width() == (int)frame.width);
+        assert(reader->_lastImg.height() == (int)frame.height);
     }
 
     frame.rowbytes = reader->_lastImg.bytesPerLine();
     frame.p = (unsigned char*)reader->_lastImg.bits();
-    frame.p2 = new unsigned char[frame.height*frame.rowbytes];
     frame.rows = new png_bytep[frame.height * sizeof(png_bytep)];
 
     for (quint32 j = 0; j < frame.height; j++)
-    {
         frame.rows[j] = frame.p + j * frame.rowbytes;
-    }
+    
+    reader->_animated = false;
 
     //read apng information
     if (png_get_valid(png_ptr, info_ptr, PNG_INFO_acTL))
     {
         reader->_animated = true;
+
         png_get_acTL(png_ptr, info_ptr, &reader->_frameCount, &reader->_plays);
         reader->_skipFirst = png_get_first_frame_is_hidden(png_ptr, info_ptr);
 
         //add extended APNG read functions
-        png_set_progressive_frame_fn(png_ptr, &ApngReader::frame_info_fn, &ApngReader::frame_end_fn);
+        png_set_progressive_frame_fn(png_ptr,
+                                     &ApngReader::frame_info_fn,
+                                     &ApngReader::frame_end_fn);
+        
         //read info for first frame (skipped otherwise)
         if(!reader->_skipFirst)
             frame_info_fn(png_ptr, 0);
-    } else
-        reader->_animated = false;
+    }
 
     reader->_infoRead = true;
 }
 
 void ApngReader::row_fn(png_structp png_ptr, png_bytep new_row, png_uint_32 row_num, int pass)
 {
-    Q_UNUSED(pass)
+    Q_UNUSED(pass);
+
+    ApngReader* reader = (ApngReader*)png_get_progressive_ptr(png_ptr);
+    assert(reader);
         
-	ApngReader* reader = _theReader;
     png_progressive_combine_row(png_ptr, reader->_frame.rows[row_num], new_row);
 }
 
 void ApngReader::end_fn(png_structp png_ptr, png_infop info_ptr)
 {
-    ApngReader* reader = _theReader;
-    //LOG3("APNG reader, end_fn ", reader->_filename)
-    ++reader->_framesRead;
-    Frame &frame = reader->_frame;
+    ApngReader* reader = (ApngReader*)png_get_progressive_ptr(png_ptr);
+    assert(reader);
+    
+    LOG3("APNG reader, end_fn ", reader->_filename);
 
-#if 0    
-    Q_UNUSED(info_ptr);
-    auto reader = _readers[png_ptr];
-
-
-    if(!reader->_animated) {
-        //reader->copyOver();
-        //reader->_allFrames.append(reader->_lastImg);
+    if (!reader->_animated)
+    {
+        reader->calcLevels();
+        reader->applyLevels();
     }
-#endif
-
+        
+    ++reader->_framesRead;
+    
+    Frame &frame = reader->_frame;
     delete[] frame.rows;
     frame.rows = 0;
 
-    delete[] frame.p2;
-    frame.p2 = 0;
+    assert(!frame.p2);
 }
 
 void ApngReader::frame_info_fn(png_structp png_ptr, png_uint_32 frame_num)
 {
-    
     Q_UNUSED(frame_num);
-    ApngReader* reader = _theReader;
+    
+    ApngReader* reader = (ApngReader*)png_get_progressive_ptr(png_ptr);
+    assert(reader);
+    
     auto info_ptr = reader->_info;
     Frame &frame = reader->_frame;
     auto &image = reader->_lastImg;
@@ -279,61 +287,88 @@ void ApngReader::frame_info_fn(png_structp png_ptr, png_uint_32 frame_num)
 
     //LOG3("APNG frame_info_fn, frame# ", frame_num << " DOP:" << (int)frame.dop << " BOP:" << (int)frame.bop);
 
+    assert(!frame.p2);
+
     // if source, we can draw directly over the existing data
     if (frame.bop == PNG_BLEND_OP_SOURCE)
     {
+        //LOG3("APNG ", "Frame BOP blend source");
         // update rows to point into part of the background image
         for (quint32 j = 0; j < frame.height; j++)
             frame.rows[j] = frame.p + (j + frame.y)*frame.rowbytes + frame.x*4;
     }
     else if (frame.bop == PNG_BLEND_OP_OVER)
     {
+        LOG4("APNG ", "Frame BOP blend over");
+
+        frame.p2 = new unsigned char[frame.height*frame.rowbytes];
         for (quint32 j = 0; j < frame.height; j++)
             frame.rows[j] = frame.p2 + j*frame.rowbytes;
     }
     else
     {
-        LOG3("APNG, frame_inf_fn, unknown BOP ", frame.bop);
+        LOG3("APNG, frame_info_fn, unknown BOP ", frame.bop);
     }
 
 }
 
 void ApngReader::frame_end_fn(png_structp png_ptr, png_uint_32 frame_num)
 {
-    ApngReader* reader = _theReader;
+    ApngReader* reader = (ApngReader*)png_get_progressive_ptr(png_ptr);
+    assert(reader);
+
     ++reader->_framesRead;
 
     Frame &frame = reader->_frame;
-    auto &image = reader->_lastImg;
 
     //LOG3("APNG frame_end_fn, frame# ", frame_num << " DOP:" << (int)frame.dop << " BOP:" << (int)frame.bop);
 
     if(frame_num == 0 && reader->_skipFirst)//TODO not always, only when reading animated
         return;
+    
     if((frame_num == 0 && !reader->_skipFirst) ||
-       (frame_num == 1 && reader->_skipFirst)) {
+       (frame_num == 1 && reader->_skipFirst))
+    {
         frame.bop = PNG_BLEND_OP_SOURCE;
+        
         if (frame.dop == PNG_DISPOSE_OP_PREVIOUS)
             frame.dop = PNG_DISPOSE_OP_BACKGROUND;
+        
+        reader->calcLevels();
     }
 
-    if(frame.dop == PNG_DISPOSE_OP_PREVIOUS)
+    if (frame.dop == PNG_DISPOSE_OP_PREVIOUS)
     {
-        reader->_prevImg = image;
+        reader->_prevImg = reader->_lastImg;
     }
 
     if (frame.bop == PNG_BLEND_OP_OVER)
     {
-        //LOG3("APNG blend over", "");
+        assert(frame.p2);
+        
+        LOG4("APNG blend over", "");
         reader->blendOver();
+
+        delete[] frame.p2;
+        frame.p2 = 0;
+
+    }
+    else if (frame.bop == PNG_BLEND_OP_SOURCE)
+    {
+        //LOG3("APNG blend source", "");
+
+        // no need to copy since we set the row pointers directly
+        // into the main image, so it's already drawn!
+        
+        //reader->copyOver();
+        reader->applyLevels();
     }
     else
     {
-        //reader->copyOver();
+        LOG3("APNG unknown blend", "");
     }
-
+        
     //reader->_allFrames.append({image, frame.delay_num, frame.delay_den});
-
 
 #if 0
 
@@ -353,8 +388,6 @@ void ApngReader::frame_end_fn(png_structp png_ptr, png_uint_32 frame_num)
 
 bool ApngReader::readChunk(quint32 len)
 {
-    //DPF1("read chunk %d", len);
-
     uchar* data;
     if(len == 0)
     {
@@ -387,6 +420,7 @@ bool ApngReader::readChunk(quint32 len)
     return true;
 }
 
+#if 0
 void ApngReader::copyOver()
 {
     for(quint32 y = 0; y < _frame.height; y++) {
@@ -403,9 +437,12 @@ void ApngReader::copyOver()
         }
     }
 }
+#endif
 
 void ApngReader::blendOver()
 {
+    // Does this happen?
+    
     for(quint32 y = 0; y < _frame.height; y++) 
     {
         for(quint32 x = 0; x < _frame.width; x++) 
@@ -440,6 +477,32 @@ void ApngReader::blendOver()
             }
         }
     }
+}
+
+void ApngReader::calcLevels()
+{
+    if (_autoLevel && !_levels.valid())
+    {
+        assert(_frame.p);
+
+        _pix._data = _frame.p;
+        _pix._w = _frame.width;
+        _pix._h = _frame.height;
+        _pix._pixelSize = _frame.channels;
+        _pix.init();
+
+        _levels.pix = &_pix;
+        _levels.findbalance();
+    }
+}
+
+void ApngReader::applyLevels()
+{
+   if (_autoLevel && _levels.valid())
+   {
+       PixBox box(&_pix, _frame.x, _frame.y, _frame.width, _frame.height);
+       _levels.colorBalance(box);
+   }
 }
 
 

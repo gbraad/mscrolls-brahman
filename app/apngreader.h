@@ -40,6 +40,8 @@
 #include <QImage>
 
 #include "png.h"
+#include "levelfilter.h"
+
 
 #if 0
 #define DPF(_x)  printf("#######" _x "\n")
@@ -71,8 +73,6 @@ struct ApngReader
         _skipFirst = false;
         _frameCount = 1;
         _plays = 0;
-
-        _theReader = this;
         _data = 0;
     }
 
@@ -130,20 +130,24 @@ struct ApngReader
         return p;
     }
 
+    bool        _autoLevel = false;
+    RawPixels   _pix;
+    LevelFilter _levels;
+    
+
  private:
     
-    static ApngReader* _theReader;
 
     png_structp _png;
     png_infop _info;
 
     //image info
-    bool _infoRead;
-    bool _animated;
-    bool _skipFirst;
-    QSize _imageSize;
-    quint32 _frameCount;
-    quint32 _plays;
+    bool        _infoRead;
+    bool        _animated;
+    bool        _skipFirst;
+    QSize       _imageSize;
+    quint32     _frameCount;
+    quint32     _plays;
 
     struct Frame
     {
@@ -180,6 +184,8 @@ struct ApngReader
     void copyOver();
     void blendOver();
 
+    void calcLevels();
+    void applyLevels();
     
 };
 

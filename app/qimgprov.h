@@ -121,6 +121,9 @@ again:
             drop();
             
             _reader = new ApngReader();
+
+            // XX hardcode to always level for now...
+            _reader->_autoLevel = true;
             
             if (!_reader->init(_filename))
             {

@@ -62,7 +62,7 @@ int main(int argc, char** argv)
     {
         if (argv[i][0] == '-')
         {
-            if (!stricmp(argv[i], "-d"))
+            if (!u_stricmp(argv[i], "-d"))
             {
                 debug = 1;
                 if (i < argc-1 && u_isdigit(*argv[i+1]))
