@@ -43,6 +43,8 @@
 #include "cap.h"
 #include "logged.h"
 
+std::string em_getline(); // emscripten
+
 #undef TAG
 #define TAG "Strandi, "
 
@@ -337,7 +339,12 @@ struct Strandi: public Traits
         delete ctx;
     }
 
-    static void _emitterDefault(char c) { putchar(c);}
+    static void _emitterDefault(char c)
+    {
+        if (c) putchar(c);
+        if (!c || c == '\n') fflush(stdout);
+    }
+    
 
     void setdebug(int v)
     {
@@ -776,6 +783,13 @@ struct Strandi: public Traits
         }
     }
 
+#ifdef __EMSCRIPTEN__
+    string _getline()
+    {
+        return em_getline();
+    }
+    
+#else    
     void _getline(char* buf, uint sz)
     {
         assert(sz);
@@ -797,6 +811,7 @@ struct Strandi: public Traits
         _getline(tbuf, sizeof(tbuf));
         return tbuf;
     }
+#endif    
 
     void setTermValue(Term* t, const var& v)
     {
@@ -3094,6 +3109,12 @@ struct Strandi: public Traits
             {
                 ERR0("not prepared");
             }
+            
+#ifdef __EMSCRIPTEN__
+            // appears to need extra flushing right at end?
+            _emit('\n');
+            flush();
+#endif
         }
         return v;
     }

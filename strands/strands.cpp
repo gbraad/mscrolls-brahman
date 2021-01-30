@@ -38,6 +38,11 @@
 #include "fd.h"
 #include "strands.h"
 
+#define DEFAULT_STORY_FILE   "story.str"
+
+#ifdef __EMSCRIPTEN__
+#endif
+
 namespace ST
 {
 Term::Terms Term::_allTerms(&Term::compareLess);
@@ -79,6 +84,13 @@ int main(int argc, char** argv)
 
     if (!files.size())
     {
+        // look for default story file. 
+        if (FD::existsFile(DEFAULT_STORY_FILE))
+            files.push_back(DEFAULT_STORY_FILE);
+    }
+    
+    if (!files.size())
+    {
         printf("Usage: %s [-d] file...\n", argv[0]);
         return -1;
     }
@@ -104,22 +116,9 @@ int main(int argc, char** argv)
             }
         }
     }
-    
+
     return 0;
 }
 
 
-/* BASIC GLUE */
-
-void _emit(const char* s)
-{
-    printf("%s", s);
-}
-
-char _getchar()
-{
-    int c = getchar();
-    return c;
-}
-    
 #endif // STANDALONE
