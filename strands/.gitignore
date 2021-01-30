@@ -11,5 +11,5 @@ save
 *.bat
 b.sh
 /*.str
-/doc
+
 
