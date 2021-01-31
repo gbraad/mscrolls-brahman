@@ -1,0 +1,88 @@
+STORY
+Once upon a time there were three bears.
+
+What's your name?
+NAME
+Ok NAME, here's the deal, the three bears have just gone out for a walk.
+ROBTHEM
+That's the end of the game.
+
+NAME?!
+* Goldilocks
+* Mousilocks
+* Dreadlocks
+
+ROBTHEM?
+Do you want to rob their place?
+* yes
+BREAKIN
+* no
+Well then!
+
+BREAKIN
+You horrible person! Well ok then since that's the plot.
+You break into their house like a pro.
+
+Whoa! Lookee here; on the table are three bowls of porridge. LIKEPORRIDGE
+
+VANDAL
+You
+* set the place on fire and leave.
+* smash the place up. That will show 'em.
+* throw the porridge all over the walls, about all it's good for really.
+
+LIKEPORRIDGE?
+Do you like porridge?
+* Hell yes!
+Right on! WHICHBOWL
+* A bit
+WHICHBOWL
+* No, it's awful!
+Oh well, not much else here then. VANDAL Bears suck anyway!
+
+WHICHBOWL
+There are three bowls; a large one, a medium one and a small one. BOWL
+
+BOWL?
+Which do you want to try NAME?
+* the biggest of course!
+Eww! It's cold and lumpy! BOWL
+* the medium sized one
+Eww! It's way too sweet! BOWL
+* the smallest one
+This one's not too bad. A bit small though, so you eat the lot!
+Suddenly the door slams open and three angry bears are glaring right at you! WHATNOW
+
+WHATNOW?
+What now?
+* Run like hell!
+Nice try, but they swiftly block your exit. MAULED
+* Climb a tree.
+Be serious, there are no trees in here! WHATNOW
+* Put your hands up and plead innocent.
+Sorry, the cute routine doesn't work with bears! MAULED
+* Say; NAME went that-a-way, and point out the window!
+It worked! The bears all rush out to find the culprit.
+Quickly, you exit the shack and run away as fast as you can. That was close! MORAL
+* Fight!
+You rush them, kicking and screaming like a banshee, perhaps they'll run off? MAULED
+
+YOUDIE
+They
+* leave you to die slowly and painfully,
+* watch you die slowly, your blood squirting out in slow motion,
+* laugh as you die screaming in agony,
+
+  while they eat their porridge!
+
+VICIOUSLY
+* viciously
+* ferociously
+* mercilessly
+* easily
+
+MAULED
+The bears grab you and VICIOUSLY tear all your arms and legs off! Bears are _that_ strong you know. YOUDIE MORAL
+
+MORAL
+Perhaps you won't mess with bears next time!

@@ -1,0 +1,257 @@
+// Murder At The Manor
+START
+GAME
+
+GAME_TITLE
+Murder at the Manor!
+
+GAME_AUTHOR
+by A.Hacker
+
+GAME_ORGANISATION
+Strand Games
+
+GAME_BACKIMAGE
+images/title.jpg
+
+GAME_COVERTEXT
+:color:blue,font:Kanit Thin,weight:200
+
+/*
+
+                               +------------------------+
+                               |                        |
+                               |  Garden                |
+                               |                        |
+                               |                        |
+                               |                        |
+                               +-------------+  +-------+
+                                             |  |    
+                 +------------------+  +-----+  +-------+
+                 |                  |  |                |
+                 |  Kitchen         |  |                |
+                 |                  |  | Dining Room    |
+                 +----------+ +-----+  |                |
+                       +----+ +-----+  |                |
+                       |            |  |                |
+                       |            |  |                |
+                       |            |  +-----+--+-------+
+                       |            |        |  |    
+  +-----------------+  |            |  +-----+--+-------+
+  |                 |  |            |  |                |
+  |                 |  |  Hall      |  |                |
+  |                 |  |            |  | Drawing Room   |
+  |                 +--+            +--+                |
+  |   Study                                             |
+  |                 +--+            +--+                |
+  |                 |  |            |  |                |
+  +-----------------+  +------------+  +----------------+
+
+*/
+
+GAME
+Major Stephenson has been shot dead in his study! You must solve the murder.
+You have deduced that exactly one member of the household is the guilty party.
+
+The Suspects are; Charles, Major Stephenson's brother and business partner,
+Charlotte the Major's wife, Jimmy the son or possibly Jeeves the family butler.
+images/map.png
+
+//Spoiler: The murderer is MURDER!
+
+Who to question? QUESTION \nThe end.
+
+// computer randomly picks murderer each game
+MURDER!
+* Jimmy
+* Charlotte
+* Charles
+* Jeeves
+
+QUESTION
+*?!(WIN or LOSE) ASK
+
+ASK?
+Interrogate,
+*+ Jimmy
+JIMMY
+*+ Charlotte
+CHARLOTTE
+*+ Charles
+CHARLES
+*+ Jeeves
+JEEVES
+*+?ASK Accuse someone!
+ACCUSE
+
+ QUESTION
+
+OKBUT
+* I see, but
+* But
+* Ok, but
+
+PROVE
+* OKBUT can you prove that?
+* OKBUT how can you prove that?
+* OKBUT do you have anything to corroborate that?
+
+WHEREU
+* where were you at the time of the murder?
+* what were you doing when the murder took place?
+* do you have an alabi?
+
+JIMMY?
+* Jimmy, WHEREU
+JWHERE JPROVE
+*?CPROVE Did you see Charles in the drawing room?
+JSAY
+*?BWHERE Jimmy, did you happen to see Jeeves in the dining room?
+JSAY2
+
+JWHERE
+* I was in the hall.
+
+JSAY MURDER
+* Jimmy
+No, the room was empty!
+* Charles
+No, I don't think so.
+*
+Yes I did!
+
+JSAY2 MURDER
+* jimmy
+No, he was definitely in the kitchen.
+* Jeeves
+I'm pretty sure he wasn't in the dining room.
+*
+Yes, I saw him setting out the table. 
+
+
+JPROVE?
+* PROVE
+Ask Charles because he saw me there.
+
+CHARLOTTE?
+* Charlotte, WHEREU
+I was in the garden. SPROVE
+*?BPROVE Jeeves said he was in the dining room, setting the dinner table. Did you see him?
+SSAY
+
+SPROVE?
+* PROVE
+Ask Jeeves, he saw me through the window.
+
+SSAY MURDER
+* Charlotte
+No, that's a lie, Jeeves was in the kitchen.
+* Jeeves
+No, I think Jeeves was in the kitchen.
+*
+Of course!
+
+CHARLES?
+* Charles, WHEREU
+I was in the drawing room, CDOING CPROVE
+*?JPROVE Was Jimmy in the hall?
+CSAY
+
+CDOING
+* smoking my pipe.
+* reading my book.
+* playing solitaire.
+* writing my new novel.
+* listening to the gramophone.
+
+CSAY MURDER
+* jimmy
+He was there earlier, but I'm not sure exactly.
+* Charles
+No, I didn't see him at all.
+*
+Yes indeed, I saw him there.
+
+CPROVE?
+* PROVE
+Jimmy came to see me, ask him.
+
+JEEVES?
+* Jeeves, WHEREU
+I was in the dining room, preparing the dinner table. BPROVE
+*?SPROVE Did you see Charlotte doing the gardening?
+BSAY
+*?JWHERE Did you see Jimmy in the hall?
+BSAY2
+
+BPROVE?
+* PROVE
+BWHERE
+
+BWHERE
+Certainly sir, ask Charlotte, she saw me preparing the dinner table.
+
+BSAY MURDER
+* jeeves
+No, she's finished that some time before.
+* Charlotte
+She did do some gardening, but I think she'd finished by then.
+* 
+Yes, I distinctly remember seeing her through the window.
+
+BSAY2 MURDER
+* jimmy
+No, I can't recall seeing him.
+* Jeeves
+He wasn't in the hall, I remember that.
+*
+Yes, I did see him there actually.
+
+ACCUSE?
+Accuse,
+* Jimmy
+CHKJ
+* Charlotte
+CHKS
+* Charles
+CHKC
+* Jeeves
+CHKB
+
+CHKJ MURDER
+* jimmy
+WIN
+*
+LOSE
+
+CHKS MURDER
+* charlotte
+WIN
+*
+LOSE
+
+CHKC MURDER
+* charles
+WIN
+*
+LOSE
+
+CHKB MURDER
+* jeeves
+WIN
+*
+LOSE
+
+WIN
+Well done! The murderer was indeed MURDER! ISBUTLER
+
+LOSE
+Sorry, wrong answer, the real murderer was MURDER. ISBUTLER
+
+ISBUTLER MURDER
+* jeeves
+Yes I know, the butler did it!
+
+
+
+

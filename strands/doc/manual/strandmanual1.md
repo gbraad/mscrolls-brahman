@@ -57,6 +57,14 @@ three
 
 This produces the exact same output as before, except now the terms `ONCE` and `THREE` emit their own flow.
 
+NOTE: Sometimes you want a capitalised word in the text. In this case, just prefix the word with `\` (backslash) to escape it. Examples: `\OK`, `\TV`. For frequent cases, you can make a term which returns the text, eg:
+
+````
+OK
+\OK
+```
+
+
 ### Selectors
 
 Now, we can give these terms branching flow using _selectors._ For example;
@@ -488,7 +496,754 @@ We can give selectors conditionals to allow them to be affected by previous choi
 
 The good news for non-programmers is that there are no, programming style, _variables_ in this language. Instead conditionals are built from whether terms have been visited or not.
 
-Let's look at an example;
+_Programmers' note: Don't panic; you can have code flows!_
+
+As usual, here's a mini game, and then some explaination.
+
+```
+STORY
+Once upon a time there was a boy called Jack. He lived with his widowed mother. They were very poor. All they had was a cow.
+
+You are Jack. One day your old mother says you must take the cow and sell it at the market, as there is no money left for food.
+
+Along the way you meet OLDMAN, he offers you some "magic beans" in exchange for the cow. DOSELL \nThe End.
+
+OLDMAN
+* a demented
+* a funny looking
+* a peculiar
+* an incontinent
+
+  old man with a white beard
+
+BODYPART&
+* shins
+* head
+* groin
+* chest
+
+DOSELL?
+Do you?
+* Trade the cow for the beans.
+You give the cow to the old man and pocket the beans, almost immediately regretting the decision. What will you poor old mother say? You return home. GOTBEANS
+She throws the beans out the window, "No dinner for you!". You go to bed.
+\nYou wake up next morning to discover a giant "beanstalk" in the garden, rising far up into the clouds. CLIMB
+* Reject the stupid old man's offer
+You tell him to get stuffed!
+CASHCOW POOR
+* Kick him in the BODYPART and take his beans!
+ATTACKMAN
+
+ATTACKMAN
+* Oof! The old man doubles up in pain and collapses! You take his silly beans and kick him in the BODYPART for good measure. CASHCOW GOTBEANS "Oh well!" and chucks the beans in the curry. POOR
+* The old man deftly doges your attack and retaliates. Turns out he's a Kung Foo master (couldn't you tell!). He kicks you right in the BODYPART, flooring you instantly! LOSE
+
+POOR
+You got dinner, POORLOSE
+
+POORLOSE
+but you're still poor and soon run out of food and starve. LOSE
+
+GOTBEANS
+Your mother looks at the beans in disgust, "What's this trash!", she says!
+
+CASHCOW
+At the market, you sell the cow for a good price and return home.
+Your mother cooks a giant curry with the money from the cow.
+
+
+
+CLIMB?
+DOCLIMB do you?
+*?!CHICKEN Climb the beanstalk
+ATTOP
+*+?CHICKEN Climb back up the beanstalk
+ATTOP
+* Go to the pub.
+PUB
+* Hang around the town like a lemon.
+You do that, POORLOSE
+
+DOCLIMB<
+* With nothing better to do, 
+* This time,
+
+PUB
+You go to the pub, and do some cleaning in exchange for a beer, POORLOSE
+
+SMOKE
+* crack
+* weed
+* hashish
+* // blank
+
+GIANTDOING
+* smoking SMOKE.
+* reading the newspaper.
+* watching \TV.
+* playing a computer game.
+* grinding some bones.
+* eating toast.
+
+ATTOP?
+At the top you see a huge castle fit for a giant. Do you?
+* Enter the castle
+Inside the castle is an enormous hall.
+At the far end sits a huge fat giant, GIANTDOING Luckily he hasn't seen you. In the middle of the room is a table atop of which is; a hen, a magic harp and a bag of old coins. WHATDO
+* Climb back down to get some weapons.
+CHICKEN
+
+CHICKEN
+Chicken! Back at the bottom, you remember you're a pauper and haven't got any weapons. Perhaps if you did you could rob the rich. Or Something. Your mother says, "Get back up that beanstalk and bag us a golden goose, idiot!" CLIMB
+
+WHATDO?
+What now?
+* Introduce yourself to the giant.
+You go up to him, holding out your hand and say, "Hi! I'm Jack, nice to meet you!". INTRO
+* Steal the coins
+GETCOINS THIEF
+* Steal the hen
+GETHEN THIEF
+* Steal the harp
+GETHARP THIEF
+
+INTRO
+* The giant shakes your hand saying, "Hi I'm a giant, would you like some tea?"
+You accept and have a nice little chat about all the problems giants have who live atop of beanstalks and what bad press they get. Presently you bid farewell and climb down. Its always good to make new friends, POORLOSE
+* The giant grabs your hand, holds you down, then bites your head clean off! He kicks your head around the room for amusement then gets to work grinding your bones. LOSE
+
+THIEF
+You thief! SOUND He bellows;
+
+Fee-fi-fo-fum!
+\nI smell the blood of an Englishman,
+\nBe he alive, or be he dead,
+\nI'll grind his bones to make my bread!
+\n\nRUNAWAY
+
+SOUND
+*?GETCOINS The giant hears the sound of the coins jangling.
+*?GETHEN The Hen squawks as you grab it alerting the giant.
+*?GETHARP The strings of the harp strum a note which alerts the giant.
+
+RUNAWAY?
+You run like hell! But the giant's huge stride is catching you fast. You;
+* Hide under a table.
+Nice try, the giant lifts the table then pounds it back down squashing you to death! LOSE
+* Turn and fight the giant.
+This is not David and Goliath you know! With a single punch, the giant knocks you out. You're put into the curry pot and eaten for dinner. That's after he grinds your bones of course! LOSE
+* Jump out the window.
+A bit risky, but hey!
+Dangling on a branch, you only just make it.
+You climb down the beanstalk as fast as you can.
+At the bottom, you quickly fetch the axe and chop it down.
+You hear a crash in the distance. Looks like you had a lucky escape there!
+You show BOOTY to your old mother who says, REVIEW
+
+BOOTY
+*?GETCOINS the bag of coins
+*?GETHEN the hen
+*?GETHARP the harp
+
+REVIEW
+*?GETCOINS "Wow gold coins! Well done Jack." Later you buy a bigger house and employ servants to do all the grotty jobs you used to do. WIN
+*?GETHEN "Only a scrawny hen!" Well i guess we might get some eggs off it. You've no idea if it lays golden eggs as, apparently, it would need to be fed golden nuggets, none of which you have. Instead you feed it grain, but hey it could be worse!
+*?GETHARP "We need money, not music!" She tosses it out the window, POORLOSE
+
+WIN
+You live happily ever after!
+
+LOSE
+You have lost!
+
+GETCOINS
+You grab the bag of coins.
+
+GETHEN
+You grab the hen.
+
+GETHARP
+You take the harp.
+```
+
+This mini game of "Jack and The Beanstalk", consists mostly of simple choice terms as we've seen before. A few `\n` are thrown in, to force a newline in the output to make it a bit neater.
+
+You can climb the beanstalk more than once so let's look at the `CLIMB` term;
+
+```
+CLIMB?
+DOCLIMB do you?
+*?!CHICKEN Climb the beanstalk
+ATTOP
+*+?CHICKEN Climb back up the beanstalk
+ATTOP
+* Go to the pub.
+PUB
+* Hang around the town like a lemon.
+You do that, POORLOSE
+
+DOCLIMB<
+* With nothing better to do, 
+* This time,
+```
+
+The initial flow of `CLIMB` could just be "do you?", but instead we want to say;
+
+* "With nothing better to do, do you?"
+  initially.
+* "This time, do you?"
+  thereafter.
+
+This is done using the `DOCLIMB` term with a sequential `<` indicator, which will select the options in order and stay on the last thereafter.
+
+At the top of the beanstalk (`ATTOP`), you get the option to climb down, which results in being called a "chicken";
+
+```
+CHICKEN
+Chicken! Back at the bottom, you remember you're a pauper and haven't got any weapons. Perhaps if you did you could rob the rich. Or Something. Your mother says, "Get back up that beanstalk and bag us a golden goose, idiot!" CLIMB
+```
+
+`CHICKEN` flows back to to `CLIMB`. And now we see how `CLIMB` has conditionals dependent on whether `CHICKEN` has been visited;
+
+```
+CLIMB?
+...
+*?!CHICKEN choice text flow
+action flow
+*+?CHICKEN choice text flow
+action flow
+```
+
+Selectors can have conditionals which test whether a term has been visited, indicated by `?TERMNAME` for true and `?!TERMNAME` for false.
+
+The `+` sign in the second selector simply allows that to be shown more than once, the first doesn't need to as it can only happen once.
+
+Here are some example conditional selectors;
+
+* `*?TERM` Choice shown if `TERM` is visited.
+* `*?!TERM` Choice shown if `TERM` is _not_ visited.
+* `*?(FISH and CHIPS)` Choice shown if both `FISH` and `CHIPS` visited.
+* `*?(FISH or CHIPS)` Choice shown if any of `FISH` and `CHIPS` visited.
+* `*?!(FISH or CHIPS)` Choice shown if neither of `FISH` and `CHIPS` visited.
+* `*?(!FISH and !CHIPS)` Choice shown if neither of `FISH` and `CHIPS` visited.
+* `*?((FISH and CHIPS) or (CURRY && SPUDS))` You can use "&&" and "||" instead of "and" and "or", if you like.
+
+You can use "not" instead of "!" if you like.
+
+Here's another conditional example from this mini game;
+
+```
+SOUND
+*?GETCOINS The giant hears the sound of the coins jangling.
+*?GETHEN The Hen squawks as you grab it alerting the giant.
+*?GETHARP The strings of the harp strum a note which alerts the giant.
+```
+
+This term produces different output depending on which item you've chosen to take in the game. Since only one can be true, then only one of the conditions will be true. Remember by default generator terms are _random_, so if there _was_ more than one, then one of the valid selectors would be chosen at random.
+
+### Filters
+
+Finally, let's look at an example using terms as generators, choices, conditionals and _filters_.
+
+A filter is when flow is _input to a term_ so that the input can be matches against selectors. This is useful when you need something like a table of different actions (a bit like a "case" statement in programming).
+
+Here is a mini murder mystery!
+
+```
+START
+GAME
+
+GAME_TITLE
+Murder at the Manor!
+
+GAME_AUTHOR
+by A.Hacker
+
+GAME_ORGANISATION
+Strand Games
+
+GAME_BACKIMAGE
+images/title.jpg
+
+GAME_COVERTEXT
+:color:blue,font:Kanit Thin,weight:200
+
+/*
+
+                               +------------------------+
+                               |                        |
+                               |  Garden                |
+                               |                        |
+                               |                        |
+                               |                        |
+                               +-------------+  +-------+
+                                             |  |    
+                 +------------------+  +-----+  +-------+
+                 |                  |  |                |
+                 |  Kitchen         |  |                |
+                 |                  |  | Dining Room    |
+                 +----------+ +-----+  |                |
+                       +----+ +-----+  |                |
+                       |            |  |                |
+                       |            |  |                |
+                       |            |  +-----+--+-------+
+                       |            |        |  |    
+  +-----------------+  |            |  +-----+--+-------+
+  |                 |  |            |  |                |
+  |                 |  |  Hall      |  |                |
+  |                 |  |            |  | Drawing Room   |
+  |                 +--+            +--+                |
+  |   Study                                             |
+  |                 +--+            +--+                |
+  |                 |  |            |  |                |
+  +-----------------+  +------------+  +----------------+
+
+*/
+
+GAME
+Major Stephenson has been shot dead in his study! You must solve the murder.
+You have deduced that exactly one member of the household is the guilty party.
+
+The Suspects are; Charles, Major Stephenson's brother and business partner,
+Charlotte the Major's wife, Jimmy the son or possibly Jeeves the family butler.
+images/map.png
+
+Who to question? QUESTION \nThe end.
+
+// computer randomly picks murderer each game
+MURDER!
+* Jimmy
+* Charlotte
+* Charles
+* Jeeves
+
+QUESTION
+*?!(WIN or LOSE) ASK
+
+ASK?
+Interrogate,
+*+ Jimmy
+JIMMY
+*+ Charlotte
+CHARLOTTE
+*+ Charles
+CHARLES
+*+ Jeeves
+JEEVES
+*+?ASK Accuse someone!
+ACCUSE
+
+ QUESTION
+
+OKBUT
+* I see, but
+* But
+* Ok, but
+
+PROVE
+* OKBUT can you prove that?
+* OKBUT how can you prove that?
+* OKBUT do you have anything to corroborate that?
+
+WHEREU
+* where were you at the time of the murder?
+* what were you doing when the murder took place?
+* do you have an alabi?
+
+JIMMY?
+* Jimmy, WHEREU
+JWHERE JPROVE
+*?CPROVE Did you see Charles in the drawing room?
+JSAY
+*?BWHERE Jimmy, did you happen to see Jeeves in the dining room?
+JSAY2
+
+JWHERE
+* I was in the hall.
+
+JSAY MURDER
+* Jimmy
+No, the room was empty!
+* Charles
+No, I don't think so.
+*
+Yes I did!
+
+JSAY2 MURDER
+* jimmy
+No, he was definitely in the kitchen.
+* Jeeves
+I'm pretty sure he wasn't in the dining room.
+*
+Yes, I saw him setting out the table. 
+
+
+JPROVE?
+* PROVE
+Ask Charles because he saw me there.
+
+CHARLOTTE?
+* Charlotte, WHEREU
+I was in the garden. SPROVE
+*?BPROVE Jeeves said he was in the dining room, setting the dinner table. Did you see him?
+SSAY
+
+SPROVE?
+* PROVE
+Ask Jeeves, he saw me through the window.
+
+SSAY MURDER
+* Charlotte
+No, that's a lie, Jeeves was in the kitchen.
+* Jeeves
+No, I think Jeeves was in the kitchen.
+*
+Of course!
+
+CHARLES?
+* Charles, WHEREU
+I was in the drawing room, CDOING CPROVE
+*?JPROVE Was Jimmy in the hall?
+CSAY
+
+CDOING
+* smoking my pipe.
+* reading my book.
+* playing solitaire.
+* writing my new novel.
+* listening to the gramophone.
+
+CSAY MURDER
+* jimmy
+He was there earlier, but I'm not sure exactly.
+* Charles
+No, I didn't see him at all.
+*
+Yes indeed, I saw him there.
+
+CPROVE?
+* PROVE
+Jimmy came to see me, ask him.
+
+JEEVES?
+* Jeeves, WHEREU
+I was in the dining room, preparing the dinner table. BPROVE
+*?SPROVE Did you see Charlotte doing the gardening?
+BSAY
+*?JWHERE Did you see Jimmy in the hall?
+BSAY2
+
+BPROVE?
+* PROVE
+BWHERE
+
+BWHERE
+Certainly sir, ask Charlotte, she saw me preparing the dinner table.
+
+BSAY MURDER
+* jeeves
+No, she's finished that some time before.
+* Charlotte
+She did do some gardening, but I think she'd finished by then.
+* 
+Yes, I distinctly remember seeing her through the window.
+
+BSAY2 MURDER
+* jimmy
+No, I can't recall seeing him.
+* Jeeves
+He wasn't in the hall, I remember that.
+*
+Yes, I did see him there actually.
+
+ACCUSE?
+Accuse,
+* Jimmy
+CHKJ
+* Charlotte
+CHKS
+* Charles
+CHKC
+* Jeeves
+CHKB
+
+CHKJ MURDER
+* jimmy
+WIN
+*
+LOSE
+
+CHKS MURDER
+* charlotte
+WIN
+*
+LOSE
+
+CHKC MURDER
+* charles
+WIN
+*
+LOSE
+
+CHKB MURDER
+* jeeves
+WIN
+*
+LOSE
+
+WIN
+Well done! The murderer was indeed MURDER! ISBUTLER
+
+LOSE
+Sorry, wrong answer, the real murderer was MURDER. ISBUTLER
+
+ISBUTLER MURDER
+* jeeves
+Yes I know, the butler did it!
+```
+
+In this game, a random character is picked each time as the murderer and _you_ have to sluth it out!
+
+Most of the contructs we've already covered. The game uses a sticky version of `MURDER` to initially choose the villian.
+
+The main loop is;
+
+```
+QUESTION
+*?!(WIN or LOSE) ASK
+
+ASK?
+Interrogate,
+*+ Jimmy
+JIMMY
+*+ Charlotte
+CHARLOTTE
+*+ Charles
+CHARLES
+*+ Jeeves
+JEEVES
+*+?ASK Accuse someone!
+ACCUSE
+
+  QUESTION
+```
+
+The tail flow on `ASK` loops back to `QUESTION`. Note the indent of `QUESTION` which attaches it to `ASK` as a tail flow rather than looking like a new term definition.
+
+`QUESTION` uses the conditional selector, `*?!(WIN or LOSE)` to determine if the game is over, since if `WIN` or `LOSE` have been set, `QUESTION` will return and flow will end.
+
+All of the `ASK` selectors use the `+` indicator as they can be visited more than once, and the final "Accuse someone" choice is conditional on whether `ASK` has been visited before (which it hasn't the first time).
+
+The gameplay is based on the idea of suspects responses being different depending on whether they are guilty or innocent; the murderer is deceptive and the innocent always tell the truth.
+
+For example, when asking `JIMMY?` "Did you see Charles in the drawing room?", we arrive at the `JSAY` term;
+
+`JSAY` is a _filter_.
+
+```
+JSAY MURDER
+* Jimmy
+No, the room was empty!
+* Charles
+No, I don't think so.
+*
+Yes I did!
+```
+
+The `JSAY` term definition has the term `MURDER` next to it. This is called a _topflow_ and turns the `JSAY` term into a "case matching" filter.
+
+What happens is the _topflow_, in this case `MURDER`, is evaluated and it output is _fed into `JSAY`._ for matching.
+
+So, we know `MURDER` has one of the following values;
+
+```
+MURDER
+* Jimmy
+* Charlotte
+* Charles
+* Jeeves
+```
+
+The `JSAY` filter compares `MURDER` to its selectors in order, where instead of the choice being random or a player choice, the _choice is made by the case match._
+
+Now we see that when Jimmy is asked, "Did you see Charles in the drawing room?", if he _is_ the murderer, he will say "No, the room was empty!" Because he's lying!
+
+And if Charles is the murderer, Jimmy will say, "No, I don't think so." because Charles wasn't in the drawing room (he was out murdering!), but Jimmy can't be completely certain - he's a kid after all.
+
+And if neither Jimmy nor Charles is the murderer, then Jimmy was certain to see Charles in the drawing room all the time, and says, "Yes I did!"
+
+Similar constructs are used for the other game suspects. By interrogating their corroborative statements, you can deduce the villain.
+
+So let's look at how it works when you accuse someone;
+
+```
+ACCUSE?
+Accuse,
+* Jimmy
+CHKJ
+* Charlotte
+CHKS
+* Charles
+CHKC
+* Jeeves
+CHKB
+
+CHKJ MURDER
+* jimmy
+WIN
+*
+LOSE
+
+CHKS MURDER
+* charlotte
+WIN
+*
+LOSE
+
+CHKC MURDER
+* charles
+WIN
+*
+LOSE
+
+CHKB MURDER
+* jeeves
+WIN
+*
+LOSE
+```
+
+Here, the `ACCUSE` term simply invokes a number of filter terms that separately check whether your accusations matches `MURDER`, invoking either `WIN` or `LOSE`.
+
+For example;
+
+```
+CHKB MURDER
+* jeeves
+WIN
+* // catch all other cases
+LOSE
+```
+
+Either jeeves matches `MURDER` or not. An empty filter match acts as the catch all "else" case and therefore collects all other cases.
+
+And that's all there is to it! Happy sleuthing!
+
+One final note is you can add game meta-data, eg:
+
+```
+GAME_TITLE
+Murder at the Manor!
+
+GAME_AUTHOR
+by A.Hacker
+
+GAME_ORGANISATION
+Strand Games
+
+GAME_BACKIMAGE
+images/title.jpg
+
+GAME_COVERTEXT
+:color:blue,font:Kanit Thin,weight:200
+```
+
+This is used to generate the cover page in the GUI,
+
+![](mm1.png)
+
+The Stands engine can feed the GUI so the choices appear as selections;
+
+![](mm2.png)
+
+## Building Parser Games
+
+We can also build parser games with the same system. We have also everything so far at our disposal, so we can build mixed parser and choice games, using an ideal mix of both gameplay strategies.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
 
 
 
