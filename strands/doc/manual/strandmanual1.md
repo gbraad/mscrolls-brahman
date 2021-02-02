@@ -1237,21 +1237,21 @@ INV
 INV
 ```
 
-An object can be given a `name` (which is a system action), which allows the object to descrive how it would like to be identified by the parser. You can give objects more than one name, for example `the player` and `me` above, so that it can be matched by different words, ie synonyms.
+An object can be given a `name` (which is a system action), which allows the object to describe how it would like to be identified by the command parser. You can give objects more than one name, for example `the player` and `me`, so that it can be matched by different words, ie _synonyms._
 
-When an object is printed out, it will either be printed as its `name` or you can override this with `label`, eg;
+When an object is printed out, it will either be textified by its `name` or you can override this with `label`, eg;
 
 ```
 PHIPPS@ THING
 * name
-phipps
+mr phipps
 * label
 Mr. Phipps
 ```
 
 Use `label` in cases where titles and forced ajectives are needed.
 
-Adjectives can be put in with the `name`
+Adjectives can be put in with `name`
 
 ```
 BODY@ THING
@@ -1277,7 +1277,7 @@ stiff
 
 Whereby the parser would match things like "the dead body", "the body", "body", "the cold dead body", "the dead cold body", "cold corpse", "old stiff" etc.
 
-Bear in mind that on output, in the absence of `label`, adjectives are only emitted when multiple objects of the same base word are present (in the same scope). For example, the _red_ key and the _blue_ key, and these adjectives will be emitted in _definition order_ until the object names are distinct.
+Bear in mind that on output, in the absence of `label`, adjectives are only emitted to discrimiate multiple objects of the same base word (when in scope). For example, the _red_ key and the _blue_ key, and further, these adjectives will be added in _definition order_ until the object names are distinct.
 
 Now looking back at `player` we see some other selectors reacting to _verbs_;
 
@@ -1290,11 +1290,11 @@ INV
 INV
 ```
 
-Loosely speaking, `i`, `inv` and `x` are verbs. The system does not have predefined verbs (except "put"), so any word can be used as a verb, it's up to you to have what you like. When you use words in selectors in verb position, they are assumed to be verbs and treated as such by the parser.
+Loosely speaking, `i`, `inv` and `x` are verbs. The system does not have predefined verbs (except "put"), so any word can be used as a verb, it's up to you to use what you like. When you use words in selectors in verb position, they are assumed to be verbs and treated as such by the parser.
 
 `it` is just shorthand, you can have instead `x player` if you like.
 
-In the above example, both `i` and `inv` do the same thing, flowing to `INV`, which will generate the inventory. if you want also "take inventory" to work, you wouldn't add it as a reaction to player, instead you'd create an "inventory" object.
+In the above example, both `i` and `inv` do the same thing, flowing to `INV`, which will generate the inventory. if you want also "take inventory" to work, you wouldn't add it as a reaction to player, instead you'd create an (in scope) "inventory" object.
 
 The last thing to explain is in `BODY`. What is, `> put it in study` ?
 
@@ -1429,7 +1429,7 @@ You could have special cases for `> get note` on `NOTE`, perhaps with a conditio
 
 If you're following this so far, you can see that we _really_ are building worlds from scratch. Even the usual stuff like getting and dropping objects is user defined. As are all the nouns, verbs and adjectives (adverbs too!).
 
-In practice, the material here would be constitute a library or core module to include. The reusable core would contain `CONCEPT`, `THING`, `GETTABLE`, `PLAYER` and a bunch of other useful stuff.
+In practice, the material here would constitute a library or "core" module to be included in new games. The reusable core would contain `CONCEPT`, `THING`, `GETTABLE`, `PLAYER` and a bunch of other useful stuff.
 
 We'll finish by defining the inventory and the main loop, then show the complete example.
 
@@ -1443,7 +1443,7 @@ You're carrying, LAST.
 You're empty handed.
 ```
 
-Turns out the parser can handle questions as well as commands, so `> what is in player` will result in _flow_ of terms.
+Turns out the parser can handle questions as well as commands, so `> what is in player` will result in a _flow_ of terms.
 
 `* them` matches any list, and `* it` matches just one, so the trick above is simply to format the output nicely. Find the inventory, and print them out and also to deal with the case when the list is empty using the catch-all.
 
@@ -1470,9 +1470,9 @@ Now what?
 
 So `WHATSHERE` is just a text introduction to `STUFFHERE`, which runs a query into a filter which _removes the player_ from the list. The result of `STUFFHERE` is thus a flow of object terms, which finally textify themselves.
 
-The only new trick is `CMD`;
+The only new trick is in `CMD`;
 
-This is a choice term with a single blank choice. A blank choice means we can have parser input. In general we could mix choices with parser like this;
+This is an ordinary choice term with a single blank choice. A blank choice means we allow parser input. In general we could mix choices with parser like this;
 
 ```
 DOWHAT?
