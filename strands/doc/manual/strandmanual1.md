@@ -1158,7 +1158,659 @@ The Stands engine can feed the GUI so the choices appear as selections;
 
 ## Building Parser Games
 
-We can also build parser games with the same system. We have also everything so far at our disposal, so we can build mixed parser and choice games, using an ideal mix of both gameplay strategies.
+We now move on to building parser games.
+
+We also have everything described so far at our disposal, so we can build mixed parser and choice games, using an ideal mix of both gameplay strategies.
+
+The difference between a "parser game" and those built so far is that, apart from a parser, we need a _world model._
+
+The _world model_ is a set of objects, their relationships and their behaviour, ie how they respond to interaction.
+
+### Building the World
+
+The world is built from objects and these are _terms_ just like we've seen before. So far we've seen terms as generators and as choices, and now we can turn a term into an object using the `@` indicator.
+
+Let's start our new, parser based, mystery game!
+
+```
+GAME
+Hi! Welcome to homicide, try not to kill people!
+What is your name? HARRY
+Ok HARRY, you have been assigned to solve the mystery death of professor Jones.
+PART1
+
+HARRY?!
+* Harry
+* Larry
+* Barry
+* Gary
+* Sally
+
+PART1?
+\nWhat next?
+* Investigate the crime scene?
+\OK get's go! CRIMESCENE
+* Read the report?
+Professor Jones was the leading expert researching the deadly "Rona" virus.
+He's been stabbed to death, the evening before he was to present his research findings. Could a rival be involved? 
+* Drink some tea?
+Sorry, you're out of tea!
+
+  PART1
+```
+
+Nothing new here, we just set the scene with a couple of choices to get going and some background. When you're ready to play, flow leads to `CRIMESCENE`, and that's where we go into the world.
+
+To build objects, we (usually) make a hierarchy of types. This way we can attach behaviour at the appropriate level. Object inheritance is described by putting the base types in the _topflow_, like this:
+
+```
+CONCEPT@
+
+THING@ CONCEPT
+
+PLAYER@ THING
+
+ROOM@ THING
+
+STUDY@ ROOM
+```
+
+These definitions aren't useful on their own as we haven't yet filled out their bodies. For that, we have to know what selectors _mean_ for objects. Selectors for choices _match_ player selection, so;
+
+**Selectors for _objects_ match action _semantics._**
+
+Object selector match can be the _semantics_ of an input command, or it can be a system action.  In any case, object selectors act as _reactors_ to actions and their action flow is taken whenever the selector matches.
+
+Let's see how this works, it's about time to define the `player`.
+
+```
+PLAYER@ THING
+* name
+the player
+* name
+me
+* x it
+You're looking good!
+* i
+INV
+* inv
+INV
+```
+
+An object can be given a `name` (which is a system action), which allows the object to descrive how it would like to be identified by the parser. You can give objects more than one name, for example `the player` and `me` above, so that it can be matched by different words, ie synonyms.
+
+When an object is printed out, it will either be printed as its `name` or you can override this with `label`, eg;
+
+```
+PHIPPS@ THING
+* name
+phipps
+* label
+Mr. Phipps
+```
+
+Use `label` in cases where titles and forced ajectives are needed.
+
+Adjectives can be put in with the `name`
+
+```
+BODY@ THING
+> put it in study
+* name
+the dead body
+* x it
+XBODY
+```
+
+This is how adjectives are defined, you don't have to list them anywhere. They're figured out from the `name` selectors. For example, you could write;
+
+```
+BODY@ THING
+> put it in study
+* name
+the dead old cold body
+* name
+corpse
+* name
+stiff
+```
+
+Whereby the parser would match things like "the dead body", "the body", "body", "the cold dead body", "the dead cold body", "cold corpse", "old stiff" etc.
+
+Bear in mind that on output, in the absence of `label`, adjectives are only emitted when multiple objects of the same base word are present (in the same scope). For example, the _red_ key and the _blue_ key, and these adjectives will be emitted in _definition order_ until the object names are distinct.
+
+Now looking back at `player` we see some other selectors reacting to _verbs_;
+
+```
+* x it
+You're looking good!
+* i
+INV
+* inv
+INV
+```
+
+Loosely speaking, `i`, `inv` and `x` are verbs. The system does not have predefined verbs (except "put"), so any word can be used as a verb, it's up to you to have what you like. When you use words in selectors in verb position, they are assumed to be verbs and treated as such by the parser.
+
+`it` is just shorthand, you can have instead `x player` if you like.
+
+In the above example, both `i` and `inv` do the same thing, flowing to `INV`, which will generate the inventory. if you want also "take inventory" to work, you wouldn't add it as a reaction to player, instead you'd create an "inventory" object.
+
+The last thing to explain is in `BODY`. What is, `> put it in study` ?
+
+This is a _command flow_.
+
+Earlier, we hinted there were various types of _flow_, so far we've seen two flow elements; _text_ flow and _term_ references. Now it's time to confess and reveal the various elements that can comprise flow:
+
+Flow Element Type | Syntax | Note
+-- | --
+term reference | TERM | Any word in capitals
+text | hello world | free-form text
+command | > put the pot plant in the plant pot | parser expression
+image media | title.jpg | or other image, eg image.png
+sound media | music.ogg | only ogg supported!
+code | { /* code here */ } | anything in {} is code
+
+If an object definition has command flow before its selectors, this is evaluated at the start, after processing all the objects. So `> put it in study` will result in the dead body being (initially) located in the study.
+
+
+### Inheritance
+
+Let's go over those base terms again;
+
+
+```
+CONCEPT@
+* name
+concept
+* x it
+BORING
+* examine it
+> x it
+* look it
+> x it
+* l it
+> x it
+
+BORING
+You don't find anything useful.
+
+THING@ CONCEPT
+* name
+a thing
+* get it
+You can't get that.
+* drop it
+You don't have that!
+
+PLAYER@ THING
+* name
+the player
+* name
+me
+* x it
+You're looking good!
+* i
+INV
+* inv
+INV
+```
+
+So now we're going to see the point of inheritance and base types. Suppose we type `examine player`, there is no match for this in `player` (only `x player`). But because `player` is a `THING`, `THING` is matched for `examine`, but it's not there either, but because `THING` is `CONCEPT`, we find eventually `examine it` in `CONCEPT`.
+
+But, `examine it` in `CONCEPT` flows to the command `> x it` which winds up matching `x it` in `PLAYER` (as it = player).
+
+So this is how we build verb synonyms. Also we see `look player` and `look at player` will work (since there is no express "look at" match, it falls to "look").
+
+But there's more. Why are there method for `get` and `drop` on `THING`?
+
+That's because "things" are not gettable, so these are catch-alls, the same as `x it` on `CONCEPT` flows to `BORING`, which is a copout generator (there's only one in the example, but you'd have a few for variety).
+
+To make something gettable, make a new term `GETTABLE` like this:
+
+```
+GETTABLE@ THING
+* get it
+DOGET
+* drop it
+DODROP
+
+DOGET > put it in player
+* ok
+You get IT.
+*
+You can't get IT.
+
+DODROP > put it in here
+* ok
+You drop IT.
+XHERE
+*
+You can't do that.
+```
+
+How does this work? Well, actually there's nothing conceptually new here.
+
+Let's say you're getting something that's `GETTABLE`, you'll match `get it` in GETTABLE, which flows to `DOGET`.
+
+Now, `DOGET` has a command as a _topflow_ !!
+
+Which means `> put it in player` is evaluated and the result ("ok" or not), matched by the selectors of `DOGET` - recall that, terms with topflows are filters! So this structure is used to test whether `put` worked or not and generate appropriate output.
+
+For comparison, suppose instead we'd had;
+
+```
+GETTABLE@ THING
+* get it
+> put it in player
+IT taken.
+* drop it
+> put it in here
+IT dropped.
+```
+
+This would sure work providing it was possible, so for example, `> get note` would work, but then you could type `> get note` _again_ and it would claim `note taken`. You could also attempt to drop things _not being carried!_
+
+So inheritance has taken the mechanics of `get` and `drop` out of the object itself and tidied this up to a base class.
+
+We _do_ have a "note" in the game, so we can mark it as `GETTABLE`, then deal specifically with its own methods, such as `> read it`.
+
+```
+NOTE@ GETTABLE
+* name
+the note
+* x it
+XNOTE
+* read it
+XNOTE
+```
+
+You could have special cases for `> get note` on `NOTE`, perhaps with a condition, that if true would override the default `GETTABLE`.
+
+If you're following this so far, you can see that we _really_ are building worlds from scratch. Even the usual stuff like getting and dropping objects is user defined. As are all the nouns, verbs and adjectives (adverbs too!).
+
+In practice, the material here would be constitute a library or core module to include. The reusable core would contain `CONCEPT`, `THING`, `GETTABLE`, `PLAYER` and a bunch of other useful stuff.
+
+We'll finish by defining the inventory and the main loop, then show the complete example.
+
+Earlier we invoked `INV`, how does this work?
+
+```
+INV > what is in player
+* them
+You're carrying, LAST.
+*
+You're empty handed.
+```
+
+Turns out the parser can handle questions as well as commands, so `> what is in player` will result in _flow_ of terms.
+
+`* them` matches any list, and `* it` matches just one, so the trick above is simply to format the output nicely. Find the inventory, and print them out and also to deal with the case when the list is empty using the catch-all.
+
+Here's the main loop;
+
+```
+MAINLOOP
+WHATSHERE.
+CMD
+MAINLOOP
+
+STUFFHERE > what is in here
+* PLAYER
+*
+LAST
+
+WHATSHERE
+\nYou can see, STUFFHERE
+
+CMD?
+Now what?
+*
+```
+
+So `WHATSHERE` is just a text introduction to `STUFFHERE`, which runs a query into a filter which _removes the player_ from the list. The result of `STUFFHERE` is thus a flow of object terms, which finally textify themselves.
+
+The only new trick is `CMD`;
+
+This is a choice term with a single blank choice. A blank choice means we can have parser input. In general we could mix choices with parser like this;
+
+```
+DOWHAT?
+* panic
+Calm down!
+* give up
+QUIT
+*
+```
+This would both present choices _and_ allow parser input. We'll be using this later with hybrid parser-choice games.
+
+So here's the complete example. If you play this, you'll notice there's no actual game only a few commands, and those are somewhat rough. To make this polished, the fiddly bits would be hived off to a separate "core" library, clearing the game file for the fun.
+
+```
+GAME
+Hi! Welcome to homicide, try not to kill people!
+What is your name? HARRY
+Ok HARRY, you have been assigned to solve the mystery death of professor Jones.
+PART1
+
+HARRY?!
+* Harry
+* Larry
+* Barry
+* Gary
+* Sally
+
+PART1?
+\nWhat next?
+* Investigate the crime scene?
+\OK get's go! CRIMESCENE
+* Read the report?
+Professor Jones was the leading expert researching the deadly "Rona" virus.
+He's been stabbed to death, the evening before he was to present his research findings. Could a rival be involved? 
+* Drink some tea?
+Sorry, you're out of tea!
+
+  PART1
+
+CRIMESCENE
+> put player in study
+You arrive at the crime scene.
+XHERE
+MAINLOOP
+
+XHERE
+> x here
+
+
+CONCEPT@
+* name
+concept
+* x it
+BORING
+* examine it
+> x it
+* look it
+> x it
+* l it
+> x it
+
+BORING
+You don't find anything useful.
+
+THING@ CONCEPT
+* name
+a thing
+* get it
+You can't get that.
+* drop it
+You don't have that!
+
+PLAYER@ THING
+* name
+the player
+* name
+me
+* x it
+You're looking good!
+* i
+INV
+* inv
+INV
+
+ROOM@ THING
+* look
+XHERE
+* l
+> look
+
+STUDY@ ROOM
+* name
+the study
+* x it
+You're in professor Jones' study. It's a bit of a mess.
+
+BODY@ THING
+> put it in study
+* name
+the dead body
+* x it
+XBODY
+
+XBODY<
+* Professor Jones has been stabbled throught the heart with a knife.
+A note falls out the professor's pocket.
+> put knife in study
+> put note in study
+* It's the dead professor.
+
+NOTE@ GETTABLE
+* name
+the note
+* x it
+XNOTE
+* read it
+XNOTE
+
+XNOTE
+Scrawled on the paper in crayon is the words, "You'll never get me copper! I'm too clever for you!"
+
+
+GETTABLE@ THING
+* get it
+DOGET
+* drop it
+DODROP
+
+DOGET > put it in player
+* ok
+You get IT.
+*
+You can't get IT.
+
+DODROP > put it in here
+* ok
+You drop IT.
+XHERE
+*
+You can't do that.
+
+
+KNIFE@ GETTABLE
+* name
+a knife
+* x it
+It's a nasty piece of work.
+
+MAINLOOP
+WHATSHERE.
+CMD
+MAINLOOP
+
+STUFFHERE > what is in here
+* PLAYER
+*
+LAST
+
+WHATSHERE
+\nYou can see, STUFFHERE
+
+CMD?
+Now what?
+*
+
+INV > what is in player
+* them
+You're carrying, LAST.
+*
+You're empty handed.
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+### Asynchronous Flow
+
+Timers.
+
+
+
+## Building Parser Choice Games
+
+These are games where the player has both choices and text entry _at the same time_.
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
