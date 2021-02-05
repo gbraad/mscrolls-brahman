@@ -1156,7 +1156,7 @@ The Stands engine can feed the GUI so the choices appear as selections;
 
 ![](mm2.png)
 
-## Building Parser Games
+## Fundamentals of Parser Games
 
 We now move on to building parser games.
 
@@ -1166,7 +1166,7 @@ The difference between a "parser game" and those built so far is that, apart fro
 
 The _world model_ is a set of objects, their relationships and their behaviour, ie how they respond to interaction.
 
-### Building the World
+### Building the World from Scratch!
 
 The world is built from objects and these are _terms_ just like we've seen before. So far we've seen terms as generators and as choices, and now we can turn a term into an object using the `@` indicator.
 
@@ -1645,149 +1645,350 @@ You're carrying, LAST.
 You're empty handed.
 ```
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+## Building Worlds with the Core Library
+
+In the previous sections we were building absolutely everything from scratch.
+This isn't necessary, nor is it really necessary to customise the fundamentals of world building.
+
+The `core.str` library has been put together to contain a standard template for building parser worlds. It has everything we've seen already (and more) predefined so all you need to do is drop it into your project to get started.
+
+Let's see how you can use this to get started right away, without even having to understand how it works.
+
+We're going to revisit our old friend "Murder at the Manor", except this time, we're going to turn it into a traditional parser game.
+
+### File Organisation
+
+```
+murdermanor
+│   story.str
+│   map.str
+│   murdermanor.str
+│   core.str
+│   ...
+│
+└───images
+│       title.jpg
+│       map.png
+│       hall.jpg
+│       study.jpg
+│       ...
+│       
+└───sounds
+        ...
+        
+```
+
+We're going to split the Strands into multiple `.str` files, and put the media into subdirectories. `core.str` can just be copied in unmodified, and for the others we have:
+
+File | Description
+-- | --
+story.str | front end meta-data
+map.str | location layout
+murdermanor.str | main game defition
+core.str | system library
+
+One way to get started is to copy the `murdermanor` sample and hack it!
+
+### Meta Data
+
+These live in `story.str`, which will be the initial file to load and will specifiy the other files needed for the runtime.
+
+Here's what it looks like:
+
+```
+START
+INITCORE
+STORY
+
+GAME_FILES
+core.str map.str murdermanor.str
+
+GAME_TITLE
+Murder at the Manor
+
+GAME_AUTHOR
+by A.Hacker
+
+GAME_ORGANISATION
+Strand Games
+
+GAME_BACKIMAGE
+images/title.jpg
+
+GAME_COVERTEXT
+:color:blue,font:Kanit Thin,weight:200
+
+MAP_BACKIMAGE
+images/map.png
+
+GAME_META
+:ui_ucanvas:false,ui_sidebar:true,autolink:false
+
+GAME_CREDITS
+<h1>GAME_TITLE<br/><em>by GAME_ORGANISATION</em></h1>
+<h3>Implemented in Strands</h3>
+<p>This game was lovingly hacked together using the Strands engine.</p>
+<h4>Strand Games Team</h4>
+<ul>
+<li>Hugh Steers</li>
+<li>Stefan Meier</li>
+<li>Stefan Bylund</li>
+</ul>
+<h4>Writing</h4>
+<ul><li>An Author</li></ul>
+<h4>Art</h4>
+<ul><li>An Artist</li></ul>
+<h4>Music</h4>
+<ul>
+<li>A Musician</li>
+<li>Additional Music thanks to <a href="http://www.soundimage.org">Eric Matyas</a></li>
+</ul>
+<h4>Testing</h4>
+<ul><li>A Tester</li></ul>
+```
+
+Apart from `START` and `GAME_FILES`, none of this is needed in console mode and it's all for the GUI.
+
+Term | Description
+-- | --
+GAME_FILES | list of other `.str` files needed at runtime.
+GAME_TITLE | for GUI cover page
+GAME_AUTHOR | for GUI cover pagep
+GAME_ORGANISATION | for GUI cover page
+GAME_BACKIMAGE | image for GUI cover page
+GAME_COVERTEXT | font settings for cover page text
+MAP_BACKIMAGE | image for map background
+GAME_META | GUI configuration (see `ifi` specification)
+GAME_CREDITS | HTML to appear on the GUI credit screen
+
+### Making the Map
+
+There are no new concepts needed to define the game location layout, but it is practical to put all the "rooms" into a separate `map.str` file which also specifies their interconnection.
+
+Here's `map.str`, you'll see how they interconnect:
+
+```
+/*
+
+                               +------------------------+
+                               |                        |
+                               |  Garden                |
+                               |                        |
+                               |                        |
+                               |                        |
+                               +-------------+  +-------+
+                                             |  |    
+                 +------------------+  +-----+  +-------+
+                 |                  |  |                |
+                 |  Kitchen         |  |                |
+                 |                  |  | Dining Room    |
+                 +----------+ +-----+  |                |
+                       +----+ +-----+  |                |
+                       |            |  |                |
+                       |            |  |                |
+                       |            |  +-----+--+-------+
+                       |            |        |  |    
+  +-----------------+  |            |  +-----+--+-------+
+  |                 |  |            |  |                |
+  |                 |  |  Hall      |  |                |
+  |                 |  |            |  | Drawing Room   |
+  |                 +--+            +--+                |
+  |   Study                                             |
+  |                 +--+            +--+                |
+  |                 |  |            |  |                |
+  +-----------------+  +------------+  +----------------+
+
+*/
+
+MANOR@ INSIDE
+* name
+the manor
+* name
+house
+
+//////////////////// hall
+
+HALL@ MANOR
+* name
+the hall
+* x it
+You're in the hall.
+Westwards is the study, east is the drawing room and further north leads to the kitchen.
+* w
+GOSTUDY
+* go study
+GOSTUDY
+* e
+GODRAWINGROOM
+* go drawing room
+GODRAWINGROOM
+* n
+GOKITCHEN
+* go kitchen
+GOKITCHEN
+
+GOHALL
+> put player in hall
+You go into the hall.
+images/hall.jpg
+XHERE
+
+///////////////////// study
+
+STUDY@ MANOR
+* name
+the study
+* x it
+You're in the study.
+Back east is the hall.
+* e
+GOHALL
+* go hall
+GOHALL
+
+GOSTUDY
+> put player in study
+You go into the study.
+images/study.jpg
+XHERE
+
+///////////////////// drawing room
+
+DRAWINGROOM@ MANOR
+* name
+the drawing room
+* x it
+You're in the drawing room.
+West leads back to the hall, while the room leads north into the dining room.
+* w
+GOHALL
+* go hall
+GOHALL
+* n
+GODININGROOM
+* go dining room
+GODININGROOM
+
+GODRAWINGROOM
+> put player in drawing room
+You go into the drawing room.
+images/drawing.jpg
+XHERE
+
+//////////////////// Dining room
+
+DININGROOM@ MANOR
+* name
+the dining room
+* x it
+This is the dining room, you can go further north out into the garden or back south to the drawing room.
+* s
+GODRAWINGROOM
+* go drawing room
+GODRAWINGROOM
+* n
+GOGARDEN
+* go garden
+GOGARDEN
+
+GODININGROOM
+> put player in dining room
+You go into the dining room.
+images/dining.jpg
+XHERE
+
+//////////////////// Garden
+
+GARDEN@ OUTSIDE
+* name
+the garden
+* x it
+You're outside in the garden.
+An exit south leads back into the house.
+* s
+GODININGROOM
+* go dining room
+GODININGROOM
+
+GOGARDEN
+> put player in garden
+You go into the garden.
+images/garden.jpg
+XHERE
+
+////////////////// kitchen
+
+KITCHEN@ MANOR
+* name
+the kitchen
+* x it
+You're in the kitchen.
+The south exit takes you back into the hall.
+* s
+GOHALL
+* go hall
+GOHALL
+
+GOKITCHEN
+> put player in kitchen
+You go into the kitchen.
+images/kitchen.jpg
+XHERE
+```
+
+Here, we define our six locations. The location descriptions are deliberately terse, to make things easier to see.
+
+Firstly, we've defined a holding location, `MANOR` which is a base for everthing except the garden. An `INSIDE` has walls and is defined in `core.str`. Anything we want to add generally to the manor can go here.
+
+Let's examine the `HALL` in detail, the rest are all similarly constructed.
+
+We give it a `name` and a description with `x it`, then we define reactors to move to the study, the kitchen and the drawing room. So `go study` flows to `GOSTUDY` as does `w`.
+
+We add reactors like `n`, `s`, `e`, `w`, if we want to support compass directions. You only need thes if you want to support traditional compass navigation. You don't need to worry about the other ways to move, since `core.str` maps variants like `go west` and `go w` to `w`.
+
+It makes sense to define a term to perform the actual movement, in this case `GOSTUDY`. This is so it can be used anywhere. If we have a "hall", then you probably want a `GOHALL` as well.
+
+```
+GOSTUDY
+> put player in study
+You go into the study.
+images/study.jpg
+XHERE
+```
+
+Is a straightforward term which has a command flow, a text flow, an image flow and finally a term `XHERE` which refreshes the text and updates the top bar on the GUI. `images/study.jpg` will display the location picture.
+
+You can use `.jpg` or `.png` as well as animated PNGs.
+
+One this is all done, you should be able to move about your game!
+
+
+### Building the main Game
+
+All that's left now is to write the actual game itself :-)
+
+
+```
+STORY
+Major Stephenson has been shot dead in his study! You must solve the murder.
+You have deduced that exactly one member of the household is the guilty party.
+
+The Suspects are; Charles, Major Stephenson's brother and business partner,
+Charlotte the Major's wife, Jimmy the son or possibly Jeeves the family butler.
+BEGIN
+
+// computer randomly picks murderer each game
+MURDER!
+* Jimmy
+* Charlotte
+* Charles
+* Jeeves
+
+BEGIN
+UPDATEMAP
+GOHALL
+MAIN
+```
 
 ### Asynchronous Flow
 
@@ -1798,6 +1999,18 @@ Timers.
 ## Building Parser Choice Games
 
 These are games where the player has both choices and text entry _at the same time_.
+
+## Animation
+
+Simple animation can be made as animated PNGs, but complex ones are built using [Spine](http://esotericsoftware.com/). The Strand GUI has the spine 2D animation runtime built in and all that's needed is to drop the spine output files into the `images` folder and use them.
+
+
+
+
+
+
+
+
 
 
 

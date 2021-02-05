@@ -457,11 +457,14 @@ struct ParseCommand: public ParseBase
     pnode* parseType(const string& w, Word::POS pos, uint t = 0) const
     {
         pnode* pn = 0;
-        const Word* wt = wordType(w, pos);
+        if (w.size())
+        {
+            const Word* wt = wordType(w, pos);
 
-        DLOG0(_debug > 1, "parsing '" << w << "' as " << Word::posName(pos) << (wt ? " ok" : " fail"));
-        if (wt)
-            pn = new pnode(wt, t);
+            DLOG0(_debug > 1, "parsing '" << w << "' as " << Word::posName(pos) << (wt ? " ok" : " fail"));
+            
+            if (wt) pn = new pnode(wt, t);
+        }
         return pn;
     }
 

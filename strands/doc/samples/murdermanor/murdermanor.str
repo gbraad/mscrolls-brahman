@@ -1,0 +1,30 @@
+
+///////////////////////////////////////////////////////////
+
+STORY
+Major Stephenson has been shot dead in his study! You must solve the murder.
+You have deduced that exactly one member of the household is the guilty party.
+
+The Suspects are; Charles, Major Stephenson's brother and business partner,
+Charlotte the Major's wife, Jimmy the son or possibly Jeeves the family butler.
+BEGIN
+
+// computer randomly picks murderer each game
+MURDER!
+* Jimmy
+* Charlotte
+* Charles
+* Jeeves
+
+BEGIN
+UPDATEMAP
+GOHALL
+MAIN
+
+///////////////////////////////////////////////
+
+
+
+
+
+

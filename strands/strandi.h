@@ -1381,9 +1381,11 @@ struct Strandi: public Traits
             matching = true;
 
             // mask choices in topflow
-            // This prevents choices being run and instead
+            // prevent choices being run and instead
             // returns the previous choice made if any
-            _pushcap(~run_choice);
+            // prevent media, emit as string instead.
+            int m = ~run_choice & ~run_media;
+            _pushcap(m);
             choices._valid = run(t->_topflow);
             
             // NB: result can be empty
@@ -2785,9 +2787,10 @@ struct Strandi: public Traits
     {
         bool v = false;
 
-        std::vector<Selector*> matches;
         for (auto& r : _ctx->_reactions) // search scope
         {
+            r._rank = 0; // no match
+            
             execInfo rei(r._reactor);
             if (prepareExecInfo(rei) && execValidate(rei))
             {
@@ -2865,7 +2868,7 @@ struct Strandi: public Traits
                     // match!
                     assert(rank);
                     r._rank = rank;
-                    DLOG1(_pcom._debug, "reactor match", textify(rei._ps));
+                    DLOG1(_pcom._debug, "reactor match", textify(rei._ps) << " rank " << r._rank);
                 }
             }
             else
@@ -3163,6 +3166,8 @@ struct Strandi: public Traits
 
                 if (!pass)
                 {
+                    //DLOG1(1, "pass 1 pre-parsing ", *ec);
+
                     pnode* pv = _pcom.parseVerb(ec->_command.c_str());
                     if (pv)
                     {
@@ -3178,6 +3183,10 @@ struct Strandi: public Traits
                             // in other commands for the second pass
                             delete _pcom.parse(ec->_command); 
                         }
+                    }
+                    else
+                    {
+                        //DLOG1(1, "failed to pre-parse verb ", *ec);
                     }
                 }
                 else
@@ -3238,6 +3247,7 @@ struct Strandi: public Traits
     void _buildDictionary()
     {
         // adds words used in object reactors to dictionary
+        // creates initial verb list.
         // also add term IDs
         
         for (auto t: *_terms)
@@ -3257,8 +3267,8 @@ struct Strandi: public Traits
                 {
                     // examine the object reactions
                     // some are special keywords
-                    // otherwise they care command templates
-
+                    // otherwise they are command templates
+                    
                     // Don't evaluate the flow, as this must happen when
                     // we parse the templates,
                     // instead just look for the first textual word
