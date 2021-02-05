@@ -49,6 +49,7 @@
 #define TERM_LAST   "LAST"
 #define TERM_IT     "IT"
 #define TERM_TICK   "TICK"
+#define TERM_NOT_FOUND "NOT_FOUND"
 
 // special properties
 #define PROP_IN     "in"

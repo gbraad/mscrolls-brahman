@@ -1,0 +1,207 @@
+// Strand Core library 1.0
+
+MAIN
+WHATSHERE
+TICK
+CMD
+MAIN
+
+MORE?
+*+ Continue
+
+STUFFHERE > what is in here
+*
+> be LAST
+
+WHATSHERE STUFFHERE
+* them
+\nYou can see LAST.
+
+CMD?>
+*
+
+ADDFUNCTIONS
+{
+    (setq make-item
+          (fn (x)  (tree (list 'id (termid x)) (list 'name (textify x)))
+              ))
+
+    (setq get-title
+          (fn (t) (tree (list 'title (capswords (textify t))))
+              ))
+
+}
+
+UPDATEINV > what is in player
+* them
+{
+    (ifisend (tree (list 'items (map make-item IT))))
+}
+*
+{ (ifisend (tree (list 'items ()))) }
+
+UPDATETITLE > what is player in
+*
+{ (ifisend (get-title IT)) }
+
+
+CONCEPT@
+* name
+concept
+* x it
+BORING
+* examine it
+> x it
+* look it
+> x it
+* l it
+> x it
+
+BORING
+You don't find anything useful.
+
+THING@ CONCEPT
+* name
+a thing
+* get it
+You can't get that.
+
+XHERE
+\
+UPDATETITLE
+> x here
+
+
+PLAYER@ THING
+* name
+the player
+* name
+me
+* x it
+You're looking good!
+* i
+INV
+* inv
+INV
+
+NOT_FOUND
+You can't do that.
+
+ROOM@ THING
+* look
+XHERE
+* l
+> look
+
+PERSON@ THING
+
+EAST@ 
+* name
+east
+
+WEST@ 
+* name
+west
+
+NORTH@
+* name
+north
+
+SOUTH@
+* name
+south
+
+UP@
+* name
+up
+
+DOWN@
+* name
+down
+
+
+GETTABLE@ THING
+* be it
+IT
+*= get it
+DOGET
+* drop it
+DODROP
+* postget it
+NULL
+* postdrop it
+NULL
+
+// dummy
+NULL
+
+
+DOGET > put it in player
+* ok
+You get IT.
+UPDATEINV
+> postget it
+*
+You can't get IT.
+
+DODROP > put it in here
+* ok
+You drop IT.
+> postdrop it
+UPDATEINV
+XHERE
+*
+You can't do that.
+
+
+INV > what is in player
+* them
+You are carrying, LAST.
+*
+You're empty handed.
+
+// where dead things go
+DEATH@ ROOM
+* name
+death
+
+/////////////////////////////////////
+
+WALLS@ THING
+* name
+walls
+* name
+wall
+
+FLOOR@ THING
+* name
+floor
+* name
+ground
+
+SKY@ THING
+* name
+the sky
+
+XFLOOR
+* It keeps you from falling down!
+* Don't bother with the ground, it's beneath you!
+
+XWALLS
+* The walls aren't really interesting.
+* Looking at the walls won't help!
+
+INSIDE@ ROOM
+* x walls
+XWALLS
+* x floor
+XFLOOR
+
+OUTSIDE@ ROOM
+* x sky
+It's up there.
+* x ground
+XFLOOR
+
+
+

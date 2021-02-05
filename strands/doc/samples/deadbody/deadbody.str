@@ -1,0 +1,84 @@
+
+///////////////////////////////////////////////////////////
+
+INTRODUCTION
+Hi! Welcome to homicide, try not to kill people!
+What is your name? HARRY
+Ok HARRY, you have been assigned to solve the mystery death of professor Jones.
+
+HARRY?!
+* Harry
+* Larry
+* Barry
+* Gary
+* Sally
+
+STORY?
+\nWhat next?
+* Investigate the crime scene?
+\OK get's go! CRIMESCENE
+* Read the report?
+Professor Jones was the leading expert researching the deadly "Rona" virus.
+He's been stabbed to death, the evening before he was to present his research findings. Could a rival be involved? 
+* Drink some tea?
+Sorry, you're out of tea!
+
+  STORY
+
+CRIMESCENE
+> put player in study
+You arrive at the crime scene.
+XHERE
+MAIN
+
+///////////////////////////////////////////////
+
+STUDY@ INSIDE
+* name
+the study
+* x it
+You're in professor Jones' study. It's a bit of a mess.
+The dead body of the professor lies slumped on the floor.
+
+
+BODY@ THING
+> put it in study
+* name
+the dead body
+* x it
+XBODY
+
+XBODY<
+* Professor Jones has been stabbled throught the heart with a knife.
+A note falls out the professor's pocket.
+> put knife in study
+> put note in study
+* It's the dead professor.
+
+NOTE@ GETTABLE
+* name
+the note
+* x it
+XNOTE
+* read it
+XNOTE
+
+XNOTE
+Scrawled on the paper in crayon is the words, "You'll never get me copper! I'm too clever for you!"
+
+KNIFE@ GETTABLE
+* name
+a knife
+* x it
+It's a nasty piece of work.
+
+
+
+
+
+
+
+
+
+
+

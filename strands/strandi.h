@@ -170,6 +170,7 @@ struct Strandi: public Traits
     Term*       _player = 0;
     Term*       _thing = 0;
     Term*       _tick = 0;
+    Term*       _notFound = 0;
 
     jmp_buf     _env_top;
     int         _time = 0;
@@ -950,7 +951,6 @@ struct Strandi: public Traits
 #else
                 // for console mode, we just emit head flow
                 // then emit the choices as text
-                _emit('\n');
                 OUTP(c._headFlow);
 
                 // emit the current capture
@@ -974,11 +974,13 @@ struct Strandi: public Traits
                 // choices count from 1
                 ch = 0;
 
+                int nchoices = c.size();
+
                 if (!line.size())
                 {
                     // blank line accepts single choice by default
                     // unless cmd available.
-                    if (c.size() == 1 && !c._cmdChoice)
+                    if (nchoices == 1 && !c._cmdChoice)
                     {
                         accept = true;
                         ch = 1;
@@ -988,9 +990,10 @@ struct Strandi: public Traits
                 {
                     // choices must be a number at the start
                     // otherwise assume command input
-                    if (u_isdigit(line[0]))
+                    if (nchoices > 0 && u_isdigit(line[0]))
                     {
-                        ch = std::stoi(line);
+                        // prevent stoi overflow
+                        if (line.length() < 10) ch = std::stoi(line);
                         if (ch > 0 && ch <= (int)c.size()) accept = true;
                     }
                     else
@@ -1070,10 +1073,28 @@ struct Strandi: public Traits
                         {
                             execInfo ei(ps);
                             accept = exec(ei);
-                            updateIt(ei);
+                            if (accept)
+                            {
+                                updateIt(ei);
                         
-                            // and run any action after command
-                            c._valid = run(c._cmdChoice->_action);
+                                // and run any action after command
+                                c._valid = run(c._cmdChoice->_action);
+                            }
+                            else
+                            {
+                                /*
+                                Word notFound(TERM_NOT_FOUND);
+                                pnode fb(&notFound, nodeType::p_verb);
+                                fb._binding = new pnode::Binding;
+                                fb._binding->push_back(_notFound);
+                                execInfo fallback;
+                                fallback._verbn = &fb;
+                                accept = exec(fallback);
+                                */
+
+                                if (_notFound)
+                                    accept = run(_notFound);
+                            }
                         }
 
                         // will also delete bindings
@@ -2747,9 +2768,9 @@ struct Strandi: public Traits
     {
         Term* it = 0;
 
-        // bind dobj to "it"
         if (ei._dobj)
         {
+            // bind dobj to "it"
             assert(!ei._dobj->empty());
             it = ei._dobj->front();
             _ctx->pushIt(it);
@@ -2765,7 +2786,7 @@ struct Strandi: public Traits
         bool v = false;
 
         std::vector<Selector*> matches;
-        for (auto& r : _ctx->_reactions)
+        for (auto& r : _ctx->_reactions) // search scope
         {
             execInfo rei(r._reactor);
             if (prepareExecInfo(rei) && execValidate(rei))
@@ -3000,8 +3021,12 @@ struct Strandi: public Traits
         _thing = Term::find(TERM_THING);
         if (!_thing) DLOG0(_pcom._debug, "There is no THING!");
 
-        _tick =  Term::find(TERM_TICK);
+        _tick =  Term::find(TERM_TICK); // automatically added
         assert(_tick);
+
+        // optional handler when cannot resolve
+        _notFound = Term::find(TERM_NOT_FOUND);
+        if (!_notFound) DLOG0(_pcom._debug, "Warning, There is no NOT_FOUND!");
 
         // calculate initial scope
         updateScope();
@@ -3110,11 +3135,9 @@ struct Strandi: public Traits
                 ERR0("not prepared");
             }
             
-#ifdef __EMSCRIPTEN__
             // appears to need extra flushing right at end?
             _emit('\n');
             flush();
-#endif
         }
         return v;
     }

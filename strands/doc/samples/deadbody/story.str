@@ -1,0 +1,56 @@
+START
+ADDFUNCTIONS
+INTRODUCTION
+STORY
+
+GAME_FILES
+core.str deadbody.str
+
+GAME_TITLE
+Game Title
+
+GAME_AUTHOR
+by The Author
+
+GAME_ORGANISATION
+Strand Games
+
+GAME_BACKIMAGE
+images/title.jpg
+
+GAME_COVERTEXT
+:color:blue,font:Kanit Thin,weight:200
+
+GAME_META
+:ui_ucanvas,ui_sidebar:false
+
+GAME_CREDITS
+<h1>GAME_TITLE<br/><em>by GAME_ORGANISATION</em></h1>
+<h3>Implemented in Strands</h3>
+<p>This game was lovingly hacked together using the Strands engine.</p>
+<h4>Strand Games Team</h4>
+<ul>
+<li>Hugh Steers</li>
+<li>Stefan Meier</li>
+<li>Stefan Bylund</li>
+</ul>
+<h4>Writing</h4>
+<ul>
+<li>Neil Rees</li>
+</ul>
+<h4>Art</h4>
+<ul>
+<li>The Painter</li>
+</ul>
+<h4>Music</h4>
+<ul>
+<li><a href="https://www.darrencurtismusic.com">Darren Curtis</a></li>
+//<li><a href="http://www.soundimage.org">Eric Matyas</a></li>
+</ul>
+<h4>Testing</h4>
+<ul>
+<li>Jkj Yuio</li>
+</ul>
+
+
+

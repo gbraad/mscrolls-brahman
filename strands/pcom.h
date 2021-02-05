@@ -163,10 +163,12 @@ struct pnode: public node<pnode>
         p_query, //20
         p_qs, // 21 query sentence
     };
+
+    typedef std::list<Term*> Binding;
     
 
     const Word*     _word = 0;
-    std::list<Term*>* _binding = 0;
+    Binding*        _binding = 0;
 
     pnode(const Word* wt, int t = 0) : node(t), _word(wt) {}
     pnode(pnode* l, int t) : node(l, t) {}
