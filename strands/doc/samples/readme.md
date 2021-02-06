@@ -10,6 +10,7 @@ These go with the manual.
 
 * [Dead Body](http://stvle.s3.amazonaws.com/deadbody/deadbody.html)
 
+* [Murder at the Manor - Parser Version](http://stvle.s3.amazonaws.com/murdermanor/murdermanor.html)
 
 
 

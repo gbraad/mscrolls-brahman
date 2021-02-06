@@ -1166,7 +1166,7 @@ The difference between a "parser game" and those built so far is that, apart fro
 
 The _world model_ is a set of objects, their relationships and their behaviour, ie how they respond to interaction.
 
-### Building the World from Scratch!
+### World Models from Scratch
 
 The world is built from objects and these are _terms_ just like we've seen before. So far we've seen terms as generators and as choices, and now we can turn a term into an object using the `@` indicator.
 
@@ -1644,6 +1644,71 @@ You're carrying, LAST.
 *
 You're empty handed.
 ```
+
+### Scope
+
+A very important concept not yet mentioned is that of _scope_.
+
+_What is scope?_
+
+Loosely speaking the _scope_, in relation to the player, is _the set of objects the player can interact with at any one time_.
+
+The scope depends on the relationship of objects and changes with that relationship. In theory, every object has a scope, but we are mainly concerned with the scope with respect to the player.
+
+`Strand` models the primary location of objects in terms of containers. 
+
+Here's an example player scope from containers, indicated by shaded boxes.
+
+![](scope1.png)
+
+
+Approximately, the player scope is:
+
+1. Anything inside the player (recursively), for example carried items, clothing and body parts.
+2. The object containing the player (the _player location_).
+3. All objects containing the player location up to the root.
+4. All objects (recursively) inside the player location, unless inside closed containers.
+
+These rules overlap somewhat, but some concepts like the _player location_ is an important concept in its own right.
+
+From the diagram we can see objects the player can currently access. For example, the player could `> examine a thing` and it would be in scope. Also the `open cupboard` and `something` inside it is also in scope.
+
+The `closed box` is in scope, but `a coin` is not.
+
+You can also see that `far away` places aren't in scope, nor is the `remote thing` in `another room`.
+
+But wait, `another room` is partially shaded, is it in scope?
+
+We now come to the problem of there being slightly different kinds of scope. There's the _interactive scope_, ie things you can examine, pick up and interact with, and then there's the _reference scope_, which are things you can mention at but not actually reach.
+
+For example, in a game which says "East of here is the dining room", you'd expect to be able to say `> go into the dining room`. But the dining room is _not_ in the interactive scope, but you can reference it!
+
+Other times the reference scope differs from the interactive scope is for things like;
+
+1. Objects seen at a distance through a window.
+2. Objects inside transparent closed containers.
+3. Objects in the "room" when the player is inside something like a cupboard.
+
+Turns out (3) is really no different than before. The following diagram shows the scope when the player climbs into the `open cupboard` (if that's possible). The other items previously in the room are no longer in the _interactive scope_, but only the _reference scope_.
+
+
+![](scope2.png)
+
+Some final notes about scope and containers;
+
+Not shown in the diagram is the fact that objects are _not_ restricted to a single container. In other words an object has a _set of containers_.
+
+Why would you ever want something in two places at once?
+
+Although not possible in the real world (presumably), this is convenient for game worlds.
+
+Game world objects that benefit from being in multiple locations:
+
+* _Doors_
+  A door is a threshold between two locations when modelled as "rooms". The player can interact with the _same door_ from both locations and its state is reflected in both. For example, if the door can be either open or closed, then it is seen as so from _both_ adjacent locations. If the door is "broken", then that state is also common.
+
+* _Some scenery objects_
+  Let's say you have a river that flows through various locations. The river, the water and all things connected to it are in _all those locations_. `Strand` minimises this type of object by supporting nested locations, so for example the `house walls` can be in the `house` and be brought into scope for all the house rooms.
 
 ## Building Worlds with the Core Library
 
