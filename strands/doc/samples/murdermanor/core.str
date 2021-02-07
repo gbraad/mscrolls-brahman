@@ -17,7 +17,7 @@ WHATSHERE STUFFHERE
 * them
 \nYou can see LAST.
 
-CMD?>
+CMD?
 *
 
 INITCORE
@@ -77,6 +77,7 @@ UPDATETITLE
 > x here
 
 
+// NB: player is not a person!
 PLAYER@ THING
 * name
 the player
@@ -100,8 +101,15 @@ NOWAY
 * You can't go that way.
 * There's no exit in that direction.
 
-NOT_FOUND
+ERROR_NOCANDO
 You can't do that.
+
+ERROR_NOSUCH
+There is no such thing here.
+
+ERROR_SYNTAX
+* Sorry, i don't understand.
+* I can't make sense of that.
 
 ROOM@ THING
 * look
@@ -118,6 +126,8 @@ NOWAY
 NOWAY
 
 PERSON@ THING
+* be it
+IT
 
 EAST@ 
 * name

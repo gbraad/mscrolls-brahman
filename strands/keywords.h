@@ -49,7 +49,9 @@
 #define TERM_LAST   "LAST"
 #define TERM_IT     "IT"
 #define TERM_TICK   "TICK"
-#define TERM_NOT_FOUND "NOT_FOUND"
+#define TERM_NOCANDO "ERROR_NOCANDO"
+#define TERM_NOSUCH "ERROR_NOSUCH"
+#define TERM_SYNTAX "ERROR_SYNTAX"
 
 // special properties
 #define PROP_IN     "in"

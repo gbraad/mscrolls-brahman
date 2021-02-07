@@ -170,7 +170,9 @@ struct Strandi: public Traits
     Term*       _player = 0;
     Term*       _thing = 0;
     Term*       _tick = 0;
-    Term*       _notFound = 0;
+    Term*       _errorNocando = 0;
+    Term*       _errorNosuch = 0;
+    Term*       _errorSyntax = 0;
 
     jmp_buf     _env_top;
     int         _time = 0;
@@ -1049,6 +1051,7 @@ struct Strandi: public Traits
 
                 if (line == "?")  // debugging
                 {
+                    _printScope();
                     _printResolutionScope();
 
                     // special case to examine reactions
@@ -1069,7 +1072,7 @@ struct Strandi: public Traits
                     pnode* ps = _pcom.parse(line);
                     if (ps)
                     {
-                        if (resolve(ps))
+                        if (resolve(ps, &_ctx->_resolutionScope))
                         {
                             execInfo ei(ps);
                             accept = exec(ei);
@@ -1082,24 +1085,26 @@ struct Strandi: public Traits
                             }
                             else
                             {
-                                /*
-                                Word notFound(TERM_NOT_FOUND);
-                                pnode fb(&notFound, nodeType::p_verb);
-                                fb._binding = new pnode::Binding;
-                                fb._binding->push_back(_notFound);
-                                execInfo fallback;
-                                fallback._verbn = &fb;
-                                accept = exec(fallback);
-                                */
-
-                                if (_notFound)
-                                    accept = run(_notFound);
+                                if (_errorNocando)
+                                    accept = run(_errorNocando);
                             }
+                        }
+                        else
+                        {
+                            // no such object
+                            if (_errorNosuch)
+                                accept = run(_errorNosuch);
                         }
 
                         // will also delete bindings
                         delete ps;
                     }
+                    else
+                    {
+                        if (_errorSyntax)
+                            accept = run(_errorSyntax);
+                    }
+                        
                 }
             }
 
@@ -1882,14 +1887,25 @@ struct Strandi: public Traits
 
     static void concata(TermList& l1, TermList& l2)
     {
-        // concat without testing destroying l2
+        // concat without testing for duplicates, destroying l2
         l1.splice(l1.end(), l2);
     }
 
     static void concatc(TermList& l1, TermList& l2)
     {
-        // concat by copying l2
+        // concat by copying l2 not testing for dups
         for (auto t : l2) l1.push_back(t);
+    }
+
+    static bool restrictTo(TermList& l1, TermList& l2)
+    {
+        // remove any member of `l1` not in `l2'.
+        for (auto it = l1.begin(); it != l1.end();)
+        {
+            if (!contains(l2, *it)) it = l1.erase(it);
+            else ++it;
+        }
+        return !l1.empty();
     }
 
     static bool subset(const TermList& a, const TermList& b)
@@ -2034,7 +2050,7 @@ struct Strandi: public Traits
     {
         // calculate scope for p (usually player)
         // the scope is:
-        // all things in P (subscope)
+        // all things in P (sub-scope)
         // all things P is in recursively.
         // all things in what P is directly in.
         // and P if not already included.
@@ -2044,13 +2060,13 @@ struct Strandi: public Traits
         subInTerms(tl, p);
 
         // immediate parent "in"
-        TermList p1;
-        inTerms(p1, p);
+        TermList parents;
+        inTerms(parents, p); 
 
-        if (!p1.empty())
+        if (!parents.empty())
         {
             // add all things in parent
-            for (auto a : p1)
+            for (auto a : parents)
             {
                 TermList tl1;
                 subInTerms(tl1, a); // will include p
@@ -2058,10 +2074,10 @@ struct Strandi: public Traits
             }
 
             // all initial parents
-            concatc(tl, p1);
+            concatc(tl, parents);
 
             // then all remaining parent
-            for (auto a : p1) inTermsRec(tl, a);
+            for (auto a : parents) inTermsRec(tl, a);
         }
         else
         {
@@ -2174,8 +2190,9 @@ struct Strandi: public Traits
         return tl;
     }
 
-    bool resolve(pnode* pn)
+    bool resolve(pnode* pn, TermList* scope = 0)
     {
+        // optional termlist `scope` to restrict to
         bool res = true;
         while (pn)
         {
@@ -2190,8 +2207,10 @@ struct Strandi: public Traits
                     assert(pn->_head);
                     assert(!pn->_binding);
                     TermList* tl = resolveNoun(pn->_head, pn->_head->_next);
-                    if (tl) pn->_binding = tl;
-                    else ok = false;
+                    if (tl && scope && !restrictTo(*tl, *scope)) { delete tl;  tl = 0; }
+                    
+                    pn->_binding = tl;
+                    if (!tl) ok = false;
                     
                     // no need to continue
                     down = false;
@@ -2201,16 +2220,19 @@ struct Strandi: public Traits
                 {
                     assert(!pn->_binding);
                     TermList* tl = resolveNoun(pn, 0);
-                    if (tl) pn->_binding = tl;
-                    else ok = false;
+                    if (tl && scope && !restrictTo(*tl, *scope)) { delete tl;  tl = 0; }
+                    pn->_binding = tl;
+                    if (!tl) ok = false;
                 }
                 break;
             case nodeType::p_pronoun:
                 {
                     assert(!pn->_binding);
                     TermList* tl = resolvePronoun(pn);
-                    if (tl) pn->_binding = tl;
-                    else
+                    if (tl && scope && !restrictTo(*tl, *scope)) { delete tl;  tl = 0; }
+                    
+                    pn->_binding = tl;
+                    if (!tl)
                     {
                         ok = false;
                         ERR1("unable to resolve pronoun", pn->_word->_text);
@@ -2221,11 +2243,15 @@ struct Strandi: public Traits
 
             if (!ok)
             {
-                ERR1("unresolved:", pn->toStringStruct());
+                // not an error if given a resolution scope
+                if (!scope)
+                {
+                    ERR1("unresolved:", pn->toStringStruct());
+                }
                 res = false;
             }
             
-            if (down && !resolve(pn->_head)) res = false;
+            if (down && !resolve(pn->_head, scope)) res = false;
 
             // on way up
             switch (pn->_type)
@@ -2936,7 +2962,7 @@ struct Strandi: public Traits
             // reactor is not a command or is not parsed
             if (!ec || !ec->_parse) continue; 
             
-            // can eliminate reactors using conditions like a generator
+            // conditionals can eliminate a reactor
             if (!checkSelectorCond(s)) continue;
             
             pnode* pn = ec->_parse->copy();
@@ -3007,10 +3033,7 @@ struct Strandi: public Traits
         if (_player)
         {
             _ctx->purgeReactions();
-            
             calculateScope(_ctx->_scope, _player);
-            //_printScope();
-
             _ctx->resolveScopeReactions();
         }
     }
@@ -3019,17 +3042,23 @@ struct Strandi: public Traits
     {
         // find well known objects
         _player = Term::find(TERM_PLAYER);
-        if (!_player) DLOG0(_pcom._debug, "There is no player!");
+        if (!_player) DLOG0(_pcom._debug, "There is no " TERM_PLAYER);
 
         _thing = Term::find(TERM_THING);
-        if (!_thing) DLOG0(_pcom._debug, "There is no THING!");
+        if (!_thing) DLOG0(_pcom._debug, "There is no " TERM_THING);
 
         _tick =  Term::find(TERM_TICK); // automatically added
         assert(_tick);
 
         // optional handler when cannot resolve
-        _notFound = Term::find(TERM_NOT_FOUND);
-        if (!_notFound) DLOG0(_pcom._debug, "Warning, There is no NOT_FOUND!");
+        _errorNocando = Term::find(TERM_NOCANDO);
+        if (!_errorNocando) DLOG0(_pcom._debug, "Warning, There is no handler " TERM_NOCANDO);
+
+        _errorNosuch =  Term::find(TERM_NOSUCH);
+        if (!_errorNosuch) DLOG0(_pcom._debug, "Warning, There is no handler " TERM_NOSUCH);
+
+        _errorSyntax =  Term::find(TERM_SYNTAX);
+        if (!_errorSyntax) DLOG0(_pcom._debug, "Warning, There is no handler " TERM_SYNTAX);
 
         // calculate initial scope
         updateScope();
