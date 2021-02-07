@@ -1647,17 +1647,19 @@ You're empty handed.
 
 ### Scope
 
-A very important concept not yet mentioned is that of _scope_.
+A very important concept is that of _scope_.
 
 _What is scope?_
 
-Loosely speaking the _scope_, in relation to the player, is _the set of objects the player can interact with at any one time_.
+Loosely speaking, the _scope_ in relation to the player is _the set of objects the player can interact with at any one time_.
 
 The scope depends on the relationship of objects and changes with that relationship. In theory, every object has a scope, but we are mainly concerned with the scope with respect to the player.
 
-`Strand` models the primary location of objects in terms of containers. 
+`Strand` models the location of objects in terms of containers.
 
-Here's an example player scope from containers, indicated by shaded boxes.
+Here's an example player scope derived from containers and inheritance. The scope is indicated by shaded boxes while solid arrows show containership and hollow arrows show inheritance.
+
+For instance, `house` is a parent of `room`, in other words a "house room", while `player` is actually `room`, but `room` is not inside `house`.
 
 ![](scope1.png)
 
@@ -1666,10 +1668,8 @@ Approximately, the player scope is:
 
 1. Anything inside the player (recursively), for example carried items, clothing and body parts.
 2. The object containing the player (the _player location_).
-3. All objects containing the player location up to the root.
-4. All objects (recursively) inside the player location, unless inside closed containers.
-
-These rules overlap somewhat, but some concepts like the _player location_ is an important concept in its own right.
+3. All objects (recursively) inside the player location, unless inside closed containers.
+4. All inheritance parents of 1-3.
 
 From the diagram we can see objects the player can currently access. For example, the player could `> examine a thing` and it would be in scope. Also the `open cupboard` and `something` inside it is also in scope.
 
@@ -1687,12 +1687,13 @@ Other times the reference scope differs from the interactive scope is for things
 
 1. Objects seen at a distance through a window.
 2. Objects inside transparent closed containers.
-3. Objects in the "room" when the player is inside something like a cupboard.
+3. Things in the "room" when the player is inside something like a cupboard.
 
-Turns out (3) is really no different than before. The following diagram shows the scope when the player climbs into the `open cupboard` (if that's possible). The other items previously in the room are no longer in the _interactive scope_, but only the _reference scope_.
-
+When the player is inside something that's inside something else, such as getting into the `open cupboard`, we get the following;
 
 ![](scope2.png)
+
+Now, the interactive scope is only the cupboard and what's inside. The `room` is not in this scope. However, it's possible that the `room` and possibly things in the room are in reference scope. Whether they are or not depends on the reactors of objects in scope.
 
 Some final notes about scope and containers;
 
@@ -1708,7 +1709,10 @@ Game world objects that benefit from being in multiple locations:
   A door is a threshold between two locations when modelled as "rooms". The player can interact with the _same door_ from both locations and its state is reflected in both. For example, if the door can be either open or closed, then it is seen as so from _both_ adjacent locations. If the door is "broken", then that state is also common.
 
 * _Some scenery objects_
-  Let's say you have a river that flows through various locations. The river, the water and all things connected to it are in _all those locations_. `Strand` minimises this type of object by supporting nested locations, so for example the `house walls` can be in the `house` and be brought into scope for all the house rooms.
+  Let's say you have a river that flows through various locations. The river, the water and all things connected to it are in _all those locations_. However, in `Strand` you most likely wouldn't do this as multiple locations, but instead create a parent of the locations in question, say `riverplaces`, which would host the behviour of the river.
+
+* Anything in two places at once that can move.
+  Scenery objects don't move, so it's convenient to put their methods into locations, but for anything that _does_ move, you can't do this, and you would _have_ to use multiple locations.
 
 ## Building Worlds with the Core Library
 

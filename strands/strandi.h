@@ -2051,7 +2051,7 @@ struct Strandi: public Traits
         // calculate scope for p (usually player)
         // the scope is:
         // all things in P (sub-scope)
-        // all things P is in recursively.
+        // the thing P is in.
         // all things in what P is directly in.
         // and P if not already included.
         tl.clear();
@@ -2076,8 +2076,29 @@ struct Strandi: public Traits
             // all initial parents
             concatc(tl, parents);
 
-            // then all remaining parent
-            for (auto a : parents) inTermsRec(tl, a);
+            // all remaining parents?
+
+            /* 
+               Actually no!
+               I used to think it was natural to include all the parents
+               in the interactive scope, but it's a mistake.
+               
+               Because those parents (of the location) bring in reference
+               terms that should not be referenced.
+
+               For example, if the player get into a cupboard, you don't 
+               want the room to be in scope, otherwise you can use
+               those room reactors. 
+
+               This means the objects in room are not in scope - and they're
+               not. At least not in the interactive scope. You might be able
+               to see them, ie reference them, but not interact with them.
+
+               Situations like this might benefit from some sort of 
+               scope operator we can specify. Needs consideration.
+             */
+            
+            //for (auto a : parents) inTermsRec(tl, a);
         }
         else
         {
