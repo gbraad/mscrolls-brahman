@@ -347,7 +347,6 @@ struct Strandi: public Traits
         if (c) putchar(c);
         if (!c || c == '\n') fflush(stdout);
     }
-    
 
     void setdebug(int v)
     {
@@ -2346,6 +2345,7 @@ struct Strandi: public Traits
         bool        _output = false;  // emit results of command
         pnode*      _verbn = 0;
         const Word* _verb = 0;
+        const Word* _verbPrep = 0;
         pnode*      _dobjn = 0;
         TermList*   _dobj = 0;
         pnode*      _prepn = 0;
@@ -2386,7 +2386,29 @@ struct Strandi: public Traits
             pnode* pn = ei._verbn = ei._ps->_head;
             if (pn)
             {
-                ei._verb = ParseCommand::getVerb(pn);
+                const pnode* vpn = ParseCommand::getVerbNode(pn);
+                if (vpn)
+                {
+                    ei._verb = ParseCommand::getVerb(vpn);
+
+                    if (vpn->_type == nodeType::p_averb)
+                    {
+                        // XX ignore adverbs for now
+                        vpn = vpn->_head;
+                        assert(vpn);
+                    }
+
+                    if (vpn->_type == nodeType::p_prepverb)
+                    {
+                        // extract any prepverb such as "look at"
+                        vpn = vpn->_head;  
+                        assert(vpn);
+                        vpn = vpn->_next;   // prep
+                        assert(vpn && vpn->_word); // simple word
+                        ei._verbPrep = vpn->_word;
+                    }
+                }
+                
                 assert(ei._verb);
 
                 // verb alone is valid.
@@ -2693,6 +2715,9 @@ struct Strandi: public Traits
 
     bool execQuery(execInfo& ei)
     {
+        // XX TODO
+        // handle is/does X prop Y
+        
         bool v = false;
         if (ei._dobj)
         {
@@ -2746,7 +2771,7 @@ struct Strandi: public Traits
                             // expect term
                             Term* r = Term::find(y->rawString());
                             OUTP(r);
-                            DLOG4(_pcom._debug, "exec QUERY", *t, *ei._prep, "=", textify(r));
+                            DLOG4(_pcom._debug, "exec prep QUERY", *t, *ei._prep, "=", textify(r));
                         }
                         else
                         {
@@ -2754,15 +2779,17 @@ struct Strandi: public Traits
                             Term* r = Term::find(y->rawString());
                             if (r)
                             {
+                                DLOG4(_pcom._debug, "exec QUERY", *t, *ei._prep, "=", textify(r));
                                 OUTP(r);
                             }
                             else
                             {
                                 // add raw value
-                                OUTP(y);
+                                DLOG4(_pcom._debug, "exec QUERY", *t, *ei._prep, "= (val)", y->rawString());
+                                OUTP(*y);
                             }
                         
-                            DLOG4(_pcom._debug, "exec QUERY", *t, *ei._prep, "=", textify(y));
+
                         }
                     }
                 }
@@ -2852,6 +2879,15 @@ struct Strandi: public Traits
                 if (v)
                 {
                     rank = 10000;
+
+                    if (rei._verbPrep)
+                    {
+                        // if the reactor specifies at a verb prep
+                        // eg "look at X" or "get in X", then prefer a match
+                        // by doubling verb rank, fallback will be to match
+                        // in absence of better reactor.
+                        if (ei._verbPrep == rei._verbPrep) rank *= 2;
+                    }
 
                     // both or neither
                     v = (rei._dobj != 0) == (ei._dobj != 0);

@@ -23,6 +23,77 @@ MAIN
 
 ///////////////////////////////////////////////
 
+//////////////////// HALL
+
+GRANDCLOCK@ THING
+> put it in hall
+* name
+grandfather large clock
+* x it
+This grandfather clock is huge!
+
+* go hall
+GOHALL
+* out
+GOHALL
+
+GOCLOCK
+> put player in clock
+You climb into the grandfather clock!
+XHERE
+
+
+JEEVES@ PERSON
+> put jeeves in hall
+* name
+jeeves
+* name
+butler
+* label
+Jeeves the butler
+* x it
+Jeeves has been in the family for as long as anyone can remember. He's surely beyond suspicion, perhaps.
+* ask it about jimmy
+Master Jimmy is Mr Stephenson's son sir!
+
+//////////////////// STUDY
+
+JIMMY@ PERSON
+> put jimmy in study
+* name
+master jimmy
+* x it
+It's Jimmy!
+
+//////////////////// Drawing room
+
+FEELIE@ THING
+* feel it
+It feels
+> what it feels
+.
+
+FIREPLACE@ FEELIE
+> put it in drawing room
+> set it feels hot
+* name
+fireplace
+* name
+fire
+* x it
+Like i said, it's blazing away!
+
+//////////////////// kitchen
+
+FRIDGE@ FEELIE
+> put it in kitchen
+> set it feels cold
+* name
+a fridge
+* x it
+It's the latest model.
+
+
 
 
 

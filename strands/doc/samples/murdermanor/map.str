@@ -44,7 +44,7 @@ HALL@ MANOR
 * name
 the hall
 * x it
-You're in the hall.
+You're in the hall. A large grandfather clock stands against one wall.
 Westwards is the study, east is the drawing room and further north leads to the kitchen.
 * w
 GOSTUDY
@@ -58,6 +58,10 @@ GODRAWINGROOM
 GOKITCHEN
 * go kitchen
 GOKITCHEN
+* go clock
+GOCLOCK
+* get in clock
+GOCLOCK
 
 GOHALL
 > put player in hall
@@ -91,6 +95,7 @@ DRAWINGROOM@ MANOR
 the drawing room
 * x it
 You're in the drawing room.
+There's an impressive fireplace with a fire blazing away.
 West leads back to the hall, while the room leads north into the dining room.
 * w
 GOHALL
@@ -155,7 +160,7 @@ KITCHEN@ MANOR
 the kitchen
 * x it
 You're in the kitchen.
-The south exit takes you back into the hall.
+There's a fridge up against the back wall. The south exit takes you back into the hall.
 * s
 GOHALL
 * go hall

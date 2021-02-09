@@ -1645,6 +1645,63 @@ You're carrying, LAST.
 You're empty handed.
 ```
 
+### Properties
+
+We've seen two kinds of properties so far, _inheritance_ and _containership._
+
+* An object term can be a descendent of another.
+* An object term can be inside another object.
+
+Inheritance allows behaviour to be attached to the appropriate superclass while containership is the primary method of locating an object in the world.
+
+What else?
+
+All other properties are user defined!
+
+We've already met the builtin verb `put`, but there is another `set`, which able to set properties.
+
+So let's say we have a fire blazing away in the drawing room and a fridge in the kitchen. We want to make the fire hot and the frige cold.
+
+
+```
+FEELIE@ THING
+* feel it
+It feels
+> what it feels
+.
+
+FIREPLACE@ FEELIE
+> put it in drawing room
+> set it feels hot
+* name
+fireplace
+* name
+fire
+* x it
+Like i said, it's blazing away!
+
+FRIDGE@ FEELIE
+> put it in kitchen
+> set it feels cold
+* name
+a fridge
+* x it
+It's the latest model.
+```
+
+Here we made a superclass `FEELIE` which will add a reactor for `feel`.
+
+It's important to note that `Strands` initially does not know the words, "feels", "hot" or "cold" (or even "fridge" and "fire" for that matter!).
+
+The statement;
+
+`> it feels cold` introduces the property "feel" and maps `fridge feel -> cold`, in this case.
+
+Once a property like `feel` is defined, you can form queries like;
+
+`> what feels hot` and `> what fridge feels`, the first returns `fireplace` and the second `cold`.
+
+
 ### Scope
 
 A very important concept is that of _scope_.
@@ -1713,6 +1770,10 @@ Game world objects that benefit from being in multiple locations:
 
 * Anything in two places at once that can move.
   Scenery objects don't move, so it's convenient to put their methods into locations, but for anything that _does_ move, you can't do this, and you would _have_ to use multiple locations.
+
+### Timers & Asynchronous Flow
+
+Timers.
 
 ## Building Worlds with the Core Library
 
@@ -2058,10 +2119,6 @@ UPDATEMAP
 GOHALL
 MAIN
 ```
-
-### Asynchronous Flow
-
-Timers.
 
 
 

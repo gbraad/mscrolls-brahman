@@ -57,10 +57,18 @@
 #define W0(_m) ERR0(_m)
 #define W1(_m, _a) ERR1(_m, _a)
 
+#ifdef LOGGING
 #define DLOG0(_cc, _m) if (_cc) ERR0(_m)
 #define DLOG1(_cc, _m, _a) if (_cc) ERR1(_m, _a)
 #define DLOG2(_cc, _m, _a, _b) if (_cc) ERR2(_m, _a, _b)
 #define DLOG3(_cc, _m, _a, _b, _c) if (_cc) ERR3(_m, _a, _b, _c)
 #define DLOG4(_cc, _m, _a, _b, _c, _d) if (_cc) ERR4(_m, _a, _b, _c, _d)
+#else
+#define DLOG0(_cc, _m) 
+#define DLOG1(_cc, _m, _a) 
+#define DLOG2(_cc, _m, _a, _b) 
+#define DLOG3(_cc, _m, _a, _b, _c) 
+#define DLOG4(_cc, _m, _a, _b, _c, _d) 
+#endif
 
 

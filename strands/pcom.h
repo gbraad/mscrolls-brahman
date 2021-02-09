@@ -876,7 +876,7 @@ struct ParseCommand: public ParseBase
             pnode* prep = parseType(word(), Word::pos_prep, nodeType::p_prep);
             if (prep)
             {
-                // talk to, look at, etc
+                // talk to, look at, get in, etc
                 pn->_next = prep;
                 pn = new pnode(pn, nodeType::p_prepverb);
                 _drop();
@@ -923,9 +923,35 @@ struct ParseCommand: public ParseBase
             pn = &(*pn)->_next;
         }
     }
+
+    static const pnode* getVerbNode(const pnode* pn)
+    {
+        const pnode* p0 = pn;
+        
+        // walk breadth first
+        while (pn)
+        {
+            if (pn->_type == nodeType::p_verb ||
+                pn->_type == nodeType::p_prepverb ||
+                pn->_type == nodeType::p_averb)
+                return pn;
+            pn = pn->_next;
+        }
+
+        // walk depth
+        while (p0)
+        {
+            assert(p0->_head);
+            pn = getVerbNode(p0->_head);
+            if (pn) break;
+            p0 = p0->_next;
+        }
+        return pn;
+    }
     
     static const Word* getVerb(const pnode* pn)
     {
+        // gets the actual word
         const pnode* vn = findSubnode(pn, nodeType::p_verb);
         return vn ? vn->_word : 0;
     }

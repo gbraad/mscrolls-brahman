@@ -95,6 +95,10 @@ INV
 > e
 * go north
 > n
+* go out
+> out
+* exit
+> out
 
 
 NOWAY
@@ -123,6 +127,8 @@ NOWAY
 * e
 NOWAY
 * s
+NOWAY
+* out
 NOWAY
 
 PERSON@ THING
@@ -161,6 +167,9 @@ DOWN@
 * name
 down
 
+OUT@
+* name
+out
 
 GETTABLE@ THING
 * be it
