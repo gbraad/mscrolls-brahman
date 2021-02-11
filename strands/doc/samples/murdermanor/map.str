@@ -155,7 +155,7 @@ XHERE
 
 ////////////////// kitchen
 
-KITCHEN@ MANOR
+KITCHEN@ MANOR DOOR_IN
 * name
 the kitchen
 * x it
@@ -166,16 +166,25 @@ GOHALL
 * go hall
 GOHALL
 
+
 GOKITCHEN
 > put player in kitchen
 You go into the kitchen.
 images/kitchen.jpg
 XHERE
 
+//////////////////// Cupboard
 
+CUPBOARD@ MANOR DOOR_OUT
+* name
+broom cupboard
+* x it
+You're in the broom cupboard!
 
-
-
+GOCUPBOARD
+> put player in broom cupboard
+You go into the broom cupboard.
+XHERE
 
 
 

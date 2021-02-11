@@ -37,6 +37,7 @@
 
 #include "fd.h"
 #include "strands.h"
+#include "logged.h"
 
 #define DEFAULT_STORY_FILE   "story.str"
 
@@ -60,6 +61,7 @@ static ParseStrands ps;
 int main(int argc, char** argv)
 {
     int debug = 0;
+    Logged initLog;
 
     std::vector<std::string> files;
     
@@ -95,8 +97,12 @@ int main(int argc, char** argv)
         return -1;
     }
 
-    if (debug) printf("debug level %d\n", debug);
-    ps._debug = debug;
+    if (debug)
+    {
+        printf("debug level %d\n", debug);
+        ps._debug = debug;
+        Logged::_logLevel = debug;
+    }
 
     if (ps.loadFiles(files))
     {

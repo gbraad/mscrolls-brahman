@@ -58,15 +58,16 @@ struct Word
             pos_pronoun = 128,
             pos_ender = 256,
             pos_except = 512,
-            pos_property = 0x400, // bastardised property grammar
-            pos_value = 0x800, // bastardised property grammar value
-            pos_query = 0x1000,
-
-            pos_prep_rel = 0x2000, // preposition relativiser
-            pos_ID = 0x4000, // is a term ID of an object
-            pos_FLOW = 0x8000, // is a term ID of a flow
-            pos_doverb = 0x10000, // require direct object
-            pos_ioverb = 0x20000, // verb requiring indirect object
+            pos_prepmod = pos_except*2, // "also" and "not".
+            pos_property = pos_prepmod*2, // bastardised property grammar
+            pos_value = pos_property*2, // bastardised property grammar value
+            pos_query = pos_value*2,
+            pos_prep_rel = pos_query*2, // preposition relativiser
+            pos_ID = pos_prep_rel*2, // is a term ID of an object
+            pos_FLOW = pos_ID*2, // is a term ID of a flow
+            pos_doverb = pos_FLOW*2, // require direct object
+            pos_ioverb = pos_doverb*2, // verb requiring indirect object
+            pos_negate = pos_ioverb*2, // not
         };
 
     // these are additional properties
@@ -87,10 +88,15 @@ struct Word
             "pronoun",
             "ender",
             "except",
+            "prepmod", // also/not
             "property",
             "value",
             "query",
+            "preprel",
             "ID",
+            "flow",
+            "doverb"
+            "ioverb",
         };
 
 
@@ -117,11 +123,8 @@ struct Word
 
     // is a relativising preposition
     bool isPrepRel() const { return (_pos & pos_prep_rel) != 0; }
-
-    bool isPOSExact(uint pos) const
-    {
-        return (_pos & pos_mask) == pos;
-    }
+    bool isPOSExact(uint pos) const { return (_pos & pos_mask) == pos; }
+    bool isNegative() const { return (_pos & pos_negate) != 0; }
         
     Word(const string& t) : _text(t) {}
     bool operator<(const Word& w) const { return _text < w._text; }
@@ -153,15 +156,16 @@ struct pnode: public node<pnode>
         p_nouns,
         p_pronoun, // 11
         p_prep,
+        p_prepmod,
         p_adverbs,
-        p_verb,  //14
+        p_verb,  //15
         p_averb,
         p_prepverb,
-        p_cs, //17 command sentence
+        p_cs, //18 command sentence
         p_property,
         p_value,
-        p_query, //20
-        p_qs, // 21 query sentence
+        p_query, //21
+        p_qs, // 22 query sentence
     };
 
     typedef std::list<Term*> Binding;
@@ -418,6 +422,9 @@ struct ParseCommand: public ParseBase
 
             { "what", Word::pos_query },
             { "where", Word::pos_query },
+            
+            { "not", Word::pos_prepmod | Word::pos_negate },
+            { "also", Word::pos_prepmod },
         };
 
         for (int i = 0; i < ASIZE(stdWords); ++i)
@@ -730,12 +737,27 @@ struct ParseCommand: public ParseBase
         return pn;
     }
 
+    pnode* makePrepMod(const Word* prepmod, pnode* prepn)
+    {
+        // either prep or (#prepmod (prepmod prep))
+        pnode* pn = prepn;
+        if (prepmod)
+        {
+            pnode* pm = new pnode(prepmod, 0);  // XX type?
+            pm->_next = pn;
+            pn = new pnode(pm, nodeType::p_prepmod);
+        }
+        return pn;
+    }
+
     pnode* parseRNoun()
     {
         // parse noun relative
-        // eg the box in the hall
+        // eg the box [not] in the hall
 
-        // #rnoun = (#tnoun (prep #rnoun)))
+        // #tn
+        // #rnoun = (#tnoun prep rnoun)
+        // #rnoun = (#tnoun (#prepmod prepmod prep) rnoun)
         
         pnode* pn = parseTNoun();
         if (pn)
@@ -743,11 +765,12 @@ struct ParseCommand: public ParseBase
             _push();
 
             string w = word();
-            
-            //const Word* nt = wordType(w, Word::pos_not);
-            //if (nt) w = word();
-            // XXX where to put "not"
 
+            // optional not or also
+            // eg X not in Y, X also in Y.
+            const Word* prepmod = wordType(w, Word::pos_prepmod);
+            if (prepmod) w = word();
+            
             pnode* rn = 0;
             pnode* prep = parseType(w, Word::pos_prep, nodeType::p_prep);
             
@@ -758,8 +781,8 @@ struct ParseCommand: public ParseBase
                 rn = parseRNoun();
                 if (rn)
                 {
-                    // make node (prep rnoun)
-                    prep->_next = rn; 
+                    prep = makePrepMod(prepmod, prep);
+                    prep->_next = rn; // (prep rnoun)
 
                     assert(!pn->_next);
                     pn->_next = prep;
@@ -796,7 +819,7 @@ struct ParseCommand: public ParseBase
             if (ex)
             {
                 // optional "not"
-                parseLiteral("not"); // ignore it
+                parseLiteral("not"); // XXX ignore it
                 
                 p2 = parseRNounx(); // right recursive
 
@@ -960,7 +983,10 @@ struct ParseCommand: public ParseBase
     {
         // ps = (verb (nouns))
         // forms are:
-        // set N prop value
+        // set N [not/also] prop value
+
+        // (set nouns prop value)
+        // (set nouns (#prepmod prepmod prop) value)
 
         assert(ps);
         assert(ps->_head);
@@ -976,10 +1002,16 @@ struct ParseCommand: public ParseBase
             _push();
             
             bool ok = false;
+            
+            string w = word();
 
+            // optional not/also
+            const Word* prepmod = wordType(w, Word::pos_prepmod);
+            if (prepmod) w = word();
+            
             // new properties are stemmed 
-            string prop = wordStem(word());
-            if (prop.size())
+            string prop = wordStem(w);
+            if (!prop.empty())
             {
                 // XX for now just accept a single word
                 // later we'll allow a flow here
@@ -995,10 +1027,11 @@ struct ParseCommand: public ParseBase
                         new pnode(&internWordType(prop, Word::pos_property),
                                   nodeType::p_property);
 
+                    pp = makePrepMod(prepmod, pp);
+
                     // (prop value)
                     pp->_next = new pnode(&internWordType(w, Word::pos_value),
                                           nodeType::p_value);
-                    
 
                     // hook into sentence
                     // (set nouns (prop value))
@@ -1009,8 +1042,7 @@ struct ParseCommand: public ParseBase
                 }
             }
 
-            if (!ok)
-                _pop();
+            if (!ok) _pop();
         }
     }
 
@@ -1048,9 +1080,14 @@ struct ParseCommand: public ParseBase
                         // head is some N
                         // head next is (prep rn)
                         assert(pr->_type == nodeType::p_rnoun);
-                        assert(pr->_head);
-                        assert(pr->_head->_next);
-                        assert(pr->_head->_next->_type == nodeType::p_prep);
+                        assert(pr->_head); // TN or lower
+
+                        // prep or prepmod
+                        pnode* prep = pr->_head->_next;
+                        assert(prep);
+
+                        assert(prep->_type == nodeType::p_prep ||
+                               prep->_type == nodeType::p_prepmod);
 
                         if (dn == pr)
                         {
@@ -1059,8 +1096,8 @@ struct ParseCommand: public ParseBase
                         else
                         {
                             // steal (prep n)
-                            dn->_next = pr->_head->_next;
-                            pr->_head->_next = 0;
+                            dn->_next = prep;
+                            pr->_head->_next = 0;  // &prep
 
                             // move subnode up to replace position of rnoun
                             *ppr = pr->_head;

@@ -254,5 +254,27 @@ It's up there.
 * x ground
 XFLOOR
 
+/////// DOORS 
+
+DOOR@ THING
+* open it
+OPENDOOR
+* close it
+CLOSEDOOR
+
+OPENDOOR > what is it state
+* open
+It's already open!
+*
+> set it state open
+You open IT.
+
+CLOSEDOOR > what is it state
+* open
+> set it state closed
+You close IT.
+*
+It's already closed.
+
 
 

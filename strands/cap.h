@@ -33,6 +33,10 @@
 
 #pragma once
 
+#include "logged.h"
+
+#define TAG_CAP "Cap, "
+
 namespace ST
 {
 
@@ -52,9 +56,17 @@ struct Capture
         Elt(Term* t) : _term(t) {}
         Elt(const var& v) : _v(v.copy()) {}
         Elt(const string& s) : _s(s) {}
+        Elt(const Elt& e)
+        {
+            // copy constructor needs to copy v
+            _term = e._term;
+            _v = e._v.copy();
+            _s = e._s;
+        }
 
         bool operator==(const Elt& e) const
         {
+            //LOG1(TAG_CAP "compare ", toStringTyped() << " == " << e.toStringTyped());
             if (_term)
             {
                 // must be a term match, no stringification
@@ -81,6 +93,17 @@ struct Capture
             }
         }
 
+        string toStringTyped() const
+        {
+            string s;
+            if (_term) s = "Term";
+            else if (_v) s = "var";
+            else s = "string";
+            s += ':';
+            s += toString();
+            return s;
+        }
+        
         string toString() const
         {
             string s;
@@ -134,6 +157,7 @@ struct Capture
     
     static void cats(string& s, const string& s1)
     {
+        // append s1 to s and add space if necessary
         if (!s1.empty())
         {
             uint sz = s.size();
@@ -222,7 +246,11 @@ struct Capture
 
     }
 
-    void add(const Elt& e) { _elts.push_back(e); }
+    void add(const Elt& e)
+    {
+        // use copy constructor to dup var if present
+        _elts.push_back(e);
+    }
 
     bool contains(const Elt& e)
     {

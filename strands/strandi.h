@@ -558,6 +558,7 @@ struct Strandi: public Traits
 
     bool run(Flow& f)
     {
+        // return false if we hit a manual return
         bool v = true;
         for (auto e : f._elts)
         {
@@ -589,8 +590,8 @@ struct Strandi: public Traits
                     Flow::EltCommand* c = (Flow::EltCommand*)e;
                     if (c->_parse)
                     {
-                        bool v = resolve(c->_parse);
-                        if (v)
+                        bool r = resolve(c->_parse);
+                        if (r)
                         {
                             execInfo ei(c->_parse);
 
@@ -603,7 +604,12 @@ struct Strandi: public Traits
                             }
                             
                             ei._err = false; // no built in errors
-                            v = exec(ei);
+                            r = exec(ei);
+
+                            // retrieve manual break request from exec
+                            if (ei._break) v = false;
+
+                            
                             clearBindings(c->_parse);
                             updateScope();
                         }
@@ -620,7 +626,7 @@ struct Strandi: public Traits
                     Term* t = et->_term;
                     if (t)
                     {
-                        if (t->isObject())
+                        if (t->isObject())
                         {
                             // objects are not "run".
                             // They just output themselves.
@@ -1453,6 +1459,7 @@ struct Strandi: public Traits
                     else
                     {
                         // if we have a setmatch, then feed all in one
+                        // ie a match for a whole set.
                         bool setmatch = false;
                         for (auto& ci : choices._choices)
                         {
@@ -1475,6 +1482,8 @@ struct Strandi: public Traits
                                 Capture icap;
                                 icap.add(e);
                                 LastCap::Tmp ltmp(_ctx->_lastCap, &icap);
+
+                                //LOG1("matching topflow elt ", e.toStringTyped());
                         
                                 for (auto& ci : choices._choices)
                                 {
@@ -1493,6 +1502,7 @@ struct Strandi: public Traits
             }
             else
             {
+                // not matching, so generating
                 for (auto s : t->_selectors._selectors)
                 {
                     // when automatically choosing we run the selector
@@ -1775,8 +1785,7 @@ struct Strandi: public Traits
         {
         case Term::t_generator:
             {
-                if (!_runSpecial(t))
-                    v = runselect(t);
+                if (!_runSpecial(t)) v = runselect(t);
             }
             break;
         case Term::t_choice:
@@ -2350,10 +2359,14 @@ struct Strandi: public Traits
         TermList*   _dobj = 0;
         pnode*      _prepn = 0;
         const Word* _prep = 0;
+        const Word* _prepmod = 0; // modifier for prep eg also/not
 
         pnode*      _iobjn = 0;
         TermList*   _iobj = 0;
         Term*       _it = 0;
+
+        // hit manual break during execution
+        bool        _break = false;
 
         execInfo(pnode* ps): _ps(ps) {}
     };
@@ -2428,15 +2441,36 @@ struct Strandi: public Traits
                         // ensure dobj list isnt empty
                         assert(!ei._dobj->empty());
 
-                        // next term might not be prep (eg set)
+                        // next term could be a prep, property or prepmod
                         pn = pn->_next;
                         if (pn)
                         {
                             v = false;
-                            if (pn->_type == nodeType::p_prep)
+                            pnode* prep;
+
+                            if (pn->_type == nodeType::p_prepmod)
                             {
+                                // point to whole (prepmod prep)
                                 ei._prepn = pn;
-                                ei._prep = pn->_word;
+                                
+                                pnode* pm = pn->_head;
+                                assert(pm && pm->_word);
+                                ei._prepmod = pm->_word;
+                                
+                                // actual prep node (or property)
+                                prep = pm->_next;
+                            }
+                            else
+                            {
+                                // prep node is simple word
+                                prep = ei._prepn = pn;
+                            }
+
+                            assert(prep);
+
+                            if (prep->_type == nodeType::p_prep)
+                            {
+                                ei._prep = prep->_word;
                                 assert(ei._prep);
 
                                 pn = ei._iobjn = pn->_next;
@@ -2451,14 +2485,13 @@ struct Strandi: public Traits
                                     assert(!ei._iobj || ei._iobj->size());
                                 }
                             }
-                            else if (pn->_type == nodeType::p_property)
+                            else if (prep->_type == nodeType::p_property)
                             {
                                 // not prep, but store in same slots
                                 // verb will know
-                            
-                                ei._prepn = pn;
-                                assert(pn->_word);
-                                ei._prep = pn->_word;
+                                
+                                ei._prep = prep->_word;
+                                assert(ei._prep);
 
                                 // same for p_value
                                 pn = pn->_next;
@@ -2632,6 +2665,21 @@ struct Strandi: public Traits
 
         assert(iobj);
 
+        bool multival = false;
+        bool negate = false;
+        
+        if (ei._prepmod)
+        {
+            negate = ei._prepmod->isNegative();
+            
+            // XX assume if got prepmod
+            multival = true;
+        }
+
+        // put X not in Y
+        // XX for now fail, later might use this to remove X
+        if (negate) return false;
+        
         // can put A in B if A != B and B is not in A.
         bool v = t != iobj;
 
@@ -2652,8 +2700,19 @@ struct Strandi: public Traits
 
         if (v)
         {
-            if (_state.setfn(t->_name, prop, ei._iobj->front()->_name))
+            if (multival)
+            {
+                _state.set(t->_name, prop, ei._iobj->front()->_name);
+            }
+            else
+            {
+                v = _state.setfn(t->_name, prop, ei._iobj->front()->_name);
+            }
+
+            if (v)
+            {
                 DLOG3(_pcom._debug, "exec PUT", *t, prop, *ei._iobj->front());
+            }
         }
         else
         {
@@ -2677,8 +2736,35 @@ struct Strandi: public Traits
 
     bool execSet1(execInfo& ei, Term* t)
     {
-        if (_state.setfn(t->_name, ei._prep->_text, ei._iobjn->_word->_text))
-            DLOG3(_pcom._debug, "exec SET", *t, *ei._prep, *ei._iobjn->_word);
+        bool multival = false;
+        bool negate = false;
+        
+        if (ei._prepmod)
+        {
+            negate = ei._prepmod->isNegative();
+
+            // XX assume if got prepmod
+            multival = true;
+        }
+
+        if (multival)
+        {
+            if (negate)
+            {
+                _state.clear(t->_name, ei._prep->_text, ei._iobjn->_word->_text);
+                DLOG3(_pcom._debug, "exec CLEAR", *t, *ei._prep, *ei._iobjn->_word);
+            }
+            else
+            {
+                _state.set(t->_name, ei._prep->_text, ei._iobjn->_word->_text);
+                DLOG3(_pcom._debug, "exec SET", *t, *ei._prep, *ei._iobjn->_word);
+            }
+        }
+        else
+        {
+            if (_state.setfn(t->_name, ei._prep->_text, ei._iobjn->_word->_text))
+                DLOG3(_pcom._debug, "exec SET!", *t, *ei._prep, *ei._iobjn->_word);
+        }
 
         return true;
     }
@@ -2755,12 +2841,17 @@ struct Strandi: public Traits
                 }
                 else
                 {
-                
-                    // currently neither properties or prep are multivalued.
-                    // so setting X in Y, replaces X in Z.
+
+                    // Wait!
+                    // properties and prep can be multivalued!
+                    // normally setting X in Y, replaces X in Z
                     // same for properties set X feels wet, replaces X feels dry.
+                    // most of the time this is true, but they can be
+                    // multivalued. get the value as if we are a function
+                    // which will be the last one if multivalued.
                     //
-                    // later we'd like to specify this
+                    // need a way for query to return a set.
+                    
                     Term* t = ei._dobj->front();
                     const var* y = _state.getfn(t->_name, ei._prep->_text);
 
@@ -2852,7 +2943,10 @@ struct Strandi: public Traits
             _ctx->pushIt(it);
         }
         
-        run(r._s->_action);
+        bool v = run(r._s->_action);
+
+        // record whether we hit a manual break
+        if (!v) ei._break = true;
 
         if (it) _ctx->popIt();
     }
@@ -3049,7 +3143,12 @@ struct Strandi: public Traits
         // child reaction is first.
         TermList tl;
         t->getParents(tl);
-        for (auto p : tl) resolveTermReactions(p);
+
+        // reactions are added in reverse parent order
+        // so that secondary parents can be added to override main
+        // parents
+        for (auto it = tl.crbegin(); it != tl.crend(); ++it)
+            resolveTermReactions(*it);
     }
 
     void resolveAllReactions(const TermList& scope)

@@ -2120,7 +2120,161 @@ GOHALL
 MAIN
 ```
 
+### How To Make Doors
 
+Firstly, what do we want from a _door?_
+
+If a door is just part of the scenery and has no state, then we can implement it purely as a scenery object. Put its behaviour in the locations that can "see" the door.
+
+However, if a door has state, eg `open` or `closed`, _and_ we want to prevent the player from going through the door if `closed`, then we need a bit more.
+
+The nature of a _door_ is something that is in _two_ locations and acts as a threshold between them.
+
+Let's add a broom cupboard, west of the kitchen behind a door.
+
+First, the new location:
+
+```
+CUPBOARD@ MANOR DOOR_OUT
+* name
+broom cupboard
+* x it
+You're in the broom cupboard!
+
+GOCUPBOARD
+> put player in broom cupboard
+You go into the broom cupboard.
+XHERE
+```
+
+And for convenience, we've bundled the behaviour to exit the cupboard into a separate parent `DOOR_OUT`. This isn't necessary, you could just put these reactions on the end of `CUPBOARD` if you like.
+
+```
+DOOR_IN@
+* w
+> go door
+* go broom cupboard
+> go door
+
+DOOR_OUT@
+* out
+> go door
+* go kitchen
+> go door
+* e
+> go door
+```
+
+But you can see we also have a `DOOR_IN`, these are the opposite reactors to go into the cupboard from the kitchen. `DOOR_IN`, needs to be added as a parent of `KITCHEN`;
+
+```
+KITCHEN@ MANOR DOOR_IN
+* name
+the kitchen
+...
+```
+
+What we've done in these reactors is sent everything to `> go door`. So now, we need a clever `> go door` that knows what to do.
+
+First, define the door itself:
+
+```
+CUPBOARDDOOR@ DOOR
+> put it in kitchen
+> put it also in broom cupboard
+* name
+the door
+* x it
+It's the broom cupboard door, XDOOR.
+* go it
+GODOOR
+```
+
+Four things here:
+
+* the `DOOR` parent object is in `core.str` and provides `open` and `close` methods depending on its `state`.
+* The two `put` methods put the door in _two_ locations.
+* `x it` uses a helper `XDOOR` which will reveals whether it's open or closed.
+* `GODOOR` is to handle the `> go door` logic.
+
+You might be wondering why we can't say `> put it in the kitchen and broom cupboard`. Well, although that's a valid statement, `put` only allows _one_ indirect object, as this is the case for normal game usage.
+
+Note the word `also` used in the second `put`. If this is not present the second `put` would override the first and the door would no longer be in the kitchen, but only the cupboard.
+
+We create a property called `state` that can have the value, either `open` or `closed`. `closed` is actually a dummy, as the logic will always test for `open`, and if not, assume `closed`.
+
+Let's see this with `XDOOR`:
+
+```
+XDOOR > what is door state
+* open
+wide open
+*
+shut
+```
+
+and for `GODOOR`:
+
+```
+GODOOR > what is door state
+* open
+DOGODOOR
+*
+> open door
+GODOOR
+
+DOGODOOR > what player in
+* KITCHEN
+GOCUPBOARD
+* CUPBOARD
+GOKITCHEN
+```
+
+In this version, we'll have the player automatically open the door, rather than say "but the door is closed" or something like that.
+
+So now, if the player is in the kitchen, `> w` will flow to `> go door`, then to `GODOOR`, which if not `open` will flow to `> open door` and then to `DODOOR` again, which will then flow to `DOGODOOR` which will figure out the player is in the kitchen and flow to `GOCUPBOARD`.
+
+Here's a transcript:
+
+> You're in the hall. A large grandfather clock stands against one wall. Westwards is the study, east is the drawing room and further north leads to the kitchen.
+You can see Jeeves the butler.
+\> n
+You go into the kitchen.
+You're in the kitchen. There's a fridge up against the back wall. The south exit takes you back into the hall.
+\> look at the door
+It's the broom cupboard door, shut.
+\> w
+You open the door. You go into the broom cupboard.
+You're in the broom cupboard!
+\> x door
+It's the broom cupboard door, wide open.
+\> go east
+You go into the kitchen.
+You're in the kitchen. There's a fridge up against the back wall. The south exit takes you back into the hall.
+
+Finally, out of curiosity let's look at the definition of `DOOR` from `core.str`. This is all reusable:
+
+```
+DOOR@ THING
+* open it
+OPENDOOR
+* close it
+CLOSEDOOR
+
+OPENDOOR > what is it state
+* open
+It's already open!
+*
+> set it state open
+You open IT.
+
+CLOSEDOOR > what is it state
+* open
+> set it state closed
+You close IT.
+*
+It's already closed.
+```
 
 ## Building Parser Choice Games
 
@@ -2129,48 +2283,6 @@ These are games where the player has both choices and text entry _at the same ti
 ## Animation
 
 Simple animation can be made as animated PNGs, but complex ones are built using [Spine](http://esotericsoftware.com/). The Strand GUI has the spine 2D animation runtime built in and all that's needed is to drop the spine output files into the `images` folder and use them.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

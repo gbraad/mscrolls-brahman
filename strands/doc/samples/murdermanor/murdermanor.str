@@ -93,9 +93,47 @@ a fridge
 * x it
 It's the latest model.
 
+CUPBOARDDOOR@ DOOR
+> put it in kitchen
+> put it also in broom cupboard
+* name
+the door
+* x it
+It's the broom cupboard door, XDOOR.
+* go it
+GODOOR
+
+DOOR_IN@
+* w
+> go door
+* go broom cupboard
+> go door
+
+DOOR_OUT@
+* out
+> go door
+* go kitchen
+> go door
+* e
+> go door
 
 
+XDOOR > what is door state
+* open
+wide open
+*
+shut
 
+GODOOR > what is door state
+* open
+DOGODOOR
+*
+> open door
+GODOOR
 
-
+DOGODOOR > what player in
+* KITCHEN
+GOCUPBOARD
+* CUPBOARD
+GOKITCHEN
 
