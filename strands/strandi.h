@@ -43,6 +43,8 @@
 #include "cap.h"
 #include "logged.h"
 
+#define GENSTATE_KEY  "_gen"
+
 std::string em_getline(); // emscripten
 
 #undef TAG
@@ -348,20 +350,19 @@ struct Strandi: public Traits
         if (!c || c == '\n') fflush(stdout);
     }
 
-    void setdebug(int v)
-    {
-        _pcom._debug = v;
-    }
+    void setdebug(int v) { _pcom._debug = v; }
 
-    struct NRan: public var::Blob
+    struct NRan
     {
         Ranq1*          _ran;
         unsigned int    _n;
         unsigned int    _maxp;
+        unsigned int    _runs;
         unsigned int*   _stats;
         
         NRan(Ranq1* r, int n, int maxp) : _ran(r), _n(n), _maxp(maxp)
         {
+            _runs = 0;
             _stats = new unsigned int[_n];
             memset(_stats, 0, sizeof(unsigned int)*_n);
             _warmup();
@@ -369,29 +370,15 @@ struct Strandi: public Traits
 
         NRan(const NRan& nr)
         {
-            //printf("nran::copy1\n");
             _ran = nr._ran;
             _n = nr._n;
             _maxp = nr._maxp;
+            _runs = nr._runs;
             _stats = new unsigned int[_n];
             memcpy(_stats, nr._stats, sizeof(unsigned int)*_n);
         }
 
-        ~NRan()
-        {
-            delete [] _stats;
-        }
-
-        // blob compliance
-        Blob* copy() const override { return new NRan(*this); }
-        void destroy() override
-        {
-            //printf("~NRan!\n");
-            delete this;
-        }
-
-        bool operator==(const Blob& b) const override { return this == &b; }
-        string toString() const override { return "blob"; }
+        ~NRan() { delete [] _stats; }
 
         unsigned int nran()
         {
@@ -417,6 +404,10 @@ struct Strandi: public Traits
             // adjust stats
             for (i = 0; i < _n; ++i) ++_stats[i];
             _stats[v] = 0;
+
+            // keep counter of trials
+            ++_runs;
+            
             return v;
         }
         
@@ -424,9 +415,201 @@ struct Strandi: public Traits
         {
             // stir the pot
             for (unsigned int i = 0; i < _n; ++i) nran();
+            
+            // clear counter as warmup doesn't count.
+            _runs = 0;
         }
     };
 
+    struct GenState : public var::Blob
+    {
+        Strandi*        _host;
+        Term::RType     _type;
+        int             _seq = 0;
+        int             _n = 0;  // used for seq
+        NRan*           _nr = 0;
+
+        GenState(Strandi* host) : _host(host) {}
+        GenState(Strandi* host, Term::RType t, int n)
+            : _host(host), _type(t), _n(n) { _init(); }
+
+        void _init()
+        {
+            switch (_type)
+            {
+            case Term::t_shuffle:
+                assert(!_nr);
+                _nr = new NRan(&_host->_rand, _n, _n);
+                break;
+            case Term::t_nonrandom:
+                assert(!_nr);
+                _nr = new NRan(&_host->_rand, _n, _n+(_n+2)/3);
+                break;
+            }
+        }
+
+        ~GenState() { _purge(); }
+
+        void _purge()
+        {
+            delete _nr;
+            _nr = 0;
+        }
+
+        bool reset()
+        {
+            // return if reset made any difference
+            
+            bool changed = false;
+            
+            switch (_type)
+            {
+            case Term::t_sequence:
+                if (_seq)
+                {
+                    changed = true;
+                    _seq = 0;
+                }
+                break;
+            case Term::t_shuffle:
+                // always reshuffle
+                _purge();
+                _init();
+                changed = true;
+                break;
+            case Term::t_nonrandom:
+                // do nothing as reset nonrandom is nonrandom
+                break;
+            }
+
+            return changed;
+        }
+
+        int choose()
+        {
+            int ch = 0;
+            switch (_type)
+            {
+            case Term::t_random:
+                assert(_n);
+                ch = _host->_rand.gen32() % _n;
+                break;
+            case Term::t_shuffle:
+            case Term::t_nonrandom:
+                assert(_nr);
+                ch = _nr->nran();
+                break;
+            case Term::t_sequence:
+                ch = _seq++;
+                break;
+            }
+            return ch;
+        }
+
+        bool finished()
+        {
+            bool r = false;
+            if (_type == Term::t_shuffle)
+            {
+                assert(_nr);
+                if (!(_nr->_runs % _nr->_maxp)) r = true;
+            }
+            else if (_type == Term::t_sequence)
+            {
+                if (_seq >= _n) r = true;
+            }
+            return r;
+        }
+
+        bool convertTo(Term::RType t)
+        {
+            // return true if conversion took place
+            
+            bool r = false;
+
+            //LOG1("converting ", Term::rtypeString(_type) << " to " << Term::rtypeString(t));
+            
+            // only some types can convert
+            
+            // random never changes
+            // nonrandom never changes
+            if (_type == Term::t_shuffle)
+            {
+                switch (t)
+                {
+                case Term::t_random:
+                case Term::t_sequence:
+                    assert(!_seq);
+                    _type = t;
+                    _n = _nr->_maxp;
+                    reset();
+                    r = true;
+                    break;
+                case Term::t_shuffle:
+                case Term::t_nonrandom:
+                    _type = t;
+                    assert(_n);
+                    reset();
+                    r = true;
+                    break;
+                }
+            }
+            else if (_type == Term::t_sequence)
+            {
+                switch (t)
+                {
+                case Term::t_random:
+                case Term::t_sequence:
+                    assert(_n);
+                    _type = t;
+                    reset();
+                    r = true;
+                    break;
+                case Term::t_shuffle:
+                case Term::t_nonrandom:
+                    _type = t;
+                    assert(!_nr);
+                    assert(_n);
+                    reset();
+                    r = true;
+                    break;
+                }
+            }
+            return r; // did we convert?
+        }
+
+        GenState* copyIf() 
+        {
+            // duplicate data for types with state
+            
+            GenState* gs = this;
+            
+            switch (_type)
+            {
+            case Term::t_shuffle:
+            case Term::t_nonrandom:
+            case Term::t_sequence:
+                gs = (GenState*)copy();
+            }
+
+            return gs;
+        }
+        
+        // blob compliance
+        Blob* copy() const override
+        {
+            GenState* gs = new GenState(_host);
+            gs->_type = _type;
+            gs->_seq = _seq;
+            gs->_n = _n;
+            if (_nr) gs->_nr = new NRan(*_nr);
+            return gs;
+        }
+        
+        void destroy() override { delete this; }
+        bool operator==(const Blob& b) const override { return this == &b; }
+        string toString() const override { return "blob"; }
+    };
     
     Strandi(Terms* t = 0) : _terms(t) 
     {
@@ -618,6 +801,10 @@ struct Strandi: public Traits
                             ERR1("flow cannot resolve", textify(c->_parse));
                         }
                     }
+                    else
+                    {
+                        ERR1("Command has no parse ", c->toString());
+                    }
                 }
                 break;
             case Flow::t_term:
@@ -626,7 +813,7 @@ struct Strandi: public Traits
                     Term* t = et->_term;
                     if (t)
                     {
-                        if (t->isObject())
+                        if (t->isObject())
                         {
                             // objects are not "run".
                             // They just output themselves.
@@ -634,9 +821,17 @@ struct Strandi: public Traits
                         }
                         else
                         {
-                            if (et->_flags & (Flow::ft_background | Flow::ft_stop))
+                            v = true;
+                            if (et->_flags & Flow::ft_background)
                             {
-                                v = runBackground(t, et->_flags);
+                                // signal to run background flow, but do nothing at this point
+                                // do not initially mark as visited.
+                                // set (term TICK)
+                                _state.set(t->_name, TERM_TICK); // does not add if already
+                            }
+                            else if (et->_flags & Flow::ft_reset)
+                            {
+                                resetTerm(t);
                             }
                             else
                             {
@@ -1191,6 +1386,133 @@ struct Strandi: public Traits
         return v;
     }
 
+    GenState* getGenState(const string& name)
+    {
+        GenState* gs = 0;
+        const var* v = _state.getfn(name, GENSTATE_KEY);
+        if (v)
+        {
+            assert(v->isBlob());
+            gs = (GenState*)v->_b;            
+        }
+        return gs;
+    }
+
+    void setGenState(const string& name, GenState* g)
+    {
+        // consumes `g`
+        assert(g);
+
+        // will delete g if not used
+        _state.setfn(name, GENSTATE_KEY, g);  // var(blob)
+    }
+
+    int choiceForSelector(Choices& c, int seq)
+    {
+        int ns = c._t->_selectors.size();
+        while (seq < ns)
+        {
+            Selector* s = c._t->_selectors[seq];
+                        
+            // find choice for `seq` if any
+            int i = 0;
+            for (auto& ci : c._choices)
+            {
+                if (ci._selected)
+                {
+                    if (ci._action == s) return i;
+                    ++i;
+                }
+            }
+
+            ++seq;
+        }
+        return -1;
+    }
+
+    int handleGenTypes(Choices& c, int n)
+    {
+        // handle types that could possibly have state
+        // shuffle, nonrandom, sequence
+        // but these could also mutate into random
+
+        int ch;
+
+        GenState* g1 = getGenState(c._t->_name);
+        GenState* g2;
+        if (g1)
+        {
+            // copy because the timeline needs to have each state.
+            // unless we dont need state anymore (eg random)
+            g2 = g1->copyIf();
+        }
+        else
+        {
+            Term::RType rtype = c._t->_rtype;
+            g2 = new GenState(this, rtype, n);
+        }
+
+        if (g2->_type == Term::t_sequence)
+        {
+            // a sequence will walk through the possibilities and
+            // park on the end
+
+            // the state stores the next sequence# to try
+            
+            int seq = 0;
+            if (g1) seq = g1->_seq;
+
+            int ns = c._t->_selectors.size();
+
+            assert(ns > 1); // otherwise wont need state at all
+
+            // find first available choice from `seq`
+            
+            while (seq < ns)
+            {
+                ch = choiceForSelector(c, seq);
+                if (ch >= 0) break;
+                ++seq;
+            }
+
+            // seq is the new current choice or seq == ns if none
+            if (seq >= ns)
+            {
+                // find last valid repeat
+                int i = 0;
+                for (auto& ci : c._choices) if (ci._selected) ch = i++;
+
+                assert(ch >= 0); // because we have at least one available
+            }
+
+            if (g1 && g1->finished())
+            {
+                // were already finished, so no need for new state
+                delete g2; g2 = 0;
+            }
+            else
+            {
+                g2->_seq = seq; // assign current, might be == ns ie fin
+                g2->choose(); // bump for next time
+            }
+            
+        }
+        else
+        {
+            ch = g2->choose();
+        }
+
+        if (g2 && g2 != g1)
+        {
+            // shuffle and sequence can change state
+            Term::RType rtypenext = c._t->_rtypenext;
+            if (g2->finished()) g2->convertTo(rtypenext);
+
+            setGenState(c._t->_name, g2); // consumes g2
+        }
+        return ch;
+    }
+
     bool runGeneratorAction(Choices& c)
     {
         // return true if done something
@@ -1228,110 +1550,36 @@ struct Strandi: public Traits
         }
         
         int ch = 0;
-        const Choice* cp = 0;
 
         if (nchoices > 1) switch (rtype)
         {
         case Term::t_random:
+            // this never has state
             ch = _rand.gen32() % nchoices;
-            break;
-        case Term::t_shuffle:
-            {
-                NRan* nr;
-                const var* v = _state.getfn(c._t->_name, "nran");
-                if (v)
-                {
-                    assert(v->isBlob());
-                    nr = (NRan*)v->_b->copy();
-                }
-                else nr = new NRan(&_rand, nchoices, nchoices);
-                        
-                ch = nr->nran();
-                _state.setfn(c._t->_name, "nran", nr);
-            }
-            break;
-        case Term::t_nonrandom:
-            {
-                NRan* nr;
-                const var* v = _state.getfn(c._t->_name, "nran");
-                if (v)
-                {
-                    assert(v->isBlob());
-                    nr = (NRan*)v->_b->copy();
-                }
-                else nr = new NRan(&_rand, nchoices,
-                                   nchoices+(nchoices+2)/3);
-
-                ch = nr->nran();
-                _state.setfn(c._t->_name, "nran", nr);
-            }
-            break;
-        case Term::t_sequence:
-            {
-                int seq = 0;
-                
-                // the sequence walks the selectors
-                const var* v = _state.getfn(c._t->_name, "seq");
-                if (v) seq = v->toInt();
-
-                if (seq >= c._t->_selectors.size())
-                {
-                    // finished, remain on last valid choice
-                    for (auto& ci : c._choices) if (ci._selected) cp = &ci;
-                    assert(cp);
-                }
-                else
-                {
-                    // walk selectors until we find a valid choice
-                    do
-                    {
-                        Selector* s = c._t->_selectors[seq];
-                        
-                        // find within choices
-                        for (auto& ci : c._choices)
-                        {
-                            if (ci._selected && ci._action == s)
-                            {
-                                cp = &ci;
-                                break;
-                            }
-                        }
-
-                        if (cp) break;
-                        
-                        // not found.
-                        // choice not available, move to next
-                        ++seq;
-                        
-                    } while (seq < c._t->_selectors.size());
-
-                    // update sequence
-                    ++seq;
-                    _state.setfn(c._t->_name, "seq", seq);
-                }
-            }
             break;
         case Term::t_first:
             // ch = 0 selects first selected
+            break;
+        default:
+            ch = handleGenTypes(c, nchoices);
             break;
         }
 
         assert(ch >= 0 && ch < nchoices);
 
-        if (!cp)
+        const Choice* cp = 0;
+
+        // find the ch'th selected choice
+        for (auto& ci : c._choices)
         {
-            // find the ch'th selected choice
-            for (auto& ci : c._choices)
+            if (ci._selected)
             {
-                if (ci._selected)
-                {
-                    cp = &ci;
-                    if (!ch) break;
-                    --ch;
-                }
+                cp = &ci;
+                if (!ch) break;
+                --ch;
             }
         }
-
+        
         assert(cp);
 
         // when we're not matching the select flow is part of the output
@@ -1475,6 +1723,7 @@ struct Strandi: public Traits
                         }
                         else
                         {
+                            // filter:
                             // feed the topflow to the matcher one at a time
                             for (auto& e : topflowcap->_cap._elts)
                             {
@@ -1487,8 +1736,12 @@ struct Strandi: public Traits
                         
                                 for (auto& ci : choices._choices)
                                 {
-                                    ci._selected = !ci.specialMatch() &&
-                                        ci._select->_cap.match(e);
+                                    ci._selected = false;
+                                    if (!ci.specialMatch())
+                                    {
+                                        //LOG1("matching topflow elt ", e.toStringTyped() << " to " << ci._select->_cap.toString());
+                                        ci._selected = ci._select->_cap.match(e);
+                                    }
                                 }
                     
                                 // run one of the matches choices OR
@@ -1807,20 +2060,32 @@ struct Strandi: public Traits
         return v;
     }
 
-    bool runBackground(Term* t, uint flags)
+    void resetTerm(Term* t)
     {
-        if (flags & Flow::ft_background)
+        // release all state from `t`
+        // Does this also reset the term value (eg sticky)??
+
+        //LOG1("Resetting term ", t->_name);
+        
+        // remove from background flow
+        // clear (term TICK) if present
+        _state.clear(t->_name, TERM_TICK);
+
+        // clear the visit marker, if present
+        _state.clear(t->_name);
+
+        // reset generate state if necessary
+        GenState* g1 = getGenState(t->_name);
+        if (g1)
         {
-            // signal to run background flow, but do nothing at this point
-            // do not initially mark as visited.
-            _state.set(t->_name, TERM_TICK); // does not add if already
+            // not all gens have state
+            GenState* g2 = g1->copyIf();
+            if (g2 != g1)
+            {
+                if (g2->reset()) setGenState(t->_name, g2);
+                else delete g2; // reset did not change state
+            }
         }
-        else if (flags & Flow::ft_stop)
-        {
-            // remove from background flow
-            _state.clear(t->_name, TERM_TICK);
-        }
-        return true;
     }
     
     bool run(Term* t)
@@ -2862,7 +3127,7 @@ struct Strandi: public Traits
                             // expect term
                             Term* r = Term::find(y->rawString());
                             OUTP(r);
-                            DLOG4(_pcom._debug, "exec prep QUERY", *t, *ei._prep, "=", textify(r));
+                            LOG4("exec prep QUERY ", *t << ' ' << *ei._prep << " = " << textify(r));
                         }
                         else
                         {
@@ -2870,13 +3135,13 @@ struct Strandi: public Traits
                             Term* r = Term::find(y->rawString());
                             if (r)
                             {
-                                DLOG4(_pcom._debug, "exec QUERY", *t, *ei._prep, "=", textify(r));
+                                LOG4("exec QUERY ", *t << ' ' << *ei._prep << " = " << textify(r));
                                 OUTP(r);
                             }
                             else
                             {
                                 // add raw value
-                                DLOG4(_pcom._debug, "exec QUERY", *t, *ei._prep, "= (val)", y->rawString());
+                                LOG4("exec QUERY ", *t << ' ' << *ei._prep << " = (val) " << y->rawString());
                                 OUTP(*y);
                             }
                         
@@ -3403,6 +3668,7 @@ struct Strandi: public Traits
 
         // selector text is a command, but not to be parsed
         // eg a special label
+        // this only applies to objects!
         ff._skipNonReactors = true;
         
         bool v = true;

@@ -2223,7 +2223,7 @@ DOGODOOR
 > open door
 GODOOR
 
-DOGODOOR > what player in
+DOGODOOR > what is player in
 * KITCHEN
 GOCUPBOARD
 * CUPBOARD

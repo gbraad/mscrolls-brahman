@@ -103,7 +103,7 @@ struct ParseStrands: public ParseBase
     {
         char c = AT;
 
-        Term::RType rt = Term::t_random;
+        Term::RType rt = Term::t_void;
 
         switch (c)
         {
@@ -202,7 +202,7 @@ struct ParseStrands: public ParseBase
         for (;;)
         {
             if (*p == SYM_BACKGROUND) flags |= Flow::ft_background;
-            else if (*p == SYM_BACKGROUND_STOP) flags |= Flow::ft_stop;
+            else if (*p == SYM_BACKGROUND_STOP) flags |= Flow::ft_reset;
             else break;
             ++p;
         }
@@ -620,37 +620,40 @@ struct ParseStrands: public ParseBase
         switch (t->_type)
         {
         case Term::t_generator:
-            t->_rtype = parseRType();
-            t->_rtypenext = parseRType();
-            
-            if (AT == SYM_STICKY)
             {
-                if (t->_rtype != Term::t_random || t->_rtypenext != Term::t_random)
+                Term::RType ty = parseRType();
+                if (ty) t->_rtype = ty;  // default is random
+                ty = parseRType();
+                if (ty) t->_rtypenext = ty; // default void
+            
+                if (AT == SYM_STICKY)
                 {
-                    W1("Only randoms can be sticky, ", t->_name);
-                    t->_rtypenext = t->_rtype = Term::t_random;
-                }
+                    if (t->_rtype != Term::t_random || t->_rtypenext != Term::t_random)
+                    {
+                        W1("Only randoms can be sticky, ", t->_name);
+                        t->_rtypenext = t->_rtype = Term::t_random;
+                    }
             
-                t->sticky(true);
-                BUMP;
-                skipws();
-            }
+                    t->sticky(true);
+                    BUMP;
+                    skipws();
+                }
 
-            if (AT == '>' || AT == '{' || u_isalnum(AT)) 
-            {
-                // optional input top flow
-                parseFlow(t->_topflow, 0, -1); // consume nl
+                if (AT == '>' || AT == '{' || u_isalnum(AT)) 
+                {
+                    // optional input top flow
+                    parseFlow(t->_topflow, 0, -1); // consume nl
+                }
+                else if (AT == '\n')
+                {
+                    BUMP;
+                }
+                else
+                {
+                    PERR1("unexpected property", AT);
+                    return false;
+                }
             }
-            else if (AT == '\n')
-            {
-                BUMP;
-            }
-            else
-            {
-                PERR1("unexpected property", AT);
-                return false;
-            }
-
             break;
         case Term::t_choice:
 
@@ -664,6 +667,8 @@ struct ParseStrands: public ParseBase
                 }
                 else if (AT == SYM_CMD_CHOICES)
                 {
+                    // signify reactors marked as choices will be displayed
+                    // along with the command line.
                     t->cmdChoices(true);
                     BUMP;
                     skipws();

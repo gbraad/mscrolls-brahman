@@ -214,7 +214,7 @@ struct Flow: public Traits
     {
         ft_none = 0,
         ft_background = 1,
-        ft_stop = 2,
+        ft_reset = 2,
     };
 
     struct EltTerm: public Elt
@@ -400,6 +400,8 @@ struct Selector: public Traits
 
     Selector(Term* t) : _host(t) {}
 
+    bool        hostIsObject() const;
+
     string flagsString() const
     {
         string s;
@@ -434,9 +436,17 @@ struct Selector: public Traits
         bool v = true;
 
         ff._lineno = _lineno;
-        
-        if (!ff._skipNonReactors || _isReactor)
+
+        if (hostIsObject())
         {
+            if (!ff._skipNonReactors || _isReactor)
+            {
+                v = ff(_text);
+            }
+        }
+        else
+        {
+            // always parse non-objects
             v = ff(_text);
         }
         
@@ -508,7 +518,8 @@ struct Term: public Traits
 
     enum RType
     {
-        t_random = 0,
+        t_void = 0,
+        t_random,
         t_shuffle,
         t_nonrandom,
         t_sequence,
@@ -522,10 +533,11 @@ struct Term: public Traits
          f_cmd_choices = 2,
     };
 
-    const char* rtypeString(int t) const
+    static const char* rtypeString(int t) 
     {
         static const char* stab[] =
             {
+                "void",
                 "random",
                 "shuffle",
                 "nonrandom",
@@ -541,7 +553,7 @@ struct Term: public Traits
     string      _name;
     Type        _type = t_generator;
     RType       _rtype = t_random;  // initial generator
-    RType       _rtypenext = t_random;  // subsequent generator
+    RType       _rtypenext = t_void;  // subsequent generator
     int         _flags = 0;
 
     // body
@@ -898,6 +910,13 @@ inline std::string Selector::id() const
     // make a virtual ID
     return _host->_name + '_' + std::to_string(_id);
 }
+
+bool Selector::hostIsObject() const
+{
+    assert(_host);
+    return _host->isObject();
+}
+
 
 }; // ST
 

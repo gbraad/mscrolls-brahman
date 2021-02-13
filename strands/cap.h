@@ -315,6 +315,18 @@ struct Capture
         }
     }
 
+    string toString() const
+    {
+        // dump the cap
+        string s;
+        for (auto& e : _elts)
+        {
+            if (!s.empty()) s += ", ";
+            s += e.toString();
+        }
+        return s;
+    }
+
 };
 
 }; // ST

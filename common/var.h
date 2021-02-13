@@ -171,7 +171,7 @@ struct var
             {
                 // move over the string content; donate pattern
                 var* vp = (var*)&v; // XX const cast
-                _s = vp->_donate();
+                _s = (char*)vp->donate();
             }
             break;
         case var_double:
@@ -777,17 +777,29 @@ struct var
     friend std::ostream& operator<<(std::ostream& os, const var& v)
     { return os << v.toString(); }
 
-private:
-
-    char* _donate()
+    void* donate()
     {
-        assert(_type == var_string);
-        char* s = _s;
-        _s = 0;
-        _type = var_null;
-        return s;
+        switch (_type)
+        {
+        case var_string:
+            {
+                char* s = _s;
+                _s = 0;
+                _type = var_null;
+                return s;
+            }
+        case var_blob:
+            // drop blob
+            {
+                Blob* b = _b;
+                _b = 0;
+                _type = var_null;
+                return b;
+            }
+            break;
+        }
+        return 0;  // nothing to give
     }
-
 
 };
 
