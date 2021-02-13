@@ -42,26 +42,12 @@ GOCLOCK
 You climb into the grandfather clock!
 XHERE
 
-
-JEEVES@ PERSON
-> put jeeves in hall
-* name
-jeeves
-* name
-butler
-* label
-Jeeves the butler
-* x it
-Jeeves has been in the family for as long as anyone can remember. He's surely beyond suspicion, perhaps.
-* ask it about jimmy
-Master Jimmy is Mr Stephenson's son sir!
-
 //////////////////// STUDY
 
 JIMMY@ PERSON
 > put jimmy in study
 * name
-master jimmy
+master Jimmy
 * x it
 It's Jimmy!
 
@@ -136,4 +122,88 @@ DOGODOOR > what is player in
 GOCUPBOARD
 * CUPBOARD
 GOKITCHEN
+
+///////////////////// JEEVES /////////////////
+
+JEEVES@ PERSON
+> put it in hall
+* name
+jeeves
+* name
+butler
+* label
+Jeeves the butler
+* x it
+Jeeves has been in the family for as long as anyone can remember. He's surely beyond suspicion, perhaps.
+* ask it about jimmy
+Master Jimmy is Mr Stephenson's son sir! JVPAUSE
+
+JVSTART
+*?!JVSTART \nWelcome to the Manor Sir, I am Jeeves the butler, at your disposal. JVMAIN^
+
+JVMAIN=
+*?JVPAUSE JVDELAY
+* JVLOOP
+
+JVPAUSE
+
+JVDELAY<
+*
+*
+* JVPAUSE# JVDELAY# JVBEALL
+
+JVBEALL
+\nJeeves, 
+* "If that's all Sir?"
+* "Will that be all Sir?"
+
+
+JVHERE > what is jeeves in
+* > what is player in
+\nJeeves arrives!
+*
+
+JVGO > what is jeeves in
+* > what is player in
+\nJeeves leaves the room.
+*
+
+// start in hall
+JVLOOP<<
+*
+*
+*
+JVGO
+> put jeeves in drawing room
+JVHERE
+*
+JVGO
+> put jeeves in dining room
+JVHERE
+*
+JVGO
+> put jeeves in drawing room
+JVHERE
+*
+JVGO
+> put jeeves in hall
+JVHERE
+*
+JVGO
+> put jeeves in kitchen
+JVHERE
+*
+JVGO
+> put jeeves in hall
+JVHERE
+*
+JVGO
+> put jeeves in study
+JVHERE
+*
+JVGO
+> put jeeves in hall
+JVHERE
+
+////////////////////////////////////////
 
