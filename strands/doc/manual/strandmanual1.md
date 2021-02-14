@@ -1,8 +1,37 @@
 # Strand IF Authoring
 
+<div>
+<p style="float:left; font-size: 10pt;height:100px; margin-right: 1%; margin-bottom: 1.5em;"><img src="strandlogo.png" style="height:100%">Strand Games Technology</p>
+<p style="float:right; font-size: 10pt; text-align: center; height:100px; margin-right: 1%; margin-bottom: 1.0em;"><img src="scrolls.png" style="height:100%">Remasters & Sequels</p>
+</div>
+
+<p style="clear:both;"></p>
+
+
 ## Introduction
 
+Strand Games is working on a novel technology for IF production called `Strand`.
+
+Easily make parser IF, choice IF and anything in between with no programming. Deploy to mobile, desktop or the web with a GUI supporting pictures, animation and sound.
+
+Historically, IF systems were designed around computer limitations at the expense of creativity. `Strand` turns this around putting authoring ahead of technobabble.
+
+`Strand` does not claim to be more capable than other systems, nor does it claim to do more or have more features. Instead, `Strand` strives to be quick and easy to use while following one simple idea:
+
+_Don't let the 10% complicated features poison the simplicity of the 90%._
+
+The documentation will show you how _one simple construct_ is used in different ways to build diverse and functional games, expressing content generation, choices, world building and text input.
+
+Anyone can use `Strand`. Write your game in your favourite editor, then run it immediately!
+
+`Strand` is all open source!
+
+
+## Fundamental Ideas
+
 ### Terms
+
+<img src="stave.png" style="float:left; height:10em; margin-right:2%; margin-bottom:0.5em"/>
 
 _Flow_ is a fundamental concept. Flow is the way in which the event sequence of a story unfolds.
 
@@ -848,7 +877,7 @@ PROVE
 WHEREU
 * where were you at the time of the murder?
 * what were you doing when the murder took place?
-* do you have an alabi?
+* do you have an alibi?
 
 JIMMY?
 * Jimmy, WHEREU
@@ -1158,6 +1187,8 @@ The Stands engine can feed the GUI so the choices appear as selections;
 
 ## Fundamentals of Parser Games
 
+<img src="compass2t.png" style="float:right; height:6em; margin-right:2%;margin-bottom:0.0em"/>
+
 We now move on to building parser games.
 
 We also have everything described so far at our disposal, so we can build mixed parser and choice games, using an ideal mix of both gameplay strategies.
@@ -1219,7 +1250,7 @@ These definitions aren't useful on their own as we haven't yet filled out their 
 
 **Selectors for _objects_ match action _semantics._**
 
-Object selector match can be the _semantics_ of an input command, or it can be a system action.  In any case, object selectors act as _reactors_ to actions and their action flow is taken whenever the selector matches.
+Object selector match can be the _semantics_ of an input command, or it can be a system action.  In any case, object selectors act as _reactions_ and their action flow is taken whenever the selector matches.
 
 Let's see how this works, it's about time to define the `player`.
 
@@ -1306,10 +1337,10 @@ Flow Element Type | Syntax | Note
 -- | --
 term reference | TERM | Any word in capitals
 text | hello world | free-form text
-command | > put the pot plant in the plant pot | parser expression
+command | > put the pot plant in the plant pot | parser expression, `>` _must_ be at the start of a line.
 image media | title.jpg | or other image, eg image.png
 sound media | music.ogg | only ogg supported!
-code | { /* code here */ } | anything in {} is code
+code | { /* code here */ } | anything in {} is code, `{` needs to be at the start of a line.
 
 If an object definition has command flow before its selectors, this is evaluated at the start, after processing all the objects. So `> put it in study` will result in the dead body being (initially) located in the study.
 
@@ -1362,7 +1393,7 @@ But, `examine it` in `CONCEPT` flows to the command `> x it` which winds up matc
 
 So this is how we build verb synonyms. Also we see `look player` and `look at player` will work (since there is no express "look at" match, it falls to "look").
 
-But there's more. Why are there method for `get` and `drop` on `THING`?
+But there's more. Why are there methods for `get` and `drop` on `THING`?
 
 That's because "things" are not gettable, so these are catch-alls, the same as `x it` on `CONCEPT` flows to `BORING`, which is a copout generator (there's only one in the example, but you'd have a few for variety).
 
@@ -1695,7 +1726,7 @@ It's important to note that `Strands` initially does not know the words, "feels"
 
 The statement;
 
-`> it feels cold` introduces the property "feel" and maps `fridge feel -> cold`, in this case.
+`> set it feels cold` introduces the property "feel" and maps `fridge feel -> cold`, in this case.
 
 Once a property like `feel` is defined, you can form queries like;
 

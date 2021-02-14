@@ -127,13 +127,22 @@ struct Word
     bool isNegative() const { return (_pos & pos_negate) != 0; }
         
     Word(const string& t) : _text(t) {}
-    bool operator<(const Word& w) const { return _text < w._text; }
 
+    bool operator==(const Word& w) const
+    { return equalsIgnoreCase(_text, w._text); }  
+    
+    bool operator<(const Word& w) const
+    {
+        return compareIgnoreCase(_text, w._text) < 0; 
+    }
+
+    /*
     void toLower()
     {
         // map to lower
         _text = ::toLower(_text);
     }
+    */
 
     friend std::ostream& operator<<(std::ostream& os, const Word& w)
     { return os << w._text; }
@@ -335,7 +344,7 @@ struct ParseCommand: public ParseBase
         Word w(word);
 
         // if not all upper, change to lower for search
-        if (!isUppercase(word)) w.toLower();
+        //if (!isUppercase(word)) w.toLower();
         
         auto it = _dictionary.find(w);
         return it == _dictionary.cend() ? 0 : &(*it);
@@ -348,7 +357,7 @@ struct ParseCommand: public ParseBase
         Word w(word);
         
         // if not all upper, change to lower for search
-        if (!isUppercase(word)) w.toLower();
+        //if (!isUppercase(word)) w.toLower();
         
         return const_cast<Word&>(*_dictionary.insert(w).first);
     }
