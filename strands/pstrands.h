@@ -628,10 +628,18 @@ struct ParseStrands: public ParseBase
             
                 if (AT == SYM_STICKY)
                 {
-                    if (t->_rtype != Term::t_random || t->_rtypenext != Term::t_random)
+                    if (t->_rtype == Term::t_shuffle
+                        || t->_rtype == Term::t_nonrandom)
                     {
-                        W1("Only randoms can be sticky, ", t->_name);
-                        t->_rtypenext = t->_rtype = Term::t_random;
+                        // no point having state for term used once
+                        LOG1("sticky term changed to random ", t->_name);
+                        t->_rtype = Term::t_random;
+                    }
+                    if (t->_rtype == Term::t_sequence)
+                    {
+                        // no need for sequence, same as first match
+                        LOG1("sticky term changed to first ", t->_name);
+                        t->_rtype = Term::t_first;
                     }
             
                     t->sticky(true);
@@ -643,6 +651,17 @@ struct ParseStrands: public ParseBase
                 {
                     // optional input top flow
                     parseFlow(t->_topflow, 0, -1); // consume nl
+
+                    if (t->_rtype != Term::t_random)
+                    {
+                        // for now we don't have meaning for filters
+                        // with state indicators
+                        // insist on them being random
+                        
+                        LOG1("term with topflow changed to random ", t->_name);
+                        t->_rtype = Term::t_random;
+                        
+                    }
                 }
                 else if (AT == '\n')
                 {

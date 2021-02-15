@@ -943,11 +943,7 @@ struct Strandi: public Traits
         }
 
         bool specialMatch() const { return _nullmatch || _setmatch; }
-
-        string id() const
-        {
-            return _reactor ? _reactor->id() : _action->id(); 
-        }
+        string id() const { return _reactor ? _reactor->id() : _action->id(); }
                 
     };
 
@@ -968,6 +964,7 @@ struct Strandi: public Traits
 
         // null choices are commands, if we have any
         Selector*           _cmdChoice = 0;
+        bool                _matching = false;
 
 
         int size() const { return _choices.size(); }
@@ -1409,34 +1406,37 @@ struct Strandi: public Traits
 
     int choiceForSelector(Choices& c, int seq)
     {
-        int ns = c._t->_selectors.size();
-        while (seq < ns)
-        {
-            Selector* s = c._t->_selectors[seq];
+        assert(seq < c._t->_selectors.size());
+        
+        Selector* s = c._t->_selectors[seq];
                         
-            // find choice for `seq` if any
-            int i = 0;
-            for (auto& ci : c._choices)
+        // find choice for `seq` if any
+        int i = 0;
+        for (auto& ci : c._choices)
+        {
+            if (ci._selected)
             {
-                if (ci._selected)
-                {
-                    if (ci._action == s) return i;
-                    ++i;
-                }
+                if (ci._action == s) return i;
+                ++i;
             }
-
-            ++seq;
         }
         return -1;
     }
 
     int handleGenTypes(Choices& c, int n)
     {
-        // handle types that could possibly have state
+        // handle types that can have state
         // shuffle, nonrandom, sequence
-        // but these could also mutate into random
+        //
+        // these types can also mutate into random (possibly others)
+        // so we can still get here even though we are random.
 
         int ch;
+
+        int ns = c.size();
+
+        // we should only get here if we have a choice for all selectors
+        assert(ns == c._t->_selectors.size());
 
         GenState* g1 = getGenState(c._t->_name);
         GenState* g2;
@@ -1448,8 +1448,8 @@ struct Strandi: public Traits
         }
         else
         {
-            Term::RType rtype = c._t->_rtype;
-            g2 = new GenState(this, rtype, n);
+            // will be the initial state, unless we don't need it
+            g2 = new GenState(this, c._t->_rtype, ns);
         }
 
         if (g2->_type == Term::t_sequence)
@@ -1458,11 +1458,10 @@ struct Strandi: public Traits
             // park on the end
 
             // the state stores the next sequence# to try
-            
+            // seq runs through the selectors not the available choices
+            // as these can change.
             int seq = 0;
             if (g1) seq = g1->_seq;
-
-            int ns = c._t->_selectors.size();
 
             assert(ns > 1); // otherwise wont need state at all
 
@@ -1499,14 +1498,32 @@ struct Strandi: public Traits
         }
         else
         {
-            ch = g2->choose();
+            // choose, out of all selectors, but not necessarily selected.
+            for (int i = 0; i < ns*2; ++i)   // *2 to allow for non-random
+            {
+                // keep choosing until get one selected.
+                int si = g2->choose();
+                ch = choiceForSelector(c, si);
+                if (ch >= 0) break;
+            }
+
+            if (ch < 0)
+            {
+                // should not happen, above should find selected eventually
+                LOG1("handleGenTypesm, failed to find selector ", c._t->_name);
+
+                // fallback to last valid in emergency
+                int i = 0;
+                for (auto& ci : c._choices) if (ci._selected) ch = i++;
+                assert(ch >= 0);
+                
+            }
         }
 
         if (g2 && g2 != g1)
         {
             // shuffle and sequence can change state
-            Term::RType rtypenext = c._t->_rtypenext;
-            if (g2->finished()) g2->convertTo(rtypenext);
+            if (g2->finished()) g2->convertTo(c._t->_rtypenext);
 
             setGenState(c._t->_name, g2); // consumes g2
         }
@@ -1539,14 +1556,17 @@ struct Strandi: public Traits
         
         // still zero? then nothing to do
         if (!nchoices) return false;
-        
+
         Term::RType rtype = c._t->_rtype;
 
-        if (rtype != Term::t_first && rtype != Term::t_sequence)
+        // when we're matching we have some of the selectors as choices
+        // and some of those are selected
+        // when we're not matching, we have all the selectors as choices
+        // but those failing conditional are not selected.
+        if (c._matching)
         {
-            // fallback to random if not all selectors active
-            if (nchoices != (int)c._t->_selectors.size())
-                rtype = Term::t_random;
+            assert(rtype == Term::t_random);
+            rtype = Term::t_random;
         }
         
         int ch = 0;
@@ -1625,8 +1645,7 @@ struct Strandi: public Traits
         // return false for stack break
         
         Choices choices(t);
-        bool matching = false;
-
+        
         // top flow is input for matching generators
         CapRef topflowcap;
 
@@ -1636,7 +1655,7 @@ struct Strandi: public Traits
         // an input selector.
         if (t->_topflow)
         {
-            matching = true;
+            choices._matching = true;
 
             // mask choices in topflow
             // prevent choices being run and instead
@@ -1674,8 +1693,11 @@ struct Strandi: public Traits
             // no matches => collect null tags and pick randomly
             // no matches & no null tags => no output.
 
-            if (matching)
+            if (choices._matching)
             {
+                // insist on matching terms being random (for now)
+                assert(t->_rtype == Term::t_random);
+                
                 // run all choice select flows and capture them
                 // for later matching
                 for (auto s : t->_selectors._selectors)
@@ -1760,12 +1782,11 @@ struct Strandi: public Traits
                 {
                     // when automatically choosing we run the selector
                     // flow later
-                    if (checkSelectorCond(s))
-                    {
-                        Choice ch(s);
-                        ch._selected = true;
-                        choices._choices.emplace_back(ch);
-                    }
+                    // add all selectors even if fails condition, but
+                    // mark as not selected.
+                    Choice ch(s);
+                    ch._selected = checkSelectorCond(s);
+                    choices._choices.emplace_back(ch);
                 }
                 runGeneratorAction(choices);
             }
@@ -3758,7 +3779,7 @@ struct Strandi: public Traits
                                 _pcom.internWordType(words[i], Word::pos_adj);
                             }
                         
-                            //DLOG1(_pcom._debug,"Adding noun", words[i]);
+                            //LOG1("Adding noun ", words[i]);
                             _pcom.internWordType(words[i], Word::pos_noun);
 
                             // now we've added the words, parse the nounphrase

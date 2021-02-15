@@ -42,9 +42,8 @@
 namespace ST
 {
 
-struct Word
+struct Word: public Traits
 {
-    typedef std::string string;
     enum POS
         {
             pos_void = 0,
@@ -128,21 +127,32 @@ struct Word
         
     Word(const string& t) : _text(t) {}
 
-    bool operator==(const Word& w) const
-    { return equalsIgnoreCase(_text, w._text); }  
-    
-    bool operator<(const Word& w) const
-    {
-        return compareIgnoreCase(_text, w._text) < 0; 
-    }
 
-    /*
-    void toLower()
+    int compare(const Word& w) const
     {
-        // map to lower
-        _text = ::toLower(_text);
+        // words compare by their string name
+        // some words are TERMS
+        bool t1 = isUppercase(_text);
+        bool t2 = isUppercase(w._text);
+
+        if (t1)
+        {
+            if (t2)
+            {
+                // straight compare
+                return _text.compare(w._text);
+            }
+            return -1; // term < non-term
+        }
+        else
+        {
+            if (t2) return 1; // non term > term
+            return compareIgnoreCase(_text, w._text);
+        }
     }
-    */
+    
+    bool operator==(const Word& w) const { return compare(w) == 0; }
+    bool operator<(const Word& w) const { return compare(w) < 0; }
 
     friend std::ostream& operator<<(std::ostream& os, const Word& w)
     { return os << w._text; }
@@ -337,29 +347,17 @@ struct ParseCommand: public ParseBase
         // dictionary words are case sensitive.
         // in the sense that uppercase words are TERM names
         // however, unless they are all uppercase, they should match
-        // without case.
+        // without case. this is done in Word.
         
         assert(word.size());
-        
-        Word w(word);
-
-        // if not all upper, change to lower for search
-        //if (!isUppercase(word)) w.toLower();
-        
-        auto it = _dictionary.find(w);
+        auto it = _dictionary.find(Word(word));
         return it == _dictionary.cend() ? 0 : &(*it);
     }
 
     Word& internWord(const string& word)
     {
         assert(word.size());
-        
-        Word w(word);
-        
-        // if not all upper, change to lower for search
-        //if (!isUppercase(word)) w.toLower();
-        
-        return const_cast<Word&>(*_dictionary.insert(w).first);
+        return const_cast<Word&>(*_dictionary.insert(Word(word)).first);
     }
 
     Word& internWordType(const string& word, uint pos)
