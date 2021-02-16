@@ -21,14 +21,14 @@ UPDATEMAP
 GOHALL
 MAIN
 
-///////////////////////////////////////////////
+/////////////////////////
 
 //////////////////// HALL
 
 GRANDCLOCK@ THING
 > put it in hall
 * name
-grandfather large clock
+the grandfather large clock
 * x it
 This grandfather clock is huge!
 
@@ -44,12 +44,6 @@ XHERE
 
 //////////////////// STUDY
 
-JIMMY@ PERSON
-> put jimmy in study
-* name
-master Jimmy
-* x it
-It's Jimmy!
 
 //////////////////// Drawing room
 
@@ -123,23 +117,74 @@ GOCUPBOARD
 * CUPBOARD
 GOKITCHEN
 
+///////////////////// ///////// PEOPLE
+
+JIMMY@ PERSON
+> put him in study
+* name
+master Jimmy
+* x it
+It's Jimmy!
+
+CLOT@ PERSON
+> put her in dining room
+* name
+Charlotte
+* x it
+It's Charlotte!
+
+CHARLES@ PERSON
+> put him in drawing room
+* name
+Charles
+* x it
+It's Charles!
+* ask him about jeeves
+"He's been our butler for goodness know how long, not much else to say really. Don't you have a butler?"
+* ask him about major
+"He was my dear brother and businss parter, such a trajic loss."
+* ask him about thing
+CHARLESCOPOUT
+
+CHARLESCOPOUT
+* I can't help you with that, at all!
+* "What a silly question! Shouldn't you be investigating the case!"
+
+
+ENT_DRAWINGROOM
+*?!ENT_DRAWINGROOM \n"Ah there you are inspector", exclaims Charles, "I trust you'll be clearing up this awful matter quickly, it's been such a shock here."
+
+MAJOR@ PERSON
+* name
+major
+* name
+major stephenson
+* label
+Major Stephenson
+* x it
+He's dead!
+
 ///////////////////// JEEVES /////////////////
 
 JEEVES@ PERSON
-> put it in hall
+> put him in hall
 * name
-jeeves
+Jeeves
 * name
 butler
 * label
 Jeeves the butler
 * x it
 Jeeves has been in the family for as long as anyone can remember. He's surely beyond suspicion, perhaps.
-* ask it about jimmy
-Master Jimmy is Mr Stephenson's son sir! JVPAUSE
+* ask him about jimmy
+"Master Jimmy is Mr Stephenson's son sir!" JVPAUSE
+* ask him about charles
+"He's in charge of everything now Sir!"
+* ask him about thing
+"Sorry, I can't help you with that Sir!"
 
 JVSTART
-*?!JVSTART \nWelcome to the Manor Sir, I am Jeeves the butler, at your disposal. JVMAIN^
+*?!JVSTART \n"Welcome to the Manor Sir, I am Jeeves the butler, at your disposal." JVMAIN^
 
 JVMAIN=
 *?JVPAUSE JVDELAY
@@ -177,29 +222,36 @@ JVGO
 > put jeeves in drawing room
 JVHERE
 *
+*
 JVGO
 > put jeeves in dining room
 JVHERE
+*
 *
 JVGO
 > put jeeves in drawing room
 JVHERE
 *
+*
 JVGO
 > put jeeves in hall
 JVHERE
+*
 *
 JVGO
 > put jeeves in kitchen
 JVHERE
 *
+*
 JVGO
 > put jeeves in hall
 JVHERE
 *
+*
 JVGO
 > put jeeves in study
 JVHERE
+*
 *
 JVGO
 > put jeeves in hall

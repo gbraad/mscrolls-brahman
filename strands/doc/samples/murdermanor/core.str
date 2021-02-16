@@ -63,13 +63,28 @@ BORING
 > x it
 
 BORING
-You don't find anything useful.
+* You don't find anything useful.
+* There's nothing special about it.
 
 THING@ CONCEPT
 * name
 a thing
 * get it
 You can't get that.
+* feel it
+BORING
+* move it
+BORING
+* push it
+BORING
+* pull it
+BORING
+* smell it
+BORING
+* eat it
+You can't eat IT.
+* search it
+BORING
 
 XHERE
 \
@@ -99,7 +114,8 @@ INV
 > out
 * exit
 > out
-
+* dance
+You do a little jig on the spot, hopefully no one noticed.
 
 NOWAY
 * You can't go that way.
@@ -134,6 +150,40 @@ NOWAY
 PERSON@ THING
 * be it
 IT
+* kiss it
+MOLESTATION
+* feel it
+MOLESTATION
+* rape it
+MOLESTATION
+* attack it
+ATTACKPERSON
+* hit it
+ATTACKPERSON
+* punch it
+ATTACKPERSON
+* kick it
+ATTACKPERSON
+* fight it
+ATTACKPERSON
+* kill it
+ATTACKPERSON
+* eat it
+MOLESTATION
+* smell it
+MOLESTATION
+* bite it
+ATTACKPERSON
+* grab it
+ATTACKPERSON
+
+MOLESTATION
+I don't think IT would take too kindly to that!
+
+ATTACKPERSON
+* Violence is not the answer.
+* You stop and reconsider.
+
 
 EAST@ 
 * name

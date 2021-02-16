@@ -38,6 +38,13 @@
 #include "pbase.h"
 #include "porter.h"
 #include "keywords.h"
+#include "logged.h"
+
+#define PRON_IT         "it"
+#define PRON_HERE       "here"
+#define PRON_HIM        "him"
+#define PRON_HER        "her"
+#define PRON_ALL        "all"
 
 namespace ST
 {
@@ -112,6 +119,7 @@ struct Word: public Traits
     uint            _pos = 0;
 
     bool isVerb() const { return (_pos & pos_verb) != 0; }
+    bool isNoun() const { return (_pos & pos_noun) != 0; }
     bool isArticle() const { return (_pos & pos_article) != 0; }
     bool isIOVerb() const { return (_pos & pos_ioverb) != 0; }
     bool isDOVerb() const { return (_pos & pos_doverb) != 0; }
@@ -122,7 +130,7 @@ struct Word: public Traits
 
     // is a relativising preposition
     bool isPrepRel() const { return (_pos & pos_prep_rel) != 0; }
-    bool isPOSExact(uint pos) const { return (_pos & pos_mask) == pos; }
+    //bool isPOSExact(uint pos) const { return (_pos & pos_mask) == pos; }
     bool isNegative() const { return (_pos & pos_negate) != 0; }
         
     Word(const string& t) : _text(t) {}
@@ -152,6 +160,12 @@ struct Word: public Traits
     }
     
     bool operator==(const Word& w) const { return compare(w) == 0; }
+    bool operator==(const char* w) const
+    {
+        // compare to literal must be exact
+        return _text == w;
+    }
+    
     bool operator<(const Word& w) const { return compare(w) < 0; }
 
     friend std::ostream& operator<<(std::ostream& os, const Word& w)
@@ -325,8 +339,6 @@ struct pnode: public node<pnode>
     void _purge()
     {
         delete _binding; _binding = 0;
-        //delete _head; _head = 0;
-        //delete _next; _next = 0;
     }
 
 };
@@ -337,7 +349,6 @@ struct ParseCommand: public ParseBase
     typedef pnode::nodeType nodeType;
     
     Dictionary          _dictionary;
-    const Word*         _here;
     const Word*         _it;
 
     ParseCommand() { _init(); }
@@ -414,13 +425,13 @@ struct ParseCommand: public ParseBase
             { "at", Word::pos_prep },
             { "for", Word::pos_prep },
 
-            { "it", Word::pos_pronoun },
-            { "him", Word::pos_pronoun },
-            { "her", Word::pos_pronoun },
-            { "here", Word::pos_pronoun },
+            { PRON_IT, Word::pos_pronoun },
+            { PRON_HIM, Word::pos_pronoun },
+            { PRON_HER, Word::pos_pronoun },
+            { PRON_HERE, Word::pos_pronoun },
             { "there", Word::pos_pronoun },
             { "them", Word::pos_pronoun },
-            { "all", Word::pos_pronoun },
+            { PRON_ALL, Word::pos_pronoun },
 
             { "put", Word::pos_verb | Word::pos_doverb | Word::pos_ioverb },
             { "set", Word::pos_verb | Word::pos_doverb },
@@ -441,7 +452,6 @@ struct ParseCommand: public ParseBase
         }
 
         // locate various pronouns so we can test directly
-        _here = findWord("here");
         _it = findWord("it");
     }
 
@@ -487,18 +497,17 @@ struct ParseCommand: public ParseBase
         // a and a and a ...
         // (a  a  a ...)
         pnode* pl;
-        uint pc = 0;
         
-        _push(); ++pc;
+        _push();
         pl = parseType(word(), ps, type);
         if (pl)
         {
             pnode* plast = pl;
-            //_drop();
+            _drop();
 
             for (;;)
             {
-                _push(); ++pc;
+                _push();
                 string w = word();
                 if (wordType(w, Word::pos_conj)) w = word(); // skip "and"
                 pnode* p2 = parseType(w, ps, type);
@@ -506,38 +515,14 @@ struct ParseCommand: public ParseBase
                 {
                     plast->_next = p2;
                     plast = p2;
-                    //_drop();
+                    _drop();
                 }
                 else
                 {
-                    _pop(); --pc;
+                    _pop(); 
                     break;
                 }
             }
-            
-            // have pc drops to make
-
-            // if the last word is also another type, reject it
-            // this prevents conflict between adj and noun where
-            // the noun is also an adj. Basically, it cannot be an adj here.
-            assert(plast->_word);
-            if (!plast->_word->isPOSExact(ps))
-            {
-                //NB: pl can be plast
-                pnode** pp = &pl;
-                while (*pp != plast) pp = &(*pp)->_next;
-                delete *pp;
-                *pp = 0;
-
-                // and pop the last word we've rejected
-                assert(pc);
-                --pc;
-                _pop();
-            }
-
-            // drop remainder
-            while (pc--) _drop();
-            
         }
         else _pop();
         return pl;
@@ -562,7 +547,49 @@ struct ParseCommand: public ParseBase
         
         _push();
         pnode* pl = parseAdjlist();
+
+        _push();
         pnode* pn = parseType(word(), Word::pos_noun, nodeType::p_noun);
+
+        if (pn)
+        {
+            _drop(); // accept noun
+        }
+        else
+        {
+            _pop();  // word that failed to be a noun
+            
+            // can last adjective also be a noun?
+            if (pl)
+            {
+                int ac = 1;
+
+                // walk to the last adj
+                pnode** ap = &pl;
+                while ((*ap)->_next)
+                {
+                    ap = &(*ap)->_next;
+                    ++ac;
+                }
+                
+                assert((*ap)->_word);
+
+                // is it also a noun?
+                if ((*ap)->_word->isNoun())
+                {
+                    // yes. promote it
+
+                    pn = *ap; // noun!
+                    pn->_type = nodeType::p_noun; // promote type
+                    
+                    *ap = 0; // remove from adj list
+
+                    // if we only had one adj, pl should now be 0
+                    assert(ac != 1 || !pl);
+                }
+            }
+        }
+
         if (pn)
         {
             if (pl)
@@ -605,22 +632,26 @@ struct ParseCommand: public ParseBase
             for (;;)
             {
                 bool of = false;
+                bool ok = false;
 
                 _push();
 
                 // allow ' or 's
                 if (AT == '\'')
                 {
+                    ok = true;
                     BUMP;
                     if (AT == 's') BUMP;
+                    else if (AT != ' ') ok = false; // must be 's or nothing
                 }
                 else
                 {
                     // skip "of" word
-                    of = parseLiteral("of");
+                    ok = of = parseLiteral("of");
                 }
                 
-                pnode* p2 = parseANoun();
+                pnode* p2 = ok ? parseANoun() : 0;
+                
                 if (p2)
                 {
                     if (of)

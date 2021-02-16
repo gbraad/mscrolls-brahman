@@ -110,7 +110,7 @@ GODRAWINGROOM
 > put player in drawing room
 You go into the drawing room.
 images/drawing.jpg
-XHERE
+XHERE ENT_DRAWINGROOM
 
 //////////////////// Dining room
 

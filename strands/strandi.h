@@ -2194,9 +2194,10 @@ struct Strandi: public Traits
     static bool restrictTo(TermList& l1, TermList& l2)
     {
         // remove any member of `l1` not in `l2'.
+        // or a subtype of some member in l2.
         for (auto it = l1.begin(); it != l1.end();)
         {
-            if (!contains(l2, *it)) it = l1.erase(it);
+            if (!subtype(*it, l2)) it = l1.erase(it);
             else ++it;
         }
         return !l1.empty();
@@ -2210,10 +2211,29 @@ struct Strandi: public Traits
         
         return true;
     }
+
+    static int subtype(Term* t, const TermList& b)
+    {
+        // is t in b or a subtype of some member in b
+        // return subtype parent distance, 0 if not a subtype
+        
+        if (contains(b, t)) return 1; // like a parent?
+
+        int di = 0;
+        for (auto bi : b)
+        {
+            di = isDistance(t, bi); // is bi a parent of t? 
+            if (di) break; // yes
+        }
+        
+        // if !di, t does not have a parent in b
+        // or return parent distance
+        return di;
+    }
     
     static int subtypes(const TermList& a, const TermList& b)
     {
-        // are elements of a, all ether in b or subtypes of some member of b
+        // are elements of a, all ether in b or subtypes of some member in b
         // return 0 if fail
         // return subtype parent distance
         // NB: if a empty, return 0
@@ -2221,15 +2241,7 @@ struct Strandi: public Traits
         int maxd = 0;
         for (auto t : a)
         {
-            if (contains(b, t)) continue;
-
-            int di = 0;
-            for (auto bi : b)
-            {
-                di = isDistance(t, bi); // is bi a parent of t? 
-                if (di) break; // yes
-            }
-
+            int di = subtype(t, b);
             if (!di) return 0; // t does not have a parent in b, fail
 
             // collect greatest parent distance for all in a
@@ -2340,6 +2352,28 @@ struct Strandi: public Traits
         return iss(a, _thing);
     }
 
+    void calculateAll(TermList& tl, Term* p)
+    {
+        // `p` is usually player
+        // all things directly in location of p except p
+        
+        tl.clear();
+
+        // immediate parent "in"
+        TermList parents;
+        inTerms(parents, p); 
+
+        // add all things in parent
+        for (auto a : parents)
+        {
+            TermList pl;
+            subInTerms(pl, a); // will include p
+
+            for (auto t : pl)
+                if (t != p && !contains(tl, t)) tl.push_back(t);
+        }
+    }
+
     void calculateScope(TermList& tl, Term* p)
     {
         // calculate scope for p (usually player)
@@ -2431,7 +2465,18 @@ struct Strandi: public Traits
         TermList* tl = 0;
         assert(pn && pn->_type == nodeType::p_pronoun);
         const Word* w = pn->_word;
-        if (w == _pcom._here)
+
+        // XX for now map him/her -> it. 
+        if (w == _pcom._it || *w == PRON_HIM || *w == PRON_HER)
+        {
+            Term* t = _ctx->getIt();
+            if (t)
+            {
+                tl = new TermList;
+                tl->push_back(t);
+            }
+        }
+        else if (*w == PRON_HERE)  // literal
         {
             if (_player)
             {
@@ -2439,13 +2484,12 @@ struct Strandi: public Traits
                 inTerms(*tl, _player);
             }
         }
-        else if (w == _pcom._it)
+        else if (*w == PRON_ALL)
         {
-            Term* t = _ctx->getIt();
-            if (t)
+            if (_player)
             {
                 tl = new TermList;
-                tl->push_back(t);
+                calculateAll(*tl, _player);
             }
         }
 
@@ -3271,7 +3315,7 @@ struct Strandi: public Traits
 
                     // both or neither
                     v = (rei._dobj != 0) == (ei._dobj != 0);
-                    
+
                     if (v && rei._dobj)
                     {
                         // insist they match
@@ -3775,16 +3819,16 @@ struct Strandi: public Traits
                                 if (wi && wi->isArticle()) continue;
 
                                 // otherwise assume adjective
-                                //DLOG1(_pcom._debug,"Adding adjective", words[i]);
+                                LOG4("Adding adjective ", words[i]);
                                 _pcom.internWordType(words[i], Word::pos_adj);
                             }
                         
-                            //LOG1("Adding noun ", words[i]);
+                            LOG4("Adding noun ", words[i]);
                             _pcom.internWordType(words[i], Word::pos_noun);
 
                             // now we've added the words, parse the nounphrase
                             // and store as one of our names.
-                            //DLOG1(_pcom._debug,"Parsing name", c._buf);
+                            LOG4("Parsing name ", abuf.c_str());
                             pn = _pcom.parseNoun(abuf.c_str());
                         }
                         
