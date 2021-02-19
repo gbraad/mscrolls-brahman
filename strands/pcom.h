@@ -46,6 +46,14 @@
 #define PRON_HER        "her"
 #define PRON_ALL        "all"
 
+#define ART_A           "a"
+#define ART_AN          "an"
+#define ART_ANY         "any"
+#define ART_THIS        "this"
+#define ART_THE         "the"
+#define ART_MY          "my"
+#define ART_THAT        "that"
+
 namespace ST
 {
 
@@ -115,6 +123,16 @@ struct Word: public Traits
         return pnames[i];
     }
 
+    enum scopeType
+    {
+        scope_void = 0, // none
+        scope_any_one,
+        scope_the_one,
+        scope_here,  // 3
+        scope_have,
+        scope_here_nothave,
+    };
+
     string          _text;
     uint            _pos = 0;
 
@@ -135,6 +153,21 @@ struct Word: public Traits
         
     Word(const string& t) : _text(t) {}
 
+    scopeType scopeOf() const
+    {
+        scopeType st = scope_void;
+        
+        // words can indicate scope
+        if (isArticle())
+        {
+            if (_text == ART_A || _text == ART_AN || _text == ART_ANY) st = scope_any_one;
+            else if (_text == ART_THE) st = scope_the_one;
+            else if (_text == ART_THIS) st = scope_here;
+            else if (_text == ART_MY) st = scope_have;
+            else if (_text == ART_THAT) st = scope_here_nothave; 
+        }
+        return st;
+    }
 
     int compare(const Word& w) const
     {
@@ -172,6 +205,43 @@ struct Word: public Traits
     { return os << w._text; }
 };
 
+struct Binding
+{
+    typedef std::list<Term*> BindList;
+    typedef Word::scopeType scopeType;
+
+    Binding() {}
+    Binding(BindList* tl)
+    {
+        // consume given terms
+        if (tl)
+        {
+            _terms.splice(_terms.begin(), *tl);
+        }
+    }
+
+    void merge(Binding& b)
+    {
+        for (auto t : b._terms)
+            if (!contains(_terms, t)) _terms.push_back(t);
+
+        // copy over any scope flags if not already
+        if (!_scope) _scope = b._scope;
+    }
+
+    Term* first()
+    {
+        assert(!_terms.empty());
+        return _terms.front();
+    }
+
+    bool empty() const { return _terms.empty(); }
+    int size() const { return _terms.size(); }
+
+    BindList    _terms;
+    scopeType   _scope = Word::scope_void;
+};
+
 struct pnode: public node<pnode>
 {
     enum nodeType
@@ -201,9 +271,7 @@ struct pnode: public node<pnode>
         p_qs, // 22 query sentence
     };
 
-    typedef std::list<Term*> Binding;
     
-
     const Word*     _word = 0;
     Binding*        _binding = 0;
 
@@ -334,11 +402,25 @@ struct pnode: public node<pnode>
         
         return pn;
     }
+
+    Binding* getBinding()
+    {
+        // find binding
+        pnode* pn = this;
+
+        while (pn)
+        {
+            if (pn->_binding) return pn->_binding;
+            pn = pn->_head;
+        }
+        return 0;
+    }
     
 
     void _purge()
     {
-        delete _binding; _binding = 0;
+        delete _binding;
+        _binding = 0;
     }
 
 };
@@ -408,11 +490,16 @@ struct ParseCommand: public ParseBase
             { "except", Word::pos_except },
             { "but", Word::pos_except },
 
-            { "the", Word::pos_article },
-            { "a", Word::pos_article },
-            { "an", Word::pos_article },
+            { ART_THE, Word::pos_article },
+            { ART_A, Word::pos_article },
+            { ART_AN, Word::pos_article },
             { "some", Word::pos_article },
-            { "any", Word::pos_article },
+            { ART_ANY, Word::pos_article },
+
+            // not really articles, but works as such
+            { ART_THIS, Word::pos_article },
+            { ART_THAT, Word::pos_article },
+            { ART_MY, Word::pos_article },
 
             { "in", Word::pos_prep | Word::pos_prep_rel },
             { "into", Word::pos_prep },
@@ -485,7 +572,10 @@ struct ParseCommand: public ParseBase
         {
             const Word* wt = wordType(w, pos);
 
-            DLOG0(_debug > 1, "parsing '" << w << "' as " << Word::posName(pos) << (wt ? " ok" : " fail"));
+            if (wt)
+            {
+                LOG3("parsing '", w << "' as " << Word::posName(pos));
+            }
             
             if (wt) pn = new pnode(wt, t);
         }
@@ -1268,6 +1358,7 @@ struct ParseCommand: public ParseBase
 
     pnode* parseIO()
     {
+        // (prep nouns)
         _push();
 
         pnode* pn = 0;
@@ -1294,7 +1385,9 @@ struct ParseCommand: public ParseBase
     
     pnode* parseSentence()
     {
+        // (#cs verb)
         // (#PS verb nouns)
+        // (#qs ...)
         pnode* ps = parseAVerb();
         if (ps)
         {
@@ -1302,12 +1395,13 @@ struct ParseCommand: public ParseBase
             if (pn)
             {
                 assert(!ps->_next);
-                ps->_next = pn;
+                ps->_next = pn;  // (verb nouns)
 
                 // indirect object?
-                pnode* io = parseIO();
-                if (io) pn->_next = io;
-                
+                pnode* io = parseIO(); // (prep nouns)
+                if (io) pn->_next = io; // (verb nouns prep nouns)
+
+                // (#cs (verb nouns prep nouns))
                 ps = new pnode(ps, nodeType::p_cs);
 
                 if (!io)
@@ -1318,7 +1412,8 @@ struct ParseCommand: public ParseBase
                         // more to parse!
                         parseSet(ps);
                     }
-                    
+
+                    // lift (verb nouns) -> (verb nouns prep nouns)
                     bool v = liftParseIO(ps);
                     DLOG0(_debug > 1 && v, "lifted parse");
                 }

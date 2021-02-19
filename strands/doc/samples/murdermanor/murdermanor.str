@@ -44,6 +44,25 @@ XHERE
 
 //////////////////// STUDY
 
+BOOKCASE@ THING
+> put it in study
+* name
+bookcase
+* x it
+There are a lot of books here.
+* get BOOK
+> put BOOK in here
+> get BOOK
+
+BOOK@ GETTABLE
+* name
+a book
+* x it
+XBOOK
+
+XBOOK
+* An incredibly boring book about fossils.
+
 
 //////////////////// Drawing room
 
@@ -62,6 +81,13 @@ fireplace
 fire
 * x it
 Like i said, it's blazing away!
+
+FISHBOOK@ GETTABLE
+> put it in drawing room
+* name
+the fish book
+* x it
+It's a book about fish.
 
 //////////////////// kitchen
 
@@ -182,6 +208,13 @@ Jeeves has been in the family for as long as anyone can remember. He's surely be
 "He's in charge of everything now Sir!"
 * ask him about thing
 "Sorry, I can't help you with that Sir!"
+* show this thing to him
+"I beg your pardon Sir!"
+* show this BOOK to him
+"Very nice Sir!"
+* show this FISHBOOK to him
+"Fishing! it's the thing!"
+
 
 JVSTART
 *?!JVSTART \n"Welcome to the Manor Sir, I am Jeeves the butler, at your disposal." JVMAIN^

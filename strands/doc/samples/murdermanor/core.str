@@ -304,27 +304,28 @@ It's up there.
 * x ground
 XFLOOR
 
-/////// DOORS 
+/////// DOORS
 
-DOOR@ THING
+OPENABLE@ THING
 * open it
-OPENDOOR
+OPENTHING
 * close it
-CLOSEDOOR
+CLOSETHING
 
-OPENDOOR > what is it state
+OPENTHING > what is it state
 * open
 It's already open!
 *
 > set it state open
 You open IT.
 
-CLOSEDOOR > what is it state
+CLOSETHING > what is it state
 * open
 > set it state closed
 You close IT.
 *
 It's already closed.
 
+DOOR@ OPENABLE
 
 
