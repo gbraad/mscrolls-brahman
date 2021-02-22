@@ -187,10 +187,22 @@ struct Traits
     static bool isUppercase(const string& s)
     { return isUppercase(s.c_str()); }
 
-    static uint countBits(uint t)
+    static uint bitIndex(uint t)
     {
         uint i = 0;
         while (t) { ++i; t >>= 1; }
+        return i;
+    }
+
+    static uint countBits(uint t)
+    {
+        // number of bits set
+        uint i = 0;
+        while (t)
+        {
+            if (t&1) ++i;
+            t >>= 1;
+        }
         return i;
     }
 

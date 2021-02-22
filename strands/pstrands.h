@@ -940,22 +940,24 @@ struct ParseStrands: public ParseBase
     
     }
 
-    bool linkTerm(Flow::EltTerm* et, bool err)
+    bool linkTerm(Flow::EltTerm* et, FlowVisitor& fv)
     {
         bool v = et->_term != 0;
         if (!v)
         {
+            //LOG1("Linking ", *et << " from " << *fv._hostTerm);
             et->_term = Term::find(et->_name);
             if (et->_term) v = true;
-            else if (err)
+            else if (fv._err)
             {
-                ERR0("missing term '" << et->_name << '\'');
+                assert(fv._hostTerm);
+                ERR0("missing term '" << et->_name << "'; in term " << fv._hostTerm->toString()); 
             }
         }
         return v;
     }
 
-    bool linkCond(Flow::EltCond* et, bool err)
+    bool linkCond(Flow::EltCond* et, FlowVisitor& fv)
     {
         assert(et->_cond);
         bool v = true;
@@ -968,7 +970,7 @@ struct ParseStrands: public ParseBase
                 if (!en->_binding)
                 {
                     v = false;
-                    if (err)
+                    if (fv._err)
                     {
                         ERR0("missing cond term '" << en->_name << '\'');
                     }
@@ -988,12 +990,12 @@ struct ParseStrands: public ParseBase
             if (e->_type == Flow::t_term)
             {
                 Flow::EltTerm* et = (Flow::EltTerm*)e;
-                if (!linkTerm(et, fv._err)) v = false;
+                if (!linkTerm(et, fv)) v = false;
             }
             else if (e->_type == Flow::t_cond)
             {
                 Flow::EltCond* et = (Flow::EltCond*)e;
-                if (!linkCond(et, fv._err)) v = false;
+                if (!linkCond(et, fv)) v = false;
             }
         }
         return v;
@@ -1142,7 +1144,8 @@ struct ParseStrands: public ParseBase
         // ensure special terms are present
         Term::intern(TERM_TICK);
         Term::intern(TERM_LAST);
-        Term::intern(TERM_IT);        
+        Term::intern(TERM_IT);
+        Term::intern(TERM_THAT);        
         
         bool v = linkTerms();
 

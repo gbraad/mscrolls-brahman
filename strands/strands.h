@@ -85,7 +85,7 @@ struct Flow: public Traits
                     "cond",
                 };
 
-            return stab[countBits(_type)];
+            return stab[bitIndex(_type)];
         }
         
         virtual string _toString(bool extra) const = 0;
@@ -212,6 +212,7 @@ struct Flow: public Traits
 
     enum FlowTermFlags
     {
+        // powers of 2
         ft_none = 0,
         ft_background = 1,
         ft_reset = 2,
@@ -356,6 +357,7 @@ struct FlowVisitor
     typedef std::function<bool(Flow&, FlowVisitor&)> FlowVisit;
 
     FlowVisit       _f;
+    Term*           _hostTerm = 0;
     int             _pass = 0;
     bool            _err = true;
     bool            _skipNonReactors = false;
@@ -888,6 +890,7 @@ struct Term: public Traits
 
     bool visit(FlowVisitor ff)
     {
+        ff._hostTerm = this;
         bool v = ff(_topflow);
         if (!ff(_flow)) v = false;
         if (!_selectors.visit(ff)) v = false;
@@ -911,7 +914,7 @@ inline std::string Selector::id() const
     return _host->_name + '_' + std::to_string(_id);
 }
 
-bool Selector::hostIsObject() const
+inline bool Selector::hostIsObject() const
 {
     assert(_host);
     return _host->isObject();

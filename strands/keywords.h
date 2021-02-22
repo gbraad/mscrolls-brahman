@@ -48,6 +48,7 @@
 
 #define TERM_LAST   "LAST"
 #define TERM_IT     "IT"
+#define TERM_THAT   "THAT"
 #define TERM_TICK   "TICK"
 #define TERM_NOCANDO "ERROR_NOCANDO"
 #define TERM_NOSUCH "ERROR_NOSUCH"
@@ -55,6 +56,7 @@
 
 // special properties
 #define PROP_IN     "in"
+#define PROP_INTO   "into"
 
 // match empty result
 #define MATCH_NULL  "null"

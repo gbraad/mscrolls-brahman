@@ -113,6 +113,9 @@ struct Capture
             return s;
         }
 
+        friend std::ostream& operator<<(std::ostream& os, const Elt& e)
+        { return os << e.toString(); }
+
         var toVar() const
         {
             return toString();

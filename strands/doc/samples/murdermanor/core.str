@@ -71,19 +71,33 @@ THING@ CONCEPT
 a thing
 * get it
 You can't get that.
+* take it
+> get it
 * feel it
 BORING
 * move it
-BORING
+MOVEIT
 * push it
-BORING
+> move it
 * pull it
-BORING
+> move it
 * smell it
 BORING
 * eat it
 You can't eat IT.
 * search it
+BORING
+* hit it
+HITIT
+* break it
+> hit it
+* kick it
+> hit it
+
+HITIT
+Trying to break things won't help.
+
+MOVEIT
 BORING
 
 XHERE
@@ -116,6 +130,19 @@ INV
 > out
 * dance
 You do a little jig on the spot, hopefully no one noticed.
+
+// player body parts
+FEET@ THING
+> put it in player
+* name
+feet
+* name
+foot
+* x it
+Your feet!
+* smell it
+Pooh!
+
 
 NOWAY
 * You can't go that way.
@@ -255,7 +282,11 @@ XHERE
 You can't do that.
 
 
-INV > what is in player
+YOURSTUFF > what is in player
+*
+> be LAST
+
+INV YOURSTUFF
 * them
 You are carrying, LAST.
 *
@@ -328,4 +359,9 @@ It's already closed.
 
 DOOR@ OPENABLE
 
+GARMENT@ GETTABLE
+* take off it
+> drop it
+* put on it
+> get it
 

@@ -197,7 +197,7 @@ struct Strandi: public Traits
         bool        _output = false;  // emit results of command
         pnode*      _verbn = 0;
         const Word* _verb = 0;
-        const Word* _verbPrep = 0;
+        const Word* _verbPrep = 0;  // look at
         pnode*      _dobjn = 0;
         Binding*    _dobj = 0;
         pnode*      _prepn = 0;
@@ -207,10 +207,12 @@ struct Strandi: public Traits
         pnode*      _iobjn = 0;
         Binding*    _iobj = 0;
         Term*       _it = 0;
+        Term*       _that = 0;
 
         // hit manual break during execution
         bool        _break = false;
         bool        _resolving = false;
+        bool        _internalOps = true; // allow "put" and "set"
 
         // current exec info
         Reaction*   _currentReaction = 0;
@@ -297,6 +299,11 @@ struct Strandi: public Traits
         void popIt() { _popPron(_host->_pcom._it); }
         void setIt(Term* t) { _replacePron(_host->_pcom._it, t); }
         Term* getIt() const { return _getPron(_host->_pcom._it); }
+
+        void pushThat(Term* t) { _pushPron(_host->_pcom._that, t); }
+        void popThat() { _popPron(_host->_pcom._that); }
+        void setThat(Term* t) { _replacePron(_host->_pcom._that, t); }
+        Term* getThat() const { return _getPron(_host->_pcom._that); }
 
         bool resolveScopeReactions()
         {
@@ -774,6 +781,20 @@ struct Strandi: public Traits
     
 #endif
 
+    struct ResInfo
+    {
+        pnode*  _pn;
+        bool    _toScope;
+        bool    _valid = true;  // resolved
+        bool    _empty = false; // resolved to nothing?
+
+        bool    resolved() const { return _valid && !_empty; }
+
+        ResInfo(pnode* pn, bool toScope = false)
+            : _pn(pn), _toScope(toScope) {}
+        
+    };
+
     bool run(Flow& f)
     {
         // return false if we hit a manual return
@@ -808,8 +829,9 @@ struct Strandi: public Traits
                     Flow::EltCommand* c = (Flow::EltCommand*)e;
                     if (c->_parse)
                     {
-                        bool r = resolve(c->_parse);
-                        if (r)
+                        ResInfo ri(c->_parse);
+                        resolve(ri);
+                        if (ri.resolved())
                         {
                             execInfo ei(c->_parse);
 
@@ -822,7 +844,7 @@ struct Strandi: public Traits
                             }
                             
                             ei._err = false; // no built in errors
-                            r = exec(ei);
+                            exec(ei);
 
                             // retrieve manual break request from exec
                             if (ei._break) v = false;
@@ -831,7 +853,8 @@ struct Strandi: public Traits
                             clearBindings(c->_parse);
                             updateScope();
                         }
-                        else
+
+                        if (!ri._valid)
                         {
                             ERR1("flow cannot resolve", textify(c->_parse));
                         }
@@ -1281,26 +1304,44 @@ struct Strandi: public Traits
 
                 assert(c._cmdChoice);
 
-                if (line == "?")  // debugging
+                bool done = false;
+
+#ifdef LOGGING                
+                if (line[0] == '?')  // debugging
                 {
+                    done = true;
                     _printScope();
                     _printResolutionScope();
 
-                    // special case to examine reactions
-                    int cc = 0;
-                    for (auto& r : _ctx->_reactions)
+                    const char* p = line.c_str() + 1; // skip "?"
+                    string dcmd = firstWordOf(p);
+
+                    if (dcmd.size())
                     {
-                        assert(r._reactor);
+                        bool any = dcmd == "?";
+                        
+                        // special case to examine reactions
+                        int cc = 0;
+                        for (auto& r : _ctx->_reactions)
+                        {
+                            assert(r._reactor);
+                            const string& host = r._s->_host->_name;
+                            if (any || equalsIgnoreCase(dcmd, host))
+                            {
+                                _emit('\n');
+                                _emit(++cc);
+                                _emit(") ");
+                                _emit(host);
+                                _emit(": ");
+                                _emit(textify(r._reactor));
+                            }
+                        }
                         _emit('\n');
-                        _emit(++cc);
-                        _emit(") ");
-                        _emit(r._s->_host->_name);
-                        _emit(": ");
-                        _emit(textify(r._reactor));
                     }
-                    _emit('\n');
                 }
-                else
+#endif                
+
+                if (!done)
                 {
                     // try to parse command and execute
                     pnode* ps = _pcom.parse(line);
@@ -1308,12 +1349,15 @@ struct Strandi: public Traits
                     {
                         // create bindings
                         // restrict input to resolution scope
-                        if (resolve(ps, true))
+                        ResInfo ri(ps, true);
+                        resolve(ri);
+                        if (ri.resolved())
                         {
                             execInfo ei(ps);
 
                             // perform resolution against reactor match
                             ei._resolving = true;
+                            ei._internalOps = false; // prevent internal "put"
                             
                             accept = exec(ei);
                             if (accept)
@@ -2085,6 +2129,16 @@ struct Strandi: public Traits
                 OUTP(it);
             }
         }
+        else if (t->_name == TERM_THAT)
+        {
+            v = true;
+            Term* it = _ctx->getThat();
+            if (it)
+            {
+                OUTP(it);
+            }
+        }
+
         else if (t->_name == TERM_TICK)
         {
             v = true;
@@ -2254,62 +2308,46 @@ struct Strandi: public Traits
         }
     }
 
-    bool restrictOneToScope(TermList* l1)
+    static int partialList(TermList& l1, TermList& l2)
     {
-        if (!l1) return true; // nothing to do
-
-        // reduce list `l1` to just one item.
-
-        // remove any member of `l1` not in resolution scope
-        // or a subtype of some member of resolution scope
+        // how many of l1 are in l2
         int cc = 0;
-        for (auto it = l1->begin(); it != l1->end();)
-        {
-            if (!subtype(*it, _ctx->_resolutionScope)) it = l1->erase(it);
-            else
-            {
-                ++it;
-                ++cc;
-            }
-        }
-
-        // have more than one left?
-        if (cc > 1)
-        {
-            // are any directly in res scope?
-            cc = 0;
-            for (auto it = l1->begin(); it != l1->end(); ++it)
-                if (contains(_ctx->_resolutionScope, *it)) ++cc;
-
-            if (cc >= 1)
-            {
-                // yes, clip to this
-                cliplist(*l1, _ctx->_resolutionScope);
-            }
-
-            if (cc > 1)
-            {
-                // have either zero or >1 directly in res scope
-                // try for interactive scope
-
-                cc = 0;
-                for (auto it = l1->begin(); it != l1->end(); ++it)
-                    if (contains(_ctx->_scope, *it)) ++cc;
-
-                if (cc >= 1)
-                {
-                    // have that then!
-                    cliplist(*l1, _ctx->_scope);
-                }
-            }
-        }
-
-        if (l1->size() > 1)
-        {
-            LOG3("restrictOneToScope failed to restrict ", textify(*l1));
-        }
+        for (auto t : l1) if (contains(l2, t)) ++cc;
+        return cc;
+    }
         
-        return !l1->empty();
+
+    bool restrictToIdeal(TermList& l1)
+    {
+        // try to reduce list by relevancy
+        // false if reduced non-empty list to empty
+        
+        if (l1.empty()) return true; // nothing to do
+        
+        if (partialList(l1, _ctx->_scope))
+        {
+            // some are in interactive scope
+            cliplist(l1, _ctx->_scope);
+            LOG3("restrict to ideal interactive: ", textify(l1));
+            
+        }
+        else if (partialList(l1, _ctx->_resolutionScope))
+        {
+            // some are directly in resolution scope
+            cliplist(l1, _ctx->_resolutionScope);
+            LOG3("restrict to ideal resolution: ", textify(l1));
+        }
+        else
+        {
+            // remove any member of `l1` not in resolution scope
+            // or a subtype of some member of resolution scope
+            for (auto it = l1.begin(); it != l1.end();)
+            {
+                if (!subtype(*it, _ctx->_resolutionScope)) it = l1.erase(it);
+                else ++it;
+            }
+        }
+        return !l1.empty();
     }
 
     static bool subset(const TermList& a, const TermList& b)
@@ -2362,7 +2400,7 @@ struct Strandi: public Traits
 
     void subInTerms(TermList& tl, Term* p)
     {
-        // all things in p
+        // all things directly in p
         Timeline::Strings ss;
         _state.getdsv(PROP_IN, p->_name, ss);
         for (auto i : ss)
@@ -2370,6 +2408,21 @@ struct Strandi: public Traits
             Term* ti = Term::find(*i);
             assert(ti);
             tl.push_back(ti);
+        }
+    }
+    
+    void subInTermsRec(TermList& tl, Term* p)
+    {
+        // all things directly or indirectly in p
+        TermList t1;
+        subInTerms(t1, p);
+        for (auto i : t1)
+        {
+            if (!contains(tl, i))
+            {
+                tl.push_back(i);
+                subInTermsRec(tl, i);
+            }
         }
     }
 
@@ -2476,6 +2529,8 @@ struct Strandi: public Traits
         for (auto a : parents)
         {
             TermList pl;
+
+            // NB: all does not include things inside things
             subInTerms(pl, a); // will include p
 
             for (auto t : pl)
@@ -2493,9 +2548,6 @@ struct Strandi: public Traits
         // and P if not already included.
         tl.clear();
 
-        // sub items of p
-        subInTerms(tl, p);
-
         // immediate parent "in"
         TermList parents;
         inTerms(parents, p); 
@@ -2506,7 +2558,7 @@ struct Strandi: public Traits
             for (auto a : parents)
             {
                 TermList tl1;
-                subInTerms(tl1, a); // will include p
+                subInTermsRec(tl1, a); // will include p and p's content
                 concatm(tl, tl1);
             }
 
@@ -2569,55 +2621,52 @@ struct Strandi: public Traits
         }
     }
 
-    TermList* resolvePronoun(pnode* pn)
+    bool resolvePronoun(pnode* pn, TermList& tl)
     {
-        TermList* tl = 0;
         assert(pn && pn->_type == nodeType::p_pronoun);
         const Word* w = pn->_word;
+
+        bool ok;
 
         // XX for now map him/her -> it. 
         if (w == _pcom._it || *w == PRON_HIM || *w == PRON_HER)
         {
+            ok = true;
             Term* t = _ctx->getIt();
-            if (t)
-            {
-                tl = new TermList;
-                tl->push_back(t);
-            }
+            if (t) tl.push_back(t);
+        }
+        else if (w == _pcom._that)
+        {
+            ok = true;
+            Term* t = _ctx->getThat();
+            if (t) tl.push_back(t);
         }
         else if (*w == PRON_HERE)  // literal
         {
-            if (_player)
-            {
-                tl = new TermList;
-                inTerms(*tl, _player);
-            }
+            assert(_player);
+            ok = true;
+            inTerms(tl, _player);
         }
         else if (*w == PRON_ALL)
         {
-            if (_player)
-            {
-                tl = new TermList;
-                calculateAll(*tl, _player);
-            }
+            assert(_player);
+            ok = true;
+            calculateAll(tl, _player);
         }
-
-        if (tl && tl->empty()) { delete tl; tl = 0; }
-        return tl;
+        return ok;
     }
 
-    TermList* resolveNoun(pnode* pn, pnode* pa)
+    bool resolveNoun(pnode* pn, pnode* pa, TermList& tl)
     {
         // pn = noun
         // pa = (a a a)
         // pa can be null.
 
+        bool v = false;
         assert(pn && pn->_type == nodeType::p_noun);
         assert(!pa || pa->_type == nodeType::p_adjs);
         assert(pn->_word);
         
-        TermList* tl = new TermList;
-
         if (pn->_word->isFlow())
         {
             // We have a flow term inside a noun phrase
@@ -2625,6 +2674,8 @@ struct Strandi: public Traits
             if (t)
             {
                 assert(t->isGenerator());
+
+                v = true; // resolved to flow term
 
                 // we expect the flow to evaluate to terms
                 _pushcap();
@@ -2635,7 +2686,7 @@ struct Strandi: public Traits
                 {
                     for (auto& e : cs->_cap._elts)
                     {
-                        if (e._term) tl->push_back(e._term);
+                        if (e._term) tl.push_back(e._term);
                         else
                         {
                             ERR2("WARNING: non-term in parse flow term", pn->_word->_text, textify(cs->_cap));
@@ -2646,17 +2697,15 @@ struct Strandi: public Traits
             }
             else
             {
-                ERR1("unresolved flow term in parse", pn->_word->_text);
+                ERR1("unknown flow term in parse", pn->_word->_text);
             }
         }
         else
         {
             // match noun with adjectives
-            Term::matchName(*tl, pn, pa);
+            v = Term::matchName(tl, pn, pa);
         }
-
-        if (tl->empty()) { delete tl; tl = 0; }
-        return tl;
+        return v;
     }
 
     bool resolveScope(Binding& b, scopeType st)
@@ -2692,7 +2741,7 @@ struct Strandi: public Traits
                 {
                     assert(_player);
                     TermList inv;
-                    subInTerms(inv, _player);
+                    subInTermsRec(inv, _player);
                     cliplist(b._terms, inv);  // reduce to those carried
                 }
                 break;
@@ -2701,7 +2750,7 @@ struct Strandi: public Traits
                 {
                     assert(_player);
                     TermList inv;
-                    subInTerms(inv, _player);
+                    subInTermsRec(inv, _player);
 
                     TermList sc;
                     concatc(sc, _ctx->_scope); // copy
@@ -2717,22 +2766,17 @@ struct Strandi: public Traits
         return r;
     }
 
-    bool resolve(pnode* pn, bool toScope = false)
-    {
-        // if `toScope` restrict objects to scope.
-         return _resolve(pn, toScope);
-    }
-
-    bool _resolve(pnode* pn, bool toScope)
+    void resolve(ResInfo& ri)
     {
         // if `scope` restrict objects to scope.
-
-        bool res = true;
-        while (pn)
+        pnode* pn = ri._pn;
+        while (pn && ri._valid)
         {
             bool down = true;
             bool ok = true;
 
+            TermList tl;
+            
             // on way down
             switch (pn->_type)
             {
@@ -2740,11 +2784,15 @@ struct Strandi: public Traits
                 {
                     assert(pn->_head);
                     assert(!pn->_binding);
-                    TermList* tl = resolveNoun(pn->_head, pn->_head->_next);
-                    if (toScope && !restrictOneToScope(tl)) { delete tl;  tl = 0; }
+                    
+                    ok = resolveNoun(pn->_head, pn->_head->_next, tl);
+                    if (ri._toScope) ok = restrictToIdeal(tl);
 
-                    if (tl) pn->_binding = new Binding(tl);
-                    else ok = false;
+                    if (ok)
+                    {
+                        if (tl.empty()) ri._empty = true;
+                        else pn->_binding = new Binding(tl);
+                    }
                     
                     // no need to continue
                     down = false;
@@ -2753,23 +2801,30 @@ struct Strandi: public Traits
             case nodeType::p_noun:
                 {
                     assert(!pn->_binding);
-                    TermList* tl = resolveNoun(pn, 0);
-                    if (toScope && !restrictOneToScope(tl)) { delete tl;  tl = 0; }
-                    if (tl) pn->_binding = new Binding(tl);
-                    else ok = false;
+                    
+                    ok = resolveNoun(pn, 0, tl);
+                    if (ri._toScope) ok = restrictToIdeal(tl);
 
+                    if (ok)
+                    {
+                        if (tl.empty()) ri._empty = true;
+                        else pn->_binding = new Binding(tl);
+                    }
+                    
                 }
                 break;
             case nodeType::p_pronoun:
                 {
                     assert(!pn->_binding);
-                    TermList* tl = resolvePronoun(pn);
-                    if (toScope && !restrictOneToScope(tl)) { delete tl;  tl = 0; }
+                    ok = resolvePronoun(pn, tl);
+                    if (ri._toScope)  ok = restrictToIdeal(tl);
 
-                    if (tl) pn->_binding = new Binding(tl);
-                    else ok = false;
-                    
-                    if (!ok)
+                    if (ok)
+                    {
+                        if (tl.empty()) ri._empty = true;
+                        else pn->_binding = new Binding(tl);
+                    }
+                    else
                     {
                         ERR1("unable to resolve pronoun", pn->_word->_text);
                     }
@@ -2779,16 +2834,23 @@ struct Strandi: public Traits
 
             if (!ok)
             {
+                ri._valid = false;  // did not resolve
+                
                 // not an error if given a resolution scope
-                if (!toScope)
+                if (!ri._toScope)
                 {
                     ERR1("unresolved:", pn->toStringStruct());
                 }
-                res = false;
+            }
+
+            if (down && ri._valid)
+            {
+                pnode* pn1 = ri._pn;
+                ri._pn = pn->_head;
+                resolve(ri);
+                ri._pn = pn1;
             }
             
-            if (down && !_resolve(pn->_head, toScope)) res = false;
-
             // on way up
             switch (pn->_type)
             {
@@ -2842,9 +2904,10 @@ struct Strandi: public Traits
                         // do not perform scope reduction in
                         // reactor templates as these are to be resolved
                         // at use-time
-                        if (toScope)
-                            res = resolveScope(*ns->_binding, ns->_binding->_scope);
-                        
+                        if (ri._toScope && ri._valid)
+                        {
+                            ri._valid = resolveScope(*ns->_binding, ns->_binding->_scope);
+                        }
                         TL_TAKE(pn, ns);
                     }
                 }
@@ -2868,10 +2931,8 @@ struct Strandi: public Traits
                 break;
             }
 
-            if (!res) break;
             pn = pn->_next;
         }
-        return res;
     }
 
     bool prepareExecInfo(execInfo& ei)   
@@ -3076,11 +3137,22 @@ struct Strandi: public Traits
 
         if (v)
         {
+            assert(!ei._it);
+            assert(!ei._that);
+            
             // setup "it" if valid
             if (ei._dobj)
             {
                 Term* t = ei._dobj->first();
+                assert(t);
                 if (t->isObject()) ei._it = t;
+            }
+
+            if (ei._iobj)
+            {
+                Term* t = ei._iobj->first();
+                assert(t);
+                if (t->isObject()) ei._that = t;
             }
         }
         
@@ -3095,15 +3167,19 @@ struct Strandi: public Traits
             v = !ei._verb->isDOVerb() || ei._dobj;
             if (v)
             {
-                v = !ei._verb->isIOVerb() || ei._iobj;
-                if (!v && ei._err)
+                // ioverb not enforced with verbprep as it changes meaning
+                if (ei._verb->isIOVerb() && !ei._verbPrep)
                 {
-                    ERR1("command expect indirect object", textify(ei._ps));
+                    if (!ei._iobj)
+                    {
+                        v = false;
+                        ERR1("command expected indirect object", textify(ei._ps));
+                    }
                 }
             }
             else if (ei._err)
             {
-                ERR1("command expect direct object", textify(ei._ps));
+                ERR1("command expected direct object", textify(ei._ps));
             }
         }
 
@@ -3149,7 +3225,7 @@ struct Strandi: public Traits
     bool execPut1(execInfo& ei, Term* t)
     {
         Term* iobj = ei._iobj->first();
-        const string& prop = ei._prep->_text;
+        string prop = ei._prep->_text;
 
         assert(iobj);
 
@@ -3170,6 +3246,9 @@ struct Strandi: public Traits
         
         // can put A in B if A != B and B is not in A.
         bool v = t != iobj;
+
+        // always set relation with "in"
+        if (prop == PROP_INTO) prop = PROP_IN;
 
         if (v && prop == PROP_IN)
         {
@@ -3199,7 +3278,7 @@ struct Strandi: public Traits
 
             if (v)
             {
-                DLOG3(_pcom._debug, "exec PUT", *t, prop, *ei._iobj->first());
+                DLOG3(_pcom._debug, "exec PUT", *t, prop, *ei._iobj->first() << ": " << v);
             }
         }
         else
@@ -3433,14 +3512,8 @@ struct Strandi: public Traits
 
     void execReaction(execInfo& ei, Reaction& r)
     {
-        Term* it = 0;
-
-        if (ei._dobj)
-        {
-            // bind dobj to "it"
-            it = ei._dobj->first();
-            _ctx->pushIt(it);
-        }
+        if (ei._it) _ctx->pushIt(ei._it);
+        if (ei._that) _ctx->pushThat(ei._that);
 
         // keep track of the reaction we are running
         assert(!ei._currentReaction);
@@ -3451,12 +3524,13 @@ struct Strandi: public Traits
         bool v = run(r._s->_action);
 
         _ctx->_currentExec = ei._prev;
-        //ei._currentReaction = 0;
 
         // record whether we hit a manual break
         if (!v) ei._break = true;
 
-        if (it) _ctx->popIt();
+        if (ei._that) _ctx->popThat();
+        if (ei._it) _ctx->popIt();
+
     }
 
     Reaction*  matchReactionInScope(execInfo& ei)
@@ -3489,6 +3563,7 @@ struct Strandi: public Traits
                         // by doubling verb rank, fallback will be to match
                         // in absence of better reactor.
                         if (ei._verbPrep == rei._verbPrep) rank *= 2;
+                        else rank /= 2; // otherwise penalty
                     }
 
                     // both or neither
@@ -3555,7 +3630,7 @@ struct Strandi: public Traits
                     // match!
                     assert(rank);
                     r._rank = rank;
-                    LOG3("reactor match ", textify(rei._ps) << " rank " << r._rank << " from " << r._s->_host->_name);
+                    LOG4("potential reactor ", textify(rei._ps) << " rank " << r._rank << " from " << r._s->_host->_name);
                 }
             }
             else
@@ -3586,6 +3661,11 @@ struct Strandi: public Traits
             }
         }
 
+        if (best)
+        {
+            LOG3("matched reactor ", textify(best->_reactor));
+        }
+        
         return best;
     }
 
@@ -3616,8 +3696,18 @@ struct Strandi: public Traits
             auto s = rei._dobj->_scope;
             if (s)
             {
-                LOG3("resolve matching reactor, scope ", s);
+                LOG3("resolve matching reactor, dobj scope ", s);
                 v = resolveScope(*ei._dobj, s);
+            }
+
+            if (v && ei._iobj && rei._iobj)
+            {
+                s = rei._iobj->_scope;
+                if (s)
+                {
+                    LOG3("resolve matching reactor, iobj scope ", s);
+                    v = resolveScope(*ei._iobj, s);
+                }
             }
             
         }
@@ -3632,14 +3722,23 @@ struct Strandi: public Traits
         if (v) 
         {
             LOG3("exec ", textify(ei._ps));
+            
+            bool done = false;
 
-            // handle built in cases 
-            if (*ei._verb == SYM_PUT) v = execPut(ei);
-            else if (*ei._verb == SYM_SET) v = execSet(ei);
+            if (ei._internalOps)
+            {
+                done = true;
+                
+                // handle built in cases 
+                if (*ei._verb == SYM_PUT && !ei._verbPrep) v = execPut(ei);
+                else if (*ei._verb == SYM_SET) v = execSet(ei);
 
-            // handle queries
-            else if (ei._verb->isQuery()) v = execQuery(ei);
-            else
+                // handle queries
+                else if (ei._verb->isQuery()) v = execQuery(ei);
+                else done = false;
+            }
+
+            if (!done)
             {
                 // match against current reactions
                 Reaction* mr = matchReactionInScope(ei);
@@ -3649,7 +3748,6 @@ struct Strandi: public Traits
                     {
                         v = resolveMatchingReactor(ei, *mr);
                     }
-
                     if (v) execReaction(ei, *mr);
                 }
                 else v = false;
@@ -3674,7 +3772,9 @@ struct Strandi: public Traits
             if (!checkSelectorCond(s)) continue;
             
             pnode* pn = ec->_parse->copy();
-            if (resolve(pn))
+            ResInfo ri(pn);
+            resolve(ri);
+            if (ri.resolved())
             {
                 _ctx->_reactions.emplace_back(Reaction(this, s, pn));
                 
@@ -3797,12 +3897,13 @@ struct Strandi: public Traits
                     if (ec->_parse)
                     {
                         //DLOG1(_pcom._debug, "resolving", *ec);
-                        bool v = resolve(ec->_parse);
-                        if (v)
+                        ResInfo ri(ec->_parse);
+                        resolve(ri);
+                        if (ri.resolved())
                         {
                             DLOG1(_pcom._debug > 1, "resolved", textify(ec->_parse));
                             execInfo ei(ec->_parse);
-                            v = exec(ei);
+                            exec(ei);
                         }
                         else
                         {

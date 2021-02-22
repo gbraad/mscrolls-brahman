@@ -45,6 +45,7 @@
 #define PRON_HIM        "him"
 #define PRON_HER        "her"
 #define PRON_ALL        "all"
+#define PRON_THAT       "that"
 
 #define ART_A           "a"
 #define ART_AN          "an"
@@ -52,7 +53,7 @@
 #define ART_THIS        "this"
 #define ART_THE         "the"
 #define ART_MY          "my"
-#define ART_THAT        "that"
+#define ART_THAT        "yon"
 
 namespace ST
 {
@@ -211,13 +212,10 @@ struct Binding
     typedef Word::scopeType scopeType;
 
     Binding() {}
-    Binding(BindList* tl)
+    Binding(BindList& tl)
     {
-        // consume given terms
-        if (tl)
-        {
-            _terms.splice(_terms.begin(), *tl);
-        }
+        // consume terms of tl
+        _terms.splice(_terms.begin(), tl);
     }
 
     void merge(Binding& b)
@@ -432,6 +430,7 @@ struct ParseCommand: public ParseBase
     
     Dictionary          _dictionary;
     const Word*         _it;
+    const Word*         _that;
 
     ParseCommand() { _init(); }
 
@@ -501,18 +500,21 @@ struct ParseCommand: public ParseBase
             { ART_THAT, Word::pos_article },
             { ART_MY, Word::pos_article },
 
-            { "in", Word::pos_prep | Word::pos_prep_rel },
-            { "into", Word::pos_prep },
+            { PROP_IN, Word::pos_prep | Word::pos_prep_rel },
+            { PROP_INTO, Word::pos_prep },
             { "to", Word::pos_prep },
             { "on", Word::pos_prep | Word::pos_prep_rel },
+            { "off", Word::pos_prep },  // XX?
             { "onto", Word::pos_prep },
             { "under", Word::pos_prep | Word::pos_prep_rel },
             { "behind", Word::pos_prep | Word::pos_prep_rel },
             { "about", Word::pos_prep },
             { "at", Word::pos_prep },
             { "for", Word::pos_prep },
+            { "with", Word::pos_prep },
 
             { PRON_IT, Word::pos_pronoun },
+            { PRON_THAT, Word::pos_pronoun },
             { PRON_HIM, Word::pos_pronoun },
             { PRON_HER, Word::pos_pronoun },
             { PRON_HERE, Word::pos_pronoun },
@@ -540,6 +542,7 @@ struct ParseCommand: public ParseBase
 
         // locate various pronouns so we can test directly
         _it = findWord("it");
+        _that = findWord("that");
     }
 
     string word()

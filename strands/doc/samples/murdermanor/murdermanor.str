@@ -42,6 +42,13 @@ GOCLOCK
 You climb into the grandfather clock!
 XHERE
 
+NOTE@ GETTABLE
+> put it in hall
+* name
+a note
+* x it
+It says, "you'll never get me copper!"
+
 //////////////////// STUDY
 
 BOOKCASE@ THING
