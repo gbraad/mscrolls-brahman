@@ -218,19 +218,36 @@ struct ParseBase: public Traits
     int lineno = 0;
     int _debug = 0;
 
+    char _prevc()
+    {
+        return pos == posStart ? 0 : pos[-1];
+    }
+
     void _skipc()
     {
         // skip any comments
         if (*pos == '/')
         {
             // XX disallow comment after colon ':', to allow http://etc
-            if (pos[1] == '/' && (pos == posStart || pos[-1] != ':'))
+            if (pos[1] == '/' && _prevc() != ':')
             {
+                bool atStart = _prevc() == '\n';
+                
                 // "//" comment
                 // skip to newline, but leave newline in stream
+                // unless we started on a line, in case ignore the
+                // whole line
                 while (*++pos)
                 {
-                    if (*pos == '\n') break;
+                    if (*pos == '\n')
+                    {
+                        if (atStart)
+                        {
+                            ++pos; // eat newline as well
+                            ++lineno;
+                        }
+                        break;
+                    }
                 }
             }
             else if (pos[1] == '*')
@@ -261,7 +278,6 @@ struct ParseBase: public Traits
 
 #define POS pos
 #define GETC _getc()
-#define PEEK pos[1]
 
 // only use when we can advance without testing newlines
 #define SETPOS(_x) POS = _x

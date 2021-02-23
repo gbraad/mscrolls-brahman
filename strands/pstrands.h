@@ -471,16 +471,23 @@ struct ParseStrands: public ParseBase
                                     break;
                                 }
 
-                                if (PEEK)
+                                // peek
                                 {
-                                    // if line starts with a NAME
-                                    if (Traits::atName(POS+1))
+                                    PUSHP;
+                                    BUMP;
+
+                                    assert(!skipender);
+
+                                    // if next line starts with a NAME
+                                    if (Traits::atName(POS))
                                     {
-                                        //int l = Traits::atName(p+1);
-                                        //printf("############## break at '%s'\n", string(p+1, l).c_str());
+                                        //int l = Traits::atName(POS);
+                                        //printf("############## break at '%s'\n", string(POS, l).c_str());
                                         skipender = true;
-                                        break;
                                     }
+
+                                    POPP;
+                                    if (skipender) break;
                                 }
                             }
                         }
@@ -1043,10 +1050,26 @@ struct ParseStrands: public ParseBase
         return v;
     }
 
+    /*
+    void _dump()
+    {
+        for (;;)
+        {
+            _skipc();
+            int c = AT;
+            if (!c) break;
+            putchar(c);
+            BUMP;
+        }
+    }
+    */
+
     void processString(const char* data)
     {
         SETPOSSTART(data);
         SETPOS(data);
+
+        //_dump(); return;
 
         for (;;)
         {
