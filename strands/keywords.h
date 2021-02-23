@@ -57,6 +57,8 @@
 // special properties
 #define PROP_IN     "in"
 #define PROP_INTO   "into"
+#define PROP_ON     "on"
+#define PROP_ONTO   "onto"
 
 // match empty result
 #define MATCH_NULL  "null"

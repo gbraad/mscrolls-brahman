@@ -2398,11 +2398,11 @@ struct Strandi: public Traits
         return maxd;
     }
 
-    void subInTerms(TermList& tl, Term* p)
+    void subPropTerms(TermList& tl, Term* p, const string& prop)
     {
-        // all things directly in p
+        // all X, X prop p
         Timeline::Strings ss;
-        _state.getdsv(PROP_IN, p->_name, ss);
+        _state.getdsv(prop, p->_name, ss);
         for (auto i : ss)
         {
             Term* ti = Term::find(*i);
@@ -2410,68 +2410,112 @@ struct Strandi: public Traits
             tl.push_back(ti);
         }
     }
-    
-    void subInTermsRec(TermList& tl, Term* p)
+
+    void subPropTermsRec(TermList& tl, Term* p, const string& prop)
     {
-        // all things directly or indirectly in p
+        // All X, X prop p, recursive
         TermList t1;
-        subInTerms(t1, p);
+        subPropTerms(t1, p, prop);
         for (auto i : t1)
         {
             if (!contains(tl, i))
             {
                 tl.push_back(i);
-                subInTermsRec(tl, i);
+                subPropTermsRec(tl, i, prop);
             }
         }
+    }
+
+    void subPropTermsSet(TermList& tl, TermList& a, const string& prop)
+    {
+        // all things X, where there is y in A, (X prop y)
+        Timeline::Rel rel;
+        _state.getRel(prop, rel);
+        for (auto t : a)
+        {
+            for (auto e : rel)
+            {
+                if (e->_val == t->_name)
+                {
+                    Term* ti = Term::find(e->_tag);
+                    if (ti && !contains(tl, ti)) tl.push_back(ti);
+                }
+            }
+        }
+    }
+
+    Term* propTerm(Term* p, const string& prop)
+    {
+        // thing Y, p prop Y, assuming prop is a function
+        Term* t = 0;
+        const var* v = _state.getfn(p->_name, prop);
+        if (v && v->isString())
+        {
+            t = Term::find(v->rawString());            
+        }
+        return t;
+    }
+
+    void propTerms(TermList& tl, Term* p, const string& prop)
+    {
+        // all things Y, p prop Y
+        Timeline::Vars vs;
+        _state.getset(p->_name, prop, vs);
+        for (auto i : vs)
+        {
+            if (i->isString())
+            {
+                Term* ti = Term::find(i->rawString());
+                if (ti) tl.push_back(ti);
+            }
+        }
+    }
+
+    /*
+    void propTermsSet(TermList& tl, TermList& a, const string& prop)
+    {
+        // all things Y, where there is x in A, (x prop Y)
+        Timeline::Rel rel;
+        _state.getRel(prop, rel);
+        for (auto e : rel)
+        {
+            for (auto t : a)  // do we have t in A also in rel
+            {
+                if (e->_tag == t->_name)
+                {
+                    if (e->_val.isString())
+                    {
+                        Term* ti = Term::find(e->_val.rawString());
+                        if (ti && !contains(tl, ti)) tl.push_back(ti);
+                    }
+                    break;
+                }
+            }
+        }
+    }
+    */
+    
+    void subInTerms(TermList& tl, Term* p)
+    {
+        subPropTerms(tl, p, PROP_IN);
+    }
+
+    void subInTermsRec(TermList& tl, Term* p)
+    {
+        subPropTermsRec(tl, p, PROP_IN);
+    }
+
+    Term* inTerm(Term* p)
+    {
+        // thing Y, p in Y, assuming p is only in ONE thing
+        return propTerm(p, PROP_IN);
     }
 
     void inTerms(TermList& tl, Term* p)
     {
         // all things Y, p in Y
-        Timeline::Vars vs;
-        _state.getset(p->_name, PROP_IN, vs);
-        for (auto i : vs)
-        {
-            Term* ti = Term::find(i->rawString());
-            if (ti) tl.push_back(ti);
-        }
-    }
-
-    void inTermsRec(TermList& tl, Term* p)
-    {
-        // all things Y, p in Y recursive
-
-        TermList t1;
-        inTerms(t1, p);
-
-        for (auto i : t1)
-        {
-            // parent
-            if (!contains(tl, i)) tl.push_back(i);;
-            
-            // and all parents of parent
-            inTermsRec(tl, i);
-        }
-    }
-
-    bool isInRec(Term* a, Term* b)
-    {
-        // is a in b?
-
-        // XX could be more efficient
-        TermList ain;
-        inTermsRec(ain, a);
-        return contains(ain, b);
-    }
-
-    bool isIn(Term* a, Term* b)
-    {
-        // is a directly in b?
-        // XX could be more efficient
-        TermList ain;
-        inTerms(ain, a);
-        return contains(ain, b);
+        // use when things can be in multiple things.
+        propTerms(tl, p, PROP_IN);
     }
 
     static bool is(Term* a, Term* p)
@@ -2542,31 +2586,23 @@ struct Strandi: public Traits
     {
         // calculate scope for p (usually player)
         // the scope is:
-        // all things in P (sub-scope)
-        // the thing P is in.
-        // all things in what P is directly in.
-        // and P if not already included.
+        // all things (recursively) in the thing P is in.
+        // ensure p is included.
         tl.clear();
 
-        // immediate parent "in"
-        TermList parents;
-        inTerms(parents, p); 
-
-        if (!parents.empty())
+        // assume that scope things can only be in one thing
+        Term* parent = inTerm(p);
+        
+        if (parent)
         {
             // add all things in parent
-            for (auto a : parents)
-            {
-                TermList tl1;
-                subInTermsRec(tl1, a); // will include p and p's content
-                concatm(tl, tl1);
-            }
+            subInTermsRec(tl, parent); // will include p and p's content
 
             // all initial parents
-            concatc(tl, parents);
-
+            assert(!contains(tl, parent));
+            tl.push_back(parent);
+            
             // all remaining parents?
-
             /* 
                Actually no!
                I used to think it was natural to include all the parents
@@ -2585,15 +2621,20 @@ struct Strandi: public Traits
 
                Situations like this might benefit from some sort of 
                scope operator we can specify. Needs consideration.
-             */
+            */
             
-            //for (auto a : parents) inTermsRec(tl, a);
         }
         else
         {
             // not in anything!
             tl.push_back(p);
         }
+
+        // add all things "on" things in scope to scope.
+        TermList ons;
+        subPropTermsSet(ons, tl, PROP_ON);
+        concatm(tl, ons);
+
     }
 
 #define TL_TAKE(_a, _b)                     \
@@ -2741,7 +2782,7 @@ struct Strandi: public Traits
                 {
                     assert(_player);
                     TermList inv;
-                    subInTermsRec(inv, _player);
+                    subInTerms(inv, _player); // directly carried
                     cliplist(b._terms, inv);  // reduce to those carried
                 }
                 break;
@@ -3247,39 +3288,54 @@ struct Strandi: public Traits
         // can put A in B if A != B and B is not in A.
         bool v = t != iobj;
 
-        // always set relation with "in"
-        if (prop == PROP_INTO) prop = PROP_IN;
-
-        if (v && prop == PROP_IN)
+        if (v)
         {
-            // already?
-            if (isIn(t, iobj))
+            // map some props
+            if (prop == PROP_INTO) prop = PROP_IN;
+            else if (prop == PROP_ONTO) prop = PROP_ON;
+
+            // is it already true?
+            Term* t1 = propTerm(t, prop);
+            if (t1 == iobj)
             {
-                // XX sentence
+                // already directly there?
+                // If A is in B is in C, and X is in A, you can still
+                // put it in B, although X is indirectly in B.
                 if (ei._err) ERR0("Already there");
                 if (ei._output) OUTP(EXEC_ALREADY);
+                
+                //LOG3("PUT already there ", textify(t));
                 return false;
             }
             
-            // prevent in loop!
-            v = !isInRec(iobj, t);
+            // prevent loops!
+            TermList allT;
+            subPropTermsRec(allT, t, prop);
+            v = !contains(allT, iobj);
+            if (!v)
+            {
+                LOG3("PUT, preventing loop with ", *t);
+            }
         }
 
         if (v)
         {
             if (multival)
             {
-                _state.set(t->_name, prop, ei._iobj->first()->_name);
+                _state.set(t->_name, prop, iobj->_name);
             }
             else
             {
-                v = _state.setfn(t->_name, prop, ei._iobj->first()->_name);
+                // on => ~in and in => ~on
+                // XX this might need to be expanded to all
+                // coordinated relations
+                if (prop == PROP_IN) _state.clearfn(t->_name, PROP_ON);
+                else if (prop == PROP_ON) _state.clearfn(t->_name, PROP_IN);
+                
+                v = _state.setfn(t->_name, prop, iobj->_name);
             }
 
-            if (v)
-            {
-                DLOG3(_pcom._debug, "exec PUT", *t, prop, *ei._iobj->first() << ": " << v);
-            }
+            DLOG3(_pcom._debug, "exec PUT", *t, prop, *iobj << ": " << v);
         }
         else
         {

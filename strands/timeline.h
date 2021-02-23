@@ -58,10 +58,18 @@ struct Timeline
             : _tag(tag), _prop(prop), _neg(neg) {}
         Ent(const string& tag, const string& prop, const var& v, bool neg)
             : _tag(tag), _prop(prop), _val(v), _neg(neg) {}
+
+        bool sameTrio(const Ent& e) const
+        {
+            // same apart from neg
+            return _tag == e._tag && _prop == e._prop && _val == e._val;
+        }
     };
 
-    typedef std::list<Ent>      Ents;
-    Ents                        _ents;
+    typedef std::list<Ent>              Ents;
+    typedef std::list<const Ent*>       Rel;
+    
+    Ents                                _ents;
 
     // boolean values
 
@@ -93,7 +101,7 @@ struct Timeline
 
     // single property
     
-    const Ent* find(const string& tag, const char* prop) const
+    const Ent* find(const string& tag, const string& prop) const
     {
         // scan backwards to find (tag,prop...) or ~(tag,prop...)
         Ents::const_reverse_iterator it = _ents.crbegin();
@@ -101,14 +109,11 @@ struct Timeline
         while (it != en)
         {
             const Ent& e = *it;
-            if (e._tag == tag && !strcmp(prop, e._prop.c_str())) return &e;
+            if (e._tag == tag && prop == e._prop) return &e;
             ++it;
         }
         return 0;
     }
-    
-    const Ent* find(const string& tag, const string prop) const
-    { return find(tag, prop.c_str()); }
 
     bool test(const string& tag, const string prop) const
     {
@@ -157,7 +162,7 @@ struct Timeline
     
     // functional values
 
-    const var* getfn(const string& tag, const char* prop) const
+    const var* getfn(const string& tag, const string& prop) const
     {
         //Scan backwards to locate (x,rel,Y) or ~(x,rel,Y) for any Y.
         //  if (x,rel,Y) return Y otherwise null.
@@ -165,9 +170,22 @@ struct Timeline
         return (e && !e->_neg) ? &e->_val : 0;
     }
 
-    const var* getfn(const string& tag, const string& prop) const
-    { return getfn(tag, prop.c_str()); }
-    
+    bool clearfn(const string& tag, const string& prop) 
+    {
+        // find (tag, prop, Y)
+        // if non-neg assert ~(tag, prop, Y)
+        // return true iff neg asserted (ie prop cleared)
+        
+        bool v = false;
+        const Ent* e = find(tag, prop);
+        if (e && !e->_neg)
+        {
+            _append(tag, prop, e->_val, true); // neg
+            v = true;
+        }
+        return v;
+    }
+
     bool setfn(const string& tag, const string& prop, const var& v)
     {
         // scan backwards to find (tag, prop...) or ~(tag, prop...)
@@ -181,11 +199,19 @@ struct Timeline
         const Ent* e = find(tag, prop);
         if (e)
         {
-            if (e->_val == v) r = false;
+            if (e->_val == v)
+            {
+                if (!e->_neg) r = false; // already true
+                else
+                {
+                    // need to re-assert it
+                    _append(tag, prop, v);  // copies var                    
+                }
+            }
             else
             {
                 _append(tag, prop, e->_val, true); // neg
-                _append(tag, prop, v);
+                _append(tag, prop, v);  // copies var
             }
         }
         else
@@ -296,6 +322,35 @@ struct Timeline
             ++it;
         }
         return tags.size();
+    }
+
+    void getRel(const string& prop, Rel& rel)
+    {
+        // get a projection of a whole `prop` relation
+      
+        Ents::const_reverse_iterator it = _ents.crbegin();
+        Ents::const_reverse_iterator en = _ents.crend();
+
+        Rel negs;
+        
+        while (it != en)
+        {
+            const Ent& e = *it;
+            if (e._prop == prop)
+            {
+                if (e._neg) negs.push_back(&e);
+                else
+                {
+                    bool ok = true;
+                    for (auto i : negs)
+                    {
+                        if (e.sameTrio(*i)) { ok = false; break; }
+                    }
+                    if (ok) rel.push_back(&e);
+                }
+            }
+            ++it;
+        }
     }
 
 private:

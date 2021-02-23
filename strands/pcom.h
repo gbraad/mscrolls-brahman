@@ -503,9 +503,9 @@ struct ParseCommand: public ParseBase
             { PROP_IN, Word::pos_prep | Word::pos_prep_rel },
             { PROP_INTO, Word::pos_prep },
             { "to", Word::pos_prep },
-            { "on", Word::pos_prep | Word::pos_prep_rel },
+            { PROP_ON, Word::pos_prep | Word::pos_prep_rel },
+            { PROP_ONTO, Word::pos_prep },
             { "off", Word::pos_prep },  // XX?
-            { "onto", Word::pos_prep },
             { "under", Word::pos_prep | Word::pos_prep_rel },
             { "behind", Word::pos_prep | Word::pos_prep_rel },
             { "about", Word::pos_prep },

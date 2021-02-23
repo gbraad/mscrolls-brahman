@@ -313,7 +313,9 @@ ground
 
 SKY@ THING
 * name
-the sky
+the blue sky
+* name
+the sun
 
 XFLOOR
 * It keeps you from falling down!
@@ -362,6 +364,41 @@ DOOR@ OPENABLE
 GARMENT@ GETTABLE
 * take off it
 > drop it
+* remove it
+> drop it
 * put on it
 > get it
+
+/// CONTAINERS
+
+CONTAINER@ THING
+* look in it
+WHATSIN
+* x it
+WHATSALSOIN
+* put this GETTABLE in it
+DOPUT
+
+DOPUT > put it in that
+* ok
+You put IT in THAT.
+*
+You can't.
+
+
+STUFFIN > what is in it
+*
+> be LAST
+
+WHATSIN STUFFIN
+* them
+IT contains, LAST.
+*
+There's nothing there.
+
+WHATSALSOIN STUFFIN
+* them
+IT contains, LAST.
+*
+
 
