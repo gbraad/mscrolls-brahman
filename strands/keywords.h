@@ -53,6 +53,7 @@
 #define TERM_NOCANDO "ERROR_NOCANDO"
 #define TERM_NOSUCH "ERROR_NOSUCH"
 #define TERM_SYNTAX "ERROR_SYNTAX"
+#define TERM_SCOPE  "SCOPE_SEED"
 
 // special properties
 #define PROP_IN     "in"

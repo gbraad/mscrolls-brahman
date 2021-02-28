@@ -43,7 +43,6 @@
 #include "utils.h"
 #include "varset.h"
 #include "pcom.h"
-#include "pexpr.h"
 
 namespace ST
 {
@@ -290,28 +289,6 @@ struct Flow: public Traits
         return e;
     }
 
-    /*
-    EltTerm* firstTermElt() const
-    {
-        // if the flow starts with a term, return it
-        EltTerm* et = 0;
-        if (!isEmpty())
-        {
-            const Elt* e = _elts.front();
-            if (e->_type == t_term) et = (EltTerm*)e;
-        }
-        return et;
-    }
-
-
-    Term* firstTerm() const
-    {
-        // if the flow starts with a term, return it
-        EltTerm* et = firstTermElt();
-        return et ? et->_term : 0;
-    }
-    */
-    
     string toString(bool listform = true) const
     {
         string s;

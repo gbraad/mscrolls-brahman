@@ -330,6 +330,9 @@ struct Capture
         return s;
     }
 
+    friend std::ostream& operator<<(std::ostream& os, const Capture& c)
+    { return os << c.toString(); }
+
 };
 
 }; // ST

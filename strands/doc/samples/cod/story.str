@@ -1,0 +1,58 @@
+START
+INITCORE
+STORY
+
+GAME_FILES
+core.str cod.str
+
+GAME_TITLE
+Cloak of Darkness
+
+GAME_AUTHOR
+A Strand
+
+GAME_ORGANISATION
+Strand Games
+
+GAME_BACKIMAGE
+images/title.jpg
+
+GAME_COVERTEXT
+:color:blue,font:Kanit Thin,weight:200
+
+MAP_BACKIMAGE
+images/map.png
+
+GAME_META
+:ui_ucanvas:false,ui_sidebar:true,autolink:false
+
+GAME_CREDITS
+<h1>GAME_TITLE<br/><em>by GAME_ORGANISATION</em></h1>
+<h3>Implemented in Strands</h3>
+<p>This game was lovingly hacked together using the Strands engine.</p>
+<h4>Strand Games Team</h4>
+<ul>
+<li>Hugh Steers</li>
+<li>Stefan Meier</li>
+<li>Stefan Bylund</li>
+</ul>
+<h4>Writing</h4>
+<ul>
+<li>GAME_AUTHOR</li>
+</ul>
+<h4>Art</h4>
+<ul>
+<li>An Artist</li>
+</ul>
+<h4>Music</h4>
+<ul>
+<li>A Musician</li>
+<li>Additional Music thanks to <a href="http://www.soundimage.org">Eric Matyas</a></li>
+</ul>
+<h4>Testing</h4>
+<ul>
+<li>A Tester</li>
+</ul>
+
+
+

@@ -35,10 +35,11 @@
 
 #include <set>
 #include <list>
+#include "logged.h"
 #include "pbase.h"
+#include "pexpr.h"
 #include "porter.h"
 #include "keywords.h"
-#include "logged.h"
 
 #define PRON_IT         "it"
 #define PRON_HERE       "here"
@@ -75,14 +76,15 @@ struct Word: public Traits
             pos_except = 512,
             pos_prepmod = pos_except*2, // "also" and "not".
             pos_property = pos_prepmod*2, // bastardised property grammar
-            pos_value = pos_property*2, // bastardised property grammar value
+            pos_value = pos_property*2, // holder for enode value expression
             pos_query = pos_value*2,
             pos_prep_rel = pos_query*2, // preposition relativiser
             pos_ID = pos_prep_rel*2, // is a term ID of an object
             pos_FLOW = pos_ID*2, // is a term ID of a flow
             pos_doverb = pos_FLOW*2, // require direct object
             pos_ioverb = pos_doverb*2, // verb requiring indirect object
-            pos_negate = pos_ioverb*2, // not
+            pos_iolift= pos_ioverb*2, // IO lifting (as separate from ioverb)
+            pos_negate = pos_iolift*2, // not
         };
 
     // these are additional properties
@@ -141,6 +143,7 @@ struct Word: public Traits
     bool isNoun() const { return (_pos & pos_noun) != 0; }
     bool isArticle() const { return (_pos & pos_article) != 0; }
     bool isIOVerb() const { return (_pos & pos_ioverb) != 0; }
+    bool isIOLift() const { return (_pos & (pos_iolift | pos_ioverb)) != 0; }
     bool isDOVerb() const { return (_pos & pos_doverb) != 0; }
     bool isID() const { return (_pos & pos_ID) != 0; }
     bool isFlow() const { return (_pos & pos_FLOW) != 0; }
@@ -267,6 +270,7 @@ struct pnode: public node<pnode>
         p_value,
         p_query, //21
         p_qs, // 22 query sentence
+        p_count,
     };
 
     
@@ -279,6 +283,7 @@ struct pnode: public node<pnode>
     ~pnode() override { _purge(); }
 
     bool isNounPhrase() const { return _type >= p_noun && _type <= p_pronoun; }
+    bool valid() const { return _type < p_count; }
 
     // converting to string uses a helper which optionally can have
     // a hook function to resolve nodes externally.
@@ -331,6 +336,13 @@ struct pnode: public node<pnode>
                     _head->_toString(h, 0);
                     //return;
                     break;
+                case p_value:
+                    // head is not a pnode!
+                    {
+                        GETENODE(this);
+                        h.s += en->toString();
+                    }
+                    break;
                 default:
                     _head->_toString(h);
                 }
@@ -352,6 +364,13 @@ struct pnode: public node<pnode>
     string toStringStruct() const
     {
         // version that shows structure.
+
+        if (_type == p_value)
+        {
+            GETENODE(this);
+            return en->toString();
+        }
+
         string s;
 
         if (_word)
@@ -380,6 +399,8 @@ struct pnode: public node<pnode>
     {
         // deep copy!
         // but not the bindings
+        assert(valid());
+        
         pnode* pn;
         if (_word)
         {
@@ -408,17 +429,30 @@ struct pnode: public node<pnode>
 
         while (pn)
         {
+            assert(pn->valid());
             if (pn->_binding) return pn->_binding;
             pn = pn->_head;
         }
         return 0;
     }
     
-
+protected:
+    
     void _purge()
     {
-        delete _binding;
-        _binding = 0;
+        delete _binding; _binding = 0;
+
+        if (_type == p_value)
+        {
+            GETENODE(this);
+            delete en;
+        }
+        else
+        {
+            delete _head;
+        }
+        _head = 0;
+        delete _next; _next = 0;
     }
 
 };
@@ -524,8 +558,8 @@ struct ParseCommand: public ParseBase
 
             { "put", Word::pos_verb | Word::pos_doverb | Word::pos_ioverb },
             { "set", Word::pos_verb | Word::pos_doverb },
-            { "is", Word::pos_verb | Word::pos_doverb | Word::pos_ioverb | Word::pos_query},
-            { "are", Word::pos_verb | Word::pos_doverb | Word::pos_ioverb | Word::pos_query},
+            { "is", Word::pos_verb | Word::pos_doverb | Word::pos_iolift | Word::pos_query},
+            { "are", Word::pos_verb | Word::pos_doverb | Word::pos_iolift | Word::pos_query},
 
             { "what", Word::pos_query },
             { "where", Word::pos_query },
@@ -577,7 +611,7 @@ struct ParseCommand: public ParseBase
 
             if (wt)
             {
-                LOG3("parsing '", w << "' as " << Word::posName(pos));
+                LOG4("parsing '", w << "' as " << Word::posName(pos));
             }
             
             if (wt) pn = new pnode(wt, t);
@@ -1058,6 +1092,7 @@ struct ParseCommand: public ParseBase
         const pnode* pn = 0;
         while (ps)
         {
+            assert(ps->valid());
             if (ps->_type == type) return ps;
             pn = findSubnode(ps->_head, type);
             if (pn) break;
@@ -1110,7 +1145,38 @@ struct ParseCommand: public ParseBase
         return vn ? vn->_word : 0;
     }
 
-    void parseSet(pnode* ps)
+    enode* parseValueExpr()
+    {
+        ParseExpr pe;
+
+        // allow simple non-terms words as property values
+        // these are wrapped as string.
+        pe._allowSimpleNames = true;
+        
+        enode* en = pe.parse(POS, lineno);
+        if (en)
+        {
+            SETPOS(pe.pos);
+            LOG4("parseExpr, ", *en);
+        }
+        return en;
+    }
+
+    static pnode* makeValueNode(enode* e)
+    {
+        pnode* p = 0;
+
+        if (e)
+        {
+            // LIES!
+            // this is not a pnode at all. but they share a
+            // common `node` baseclass whose types do not overlap
+            p = new pnode((pnode*)e, nodeType::p_value);
+        }
+        return p;
+    }
+
+    bool parseSet(pnode* ps)
     {
         // ps = (verb (nouns))
         // forms are:
@@ -1123,35 +1189,47 @@ struct ParseCommand: public ParseBase
         assert(ps->_head);
         
         pnode* pn = ps->_head->_next; // nouns
-        if (!pn) return;
+        if (!pn) return true;
         
         assert(!pn->_next); // no prep lifted yet.
+
+        bool ok = true;
         
         const Word* verb = getVerb(ps->_head);  // search verb branch
         if (verb && verb->_text == SYM_SET)
         {
             _push();
             
-            bool ok = false;
+            ok = false;
             
             string w = word();
 
             // optional not/also
             const Word* prepmod = wordType(w, Word::pos_prepmod);
             if (prepmod) w = word();
+
+            string prop;
+
+            // new properties are stemmed
+
+            // properties are not case sensitive
+            w = toLower(w);
             
-            // new properties are stemmed 
-            string prop = wordStem(w);
+            if (atSimpleName(w.c_str())) prop = wordStem(w);
+            else
+            {
+                PERR1("expected a property word instead of ", w);
+                ok = false;
+            }
+            
             if (!prop.empty())
             {
-                // XX for now just accept a single word
-                // later we'll allow a flow here
-                string w = word();
+                enode* en = parseValueExpr();
 
-                if (w.size())
+                if (en)
                 {
-                    //ERR0("adding prop " << prop << ' ' << w);
-                        
+                    //LOG1("adding prop ", prop << " " << *en);
+                    
                     // add properties to dictionary
                     // (prop)
                     pnode* pp =
@@ -1159,13 +1237,10 @@ struct ParseCommand: public ParseBase
                                   nodeType::p_property);
 
                     pp = makePrepMod(prepmod, pp);
-
-                    // (prop value)
-                    pp->_next = new pnode(&internWordType(w, Word::pos_value),
-                                          nodeType::p_value);
-
+                    pp->_next = makeValueNode(en);
+                    
                     // hook into sentence
-                    // (set nouns (prop value))
+                    // (set nouns (prop (value X)))
                     pn->_next = pp;
 
                     ok = true;
@@ -1175,6 +1250,7 @@ struct ParseCommand: public ParseBase
 
             if (!ok) _pop();
         }
+        return ok;
     }
 
 
@@ -1198,7 +1274,7 @@ struct ParseCommand: public ParseBase
             if (dn && !dn->_next)  // no current prep
             {
                 const Word* verb = getVerb(vn);
-                if (verb && verb->isIOVerb())
+                if (verb && verb->isIOLift())  // also ioverb
                 {
                     NodeRefs nodes;
                     findSubnodes(nodes, &vn->_next, nodeType::p_rnoun);
@@ -1265,7 +1341,10 @@ struct ParseCommand: public ParseBase
             string prop = wordStem(w);
             prep = parseType(prop, Word::pos_property, nodeType::p_property);
             if (prep)
-                rn = parseType(word(), Word::pos_value, nodeType::p_value);
+            {
+                // possibly null
+                rn = makeValueNode(parseValueExpr());
+            }
         }
         
         if (rn)
@@ -1320,12 +1399,14 @@ struct ParseCommand: public ParseBase
 
     pnode* parseQuery()
     {
+        // typeX
         // what prep N, eg what in hall => all X where, (X in hall).
         // what prop VAL, eg what feels wet => all X where, (X feels wet).
 
+        // typeY
         // what N prep, eg what hall in => all Y where (hall in Y).
-        
         // what N prop, eg what hall feel => all Y where (hall feel Y).
+        
         // but Y are values not terms.
         
         _push();
@@ -1413,7 +1494,10 @@ struct ParseCommand: public ParseBase
                     if (AT)
                     {
                         // more to parse!
-                        parseSet(ps);
+                        if (!parseSet(ps))
+                        {
+                            LOG1("parse set problem ", POS);
+                        }
                     }
 
                     // lift (verb nouns) -> (verb nouns prep nouns)

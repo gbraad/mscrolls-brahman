@@ -964,6 +964,24 @@ struct ParseStrands: public ParseBase
         return v;
     }
 
+    bool linkEnode(enode* en, FlowVisitor& fv)
+    {
+        bool v = true;
+        if (en->isTermName())
+        {
+            en->_binding = Term::find(en->name());
+            if (!en->_binding)
+            {
+                v = false;
+                if (fv._err)
+                {
+                    ERR0("missing cond term '" << *en << '\'');
+                }
+            }
+        }
+        return v;
+    }
+
     bool linkCond(Flow::EltCond* et, FlowVisitor& fv)
     {
         assert(et->_cond);
@@ -971,19 +989,7 @@ struct ParseStrands: public ParseBase
         for (enode::It it(et->_cond); it; ++it)
         {
             enode* en = const_cast<enode*>(it._n);
-            if (en->isTermName())
-            {
-                en->_binding = Term::find(en->_name);
-                if (!en->_binding)
-                {
-                    v = false;
-                    if (fv._err)
-                    {
-                        ERR0("missing cond term '" << en->_name << '\'');
-                    }
-                }
-
-            }
+            if (!linkEnode(en, fv)) v = false;
         }
 
         return v;
@@ -1087,7 +1093,7 @@ struct ParseStrands: public ParseBase
                 }
                 else
                 {
-                    ERR1("Duplicate term", t->_name);
+                    LOG1("ERROR: Duplicate term ", t->_name);
                 }
 
                 DLOG0(_debug, t->toString());

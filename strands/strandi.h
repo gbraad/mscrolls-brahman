@@ -133,12 +133,26 @@ struct Strandi: public Traits
                 // but do need to expand bindings.
                 s += _host->textifyFancy(_reactor);
             }
-            //LOG3("Reaction ID ", s);
             return s;
         }
 
         Reaction(Strandi* host, Selector* s, pnode* pn)
             : _host(host),_s(s), _reactor(pn) {}
+
+        Reaction(const Reaction& r) { _dub(r); }
+        ~Reaction() { delete _reactor; }
+
+    private:
+
+        void _dub(const Reaction& r)
+        {
+            // move content
+            _host = r._host;
+            _s = r._s;
+            _reactor = r._reactor;
+            _rank = r._rank;
+            const_cast<Reaction&>(r)._reactor = 0;
+        }
     };
 
     typedef std::list<Reaction> Reactions;
@@ -173,6 +187,7 @@ struct Strandi: public Traits
     Term*       _player = 0;
     Term*       _thing = 0;
     Term*       _tick = 0;
+    Term*       _scopeSeed = 0;
     Term*       _errorNocando = 0;
     Term*       _errorNosuch = 0;
     Term*       _errorSyntax = 0;
@@ -206,6 +221,7 @@ struct Strandi: public Traits
 
         pnode*      _iobjn = 0;
         Binding*    _iobj = 0;
+        enode*      _value = 0; // in place of iobj when prep is property
         Term*       _it = 0;
         Term*       _that = 0;
 
@@ -215,7 +231,7 @@ struct Strandi: public Traits
         bool        _internalOps = true; // allow "put" and "set"
 
         // current exec info
-        Reaction*   _currentReaction = 0;
+        Selector*   _currentSelector = 0; // being exec
         execInfo*   _prev = 0; // upchain of execs
         
 
@@ -242,6 +258,7 @@ struct Strandi: public Traits
         // currently available
         Reactions           _reactions;
         execInfo*           _currentExec = 0;
+        bool                _scopeChanged = false;
 
         Context(Strandi* h) : _host(h) {}
         ~Context() { _purge(); }
@@ -328,7 +345,7 @@ struct Strandi: public Traits
 
         void purgeReactions()
         {
-            for (auto& r : _reactions) delete r._reactor;
+            //LOG1("purging reactions ", _reactions.size());
             _reactions.clear();
         }
 
@@ -787,6 +804,7 @@ struct Strandi: public Traits
         bool    _toScope;
         bool    _valid = true;  // resolved
         bool    _empty = false; // resolved to nothing?
+        bool    _artScope = false;
 
         bool    resolved() const { return _valid && !_empty; }
 
@@ -830,6 +848,8 @@ struct Strandi: public Traits
                     if (c->_parse)
                     {
                         ResInfo ri(c->_parse);
+                        ri._artScope = true;
+                        
                         resolve(ri);
                         if (ri.resolved())
                         {
@@ -849,7 +869,6 @@ struct Strandi: public Traits
                             // retrieve manual break request from exec
                             if (ei._break) v = false;
 
-                            
                             clearBindings(c->_parse);
                             updateScope();
                         }
@@ -1398,57 +1417,45 @@ struct Strandi: public Traits
         updateScope();
     }
 
-    bool evalENode(enode* e)
+    var _evalEnodeTerm(eNodeCtx* ctx, const char* name)
     {
-        bool v = false;
-        assert(e);
-        switch (e->_type)
-        {
-        case enodeType::e_name:
-            {
-                Term* t = e->_binding;
-                if (t)
-                {
-                    // XX
-                    // since we're using the name to test, do we actually need
-                    // the binding?
-                    v = _state.test(t->_name);
-                }
-                else
-                {
-                    LOG1(TAG "WARNING unbound conditional ", e->_name);
-                }
-            }
-            break;
-        case enodeType::e_and:
-            {
-                enode* ei = e->_head;
-                while (ei)
-                {
-                    v = evalENode(ei);
-                    if (!v) break;
-                    ei = ei->_next;
-                }
-            }
-            break;
-        case enodeType::e_or:
-            {
-                enode* ei = e->_head;
-                while (ei)
-                {
-                    v = evalENode(ei);
-                    if (v) break;
-                    ei = ei->_next;
-                }
-            }
-            break;
-        }
-
-        if (e->_neg) v = !v;
-        
+        assert(name && *name);
+        var v = _state.test(name) ? 1 : 0;
         return v;
     }
 
+    var _evalEnodeFunction(eNodeCtx*, enode* e)
+    {
+        var v;
+        assert(e && e->e_name); // lead with a term 
+        string a = e->_v.rawString();
+
+        e = e->_next; // arg1
+        if (e)
+        {
+            string b = e->_v.toString();
+            b = wordStem(b);
+            const var* vp = _state.getfn(a, b);
+            if (vp) v = vp->copy();
+            LOG3("eval node function ", a << ' ' << b << " = " << v);
+        }
+        return v;
+    }
+
+    var evalEnode(enode* en)
+    {
+        eNodeCtx ectx(en);
+        
+        using namespace std::placeholders;  
+        ectx._termFn =
+            std::bind(&Strandi::_evalEnodeTerm, this, _1, _2);
+
+        ectx._fnFn =
+            std::bind(&Strandi::_evalEnodeFunction, this, _1, _2);
+        
+        return ectx.eval(en);
+    }
+    
     bool checkSelectorCond(Selector* s)
     {
         bool v = true;
@@ -1461,10 +1468,8 @@ struct Strandi: public Traits
             if (e && e->isCond())
             {
                 Flow::EltCond* ec = (Flow::EltCond*)e;
-                v = evalENode(ec->_cond);
+                v = evalEnode(ec->_cond).isTrue();
             }
-                
-            //LOG3(TAG "conditional ", s->_cond << " = " << v);
         }
 
         return v;
@@ -2582,7 +2587,7 @@ struct Strandi: public Traits
         }
     }
 
-    void calculateScope(TermList& tl, Term* p)
+    void calculateScope(TermList& tl, TermList& seed)
     {
         // calculate scope for p (usually player)
         // the scope is:
@@ -2590,45 +2595,22 @@ struct Strandi: public Traits
         // ensure p is included.
         tl.clear();
 
-        // assume that scope things can only be in one thing
-        Term* parent = inTerm(p);
-        
-        if (parent)
+        for (auto t : seed)
         {
-            // add all things in parent
-            subInTermsRec(tl, parent); // will include p and p's content
+            // add all things in seeds
+            subInTermsRec(tl, t); 
 
-            // all initial parents
-            assert(!contains(tl, parent));
-            tl.push_back(parent);
-            
-            // all remaining parents?
-            /* 
-               Actually no!
-               I used to think it was natural to include all the parents
-               in the interactive scope, but it's a mistake.
-               
-               Because those parents (of the location) bring in reference
-               terms that should not be referenced.
-
-               For example, if the player get into a cupboard, you don't 
-               want the room to be in scope, otherwise you can use
-               those room reactors. 
-
-               This means the objects in room are not in scope - and they're
-               not. At least not in the interactive scope. You might be able
-               to see them, ie reference them, but not interact with them.
-
-               Situations like this might benefit from some sort of 
-               scope operator we can specify. Needs consideration.
-            */
-            
+            // include seed objects
+            if (!contains(tl, t)) tl.push_back(t);
         }
-        else
-        {
-            // not in anything!
-            tl.push_back(p);
-        }
+
+        // ensure player is in scope
+        assert(_player);
+        if (!contains(tl, _player)) tl.push_back(_player);
+
+        // ensure the location of player is in scope
+        Term* loc = inTerm(_player);
+        if (loc && !contains(tl, loc)) tl.push_back(loc);
 
         // add all things "on" things in scope to scope.
         TermList ons;
@@ -2657,7 +2639,10 @@ struct Strandi: public Traits
         {
             delete pn->_binding;
             pn->_binding = 0;
-            clearBindings(pn->_head);
+            
+            if (pn->_type != nodeType::p_value)
+                clearBindings(pn->_head);                
+            
             pn = pn->_next;
         }
     }
@@ -2871,6 +2856,10 @@ struct Strandi: public Traits
                     }
                 }
                 break;
+            case nodeType::p_value:
+                // below this is a enode, so skip it
+                down = false;
+                break;
             }
 
             if (!ok)
@@ -2945,9 +2934,21 @@ struct Strandi: public Traits
                         // do not perform scope reduction in
                         // reactor templates as these are to be resolved
                         // at use-time
-                        if (ri._toScope && ri._valid)
+                        
+                        if (ri._valid)
                         {
-                            ri._valid = resolveScope(*ns->_binding, ns->_binding->_scope);
+                            // resolve when full scope is selected
+                            // also if just article scope selected
+                            if (ri._toScope || ri._artScope)
+                            {
+                                if (!resolveScope(*ns->_binding, ns->_binding->_scope))
+                                {
+                                    // understood, but resolved to empty
+                                    delete ns->_binding;
+                                    ns->_binding = 0;
+                                    ri._empty = true;
+                                }
+                            }
                         }
                         TL_TAKE(pn, ns);
                     }
@@ -3087,8 +3088,9 @@ struct Strandi: public Traits
                                 pn = pn->_next;
                                 if (pn && pn->_type == nodeType::p_value)
                                 {
-                                    ei._iobjn = pn;
-                                    assert(pn->_word);
+                                    // head of value is actually an enode
+                                    GETENODE(pn);
+                                    ei._value = en;
                                     v = true;
                                 }
                             }
@@ -3167,7 +3169,9 @@ struct Strandi: public Traits
                             pn = pn->_next;
                             assert(pn && pn->_type == nodeType::p_value);
 
-                            ei._iobjn = pn;
+                            GETENODE(pn);
+                            ei._value = en;
+                            
                             // NB: iobj is blank
                             v = true;
                         }
@@ -3370,23 +3374,38 @@ struct Strandi: public Traits
             multival = true;
         }
 
+        string val;
+            
+        if (ei._iobj)
+        {
+            Term* t = ei._iobj->first();
+            assert(t);
+            val = t->_name;
+        }
+        else
+        {
+            assert(ei._value);
+            var ev = evalEnode(ei._value);
+            val = ev.toString();
+        }
+
         if (multival)
         {
             if (negate)
             {
-                _state.clear(t->_name, ei._prep->_text, ei._iobjn->_word->_text);
-                DLOG3(_pcom._debug, "exec CLEAR", *t, *ei._prep, *ei._iobjn->_word);
+                _state.clear(t->_name, ei._prep->_text, val);
+                LOG3("exec CLEAR ", *t << ' ' << *ei._prep << ' ' << val);
             }
             else
             {
-                _state.set(t->_name, ei._prep->_text, ei._iobjn->_word->_text);
-                DLOG3(_pcom._debug, "exec SET", *t, *ei._prep, *ei._iobjn->_word);
+                _state.set(t->_name, ei._prep->_text, val);
+                LOG3("exec SET ", *t << ' ' << *ei._prep << ' ' << val);
             }
         }
         else
         {
-            if (_state.setfn(t->_name, ei._prep->_text, ei._iobjn->_word->_text))
-                DLOG3(_pcom._debug, "exec SET!", *t, *ei._prep, *ei._iobjn->_word);
+            if (_state.setfn(t->_name, ei._prep->_text, val))
+                LOG3("exec SET! ", *t << ' ' << *ei._prep << ' ' << val);
         }
 
         return true;
@@ -3416,7 +3435,7 @@ struct Strandi: public Traits
         // assume verb is SET and dobj
         // needs to check prop val
 
-        bool v = ei._prep && ei._iobjn; 
+        bool v = ei._prep;
         if (v) for (auto t : ei._dobj->_terms) if (!execSet1(ei, t)) v = false;
         if (v && ei._output) OUTP(EXEC_OK);
         return v;
@@ -3426,32 +3445,41 @@ struct Strandi: public Traits
     {
         // XX TODO
         // handle is/does X prop Y
+
+        //LOG1("execQuery, ", textify(ei._ps));
         
         bool v = false;
         if (ei._dobj)
         {
             // what N in, eg what player in
             // what N prop, eg what box feels
-            assert(ei._prep);
 
+            //LOG1("execQuery dobj, ", textify(ei._ps));
+
+            if (!ei._prep)
+            {
+                // eg ioLift and not ioverb
+                // then query is true
+                OUTP(EXEC_TRUE);
+                return true;
+            }
+            
             // currently only query singleton N
             v = execChkSingleDO(ei);
             if (v)
             {
-                if (ei._iobjn)
+                if (ei._iobj)
                 {
                     // is player in hall
-
                     // _iobj is NP
-                    assert(ei._iobj);
-
-
+                    
                     v = execChkSingleIO(ei);
                     if (v)
                     {
                         Term* t = ei._dobj->first();
                         string val = ei._iobj->first()->_name;
                         bool r = _state.test(t->_name, ei._prep->_text, val);
+                        //LOG1("exec iobj QUERY ", *t << ' ' << *ei._prep << " " << val << " = " << r);
                         if (r)
                         {
                             OUTP(EXEC_TRUE);
@@ -3464,6 +3492,7 @@ struct Strandi: public Traits
                 }
                 else
                 {
+                    assert(!ei._value);
 
                     // Wait!
                     // properties and prep can be multivalued!
@@ -3477,6 +3506,8 @@ struct Strandi: public Traits
                     
                     Term* t = ei._dobj->first();
                     const var* y = _state.getfn(t->_name, ei._prep->_text);
+                    
+                    //LOG1("execQuery dobj + !obj ", *t << ' ' << *ei._prep << " = " << (y ? y->toString() : "null"));
 
                     if (y)
                     {
@@ -3485,7 +3516,7 @@ struct Strandi: public Traits
                             // expect term
                             Term* r = Term::find(y->rawString());
                             OUTP(r);
-                            LOG4("exec prep QUERY ", *t << ' ' << *ei._prep << " = " << textify(r));
+                            //LOG1("exec prep QUERY ", *t << ' ' << *ei._prep << " = " << textify(r));
                         }
                         else
                         {
@@ -3493,23 +3524,21 @@ struct Strandi: public Traits
                             Term* r = Term::find(y->rawString());
                             if (r)
                             {
-                                LOG4("exec QUERY ", *t << ' ' << *ei._prep << " = " << textify(r));
+                                //LOG1("exec QUERY ", *t << ' ' << *ei._prep << " = " << textify(r));
                                 OUTP(r);
                             }
                             else
                             {
                                 // add raw value
-                                LOG4("exec QUERY ", *t << ' ' << *ei._prep << " = (val) " << y->rawString());
+                                //LOG1("exec QUERY ", *t << ' ' << *ei._prep << " = (val) " << y->rawString());
                                 OUTP(*y);
                             }
-                        
-
                         }
                     }
                 }
             }
         }
-        else if (ei._iobjn)
+        else if (ei._iobj || ei._value)
         {
             // what in player
             // what feels wet
@@ -3534,7 +3563,9 @@ struct Strandi: public Traits
             else
             {
                 // property, iobj is blank
-                val = ei._iobjn->_word->_text;
+                assert(ei._value);
+                var ev = evalEnode(ei._value);
+                val = ev.toString();
                 v = true;
             }
 
@@ -3554,13 +3585,25 @@ struct Strandi: public Traits
         return v;
     }
 
+    void _pushExec(execInfo& ei)
+    {
+        ei._prev = _ctx->_currentExec;
+        _ctx->_currentExec = &ei;        
+    }
+
+    void _popExec()
+    {
+        assert(_ctx->_currentExec);
+        _ctx->_currentExec = _ctx->_currentExec->_prev;
+    }
+
     bool reactionAlreadyExec(Reaction& r)
     {
         // see if `r` is already in exec chain
         execInfo* eip = _ctx->_currentExec;
         while (eip)
         {
-            if (eip->_currentReaction == &r) return true;
+            if (eip->_currentSelector == r._s) return true;
             eip = eip->_prev;
         }
         return false;
@@ -3572,14 +3615,13 @@ struct Strandi: public Traits
         if (ei._that) _ctx->pushThat(ei._that);
 
         // keep track of the reaction we are running
-        assert(!ei._currentReaction);
-        ei._currentReaction = &r;
-        ei._prev = _ctx->_currentExec;
-        _ctx->_currentExec = &ei;
-        
-        bool v = run(r._s->_action);
+        // NB: cannot hang onto reaction as this gets regenerated.
+        assert(!ei._currentSelector);
+        ei._currentSelector = r._s;
 
-        _ctx->_currentExec = ei._prev;
+        _pushExec(ei);
+        bool v = run(r._s->_action);
+        _popExec();
 
         // record whether we hit a manual break
         if (!v) ei._break = true;
@@ -3589,7 +3631,7 @@ struct Strandi: public Traits
 
     }
 
-    Reaction*  matchReactionInScope(execInfo& ei)
+    Reaction* matchReactionInScope(execInfo& ei)
     {
         //LOG3("Looking for reactor match for ", textify(ei._ps));
 
@@ -3719,7 +3761,7 @@ struct Strandi: public Traits
 
         if (best)
         {
-            LOG3("matched reactor ", textify(best->_reactor));
+            LOG3("matched reactor ", textify(best->_reactor) << " from " << best->_s->_host->_name);
         }
         
         return best;
@@ -3786,11 +3828,26 @@ struct Strandi: public Traits
                 done = true;
                 
                 // handle built in cases 
-                if (*ei._verb == SYM_PUT && !ei._verbPrep) v = execPut(ei);
-                else if (*ei._verb == SYM_SET) v = execSet(ei);
+                if (*ei._verb == SYM_PUT && !ei._verbPrep)
+                {
+                    v = execPut(ei);
+                    if (v) _ctx->_scopeChanged = true;
+                }
+                else if (*ei._verb == SYM_SET)
+                {
+                    v = execSet(ei);
+                    if (v) _ctx->_scopeChanged = true;
+                }
 
                 // handle queries
-                else if (ei._verb->isQuery()) v = execQuery(ei);
+                else if (ei._verb->isQuery())
+                {
+                    v = execQuery(ei);
+                    if (!v)
+                    {
+                        LOG3("exec query failed ", textify(ei._ps));
+                    }
+                }
                 else done = false;
             }
 
@@ -3801,9 +3858,8 @@ struct Strandi: public Traits
                 if (mr)
                 {
                     if (ei._resolving)
-                    {
                         v = resolveMatchingReactor(ei, *mr);
-                    }
+
                     if (v) execReaction(ei, *mr);
                 }
                 else v = false;
@@ -3827,7 +3883,7 @@ struct Strandi: public Traits
             // conditionals can eliminate a reactor
             if (!checkSelectorCond(s)) continue;
             
-            pnode* pn = ec->_parse->copy();
+            pnode* pn = ec->_parse->copy();  // consumed by reaction
             ResInfo ri(pn);
             resolve(ri);
             if (ri.resolved())
@@ -3866,6 +3922,7 @@ struct Strandi: public Traits
 
     void resolveAllReactions(const TermList& scope)
     {
+        //LOG1("resolving scope reactions ", "");
         for (auto t : scope)
         {
             // within a reaction, "it" corresponds to itself
@@ -3898,12 +3955,58 @@ struct Strandi: public Traits
 
         // this is called after every choice/command made
         // AND after every command within flows.
+
+        if (!_ctx->_scopeChanged) return; // no need!
+        _ctx->_scopeChanged = false;
+        
+        //LOG1("updating scope", "");
         
         if (_player)
         {
             _ctx->purgeReactions();
-            calculateScope(_ctx->_scope, _player);
+
+            TermList seed;
+            if (_scopeSeed)
+            {
+                int m = ~run_choice & ~run_media;
+                _pushcap(m);
+                _run(_scopeSeed);
+                CapRef cap = _popcap();
+                if (cap)
+                {
+                    for (auto& e : cap->_cap._elts)
+                        if (e._term) seed.push_back(e._term);
+                    
+                    if (seed.empty())
+                    {
+                        LOG2("seed cap has no terms, ", cap->_cap);
+                    }
+
+                }
+                else
+                {
+                    LOG1("seed cap empty ", textify(_scopeSeed));
+                }
+
+            }
+
+            if (seed.empty())
+            {
+                // cannot have empty seed. start with player
+                Term* p = inTerm(_player); // location
+                if (!p) p = _player;
+                seed.push_back(p);
+            }
+            else
+            {
+                LOG1("Using scope seed ", textify(seed));
+            }
+            
+            calculateScope(_ctx->_scope, seed);
             _ctx->resolveScopeReactions();
+
+            // if somehow got set
+            _ctx->_scopeChanged = false;
         }
     }
 
@@ -3918,6 +4021,9 @@ struct Strandi: public Traits
 
         _tick =  Term::find(TERM_TICK); // automatically added
         assert(_tick);
+
+        // may not exist
+        _scopeSeed = Term::find(TERM_SCOPE);
 
         // optional handler when cannot resolve
         _errorNocando = Term::find(TERM_NOCANDO);
@@ -4091,13 +4197,12 @@ struct Strandi: public Traits
                 else
                 {
                     pnode* pn = _pcom.parse(ec->_command, fv._lineno);
-                    
                     if (pn) ec->setParse(pn); //owns
                     else v = false;
                 
                     if (v)
                     {
-                        DLOG1(_pcom._debug, "parsed", *ec);
+                        LOG3("parsed, ", *ec);
                     }
                     else
                     {
@@ -4403,35 +4508,43 @@ struct Strandi: public Traits
 
         while (pn)
         {
-            bool close = false;
-            pnode* n = pn;
-            if (pn->_word)
+            if (pn->_type == nodeType::p_value)
             {
-                assert(!pn->_head);
-                s += pn->_word->_text;
+                GETENODE(pn);
+                s += en->toString();
             }
             else
             {
-                n = pn->_head;
-                assert(n);
+                bool close = false;
+                pnode* n = pn;
+                if (pn->_word)
+                {
+                    assert(!pn->_head);
+                    s += pn->_word->_text;
+                }
+                else
+                {
+                    n = pn->_head;
+                    assert(n);
 
-                close = n->_next != 0;
+                    close = n->_next != 0;
 
-                if (close) s += '(';
-                s += textify(n);
+                    if (close) s += '(';
+                    s += textify(n);
+                }
+
+                if (n->_binding)
+                {
+                    // term list
+                    s += " [";
+                    s += textify(*n->_binding);
+                    s += ']';
+                }
+
+                if (close) s += ')';
+
+                if (pn->_next) s += ' ';
             }
-
-            if (n->_binding)
-            {
-                // term list
-                s += " [";
-                s += textify(*n->_binding);
-                s += ']';
-            }
-
-            if (close) s += ')';
-
-            if (pn->_next) s += ' ';
             pn = pn->_next;
         }
         return s;

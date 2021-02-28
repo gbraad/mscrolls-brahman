@@ -59,6 +59,20 @@ struct Traits
         m_animation,
     };
 
+    static int atSimpleName(const char* p0)
+    {
+        // `[A-Za-z][A-Za-z0-9_]+`
+        const char* p = p0;
+        int l = 0;
+        if (u_isalpha(*p))
+        {
+            ++p;
+            while (u_isalnum(*p) || *p == '_' ) ++p;
+            l = p - p0;
+        }
+        return l;
+    }
+
     static int atName(const char* p0)
     {
         // `[A-Z][A-Z0-9-_]+`
@@ -506,6 +520,10 @@ struct ParseBase: public Traits
     
 };
 
+#define GETENODE(_n)                    \
+enode* en = (enode*)(_n)->_head;        \
+assert(en && en->valid())
+
 template<typename T> struct node
 {
     typedef std::string string;
@@ -517,7 +535,7 @@ template<typename T> struct node
     node(int t = 0) : _type(t) {}
     node(T* l, int t) : _type(t), _head(l) {}
 
-    virtual ~node() { _purge(); }
+    virtual ~node() {}
 
     struct It
     {
@@ -541,6 +559,7 @@ template<typename T> struct node
 
                 _n = _n->_head;
                 _up = i;
+                assert(_n->valid());
             }
         }
 
@@ -591,13 +610,6 @@ template<typename T> struct node
         It() {}
 
     };
-
-    void _purge()
-    {
-        delete _head; _head = 0;
-        delete _next; _next = 0;
-    }
-
 };
 
     
