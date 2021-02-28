@@ -267,7 +267,8 @@ void PrintDebugResult(resultStruct result)
       }
       break;
     case DIR: ;
-    case WORD_ID:
+    case WORD_ID: ;  /* @!@ */
+    case VERB:  /* @!@ */
       PrintWord(result.value, 0);
       break;
     case ATTR_ID:
@@ -289,7 +290,15 @@ void PrintDebugResult(resultStruct result)
       }
       PrintString("\n", 0);
       break;
-
+    case NO_TYPE:  /* @!@ */
+      switch (result.value) {
+        case NONE:
+          PrintString("%none", 0);
+          break;
+        default:
+          PrintString("Unknown keyword", 0);
+      }
+      break;
     default:
       PrintString("(unknown type) ", 0);
       PrintNumber(result.value, 0);

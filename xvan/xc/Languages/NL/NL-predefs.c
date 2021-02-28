@@ -43,7 +43,7 @@ int32_t NL_PreDefs(void)
 {
   /* for comments see ENG_Predefs() function */
 
-  int32_t id = NO_ID;
+  int32_t id         = NO_ID;
 
   if (!GetDescrId("sys", &id, COMMON_DESCRS, 1))
     return(ERROR);
@@ -58,11 +58,18 @@ int32_t NL_PreDefs(void)
   if (!GetObjectId("niets", &id, 0, -1))
     return(ERROR);
 
-      /* predefine it */
+  /* predefine it */
   if (!GetObjectId("het", &id, 0, -1))
     return(ERROR);
 
+  /* predefine unbound */  /* @!@ */
+  if (!GetObjectId("unbound", &id, 0, -1))
+    return(ERROR);
+
   if (!GetAttrId("het", 0, IT, &id, WORD_ID, NONE, NO_ID, 0))
+    return(ERROR);
+
+  if (!GetAttrId("unbound", 0, UNBOUND, &id, WORD_ID, NONE, NO_ID, 0))  /* @!@ */
     return(ERROR);
 
   if (GetFlagId("verlicht", 0, &id, 0, COMMON_FLAGS, 1).tag == ERROR)
@@ -82,6 +89,10 @@ int32_t NL_PreDefs(void)
 
   if (GetFlagId("json_mode", 0, &id, 0, PLAYER, 1).tag == ERROR)
     /* this is a local flag */
+    return(ERROR);
+
+  if (GetTriggerId("unbound", 0, &id, UNBOUND, 0).tag == ERROR)  /* @!@ */
+    /* this is a local trigger for the o_unbound object */
     return(ERROR);
 
   /* triggers t_naarbinnen, t_verlaat and t_default can   */

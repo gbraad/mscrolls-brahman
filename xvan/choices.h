@@ -35,6 +35,7 @@ extern storyInfo    story_info;                                            /* in
 extern char         *json_msg_from_story;
 
 extern int32_t      ContList(int32_t, int32_t*, int32_t);                  /* sysfunc.c  */
+extern void         InitUsrActionRec(usrActionRec*);                       /* trnslate.c    */  /* @!@ */
 extern resultStruct XeqTrigger(int32_t, int32_t, usrActionRec*, int32_t);  /* execute.c  */
 extern void         GetAddtlInput(kvPair*, char*, int32_t, int);           /* input.c    */
 extern void         PrintString(char*, int);                               /* output.c   */

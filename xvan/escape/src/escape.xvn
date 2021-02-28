@@ -8,7 +8,7 @@
 #======================================
 
 TITLE         "Escape!"
-VERSION       "1.2"
+VERSION       "1.3"
 AUTHOR        "Marnix van den Bos"
 CREDITS       "type 'credits' on command line."
 ORGANIZATION  "XVAN"
@@ -1863,6 +1863,34 @@ $OBJECT o_player
      if equal(r_next_dir, d) then 
        if try(l_location, 0, 1, "go d") and equal(l_location, r_dest) then agree() else disagree() endif
 
+END_OBJ
+#-------------------------------------------------------------------------------
+
+#-------------------------------------------------------------------------------
+$OBJECT o_unbound
+ DESCRIPTIONS
+   d_no_descr  ""
+
+ CONTAINED in o_player
+
+ FLAGS
+  f_hidden = 1
+
+ ATTRIBUTES
+   r_unbound = %none
+
+ TRIGGERS
+   t_unbound
+     if equal(%action, hit) and equal(r_unbound, road) then
+       printcr("Please use compass directions to move.")
+       agree()
+     endif
+     if equal(%action, get) and equal(r_unbound, rest) then
+       printcr("Resting costs you 2 moves.")
+       wait(2)
+       agree()
+     endif
+     disagree()
 END_OBJ
 #-------------------------------------------------------------------------------
 

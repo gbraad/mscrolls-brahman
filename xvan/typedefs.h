@@ -322,12 +322,17 @@ typedef struct {
 /* case a value is returned that is equal to a      */
 /* status code, we have ambiguity.                  */
 
-
 typedef struct {
           int32_t tag;
           int32_t owner; /* 02may19, for descriptions */
           int32_t value;
         } resultStruct;
+
+
+typedef struct {         /* for choice and hybrid mode */
+          char *choice;
+          char *response;
+        } choiceStruct;
 
 
 typedef struct {  /* @!@ */

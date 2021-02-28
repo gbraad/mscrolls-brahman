@@ -63,6 +63,7 @@ extern int32_t    action;                    /* letsplay.c */
 extern int32_t    actor;                     /* letsplay.c */
 extern int32_t    subject;                   /* letsplay.c */
 extern int32_t    specifier;                 /* letsplay.c */
+extern choiceStruct choices[];               /* input.c    */  /* @!@ */
 
 extern void       PrintString(char*, int);   /* output.c   */
 extern void       PrintNumber(int32_t, int); /* output.c   */
@@ -70,6 +71,7 @@ extern char       *outputline;               /* init.c     */
 extern void       Output(void);              /* output.c   */
 extern int32_t    IsLocId(int32_t);          /* execute.c  */
 extern int32_t    IsObjId(int32_t);          /* execute.c  */
+extern int32_t InMem(int32_t);               /* fileio.c  */  /* @!@ */
 extern void       PrintWord(int32_t, int);   /* output.c   */
 extern void       PrintId(int32_t, int);     /* output.c   */
 

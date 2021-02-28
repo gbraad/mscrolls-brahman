@@ -57,6 +57,8 @@ int32_t   sp = 0;     /* stackpointer                   */
 char      *outputline = NULL;
 char      *json_msg_from_story;
 
+choiceStruct choices[MAX_CHOICES];    /* for choice and hybrid mode */
+
 /*************************/
 /* function declarations */
 /*************************/
@@ -76,7 +78,7 @@ int32_t CompilerVersionOK(void)
   if (!ReadStoryInfo(&story_info))
     return(ERROR);
 
-  if (strcmp(story_info.compiler_version, "2.5") != 0) {
+  if (strcmp(story_info.compiler_version, "2.6") != 0) {  /* @!@ */
     PrintError(37, NULL, NULL);
     PrintError(38, NULL, story_info.compiler_version);
     Output();

@@ -267,7 +267,7 @@ int32_t ENG_CheckIfKeyword(char *word_lwr)
     return(ADDCHOICE);
   if (strncmp(word_lwr, "playmode", MAX_WORD_LEN) == 0)
     return(PLAYMODE);
-  if (strncmp(word_lwr, "undo", MAX_WORD_LEN) == 0)  /* @!@ */
+  if (strncmp(word_lwr, "undo", MAX_WORD_LEN) == 0)
     return(UNDO);
   if (strncmp(word_lwr, "(", MAX_WORD_LEN) == 0)
     return(LEFT_PAR);

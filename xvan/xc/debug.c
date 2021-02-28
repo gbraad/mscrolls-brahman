@@ -131,7 +131,7 @@ void PrintVerbDir(void)
   int i  = 0;
 
   printf("\n\n******** VERB DIRECTORY ********\n\n");
-
+  printf("Nr of verbs: %d\n", nr_of_verbs);
   for(i=0; i<nr_of_verbs; i++) {
     printf("\nverb id: %d (%d)\n", i+FIRST_VERB_ID, i);
     printf("scope: %d\n", verb_dir[i].scope);

@@ -68,6 +68,8 @@ extern resultStruct XeqEpilogue(int32_t);                                    /* 
 extern resultStruct XeqActionRec(usrActionRec*, int32_t*, int32_t);          /* execute.c  */
 extern resultStruct XeqVerbDefault(usrActionRec*, int32_t);                  /* execute.c  */
 extern int32_t      ContList(int32_t, int32_t*, int32_t);                    /* sysfunc.c  */
+extern int32_t      GetAttributeInfo(int32_t, int32_t, attrInfo**, int32_t*);  /* sysfunc.c */  /* @!@ */
+extern resultStruct XeqTrigger(int32_t, int32_t, usrActionRec*, int32_t); /* execute.c */  /* @!@ */
 
 extern resultStruct Translate(parsedInput*, int32_t, usrActionRec*, char*);  /* trnslate.c */
 

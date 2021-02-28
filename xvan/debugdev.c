@@ -43,6 +43,7 @@ void    PrintLocalAttributes(void);
 void    PrintCommonFlags(void);
 void    PrintLocalFlags(void);
 void    PrintVerb(verbInfo*);
+void    PrintVerbsInMem(void);  /* @!@ */
 void    PrintLocation(locationInfo*);
 void    PrintObject(objectInfo*);
 void    PrintSpecialIds(void);
@@ -59,6 +60,7 @@ void    PrintTimer(timerInfo*);
 void    PrintSpanTree(spanTree*);
 void    PrintRoute(int32_t*);
 void    PrintUndoStack(void);  /* @!@ */
+void    PrintChoices(void);  /* @!@ */
 
 /************************/
 /* Function definitions */
@@ -466,6 +468,25 @@ void PrintVerb(verbInfo *verb)
 
   PrintString("\n***********************\n", 0);
   Output();
+}
+
+
+void PrintVerbsInMem(void)  /* @!@ */
+{
+  int  i = 0;
+  char text_to_print[OUTPUT_LINE_LEN];
+
+  PrintString("Following verbs are currently loaded in memory:\n\n", 0);
+  for (i=0; i<nr_of_verbs; i++) {
+    if (InMem(i+FIRST_VERB_ID)) {
+      /* verb is in memory */
+      sprintf(text_to_print, "%d: ", i+FIRST_VERB_ID);
+      PrintString(text_to_print, 0);
+      PrintId(i+FIRST_VERB_ID, 0);
+      PrintString("\n", 0);
+      Output();
+    }
+  }
 }
 
 
@@ -1394,4 +1415,30 @@ void PrintUndoStack()  /* @!@ */
       return;
     }
   }
+}
+
+void PrintChoices(void)  /* @!@ */
+{
+  int  i = 0;
+  char text_to_print[OUTPUT_LINE_LEN];
+
+  PrintString("\n\n**** choices ****\n", 0);
+  PrintString("Following choices are available:\n\n", 0);
+
+  while (i<MAX_CHOICES) {
+    if (choices[i].choice != NULL) {
+      sprintf(text_to_print, "Choice, response %d: %s --- %s.\n\n", i, choices[i].choice, choices[i].response);
+      PrintString(text_to_print, 0);
+    }
+    else {
+      PrintString("<empty choice>\n\n", 0);
+    }
+    i++;
+  }
+  if (i==0) {
+    PrintString("There are no choices.\n\n", 0);
+  }
+
+  PrintString("*****************\n\n", 0);
+  Output();
 }
