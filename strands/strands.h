@@ -89,6 +89,8 @@ struct Flow: public Traits
         
         virtual string _toString(bool extra) const = 0;
         virtual string _toBaseString() const { return _toString(false); }
+
+        bool isTerm() const { return _type == t_term; }
         
         string toString() const
         {
@@ -351,8 +353,9 @@ struct Selector: public Traits
     {
         c_none = 0,
         c_once = 1,   // once chosen becomes hidden
-        c_hidden = 2,  
-        c_always = 4, // always available
+        c_always = 2, // always available
+        c_filler = 4, // use as padding
+        c_terminal = 8,  // only add if some already
     };
 
     enum OFlag
@@ -372,9 +375,10 @@ struct Selector: public Traits
     // conditional term ref
     Flow      _cond;
     
-    bool hidden() const { return (_flags & c_hidden) != 0; }
+    bool filler() const { return (_flags & c_filler) != 0; }
     bool always() const { return (_flags & c_always) != 0; }
     bool once() const { return (_flags & c_once) != 0; }
+    bool terminal() const { return (_flags & c_terminal) != 0; }
     bool aschoice() const { return (_flags & o_aschoice) != 0; }
 
     Selector(Term* t) : _host(t) {}
@@ -388,8 +392,10 @@ struct Selector: public Traits
         {
             s += "Flags:";
             if (_flags & c_once) s += "once";
-            if (_flags & c_hidden) s += "hidden";
-            if (_flags & c_always) s += "always";            
+            if (_flags & c_filler) s += "filler";
+            if (_flags & c_always) s += "always";
+            if (_flags & c_terminal) s += "terminal";
+            if (_flags & o_aschoice) s += "=";
         }
         return s;
     }
@@ -534,6 +540,10 @@ struct Term: public Traits
     RType       _rtype = t_random;  // initial generator
     RType       _rtypenext = t_void;  // subsequent generator
     int         _flags = 0;
+
+    // if we are a choice term, use any filler choices
+    // to pad to this number, if possible
+    int         _idealChoiceCount = 3;
 
     // body
     Flow        _flow;

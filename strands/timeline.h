@@ -353,6 +353,38 @@ struct Timeline
         }
     }
 
+    struct Mark
+    {
+        Timeline*               _host;
+        bool                    _valid = true;
+        //int                     _index = 0;
+        Ents::iterator          _p;
+
+        Mark(Timeline* host) : _host(host) {}
+    };
+
+    Mark getMark()
+    {
+        Mark m(this);
+        m._p = std::prev(_ents.end());
+
+        // XX debug
+        //m._index = _ents.size();
+        //LOG1("getting mark at ", m._index);
+
+        return m;
+    }
+
+    void clearToMark(const Mark& m)
+    {
+        if (!m._valid) return;  // mark invalid
+        Ents::iterator i = m._p;
+
+        //LOG1("clearing state from ", m._index << " to " << _ents.size());
+        _ents.erase(++i, _ents.end());
+    }
+
+
 private:
 
     void _append(const string& tag, bool neg = false)

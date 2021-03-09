@@ -319,9 +319,9 @@ INV1 INV2
 
 INV1 YOURSTUFF
 * them
-You are carrying, LAST
+You are carrying, LAST.
 *
-You're empty handed
+You're empty handed.
 
 INV2 YOURCLOTHES
 * them

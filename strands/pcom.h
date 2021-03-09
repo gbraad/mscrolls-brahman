@@ -238,6 +238,7 @@ struct Binding
 
     bool empty() const { return _terms.empty(); }
     int size() const { return _terms.size(); }
+    void clear() { _terms.clear(); }
 
     BindList    _terms;
     scopeType   _scope = Word::scope_void;

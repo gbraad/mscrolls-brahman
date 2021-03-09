@@ -53,9 +53,9 @@
 #define SYM_OBJECT '@'
 
 // choice selector flags
-#define SYM_ONCE  '!'
-#define SYM_HIDDEN  '^'
 #define SYM_ALWAYS  '+'
+#define SYM_FILLER '-'
+#define SYM_TERMINAL '!'
 
 // object flags
 #define SYM_ASCHOICE '='
@@ -752,25 +752,25 @@ struct ParseStrands: public ParseBase
         for (;;)
         {
             char c = AT;
-            if (c == SYM_ONCE)  f |= Selector::c_once;
-            else if (c == SYM_HIDDEN) f |= Selector::c_hidden;
+            if (c == SYM_FILLER) f |= Selector::c_filler;
             else if (c == SYM_ALWAYS) f |= Selector::c_always;
+            else if (c == SYM_TERMINAL) f |= Selector::c_terminal;
             else break;
 
             BUMP;
             skipws();
         }
 
-        if ((f & Selector::c_once) && (f & Selector::c_always))
+        if ((f & Selector::c_always) == 0)
         {
-            // both
-            PERR1("selector cannot be both once and always", s->id());
-            f &= ~Selector::c_once; // make always
-        }
-        else if ((f & (Selector::c_once | Selector::c_always)) == 0)
-        {
-            // neither
+            // not always, default to once
             f |= Selector::c_once; // make once by default
+        }
+
+        if ((f & Selector::c_terminal) && (f & Selector::c_filler))
+        {
+            PERR1("selector cannot be both terminal and filler", s->id());
+            f &= ~Selector::c_filler;
         }
     
         return f;
@@ -811,11 +811,13 @@ struct ParseStrands: public ParseBase
 
         uint f = 0;
 
-        if (host->isObject())
-            f |= parseObjectFlags(s);
+        if (host->isObject()) f |= parseObjectFlags(s);
 
         // objects can have choice flags
         f |= parseChoiceFlags(s);
+
+        // so that flags can be in any order
+        if (host->isObject()) f |= parseObjectFlags(s);
 
         s->_flags = f;
 
@@ -1174,7 +1176,8 @@ struct ParseStrands: public ParseBase
         Term::intern(TERM_TICK);
         Term::intern(TERM_LAST);
         Term::intern(TERM_IT);
-        Term::intern(TERM_THAT);        
+        Term::intern(TERM_THAT);
+        Term::intern(TERM_LASTGEN);
         
         bool v = linkTerms();
 

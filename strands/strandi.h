@@ -252,6 +252,9 @@ struct Strandi: public Traits
 
         // stack of temp LAST bindings
         LastCap              _lastCap;
+
+        // last generator index selected
+        int                  _lastGen = 0;
         
         PronBinding*        _pronouns = 0;
 
@@ -538,6 +541,9 @@ struct Strandi: public Traits
                 break;
             case Term::t_nonrandom:
                 // do nothing as reset nonrandom is nonrandom
+                // unless we don't have a nonrandom, which happens
+                // when we're converted
+                if (!_nr) _init();
                 break;
             }
 
@@ -1036,13 +1042,25 @@ struct Strandi: public Traits
         
         // building choices
         bool                _valid = true;
-        bool                _ranhead = false;
         string              _headFlow;
 
         // null choices are commands, if we have any
         Selector*           _cmdChoice = 0;
         bool                _matching = false;
 
+        // invalid when a manual break occurs
+        operator bool() const { return _valid; }
+
+        bool present() const
+        {
+            return _valid && (!isEmpty() || _cmdChoice);
+        }
+
+        Choice& last()
+        {
+            assert(!_choices.empty());
+            return _choices.back();
+        }
 
         int size() const { return _choices.size(); }
         bool isEmpty() const { return _choices.empty(); }
@@ -1194,7 +1212,7 @@ struct Strandi: public Traits
                 ci._text = textify(ci._select->_cap);
         }
 
-        while (c._valid && c._ranhead)
+        while (c)
         {
             int ch;
             bool accept = false;
@@ -1255,8 +1273,8 @@ struct Strandi: public Traits
                 if (!line.size())
                 {
                     // blank line accepts single choice by default
-                    // unless cmd available.
-                    if (nchoices == 1 && !c._cmdChoice)
+                    // even if cmd available.
+                    if (nchoices == 1)
                     {
                         accept = true;
                         ch = 1;
@@ -1347,11 +1365,15 @@ struct Strandi: public Traits
                             const string& host = r._s->_host->_name;
                             if (any || equalsIgnoreCase(dcmd, host))
                             {
+                                bool aschoice = r._s->aschoice();
+                                
                                 _emit('\n');
                                 _emit(++cc);
                                 _emit(") ");
                                 _emit(host);
-                                _emit(": ");
+                                _emit(':');
+                                if (aschoice) _emit('=');
+                                _emit(' ');
                                 _emit(textify(r._reactor));
                             }
                         }
@@ -1682,6 +1704,7 @@ struct Strandi: public Traits
         const Choice* cp = 0;
 
         // find the ch'th selected choice
+        int ri = 0;
         for (auto& ci : c._choices)
         {
             if (ci._selected)
@@ -1690,9 +1713,13 @@ struct Strandi: public Traits
                 if (!ch) break;
                 --ch;
             }
+            ++ri;
         }
         
         assert(cp);
+
+        // ri is the raw index, not just those selected
+        _ctx->_lastGen = ri; 
 
         // when we're not matching the select flow is part of the output
         if (!cp->_select)
@@ -1909,43 +1936,77 @@ struct Strandi: public Traits
         return res;
     }
 
-    void prepareChoice(Choices& c, Selector* s, Reaction* reactor)
+    bool selectorShown(Selector* s, Reaction* reactor = 0)
     {
-        // a `reactor` is given if this is a resolved command
-        // behaving like a choice.
+        // should we show this selector?
+        bool show = true;
         
-        bool show = !s->hidden();
-
-        if (show)
+        // if already seen, dont show
+        if (s->once())
         {
-            // if already seen, dont show
-            if (s->once())
-            {
-                string id = reactor ? reactor->id() : s->id();
-                if (_state.test(id)) show = false;
-            } 
+            string id = reactor ? reactor->id() : s->id();
+            if (_state.test(id)) show = false;
         }
 
+        // check conditional
         if (show) show = checkSelectorCond(s);
+        return show;
+    }
 
-        if (show)
+    bool suppressElevatedChoice(Selector* s)
+    {
+        bool suppress = !s->_action;
+        if (!suppress && s->_action.size() == 1)
         {
-            if (!c._ranhead)
+            // if we have a single action
+            auto e = s->_action.firstElt();
+            assert(e);
+            if (e->isTerm())
             {
-                // we have at least once choice
-                // before running the selector flow, run the
-                // term head.
-                c._ranhead = true;
+                Term* t1 = ((Flow::EltTerm*)e)->_term;
+                assert(t1);  // otherwise not bound
+                if (t1->isChoice())
+                {
+#if 1
+                    // simple version that just looks at choice conditions
+                    int cc = 0;
+                    for (auto s : t1->_selectors._selectors)
+                    {
+                        // only count non-terminals
+                        if (!s->terminal() && selectorShown(s)) ++cc;
+                    }
 
-                // run headflow before running the first valid choice
-                // keep output
-                _pushcap();
-                c._valid = run(c._t->_flow);
-                CapRef ccap = _popcap();
-                if (!c._valid) return; // break;
-                c._headFlow = textify(ccap->_cap);
+                    if (!cc) suppress = true;
+#else
+                    // this version actually runs subsequent flow,
+                    // then reverts it to see if something happens
+                    Choices ch(t1);
+                    // revert any state changes whilst inspecting flow
+                    Timeline::Mark m = _state.getMark();
+                    prepareChoices(ch);
+                    _state.clearToMark(m);
+                    if (!ch.present()) suppress = true;
+#endif                    
+
+                    if (suppress)
+                    {
+                        LOG3("suppressing elevated choice reactor ", t1->_name);
+                    }
+                }
             }
-                
+        }
+        return suppress;
+    }
+    
+    bool prepareChoice(Choices& c, Selector* s, Reaction* reactor)
+    {
+        // a `reactor` is given if this is a command
+        // elevated to choice
+        
+        bool r = false; // return true if choice was added
+        
+        if (selectorShown(s, reactor))
+        {
             if (s->_text)
             {
                 if (s->_isReactor)
@@ -1958,29 +2019,22 @@ struct Strandi: public Traits
                     assert(reactor);
 
                     pn = reactor->_reactor;
-
+                    
                     assert(pn);
 
-                    /*
-                    Flow::EltCommand* ec = s->_text.firstCommand();
-                    if (ec)
+                    if (!suppressElevatedChoice(s))
                     {
-                        // if we have a parse use that
-                        if (ec->_parse) pn = ec->_parse;
-                        
-                        else
+                        // convert the bound reaction into plain text
+                        ctext = textifyFancy(pn);
+                        //LOG3("creating choice ", ctext << " from " << pn->toStringStruct());
+                        if (!ctext.empty())
                         {
-                            ctext = ec->_command;
+                            // capitalise start, if needed.
+                            ctext[0] = u_toupper(ctext[0]);
+                            c._choices.emplace_back(Choice(ctext, reactor));
+                            r = true;
                         }
                     }
-                    */
-
-                    // convert the bound reaction into plain text
-                    ctext = textifyFancy(pn);
-                    //LOG3("creating choice ", ctext << " from " << pn->toStringStruct());
-                    if (!ctext.empty())
-                        c._choices.emplace_back(Choice(ctext, reactor));
-
                 }
                 else
                 {
@@ -1989,10 +2043,11 @@ struct Strandi: public Traits
                     c._valid = run(s->_text);
                     CapRef ccap = _popcap();
 
-                    if (!c._valid) return; // break
-                
-                    if (ccap->_cap)
+                    if (c && ccap->_cap)
+                    {
                         c._choices.emplace_back(Choice(ccap, s));
+                        r = true;
+                    }
                 }
             }
             else
@@ -2002,58 +2057,113 @@ struct Strandi: public Traits
                 c._cmdChoice = s;
             }
         }
+        return r;
     }
 
-    bool runChoice(Term* t)
+    void prepareChoices(Choices& c)
     {
-        // return false for stack break
-        
-        Choices choices(t);
+        Term* t = c._t;
+        assert(t);
 
-        assert(t->isChoice());
-        
-        // choice does not run the headflow (nor tail)
-        // if there are no actual valid choices
-            
-        // TODO: can choices have topflow?
-        // one idea is that this can be inherited choices??
-            
+        // first process all choices that are not fillers
+        int terminal = 0;
         for (auto s : t->_selectors._selectors)
-            prepareChoice(choices, s, 0);
-
-        if (choices._valid && t->cmdChoices())
         {
-            // add in any `aschoice` reactions
-            // these are object reactions that appear as choices
-            for (auto& r : _ctx->_reactions)
+            if (s->terminal())
             {
-                Selector* s = r._s;
-                if (s->aschoice())
+                // how many terminals?
+                if (selectorShown(s)) ++terminal;
+            }
+            else if (!s->filler())
+            {
+                prepareChoice(c, s, 0);
+                if (!c) break;
+            }
+        }
+        
+        if (c)
+        {
+            // add in commands elevated to choice
+            if (t->cmdChoices())
+            {
+                // add in any `aschoice` reactions
+                // these are object reactions that appear as choices
+                for (auto& r : _ctx->_reactions)
                 {
-                    assert(s->_isReactor);
-                    prepareChoice(choices, s, &r);
+                    Selector* s = r._s;
+                    if (s->aschoice())
+                    {
+                        assert(s->_isReactor);
+                        prepareChoice(c, s, &r);
+                        if (!c) break;
+                    }
                 }
             }
         }
 
-        // ranhead => choices non-empty or cmdChoice
-        if (choices._valid && choices._ranhead)
-            presentChoices(choices);
-        
-        bool res = choices._valid;
-
-        if (res)
+        if (c)
         {
-            // otherwise the number of choices
-            int nc = choices.size();
+            // pad with filler choices?
+            for (auto s : t->_selectors._selectors)
+            {
+                if (t->_idealChoiceCount - (c.size() + terminal) <= 0) break;
+                
+                if (s->filler())
+                {
+                    prepareChoice(c, s, 0);
+                    if (!c) break;
+                }
+            }
+        }
 
-            // but can be zero if command usage
-            // in this case we still want postflow
-            if (choices._ranhead) ++nc;
-            if (nc) res = run(t->_postflow);
+        if (c && terminal)
+        {
+            // add terminals
+            for (auto s : t->_selectors._selectors)
+            {
+                if (s->terminal())
+                {
+                    prepareChoice(c, s, 0);
+                    if (!c) break;
+                }
+            }
+        }
+    }
+    
+
+    bool runChoice(Term* t)
+    {
+        // return false for stack break
+
+        assert(t->isChoice());
+        
+        Choices choices(t);
+
+        // choice does not run the headflow (nor tail)
+        // if there are no actual valid choices
+        // TODO: can choices have topflow? what does this mean?
+        
+        prepareChoices(choices);
+        
+        if (choices.present())
+        {
+            // run head flow ONCE we know we have choices
+            _pushcap();
+            choices._valid = run(t->_flow);  // collect manual break
+            CapRef ccap = _popcap();
+            if (choices) choices._headFlow = textify(ccap->_cap);
+        }
+
+        if (choices.present())
+        {
+            presentChoices(choices);
+            if (choices)
+            {
+                choices._valid = run(t->_postflow);
+            }
         }
         
-        return res;
+        return choices;
     }
     
     bool runselect(Term* t)
@@ -2143,11 +2253,15 @@ struct Strandi: public Traits
                 OUTP(it);
             }
         }
-
         else if (t->_name == TERM_TICK)
         {
             v = true;
             _runTick();
+        }
+        else if (t->_name == TERM_LASTGEN)
+        {
+            v = true;
+            OUTP(var(_ctx->_lastGen));
         }
         return v;
     }
@@ -2505,6 +2619,11 @@ struct Strandi: public Traits
         subPropTerms(tl, p, PROP_IN);
     }
 
+    void subOnTerms(TermList& tl, Term* p)
+    {
+        subPropTerms(tl, p, PROP_ON);
+    }
+
     void subInTermsRec(TermList& tl, Term* p)
     {
         subPropTermsRec(tl, p, PROP_IN);
@@ -2792,6 +2911,45 @@ struct Strandi: public Traits
         return r;
     }
 
+    bool resolvePossession(Binding& b, pnode* tail)
+    {
+        bool v = true;
+        int n = b.size();  
+        if (n > 0) // have something to resolve?
+        {
+            while (tail && !b.empty())
+            {
+                LOG3("resolving from ", textify(b));
+
+                Binding* u = tail->_binding;
+                if (u)
+                {
+                    // restrict b to in or on u.
+                    TermList tl;
+                    for (auto t : u->_terms)
+                    {
+                        TermList tin, ton;
+                        subInTerms(tin, t);
+                        subOnTerms(ton, t);
+                        
+                        concatm(tl, tin);
+                        concatm(tl, ton);
+                    }
+                    cliplist(b._terms, tl);
+
+                }
+                else b.clear();
+
+                LOG3("resolving to ", textify(b));
+                                    
+                tail = tail->_next;
+            }
+
+            v = !b.empty();
+        }
+        return v;
+    }
+
     void resolve(ResInfo& ri)
     {
         // if `scope` restrict objects to scope.
@@ -2885,15 +3043,25 @@ struct Strandi: public Traits
             switch (pn->_type)
             {
             case nodeType::p_unoun:
-                // handle possession
-                assert(pn->_head);
-                assert(pn->_head->_binding); // should be resolved
-                assert(!pn->_binding);
+                {
+                    // handle possession
+                    assert(!pn->_binding);
 
-                // elevate resolution of first anoun
-                // XX TODO need to resolve against others!!
-                TL_TAKE(pn, pn->_head);
-                
+                    pnode* un = pn->_head;
+                    assert(un);
+
+                    if (un->_binding)
+                    {
+                        if (!resolvePossession(*un->_binding, un->_next))
+                        {
+                            delete un->_binding;
+                            un->_binding = 0;
+                            ri._empty = true;
+                        }
+
+                        TL_TAKE(pn, un);
+                    }
+                }
                 break;
             case nodeType::p_nounlist:
                 // combine resolved nouns

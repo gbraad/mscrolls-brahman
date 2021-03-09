@@ -108,6 +108,7 @@ UPDATETITLE
 
 // NB: player is not a person!
 PLAYER@ THING
+> set player score 0
 * name
 the player
 * name
@@ -124,12 +125,23 @@ INV
 > e
 * go north
 > n
+* go up
+> u
+* go down
+> d
 * go out
 > out
 * exit
 > out
-* dance
-You do a little jig on the spot, hopefully no one noticed.
+* score
+Your score is
+> what is player score
+.
+
+INCSCORE
+You scored a point!
+> set player score PLAYER(score)+1
+
 
 // player body parts
 FEET@ THING
@@ -170,6 +182,10 @@ NOWAY
 * e
 NOWAY
 * s
+NOWAY
+* u
+NOWAY
+* d
 NOWAY
 * out
 NOWAY
@@ -239,10 +255,14 @@ s
 UP@
 * name
 up
+* name
+u
 
 DOWN@
 * name
 down
+* name
+d
 
 OUT@
 * name
@@ -286,11 +306,24 @@ YOURSTUFF > what is in player
 *
 > be LAST
 
-INV YOURSTUFF
+YOURCLOTHES > what is on me
+*
+> be LAST
+
+INV
+INV1 INV2
+
+INV1 YOURSTUFF
 * them
 You are carrying, LAST.
 *
 You're empty handed.
+
+INV2 YOURCLOTHES
+* them
+You're wearing LAST.
+
+
 
 // where dead things go
 DEATH@ ROOM
@@ -361,13 +394,40 @@ It's already closed.
 
 DOOR@ OPENABLE
 
+
+// GARMENTS
+
 GARMENT@ GETTABLE
 * take off it
-> drop it
+> remove it
 * remove it
-> drop it
+REMOVEGARMENT
 * put on it
-> get it
+> wear it
+* wear it
+WEARGARMENT
+
+
+WEARGARMENT > put it on me
+* ok
+You put on IT.
+*
+You can't wear that.
+
+
+REMOVEGARMENT > is it on me
+* yes
+REMOVEGARMENT2
+*
+You're not wearing IT.
+
+REMOVEGARMENT2 > put it in me
+* ok
+You take off IT.
+*
+You can't remove that.
+
+
 
 /// CONTAINERS
 
@@ -377,14 +437,13 @@ WHATSIN
 * x it
 WHATSALSOIN
 * put this GETTABLE in it
-DOPUT
+DOPUTIN
 
-DOPUT > put it in that
+DOPUTIN > put it in that
 * ok
 You put IT in THAT.
 *
 You can't.
-
 
 STUFFIN > what is in it
 *
@@ -400,5 +459,37 @@ WHATSALSOIN STUFFIN
 * them
 IT contains, LAST.
 *
+
+// SURFACES aka supporters
+
+SURFACE@ THING
+* look on it
+WHATSON
+* x it
+WHATSALSOON
+* put this GETTABLE on it
+DOPUTON
+
+DOPUTON > put it on that
+* ok
+You put IT on THAT.
+*
+You can't.
+
+WHATSON > what is on it
+* them
+On IT you see, LAST.
+*
+There's nothing there.
+
+WHATSALSOON > what is on it
+* them
+On IT you see, LAST.
+*
+
+
+
+
+
 
 

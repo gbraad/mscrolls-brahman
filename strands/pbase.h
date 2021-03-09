@@ -81,7 +81,11 @@ struct Traits
         if (u_isupper(*p))
         {
             ++p;
-            while (u_isupper(*p) || u_isdigit(*p) || *p == '_' || *p == '-') ++p;
+            // hypen cannot be after first character (eg V-neck)
+            while (u_isupper(*p) || u_isdigit(*p)
+                   || *p == '_'
+                   || (*p == '-' && (p-p0 > 1)))
+                ++p;
 
             l = p - p0;
             if (l < 2) l = 0;
