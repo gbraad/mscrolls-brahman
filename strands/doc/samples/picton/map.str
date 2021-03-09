@@ -1,0 +1,194 @@
+/*
+
+   +---------------------------------------------------------+
+   |                                                         |
+   | Garden                                                  |
+   |                                                         |
+   +-+ +-----------------------------------------------------+
+   +-+ +-----+ +------------------------+
+   |         | |                        |
+   |         | |                        |
+   | Kitchen | | Dining Room            |
+   |         | |                        |
+   |         | |                        |
+   |         | |                        |
+   |         | |                        |
+   |         | |                        |
+   +---------+ +-----------------+  +---+
+                                 |  |
+                            +----+  +---+  +-----------------+
+                            |           |  |                 |
+                            |           |  |                 |
+               +---------+  |           |  |                 |
+               |         |  |           |  |                 |
+               | Study   |  |   Hall    |  |  Drawing Room   |
+               |         |  |           |  |                 |
+               |         |  |           |  |                 |
+               |         +--+           +--+                 |
+               |                                             |
+               |         +--+           +--+                 |
+               |         |  |           |  |                 |
+               +---------+  +-+       +-+  +-----------------+
+                            +-+       +-+
+                            |           |
+                            | Entrance  |
+                            |           |
+                            +-----------+
+*/
+
+MANOR@ INSIDE
+* name
+the manor
+* name
+house
+* x manor
+It's an old manor house.
+
+// Entrance
+
+ENTRANCE@ MANOR
+* name
+the main entrance
+* x it
+You're standing in the doorway, north is the main hall.
+Sgt. Bulwark is here.
+* n
+GOHALL
+* go hall
+GOHALL
+
+GOENT
+> put player in entrance
+You step out into the entrance.
+XHERE ENT_OUT
+
+//////////////////// hall
+
+HALL@ MANOR
+* name
+the hall
+* x it
+You're in the hall. A large grandfather clock stands against one wall.
+Westwards is the study, east is the drawing room and further north leads through to the dining room. Going south leaves the building through the main entrance.
+* w
+GOSTUDY
+* go study
+GOSTUDY
+* e
+GODRAWINGROOM
+* go drawing room
+GODRAWINGROOM
+* n
+GODININGROOM
+* go dining room
+GODININGROOM
+* s
+GOENT
+* go entrance
+GOENT
+
+GOHALL
+> put player in hall
+You go into the hall.
+images/hall.jpg
+XHERE JVSTART
+
+///////////////////// study
+
+STUDY@ MANOR
+* name
+the study
+* x it
+This study was used my the major for his business affairs. All along the back wall stands an impressive bookcase.
+Back east is the hall.
+* e
+GOHALL
+* go hall
+GOHALL
+
+GOSTUDY
+> put player in study
+You go into the study.
+images/study.jpg
+XHERE ENT_STUDY
+
+///////////////////// drawing room
+
+DRAWINGROOM@ MANOR
+* name
+the drawing room
+* x it
+You're in the drawing room.
+There's an impressive fireplace with a fire blazing away.
+West leads back to the hall.
+* w
+GOHALL
+* go hall
+GOHALL
+
+GODRAWINGROOM
+> put player in drawing room
+You go into the drawing room.
+images/drawing.jpg
+XHERE ENT_DRAWING
+
+//////////////////// Dining room
+
+DININGROOM@ MANOR
+* name
+the dining room
+* x it
+This is the dining room, you can see the garden through the north windows. Back south is the hall. 
+* s
+GOHALL
+* go hall
+GOHALL
+
+GODININGROOM
+> put player in dining room
+You go into the dining room.
+images/dining.jpg
+XHERE ENT_DINING
+
+//////////////////// Garden
+
+GARDEN@ OUTSIDE
+* name
+the garden
+* x it
+You're outside in the garden.
+An exit south leads back into the house.
+* s
+GOKITCHEN
+* go kitchen
+GOKITCHEN
+
+GOGARDEN
+> put player in garden
+You go into the garden.
+images/garden.jpg
+XHERE
+
+////////////////// kitchen
+
+KITCHEN@ MANOR
+* name
+the kitchen
+* x it
+You're in the kitchen.
+There's a fridge up against the back wall. The east exit takes you back to the dining room.
+* e
+GODININGROOM
+* go dining room
+GODININGROOM
+* n
+GOGARDEN
+* go garden
+GOGARDEN
+
+GOKITCHEN
+> put player in kitchen
+You go into the kitchen.
+images/kitchen.jpg
+XHERE
+

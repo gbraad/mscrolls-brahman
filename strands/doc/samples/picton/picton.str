@@ -1,0 +1,277 @@
+
+///////////////////////////////////////////////////////////
+
+STORY
+Major Stephenson has been shot dead in his study!
+
+You are the indomitable inspector Lance Picton. You take on the cases no one else can solve. Your rugged resolve and tenacious approach to detail consistently nail the guilty party.
+
+You've already figured out that exactly one member of the household is guilty. The Suspects are; Charles, Major Stephenson's brother and business partner, Charlotte the Major's wife, Jimmy the son or possibly Jeeves the family butler. BEGIN
+
+// computer randomly picks murderer each game
+MURDER!
+* Jimmy
+* Charlotte
+* Charles
+* Jeeves
+
+GOODWORK?
+* "Good work Sergeant."
+
+BEGIN
+\n\nYou arrive at the manor entrance where Sergeant Bulwark is currently posted.
+\n"'ello Inspector", he says in his usual acerbic manner, "We got a right one 'ere!"
+\n"We had that numpty detective Hazelden round earlier. He poked around, got nowhere, totally baffled!
+What a fool, he even suggested that the butler did it; does he think this is some kind of game!
+\nAnyway, we saw 'im off and called you in. I've had all the suspects stay right 'ere in the 'ouse for questioning."  GOODWORK
+"When you've rumbled it, come back 'ere 'an I'll nab 'im. Or her, that is!"
+\nWith that, the sergeant thumps on the door with his fist, which is opened rapily by a flustered butler.
+UPDATEMAP
+GOHALL
+MAIN
+
+/////////////////////////
+
+//////////////////// HALL
+
+//////////////////// STUDY
+
+BOOKCASE@ THING
+> put it in study
+* name
+bookcase
+* x it
+There are a lot of books here.
+
+//////////////////// Drawing room
+
+FEELIE@ THING
+* feel it
+It feels
+> what it feels
+.
+
+FIREPLACE@ FEELIE
+> put it in drawing room
+> set it feels hot
+* name
+fireplace
+* name
+fire
+* x it
+Like i said, it's blazing away!
+//////////////////// kitchen
+
+///////////////////// ///////// PEOPLE
+
+/////////////////// JIMMY
+
+JIMMY@ PERSON
+> put him in study
+* name
+Master Jimmy
+* x it
+He's about 10 years old, wearing a maroon V-neck wool jumper and grey schoolboy shorts. Despite born with a silver spoon in his mouth, he still manages to somehow look scruffy. Piecing, piggy blue eyes stare back at you fiercely. You get the impression he totally despises the police and you in particular. He's probably guilty as Hell! Unfortunately, you need more solid proof.
+* ask him about thing
+JIMCOPOUT
+* ask him for thing
+"No chance copper!"
+
+JIMCOPOUT
+* What's it to you copper!
+* I'm not answering that without my lawyer!
+* I'm not saying anything!
+* I have no comment!
+
+JIMCLOTH@ THING
+> put it on jimmy
+* name
+the clothes
+* name
+wool jumper
+* name
+grey shorts
+* x it
+Typical urchin!
+
+/////////////////// Charlotte
+
+CLOT@ PERSON
+> put her in dining room
+* name
+Charlotte
+* x it
+A woman in her early thirties and a good deal younger than the Major, she strikes you as attractive, devious and effortlessly manipulative. Wearing a stunning Worth couture magenta floral ensemble, she glides silently around the house, where you can be sure, she never misses a trick!
+* ask her about thing
+CLOTCOP
+* ask her for thing
+"I should say not inspector!"
+
+CLOTCOP
+* "You're going to have to ask my husband about that!"
+
+DRESS@ THING
+> put it on charlotte
+* name
+the dress
+* name
+ensemble
+* x dress
+Worth a packet no doubt!
+
+/////////////////// CHARLES
+
+CHARLES@ PERSON
+> put him in drawing room
+* name
+Charles
+* x it
+Charles is the Major's brother and partner in their investments business. He'll now be worth a pretty penny, becoming the sole proprietor along with the manor house and its antiques. That certainly gives him a solid motive. You don't trust him; sat there in his pompous cravat and tweedy, shoulder patched, green shooting jacket. When did he last shoot anything anyway?
+*= see it
+> x it
+* ask him about jeeves
+"He's been our butler for goodness know how long, not much else to say really. Don't you have a butler?"
+* ask him about major
+"He was my dear brother and businss parter, such a trajic loss."
+* ask him about thing
+CHARLESCOPOUT
+* ask him for thing
+"Not the done thing, old boy!"
+*+= talk to him
+TALK_CHARLES
+
+CHARLESCOPOUT
+* I can't help you with that, at all!
+* "What a silly question! Shouldn't you be solving the case!"
+
+JACKET@ THING
+> put it on charles
+* name
+tweedy tweed shooting jacket
+* name
+cravat
+* x it
+Dapper hunting indeed.
+
+
+MAJOR@ PERSON
+* name
+the Major
+* name
+major stephenson
+* x it
+He's dead!
+
+///////////////////// JEEVES /////////////////
+
+JEEVES@ PERSON
+> put him in hall
+* be it
+IT
+* name
+Jeeves
+* name
+butler
+* label
+Jeeves the butler
+* x it
+Jeeves has been in the family for as long as anyone can remember. Softly spoken and impeccably dressed in kid gloves, black waistcoat, starched white dickey and bow tie. Standing as tall as he can, he looks at you with a haughty demeanour as if you're not worth his time, whilst at the same time acting obsequiously apologetic and toady. Surely he's beyond suspicion, not!
+*= see it
+> x it
+* ask him about jimmy
+"Master Jimmy is Mr Stephenson's son sir!" JVPAUSE
+* ask him about charles
+"He's in charge of everything now Sir!"
+* ask him about thing
+JEEVCOP
+* ask him for thing
+"That's not possible right now, Sir!"
+
+JEEVCOP
+"Sorry, I can't help you with that Sir!"
+
+
+JVSTART
+*?!JVSTART \n"Welcome to the Manor Sir, I am Jeeves the butler, at your disposal." JVMAIN^
+
+JVMAIN=
+*?JVPAUSE JVDELAY
+* JVLOOP
+
+JVPAUSE
+
+JVDELAY<
+*
+*
+* JVPAUSE# JVDELAY# JVBEALL
+
+JVBEALL
+\nJeeves, 
+* "If that's all Sir?"
+* "Will that be all Sir?"
+
+
+JVHERE > what is jeeves in
+* > what is player in
+\nJeeves arrives!
+*
+
+JVGO > what is jeeves in
+* > what is player in
+\nJeeves leaves the room.
+*
+
+// start in hall
+JVLOOP<<
+*
+*
+*
+JVGO
+> put jeeves in dining room
+JVHERE
+*
+*
+JVGO
+> put jeeves in kitchen
+JVHERE
+*
+*
+JVGO
+> put jeeves in dining room
+JVHERE
+*
+*
+JVGO
+> put jeeves in hall
+JVHERE
+*
+*
+JVGO
+> put jeeves in drawing room
+JVHERE
+*
+*
+JVGO
+> put jeeves in hall
+JVHERE
+*
+*
+JVGO
+> put jeeves in study
+JVHERE
+*
+*
+JVGO
+> put jeeves in hall
+JVHERE
+
+////////////////////////////////////////
+
+BULWARK@ PERSON
+> put him in entrance
+* name
+Sergeant sgt Bulwark
+* x it
+Built like a brickhouse!
+
+

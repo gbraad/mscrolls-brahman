@@ -3,13 +3,13 @@ INITCORE
 STORY
 
 GAME_FILES
-core.str map.str murdermanor.str
+core.str map.str picton.str people.str
 
 GAME_TITLE
-Murder at the Manor
+Picton Murder Whodunnit
 
 GAME_AUTHOR
-by A.Hacker
+Sia See
 
 GAME_ORGANISATION
 Strand Games

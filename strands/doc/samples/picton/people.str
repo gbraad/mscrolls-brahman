@@ -1,0 +1,282 @@
+
+OKBUT
+* I see, but
+* But
+* Ok, but
+
+PROVE
+* OKBUT can you prove that?
+* OKBUT how can you prove that?
+* OKBUT do you have anything to corroborate that?
+
+WHEREU
+* where were you at the time of the murder?
+* what were you doing when the murder took place?
+* do you have an alibi?
+
+// Jimmy
+
+ENT_STUDY
+TALKTO_JIMMY
+
+TALKTO_JIMMY?
+*+ Talk to Jimmy?
+TALK_JIMMY
+*+ continue
+*
+
+TALK_JIMMY?
+* Jimmy, WHEREU
+JWHERE JPROVE
+*?CPROVE Did you see Charles in the drawing room?
+JSAY
+*?BWHERE Jimmy, did you happen to see Jeeves in the dining room?
+JSAY2
+
+JWHERE
+I was in the hall.
+
+JPROVE?
+* PROVE
+Ask Charles because he saw me there.
+
+JSAY MURDER
+* Jimmy
+No, the room was empty!
+* Charles
+No, I don't think so.
+*
+Yes I did!
+
+JSAY2 MURDER
+* jimmy
+No, he was definitely in the kitchen.
+* Jeeves
+I'm pretty sure he wasn't in the dining room.
+*
+Yes, I saw him setting out the table. 
+
+
+// Charlotte
+
+ENT_DINING
+TALKTO_CLOT
+
+TALKTO_CLOT?
+*+ Talk to Charlotte?
+TALK_CLOT
+*
+
+
+TALK_CLOT?
+* Charlotte, WHEREU
+I was in the garden. SPROVE
+*?BPROVE Jeeves said he was in the dining room, setting the dinner table. Did you see him?
+SSAY
+
+SPROVE?
+* PROVE
+Ask Jeeves, he saw me through the window.
+
+SSAY MURDER
+* Charlotte
+No, that's a lie, Jeeves was in the kitchen.
+* Jeeves
+No, I think Jeeves was in the kitchen.
+*
+Of course!
+
+// charles
+
+ENT_DRAWING
+Charles is here, CNOWDOING. CGREET ENT_DRAWING1.
+
+CGREET<#
+\n
+* "Ah there you are inspector"
+* "Hello inspector"
+
+  , exclaims Charles
+
+
+ENT_DRAWING1
+*?!ENT_DRAWING1 , "I trust you'll be clearing up this awful matter quickly, it's been such a shock here"
+
+TALK_CHARLES?
+* Charles, WHEREU
+I was in here, CDOING. CPROVE
+*?JPROVE Was Jimmy in the hall?
+CSAY
+*- Do you own a gun?
+"I don't know what you're talking about."
+*- What kind of hunting do you do?
+"hunting, are you serious!"
+*- What's you're favouire colour?
+Green!
+*+! That's all for now
+"ok" MAIN
+
+   TALK_CHARLES
+
+
+CNOWDOING
+* smoking his pipe
+* reading a book
+* reading the paper
+
+CDOING
+* smoking my pipe
+* reading my book
+* playing solitaire
+* writing my new novel
+* listening to the gramophone
+
+CSAY MURDER
+* jimmy
+He was there earlier, but I'm not sure exactly.
+* Charles
+No, I didn't see him at all.
+*
+Yes indeed, I saw him there.
+
+CPROVE?
+* PROVE
+Jimmy came to see me, ask him.
+
+// jeeves
+
+TALK_JEEVES?
+* Jeeves, WHEREU
+I was in the dining room, preparing the dinner table. BPROVE
+*?SPROVE Did you see Charlotte doing the gardening?
+BSAY
+*?JWHERE Did you see Jimmy in the hall?
+BSAY2
+
+BPROVE?
+* PROVE
+BWHERE
+
+BWHERE
+Certainly sir, ask Charlotte, she saw me preparing the dinner table.
+
+BSAY MURDER
+* jeeves
+No, she's finished that some time before.
+* Charlotte
+She did do some gardening, but I think she'd finished by then.
+* 
+Yes, I distinctly remember seeing her through the window.
+
+BSAY2 MURDER
+* jimmy
+No, I can't recall seeing him.
+* Jeeves
+He wasn't in the hall, I remember that.
+*
+Yes, I did see him there actually.
+
+ENT_OUT
+"Have you sussed it yet inspector?", he asks.
+ACCUSE
+
+ACCUSE?
+Accuse,
+* Jimmy
+ARRESTJIMMY
+CHKJ
+* Charlotte
+ARRESTCLOT
+CHKS
+* Charles
+ARRESTCHARLES
+CHKC
+* Jeeves
+ARRESTJEEVES
+CHKB
+* You don't know yet!
+GOHALL
+
+BUL1
+"Right! Let's get
+
+BUL2
+Sergeant Bulwark rams open the front door with his full weight, and rushes in. You hear a muffled commotion and several crashes, followed by Bulwark dragging
+
+BUL3
+is unceremoniously bundled into the waiting black Mariah and the door slammed shut!
+
+ARRESTJIMMY
+BUL1 'im!", BUL2 Jimmy out by his pullover. Jimmy kicking and screaming, yelling, "I'll get you for this you pigs!" BUL3
+
+GRILLING
+hires the best lawyers in town and you're given a royal grilling in Court.
+
+FAVOUR
+The court finds in favour of
+
+WRONGJIMMY
+Turns out Jimmy isn't without resources. He GRILLING FAVOUR Jimmy on account of his cast iron alibi. DISGRACE
+
+ARRESTCLOT
+BUL1 'er!" BUL2 Charlotte out by her expensive dress across the mud in the most undignified manner. Shrieking at the top of her voice, you hear Charlotte scream, "Hands off me, you vile beasts!". She BUL3
+
+WRONGCLOT
+With poisonous vengeance, Charlotte GRILLING All the time, she stares at you with the most penetrating stare, almost willing you dead! FAVOUR Charlotte on account of her alibi. DISGRACE
+
+ARRESTJEEVES
+BUL1 'im!" BUL2 Jeeves out by his coattails, his polished shoes and starched white shirt splattered in mud. He looks livid with rage, yelling and shouting, you hear him say, "You think you can better me do you!". He BUL3
+
+WRONGJEEVES
+Turns out Jeeves isn't without connections, his valet buddies put monies up for his defence. He GRILLING FAVOUR Jeeves on account of his cast iron alibi. DISGRACE
+
+ARRESTCHARLES
+BUL1 'im!" BUL2 Charles out by his tweedy jacket lapels, he looks in a right state, losing his silk cravat in the mud, his face incandescent with rage and indignation he shouts, "You incompetent Neanderthal coppers! I'll have you whipped and rosted for this!". He BUL3
+
+WRONGCHARLES
+With his substantial wealth, resources and influence Charles defence is formidable. Instructing no less than Denton Hall and Savage, they prepare to, almost literally, rip you apart in court. Unfortunately, your case collapses within the first five minutes as Charles' cast iron alibi is unshakeable. DISGRACE
+
+
+DISGRACE
+\nYou are disgraced, you failed the case, arrested the wrong person. Your reputation is in tatters, and you're demoted from inspector to janitor. 
+
+
+CHKJ MURDER
+* jimmy
+WIN
+*
+WRONGJIMMY
+LOSE
+
+CHKS MURDER
+* charlotte
+WIN
+*
+WRONGCLOT
+LOSE
+
+CHKC MURDER
+* charles
+WIN
+*
+WRONGCHARLES
+LOSE
+
+CHKB MURDER
+* jeeves
+WIN
+*
+WRONGJEEVES
+LOSE
+
+WIN
+Well done! The murderer was indeed MURDER! ISBUTLER
+
+LOSE
+Sorry, wrong answer, the real murderer was MURDER. ISBUTLER
+
+ISBUTLER MURDER
+* jeeves
+Yes I know, the butler did it!
+
+

@@ -1,4 +1,7 @@
-// Strand Core library 1.0
+// Strand Core library
+
+CORE_VERSION
+1.0
 
 MAIN
 TICK
@@ -17,7 +20,7 @@ WHATSHERE STUFFHERE
 * them
 \nYou can see LAST.
 
-CMD?
+CMD?>
 *
 
 INITCORE
@@ -73,8 +76,6 @@ a thing
 You can't get that.
 * take it
 > get it
-* feel it
-BORING
 * move it
 MOVEIT
 * push it
@@ -93,12 +94,19 @@ HITIT
 > hit it
 * kick it
 > hit it
+* touch it
+> feel it
+* feel it
+FEELIT
 
 HITIT
 Trying to break things won't help.
 
 MOVEIT
 BORING
+
+FEELIT
+That won't help.
 
 XHERE
 \
@@ -137,6 +145,13 @@ INV
 Your score is
 > what is player score
 .
+* z
+WAIT
+* wait
+WAIT
+
+WAIT
+zzz...
 
 INCSCORE
 You scored a point!
@@ -151,7 +166,7 @@ feet
 * name
 foot
 * x it
-Your feet!
+Feet are size 9.
 * smell it
 Pooh!
 
@@ -191,11 +206,11 @@ NOWAY
 NOWAY
 
 PERSON@ THING
-* be it
-IT
 * kiss it
 MOLESTATION
 * feel it
+MOLESTATION
+* touch it
 MOLESTATION
 * rape it
 MOLESTATION
