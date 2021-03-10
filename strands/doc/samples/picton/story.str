@@ -6,7 +6,7 @@ TOP_BEGIN
 \nGame Over.
 
 GAME_FILES
-core.str map.str picton.str people.str
+core.str map.str picton.str
 
 GAME_TITLE
 Picton Murder Whodunnit

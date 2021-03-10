@@ -69,7 +69,7 @@ HALL@ MANOR
 the hall
 * x it
 You're in the hall. A large grandfather clock stands against one wall.
-Westwards is the study, east is the drawing room and further north leads through to the dining room. Going south leaves the building through the main entrance.
+Westwards is the study, east is the drawing room and further north leads through to the dining room. Going south takes you back out through the main entrance.
 * w
 GOSTUDY
 * go study
@@ -92,6 +92,16 @@ GOHALL
 You go into the hall.
 images/hall.jpg
 XHERE JVSTART
+
+CLOCK@ THING
+> put it in hall
+* name
+the grandfather clock
+* x it
+It's one of the many valulable antiques in the manor.
+* listen to it
+It's ticking!
+
 
 ///////////////////// study
 
@@ -138,11 +148,15 @@ DININGROOM@ MANOR
 * name
 the dining room
 * x it
-This is the dining room, you can see the garden through the north windows. Back south is the hall. 
+This is the dining room, you can see the garden through the north windows. West leads to the kitchen, but that's staff only. Back south is the hall. 
 * s
 GOHALL
 * go hall
 GOHALL
+* w
+TRYKITCHEN
+* go kitchen
+TRYKITCHEN
 
 GODININGROOM
 > put player in dining room
@@ -150,24 +164,20 @@ You go into the dining room.
 images/dining.jpg
 XHERE ENT_DINING
 
-//////////////////// Garden
-
-GARDEN@ OUTSIDE
+GARDEN@ THING
+> put it in dining room
 * name
 the garden
+* name
+window
+* name
+windows
 * x it
-You're outside in the garden.
-An exit south leads back into the house.
-* s
-GOKITCHEN
-* go kitchen
-GOKITCHEN
+Through the window you can see a fantastic garden.
 
-GOGARDEN
-> put player in garden
-You go into the garden.
-images/garden.jpg
-XHERE
+TRYKITCHEN
+"Just where do you think you're going Inspector!" Charlotte tell you, "there's nobody in the kitchen to question!"
+
 
 ////////////////// kitchen
 
@@ -181,10 +191,6 @@ There's a fridge up against the back wall. The east exit takes you back to the d
 GODININGROOM
 * go dining room
 GODININGROOM
-* n
-GOGARDEN
-* go garden
-GOGARDEN
 
 GOKITCHEN
 > put player in kitchen

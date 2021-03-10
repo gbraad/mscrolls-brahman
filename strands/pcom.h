@@ -1536,7 +1536,10 @@ struct ParseCommand: public ParseBase
             if (AT && AT != '\n')
             {
                 // more not expected
-                PERR1("extra text not expected", POS);
+                if (line)
+                {
+                    PERR1("extra text not expected", POS);
+                }
 
                 delete pn;
                 pn = 0;

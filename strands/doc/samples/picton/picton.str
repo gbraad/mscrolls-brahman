@@ -2,18 +2,17 @@
 STORY
 Major Stephenson has been shot dead in his study!
 
-You are the indomitable inspector Lance Picton, who gets the cases no one else can solve. Your rugged resolve and tenacious approach to detail consistently nail the guilty.
+You are the indomitable inspector Lance Picton, who gets the cases no one else can solve. Your tenacious approach to detail consistently nail the guilty.
 
 You've already figured out that exactly one member of the household is guilty. The Suspects are; Charles, Major Stephenson's brother and business partner, Charlotte the Major's wife, Jimmy the son or possibly Jeeves the family butler. 
 
 BEGIN
-\n\nYou arrive at the manor entrance where Sergeant Bulwark is currently posted.
-\n"'ello Inspector", he says in his usual acerbic manner, "We got a right one 'ere!"
-\n"We had that numpty detective Hazelden round earlier. He poked around, got nowhere, totally baffled!
-What a fool, he even suggested that the butler did it; does he think this is some kind of game!
-\nAnyway, we saw 'im off and called you in. I've had all the suspects stay right 'ere in the 'ouse for questioning."  GOODWORK
+\nYou arrive at the manor entrance where Sergeant Bulwark is currently posted.
+\n"'ello Inspector," he says in his usual acerbic manner, "We got a right one 'ere!
+\n"We had that numpty detective Hazelden round earlier. He poked around, got absolutely nowhere. What a fool, he even suggested that the butler did it; does he think this is some kind of game!
+\n"Anyway, we saw 'im off and called you in. I've had all the suspects stay right 'ere in the 'ouse for questioning."  GOODWORK
 "When you've rumbled it, come back 'ere 'an I'll nab 'im. Or her, that is!"
-\nWith that, the sergeant thumps on the door with his fist, which is opened rapidly by a flustered butler.
+\nWith that, the sergeant thumps his fist on the door, which flies open revealing a flustered butler.
 UPDATEMAP
 GOHALL
 MAIN
@@ -28,8 +27,7 @@ MURDER!
 * Jeeves
 
 GOODWORK?
-* "Good work Sergeant."
-
+* Good work Sergeant
 
 //////////////////// HALL
 
@@ -42,23 +40,39 @@ bookcase
 * x it
 There are a lot of books here.
 
+BOOK@ THING
+> put it on bookcase
+* name
+a book
+* name
+books
+* x it
+GETBOOK
+* get it
+GETBOOK
+
+GETBOOK&
+You pick up a book at random,
+* it's about fish-keeping.
+* it chronicles the rise and fall of the Roman Empire.
+* a fascinating treatise on fossils.
+* the 1898 sportsman almanac.
+
+   Not very relevant to the case though.
+
+
+
 //////////////////// Drawing room
 
-FEELIE@ THING
-* feel it
-It feels
-> what it feels
-.
-
-FIREPLACE@ FEELIE
+FIREPLACE@
 > put it in drawing room
-> set it feels hot
 * name
 fireplace
 * name
 fire
 * x it
 Like i said, it's blazing away!
+
 //////////////////// kitchen
 
 ///////////////////// ///////// PEOPLE
@@ -75,12 +89,16 @@ He's about 10 years old, wearing a maroon V-neck wool jumper and grey schoolboy 
 JIMCOPOUT
 * ask him for thing
 "No chance copper!"
+*= describe him
+> x it
+*+= talk to him
+TALK_JIMMY
 
 JIMCOPOUT
-* What's it to you copper!
-* I'm not answering that without my lawyer!
-* I'm not saying anything!
-* I have no comment!
+* "What's it to you copper!"
+* "I'm not answering that without my lawyer!"
+* "I'm not saying anything!"
+* "I have no comment!"
 
 JIMCLOTH@ THING
 > put it on jimmy
@@ -105,6 +123,10 @@ A woman in her early thirties and a good deal younger than the Major, she strike
 CLOTCOP
 * ask her for thing
 "I should say not inspector!"
+*= describe her
+> x it
+*+= talk to her
+TALK_CLOT
 
 CLOTCOP
 * "You're going to have to ask my husband about that!"
@@ -126,7 +148,7 @@ CHARLES@ PERSON
 Charles
 * x it
 Charles is the Major's brother and partner in their investments business. He'll now be worth a pretty penny, becoming the sole proprietor along with the manor house and its antiques. That certainly gives him a solid motive. You don't trust him; sat there in his pompous cravat and tweedy, shoulder patched, green shooting jacket. When did he last shoot anything anyway?
-*= see it
+*= describe him
 > x it
 * ask him about jeeves
 "He's been our butler for goodness know how long, not much else to say really. Don't you have a butler?"
@@ -165,8 +187,6 @@ He's dead!
 
 JEEVES@ PERSON
 > put him in hall
-* be it
-IT
 * name
 Jeeves
 * name
@@ -174,17 +194,19 @@ butler
 * label
 Jeeves the butler
 * x it
-Jeeves has been in the family for as long as anyone can remember. Softly spoken and impeccably dressed in kid gloves, black waistcoat, starched white dickey and bow tie. Standing as tall as he can, he looks at you with a haughty demeanour as if you're not worth his time, whilst at the same time acting obsequiously apologetic and toady. Surely he's beyond suspicion, not!
-*= see it
-> x it
+Jeeves has been in the family for as long as anyone can remember. Softly spoken and impeccably dressed in kid gloves, black waistcoat, starched white dickey and bow tie. Standing as tall as he can, he looks at you with a haughty demeanour as if you're not worth his time, whilst at the same time acting obsequiously apologetic and toady. Surely he's beyond suspicion!
 * ask him about jimmy
 "Master Jimmy is Mr Stephenson's son sir!" JVPAUSE
 * ask him about charles
-"He's in charge of everything now Sir!"
+"He's in charge of everything now Sir!" JVPAUSE
 * ask him about thing
 JEEVCOP
 * ask him for thing
 "That's not possible right now, Sir!"
+*= describe him
+> x it
+*+= talk to him
+TALK_JEEVES
 
 JEEVCOP
 "Sorry, I can't help you with that Sir!"
@@ -272,5 +294,322 @@ BULWARK@ PERSON
 Sergeant Sgt Bulwark
 * x it
 Built like a brick-house!
+
+//// PEOPLE
+
+OKBUT
+* I see, but
+* But
+* Ok, but
+
+PROVE
+* OKBUT can you prove that?
+* OKBUT how can you prove that?
+* OKBUT do you have anything to corroborate that?
+
+WHEREU
+* where were you at the time of the murder?
+* what were you doing when the murder took place?
+* do you have an alibi?
+
+THATSALL
+* That's all for now.
+* I have no more questions.
+
+// Jimmy
+
+ENT_STUDY
+\nJimmy is here, JIMDO. JIMGREET
+
+JIMDO
+* loitering
+
+JIMGREET<
+He says,
+* "You must be the inspector!"
+* "What do you want inspector?"
+* "Now what?"
+
+
+ENT_STUDY1
+*?!ENT_STUDY1 He says, "You must be the inspector!"
+
+TALK_JIMMY?
+* Jimmy, WHEREU
+JWHERE JPROVE
+*?CPROVE Did you see Charles in the drawing room?
+JSAY
+*?BWHERE Jimmy, did you happen to see Jeeves in the dining room?
+JSAY2
+*+! THATSALL
+JIMBYE MAIN
+
+  TALK_JIMMY
+
+JIMBYE
+* "\OK copper"
+
+JWHERE
+"I was in the hall."
+
+JPROVE?
+* PROVE
+"Ask Charles because he saw me there."
+
+JSAY MURDER
+* Jimmy
+"No, the room was empty!"
+* Charles
+"No, I don't think so."
+*
+"Yes I did!"
+
+JSAY2 MURDER
+* jimmy
+"No, he was definitely in the kitchen."
+* Jeeves
+"I'm pretty sure he wasn't in the dining room."
+*
+"Yes, I saw him setting out the table."
+
+
+// Charlotte
+
+ENT_DINING
+\nCharlotte is here, CLOTDO. CLOTGREET
+
+CLOTDO
+* arranging the flowers
+
+CLOTGREET<
+She says,
+* "Can I help you inspector?"
+* "More questions, inspector?"
+
+TALK_CLOT?
+* Charlotte, WHEREU
+I was in the garden. SPROVE
+*?BPROVE Jeeves said he was in the dining room, setting the dinner table. Did you see him?
+SSAY
+*+! THATSALL
+CLOTBYE MAIN
+
+   TALK_CLOT
+
+CLOTBYE
+* "Goodbye inspector."
+
+SPROVE?
+* PROVE
+"Ask Jeeves, he saw me through the window."
+
+SSAY MURDER
+* Charlotte
+"No, that's a lie, Jeeves was in the kitchen."
+* Jeeves
+"No, I think Jeeves was in the kitchen."
+*
+"Of course I did!"
+
+// charles
+
+ENT_DRAWING
+\nCharles is here, CHARDO. CGREET
+
+CGREET<
+\n
+* "Ah there you are inspector!" exclaims Charles, "I trust you'll be clearing up this awful matter quickly, it's been such a shock here."
+* "Hello inspector," he says.
+
+TALK_CHARLES?
+* Charles, WHEREU
+"I was in here, CDOING." CPROVE
+*?JPROVE Was Jimmy in the hall?
+CSAY
+*- Do you own a gun?
+"I don't know what you're talking about."
+*- What kind of hunting do you do?
+"hunting, are you serious!"
+*- What's you're favourite colour?
+Green!
+*+! THATSALL
+CHARBYE MAIN
+
+   TALK_CHARLES
+
+CHARBYE
+"Toodle pip!"
+
+CHARDO
+* smoking his pipe
+* reading a book
+* reading the paper
+
+CDOING
+* smoking my pipe
+* reading my book
+* playing solitaire
+* writing my new novel
+* listening to the gramophone
+
+CSAY MURDER
+* jimmy
+"He was there earlier, but I'm not sure exactly."
+* Charles
+"No, I didn't see him at all."
+*
+"Yes indeed, I saw him there."
+
+CPROVE?
+* PROVE
+"Jimmy came to see me, ask him."
+
+// jeeves
+
+TALK_JEEVES?
+* Jeeves, WHEREU
+"I was in the dining room, preparing the dinner table." BPROVE
+*?SPROVE Did you see Charlotte doing the gardening?
+BSAY
+*?JWHERE Did you see Jimmy in the hall?
+BSAY2
+*+! THATSALL
+JEEVESBYE MAIN
+
+   TALK_JEEVES
+
+JEEVESBYE
+"Very good Sir."
+
+BPROVE?
+* PROVE
+BWHERE
+
+BWHERE
+"Certainly sir, ask Charlotte, she saw me preparing the dinner table."
+
+BSAY MURDER
+* jeeves
+"No, she's finished that some time before."
+* Charlotte
+"She did do some gardening, but I think she'd finished by then."
+* 
+"Yes, I distinctly remember seeing her through the window."
+
+BSAY2 MURDER
+* jimmy
+"No, I can't recall seeing him."
+* Jeeves
+"He wasn't in the hall, I remember that."
+*
+"Yes, I did see him there actually."
+
+ENT_OUT
+"Shall I arrest someone, inspector?" he asks.
+ACCUSE
+
+ACCUSE?
+Arrest,
+* Jimmy
+ARRESTJIMMY
+CHKJ
+* Charlotte
+ARRESTCLOT
+CHKS
+* Charles
+ARRESTCHARLES
+CHKC
+* Jeeves
+ARRESTJEEVES
+CHKB
+* No one yet!
+GOHALL
+
+BUL1
+"Right! Let's get
+
+BUL2
+Sergeant Bulwark rams open the front door, and rushes in. You hear a muffled commotion and several crashes, followed by Bulwark dragging
+
+BUL3
+is unceremoniously bundled into the waiting black Mariah and the door slammed shut!
+
+ARRESTJIMMY
+BUL1 'im!" BUL2 Jimmy out by his pullover. Jimmy kicking and screaming, yelling, "I'll get you for this you pigs!" BUL3
+
+GRILLING
+hires the best lawyers in town and you're given a royal grilling in Court.
+
+FAVOUR
+The Jury find in favour of
+
+WRONGJIMMY
+Turns out Jimmy isn't without resources. He GRILLING FAVOUR Jimmy on account of his cast iron alibi. DISGRACE
+
+ARRESTCLOT
+BUL1 'er!" BUL2 Charlotte out pulling her expensive dress across the mud in the most undignified manner. Shrieking at the top of her voice, you hear Charlotte scream, "Hands off me, you vile beasts!". She BUL3
+
+WRONGCLOT
+With poisonous vengeance, Charlotte GRILLING All the time, she stares at you with the most penetrating stare, almost willing you dead! FAVOUR Charlotte on account of her alibi. DISGRACE
+
+ARRESTJEEVES
+BUL1 'im!" BUL2 Jeeves out by his coattails, his polished shoes and starched white shirt splattered in mud. He looks livid with rage, yelling and shouting, you hear him say, "You think you can better me do you!". He BUL3
+
+WRONGJEEVES
+Turns out Jeeves isn't without connections, his valet buddies put monies up for his defence. He GRILLING FAVOUR Jeeves on account of his cast iron alibi. DISGRACE
+
+ARRESTCHARLES
+BUL1 'im!" BUL2 Charles out by his tweedy jacket lapels, he looks in a right state, losing his silk cravat in the mud, his face incandescent with rage and indignation he shouts, "You incompetent Neanderthal coppers! I'll have you whipped and rosted for this!". He BUL3
+
+WRONGCHARLES
+With his substantial wealth, resources and influence Charles defence is formidable. Instructing no less than Denton Hall and Savage, they prepare to, almost literally, rip you apart in court. Unfortunately, your case collapses within the first five minutes as Charles' cast iron alibi is unshakeable. DISGRACE
+
+
+DISGRACE
+\nYou are disgraced, you failed the case, arrested the wrong person. Your reputation is in tatters, and you're demoted from inspector to janitor. 
+
+
+CHKJ MURDER
+* jimmy
+WIN
+*
+WRONGJIMMY
+LOSE
+
+CHKS MURDER
+* charlotte
+WIN
+*
+WRONGCLOT
+LOSE
+
+CHKC MURDER
+* charles
+WIN
+*
+WRONGCHARLES
+LOSE
+
+CHKB MURDER
+* jeeves
+WIN
+*
+WRONGJEEVES
+LOSE
+
+WIN
+Well done! The murderer was indeed MURDER! ISBUTLER
+TOP_BEGIN
+
+LOSE
+Sorry, wrong answer, the real murderer was MURDER. ISBUTLER 
+TOP_BEGIN
+
+ISBUTLER MURDER
+* jeeves
+Yes I know, the butler did it!
+
+
+
 
 
