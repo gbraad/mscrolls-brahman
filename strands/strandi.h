@@ -42,6 +42,7 @@
 #include "timeline.h"
 #include "cap.h"
 #include "logged.h"
+#include "version.h"
 
 #define GENSTATE_KEY  "_gen"
 
@@ -254,7 +255,7 @@ struct Strandi: public Traits
         LastCap              _lastCap;
 
         // last generator index selected
-        int                  _lastGen = 0;
+        //int                  _lastGen = 0;
         
         PronBinding*        _pronouns = 0;
 
@@ -825,6 +826,7 @@ struct Strandi: public Traits
         bool v = true;
         for (auto e : f._elts)
         {
+            if (!v) break;
             switch (e->_type)
             {
             case Flow::t_text:
@@ -873,7 +875,11 @@ struct Strandi: public Traits
                             exec(ei);
 
                             // retrieve manual break request from exec
-                            if (ei._break) v = false;
+                            if (ei._break)
+                            {
+                                v = false;
+                                //LOG1("command had break ", textify(c->_parse));
+                            }
 
                             clearBindings(c->_parse);
                             updateScope();
@@ -920,8 +926,6 @@ struct Strandi: public Traits
                             {
                                 v = run(t);
                             }
-                                
-                            if (!v) break;
                         }
                     }
                     else
@@ -1302,7 +1306,7 @@ struct Strandi: public Traits
 
             if (ch)
             {
-                LOG3(TAG "choice made ", (int)ch);
+                //LOG3(TAG "choice made ", (int)ch);
 
                 Choice& cc = c._choices[--ch];
                 Selector* s = cc._action;
@@ -1330,7 +1334,6 @@ struct Strandi: public Traits
                     // choices remember their last chosen choice text
                     // also to support sticky choices
                     setTermValue(c._t, cc._text);
-                
                     c._valid = run(s->_action);
                 }
             }
@@ -1401,17 +1404,26 @@ struct Strandi: public Traits
                             ei._internalOps = false; // prevent internal "put"
                             
                             accept = exec(ei);
-                            if (accept)
+
+                            if (ei._break)
                             {
-                                updateIt(ei);
-                        
-                                // and run any action after command
-                                c._valid = run(c._cmdChoice->_action);
+                                c._valid = false;
+                                //LOG1("parse command had break ", line);
                             }
                             else
                             {
-                                if (_errorNocando)
-                                    accept = run(_errorNocando);
+                                if (accept)
+                                {
+                                    updateIt(ei);
+                        
+                                    // and run any action after command
+                                    c._valid = run(c._cmdChoice->_action);
+                                }
+                                else
+                                {
+                                    if (_errorNocando)
+                                        accept = run(_errorNocando);
+                                }
                             }
                         }
                         else
@@ -1719,7 +1731,7 @@ struct Strandi: public Traits
         assert(cp);
 
         // ri is the raw index, not just those selected
-        _ctx->_lastGen = ri; 
+        //_ctx->_lastGen = ri; 
 
         // when we're not matching the select flow is part of the output
         if (!cp->_select)
@@ -2258,11 +2270,18 @@ struct Strandi: public Traits
             v = true;
             _runTick();
         }
+        else if (t->_name == TERM_VERSION)
+        {
+            v = true;
+            OUTP(var(VERSION " " BUILD_VER));
+        }
+        /*
         else if (t->_name == TERM_LASTGEN)
         {
             v = true;
             OUTP(var(_ctx->_lastGen));
         }
+        */
         return v;
     }
 
@@ -2334,6 +2353,8 @@ struct Strandi: public Traits
         {
             if (rt->_term == t)
             {
+                //LOG1("initiate break, returning to ", t->_name);
+                
                 // yes! initiate a manual return
                 // this will cause all callers to return
                 rt->_jmp = true; // indicate the jump point
@@ -2372,8 +2393,8 @@ struct Strandi: public Traits
 
             // emit what we have in case we are in a loop
             flush();
-
-            //DLOG1(_pcom._debug, "returned to term ", t->_name);
+            
+            //LOG1("manual break, returned to term ", t->_name);
 
             //loop back to term
         }
@@ -3792,7 +3813,11 @@ struct Strandi: public Traits
         _popExec();
 
         // record whether we hit a manual break
-        if (!v) ei._break = true;
+        if (!v)
+        {
+            ei._break = true;
+            //LOG1("reaction had break ", textify(ei._ps));
+        }
 
         if (ei._that) _ctx->popThat();
         if (ei._it) _ctx->popIt();

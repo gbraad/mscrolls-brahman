@@ -37,13 +37,18 @@
 
 #define BUILD_VER "(MSVC) " __DATE__ "/" __TIME__
 
+#elif defined(__EMSCRIPTEN__)
+
+#define BUILD_VER "(em) " __DATE__ 
+
 #elif defined(__GNUC__)
 
 #define BUILD_VER "(GCC) " __DATE__ "/" __TIME__
+
 #else
 // dummy otherwise
 #define BUILD_VER ""
 #endif
 
-#define VERSION "0.2"
+#define VERSION "1.0"
 

@@ -54,7 +54,8 @@
 #define TERM_NOSUCH "ERROR_NOSUCH"
 #define TERM_SYNTAX "ERROR_SYNTAX"
 #define TERM_SCOPE  "SCOPE_SEED"
-#define TERM_LASTGEN "LAST_GEN"
+//#define TERM_LASTGEN "LAST_GEN"
+#define TERM_VERSION "SYSTEM_VERSION"
 
 // special properties
 #define PROP_IN     "in"

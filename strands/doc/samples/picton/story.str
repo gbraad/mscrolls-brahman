@@ -1,6 +1,9 @@
 START
 INITCORE
 STORY
+GAME_DETAILS
+TOP_BEGIN
+\nGame Over.
 
 GAME_FILES
 core.str map.str picton.str people.str
@@ -10,6 +13,9 @@ Picton Murder Whodunnit
 
 GAME_AUTHOR
 Sia See
+
+GAME_VERSION
+1.0
 
 GAME_ORGANISATION
 Strand Games

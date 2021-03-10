@@ -1177,7 +1177,8 @@ struct ParseStrands: public ParseBase
         Term::intern(TERM_LAST);
         Term::intern(TERM_IT);
         Term::intern(TERM_THAT);
-        Term::intern(TERM_LASTGEN);
+        Term::intern(TERM_VERSION);
+        //Term::intern(TERM_LASTGEN);
         
         bool v = linkTerms();
 

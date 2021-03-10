@@ -1,4 +1,3 @@
-
 OKBUT
 * I see, but
 * But
@@ -111,7 +110,7 @@ CSAY
 "I don't know what you're talking about."
 *- What kind of hunting do you do?
 "hunting, are you serious!"
-*- What's you're favouire colour?
+*- What's you're favourite colour?
 Green!
 *+! That's all for now
 "ok" MAIN
@@ -177,11 +176,11 @@ He wasn't in the hall, I remember that.
 Yes, I did see him there actually.
 
 ENT_OUT
-"Have you sussed it yet inspector?", he asks.
+"Who shall I arrest inspector?", he asks.
 ACCUSE
 
 ACCUSE?
-Accuse,
+Arrest,
 * Jimmy
 ARRESTJIMMY
 CHKJ
@@ -194,7 +193,7 @@ CHKC
 * Jeeves
 ARRESTJEEVES
 CHKB
-* You don't know yet!
+* No one yet!
 GOHALL
 
 BUL1
@@ -271,9 +270,11 @@ LOSE
 
 WIN
 Well done! The murderer was indeed MURDER! ISBUTLER
+TOP_BEGIN
 
 LOSE
-Sorry, wrong answer, the real murderer was MURDER. ISBUTLER
+Sorry, wrong answer, the real murderer was MURDER. ISBUTLER 
+TOP_BEGIN
 
 ISBUTLER MURDER
 * jeeves

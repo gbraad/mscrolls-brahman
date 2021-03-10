@@ -1,12 +1,24 @@
 
-///////////////////////////////////////////////////////////
-
 STORY
 Major Stephenson has been shot dead in his study!
 
-You are the indomitable inspector Lance Picton. You take on the cases no one else can solve. Your rugged resolve and tenacious approach to detail consistently nail the guilty party.
+You are the indomitable inspector Lance Picton, who gets the cases no one else can solve. Your rugged resolve and tenacious approach to detail consistently nail the guilty.
 
-You've already figured out that exactly one member of the household is guilty. The Suspects are; Charles, Major Stephenson's brother and business partner, Charlotte the Major's wife, Jimmy the son or possibly Jeeves the family butler. BEGIN
+You've already figured out that exactly one member of the household is guilty. The Suspects are; Charles, Major Stephenson's brother and business partner, Charlotte the Major's wife, Jimmy the son or possibly Jeeves the family butler. 
+
+BEGIN
+\n\nYou arrive at the manor entrance where Sergeant Bulwark is currently posted.
+\n"'ello Inspector", he says in his usual acerbic manner, "We got a right one 'ere!"
+\n"We had that numpty detective Hazelden round earlier. He poked around, got nowhere, totally baffled!
+What a fool, he even suggested that the butler did it; does he think this is some kind of game!
+\nAnyway, we saw 'im off and called you in. I've had all the suspects stay right 'ere in the 'ouse for questioning."  GOODWORK
+"When you've rumbled it, come back 'ere 'an I'll nab 'im. Or her, that is!"
+\nWith that, the sergeant thumps on the door with his fist, which is opened rapidly by a flustered butler.
+UPDATEMAP
+GOHALL
+MAIN
+
+/////////////////////////
 
 // computer randomly picks murderer each game
 MURDER!
@@ -18,19 +30,6 @@ MURDER!
 GOODWORK?
 * "Good work Sergeant."
 
-BEGIN
-\n\nYou arrive at the manor entrance where Sergeant Bulwark is currently posted.
-\n"'ello Inspector", he says in his usual acerbic manner, "We got a right one 'ere!"
-\n"We had that numpty detective Hazelden round earlier. He poked around, got nowhere, totally baffled!
-What a fool, he even suggested that the butler did it; does he think this is some kind of game!
-\nAnyway, we saw 'im off and called you in. I've had all the suspects stay right 'ere in the 'ouse for questioning."  GOODWORK
-"When you've rumbled it, come back 'ere 'an I'll nab 'im. Or her, that is!"
-\nWith that, the sergeant thumps on the door with his fist, which is opened rapily by a flustered butler.
-UPDATEMAP
-GOHALL
-MAIN
-
-/////////////////////////
 
 //////////////////// HALL
 
@@ -132,7 +131,7 @@ Charles is the Major's brother and partner in their investments business. He'll 
 * ask him about jeeves
 "He's been our butler for goodness know how long, not much else to say really. Don't you have a butler?"
 * ask him about major
-"He was my dear brother and businss parter, such a trajic loss."
+"He was my dear brother and business partner, such a tragic loss."
 * ask him about thing
 CHARLESCOPOUT
 * ask him for thing
@@ -270,8 +269,8 @@ JVHERE
 BULWARK@ PERSON
 > put him in entrance
 * name
-Sergeant sgt Bulwark
+Sergeant Sgt Bulwark
 * x it
-Built like a brickhouse!
+Built like a brick-house!
 
 
