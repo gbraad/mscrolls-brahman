@@ -64,6 +64,9 @@ int32_t Play(char *user_input, int32_t undo)  /* @!@ */
   static resultStruct arec_result;
   static resultStruct prologue_result;
   static resultStruct verb_def_result;
+  resultStruct unbound_result;   /* for unbound subjects */  /* @!@ */
+  attrInfo     *attributes = NULL;  /* @!@ */
+  int          index = 0;  /* @!@ */
   int32_t             i = 0;
 
   /* 17dec2016: added nr_of_subjects because introducing the parser  */
@@ -405,10 +408,40 @@ int32_t Play(char *user_input, int32_t undo)  /* @!@ */
           PrintNotFound(&(parsed_input.specifier));
           break;
 
-        case SUBJECT_ERROR:
-          PrintNotFound(&(parsed_input.subject[translate_result.value]));
-          break;
-      } /* switch translate_result */
+          case SUBJECT_ERROR:  /* @!@ */
+            /* check for an unbound subject. they may have entered a  */
+            /* a sentence like "get some rest" or "hit the road". In  */
+            /* such a case there will be no matching object.          */
+            /* Conditions to process unbound subject:                 */
+            /*   - the user input may only have 1 subject             */
+            /*   - the subject must be a single noun, no adjectives   */
+            /*   - still to decide whether a specifier may be present */
+            /*      => o_unbound checks for empty specifier           */
+
+            if (nr_of_subjects == 1 && parsed_input.subject[0].part1.nr_of_adjectives == 0) {
+              /* check for unbound subject                              */
+              /* load the unbound noun in attribute o_unbound.r_unbound */
+              if (!GetAttributeInfo(UNBOUND_ATTR, UNBOUND, &attributes, &index)) {
+                /* do nothing */
+                break;
+              }
+
+              /* no store the noun value in the attribute */
+              attributes[index].type  = WORD_ID;
+              attributes[index].value = parsed_input.subject[0].part1.noun;
+
+              /* now call trigger o_unbound.t_unbound */
+              unbound_result = XeqTrigger(UNBOUND, T_UNBOUND, &action_rec, 0);
+              /* must return AGREE or DISAGREE, no_match is not an option */
+              if (unbound_result.tag == AGREE) {
+                break;
+              }
+            }
+
+            /* no unbound subject, print "You cannot see ..." message */
+            PrintNotFound(&(parsed_input.subject[translate_result.value]));
+            break;
+        } /* switch translate_result */
       subject_index--;
     } while (subject_index >= 0);
   } /* if (parse_result == OK)*/

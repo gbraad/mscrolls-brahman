@@ -64,7 +64,7 @@ const char *ENG_errors[] = {
   "initialization error (034): ReadSysDescr(): error reading",
   "initialization error (035): ReadContData(): error reading",
   "initialization error (036): load(): error reading",
-  "\n\nThis interpreter version 2.5 needs compiler version 2.5 stories",
+  "\n\nThis interpreter version 2.6 needs compiler version 2.6 stories", /* @!@ */
   "\nThis story was compiled with XVAN compiler version",
   "Hit a key...",
   "initialization error (040): error opening file:",

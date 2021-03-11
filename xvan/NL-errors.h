@@ -64,7 +64,7 @@ const char *NL_errors[] = {
   "initialization error (034): ReadSysDescr(): fout bij het lezen van",
   "initialization error (035): ReadContData(): fout bij het lezen van",
   "initialization error (036): load(): fout bij het lezen van",
-  "\n\nVersie 2.5 van de interpreter kan alleen bestanden van compiler versie 2.5 lezen.",
+  "\n\nVersie 2.6 van de interpreter kan alleen bestanden van compiler versie 2.6 lezen.", /* @!@ */
   "\nDit bestand is gecompileerd met versie",
   "Druk een willekeurige toets...",
   "initialization error (040): fout bij het openen van bestand:",

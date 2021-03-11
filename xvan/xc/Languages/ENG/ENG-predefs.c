@@ -70,7 +70,7 @@ int32_t ENG_PreDefs(void)
   /* defined is not changed and that these are the first       */
   /* common trigger definitions.                               */
 
-  int32_t id = NO_ID;
+  int32_t id         = NO_ID;
 
   if (!GetDescrId("sys", &id, COMMON_DESCRS, 1))
     return(ERROR);
@@ -96,7 +96,14 @@ int32_t ENG_PreDefs(void)
   if (!GetObjectId("it", &id, 0, -1))
     return(ERROR);
 
+  /* predefine unbound */  /* @!@ */
+  if (!GetObjectId("unbound", &id, 0, -1))
+    return(ERROR);
+
   if (!GetAttrId("it", 0, IT, &id, WORD_ID, NONE, NO_ID, 0))
+    return(ERROR);
+
+  if (!GetAttrId("unbound", 0, UNBOUND, &id, WORD_ID, NONE, NO_ID, 0))  /* @!@ */
     return(ERROR);
 
   if (GetFlagId("lit", 0, &id, 0, COMMON_FLAGS, 1).tag == ERROR)
@@ -116,6 +123,10 @@ int32_t ENG_PreDefs(void)
 
   if (GetFlagId("json_mode", 0, &id, 0, PLAYER, 1).tag == ERROR)
     /* this is a local flag */
+    return(ERROR);
+
+  if (GetTriggerId("unbound", 0, &id, UNBOUND, 0).tag == ERROR)  /* @!@ */
+    /* this is a local trigger for the o_unbound object */
     return(ERROR);
 
   /* triggers t_entrance, t_exit and t_default can be   */

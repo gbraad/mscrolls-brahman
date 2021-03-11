@@ -263,7 +263,7 @@ int32_t NL_CheckIfKeyword(char *word_lwr)
     return(ADDCHOICE);
   if (strncmp(word_lwr, "speelmodus", MAX_WORD_LEN) == 0)
     return(PLAYMODE);
-  if (strncmp(word_lwr, "herstel", MAX_WORD_LEN) == 0)  /* @!@ */
+  if (strncmp(word_lwr, "herstel", MAX_WORD_LEN) == 0)
     return(UNDO);
   if (strncmp(word_lwr, "(", MAX_WORD_LEN) == 0)
     return(LEFT_PAR);

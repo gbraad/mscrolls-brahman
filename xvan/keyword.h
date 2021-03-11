@@ -76,9 +76,9 @@
                                   /* mapping objects                 */
 #define MAX_CHOICES             5 /* for choice and hybrid mode      */
 
-#define MAX_UNDO_STACK_SIZE  5000  /* @!@ */
+#define MAX_UNDO_STACK_SIZE  5000
 
-#define PLAYER_COMMENT         '*'  /* @!@ */
+#define PLAYER_COMMENT         '*'
 
 /***********************/
 /* keyword definitions */
@@ -217,7 +217,7 @@
 #define NEWDSYS         267
 #define ADDCHOICE       268
 #define PLAYMODE        269
-#define UNDO            270  /* @!@ */
+#define UNDO            270
 #define UPPER_BOUND_INT_ACT         400
 
 #define LOWER_BOUND_SPECIAL_CHAR    401
@@ -357,7 +357,7 @@
 #define NEXT_SENTENCE                816
 #define DYN_DSYS                     817 /* dynamic d_sys 10may2019 */
 #define PLURAL                       818 /* for plurality           */
-#define EOU                          819 /* End Of Undo */  /* @!@ */
+#define EOU                          819 /* End Of Undo */
 
 
 /***********************************************/
@@ -377,6 +377,7 @@
 #define PLAYER                   4503 /* Each story has a player     */
 #define NO_SUCH_THING            4504 /* For disambiguation          */
 #define IT                       4505 /* for it object               */
+#define UNBOUND                  4506 /* for unbound object          */  /* @!@ */
 #define FIRST_OBJECT_ID          4503 /* This value is not a mistake.*/
 #define LAST_OBJECT_ID           4799 /* 296 user definable objects  */
 #define FIRST_COMMON_FLAG_ID     4800
@@ -398,6 +399,7 @@
 #define CHOICE                  5403 /* and for t_choice            */  /* added on jul 17th 2019 for choice IF        */
 #define LAST_COMMON_TRIGGER_ID  5508 /* 100 common triggers.        */
 #define FIRST_LOCAL_TRIGGER_ID  5509
+#define T_UNBOUND               5509 /* system defined local trigg  */  /* @!@ */
 #define LAST_LOCAL_TRIGGER_ID   6198 /* 689 local triggers.         */
 #define FIRST_TIMER_ID          6199
 #define LAST_TIMER_ID           6298 /* 99 timers.                  */
@@ -410,6 +412,7 @@
 #define FIRST_COMMON_ATTR_ID    9100
 #define LAST_COMMON_ATTR_ID     10100 /* 100 common attributes.     */
 #define IT_ATTR                 11100
+#define UNBOUND_ATTR            11101 /* @!@ */
 #define FIRST_LOCAL_ATTR_ID     11100
 #define LAST_LOCAL_ATTR_ID      12100 /* 100 local attributes       */
 #define ACTION                  13100 /* denotes the current verb.  */

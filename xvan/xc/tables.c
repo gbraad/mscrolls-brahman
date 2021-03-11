@@ -529,7 +529,7 @@ int32_t InitVerbDir()
   /* vocabulary file will not have their own directory entry, */
   /* since there id is equal to that of their synonym(s).     */
 
-  /* 04jan2018: nowe that we allow verb redefinition, synonyms */
+  /* 04jan2018: now that we allow verb redefinition, synonyms  */
   /* may get their own entry in the verb_dir whichs means      */
   /* there can be more than nr_of_verbs-nr_of_syn_verb entries */
   /* To be on the safe side, we allocate nr_of_verbs entries   */
@@ -543,12 +543,12 @@ int32_t InitVerbDir()
     return(ERROR);
   }
 
-  /* 04jan2018: because we now allow redefinition of verbs, there  */
-  /* is a change that an entry in the verb_dir will not be written */
-  /* (when a verb and all of its synonyms get redefined). This     */
-  /* cause an error when the interpreter preloads verbs. Therefore */
-  /* we will now intitialize all entries in the verb_dir with      */
-  /* scope CURR_LOC_ONLY and offset -1.                            */
+  /* 04jan2018: because we now allow redefinition of verbs, there   */
+  /* is a change that an entry in the verb_dir will not be written  */
+  /* (when a verb and all of its synonyms get redefined). This will */
+  /* cause an error when the interpreter preloads verbs. Therefore  */
+  /* we will now intitialize all entries in the verb_dir with scope */
+  /* CURR_LOC_ONLY and offset -1.                                   */
   for (i=0; i<nr_of_verbs; i++) {
     verb_dir[i].scope  = CURR_LOC_ONLY;
     verb_dir[i].offset = -1;

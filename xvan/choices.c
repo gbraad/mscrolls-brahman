@@ -64,7 +64,7 @@ int32_t UpdateChoicesMenu(char *response_txt)
 
   /* we need dummy_rec to enforce an error when t_choice */
   /* ends up in XeqVerbDefault()                         */
-  dummy_rec.action1 = NO_ID;
+  InitUsrActionRec(&dummy_rec);   /* @!@ */
 
   /* determine the set of locations/objects in scope */
   /* unused items in list[] will have value NO_ID    */

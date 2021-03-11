@@ -70,7 +70,7 @@ int32_t ReadStoryInfo(info, filename, file_list)
   info->ui_textinput = 1;   /* true  */
   info->ui_compass   = 1;   /* true  */
   info->autolink     = 0;   /* false */
-  strcpy(info->compiler_version, "2.5");
+  strcpy(info->compiler_version, "2.6");
   info->xvan_language  = ENG;
   info->story_language = ENG;
   info->play_mode      = INTERPRETER_MODE;

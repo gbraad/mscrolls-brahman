@@ -93,7 +93,7 @@ int32_t LetsPlay(void)
   }
 
   /* Print interpreter opening message. */
-  PrintString("-- XVAN 2.5 interpreter --\n\n", 0);
+  PrintString("-- XVAN 2.6 interpreter --\n\n", 0);  /* @!@ */
   PrintString("(c) Marnix van den Bos\n\n\n\n", 0);
 
   /* %s doesn't work with PrintString() */

@@ -1043,6 +1043,7 @@ resultStruct Translate(parsedInput *parsed_input, int32_t index, usrActionRec *u
   int32_t      try_to_find = 0;
   int32_t      tries       = 3;  /* actor, subject and specifier */
   int32_t      winners     = 0;
+  int          unbound     = 0;  /* to denote a possible unbound subjet */  /* @!@ */
   resultStruct result      = {OK, NONE, OK};
   match        actor_hits;
   match        subject_hits;
@@ -1156,11 +1157,14 @@ resultStruct Translate(parsedInput *parsed_input, int32_t index, usrActionRec *u
               }
             }
             if (!try_to_find) {
-              /* this is not going to work, 0 hits remain */
-              result.tag = SUBJECT_ERROR;
+              /* this is not going to work, 0 hits remain          */
+              /* it may be an unbound subject, e.g. "hit the road" */  /* @!@ */
+              result.tag   = SUBJECT_ERROR;
               result.value = index;
-              free(subject_hits.matched_objs);
-              return(result);
+              unbound      = 1;  /* @!@ */
+              tries--; /* @!@ */
+              /*free(subject_hits.matched_objs);*/  /* @!@ */
+              /*return(result);*/  /* @!@ */
             }
           } /* if */
           else {
@@ -1396,6 +1400,6 @@ resultStruct Translate(parsedInput *parsed_input, int32_t index, usrActionRec *u
   free(subject_hits.matched_objs);
   free(specifier_hits.matched_objs);
 
-  result.tag = OK;
+  result.tag = (unbound == 1 ? SUBJECT_ERROR : OK);  /* @!@ */
   return(result);
 }

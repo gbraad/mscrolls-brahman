@@ -536,6 +536,15 @@ int32_t ReplaceItObjects(usrActionRec *action_rec)
     return(ERROR);
   }
 
+  /* check if we have an unbound subject */  /* @!@ */
+  if (attributes[index].type == WORD_ID) {
+    /* we don't want unbound objects for it, clear the it attribute */
+    attributes[index].type  = NO_TYPE;
+    attributes[index].value = NONE;
+    /*return(OK);*/
+  }
+
+
   if (attributes[index].value != NONE) {
     /* there is a value for 'it' */
     /* check if 'it' is a location or an object */
