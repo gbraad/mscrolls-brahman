@@ -1,6 +1,10 @@
 #pragma once
 
+
+#include "filter.h"
+
 #include "logged.h"
+#include "types.h"
 
 #define GETR(_p) (_p)[0]
 #define GETG(_p) (_p)[1]

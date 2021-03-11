@@ -91,7 +91,7 @@ GOHALL
 > put player in hall
 You go into the hall.
 images/hall.jpg
-XHERE JVSTART
+XHERE
 
 CLOCK@ THING
 > put it in hall
@@ -109,7 +109,7 @@ STUDY@ MANOR
 * name
 the study
 * x it
-This study was used my the major for his business affairs. All along the back wall stands an impressive bookcase.
+This study was used my the major for his business affairs. A huge desk dominates the centre and along the back wall stands an impressive bookcase, and on another, a row of hunting trophies.
 Back east is the hall.
 * e
 GOHALL
@@ -172,11 +172,13 @@ the garden
 window
 * name
 windows
+* name
+greenhouse
 * x it
-Through the window you can see a fantastic garden.
+Through the window you can see a fantastic garden, and a large greenhouse with a broken window.
 
 TRYKITCHEN
-"Just where do you think you're going Inspector!" Charlotte tell you, "there's nobody in the kitchen to question!"
+"Just where do you think you're going Inspector!" Charlotte tells you, "there's nobody in the kitchen to question!"
 
 
 ////////////////// kitchen

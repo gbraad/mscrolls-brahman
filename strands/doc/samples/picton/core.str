@@ -5,7 +5,7 @@ CORE_VERSION
 
 GAME_DETAILS
 \n\nGAME_TITLE by GAME_AUTHOR, GAME_VERSION.
-\nStrand SYSTEM_VERSION, Core CORE_VERSION.\n
+\nStrand SYSTEM_VERSION, Core CORE_VERSION.
 
 TOP_BEGIN
 *?!BEGIN BEGIN
@@ -135,6 +135,8 @@ You're looking good!
 INV
 * inv
 INV
+* help
+HELP
 * go west
 > w
 * go east
@@ -492,6 +494,8 @@ WHATSON
 WHATSALSOON
 * put this GETTABLE on it
 DOPUTON
+* sit on it
+Not a good idea.
 
 DOPUTON > put it on that
 * ok
@@ -510,9 +514,14 @@ WHATSALSOON > what is on it
 On IT you see, LAST.
 *
 
+/// HELP
 
+HELP
+This is interactive fiction. You can move around and interact with the world and with people. You can type commands like "get lamp" and "kill troll with axe" and also select options presented to you by selecting their number.
 
+When not in conversations, you can type a command instead of choosing an option. In other words, the options are optional and are presented merely as suggestions.
 
+Type \LOOK to refresh the room description.\n
 
 
 

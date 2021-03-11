@@ -547,6 +547,7 @@ struct ParseCommand: public ParseBase
             { "at", Word::pos_prep },
             { "for", Word::pos_prep },
             { "with", Word::pos_prep },
+            { "through", Word::pos_prep },
 
             { PRON_IT, Word::pos_pronoun },
             { PRON_THAT, Word::pos_pronoun },

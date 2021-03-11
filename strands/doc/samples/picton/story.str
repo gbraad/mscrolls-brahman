@@ -15,7 +15,7 @@ GAME_AUTHOR
 Sia See
 
 GAME_VERSION
-1.0
+1.01
 
 GAME_ORGANISATION
 Strand Games
@@ -30,7 +30,7 @@ MAP_BACKIMAGE
 images/map.png
 
 GAME_META
-:ui_ucanvas:false,ui_sidebar:true,autolink:false
+:ui_ucanvas:false,ui_sidebar:false,autolink:false
 
 GAME_CREDITS
 <h1>GAME_TITLE<br/><em>by GAME_ORGANISATION</em></h1>

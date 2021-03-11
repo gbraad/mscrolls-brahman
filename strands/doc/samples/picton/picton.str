@@ -7,14 +7,16 @@ You are the indomitable inspector Lance Picton, who gets the cases no one else c
 You've already figured out that exactly one member of the household is guilty. The Suspects are; Charles, Major Stephenson's brother and business partner, Charlotte the Major's wife, Jimmy the son or possibly Jeeves the family butler. 
 
 BEGIN
-\nYou arrive at the manor entrance where Sergeant Bulwark is currently posted.
+\nBeta version. Please send all feedback to sia@9ize.com Thanks!
+\n\nYou arrive at the manor entrance where Sergeant Bulwark is currently posted.
 \n"'ello Inspector," he says in his usual acerbic manner, "We got a right one 'ere!
 \n"We had that numpty detective Hazelden round earlier. He poked around, got absolutely nowhere. What a fool, he even suggested that the butler did it; does he think this is some kind of game!
 \n"Anyway, we saw 'im off and called you in. I've had all the suspects stay right 'ere in the 'ouse for questioning."  GOODWORK
 "When you've rumbled it, come back 'ere 'an I'll nab 'im. Or her, that is!"
 \nWith that, the sergeant thumps his fist on the door, which flies open revealing a flustered butler.
 UPDATEMAP
-GOHALL
+GOHALL JVSTART
+\n\n[To play the game, type commands or choose options, type \HELP for more info.]\n
 MAIN
 
 /////////////////////////
@@ -32,6 +34,13 @@ GOODWORK?
 //////////////////// HALL
 
 //////////////////// STUDY
+
+DESK@ SURFACE
+> put it in study
+* name
+the desk
+* x it
+A solidly built mahogany desk, the Major was sat here when he was murdered.
 
 BOOKCASE@ THING
 > put it in study
@@ -60,7 +69,18 @@ You pick up a book at random,
 
    Not very relevant to the case though.
 
-
+TROPHY@ THING
+> put it in study
+* name
+a hunting trophy
+* name
+trophies
+* name
+dog
+* name
+ruffy
+* x it
+Heads of innocent animals mounted in a row on the wall, presumably shot my the Major. One of them looks like a small dog.
 
 //////////////////// Drawing room
 
@@ -87,6 +107,10 @@ Master Jimmy
 He's about 10 years old, wearing a maroon V-neck wool jumper and grey schoolboy shorts. Despite born with a silver spoon in his mouth, he still manages to somehow look scruffy. Piecing, piggy blue eyes stare back at you fiercely. You get the impression he totally despises the police and you in particular. He's probably guilty as Hell! Unfortunately, you need more solid proof.
 * ask him about thing
 JIMCOPOUT
+* ask him about window
+"Stupid old greenhouse!"
+* ask him about dog
+"Yeah, the old man shot Ruffy, the dog, in a hunting accident."
 * ask him for thing
 "No chance copper!"
 *= describe him
@@ -121,6 +145,8 @@ Charlotte
 A woman in her early thirties and a good deal younger than the Major, she strikes you as attractive, devious and effortlessly manipulative. Wearing a stunning Worth couture magenta floral ensemble, she glides silently around the house, where you can be sure, she never misses a trick!
 * ask her about thing
 CLOTCOP
+* ask her about dog
+"Ruffy was the cutest puppy you've ever seen! Such a tragedy."
 * ask her for thing
 "I should say not inspector!"
 *= describe her
@@ -156,13 +182,15 @@ Charles is the Major's brother and partner in their investments business. He'll 
 "He was my dear brother and business partner, such a tragic loss."
 * ask him about thing
 CHARLESCOPOUT
+* ask him about dog
+"Stupid mutt ran in front of the gun; his own silly fault really!"
 * ask him for thing
 "Not the done thing, old boy!"
 *+= talk to him
 TALK_CHARLES
 
 CHARLESCOPOUT
-* I can't help you with that, at all!
+* "I can't help you with that, at all!"
 * "What a silly question! Shouldn't you be solving the case!"
 
 JACKET@ THING
@@ -187,6 +215,8 @@ He's dead!
 
 JEEVES@ PERSON
 > put him in hall
+* be it
+IT
 * name
 Jeeves
 * name
@@ -213,7 +243,7 @@ JEEVCOP
 
 
 JVSTART
-*?!JVSTART \n"Welcome to the Manor Sir, I am Jeeves the butler, at your disposal." JVMAIN^
+\n"Welcome to the Manor Sir, I am Jeeves the butler, at your disposal." JVMAIN^
 
 JVMAIN=
 *?JVPAUSE JVDELAY
@@ -323,6 +353,7 @@ ENT_STUDY
 
 JIMDO
 * loitering
+* looking suspicious
 
 JIMGREET<
 He says,
@@ -338,9 +369,17 @@ TALK_JIMMY?
 * Jimmy, WHEREU
 JWHERE JPROVE
 *?CPROVE Did you see Charles in the drawing room?
-JSAY
-*?BWHERE Jimmy, did you happen to see Jeeves in the dining room?
-JSAY2
+JSAYC
+*?BPROVE Did you happen to see Jeeves in the dining room?
+JSAYB
+*?SPROVE Do you know where Charlotte was?
+JSAYS
+*-?JPROVE What where you doing outside?
+"Hiding dead bodies of course. Why don't you go dig them up!"
+*-How did the Major die?
+"He was shot in the head at point blank range, obviously!"
+*-Where is the body?
+"Hazelden had it sent for autopsy, to find the cause of death."
 *+! THATSALL
 JIMBYE MAIN
 
@@ -350,13 +389,13 @@ JIMBYE
 * "\OK copper"
 
 JWHERE
-"I was in the hall."
+"I'd just come back home and was in the hall."
 
 JPROVE?
 * PROVE
 "Ask Charles because he saw me there."
 
-JSAY MURDER
+JSAYC MURDER
 * Jimmy
 "No, the room was empty!"
 * Charles
@@ -364,14 +403,21 @@ JSAY MURDER
 *
 "Yes I did!"
 
-JSAY2 MURDER
+JSAYB MURDER
 * jimmy
-"No, he was definitely in the kitchen."
+"Yes, but he came out of the study and then went to the dining room."
 * Jeeves
 "I'm pretty sure he wasn't in the dining room."
 *
 "Yes, I saw him setting out the table."
 
+JSAYS MURDER
+* jimmy
+"She was in the dining room."
+* charlotte
+"She came in from the garden at some point."
+*
+"No idea, but she often goes into the garden around that time."
 
 // Charlotte
 
@@ -380,6 +426,8 @@ ENT_DINING
 
 CLOTDO
 * arranging the flowers
+* looking out the window
+* composing her poetry
 
 CLOTGREET<
 She says,
@@ -390,7 +438,9 @@ TALK_CLOT?
 * Charlotte, WHEREU
 I was in the garden. SPROVE
 *?BPROVE Jeeves said he was in the dining room, setting the dinner table. Did you see him?
-SSAY
+SSAYB
+*?CPROVE Any idea where Charles was?
+"I'm not a detective, Inspector!"
 *+! THATSALL
 CLOTBYE MAIN
 
@@ -403,11 +453,11 @@ SPROVE?
 * PROVE
 "Ask Jeeves, he saw me through the window."
 
-SSAY MURDER
+SSAYB MURDER
 * Charlotte
-"No, that's a lie, Jeeves was in the kitchen."
+"No, that's a lie, Jeeves wasn't here at all."
 * Jeeves
-"No, I think Jeeves was in the kitchen."
+"No, but perhaps Jeeves was in the kitchen."
 *
 "Of course I did!"
 
@@ -425,13 +475,15 @@ TALK_CHARLES?
 * Charles, WHEREU
 "I was in here, CDOING." CPROVE
 *?JPROVE Was Jimmy in the hall?
-CSAY
+CSAYJ
+*?BPROVE Do you happen to know where Jeeves was?
+CSAYB
 *- Do you own a gun?
-"I don't know what you're talking about."
+"Of course, but they're all locked in the gun cupboard." GUN
+"Let's see; Jeeves of course, Charlotte has a spare, sometimes Jimmy, then there's myself." GUN1
+"Oh, don't you know. Hazelden had it sent to forensics."
 *- What kind of hunting do you do?
-"hunting, are you serious!"
-*- What's you're favourite colour?
-Green!
+"Grouse, pheasant and those despicable foxes!"
 *+! THATSALL
 CHARBYE MAIN
 
@@ -439,6 +491,12 @@ CHARBYE MAIN
 
 CHARBYE
 "Toodle pip!"
+
+GUN?
+* Who has keys for the gun cupboard?
+
+GUN1?
+* Where's the gun that shot the Major?
 
 CHARDO
 * smoking his pipe
@@ -452,13 +510,22 @@ CDOING
 * writing my new novel
 * listening to the gramophone
 
-CSAY MURDER
+CSAYJ MURDER
 * jimmy
 "He was there earlier, but I'm not sure exactly."
 * Charles
 "No, I didn't see him at all."
 *
 "Yes indeed, I saw him there."
+
+CSAYB MURDER
+* jeeves
+"I heard someone come out of the study."
+* charles
+"I think he came out of the study."
+*
+"No idea, old bean!"
+
 
 CPROVE?
 * PROVE
@@ -469,10 +536,12 @@ CPROVE?
 TALK_JEEVES?
 * Jeeves, WHEREU
 "I was in the dining room, preparing the dinner table." BPROVE
-*?SPROVE Did you see Charlotte doing the gardening?
-BSAY
-*?JWHERE Did you see Jimmy in the hall?
-BSAY2
+*?SPROVE Did you see Charlotte in the garden?
+BSAYS
+*?JPROVE Did you see Jimmy in the hall?
+BSAYJ
+*?CPROVE Do you know if Charles was in the drawing room?
+BSAYC
 *+! THATSALL
 JEEVESBYE MAIN
 
@@ -488,7 +557,7 @@ BWHERE
 BWHERE
 "Certainly sir, ask Charlotte, she saw me preparing the dinner table."
 
-BSAY MURDER
+BSAYS MURDER
 * jeeves
 "No, she's finished that some time before."
 * Charlotte
@@ -496,20 +565,28 @@ BSAY MURDER
 * 
 "Yes, I distinctly remember seeing her through the window."
 
-BSAY2 MURDER
+BSAYJ MURDER
 * jimmy
 "No, I can't recall seeing him."
 * Jeeves
 "He wasn't in the hall, I remember that."
 *
-"Yes, I did see him there actually."
+"Yes of course, I answered the door."
+
+BSAYC MURDER
+* charles
+"Sorry Sir, I can't recal."
+* jeeves
+"He was definitely there at some point, but not all the time."
+*
+"Sorry Sir, I've no idea."
 
 ENT_OUT
 "Shall I arrest someone, inspector?" he asks.
 ACCUSE
 
 ACCUSE?
-Arrest,
+\nArrest,
 * Jimmy
 ARRESTJIMMY
 CHKJ
