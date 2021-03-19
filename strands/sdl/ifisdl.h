@@ -39,8 +39,11 @@
 #include "logged.h"
 #include "strutils.h"
 #include "fd.h"
+#include "imtext.h"
 
 #define CHOICE_TEXTXX
+
+#define META_PREFIX "meta_"
 
 struct SDLHandler: public IFIHandler
 {
@@ -165,9 +168,36 @@ struct SDLHandler: public IFIHandler
 
     bool ifiTitleTextResponse(const string& s) override
     {
+        // in game title such as location 
         LOG3("got title ", s);
         _title = s;
         return true;
+    }
+
+    bool ifiMetaResponse(const string& js) override
+    {
+        LOG1("Got meta ", js);
+        for (JSONWalker jw(js); jw.nextKey(); jw.next())
+        {
+            bool isObject;
+            const char* st = jw.checkValue(isObject);
+            if (!st) break; // bad json
+
+            if (!isObject)
+            {
+                // throw all the meta data into the handler propset
+                var v = jw.collectValue(st);
+                if (v) setProp(string(META_PREFIX) + jw._key, v);
+            }
+        }
+        return true;
+    }
+
+    string getGameTitle()
+    {
+        // meta title of game for window header
+        var v = _props.find(META_PREFIX IFI_TITLE);
+        return v ? v.toString() : string();
     }
 
     /////
@@ -251,9 +281,6 @@ struct SDLHandler: public IFIHandler
             // clear any choices after input
             delete _choice; _choice = 0;
 
-            // take a line before processing command
-            //addText("\n");
-            
             _host->eval(js.start());
         }
     }
@@ -312,8 +339,8 @@ struct StrandCtx
 
     char            _guiInputBuf[256];
     bool            _guiInputReady = false;
-
-    History   _hist;
+    History         _hist;
+    ImText          _mainText;
 
     StrandCtx() : h(&host)
     {

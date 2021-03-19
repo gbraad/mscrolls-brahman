@@ -27,7 +27,6 @@
 
 // forward
 const char* gui_input_pump();
-void addText(const char* s);
 
 #include "ifisdl.h"
 
@@ -244,34 +243,6 @@ static void main_loop()
     SDL_GL_SwapWindow(g_Window);
 }
 
-
-static char textbuf[1024*4];
-static int tpos = 0;
-static int tmax = sizeof(textbuf)-1;
-static bool textChanged = false;
-
-void addText(const char* s, int l)
-{
-    if (!l) return;
-    
-    int p = tpos + l;
-    if (p > tmax)
-    {
-        int r = p - tmax;
-        memmove(textbuf, textbuf + r, tpos - r);
-        tpos -= r;
-    }
-    memcpy(textbuf + tpos, s, l);
-    tpos += l;
-    textbuf[tpos] = 0;
-    textChanged = true;
-}
-
-void addText(const char* s)
-{
-    addText(s, strlen(s));
-}
-
 static StrandCtx sctx;
 
 const char* gui_input_pump()
@@ -289,7 +260,7 @@ const char* gui_input_pump()
 
 static void textReceiver(const char* s)
 {
-    addText(s);
+    sctx._mainText.add(s);
 }
 
 void StrandInit()
@@ -406,7 +377,9 @@ void StrandWindow(bool* strand_open)
     ImVec2 spacing = style.ItemSpacing;
 
     // dont pass in show flag
-    ImGui::Begin("Strand " WEB_VERSION, 0, flags);
+    std::string tbar = sctx.h.getGameTitle();
+    if (tbar.empty()) tbar = "Strand";
+    ImGui::Begin(tbar.c_str(), 0, flags);
 
     if (ImGui::BeginMenuBar())
     {
@@ -505,12 +478,15 @@ void StrandWindow(bool* strand_open)
     {
         // main text box
         ImGui::BeginChild("Main", textBoxSz, true);
-        ImGui::TextWrapped("%s", textbuf);
-        if (textChanged)
+        
+        //ImGui::TextWrapped("%s", textbuf);
+        sctx._mainText.render();
+        
+        if (sctx._mainText._changed)
         {
             float ym = ImGui::GetScrollMaxY() + 1000; // XXX
             ImGui::SetScrollY(ym);
-            textChanged = false;
+            sctx._mainText._changed = false;
         }
         ImGui::EndChild();
     }
