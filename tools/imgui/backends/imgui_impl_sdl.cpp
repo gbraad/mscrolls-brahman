@@ -352,15 +352,11 @@ bool ImGui_ImplSDL2_Tick()
      * this will cause returns of FALSE
      */
 
-    // Setup time step (we don't use SDL_GetTicks() because it is using millisecond resolution)
     static Uint64 frequency = SDL_GetPerformanceFrequency();
     Uint64 current_time = SDL_GetPerformanceCounter();
-    //io.DeltaTime = g_Time > 0 ? (float)((double)(current_time - g_Time) / frequency) : (float)(1.0f / 60.0f);
-    int64_t dt = current_time - g_Time;
-    double dtf = ((double)dt)/frequency;
-    float dtff = dtf;
-    if (dtff <= 0) return false;
-    io.DeltaTime = dtff;
+    float dt = (float)((double)(current_time - g_Time) / frequency);
+    if (dt <= 0) return false;
+    io.DeltaTime = dt;
     g_Time = current_time;
     return true;
 }

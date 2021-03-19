@@ -7,6 +7,8 @@
 // It is possible to combine both code into a single source file that will compile properly on Desktop and using Emscripten.
 // See https://github.com/ocornut/imgui/pull/2492 as an example on how to do just that.
 
+#define WEB_VERSION  "1.0"
+
 #define HAVE_FREETYPETEST
 
 #include "imgui.h"
@@ -127,7 +129,7 @@ int main(int, char**)
     int window_flags = SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE;
     window_flags += SDL_WINDOW_ALLOW_HIGHDPI;
     
-    g_Window = SDL_CreateWindow("Strand",
+    g_Window = SDL_CreateWindow("Strand " WEB_VERSION,
                                 SDL_WINDOWPOS_CENTERED,
                                 SDL_WINDOWPOS_CENTERED,
                                 1280, 720,
@@ -157,27 +159,12 @@ int main(int, char**)
 
     // Setup Dear ImGui style
     ImGui::StyleColorsDark();
-    //ImGui::StyleColorsClassic();
 
     // Setup Platform/Renderer backends
     ImGui_ImplSDL2_InitForOpenGL(g_Window, g_GLContext);
     ImGui_ImplOpenGL3_Init(glsl_version);
 
-    // Load Fonts
-    // - If no fonts are loaded, dear imgui will use the default font. You can also load multiple fonts and use ImGui::PushFont()/PopFont() to select them.
-    // - AddFontFromFileTTF() will return the ImFont* so you can store it if you need to select the font among multiple.
-    // - If the file cannot be loaded, the function will return NULL. Please handle those errors in your application (e.g. use an assertion, or display an error and quit).
-    // - The fonts will be rasterized at a given size (w/ oversampling) and stored into a texture when calling ImFontAtlas::Build()/GetTexDataAsXXXX(), which ImGui_ImplXXXX_NewFrame below will call.
-    // - Read 'docs/FONTS.md' for more instructions and details.
-    // - Remember that in C/C++ if you want to include a backslash \ in a string literal you need to write a double backslash \\ !
-    // - Emscripten allows preloading a file or folder to be accessible at runtime. See Makefile for details.
-    //io.Fonts->AddFontDefault();
-#ifndef IMGUI_DISABLE_FILE_FUNCTIONS
-    //io.Fonts->AddFontFromFileTTF("fonts/Roboto-Regular.ttf", 18.0f);
-
-
     ImFontConfig config;
-
     float fsize = 24.0f;
 
     // these oversampling values are ignored by freetype atlas build
@@ -186,7 +173,6 @@ int main(int, char**)
     //config.GlyphExtraSpacing.x = 1.0f;
     io.Fonts->AddFontFromFileTTF("fonts/Roboto-Regular.ttf", fsize);
     io.Fonts->AddFontFromFileTTF("fonts/Merriweather-Light.ttf", fsize);
-#endif
 
     G.fibers[0].init_with_api(runfiber, 0);
     emscripten_set_main_loop(main_loop, 0, true);
@@ -200,11 +186,19 @@ static void main_loop()
     static bool show_demo_window = false;
     static ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
-    SDL_Event event;
-    while (SDL_PollEvent(&event))
+    for (;;)
     {
-        ImGui_ImplSDL2_ProcessEvent(&event);
-        // Capture events here, based on io.WantCaptureMouse and io.WantCaptureKeyboard
+        SDL_Event event;
+        while (SDL_PollEvent(&event))
+        {
+            ImGui_ImplSDL2_ProcessEvent(&event);
+            // Capture events here, based on io.WantCaptureMouse and io.WantCaptureKeyboard
+        }
+
+        bool v = ImGui_ImplSDL2_Tick();
+        if (v) break;
+
+        SDL_Delay(0);
     }
 
     static bool show_freetype = false;
@@ -351,30 +345,59 @@ static int InputCallback(ImGuiInputTextCallbackData* data)
 
 static void setF(const char* name)
 {
+    ImGuiID id;
+
+    if (name) id = ImGui::GetID(name);
+    else id = ImGui::GetItemID();
+    
     // https://github.com/ocornut/imgui/issues/1712
-    ImGui::SetFocusID(ImGui::GetID(name), ImGui::GetCurrentWindow()); 
+    ImGui::SetFocusID(id, ImGui::GetCurrentWindow()); 
     //ImGuiContext& g = *ImGui::GetCurrentContext();
     //g.NavDisableHighlight = false;
 }
 
+
+void PopKeyboard()
+{
+    SDL_StartTextInput();
+
+#if 0
+      if (SDL_HasScreenKeyboardSupport())
+      {
+          if (!SDL_IsTextInputActive() || !SDL_IsScreenKeyboardShown(sdlWindow)) {
+      /* User killed the keyboard (e.g. with Android Back button), let's grab it back. */
+              SDL_Log("Start text input\n");
+              SDL_StartTextInput();
+          }
+      }
+#endif
+}
+
 void StrandWindow(bool* strand_open)
 {
-    ImGuiWindowFlags window_flags = 0;
-    //if (no_titlebar)        window_flags |= ImGuiWindowFlags_NoTitleBar;
-    //if (no_scrollbar)       window_flags |= ImGuiWindowFlags_NoScrollbar;
-    window_flags |= ImGuiWindowFlags_MenuBar;
-    //window_flags |= ImGuiWindowFlags_NoMove;
-    window_flags |= ImGuiWindowFlags_NoCollapse;
-    //if (no_nav)             window_flags |= ImGuiWindowFlags_NoNav;
+    ImGuiWindowFlags flags = 0;
 
-    //const ImGuiViewport* main_viewport = ImGui::GetMainViewport();
-    //ImGui::SetNextWindowPos(ImVec2(main_viewport->WorkPos.x + 650, main_viewport->WorkPos.y + 20), ImGuiCond_FirstUseEver);
+    flags |= ImGuiWindowFlags_MenuBar;
+    flags |= ImGuiWindowFlags_NoCollapse;
+
+#if 0
+    // windowed    
+    ImGui::SetNextWindowSize(ImVec2(800, 720), ImGuiCond_FirstUseEver);
+#else
+    // full screen
+    bool use_work_area = true;
+    flags |= ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoSavedSettings;
+
+    //flags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoSavedSettings;
+
+
+    const ImGuiViewport* viewport = ImGui::GetMainViewport();
+    ImGui::SetNextWindowPos(use_work_area ? viewport->WorkPos : viewport->Pos);
+    ImGui::SetNextWindowSize(use_work_area ? viewport->WorkSize : viewport->Size);
+#endif    
 
     ImGuiIO& io = ImGui::GetIO();
-    //io.KeyRepeatDelay = 2.0f;
 
-    ImGui::SetNextWindowSize(ImVec2(800, 720), ImGuiCond_FirstUseEver);
-    
     ImGuiStyle& style = ImGui::GetStyle();
     style.ScrollbarSize = 18.0f;
     style.ChildRounding = 4.0f;
@@ -383,13 +406,11 @@ void StrandWindow(bool* strand_open)
     ImVec2 spacing = style.ItemSpacing;
 
     // dont pass in show flag
-    ImGui::Begin("Strand", 0, window_flags);
+    ImGui::Begin("Strand " WEB_VERSION, 0, flags);
 
-    //bogus(); return;
-    
-#if 0
     if (ImGui::BeginMenuBar())
     {
+#if 0
         if (ImGui::BeginMenu("File"))
         {
             if (ImGui::MenuItem("Open..", "Ctrl+O")) { /* Do stuff */ }
@@ -397,9 +418,38 @@ void StrandWindow(bool* strand_open)
             if (ImGui::MenuItem("Close", "Ctrl+W"))  { *strand_open = false; }
             ImGui::EndMenu();
         }
-        ImGui::EndMenuBar();
-    }
 #endif
+
+        if (ImGui::BeginMenu("Style"))
+        {
+            if (ImGui::MenuItem("Dark")) ImGui::StyleColorsDark();
+            if (ImGui::MenuItem("Light")) ImGui::StyleColorsLight();
+            if (ImGui::MenuItem("Classic")) ImGui::StyleColorsClassic();
+            ImGui::EndMenu();
+        }
+
+        if (ImGui::BeginMenu("Font"))
+        {
+            for (int n = 0; n < io.Fonts->Fonts.Size; n++)
+            {
+                ImFont* font = io.Fonts->Fonts[n];
+                ImGui::PushID((void*)font);
+                if (ImGui::MenuItem(font->GetDebugName())) io.FontDefault = font;
+                ImGui::PopID();
+            }
+            ImGui::EndMenu();
+        }
+        ImGui::EndMenuBar();
+
+        /*
+        if (ImGui::BeginMenu("Other"))
+        {
+            if (ImGui::MenuItem("Hit me!")) PopKeyboard();
+            ImGui::EndMenu();
+        }
+        */
+        
+    }
 
     // get client space
     //ImVec2 top = ImGui::GetCursorPos();
