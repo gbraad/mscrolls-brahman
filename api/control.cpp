@@ -70,6 +70,7 @@ struct ControlImpBase
 struct ImpIFI: public IFIHandler, public ControlImpBase
 {
     typedef std::string string;
+    typedef IFI::Pump Pump;
 
     IFI*        _ifi = 0;
     IFIHost     _ifiHost;
@@ -183,7 +184,7 @@ struct ImpIFI: public IFIHandler, public ControlImpBase
             }
             else
             {
-                LOG1("malformed object JSON ", js)
+                LOG1("malformed object JSON ", js);
             }
         }
     }
@@ -554,7 +555,7 @@ struct ImpEngine
 
         if (!data || !amt) return false;
 
-        LOG4("control, ", "updateWordsRequest")
+        LOG4("control, ", "updateWordsRequest");
 
         GrowString gs;
         _wordStat->buildWordsJSON(gs);

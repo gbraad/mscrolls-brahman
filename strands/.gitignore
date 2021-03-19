@@ -1,4 +1,3 @@
-Makefile
 Makefile.*
 *.vcxproj
 *.vcxproj.*
@@ -11,5 +10,4 @@ save
 *.bat
 b.sh
 /*.str
-
 

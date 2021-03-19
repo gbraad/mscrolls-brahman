@@ -92,10 +92,13 @@ public:
 
         // ASSUME not empty
         T* first() const { return (T*)_head._next; }
+        T* front() const { return (T*)_head._next; }        
         T* last() const { return (T*)_head._prev; }
 
         /// add to end of list
         void        add(DL* r) { r->insert(&_head); }
+        void        push_back(DL* r) { r->insert(&_head); }
+
         
         /// long-winded size measure.
         unsigned int size() const

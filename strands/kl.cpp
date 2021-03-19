@@ -100,7 +100,7 @@ struct InStream: public Stream
 };
 
 #ifdef IFI_BUILD
-struct Handler: public IFIHandler
+struct KLHandler: public IFIHandler
 {
     typedef IFIHandler  parentT;
     using Strandi = ST::Strandi;
@@ -114,66 +114,11 @@ struct Handler: public IFIHandler
     bool                _gameReady = false;
     string              _story;
     
-    Handler()
+    KLHandler()
     {
         ifih = this;
         _startDone = true;
     }
-
-    /*
-    void ifiBegin() override
-    {
-        _terms.clear();
-    }
-
-    void ifiEnd() override
-    {
-        if (!_terms.isEmpty())
-        {
-            // (ifi {(k1 v1) (k2 v2) .. })
-            ParseContext pctx(_kl);
-            Term ifi = Symbol("ifi").find(&pctx);
-            if (ifi)
-            {
-                Term t = List(*ifi, _terms);
-                Term v = _kl->eval(t, _kl->_env, EVALOPT_NOEVALARGS);
-            }
-        }
-    }
-    */
-
-    /*
-    void ifiKey(const string& key, const var& v) override
-    {
-        // hook the key handler directly
-
-        assert(_kl);
-        
-        bool r = false;
-
-        if (key == IFI_CONFIGDIR)
-        {
-            _kl->_loadFilePrefix = v.toString();
-        }
-        else if (key == IFI_COMMAND) r = ifiCommand(v.toString());
-        else if (key == IFI_SAVEDATA)
-        {
-            // request save
-            handleFunction(*_kl, key.c_str());
-            r = true;
-        }
-                 
-        if (!r)
-        {
-            //LOG3("ifiKey (", key << " " << v << ")");
-            ParseContext pctx(_kl);
-            Tree::iterator it(_terms);
-            it.toSup();
-            LValue lv(it);
-            lv = List(*Symbol(key.c_str()).intern(&pctx), *KL::varToTerm(v));
-        }
-    }
-    */
 
     ST::Capture* evalKL(const string& buf, ST::Capture* args)
     {
@@ -232,7 +177,7 @@ struct Handler: public IFIHandler
 
         CapStdStream tout;
         StdStream* old = _kl->setOutput(&tout);
-        _kl->loadString(buf.c_str(), _kl->_env);
+        _kl->loadString(buf.c_str(), _kl->_env); // eval!
         _kl->setOutput(old);
         r->add(tout._buf); // ignore if empty
 
@@ -304,7 +249,7 @@ struct Handler: public IFIHandler
                     //si.setdebug(debug);
                     
                     using namespace std::placeholders;
-                    _strandi.setEvaluator(std::bind(&Handler::evalKL, this, _1, _2));
+                    _strandi.setEvaluator(std::bind(&KLHandler::evalKL, this, _1, _2));
 
                     addKLSymbols(ST::Term::_allTerms);
 
@@ -486,6 +431,8 @@ struct Handler: public IFIHandler
                 LOG1(TAG "cannot start ", _story);
             }
         }
+
+        LOG2(TAG "game finished ", _story);
         
         return true;
     }
@@ -497,9 +444,22 @@ struct Handler: public IFIHandler
     
 };
 
-IFI* IFI::create()
+struct KLClient: public IFIClient
 {
-    ifi = new IFIClient();
+    void coopWork() override;
+};
+
+IFI* IFI::create(Pump* p)
+{
+    ifi = new KLClient();
+
+    if (p)
+    {
+        // if we want to run in coop mode
+        ifi->_coop = true;
+        ifi->_pump = *p;
+    }
+
     return ifi;
 }
 
@@ -525,7 +485,7 @@ static void banner()
     // otherwise we emit text too early
 #ifndef IFI_BUILD
     OStream::putstring("\nKL Version " VERSION ", " BUILD_VER "\n");
-    OStream::putstring("Copyright © Strand Games, 2016-20\n\n");
+    OStream::putstring("Copyright © Strand Games, 2016-21\n\n");
 #endif
 }
 
@@ -538,34 +498,9 @@ static void prompt(KL& kl)
 #endif        
 }
 
-static void interactive(KL& kl)
-{
-    // drop into interactive 
-
-    for (;;)
-    {
-        prompt(kl);
-
-#ifdef IFI_BUILD
-        const char* r = ifi->getRequest();
-        if (!r) break; // shutdown
-        ifih->handle(r);
-#else
-        
-        SBuf sb;
-        if (!kl._in->getline(sb)) break; // EOF or shutdown
-        const char* line = sb;
-            
-        if (!*line) continue; // blank line
-        if (!strcmp(line, "q")) break;
-        handleCommand(kl, line);
-#endif
-    }
-}
-
 struct KLI
 {
-    Handler     _ifiHandler;
+    KLHandler   _ifiHandler;
     KL          _kl;
     InStream    _ins;
     OStream     _outs;
@@ -585,6 +520,49 @@ struct KLI
         if (c) _outs.put(c);
         else _outs.flush();
     }
+};
+
+
+static bool interactive(KLI& kli)
+{
+    // drop into interactive 
+
+    bool more = true;
+    
+    if (!ifi->_coop) prompt(kli._kl);
+
+#ifdef IFI_BUILD
+    const char* r = ifi->getRequest();
+    if (r)
+    {
+        LOG3("KL interative, request: ", r);
+        kli._ifiHandler.handle(r);
+    }
+    else more = false; // shutdown
+#else
+        
+    SBuf sb;
+    if (!kli._kl._in->getline(sb))
+    {
+        more = false; // EOF or shutdown
+    }
+    else
+    {
+        const char* line = sb;
+        if (*line) handleCommand(kli._kl, line);
+    }
+#endif
+    return more;
+}
+
+static KLI kli;
+
+void KLClient::coopWork()
+{
+    //LOG3("KLCLient, coopwork", "");
+
+    // process all pending input
+    while (interactive(kli)) ;
 };
 
 int main(int argc, char** argv)
@@ -627,7 +605,6 @@ int main(int argc, char** argv)
         return -1;
     }
 
-    KLI kli;
     string initFile;
 
 #ifdef IFI_BUILD
@@ -680,11 +657,17 @@ int main(int argc, char** argv)
     
     //LOG2("Total Objects: ", Head::_count);
 
-    interactive(kli._kl);
+#ifdef IFI_BUILD
+    assert(ifi);
+
+    // in coop mode, do not drop into interactive
+    if (ifi->_coop) return 0;
+#endif   
+    
+    while (interactive(kli)) ;
 
     return 0;
 }
-
 
 
 

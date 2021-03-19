@@ -37,7 +37,6 @@
 #include <string>
 #include <deque>
 #include <mutex>
-#include <functional>
 #include "jsonwalker.h"
 #include "logged.h"
 #include "ifischema.h"
@@ -49,7 +48,6 @@ struct IFIHost
     
     typedef std::string string;
     typedef std::deque<char*>  Queue;
-    typedef IFIHandler::Pump Pump;
 
     IFI*        _ifi = 0;
     mutex       _queueLock;
@@ -59,7 +57,7 @@ struct IFIHost
     bool        _more;
     bool        _combineReplies = true;
 
-    Pump        _pump;
+    IFI::Pump   _pump;
 
     virtual ~IFIHost() {}
 
@@ -236,9 +234,10 @@ struct IFIHost
             // perform work if sync ok or timeout yield
             if (v >= 0) drainQueue();
 
-        } while(!v); // try again while timeout
+        } while (!v); // try again while timeout
 
-        return v > 0;
+        // true if synced, false=> can't sync/shutdown
+        return v > 0;  
     }
 
     bool sync()

@@ -43,6 +43,7 @@
 #include "cap.h"
 #include "logged.h"
 #include "version.h"
+#include "dl.h"
 
 #define GENSTATE_KEY  "_gen"
 
@@ -104,6 +105,7 @@ template<class T> struct Stacked
         ~Tmp() { _s.pop(); }
     };
 };
+
 
 struct Strandi: public Traits
 {
@@ -195,6 +197,9 @@ struct Strandi: public Traits
 
     jmp_buf     _env_top;
     int         _time = 0;
+
+    //Exec        _exec;
+
 
     struct PronBinding
     {
@@ -820,150 +825,188 @@ struct Strandi: public Traits
         
     };
 
+    void run(Flow::EltText* et)
+    {
+        OUTP(et->_text);
+    }
+
+    void run(Flow::EltCode* ec)
+    {
+        if (_eval)
+        {
+            Capture* args = _ctx->_lastCap.get();
+            Capture* cp = (_eval)(ec->_code, args);
+            if (cp)
+            {
+                outCap(*cp);
+                delete cp;
+            }
+        }
+    }
+
+    bool run(Flow::EltCommand* c)
+    {
+        bool v = true;
+        if (c->_parse)
+        {
+            ResInfo ri(c->_parse);
+            ri._artScope = true;
+                        
+            resolve(ri);
+            if (ri.resolved())
+            {
+                execInfo ei(c->_parse);
+
+                if ((_runtypemask & run_choice) == 0)
+                {
+                    // XX hacky way
+                    // we're in topflow emit result of
+                    // command so it can be tested.
+                    ei._output = true;
+                }
+                            
+                ei._err = false; // no built in errors
+                exec(ei);
+
+                // retrieve manual break request from exec
+                if (ei._break)
+                {
+                    v = false;
+                    //LOG1("command had break ", textify(c->_parse));
+                }
+
+                clearBindings(c->_parse);
+                updateScope();
+            }
+
+            if (!ri._valid)
+            {
+                ERR1("flow cannot resolve", textify(c->_parse));
+            }
+        }
+        else
+        {
+            ERR1("Command has no parse ", c->toString());
+        }
+        return v;
+    }
+
+    bool run1(Flow::EltTerm* et)
+    {
+        // handle immediate eval of term element
+        // return true if done, otherwise need to run it.
+        
+        bool done = true;
+        
+        Term* t = et->_term;
+        if (t)
+        {
+            if (t->isObject())
+            {
+                // objects are not "run".
+                // They just output themselves.
+                OUTP(t);
+            }
+            else
+            {
+                if (et->_flags & Flow::ft_background)
+                {
+                    // signal to run background flow, but do nothing at this point
+                    // do not initially mark as visited.
+                    // set (term TICK)
+                    _state.set(t->_name, TERM_TICK); // does not add if already
+                }
+                else if (et->_flags & Flow::ft_reset)
+                {
+                    resetTerm(t);
+                }
+                else
+                {
+                    // need to run term
+                    done = false;
+                }
+            }
+        }
+        else
+        {
+            ERR1("unbound term", et->_name);
+        }
+        return done;
+    }
+
+    bool run(Flow::EltTerm* et)
+    {
+        bool v = true;
+        if (!run1(et))
+        {
+            Term* t = et->_term;
+            v = run(t);
+        }
+        return v;
+    }
+
+    void run(Flow::EltMedia* em)
+    {
+        if (_runtypemask & run_media)
+        {
+            // when we run media we send a request
+#ifdef IFI_BUILD
+            switch (em->_mType)
+            {
+            case m_image:
+                emitPicture(*em);
+                break;
+            case m_audio:
+                emitSound(*em);
+                break;
+            case m_animation:
+                emitAnimation(*em);
+                break;
+            }
+#endif                        
+        }
+        else
+        {
+            // otherwise just emit the filename
+            OUTP(em->_filename);
+        }
+    }
+    
+    bool run(Flow::Elt* e)
+    {
+        // return false if we hit a manual return
+        bool v = true;
+        
+        switch (e->_type)
+        {
+        case Flow::t_text:
+            run((Flow::EltText*)e);
+            break;
+        case Flow::t_code:
+            run((Flow::EltCode*)e);
+            break;
+        case Flow::t_command:
+            v = run((Flow::EltCommand*)e);
+            break;
+        case Flow::t_term:
+            v = run((Flow::EltTerm*)e);
+            break;
+        case Flow::t_media:
+            run((Flow::EltMedia*)e);
+            break;
+        }
+        return v;
+    }
+
     bool run(Flow& f)
     {
         // return false if we hit a manual return
         bool v = true;
-        for (auto e : f._elts)
+        for (auto i = f._elts.begin(); i != f._elts.end(); ++i) 
         {
+            Flow::Elt* e = i;
+            v = run(e);
             if (!v) break;
-            switch (e->_type)
-            {
-            case Flow::t_text:
-                {
-                    Flow::EltText* et = (Flow::EltText*)e;
-                    OUTP(et->_text);
-                }
-                break;
-            case Flow::t_code:
-                {
-                    Flow::EltCode* ec = (Flow::EltCode*)e;
-                    if (_eval)
-                    {
-                        Capture* args = _ctx->_lastCap.get();
-                        Capture* cp = (_eval)(ec->_code, args);
-                        if (cp)
-                        {
-                            outCap(*cp);
-                            delete cp;
-                        }
-                    }
-                }
-                break;
-            case Flow::t_command:
-                {
-                    Flow::EltCommand* c = (Flow::EltCommand*)e;
-                    if (c->_parse)
-                    {
-                        ResInfo ri(c->_parse);
-                        ri._artScope = true;
-                        
-                        resolve(ri);
-                        if (ri.resolved())
-                        {
-                            execInfo ei(c->_parse);
-
-                            if ((_runtypemask & run_choice) == 0)
-                            {
-                                // XX hacky way
-                                // we're in topflow emit result of
-                                // command so it can be tested.
-                                ei._output = true;
-                            }
-                            
-                            ei._err = false; // no built in errors
-                            exec(ei);
-
-                            // retrieve manual break request from exec
-                            if (ei._break)
-                            {
-                                v = false;
-                                //LOG1("command had break ", textify(c->_parse));
-                            }
-
-                            clearBindings(c->_parse);
-                            updateScope();
-                        }
-
-                        if (!ri._valid)
-                        {
-                            ERR1("flow cannot resolve", textify(c->_parse));
-                        }
-                    }
-                    else
-                    {
-                        ERR1("Command has no parse ", c->toString());
-                    }
-                }
-                break;
-            case Flow::t_term:
-                {
-                    Flow::EltTerm* et = (Flow::EltTerm*)e;
-                    Term* t = et->_term;
-                    if (t)
-                    {
-                        if (t->isObject())
-                        {
-                            // objects are not "run".
-                            // They just output themselves.
-                            OUTP(t);
-                        }
-                        else
-                        {
-                            v = true;
-                            if (et->_flags & Flow::ft_background)
-                            {
-                                // signal to run background flow, but do nothing at this point
-                                // do not initially mark as visited.
-                                // set (term TICK)
-                                _state.set(t->_name, TERM_TICK); // does not add if already
-                            }
-                            else if (et->_flags & Flow::ft_reset)
-                            {
-                                resetTerm(t);
-                            }
-                            else
-                            {
-                                v = run(t);
-                            }
-                        }
-                    }
-                    else
-                    {
-                        ERR1("unbound term", et->_name);
-                    }
-                }
-                break;
-            case Flow::t_media:
-                {
-                    Flow::EltMedia* em = (Flow::EltMedia*)e;
-                    if (_runtypemask & run_media)
-                    {
-                        // when we run media we send a request
-
-#ifdef IFI_BUILD
-                        switch (em->_mType)
-                        {
-                        case m_image:
-                            emitPicture(*em);
-                            break;
-                        case m_audio:
-                            emitSound(*em);
-                            break;
-                        case m_animation:
-                            emitAnimation(*em);
-                            break;
-                        }
-#endif                        
-                    }
-                    else
-                    {
-                        // otherwise just emit the filename
-                        OUTP(em->_filename);
-                    }
-                }
-                break;
-            }
         }
         return v;
     }
@@ -1052,6 +1095,9 @@ struct Strandi: public Traits
         Selector*           _cmdChoice = 0;
         bool                _matching = false;
 
+        string              _line;  // input
+        int                 _ch = -1; // choice
+
         // invalid when a manual break occurs
         operator bool() const { return _valid; }
 
@@ -1082,7 +1128,7 @@ struct Strandi: public Traits
         }
     }
 
-#ifdef __EMSCRIPTEN__
+#if defined(__EMSCRIPTEN__) && !defined(IFI_BUILD)
     string _getline()
     {
         return em_getline();
@@ -1146,8 +1192,16 @@ struct Strandi: public Traits
             }
             else
             {
-                LOG1(TAG, "request shutdown");
-                longjmp(_env_top, 1);
+                if (ifi->_coop)
+                {
+                    assert(ifi->_pump);
+                    (ifi->_pump)();
+                }
+                else
+                {
+                    LOG1(TAG, "request shutdown");
+                    longjmp(_env_top, 1);
+                }
             }
         }
     }
@@ -1205,250 +1259,293 @@ struct Strandi: public Traits
         //LOG3(TAG "choice json ", gs.start());
         return res;
     }
-#endif    
-
-    void presentChoices(Choices& c)
+    
+    void presentChoicesIFI(Choices& c)
     {
-        // flatten choice text
-        for (auto& ci : c._choices)
+        GrowString gs;
+        bool v = buildChoiceJSON(gs, c);
+        
+        // without choices, emit any headflow into the main text
+        // otherwise it gets put into the choice box
+        if (c.isEmpty())
         {
-            if (ci._text.empty())
-                ci._text = textify(ci._select->_cap);
+            OUTP(c._headFlow);
         }
 
-        while (c)
+        // emit the current capture
+        flush();
+
+        if (v)
         {
-            int ch;
-            bool accept = false;
-            string line;
+            // emit the choices or request command line
+            ifi->emitResponse(gs.start());
+        }
 
-            do
-            {
-#ifdef IFI_BUILD
+        yield();
+    }
+#endif // IFI_BUILD    
 
-                // the headflow is put into the choice dialog
-                GrowString gs;
-                bool v = buildChoiceJSON(gs, c);
-
-                // without choices, emit any headflow into the main text
-                if (c.isEmpty())
-                {
-                    OUTP(c._headFlow);
-                }
-
-                // emit the current capture
-                flush();
-
-                if (v)
-                {
-                    // emit the choices or request command line
-                    ifi->emitResponse(gs.start());
-                }
-
-                yield();
-#else
+    void presentChoicesConsole(Choices& c)
+    {
                 // for console mode, we just emit head flow
-                // then emit the choices as text
-                OUTP(c._headFlow);
+        // then emit the choices as text
+        OUTP(c._headFlow);
 
-                // emit the current capture
-                flush();
+        // emit the current capture
+        flush();
 
-                _emit('\n');
+        _emit('\n');
                 
-                int cc = 0;
-                for (auto& ci : c._choices)
+        int cc = 0;
+        for (auto& ci : c._choices)
+        {
+            char buf[16];
+            sprintf(buf, "(%d) ", ++cc);
+            _emit(buf);
+            _emit(ci._text);
+            _emit('\n');
+        }
+    }
+    
+    bool validateInput(Choices& c)
+    {
+        // store choice in c.ch
+        // 0=> cmd
+        // >0 => choice
+        // <0 => invalid
+        
+        bool v = false;
+
+        int nchoices = c.size();
+
+        if (c._line.empty())
+        {
+            // blank line accepts single choice by default
+            // even if cmd available.
+            if (nchoices == 1)
+            {
+                c._ch = 1;  // choice = 1
+                v = true; // accept
+            }
+        }
+        else
+        {
+            // choices must be a number at the start
+            // otherwise assume command input
+            if (nchoices > 0 && u_isdigit(c._line[0]))
+            {
+                // prevent stoi overflow
+                int ch = 0;
+                if (c._line.length() < 10) ch = std::stoi(c._line);
+                
+                if (ch > 0 &&  ch <= (int)c.size())
                 {
-                    char buf[16];
-                    sprintf(buf, "(%d) ", ++cc);
-                    _emit(buf);
-                    _emit(ci._text);
-                    _emit('\n');
+                    v = true;
+                    c._ch = ch;
                 }
-#endif  // IFI_BUILD                
                 
-                line = toLower(_getline());
-                
-                // choices count from 1
-                ch = 0;
-
-                int nchoices = c.size();
-
-                if (!line.size())
+            }
+            else
+            {
+                if (c._cmdChoice)
                 {
-                    // blank line accepts single choice by default
-                    // even if cmd available.
-                    if (nchoices == 1)
+                    c._ch = 0; // command choice
+                    v = true;
+                }
+                    
+            }
+        }
+        return v;
+    }
+
+    void acceptInput(Choices& c)
+    {
+        c._line = toLower(_getline());
+    }
+
+    bool handleDebugCmd(Choices& c)
+    {
+        bool done = false;
+#ifdef LOGGING        
+        if (c._line[0] == '?')  // debugging
+        {
+            done = true;
+            _printScope();
+            _printResolutionScope();
+
+            const char* p = c._line.c_str() + 1; // skip "?"
+            string dcmd = firstWordOf(p);
+
+            if (dcmd.size())
+            {
+                bool any = dcmd == "?";
+                        
+                // special case to examine reactions
+                int cc = 0;
+                for (auto& r : _ctx->_reactions)
+                {
+                    assert(r._reactor);
+                    const string& host = r._s->_host->_name;
+                    if (any || equalsIgnoreCase(dcmd, host))
                     {
-                        accept = true;
-                        ch = 1;
+                        bool aschoice = r._s->aschoice();
+                                
+                        _emit('\n');
+                        _emit(++cc);
+                        _emit(") ");
+                        _emit(host);
+                        _emit(':');
+                        if (aschoice) _emit('=');
+                        _emit(' ');
+                        _emit(textify(r._reactor));
                     }
+                }
+                _emit('\n');
+            }
+        }
+#endif  // LOGGING
+        return done;
+    }
+
+    void requestNL()
+    {
+        // arrange for newline after choice and before subsequent
+        // text, ONLY if there is text!
+        _out->_cap._needNewline = true;
+    }
+
+    void handleChoice(Choices& c)
+    {
+        int ch = c._ch;
+        
+        assert(ch > 0 && ch <= c.size());
+        
+        LOG3(TAG "choice made ", ch);
+
+        Choice& cc = c._choices[--ch];
+        Selector* s = cc._action;
+                
+        // mark as chosen.
+        if (s->once()) _state.set(cc.id());
+                
+        // arrange for newline after choice and before subsequent
+        // text, ONLY if there is text!
+        requestNL();
+
+        if (cc._reactor)
+        {
+            // is a command choice
+            assert(cc._reactor->_reactor);
+            execInfo ei(cc._reactor->_reactor);
+            if (prepareExecInfo(ei) && execValidate(ei))
+            {
+                execReaction(ei, *cc._reactor);
+                updateIt(ei);
+            }
+        }
+        else
+        {
+            // choices remember their last chosen choice text
+            // also to support sticky choices
+            setTermValue(c._t, cc._text);
+            c._valid = run(s->_action);
+        }
+    }
+
+    bool handleCmd(Choices& c)
+    {
+        bool done = false;
+
+        LOG3(TAG "command ", c._line);
+
+        requestNL();
+        
+        // try to parse command and execute
+        pnode* ps = _pcom.parse(c._line);
+        if (ps)
+        {
+            // create bindings
+            // restrict input to resolution scope
+            ResInfo ri(ps, true);
+            resolve(ri);
+            if (ri.resolved())
+            {
+                execInfo ei(ps);
+
+                // perform resolution against reactor match
+                ei._resolving = true;
+                ei._internalOps = false; // prevent internal "put"
+                            
+                done = exec(ei);
+
+                if (ei._break)
+                {
+                    c._valid = false;
+                    //LOG1("parse command had break ", line);
                 }
                 else
                 {
-                    // choices must be a number at the start
-                    // otherwise assume command input
-                    if (nchoices > 0 && u_isdigit(line[0]))
+                    if (done)
                     {
-                        // prevent stoi overflow
-                        if (line.length() < 10) ch = std::stoi(line);
-                        if (ch > 0 && ch <= (int)c.size()) accept = true;
+                        updateIt(ei);
+                        
+                        // and run any action after command
+                        c._valid = run(c._cmdChoice->_action);
                     }
                     else
                     {
-                        if (c._cmdChoice) accept = true;
+                        if (_errorNocando)
+                        {
+                            c._valid = run(_errorNocando);
+                            done = true;
+                        }
                     }
-                }
-            } while (!accept);
-
-            // ch > 0 will be a choice
-            // ch == 0 is a cmd.
-
-            if (ch)
-            {
-                //LOG3(TAG "choice made ", (int)ch);
-
-                Choice& cc = c._choices[--ch];
-                Selector* s = cc._action;
-                
-                // mark as chosen.
-                if (s->once()) _state.set(cc.id());
-                
-                // arrange for newline after choice and before subsequent
-                // text, ONLY if there is text!
-                _out->_cap._needNewline = true;
-
-                if (cc._reactor)
-                {
-                    // is a command choice
-                    assert(cc._reactor->_reactor);
-                    execInfo ei(cc._reactor->_reactor);
-                    if (prepareExecInfo(ei) && execValidate(ei))
-                    {
-                        execReaction(ei, *cc._reactor);
-                        updateIt(ei);
-                    }
-                }
-                else
-                {
-                    // choices remember their last chosen choice text
-                    // also to support sticky choices
-                    setTermValue(c._t, cc._text);
-                    c._valid = run(s->_action);
                 }
             }
             else
             {
-                // handle command
-                accept = false;
-
-                assert(c._cmdChoice);
-
-                bool done = false;
-
-#ifdef LOGGING                
-                if (line[0] == '?')  // debugging
+                // no such object
+                if (_errorNosuch)
                 {
+                    c._valid = run(_errorNosuch);
                     done = true;
-                    _printScope();
-                    _printResolutionScope();
-
-                    const char* p = line.c_str() + 1; // skip "?"
-                    string dcmd = firstWordOf(p);
-
-                    if (dcmd.size())
-                    {
-                        bool any = dcmd == "?";
-                        
-                        // special case to examine reactions
-                        int cc = 0;
-                        for (auto& r : _ctx->_reactions)
-                        {
-                            assert(r._reactor);
-                            const string& host = r._s->_host->_name;
-                            if (any || equalsIgnoreCase(dcmd, host))
-                            {
-                                bool aschoice = r._s->aschoice();
-                                
-                                _emit('\n');
-                                _emit(++cc);
-                                _emit(") ");
-                                _emit(host);
-                                _emit(':');
-                                if (aschoice) _emit('=');
-                                _emit(' ');
-                                _emit(textify(r._reactor));
-                            }
-                        }
-                        _emit('\n');
-                    }
-                }
-#endif                
-
-                if (!done)
-                {
-                    // try to parse command and execute
-                    pnode* ps = _pcom.parse(line);
-                    if (ps)
-                    {
-                        // create bindings
-                        // restrict input to resolution scope
-                        ResInfo ri(ps, true);
-                        resolve(ri);
-                        if (ri.resolved())
-                        {
-                            execInfo ei(ps);
-
-                            // perform resolution against reactor match
-                            ei._resolving = true;
-                            ei._internalOps = false; // prevent internal "put"
-                            
-                            accept = exec(ei);
-
-                            if (ei._break)
-                            {
-                                c._valid = false;
-                                //LOG1("parse command had break ", line);
-                            }
-                            else
-                            {
-                                if (accept)
-                                {
-                                    updateIt(ei);
-                        
-                                    // and run any action after command
-                                    c._valid = run(c._cmdChoice->_action);
-                                }
-                                else
-                                {
-                                    if (_errorNocando)
-                                        accept = run(_errorNocando);
-                                }
-                            }
-                        }
-                        else
-                        {
-                            // no such object
-                            if (_errorNosuch)
-                                accept = run(_errorNosuch);
-                        }
-
-                        // will also delete bindings
-                        delete ps;
-                    }
-                    else
-                    {
-                        if (_errorSyntax)
-                            accept = run(_errorSyntax);
-                    }
-                        
                 }
             }
 
-            if (accept) break;
+            // will also delete bindings
+            delete ps;
         }
+        else
+        {
+            if (_errorSyntax)
+            {
+                c._valid = run(_errorSyntax);
+                done = true;
+            }
+        }
+        return done;
+    }
+    
+    void runChoices(Choices& c)
+    {
+        // ch > 0 will be a choiceP
+        // ch == 0 is a cmd.
 
-        updateScope();
+        if (c._ch > 0)
+        {
+            handleChoice(c);
+        }
+        else
+        {
+            // handle command
+            
+            assert(c._cmdChoice);
+
+            if (!handleDebugCmd(c))
+            {
+                handleCmd(c);
+            }
+        }
     }
 
     var _evalEnodeTerm(eNodeCtx* ctx, const char* name)
@@ -1744,49 +1841,18 @@ struct Strandi: public Traits
         return true;
     }
 
-    bool runSticky(Term* t)
-    {
-        // if we're sticky and stuck, run that.
-        
-        bool res = false;
-
-        if (t->sticky())
-        {
-            // stuck?
-            // topflow is not run when stuck
-            const var* v = getTermValue(t);
-            if (v)
-            {
-                // dont run headflow if stuck!
-                //run(t->_flow);
-                    
-                // return the sticky value
-                Capture cap;
-                cap.fromVar(*v);
-                outCap(cap);
-
-                res = true;
-            }
-        }
-        return res;
-    }
-    
-    bool runGenerator(Term* t)
+    bool runGenerator(Choices& c)
     {
         // return false for stack break
-        
-        Choices choices(t);
         
         // top flow is input for matching generators
         CapRef topflowcap;
 
-        assert(t->isGenerator());
-            
         // run top flow and keep result, this becomes
         // an input selector.
-        if (t->_topflow)
+        if (c._t->_topflow)
         {
-            choices._matching = true;
+            c._matching = true;
 
             // mask choices in topflow
             // prevent choices being run and instead
@@ -1794,7 +1860,7 @@ struct Strandi: public Traits
             // prevent media, emit as string instead.
             int m = ~run_choice & ~run_media;
             _pushcap(m);
-            choices._valid = run(t->_topflow);
+            c._valid = run(c._t->_topflow);
             
             // NB: result can be empty
             topflowcap = _popcap();
@@ -1804,9 +1870,9 @@ struct Strandi: public Traits
         LastCap::Tmp ltmp(_ctx->_lastCap, &topflowcap->_cap);
         
         bool stickpushed = false;
-        if (choices._valid)
+        if (c)
         {
-            if (t->sticky())
+            if (c._t->sticky())
             {
                 _pushcap();
                 stickpushed = true; // remember to pop
@@ -1814,38 +1880,38 @@ struct Strandi: public Traits
             
             // run head flow after any topflow
             // NB: code within headflow can access topflow via lastcap
-            choices._valid = run(t->_flow);
+            c._valid = run(c._t->_flow);
         }
 
-        if (choices._valid)
+        if (c)
         {
             // if we are matching:
             // one or more matches => pick random match
             // no matches => collect null tags and pick randomly
             // no matches & no null tags => no output.
 
-            if (choices._matching)
+            if (c._matching)
             {
                 // insist on matching terms being random (for now)
-                assert(t->_rtype == Term::t_random);
+                assert(c._t->_rtype == Term::t_random);
                 
                 // run all choice select flows and capture them
                 // for later matching
-                for (auto s : t->_selectors._selectors)
+                for (auto s : c._t->_selectors._selectors)
                 {
                     if (checkSelectorCond(s)) // ignore failed conditional
                     {
                         // when matching we must run all selector flows
                         // in order to make match.
                         _pushcap();
-                        choices._valid = run(s->_text);
+                        c._valid = run(s->_text);
                         Choice ch(_popcap(), s);
-                        if (!choices._valid) break;
-                        choices._choices.push_back(ch);
+                        if (!c) break;
+                        c._choices.push_back(ch);
                     }
                 }
 
-                if (choices._valid)
+                if (c)
                 {
                     assert(topflowcap);
 
@@ -1853,16 +1919,16 @@ struct Strandi: public Traits
                     {
                         // input flow yielded nothing
                         // do we have a null match choice?
-                        for (auto& ci : choices._choices)
+                        for (auto& ci : c._choices)
                             ci._selected = ci._nullmatch;
-                        runGeneratorAction(choices);
+                        runGeneratorAction(c);
                     }
                     else
                     {
                         // if we have a setmatch, then feed all in one
                         // ie a match for a whole set.
                         bool setmatch = false;
-                        for (auto& ci : choices._choices)
+                        for (auto& ci : c._choices)
                         {
                             ci._selected = ci._setmatch;
                             if (ci._selected) setmatch = true;
@@ -1872,7 +1938,7 @@ struct Strandi: public Traits
                         {
                             // already installed as lastcap
                             //LastCap::Tmp ltmp(_ctx->_lastCap, &topflowcap->_cap);
-                            runGeneratorAction(choices);
+                            runGeneratorAction(c);
                         }
                         else
                         {
@@ -1887,7 +1953,7 @@ struct Strandi: public Traits
 
                                 //LOG1("matching topflow elt ", e.toStringTyped());
                         
-                                for (auto& ci : choices._choices)
+                                for (auto& ci : c._choices)
                                 {
                                     ci._selected = false;
                                     if (!ci.specialMatch())
@@ -1899,8 +1965,8 @@ struct Strandi: public Traits
                     
                                 // run one of the matches choices OR
                                 // one of the null flow choices
-                                runGeneratorAction(choices);
-                                if (!choices._valid) break;
+                                runGeneratorAction(c);
+                                if (!c) break;
                             }
                         }
                     }
@@ -1909,7 +1975,7 @@ struct Strandi: public Traits
             else
             {
                 // not matching, so generating
-                for (auto s : t->_selectors._selectors)
+                for (auto s : c._t->_selectors._selectors)
                 {
                     // when automatically choosing we run the selector
                     // flow later
@@ -1917,33 +1983,33 @@ struct Strandi: public Traits
                     // mark as not selected.
                     Choice ch(s);
                     ch._selected = checkSelectorCond(s);
-                    choices._choices.emplace_back(ch);
+                    c._choices.emplace_back(ch);
                 }
-                runGeneratorAction(choices);
+                runGeneratorAction(c);
             }
         }
         
         if (stickpushed)
         {
-            assert(t->sticky());
+            assert(c._t->sticky());
             
             CapRef cs = _popcap();
 
-            if (choices._valid)
+            if (c)
             {
                 // save sticky
-                setTermValue(t, cs->_cap.toVar());
+                setTermValue(c._t, cs->_cap.toVar());
 
                 // dub onto base cap
                 outCap(cs->_cap);
             }
         }
 
-        bool res = choices._valid;
+        bool res = c;
 
         // NB: lastcap is still in scope for the postflow
         if (res)
-            res = run(t->_postflow);
+            res = run(c._t->_postflow);
 
         return res;
     }
@@ -2140,61 +2206,60 @@ struct Strandi: public Traits
                 }
             }
         }
-    }
-    
-
-    bool runChoice(Term* t)
-    {
-        // return false for stack break
-
-        assert(t->isChoice());
         
-        Choices choices(t);
+        // flatten choice text
+        for (auto& ci : c._choices)
+        {
+            if (ci._text.empty())
+                ci._text = textify(ci._select->_cap);
+        }
+    }
 
+    void runChoiceHead(Choices& c)
+    {
         // choice does not run the headflow (nor tail)
         // if there are no actual valid choices
         // TODO: can choices have topflow? what does this mean?
         
-        prepareChoices(choices);
-        
-        if (choices.present())
-        {
-            // run head flow ONCE we know we have choices
-            _pushcap();
-            choices._valid = run(t->_flow);  // collect manual break
-            CapRef ccap = _popcap();
-            if (choices) choices._headFlow = textify(ccap->_cap);
-        }
+        // run head flow ONCE we know we have choices
+        _pushcap();
+        c._valid = run(c._t->_flow);  // collect manual break
+        CapRef ccap = _popcap();
+        if (c) c._headFlow = textify(ccap->_cap);
+    }
 
-        if (choices.present())
+    void runChoice2(Choices& c)
+    {
+        // present input until accepted
+        for (;;)
         {
-            presentChoices(choices);
-            if (choices)
-            {
-                choices._valid = run(t->_postflow);
-            }
+            
+#ifdef IFI_BUILD
+                presentChoicesIFI(c);
+#else
+                presentChoicesConsole(c);
+#endif
+
+                acceptInput(c);
+                if (validateInput(c)) break;
+            
         }
+    }
+
+    bool runChoice3(Choices& c)
+    {
+        // return false for stack break
+        runChoices(c);
         
-        return choices;
+        updateScope();
+
+        if (c)
+        {
+            c._valid = run(c._t->_postflow);
+        }
+        return c;
     }
     
-    bool runselect(Term* t)
-    {
-        // run a term and selectors
-        // return false for stack break
-
-        bool res = true;
-
-        // if stuck, no postflow
-        if (!runSticky(t))
-        {
-            if (t->isGenerator()) res = runGenerator(t);
-            else if (t->isChoice()) res = runChoice(t);
-        }
-        
-        return res;
-    }
-
     struct RuntimeTermStack
     {
         Term*               _term;
@@ -2285,34 +2350,76 @@ struct Strandi: public Traits
         return v;
     }
 
+    bool _run1(Term* t)
+    {
+        // return true if done
+
+        // handle terms that can be evaluated immediately
+        // such as special terms and sticky
+        
+        bool done = t->isGenerator() && _runSpecial(t);
+        if (!done)
+        {
+            done = t->isChoice() && !(_runtypemask & run_choice);
+            if (done || t->sticky())
+            {
+                // we're sticky
+                // or a choice but not allowed to run
+                // if stuck, no postflow
+                const var* v = getTermValue(t);
+                if (v)
+                {
+                    // dont run headflow if stuck!
+                    // return the sticky value
+                    Capture cap;
+                    cap.fromVar(*v);
+                    outCap(cap);
+                    done = true;
+                }
+                else
+                {
+                    // sticky but not yet stuck, so not done yet
+                    if (t->sticky()) done = false;
+                }
+            }
+        }
+        return done;
+    }
+
+    bool _run2(Term* t)
+    {
+        // return false for break
+        bool v = true;
+
+        // run a term and selectors
+        // return false for stack break
+        Choices choices(t);
+        if (t->isGenerator())
+        {
+            v = runGenerator(choices);
+        }
+        else if (t->isChoice())
+        {
+            prepareChoices(choices);
+            if (choices.present())
+            {
+                runChoiceHead(choices);
+                if (choices.present())
+                {
+                    runChoice2(choices);
+                    v = runChoice3(choices);
+                }
+            }
+        }
+        return v;
+    }
+
     bool _run(Term* t)
     {
         // return false for break
-        
+
         bool v = true;
-        switch (t->_type)
-        {
-        case Term::t_generator:
-            {
-                if (!_runSpecial(t)) v = runselect(t);
-            }
-            break;
-        case Term::t_choice:
-            if (_runtypemask & run_choice)
-            {
-                v =  runselect(t);
-            }
-            else
-            {
-                // when not running choices (eg topflow),
-                // return last choice text
-                const var* v = getTermValue(t);
-                if (v) OUTP(v->toString());
-            }
-            break;
-        case Term::t_object:
-            break;
-        }
+        if (!_run1(t)) v = _run2(t);
         return v;
     }
 
@@ -2468,14 +2575,14 @@ struct Strandi: public Traits
         {
             // some are in interactive scope
             cliplist(l1, _ctx->_scope);
-            LOG3("restrict to ideal interactive: ", textify(l1));
+            LOG4("restrict to ideal interactive: ", textify(l1));
             
         }
         else if (partialList(l1, _ctx->_resolutionScope))
         {
             // some are directly in resolution scope
             cliplist(l1, _ctx->_resolutionScope);
-            LOG3("restrict to ideal resolution: ", textify(l1));
+            LOG4("restrict to ideal resolution: ", textify(l1));
         }
         else
         {
@@ -2792,7 +2899,7 @@ struct Strandi: public Traits
         assert(pn && pn->_type == nodeType::p_pronoun);
         const Word* w = pn->_word;
 
-        bool ok;
+        bool ok = false;
 
         // XX for now map him/her -> it. 
         if (w == _pcom._it || *w == PRON_HIM || *w == PRON_HER)
@@ -2886,7 +2993,7 @@ struct Strandi: public Traits
         {
             if (st)
             {
-                LOG3("Resolving scope: ", st << ", " << textify(b));
+                LOG4("Resolving scope: ", st << ", " << textify(b));
             }
         
             switch (st)
@@ -2940,7 +3047,7 @@ struct Strandi: public Traits
         {
             while (tail && !b.empty())
             {
-                LOG3("resolving from ", textify(b));
+                LOG4("resolving from ", textify(b));
 
                 Binding* u = tail->_binding;
                 if (u)
@@ -2961,7 +3068,7 @@ struct Strandi: public Traits
                 }
                 else b.clear();
 
-                LOG3("resolving to ", textify(b));
+                LOG4("resolving to ", textify(b));
                                     
                 tail = tail->_next;
             }
@@ -3528,7 +3635,7 @@ struct Strandi: public Traits
                 v = _state.setfn(t->_name, prop, iobj->_name);
             }
 
-            DLOG3(_pcom._debug, "exec PUT", *t, prop, *iobj << ": " << v);
+            LOG4("exec PUT ", *t << ' ' << prop << ' ' << *iobj << ": " << v);
         }
         else
         {
@@ -3583,18 +3690,18 @@ struct Strandi: public Traits
             if (negate)
             {
                 _state.clear(t->_name, ei._prep->_text, val);
-                LOG3("exec CLEAR ", *t << ' ' << *ei._prep << ' ' << val);
+                LOG4("exec CLEAR ", *t << ' ' << *ei._prep << ' ' << val);
             }
             else
             {
                 _state.set(t->_name, ei._prep->_text, val);
-                LOG3("exec SET ", *t << ' ' << *ei._prep << ' ' << val);
+                LOG4("exec SET ", *t << ' ' << *ei._prep << ' ' << val);
             }
         }
         else
         {
             if (_state.setfn(t->_name, ei._prep->_text, val))
-                LOG3("exec SET! ", *t << ' ' << *ei._prep << ' ' << val);
+                LOG4("exec SET! ", *t << ' ' << *ei._prep << ' ' << val);
         }
 
         return true;
@@ -3942,7 +4049,7 @@ struct Strandi: public Traits
                 // to effectively call its parent
                 if (reactionAlreadyExec(r))
                 {
-                    LOG3("Skipping exiting reaction ", textify(r._reactor));
+                    LOG4("Skipping exiting reaction ", textify(r._reactor));
                 }
                 else
                 {
@@ -3954,7 +4061,7 @@ struct Strandi: public Traits
 
         if (best)
         {
-            LOG3("matched reactor ", textify(best->_reactor) << " from " << best->_s->_host->_name);
+            LOG4("matched reactor ", textify(best->_reactor) << " from " << best->_s->_host->_name);
         }
         
         return best;
@@ -3987,7 +4094,7 @@ struct Strandi: public Traits
             auto s = rei._dobj->_scope;
             if (s)
             {
-                LOG3("resolve matching reactor, dobj scope ", s);
+                LOG4("resolve matching reactor, dobj scope ", s);
                 v = resolveScope(*ei._dobj, s);
             }
 
@@ -3996,7 +4103,7 @@ struct Strandi: public Traits
                 s = rei._iobj->_scope;
                 if (s)
                 {
-                    LOG3("resolve matching reactor, iobj scope ", s);
+                    LOG4("resolve matching reactor, iobj scope ", s);
                     v = resolveScope(*ei._iobj, s);
                 }
             }
@@ -4012,7 +4119,7 @@ struct Strandi: public Traits
 
         if (v) 
         {
-            LOG3("exec ", textify(ei._ps));
+            LOG4("exec ", textify(ei._ps));
             
             bool done = false;
 
@@ -4038,7 +4145,7 @@ struct Strandi: public Traits
                     v = execQuery(ei);
                     if (!v)
                     {
-                        LOG3("exec query failed ", textify(ei._ps));
+                        LOG4("exec query failed ", textify(ei._ps));
                     }
                 }
                 else done = false;
@@ -4245,8 +4352,9 @@ struct Strandi: public Traits
             if (t->isObject())
             {
                 BindIt bind(this, t); // "it" refers to the defined object
-                for (auto e : t->_flow._elts)
+                for (auto i = t->_flow._elts.begin(); i != t->_flow._elts.end(); ++i)
                 {
+                    Flow::Elt* e = i;
                     assert(e->_type == Flow::t_command);
                     Flow::EltCommand* ec = (Flow::EltCommand*)e;
                     if (ec->_parse)
@@ -4355,8 +4463,9 @@ struct Strandi: public Traits
         int pass = fv._pass;
         bool v = true;
 
-        for (auto e : f._elts)
+        for (auto i = f._elts.begin(); i != f._elts.end(); ++i)
         {
+            Flow::Elt* e = i;
             if (e->_type == Flow::t_command)
             {
                 Flow::EltCommand* ec = (Flow::EltCommand*)e;
@@ -4395,7 +4504,7 @@ struct Strandi: public Traits
                 
                     if (v)
                     {
-                        LOG3("parsed, ", *ec);
+                        LOG4("parsed, ", *ec);
                     }
                     else
                     {
@@ -4742,6 +4851,212 @@ struct Strandi: public Traits
         }
         return s;
     }
+
+
+   //  EXEC
+
+#if 0
+
+    enum Op
+    {
+        op_void = 0,
+        op_term,
+        op_choice,
+        op_choice2,
+        op_choice3,
+        op_pophead,
+        op_generate,
+        op_finish,
+
+        op_flow,
+
+    };
+
+    struct Oi
+    {
+        Op      _op;
+        void*   _arg;
+        void*   _ctx = 0;
+
+        Oi(Op op, void* a) : _op(op), _arg(a) {}
+    };
+
+    std::list<Oi>      _istack;
+
+    Oi  ipop()
+    {
+        assert(!_istack.empty());
+        Oi e = _istack.back();
+        _istack.pop_back();
+        return e;
+    }
+
+    void ipush(Oi& e) { _istack.push_back(e); }
+    void ipush(Term* t) { _istack.emplace_back(Oi(op_term, t)); }
+
+    void ipushunder(Oi& e)
+    {
+        Oi a = ipop();
+        ipush(e);
+        ipush(a);
+    }
+
+    void ipush(Flow& f, void* ctx = 0)
+    {
+        Flow::Elt* f1 = f.firstElt();
+        if (f1)
+        {
+            Oi i(op_flow, f1);
+            i._ctx = ctx;
+            _istack.push_back(i);
+        }
+    }
+
+   void ipush(const Oi& e, Op op)
+   {
+       // use e as template for op
+       Oi i = e;
+       i._op = op;
+       ipush(i);
+   }
+
+    void ex()
+    {
+        if (!_istack.empty())
+        {
+            Oi e = ipop();
+            
+            switch (e._op)
+            {
+            case op_term:
+                {
+                    Term* t = (Term*)e._arg;
+                    if (!_run1(t))
+                    {
+                        if (t->isChoice())
+                        {
+                            e._op = op_choice;
+                            ipush(e);
+                        }
+                        else if (t->isGenerator())
+                        {
+                            e._op = op_generate;
+                            ipush(e);
+                        }
+                    }
+                }
+                break;
+            case op_choice:
+                {
+                    Term* t = (Term*)e._arg;
+                    Choices* c = new Choices(t);
+                    prepareChoices(*c);
+                    if (c->present())
+                    {
+                        e._ctx = c;
+                        ipush(e, op_finish); // delete c
+
+                        ipush(e, op_choice2); // after headflow
+                        
+                        // run head flow?
+                        if (t->_flow)
+                        {
+                            // after eval head pop
+                            ipush(e, op_pophead);
+
+                            _pushcap();
+                            ipush(t->_flow, c);
+                        }
+                    }
+                    else
+                    {
+                        delete c;
+                    }
+                }
+                break;
+            case op_choice2:
+                {
+                    Choices* c = (Choices*)e._ctx;
+                    assert(c);
+                    if (c->present())
+                    {
+                        ipush(e, op_choice3);
+                        runChoice2(*c);
+                    }
+                }
+                break;
+            case op_choice3:
+                {
+                    Choices* c = (Choices*)e._ctx;
+                    assert(c);
+
+                    runChoices(*c);
+                    updateScope();
+                    if (*c)
+                    {
+                        ipush(c->_t->_postflow, c);
+                    }
+                }
+                break;
+            case op_pophead:
+                {
+                    Choices* c = (Choices*)e._ctx;
+                    assert(c);
+                    CapRef ccap = _popcap();
+                    if (*c) c->_headFlow = textify(ccap->_cap);
+                }
+                break;
+            case op_finish:
+                {
+                    Choices* c = (Choices*)e._ctx;
+                    assert(c);
+                    delete c;
+                }
+                break;
+            case op_flow:
+                {
+                    auto f = (Flow::Elt*)e._arg;
+                    assert(f);
+                    switch (f->_type)
+                    {
+                    case Flow::t_text:
+                        run((Flow::EltText*)f);
+                        break;
+                    case Flow::t_code:
+                        run((Flow::EltCode*)f);
+                        break;
+                    case Flow::t_command:
+                        {
+                            bool v = run((Flow::EltCommand*)f); // XXX
+                        }
+                        break;
+                    case Flow::t_term:
+                        {
+                            auto et = (Flow::EltTerm*)f;
+                            assert(et->_term);
+                            ipush(et->_term); // XX what about break
+                        }
+                        break;
+                    case Flow::t_media:
+                        run((Flow::EltMedia*)f);
+                        break;
+                    }
+
+                    f = f->next();
+                    if (f)
+                    {
+                        e._arg = f;
+                        ipush(e);
+                    }
+                }
+                break;
+            }
+        }
+    }
+
+#endif // 0
+    
+
 };
 
 }; // ST

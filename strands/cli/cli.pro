@@ -45,7 +45,9 @@ include($$PROJ/app.pri)
 
 STRDIR = $$PROJ/strands
 INCLUDEPATH += $$IFIDIR
-DEFINES += IFI_BUILD IFI_IMPORT
+
+# consider also IFI_STATIC
+DEFINES += IFI_BUILD IFI_IMPORT IFI_HANDLE_CHOICE
 
 win32:!msvc {
    QMAKE_POST_LINK += $$copyToDest($$STRDIR/$$LIBDIR/ifigame.dll, $${OUT_PWD}/$${BUILDT})

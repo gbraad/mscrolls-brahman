@@ -729,7 +729,7 @@ struct ParseStrands: public ParseBase
         // NAME PROPS
         Term* t = 0;
         string name = parseName();
-        if (name.size())
+        if (!name.empty())
         {
             t = new Term(name);
             skipws();
@@ -1000,8 +1000,9 @@ struct ParseStrands: public ParseBase
     bool linkFlow(Flow& f, FlowVisitor& fv)
     {
         bool v = true;
-        for (auto e : f._elts)
+        for (auto i = f._elts.begin(); i != f._elts.end(); ++i)
         {
+            Flow::Elt* e = i;
             if (e->_type == Flow::t_term)
             {
                 Flow::EltTerm* et = (Flow::EltTerm*)e;
@@ -1098,7 +1099,7 @@ struct ParseStrands: public ParseBase
                     LOG1("ERROR: Duplicate term ", t->_name);
                 }
 
-                DLOG0(_debug, t->toString());
+                //DLOG0(_debug, t->toString());
 
             }
             else
@@ -1113,6 +1114,8 @@ struct ParseStrands: public ParseBase
     {
         lineno = 1;
         _filename = makePath(_loadFilePrefix, filename);
+
+        LOG3("processfile ", _filename);
 
         FD fd;
         bool r = fd.open(_filename);
@@ -1152,8 +1155,9 @@ struct ParseStrands: public ParseBase
                 // we're too early to run flows, so just go through
                 // the headflow and look for file media elements.
                 // load these.
-                for (auto e : t->_flow._elts)
+                for (auto i = t->_flow._elts.begin(); i != t->_flow._elts.end(); ++i)
                 {
+                    Flow::Elt* e = i;
                     if (e->_type == Flow::t_media)
                     {
                         Flow::EltMedia* em = (Flow::EltMedia*)e;

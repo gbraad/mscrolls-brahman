@@ -46,12 +46,17 @@ It's an old manor house.
 
 // Entrance
 
+BULDOING
+* looking bored
+* making an entry in his notebook
+* shuffling restlessly
+
 ENTRANCE@ MANOR
 * name
 the main entrance
 * x it
 You're standing in the doorway, north is the main hall.
-Sgt. Bulwark is here.
+\nSgt. Bulwark is here, BULDOING.
 * n
 GOHALL
 * go hall

@@ -52,13 +52,16 @@
 #define DLL
 #endif // _WIN32
 
+#include <functional>
+
 struct DLL IFI
 {
     typedef void charEmitFn(void*, const char*);
+    typedef std::function<void(void)> Pump;
 
     virtual ~IFI() {}
 
-    static IFI* create();
+    static IFI* create(Pump* p = 0);
     
     virtual void setEmitter(charEmitFn* emitter, void* ctx) = 0;
     virtual bool eval(const char* json) = 0;

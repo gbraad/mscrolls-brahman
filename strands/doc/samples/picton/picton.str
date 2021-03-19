@@ -111,6 +111,12 @@ JIMCOPOUT
 "Stupid old greenhouse!"
 * ask him about dog
 "Yeah, the old man shot Ruffy, the dog, in a hunting accident."
+* ask him about charles
+"I've never liked him, but then i don't like anyone!"
+* ask him about charlotte
+"Spends all her time in the garden, probably digging holes for bodies!"
+* ask him about major
+"Got the right hump at me for breaking his greenhouse!"
 * ask him for thing
 "No chance copper!"
 *= describe him
@@ -147,6 +153,14 @@ A woman in her early thirties and a good deal younger than the Major, she strike
 CLOTCOP
 * ask her about dog
 "Ruffy was the cutest puppy you've ever seen! Such a tragedy."
+* ask her about jimmy
+"Such a well behaved little boy!"
+* ask her about charles
+"I don't think it'll be easy for him to fill the Major's shoes - wrong size, for a start!"
+* ask her about major
+"My devoted husband, taken from me! What a tragic loss. I do hope you catch him Inspector!"
+* ask her about jeeves
+"Jeeves, he's the butler inspector! Really, you police are a bit slow sometimes."
 * ask her for thing
 "I should say not inspector!"
 *= describe her
@@ -180,6 +194,10 @@ Charles is the Major's brother and partner in their investments business. He'll 
 "He's been our butler for goodness know how long, not much else to say really. Don't you have a butler?"
 * ask him about major
 "He was my dear brother and business partner, such a tragic loss."
+* ask him about charlotte
+"I'd rather not say anything about that!"
+* ask him about jimmy
+"Young rascal! Weren't you young once Inspector?"
 * ask him about thing
 CHARLESCOPOUT
 * ask him about dog
@@ -226,9 +244,13 @@ Jeeves the butler
 * x it
 Jeeves has been in the family for as long as anyone can remember. Softly spoken and impeccably dressed in kid gloves, black waistcoat, starched white dickey and bow tie. Standing as tall as he can, he looks at you with a haughty demeanour as if you're not worth his time, whilst at the same time acting obsequiously apologetic and toady. Surely he's beyond suspicion!
 * ask him about jimmy
-"Master Jimmy is Mr Stephenson's son sir!" JVPAUSE
+"Master Jimmy is Major Stephenson's son sir!" JVPAUSE
 * ask him about charles
 "He's in charge of everything now Sir!" JVPAUSE
+* ask him about charlotte
+"I should say, you'd best ask her directly, Sir!" JVPAUSE
+* ask him about major
+"I'm afraid he's dead, Sir!" JVPAUSE
 * ask him about thing
 JEEVCOP
 * ask him for thing
@@ -322,8 +344,17 @@ BULWARK@ PERSON
 > put him in entrance
 * name
 Sergeant Sgt Bulwark
+* name
+policeman
 * x it
 Built like a brick-house!
+
+HAZELDEN@ PERSON
+* name
+Hazelden
+* name
+detective
+
 
 //// PEOPLE
 
@@ -581,9 +612,10 @@ BSAYC MURDER
 *
 "Sorry Sir, I've no idea."
 
-ENT_OUT
-"Shall I arrest someone, inspector?" he asks.
-ACCUSE
+ENT_OUT=
+*?(GOSTUDY or GODININGROOM or GODRAWINGROOM) "Shall I arrest someone, inspector?" he asks. ACCUSE
+* "Aren't you going to interrogate the suspects, Inspector?" GOHALL
+
 
 ACCUSE?
 \nArrest,

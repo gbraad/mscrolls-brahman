@@ -61,6 +61,9 @@ struct IFIClient: public IFI, public Worker
     int                 _argc;
     char**              _argv;
 
+    bool                _coop = false;
+    Pump                _pump; // only if coop
+
     // Compliance
     void setEmitter(charEmitFn* e, void* ctx)  override
     {
@@ -124,7 +127,7 @@ struct IFIClient: public IFI, public Worker
             }
         }
 
-        signal();
+        if (!_coop) signal();
         
         return r;
     }
@@ -138,18 +141,39 @@ struct IFIClient: public IFI, public Worker
         handleOptions(argc, argv);
         
         Opt::rebuildArgs(_argc, _argv);
-        
+
+        // in coop mode, we do not start the client thread
+        if (_coop)
+        {
+            // call client main immediately
+            // this would normally be called first thing
+            // on the worker thread.
+            client_main(_argc, _argv);
+            return true;
+        }
         return Worker::start("IFIClient");
     }
 
+    virtual void coopWork() {}
+
     virtual int sync(int timeoutms = 0) override
     {
-        return Worker::sync(timeoutms);
+        if (_coop)
+        {
+            // do client work here
+            coopWork();
+            return 1;  // signal done
+        }
+        else
+        {
+            return Worker::sync(timeoutms);
+        }
     }
 
     virtual void release() override
     {
-        Worker::release();
+        if (!_coop)
+            Worker::release();
     }
 
     void setLogLevel(int level)
@@ -201,12 +225,13 @@ struct IFIClient: public IFI, public Worker
 
             // only block if we didn't fill from `getRequest`
             if (_madeRequest) break;
+            if (_coop) break; // do not block
             waitForSignal();
         }
 
         if (!c)
         {
-            c = '\n';
+            if (!_coop) c = '\n';  // !c remains for coop
             if (_shutdown) c = EOF;
 
             // subsequent calls to getchar will block unless getRequest
@@ -221,12 +246,19 @@ struct IFIClient: public IFI, public Worker
         const char* r = 0;
 
         _madeRequest = true;
-        
-        while (!_shutdown)
+
+        // coop version does not block, but can return 0
+        if (!_coop)
         {
-            if (_inBufferReady) break;
-            waitForSignal();
+            while (!_inBufferReady && !_shutdown)
+            {
+                waitForSignal();
+            }
         }
+
+        if (_shutdown) return 0;
+        
+        assert(_coop || _inBufferReady);
 
         if (_inBufferReady)
         {
@@ -235,9 +267,10 @@ struct IFIClient: public IFI, public Worker
             // buffer has been used now
             _inBufferReady = false;
         }
+
+        assert(_coop || r);
         
         return r;
-        
     }
 
     void flush()

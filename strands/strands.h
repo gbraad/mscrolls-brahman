@@ -43,6 +43,7 @@
 #include "utils.h"
 #include "varset.h"
 #include "pcom.h"
+#include "dl.h"
 
 namespace ST
 {
@@ -64,7 +65,7 @@ struct Flow: public Traits
         t_cond = 32,
     };
     
-    struct Elt
+    struct Elt: public DL<Elt>
     {
         Type    _type;
 
@@ -242,8 +243,8 @@ struct Flow: public Traits
 
     };
 
-    std::list<Elt*>     _elts;
-
+    Elt::List           _elts;
+    
     ~Flow() { _purge(); }
     
     int size() const { return _elts.size(); }
@@ -297,7 +298,7 @@ struct Flow: public Traits
 
         if (listform) s = "{\n";
         int cc = 0;
-        for (auto i : _elts)
+        for (auto i = _elts.begin(); i != _elts.end(); ++i)
         {
             if (!listform && cc++) s += ' ';
             s += i->toString();
@@ -312,7 +313,7 @@ struct Flow: public Traits
     {
         string s;
         int cc = 0;
-        for (auto i : _elts)
+        for (auto i = _elts.begin(); i != _elts.end(); ++i)
         {
             if (cc++) s += ' ';
             s += i->_toBaseString();
@@ -326,7 +327,15 @@ struct Flow: public Traits
 
 private:
 
-    void _purge() {  for (auto i : _elts) delete i; _elts.clear(); }
+    void _purge()
+    {
+        for (auto i = _elts.begin(); i != _elts.end(); ++i)
+        {
+            Flow::Elt* e = i;
+            delete e;
+        }
+        _elts.clear();
+    }
 
 };
 
@@ -627,7 +636,7 @@ struct Term: public Traits
     {
         // find term by ID.
         Term* ft = 0;
-        if (name.size())
+        if (!name.empty())
         {
             Term t(name);
             Terms::iterator it = _allTerms.find(&t);
@@ -865,8 +874,9 @@ struct Term: public Traits
         if (_type == t_object) // only objects have parents
         {
             // flow will be terms
-            for (auto e : _topflow._elts)
+            for (auto i = _topflow._elts.begin(); i != _topflow._elts.end(); ++i) 
             {
+                Flow::Elt* e = i;
                 assert(e->_type == Flow::t_term);
                 Term* ti = ((Flow::EltTerm*)e)->_term;
                 assert(ti); // assume linked

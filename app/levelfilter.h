@@ -1,7 +1,8 @@
 #pragma once
 
-
+#if !defined(__APPLE__)
 #include "filter.h"
+#endif
 
 #include "logged.h"
 #include "types.h"

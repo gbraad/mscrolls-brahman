@@ -43,16 +43,23 @@
 struct Handler: public IFIHandler
 {
     IFIHost*        _host;
+    ChoicesInfo*    _choice = 0;
      
     Handler(IFIHost* host) : _host(host) {}
+    ~Handler() { delete _choice; }
 
-    bool ifiText(const string& s) override
+    void _emit(const string& s)
     {
         if (!s.empty())
         {
             std::cout << s;
             std::cout.flush();
         }
+    }
+
+    bool ifiText(const string& s) override
+    {
+        _emit(s);
         return true;
     }
     
@@ -144,23 +151,227 @@ struct Handler: public IFIHandler
         }
         return true;
     }
+
+    void presentChoices()
+    {
+        if (_choice)
+        {
+            int cc = 0;
+            for (auto& i : _choice->_choices)
+            {
+                string s = "(";
+                ++cc;
+                s += std::to_string(cc);
+                s += ") ";
+                s += i._text._text;
+                s += '\n';
+                _emit(s);
+            }
+        }
+    }
+
+    // NB: build with IFI_HANDLE_CHOICE
+    bool ifiHandleChoicesInfo(ChoicesInfo* ci) override
+    {
+        assert(ci);
+
+        if (_choice)
+        {
+            LOG1("IFI, old choice still present! ", *_choice);
+            delete _choice;
+        }
+
+        // we keep the donated choices given to us, and delete it later
+        _choice = ci;
+        
+        //LOG1("Handler for choices ", *_choice);
+
+        _emit("\n");
+
+        if (_choice->_header)
+        {
+            _emit(_choice->_header._text);
+            _emit("\n");
+        }
+
+        presentChoices();
+        
+        return true;
+    }
+
+
+#if 0    
+    int handleInput(const string& line)
+    {
+        // return < 0 if done
+        // return == 0 if not accepted
+        // return > 0 if ok
+        
+        bool accept = false;
+        int  chosen;
+        
+        string cmd = trim(line); // remove bogus whitespace
+        
+        if (_choice)
+        {
+            int nc = _choice->size();
+            assert(nc);
+
+            if (cmd.empty())
+            {
+                // blank line.
+                if (nc == 1)
+                {
+                    // accept single choice
+                    chosen = 1;
+                    accept = true;
+                }
+            }
+
+            if (!accept)
+            {
+                // extract a number
+                chosen = 0;
+                const char* p = cmd.c_str();
+                while (u_isdigit(*p))
+                {
+                    chosen = chosen*10 + (*p - '0');
+                    ++p;
+                }
+
+                if (!*p)
+                {
+                    // input was a single number on its own
+                    // accept this as a choice response
+                    if (chosen > 0 && chosen <= nc) accept = true;
+                }
+            }
+
+            if (!accept)
+            {
+                // if we allow text input and this is not a choice
+                // and also not blank, then accept it as cmd
+                if (_choice->_textinput && !cmd.empty())
+                {
+                    accept = true;
+
+                    // no longer a choice input
+                    delete _choice; _choice = 0;
+                }
+            }
+        }
+        else
+        {
+            accept = !cmd.empty();
+        }
+
+        if (!accept) return 0; 
+
+        bool done = false;
+        bool handled = false;
+
+        if (_choice)
+        {
+            // have accepted a value
+            ChoiceList::iterator it = _choice->_choices.begin();
+            if (chosen > 1) std::advance(it, chosen-1);
+
+            ChoiceInfo ci = *it; // copy
+
+            // and delete old choices
+            delete _choice; _choice = 0;
+            
+            if (ci._response[0] == '{')
+            {
+                // response is JSON, so just use it.
+                
+                handled = true;
+                LOG4("IFI choice, sending direct response ", ci._response);
+                
+                _host->eval(ci._response.c_str());
+                do
+                {
+                    done = !_host->sync();
+                } while (!done && _host->release());
+            }
+            else
+            {
+                // response is plain text, process as command
+                cmd = ci._response;
+            }
+        }
+        
+        if (!handled && !done)
+        {
+            GrowString js;
+            buildJSONStart(js);
+            if (buildCmdJSON(cmd.c_str()))
+            {
+                buildJSONEnd();
+                _host->eval(js.start());
+
+                do
+                {
+                    done = !_host->sync();
+                } while (!done && _host->release());
+            }
+        }
+
+        if (done) return -1;
+        return 1;
+    }
+#endif
+
+    void sendInput()
+    {
+        // wait for input
+
+        std::string cmd;
+        std::cout << getProp(IFI_PROMPT); std::cout.flush();
+        std::getline(std::cin, cmd);
+
+        GrowString js;
+        buildJSONStart(js);
+        buildCmdJSON(cmd.c_str());
+        buildJSONEnd();
+        _host->eval(js.start());
+    }
+
+    bool flush()
+    {
+        // wait for input
+        bool done;
+
+        for (;;)
+        {
+            done = !_host->sync();
+            if (done) break;
+            _host->release();
+            break;
+        }
+        return done;
+    }
+
+    void pumpfn()
+    {
+        LOG1("pump!", "");
+        flush();
+        sendInput();
+    }
+    
 };
+
 
 int main(int argc, char** argv)
 {
     Logged initLog;
     
-    IFI* ifi = IFI::create();
-    if (!ifi)
-    {
-        std::cout << "Failed to create IFI\n";
-        return -1;
-    }
 
     const char* configdir = ".";
     const char* datadir = "."; // default;
-    const char* story = 0;
+    const char* story = "story.str"; // default
     bool help = false;
+    bool coop = false;
     
     char** args = argv+1;
     for (char**& ap = args; *ap; ++ap)
@@ -172,6 +383,11 @@ int main(int argc, char** argv)
         if ((arg = Opt::nextOptArg(ap, "-d", true)) != 0)
             Logged::_logLevel = atoi(arg);
         if (Opt::nextOpt(ap, "-h")) help = true;
+        if (Opt::nextOpt(ap, "-coop"))
+        {
+            coop = true;
+            LOG1("Running in COOP mode", "");
+        }
     }
     Opt::rebuildArgs(argc, argv);
 
@@ -183,10 +399,22 @@ int main(int argc, char** argv)
 
     IFIHost host;
     Handler h(&host);
+    
+    using namespace std::placeholders;  
+    IFI::Pump p = std::bind(&Handler::pumpfn, &h);
 
+    IFI* ifi = IFI::create(coop ? &p : 0);
+    if (!ifi)
+    {
+        std::cout << "Failed to create IFI\n";
+        return -1;
+    }
+
+
+    assert(story);
     h.setProp(IFI_CONFIGDIR, configdir);
     h.setProp(IFI_DATADIR, datadir);
-    if (story) h.setProp(IFI_STORY, story);
+    h.setProp(IFI_STORY, story);
 
     host.setHandler(&h);
     host.setIFI(ifi);
@@ -238,31 +466,11 @@ int main(int argc, char** argv)
     const char* beginjs = "{\"" IFI_BEGIN "\":true}";
     LOG4("Sending ifi begin, ", beginjs);
     if (host.eval(beginjs)) host.syncRelease();
-    
-    bool done = false;
 
-    while (!done)
+    for (;;)
     {
-        std::string cmd;
-        std::cout << '\n' << h.getProp(IFI_PROMPT); std::cout.flush();
-        std::getline(std::cin, cmd);
-        if (cmd == "quit") break;
-
-        if (cmd.empty()) continue; // blank line
-
-        GrowString js;
-        h.buildJSONStart(js);
-        if (h.buildCmdJSON(cmd.c_str()))
-        {
-            h.buildJSONEnd();
-            
-            host.eval(js.start());
-
-            do
-            {
-                done = !host.sync();
-            } while (!done && host.release());
-        }
+        h.sendInput();
+        if (h.flush()) break;
     }
 
     Opt::deleteCopyArgs(argv);

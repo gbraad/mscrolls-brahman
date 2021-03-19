@@ -34,19 +34,24 @@
 #pragma once
 
 #include <string>
-#include <list>
+#include <vector>
 #include "jsonwalker.h"
 #include "logged.h"
 #include "ifischema.h"
 #include "varset.h"
 #include "osrandom.h"
+#include "strutils.h"
 
 #define TAG "IFIHandler, "
+
+/* IFI_HANDLE_CHOICE is defined (elsewhere) to include code here
+ * that breaks down the choice JSON. This isn't needed for the GUI,
+ * which consumed the JSON directly, but is needed for cli.
+ */
 
 struct IFIHandler
 {
     typedef std::string string;
-    typedef std::function<void(void)> Pump;
     
     VarSet              _props;
 
@@ -62,44 +67,41 @@ struct IFIHandler
         int             _id = 0;
 
         bool             valid() const { return !_text.empty(); }
+        operator bool() const { return valid(); }
 
         friend std::ostream& operator<<(std::ostream& os, const TextF& t)
-        {
-            return os << "{\"" << t._text << "\", id=" << t._id << '}';
-        }
+        { return os << "{\"" << t._text << "\", id=" << t._id << '}'; }
 
         void clear() { _text.clear(); }
     };
 
-    /*
+#ifdef IFI_HANDLE_CHOICE
+    
     struct ChoiceInfo
     {
         TextF           _text;
         string          _response;
-        bool            _default = false;
 
         friend std::ostream& operator<<(std::ostream& os, const ChoiceInfo& ci)
         {
-            return os << "{ choice=" << ci._text << ", response=" << ci._response << ", default=" << ci._default << '}';
+            return os << "{ choice=" << ci._text << ", response=" << ci._response << '}';
         }
     };
 
-    typedef std::list<ChoiceInfo> ChoiceList;
+    typedef std::vector<ChoiceInfo> ChoiceList;
     
     struct ChoicesInfo
     {
         TextF       _header;
         ChoiceList  _choices;
+        bool        _textinput = false;
+        int         _selected = -1;
 
-        void clear() 
-        {
-            _header.clear();
-            _choices.clear();
-        }
+        int size() const { return _choices.size(); }
 
         friend std::ostream& operator<<(std::ostream& os, const ChoicesInfo& ci)
         {
-            os << "{ header=" << ci._header << "\n";
+            os << "{ header=" << ci._header << ", textinput=" << ci._textinput << '\n';
             for (auto& i : ci._choices)
             {
                 os << i << '\n';
@@ -111,21 +113,41 @@ struct IFIHandler
 
     struct HandlerCtx
     {
-        ChoicesInfo      _choices;
+        ChoicesInfo*     _choices = 0;
+
+        void init()
+        {
+            if (!_choices) _choices = new ChoicesInfo;
+        }
 
         void clear()
         {
-            _choices.clear();
+            if (_choices)
+            {
+                delete _choices;
+                _choices = 0;
+            }
         }
+
+        ChoicesInfo* donate()
+        {
+            ChoicesInfo* ci = _choices;
+            _choices = 0;
+            return ci;
+        }
+
+        ~HandlerCtx() { clear(); }
 
         friend std::ostream& operator<<(std::ostream& os, const HandlerCtx& h)
         {
-            return os << h._choices;
+            if (h._choices) os << *h._choices;
+            else os << "null";
+            return os;
         }
     };
 
     HandlerCtx          _hctx;
-    */
+#endif // IFI_HANDLE_CHOICE
 
     IFIHandler()
     {
@@ -190,7 +212,7 @@ struct IFIHandler
 
             if (!_startDone)
             {
-                LOG3(TAG "WARNING, IFI received response before started: ", json)
+                LOG3(TAG "WARNING, IFI received response before started: ", json);
             }
 
             if (!isObject)
@@ -267,7 +289,6 @@ struct IFIHandler
 
         LOG5("IFI Handler; ", json);
 
-        //_hctx.clear();
         ifiBegin();
         handleAux(json, string());
         ifiEnd();
@@ -313,7 +334,14 @@ struct IFIHandler
         else if (key == IFI_DATADIR) r = ifiDataDir(v.toString());
         else if (key == IFI_STORY) r = ifiStory(v.toString());
         else if (key == IFI_TEXT) r = ifiText(v.toString());
-        else if (key == IFI_BEGIN) r = ifiBeginGame();
+        else if (key == IFI_BEGIN)
+        {
+            r = ifiBeginGame();
+            if (!r)
+            {
+                LOG2("IFI, Warning ifiBeginGame returned ", r);
+            }
+        }
         else if (key == IFI_MOVES)
         {
             int n;
@@ -371,7 +399,11 @@ struct IFIHandler
     
     virtual bool ifiCommand(const string&) { return false; }
     virtual bool ifiSubcommand(const string&) { return false; }
-    virtual bool ifiConfigDir(const string&) { return false; }
+    virtual bool ifiConfigDir(const string&)
+    {
+        LOG2("IFI Warning, no ifiConfigDir handler", "");
+        return false;
+    }
     virtual bool ifiDataDir(const string&) { return false; }
     virtual bool ifiStory(const string&) { return false; }
     virtual bool ifiText(const string&) { return false; }
@@ -527,15 +559,17 @@ struct IFIHandler
 
     virtual bool ifiChoiceGeneralResponse(const string& js)
     {
-        // choice:{text:"heading",choices:[{choiceobj}...]}
+#ifdef IFI_HANDLE_CHOICE
+        // choice:{text:"heading",ui_textinput:true,choices:[{choiceobj}...]}
         // choice:{text:{textobj},choices:[{choiceobj}...]}
 
         // extract the top-level choice properties, then call
         // the choice list response to extract the choice list itself
         
-        /*
         bool r = true;
-        
+
+        _hctx.init(); 
+
         for (JSONWalker jw(js); r && jw.nextKey(); jw.next())
         {
             bool isObject;
@@ -546,33 +580,41 @@ struct IFIHandler
                                 
             if (jw._key == IFI_TEXT) // heading
             {
-                TextF& textF = _hctx._choices._header;
-
+                TextF& textF = _hctx._choices->_header;
+                
                 // can be just a string or a text object
                 if (isObject) r = atObj(jw, subjs) && _makeTextF(subjs, textF);
                 else textF._text = jw.collectValue(st).toString();
-            } 
+
+                // ensure header text is trimmed
+                textF._text = trim(textF._text);
+            }
+            else if (jw._key == IFI_UI_TEXTINPUT)
+            {
+                bool v = jw.collectValue(st).isTrue();
+                _hctx._choices->_textinput = v;
+            }
             else if (jw._key == IFI_CHOICE)
             {
                 // expect list!
                 r = atList(jw, subjs) && ifiChoiceListResponse(subjs);
             }
         }
-        */
-
+#endif // IFI_HANDLE_CHOICE        
+        
         // always return true, saying we're done even if fail
         return true;
     }
 
-    /*
+#ifdef IFI_HANDLE_CHOICE
     bool addChoice(const string& choiceobj)
     {
-        // {text:"whatever",default:true,chosen:"whatever"}
-        // {text:{textobj},default:true,chosen:"whatever"}
+        // {text:"whatever",chosen:"whatever"}
+        // {text:{textobj},chosen:{"command":1} }
         
         bool r = true;
 
-        LOG3(TAG "choiceobj ", choiceobj);
+        LOG5(TAG "choiceobj ", choiceobj);
 
         ChoiceInfo choice;
         
@@ -593,17 +635,22 @@ struct IFIHandler
             } 
             else if (jw._key == IFI_CHOSEN)
             {
-                if (isObject) break;
-                choice._response = jw.collectValue(st).toString();              
-            }
-            else if (jw._key == IFI_DEFAULT)
-            {
-                bool v = jw.collectValue(st).isTrue();
-                choice._default = v;
+                if (isObject)
+                {
+                    string subjs;
+                    r = atObj(jw, subjs);
+                    if (r)
+                    {
+                        choice._response = subjs;
+                    }
+                    else break;
+                    
+                }
+                else choice._response = jw.collectValue(st).toString();
             }
         }
 
-        r = r && choice._text.valid();
+        r = r && choice._text;
         
         if (r)
         {
@@ -613,7 +660,7 @@ struct IFIHandler
                 choice._response = choice._text._text;
             }
 
-            _hctx._choices._choices.push_back(choice);
+            _hctx._choices->_choices.push_back(choice);
         }
         else
         {
@@ -622,15 +669,37 @@ struct IFIHandler
 
         return r;
     }
-    */
+
+    // override this to handle a broken down version of choices
+    virtual bool ifiHandleChoicesInfo(ChoicesInfo*) { return false; }
+
+    void finishChoice()
+    {
+        LOG5("got choice ", _hctx);
+
+        ChoicesInfo* ci = _hctx.donate();
+
+        // assume handler consumes `ci`
+        bool r = ifiHandleChoicesInfo(ci);
+        if (!r)
+        {
+            // didn't handle it. so delete
+            delete ci;
+        }
+    }
+
+    
+#endif // IFI_HANDLE_CHOICE
 
     virtual bool ifiChoiceListResponse(const string& js)
     {
         // [{choiceobj}...]
-
-        LOG4(TAG "choice list ", js);
-
-        /*
+        
+#ifdef IFI_HANDLE_CHOICE
+        
+        LOG5(TAG "choice list ", js);
+        
+        _hctx.init();
         JSONWalker jw;
         jw._json = js.c_str();
         jw.beginArray();
@@ -655,7 +724,10 @@ struct IFIHandler
 
             jw.next();
         }
-        */
+
+        finishChoice();
+        
+#endif // IFI_HANDLE_CHOICE
         
         return true; // accept regardless
     }
