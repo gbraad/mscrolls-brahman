@@ -1,6 +1,9 @@
 START
 INITCORE
 STORY
+GAME_DETAILS
+TOP_BEGIN
+\nGame Over.
 
 GAME_FILES
 core.str cod.str
@@ -10,6 +13,9 @@ Cloak of Darkness
 
 GAME_AUTHOR
 A Strand
+
+GAME_VERSION
+1.00
 
 GAME_ORGANISATION
 Strand Games
@@ -24,7 +30,7 @@ MAP_BACKIMAGE
 images/map.png
 
 GAME_META
-:ui_ucanvas:false,ui_sidebar:true,autolink:false
+:ui_ucanvas:false,ui_sidebar:false,autolink:false
 
 GAME_CREDITS
 <h1>GAME_TITLE<br/><em>by GAME_ORGANISATION</em></h1>

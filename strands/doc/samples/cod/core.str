@@ -1,4 +1,15 @@
-// Strand Core library 1.0
+// Strand Core library
+
+CORE_VERSION
+1.01
+
+GAME_DETAILS
+\n\nGAME_TITLE by GAME_AUTHOR, GAME_VERSION.
+\nStrand SYSTEM_VERSION, Core CORE_VERSION.
+
+TOP_BEGIN
+*?!BEGIN BEGIN
+
 
 MAIN
 TICK
@@ -73,8 +84,6 @@ a thing
 You can't get that.
 * take it
 > get it
-* feel it
-BORING
 * move it
 MOVEIT
 * push it
@@ -93,6 +102,10 @@ HITIT
 > hit it
 * kick it
 > hit it
+* touch it
+> feel it
+* feel it
+FEELIT
 
 HITIT
 Trying to break things won't help.
@@ -100,18 +113,17 @@ Trying to break things won't help.
 MOVEIT
 BORING
 
+FEELIT
+That won't help.
+
 XHERE
 \
 UPDATETITLE
 > x here
 
 
-RANDOM@
-* dance
-You do a little jig on the spot, hopefully no one noticed.
-
 // NB: player is not a person!
-PLAYER@ THING RANDOM
+PLAYER@ THING
 > set player score 0
 * name
 the player
@@ -123,12 +135,16 @@ You're looking good!
 INV
 * inv
 INV
+* help
+HELP
 * go west
 > w
 * go east
 > e
 * go north
 > n
+* go south
+> s
 * go up
 > u
 * go down
@@ -141,6 +157,13 @@ INV
 Your score is
 > what is player score
 .
+* z
+WAIT
+* wait
+WAIT
+
+WAIT
+zzz...
 
 INCSCORE
 You scored a point!
@@ -155,7 +178,7 @@ feet
 * name
 foot
 * x it
-Your feet!
+Feet are size 9.
 * smell it
 Pooh!
 
@@ -195,11 +218,11 @@ NOWAY
 NOWAY
 
 PERSON@ THING
-* be it
-IT
 * kiss it
 MOLESTATION
 * feel it
+MOLESTATION
+* touch it
 MOLESTATION
 * rape it
 MOLESTATION
@@ -325,7 +348,7 @@ You're empty handed.
 
 INV2 YOURCLOTHES
 * them
-, and you're wearing LAST.
+You're wearing LAST.
 
 
 
@@ -482,6 +505,8 @@ WHATSON
 WHATSALSOON
 * put this GETTABLE on it
 DOPUTON
+* sit on it
+Not a good idea.
 
 DOPUTON > put it on that
 * ok
@@ -500,8 +525,14 @@ WHATSALSOON > what is on it
 On IT you see, LAST.
 *
 
+/// HELP
 
+HELP
+This is interactive fiction. You can move around and interact with the world and with people. You can type commands like "get lamp" and "kill troll with axe" and also select choices presented to you by selecting their number.
 
+Type \LOOK to refresh the room description.\n
+Move about with commands like "go north", "go east" and so on. These can be abbreviated to "n" and "e" for example.\n
+Ask people about things, for example, "ask butler about dog", and so on.
 
 
 
