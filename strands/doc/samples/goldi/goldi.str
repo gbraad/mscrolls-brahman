@@ -5,7 +5,14 @@ What's your name?
 NAME
 Ok NAME, here's the deal, the three bears have just gone out for a walk.
 ROBTHEM
-That's the end of the game.
+That's the end of the game!
+
+///// Here we put some terms for the UI
+
+GAME_TITLE
+Goldilocks and the Bears!
+
+////////////////////
 
 NAME?!
 * Goldilocks

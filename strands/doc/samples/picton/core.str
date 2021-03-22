@@ -1,7 +1,7 @@
 // Strand Core library
 
 CORE_VERSION
-1.0
+1.01
 
 GAME_DETAILS
 \n\nGAME_TITLE by GAME_AUTHOR, GAME_VERSION.
@@ -143,6 +143,8 @@ HELP
 > e
 * go north
 > n
+* go south
+> s
 * go up
 > u
 * go down
@@ -517,11 +519,13 @@ On IT you see, LAST.
 /// HELP
 
 HELP
-This is interactive fiction. You can move around and interact with the world and with people. You can type commands like "get lamp" and "kill troll with axe" and also select options presented to you by selecting their number.
-
-When not in conversations, you can type a command instead of choosing an option. In other words, the options are optional and are presented merely as suggestions.
+This is interactive fiction. You can move around and interact with the world and with people. You can type commands like "get lamp" and "kill troll with axe" and also select choices presented to you by selecting their number.
 
 Type \LOOK to refresh the room description.\n
+Move about with commands like "go north", "go east" and so on. These can be abbreviated to "n" and "e" for example.\n
+Ask people about things, for example, "ask butler about dog", and so on.
+
+
 
 
 

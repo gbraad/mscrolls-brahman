@@ -2,6 +2,4 @@
 
 
 
-http://stvle.s3.amazonaws.com/beanstalk/beanstalk.html
-
-https://terminal.jcubic.pl/
+http://stvle.s3.amazonaws.com/beanstalk/index.html

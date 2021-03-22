@@ -12,9 +12,9 @@ struct ImText
     struct Par
     {
         GrowString      _text;
-        ImVec4          _col; 
+        bool            _hilite = false;
 
-        Par(const char* s) : _col(ImGui::GetStyleColorVec4(ImGuiCol_Text))
+        Par(const char* s, bool hilite) : _hilite(hilite)
         {
             _text.append(s);
             _text.add(0);
@@ -28,7 +28,7 @@ struct ImText
 
     Pars        _pars;
     bool        _changed = false;
-    int         _maxText = 1024*8;
+    int         _maxText = 1024*4;
     int         _size = 0;
 
     ~ImText()
@@ -43,14 +43,14 @@ struct ImText
     }
 
 
-    void add(const char* s)
+    void add(const char* s, bool hitlite = false)
     {
         if (s && *s)
         {
             //LOG1("IMTEXT, adding '", s << "'");
             // whole string will be a single par regardless
 
-            Par* p = new Par(s);
+            Par* p = new Par(s, hitlite);
             _add(p);
         }
     }
@@ -65,16 +65,28 @@ struct ImText
             const Par* p = *it;
             ++it;
 
+            ImVec4 col;
+
             bool last = (it == ie);
 
-            ImVec4 col;
             if (last)
             {
-                col = p->_col;
+                if (p->_hilite)
+                {
+                    col = ImGui::GetStyleColorVec4(ImGuiCol_HeaderActive);
+                }
+                else col = ImGui::GetStyleColorVec4(ImGuiCol_Text);
             }
             else
             {
-                col = ImGui::GetStyleColorVec4(ImGuiCol_TextDisabled);
+                if (p->_hilite)
+                {
+                    col = ImGui::GetStyleColorVec4(ImGuiCol_Header);
+                }
+                else
+                {
+                    col = ImGui::GetStyleColorVec4(ImGuiCol_TextDisabled);
+                }
             }
             
             ImGui::PushStyleColor(ImGuiCol_Text, col);

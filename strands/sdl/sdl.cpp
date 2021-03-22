@@ -7,8 +7,6 @@
 // It is possible to combine both code into a single source file that will compile properly on Desktop and using Emscripten.
 // See https://github.com/ocornut/imgui/pull/2492 as an example on how to do just that.
 
-#define WEB_VERSION  "1.0"
-
 #define HAVE_FREETYPETEST
 
 #include "imgui.h"
@@ -128,7 +126,7 @@ int main(int, char**)
     int window_flags = SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE;
     window_flags += SDL_WINDOW_ALLOW_HIGHDPI;
     
-    g_Window = SDL_CreateWindow("Strand " WEB_VERSION,
+    g_Window = SDL_CreateWindow("Strand",
                                 SDL_WINDOWPOS_CENTERED,
                                 SDL_WINDOWPOS_CENTERED,
                                 1280, 720,
@@ -200,12 +198,13 @@ static void main_loop()
         SDL_Delay(0);
     }
 
-    static bool show_freetype = false;
-
     if (ImGui::IsKeyPressed(0x3A)) show_demo_window = true;
-    if (ImGui::IsKeyPressed(0x3B)) show_freetype = true;
 
-#ifdef HAVE_FREETYPETEST    
+#ifdef HAVE_FREETYPETEST
+    static bool show_freetype = false;
+        
+    if (ImGui::IsKeyPressed(0x3B)) show_freetype = true;
+    
     if (show_freetype && freetype_test.PreNewFrame())
     {
         // REUPLOAD FONT TEXTURE TO GPU
@@ -248,8 +247,13 @@ static StrandCtx sctx;
 const char* gui_input_pump()
 {
     // called from strand to poll for input
-    const char* s = sctx.yieldCmd();
-    if (s) return s; // something to do
+    const char* label;
+    const char* s = sctx.yieldCmd(&label);
+    if (s)
+    {
+        sctx._mainText.add(label, true);
+        return s; // something to do
+    }
     else
     {
         // yield back to main
@@ -300,17 +304,6 @@ static int InputCallback(ImGuiInputTextCallbackData* data)
             }
         }
     }
-    /*
-      else if (data->EventFlag == ImGuiInputTextFlags_CallbackEdit)
-      {
-      int l = data->BufTextLen;
-      if (l > 0)
-      {
-      addText("\n");
-      addText(data->Buf, l);
-      }
-      }
-    */
     return 0;
 }
 
@@ -328,11 +321,12 @@ static void setF(const char* name)
 }
 
 
+#if 0
 void PopKeyboard()
 {
     SDL_StartTextInput();
 
-#if 0
+
       if (SDL_HasScreenKeyboardSupport())
       {
           if (!SDL_IsTextInputActive() || !SDL_IsScreenKeyboardShown(sdlWindow)) {
@@ -341,8 +335,9 @@ void PopKeyboard()
               SDL_StartTextInput();
           }
       }
-#endif
 }
+#endif
+
 
 void StrandWindow(bool* strand_open)
 {
@@ -413,15 +408,6 @@ void StrandWindow(bool* strand_open)
             ImGui::EndMenu();
         }
         ImGui::EndMenuBar();
-
-        /*
-        if (ImGui::BeginMenu("Other"))
-        {
-            if (ImGui::MenuItem("Hit me!")) PopKeyboard();
-            ImGui::EndMenu();
-        }
-        */
-        
     }
 
     // get client space
@@ -441,7 +427,8 @@ void StrandWindow(bool* strand_open)
         if (ch->_header) ++n;
         
         int lh = ImGui::GetFrameHeightWithSpacing();
-        
+
+        // choice box can switch off input
         inputActive = ch->_textinput;
 
         cby = lh*n;
@@ -534,7 +521,7 @@ void StrandWindow(bool* strand_open)
 
                 char buf[8];
                 sprintf(buf, "%d", i+1);
-                sctx.sendCmd(buf);                    
+                sctx.sendCmd(buf, &t);
             }
         }
 
@@ -563,8 +550,10 @@ void StrandWindow(bool* strand_open)
             ;
 
         tf |=  ImGuiInputTextFlags_EnterReturnsTrue ;
-
+        
         bool reclaim_focus = false;
+        static bool claimed = false;
+
         if (ImGui::InputTextWithHint("", "type here", buf1, sizeof(buf1),
                                      tf, InputCallback))
         {
@@ -572,12 +561,28 @@ void StrandWindow(bool* strand_open)
             *buf1 = 0; // clear
             reclaim_focus = true;
         }
+
+        if (cby)
+        {
+            // allow claim next time no choices
+            claimed = false;
+        }
+        else
+        {
+            // claim focus just the once 
+            if (!claimed)
+            {
+                reclaim_focus = true;
+                claimed = true;
+            }
+        }
+        
         if (reclaim_focus)
             ImGui::SetKeyboardFocusHere(-1); // Auto focus previous widget
         
         ImGui::EndChild();
     }
-    
+
     ImGui::End();
 }
 

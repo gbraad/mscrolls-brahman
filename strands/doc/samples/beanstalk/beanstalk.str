@@ -5,6 +5,13 @@ You are Jack. One day your old mother says you must take the cow and sell it at 
 
 Along the way you meet OLDMAN, he offers you some "magic beans" in exchange for the cow. DOSELL \nThe End.
 
+///// Here we put some terms for the UI
+
+GAME_TITLE
+Jack and the Beanstalk!
+
+////////////////////
+
 OLDMAN
 * a demented
 * a funny looking

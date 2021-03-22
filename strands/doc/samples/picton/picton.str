@@ -2,16 +2,15 @@
 STORY
 Major Stephenson has been shot dead in his study!
 
-You are the indomitable inspector Lance Picton, who gets the cases no one else can solve. Your tenacious approach to detail consistently nail the guilty.
+You are the indomitable inspector Lance Picton, who gets the cases no one else can solve. Your tenacious approach to detail consistently nails the guilty.
 
-You've already figured out that exactly one member of the household is guilty. The Suspects are; Charles, Major Stephenson's brother and business partner, Charlotte the Major's wife, Jimmy the son or possibly Jeeves the family butler. 
+You've already figured out that exactly one member of the household is guilty. The Suspects are: Charles, Major Stephenson's brother and business partner, Charlotte the Major's wife, Jimmy the son or possibly Jeeves the family butler. 
 
 BEGIN
 \nBeta version. Please send all feedback to sia@9ize.com Thanks!
 \n\nYou arrive at the manor entrance where Sergeant Bulwark is currently posted.
-\n"'ello Inspector," he says in his usual acerbic manner, "We got a right one 'ere!
-\n"We had that numpty detective Hazelden round earlier. He poked around, got absolutely nowhere. What a fool, he even suggested that the butler did it; does he think this is some kind of game!
-\n"Anyway, we saw 'im off and called you in. I've had all the suspects stay right 'ere in the 'ouse for questioning."  GOODWORK
+\n\n" 'ello Inspector," he says in his usual acerbic manner, "We got a right one 'ere! We had that numpty detective Hazelden round earlier. He poked around, got absolutely nowhere. What a fool, he even suggested that the butler did it; does he think this is some kind of game!
+\nAnyway, we saw 'im off and called you in. I've had all the suspects stay right 'ere in the 'ouse for questioning." GOODWORK
 "When you've rumbled it, come back 'ere 'an I'll nab 'im. Or her, that is!"
 \nWith that, the sergeant thumps his fist on the door, which flies open revealing a flustered butler.
 UPDATEMAP
@@ -80,7 +79,7 @@ dog
 * name
 ruffy
 * x it
-Heads of innocent animals mounted in a row on the wall, presumably shot my the Major. One of them looks like a small dog.
+Heads of innocent animals mounted in a row on the wall, presumably shot by the Major. One of them looks like a small dog.
 
 //////////////////// Drawing room
 
@@ -91,7 +90,7 @@ fireplace
 * name
 fire
 * x it
-Like i said, it's blazing away!
+Like I said, it's blazing away!
 
 //////////////////// kitchen
 
@@ -104,7 +103,7 @@ JIMMY@ PERSON
 * name
 Master Jimmy
 * x it
-He's about 10 years old, wearing a maroon V-neck wool jumper and grey schoolboy shorts. Despite born with a silver spoon in his mouth, he still manages to somehow look scruffy. Piecing, piggy blue eyes stare back at you fiercely. You get the impression he totally despises the police and you in particular. He's probably guilty as Hell! Unfortunately, you need more solid proof.
+He's about 10 years old, wearing a maroon V-neck wool jumper and grey schoolboy shorts. Despite being born with a silver spoon in his mouth, he still manages to somehow look scruffy. Piecing, piggy blue eyes stare back at you fiercely. You get the impression he totally despises the police and you in particular. He's probably guilty as Hell! Unfortunately, you need more solid proof.
 * ask him about thing
 JIMCOPOUT
 * ask him about window
@@ -187,7 +186,7 @@ CHARLES@ PERSON
 * name
 Charles
 * x it
-Charles is the Major's brother and partner in their investments business. He'll now be worth a pretty penny, becoming the sole proprietor along with the manor house and its antiques. That certainly gives him a solid motive. You don't trust him; sat there in his pompous cravat and tweedy, shoulder patched, green shooting jacket. When did he last shoot anything anyway?
+Charles is the Major's brother and partner in their investments business. He'll now be worth a pretty penny, becoming the sole proprietor along with the manor house and its antiques. That certainly gives him a solid motive. You don't trust him, sat there in his pompous cravat and tweedy, shoulder patched, green shooting jacket. When did he last shoot anything anyway?
 *= describe him
 > x it
 * ask him about jeeves
@@ -251,6 +250,8 @@ Jeeves has been in the family for as long as anyone can remember. Softly spoken 
 "I should say, you'd best ask her directly, Sir!" JVPAUSE
 * ask him about major
 "I'm afraid he's dead, Sir!" JVPAUSE
+* ask him about dog
+"Sadly, Ruffy the dog passed away recently."
 * ask him about thing
 JEEVCOP
 * ask him for thing
@@ -635,7 +636,7 @@ CHKB
 GOHALL
 
 BUL1
-"Right! Let's get
+"Right! Let's
 
 BUL2
 Sergeant Bulwark rams open the front door, and rushes in. You hear a muffled commotion and several crashes, followed by Bulwark dragging
@@ -644,7 +645,7 @@ BUL3
 is unceremoniously bundled into the waiting black Mariah and the door slammed shut!
 
 ARRESTJIMMY
-BUL1 'im!" BUL2 Jimmy out by his pullover. Jimmy kicking and screaming, yelling, "I'll get you for this you pigs!" BUL3
+BUL1 get 'im!" BUL2 Jimmy out by his pullover. Jimmy kicking and screaming, yelling, "I'll get you for this you pigs!" BUL3
 
 GRILLING
 hires the best lawyers in town and you're given a royal grilling in Court.
@@ -656,19 +657,19 @@ WRONGJIMMY
 Turns out Jimmy isn't without resources. He GRILLING FAVOUR Jimmy on account of his cast iron alibi. DISGRACE
 
 ARRESTCLOT
-BUL1 'er!" BUL2 Charlotte out pulling her expensive dress across the mud in the most undignified manner. Shrieking at the top of her voice, you hear Charlotte scream, "Hands off me, you vile beasts!". She BUL3
+BUL1 get 'er!" BUL2 Charlotte out pulling her expensive dress across the mud in the most undignified manner. Shrieking at the top of her voice, you hear Charlotte scream, "Hands off me, you vile beasts!". She BUL3
 
 WRONGCLOT
 With poisonous vengeance, Charlotte GRILLING All the time, she stares at you with the most penetrating stare, almost willing you dead! FAVOUR Charlotte on account of her alibi. DISGRACE
 
 ARRESTJEEVES
-BUL1 'im!" BUL2 Jeeves out by his coattails, his polished shoes and starched white shirt splattered in mud. He looks livid with rage, yelling and shouting, you hear him say, "You think you can better me do you!". He BUL3
+BUL1 get 'im!" BUL2 Jeeves out by his coattails, his polished shoes and starched white shirt splattered in mud. He looks livid with rage, yelling and shouting, you hear him say, "You think you can better me do you!". He BUL3
 
 WRONGJEEVES
 Turns out Jeeves isn't without connections, his valet buddies put monies up for his defence. He GRILLING FAVOUR Jeeves on account of his cast iron alibi. DISGRACE
 
 ARRESTCHARLES
-BUL1 'im!" BUL2 Charles out by his tweedy jacket lapels, he looks in a right state, losing his silk cravat in the mud, his face incandescent with rage and indignation he shouts, "You incompetent Neanderthal coppers! I'll have you whipped and rosted for this!". He BUL3
+BUL1 get 'im!" BUL2 Charles out by his tweedy jacket lapels, he looks in a right state, losing his silk cravat in the mud, his face incandescent with rage and indignation he shouts, "You incompetent Neanderthal coppers! I'll have you whipped and roasted for this!". He BUL3
 
 WRONGCHARLES
 With his substantial wealth, resources and influence Charles defence is formidable. Instructing no less than Denton Hall and Savage, they prepare to, almost literally, rip you apart in court. Unfortunately, your case collapses within the first five minutes as Charles' cast iron alibi is unshakeable. DISGRACE

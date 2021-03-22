@@ -16,7 +16,7 @@
 CC = emcc
 CXX = em++
 PACK = file_packager
-WEB_DIR = picton
+WEB_DIR = beanstalk
 EXE = $(WEB_DIR)/index.html
 TOP = ../../../..
 IMGUI_DIR = $(TOP)/tools/imgui
@@ -39,8 +39,7 @@ COMMONDIR := $(TOP)/common
 IFIDEFS := -DIFI_BUILD -DIFI_STATIC -DIFI_HANDLE_CHOICE -s ASYNCIFY=1 #-DLOGGING
 
 GAMEDIR := .
-GAME := --preload-file $(GAMEDIR)/story.str@story.str --preload-file $(GAMEDIR)/core.str@core.str --preload-file $(GAMEDIR)/map.str@map.str --preload-file $(GAMEDIR)/picton.str@picton.str --preload-file $(GAMEDIR)/init.kl@init.kl
-
+GAME := --preload-file $(GAMEDIR)/beanstalk.str@story.str
 FONTS = --preload-file $(SDLDIR)/fonts@/fonts
 
 ## if using package

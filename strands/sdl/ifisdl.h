@@ -339,6 +339,7 @@ struct StrandCtx
 
     char            _guiInputBuf[256];
     bool            _guiInputReady = false;
+    string          _cmdLabel; // text to display
     History         _hist;
     ImText          _mainText;
 
@@ -353,19 +354,27 @@ struct StrandCtx
 
     const char* getTitle() const { return h._title.c_str(); }
 
-    void sendCmd(const char* s)
+    void setLabel(const string& label)
+    {
+        _cmdLabel = "\n> ";
+        _cmdLabel += label;
+    }
+    
+    void sendCmd(const char* s, const string* label = 0)
     {
         strcpy(_guiInputBuf, s);
         _hist.add(_guiInputBuf);
+        setLabel(label ? *label : s);
         _guiInputReady = true;
     }
 
-    const char* yieldCmd()
+    const char* yieldCmd(const char** label)
     {
         const char* s = 0;
         if (_guiInputReady)
         {
             s = _guiInputBuf;
+            *label = _cmdLabel.c_str();
             _guiInputReady = false;
         }
         return s;
