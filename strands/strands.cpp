@@ -35,11 +35,12 @@
 #include <time.h>
 #endif
 
-#include "fd.h"
+#include "fdz.h"
 #include "strands.h"
 #include "logged.h"
 
 #define DEFAULT_STORY_FILE   "story.str"
+#define DEFAULT_STORY_BINARY "story.stz"
 
 #ifdef __EMSCRIPTEN__
 #endif
@@ -56,12 +57,34 @@ using namespace ST;
 #include "strandi.h"
 #include "pstrands.h"
 
-static ParseStrands ps;
+bool writeBinary(GrowString& buf, const char* fname, bool compress)
+{
+    FD out;
+    bool r = out.open(fname, FD::fd_new);
+    if (r)
+    {
+        if (compress)
+        {
+            r = writez(out, (unsigned char*)buf.start(), buf.size());
+        }
+        else
+        {
+            r = out.write((unsigned char*)buf.start(), buf.size());
+        }
+    }
+    return r;
+}
 
 int main(int argc, char** argv)
 {
     int debug = 0;
     Logged initLog;
+    ParseStrands ps;
+
+    // write all files out as compressed story
+    bool emitBin = false;
+    bool loadGameFiles = true;
+    bool compress = true;
 
     std::vector<std::string> files;
     
@@ -76,6 +99,29 @@ int main(int argc, char** argv)
                 {
                     debug = atoi(argv[++i]);
                 }
+            }
+            else if (!u_stricmp(argv[i], "-bin"))
+            {
+                // collect up all the source code
+                // as we read it in.
+                ps._collectSource = true;
+                emitBin = true;
+            }
+            else if (!u_stricmp(argv[i], "-only"))
+            {
+                // do not load other game files by processing
+                // TERM_GAME_FILES
+                // this option is useful when all files are merged into one
+                loadGameFiles = false;
+            }
+            else if (!u_stricmp(argv[i], "-nocompress"))
+            {
+                // if emitting bin, do not compress
+                compress = false;
+            }
+            else
+            {
+                printf("unrecognised option '%s'\n", argv[i]);
             }
         }
         else
@@ -93,7 +139,7 @@ int main(int argc, char** argv)
     
     if (!files.size())
     {
-        printf("Usage: %s [-d] file...\n", argv[0]);
+        printf("Usage: %s [-bin [-nocompress]] [-only] [-d] file...\n", argv[0]);
         return -1;
     }
 
@@ -104,26 +150,41 @@ int main(int argc, char** argv)
         Logged::_logLevel = debug;
     }
 
-    if (ps.loadFiles(files))
+    bool v = ps.loadFiles(files, loadGameFiles);
+
+    if (v)
     {
         bool v = ps.validate();
 
         if (v && ps._startTerm)
         {
-            Strandi si(&Term::_allTerms);
-            si.setdebug(debug);
-
-            time_t tt;
-            si.randomise(time(&tt));
-
-            if (!si.start(ps._startTerm))
+            if (emitBin)
             {
-                ERR0("cannot start");
+                // emit compressed binary
+                v = writeBinary(ps._sourceCollector,
+                                DEFAULT_STORY_BINARY,
+                                compress);
+                if (!v)
+                    printf("error writing binary '%s'\n", DEFAULT_STORY_BINARY);
+            }
+            else
+            {
+                Strandi si(&Term::_allTerms);
+                si.setdebug(debug);
+
+                time_t tt;
+                si.randomise(time(&tt));
+
+                if (!si.start(ps._startTerm))
+                {
+                    v = false;
+                    ERR0("cannot start");
+                }
             }
         }
     }
 
-    return 0;
+    return v ? 0 : 1;
 }
 
 

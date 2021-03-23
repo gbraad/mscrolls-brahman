@@ -5,19 +5,26 @@ struct FreeTypeTest
     enum FontBuildMode { FontBuildMode_FreeType, FontBuildMode_Stb };
 
     FontBuildMode   BuildMode = FontBuildMode_FreeType;
-    bool            WantRebuild = true;
+    bool            WantRebuild = false;
     float           RasterizerMultiply = 1.0f;
     unsigned int    FreeTypeBuilderFlags = 0;
 
     // Call _BEFORE_ NewFrame()
-    bool PreNewFrame()
+    bool PreNewFrame(float fsize)
     {
         if (!WantRebuild)
             return false;
 
         ImFontAtlas* atlas = ImGui::GetIO().Fonts;
+
+        LOG3("Rebuilding fonts! ", atlas->ConfigData.Size);
+
         for (int n = 0; n < atlas->ConfigData.Size; n++)
-            ((ImFontConfig*)&atlas->ConfigData[n])->RasterizerMultiply = RasterizerMultiply;
+        {
+            auto c = (ImFontConfig*)&atlas->ConfigData[n];
+            c->RasterizerMultiply = RasterizerMultiply;
+            c->SizePixels = fsize;
+        }
 
         // Allow for dynamic selection of the builder. 
         // In real code you are likely to just define IMGUI_ENABLE_FREETYPE and never assign to FontBuilderIO.

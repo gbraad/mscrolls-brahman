@@ -39,7 +39,9 @@ COMMONDIR := $(TOP)/common
 IFIDEFS := -DIFI_BUILD -DIFI_STATIC -DIFI_HANDLE_CHOICE -s ASYNCIFY=1 #-DLOGGING
 
 GAMEDIR := .
-GAME := --preload-file $(GAMEDIR)/story.str@story.str --preload-file $(GAMEDIR)/core.str@core.str --preload-file $(GAMEDIR)/map.str@map.str --preload-file $(GAMEDIR)/picton.str@picton.str --preload-file $(GAMEDIR)/init.kl@init.kl
+GAMESRC = $(GAMEDIR)/story.str $(GAMEDIR)/core.str $(GAMEDIR)/map.str $(GAMEDIR)/picton.str
+
+GAME := --preload-file story.stz@story.stz --preload-file $(GAMEDIR)/init.kl@init.kl
 
 FONTS = --preload-file $(SDLDIR)/fonts@/fonts
 
@@ -110,14 +112,17 @@ all: $(EXE)
 $(WEB_DIR):
 	mkdir $@
 
+story.stz: $(GAMESRC)
+	$(KLDIR)/strands -bin -only $(GAMESRC)
+
 serve: all
 	python3 -m http.server -d $(WEB_DIR)
 
-$(EXE): $(OBJS) $(WEB_DIR)
+$(EXE): $(OBJS) $(WEB_DIR) story.stz
 	$(CXX) -o $@ $(OBJS) $(LIBS) $(LDFLAGS)
 #	$(PACK) $(WEB_DIR)/index.data $(PACKFLAGS)
 	cp -v $(SDLDIR)/shell-async.html $(WEB_DIR)/index.html
 
 
 clean:
-	rm -rf $(OBJS) $(WEB_DIR)
+	rm -rf $(OBJS) $(WEB_DIR) story.stz

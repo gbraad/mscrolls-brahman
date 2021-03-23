@@ -35,6 +35,7 @@
 #include "strutils.h"
 #include "varset.h"
 #include "pexpr.h"
+#include "growbuf.h"
 
 #define SYM_STICKY      '!'
 
@@ -84,6 +85,9 @@ struct ParseStrands: public ParseBase
 {
     Term*       _startTerm = 0;
     string      _loadFilePrefix;  // files base dir
+
+    GrowString  _sourceCollector;
+    bool        _collectSource = false;
     
     string parseName()
     {
@@ -1059,25 +1063,33 @@ struct ParseStrands: public ParseBase
         return v;
     }
 
-    /*
-    void _dump()
+    void collect()
     {
         for (;;)
         {
             _skipc();
             int c = AT;
             if (!c) break;
-            putchar(c);
+            _sourceCollector.add(c);
             BUMP;
         }
+
+        // ensure first term of next file is treated as a term
+        // need to two blanks + 1 in case file not ending in newline
+        _sourceCollector.append("\n\n\n");
     }
-    */
 
     void processString(const char* data)
     {
         SETPOSSTART(data);
         SETPOS(data);
 
+        if (_collectSource)
+        {
+            collect();
+            SETPOS(data);
+        }
+        
         //_dump(); return;
 
         for (;;)
@@ -1110,7 +1122,7 @@ struct ParseStrands: public ParseBase
         }
     }
 
-    bool processFile(const string& filename)
+    bool processFile(const string& filename, bool* wasCompressed = 0)
     {
         lineno = 1;
         _filename = makePath(_loadFilePrefix, filename);
@@ -1121,34 +1133,58 @@ struct ParseStrands: public ParseBase
         bool r = fd.open(_filename);
         if (r)
         {
-            FD::Pos fsize;
-            unsigned char* data =
-                fd.readAll(&fsize, true); // remove dos newlines
+            // try reading compressed first
+            size_t usize;
+            unsigned char* data = readz(fd, &usize);
+
+            if (wasCompressed) *wasCompressed = data != 0;
+            
+            if (!data)
+            {            
+                FD::Pos fsize;
+                data = fd.readAll(&fsize, true); // remove dos newlines
+            }
+            
             if (data)
             {
                 processString((char*)data);
                 delete data;
             }
+            else r = false;
         }
-        else
+
+        if (!r)
         {
             ERR1("Can't open input file", filename);
         }
         return r;
     }
 
-    bool loadFiles(std::vector<std::string>& files)
+    bool loadFiles(std::vector<std::string>& files, bool loadGameFiles = true)
     {
         // false if any file fails
         bool v = true;
+        bool wasCompressed;
 
         for (auto& f : files)
-            if (!processFile(f)) v = false;
+        {
+            v = processFile(f, &wasCompressed);
+            if (!v) break;
+
+            // dont auto load game files if compressed
+            // as we assume this is a complete story in one
+            if (wasCompressed) loadGameFiles = false;
+        }
 
         if (v)
         {
-            // look for well-known term to list extra files
-            Term* t = Term::find(TERM_GAME_FILES);
+            Term* t = 0;
+
+            if (loadGameFiles)
+            {
+                // look for well-known term to list extra files
+                t = Term::find(TERM_GAME_FILES);
+            }
 
             if (t)
             {
@@ -1164,7 +1200,7 @@ struct ParseStrands: public ParseBase
                         if (em->_mType == m_file)
                         {
                             // a game source file
-                            if (!processFile(em->_filename)) v = false;    
+                            if (!processFile(em->_filename)) v = false;
                         }
                     }
                 }

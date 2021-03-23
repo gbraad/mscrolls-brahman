@@ -234,8 +234,12 @@ struct KLHandler: public IFIHandler
     bool ifiStory(const string& story) override
     {
         _story = story;
-        
-        string sfile = changeSuffix(_story, ".str");
+
+        // ensure suffix is .stz or .str
+        string sfile = story;
+        if (suffixOf(sfile) != ".stz")
+            sfile = changeSuffix(_story, ".str");
+    
         LOG3(TAG "story ", sfile);
         std::vector<string> fv = { sfile };
         if (_ps.loadFiles(fv))

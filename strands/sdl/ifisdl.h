@@ -331,7 +331,7 @@ struct StrandCtx
 
     const char* configdir = ".";
     const char* datadir = "."; // default;
-    const char* story = "story.str";
+    const char* story = "story.stz"; // compressed single file
 
     IFIHost host;
     SDLHandler h;

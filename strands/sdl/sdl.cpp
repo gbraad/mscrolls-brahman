@@ -19,18 +19,15 @@
 #include <SDL_opengles2.h>
 #include <emscripten/fiber.h>
 
-#ifdef HAVE_FREETYPETEST
-#include "freetypetest.h"
-#endif
-
 // forward
 const char* gui_input_pump();
 
 #include "ifisdl.h"
-
+#include "freetypetest.h"
 
 SDL_Window*     g_Window = NULL;
 SDL_GLContext   g_GLContext = NULL;
+static float    fontSize = 24;
 
 // For clarity, our main loop code is declared at the end.
 static void main_loop();
@@ -162,14 +159,13 @@ int main(int, char**)
     ImGui_ImplOpenGL3_Init(glsl_version);
 
     ImFontConfig config;
-    float fsize = 24.0f;
-
+    
     // these oversampling values are ignored by freetype atlas build
     //config.OversampleH = 4;
     //config.OversampleV = 2;
     //config.GlyphExtraSpacing.x = 1.0f;
-    io.Fonts->AddFontFromFileTTF("fonts/Roboto-Regular.ttf", fsize);
-    io.Fonts->AddFontFromFileTTF("fonts/Merriweather-Light.ttf", fsize);
+    io.Fonts->AddFontFromFileTTF("fonts/Roboto-Regular.ttf", fontSize);
+    io.Fonts->AddFontFromFileTTF("fonts/Merriweather-Light.ttf", fontSize);
 
     G.fibers[0].init_with_api(runfiber, 0);
     emscripten_set_main_loop(main_loop, 0, true);
@@ -200,29 +196,25 @@ static void main_loop()
 
     if (ImGui::IsKeyPressed(0x3A)) show_demo_window = true;
 
-#ifdef HAVE_FREETYPETEST
+    // debug show freetype tweak window
     static bool show_freetype = false;
-        
     if (ImGui::IsKeyPressed(0x3B)) show_freetype = true;
-    
-    if (show_freetype && freetype_test.PreNewFrame())
+
+    // if font changed
+    if (freetype_test.PreNewFrame(fontSize))
     {
         // REUPLOAD FONT TEXTURE TO GPU
         ImGui_ImplOpenGL3_DestroyDeviceObjects();
         ImGui_ImplOpenGL3_CreateDeviceObjects();
     }
-#endif    
 
     // Start the Dear ImGui frame
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplSDL2_NewFrame(g_Window);
     ImGui::NewFrame();
 
-
-#ifdef HAVE_FREETYPETEST
     if (show_freetype)
         freetype_test.ShowFontsOptionsWindow(&show_freetype);
-#endif
 
     if (show_demo_window)
         ImGui::ShowDemoWindow(&show_demo_window);
@@ -338,6 +330,61 @@ void PopKeyboard()
 }
 #endif
 
+static const char* fontName(ImFont* f)
+{
+    static char buf[64];
+    const char* p = f->GetDebugName();
+    char* q = buf;
+    while (*p)
+    {
+        if (*p == '.') break;
+        *q++ = *p++;
+    }
+    *q = 0;
+    return buf;
+}
+
+static void fontMenu()
+{
+    float h = ImGui::GetFrameHeightWithSpacing();
+    float w = 26*fontSize;
+    if (w < 500) w = 500;
+    ImGui::BeginChild("fontchooser", ImVec2(w,h), false);
+    ImGuiIO& io = ImGui::GetIO();
+    
+    ImFont* font_current = ImGui::GetFont();
+
+    if (ImGui::BeginCombo("Font", fontName(font_current)))
+    {
+        for (int n = 0; n < io.Fonts->Fonts.Size; n++)
+        {
+            ImFont* font = io.Fonts->Fonts[n];
+            ImGui::PushID((void*)font);
+            if (ImGui::Selectable(fontName(font), font == font_current))
+                io.FontDefault = font;
+            ImGui::PopID();
+        }
+
+        ImGui::EndCombo();
+    }
+    ImGui::SameLine();
+
+    float w1 = 4*fontSize;
+    if (w1 < 100) w1 = 100;
+    ImGui::SetNextItemWidth(w1);
+    int fz = fontSize;
+    ImGui::InputInt("Size", &fz, 1, 0);
+    if (fz > 40) fz = 40;
+    else if (fz < 12) fz = 12;
+    if (fontSize != fz)
+    {
+        fontSize = fz;
+        freetype_test.WantRebuild = true;
+    }
+    
+    ImGui::EndChild();
+}
+
 
 void StrandWindow(bool* strand_open)
 {
@@ -398,6 +445,8 @@ void StrandWindow(bool* strand_open)
 
         if (ImGui::BeginMenu("Font"))
         {
+            fontMenu();
+            /*
             for (int n = 0; n < io.Fonts->Fonts.Size; n++)
             {
                 ImFont* font = io.Fonts->Fonts[n];
@@ -405,6 +454,7 @@ void StrandWindow(bool* strand_open)
                 if (ImGui::MenuItem(font->GetDebugName())) io.FontDefault = font;
                 ImGui::PopID();
             }
+            */
             ImGui::EndMenu();
         }
         ImGui::EndMenuBar();
