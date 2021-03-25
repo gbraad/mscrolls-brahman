@@ -54,6 +54,8 @@ BULDOING
 ENTRANCE@ MANOR
 * name
 the main entrance
+* name
+outside
 * x it
 You're standing in the doorway, north is the main hall.
 \nSgt. Bulwark is here, BULDOING.
@@ -77,19 +79,23 @@ You're in the hall. A large grandfather clock stands against one wall.
 Westwards is the study, east is the drawing room and further north leads through to the dining room. Going south takes you back out through the main entrance.
 * w
 GOSTUDY
-* go study
+*=+ go into the study
 GOSTUDY
 * e
 GODRAWINGROOM
-* go drawing room
+*=+ go into the drawing room
 GODRAWINGROOM
 * n
 GODININGROOM
-* go dining room
+*=+ go into the dining room
 GODININGROOM
 * s
 GOENT
+* out
+GOENT
 * go entrance
+GOENT
+*=+ go outside
 GOENT
 
 GOHALL
@@ -118,7 +124,7 @@ This study was used by the Major for his business affairs. A huge desk dominates
 Back east is the hall.
 * e
 GOHALL
-* go hall
+*=+ go into the hall
 GOHALL
 
 GOSTUDY
@@ -138,7 +144,7 @@ There's an impressive fireplace with a fire blazing away.
 West leads back to the hall.
 * w
 GOHALL
-* go hall
+*=+ go into the hall
 GOHALL
 
 GODRAWINGROOM
@@ -156,7 +162,7 @@ the dining room
 This is the dining room, you can see the garden through the north windows. West leads to the kitchen, but that's staff only. Back south is the hall. 
 * s
 GOHALL
-* go hall
+*=+ go into the hall
 GOHALL
 * w
 TRYKITCHEN

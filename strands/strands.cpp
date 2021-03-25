@@ -42,6 +42,8 @@
 #define DEFAULT_STORY_FILE   "story.str"
 #define DEFAULT_STORY_BINARY "story.stz"
 
+#define DEFAULT_VOICE_FILE   "voice.txt"
+
 #ifdef __EMSCRIPTEN__
 #endif
 
@@ -70,6 +72,24 @@ bool writeBinary(GrowString& buf, const char* fname, bool compress)
         else
         {
             r = out.write((unsigned char*)buf.start(), buf.size());
+        }
+    }
+    return r;
+}
+
+bool writeVoices(ParseStrands::VoiceSet& vs, const char* fname)
+{
+    FD out;
+    bool r = out.open(fname, FD::fd_new);
+    if (r)
+    {
+        FDBuf fout(out);
+        for (auto& v : vs)
+        {
+            fout.printf("%s: rec:%s\n", v._actor.c_str(), v._filename.c_str());
+            fout.write((const unsigned char*)v._speech.c_str(), v._speech.size());
+            fout.putc('\n');
+            fout.putc('\n');
         }
     }
     return r;
@@ -119,6 +139,10 @@ int main(int argc, char** argv)
                 // if emitting bin, do not compress
                 compress = false;
             }
+            else if (!u_stricmp(argv[i], "-genvoice"))
+            {
+                ps._collectVoices = true;
+            }
             else
             {
                 printf("unrecognised option '%s'\n", argv[i]);
@@ -139,7 +163,7 @@ int main(int argc, char** argv)
     
     if (!files.size())
     {
-        printf("Usage: %s [-bin [-nocompress]] [-only] [-d] file...\n", argv[0]);
+        printf("Usage: %s [-bin [-nocompress]] [-genvoice] [-only] [-d] file...\n", argv[0]);
         return -1;
     }
 
@@ -166,6 +190,10 @@ int main(int argc, char** argv)
                                 compress);
                 if (!v)
                     printf("error writing binary '%s'\n", DEFAULT_STORY_BINARY);
+            }
+            else if (ps._collectVoices)
+            {
+                writeVoices(ps._voiceSet, DEFAULT_VOICE_FILE);
             }
             else
             {

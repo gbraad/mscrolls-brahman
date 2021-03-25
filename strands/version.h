@@ -50,5 +50,5 @@
 #define BUILD_VER ""
 #endif
 
-#define VERSION "1.06"
+#define VERSION "1.10"
 

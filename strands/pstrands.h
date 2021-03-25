@@ -77,6 +77,8 @@
 #define SYM_ATTRIBUTE ':'
 #define SYM_ATTR_SEP ','
 
+#define MEDIA_ATTR_VOICE        "voice"
+#define MEDIA_ATTR_SPEECH       "speech"
 
 namespace ST
 {
@@ -88,6 +90,18 @@ struct ParseStrands: public ParseBase
 
     GrowString  _sourceCollector;
     bool        _collectSource = false;
+
+    struct VoiceInfo
+    {
+        string          _speech;
+        string          _actor;
+        string          _filename;
+    };
+
+    typedef std::list<VoiceInfo>   VoiceSet;
+
+    VoiceSet           _voiceSet;
+    bool               _collectVoices = false;
     
     string parseName()
     {
@@ -137,6 +151,36 @@ struct ParseStrands: public ParseBase
         }
 
         return rt;
+    }
+
+    void collectVoice(const Flow::EltMedia& m)
+    {
+        if (m._attr)
+        {
+            var actor = m._attr->find(MEDIA_ATTR_VOICE);
+            var speech = m._attr->find(MEDIA_ATTR_SPEECH);
+
+            // if no actor, then this isn't a voice tag
+            if (actor && speech)
+            {
+                VoiceInfo vi;
+                vi._speech = speech.toString();
+                vi._actor = actor.toString();
+                vi._filename = m._filename;
+
+                // check for duplicate filenames
+                for (auto& v : _voiceSet)
+                {
+                    if (v._filename == vi._filename)
+                    {
+                        LOG1("WARNING: collect Voice, duplicte filename ", v._filename);
+                        break;
+                    }
+                }
+                
+                _voiceSet.push_back(vi);
+            }
+        }
     }
 
     void _addText(Flow& f,
@@ -249,7 +293,21 @@ struct ParseStrands: public ParseBase
                 const char* vs = p;
 
                 // value ends with comma or newline or null
-                while (*p && *p != SYM_ATTR_SEP && *p != '\n') ++p;
+                bool inQuote = false;
+                while (*p)
+                {
+                    if (*p == '"')
+                    {
+                        inQuote = !inQuote;
+                    }
+                    else
+                    {
+                        if (!inQuote && *p == SYM_ATTR_SEP) break;
+                        if (*p == '\n') break;
+                    }
+                    ++p;
+                }
+                
                 if (vs == p) break; // no value given, drop out
 
                 string val(vs, p - vs);
@@ -303,6 +361,10 @@ struct ParseStrands: public ParseBase
                 else if (*p == '.' && p != q)
                 {
                     // collect suffix and see if it's a media filename
+                    // media elements can have attributes,
+                    // foo.jpg:wibble:1,wobble:2,whatever:something ...
+                    // these are collected and stored in a varset
+                    
                     const char* e = p;
                     e++;
                     while (u_isalnum(*e)) ++e;
@@ -332,6 +394,8 @@ struct ParseStrands: public ParseBase
                                 m->_attr = parseAttributes(m->_attr, &e);
                             }
 
+                            if (_collectVoices) collectVoice(*m);
+                            
                             q = p = e;
                             assert(!l);
                             break;

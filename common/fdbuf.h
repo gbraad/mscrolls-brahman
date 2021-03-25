@@ -35,6 +35,7 @@
 
 #include <assert.h>
 #include <string.h>     // memcpy
+#include <stdarg.h>
 #include "fd.h"
 #include "logged.h"
 
@@ -265,6 +266,12 @@ template<int SZ> struct FDBufN: public FDBase
         return res;
     }
 
+    bool write(const unsigned char* buf, size_t amt)
+    {
+        size_t nwrote;
+        return write(buf, amt, nwrote) && nwrote == amt;
+    }
+
     int lastChar(unsigned int n = 1) const
     {
         return _bp >= n ? _buf[_bp - n] : 0;
@@ -411,6 +418,32 @@ template<int SZ> struct FDBufN: public FDBase
                  std::hex << e._id << std::dec << " in " << e._name);
         }
         return r;
+    }
+
+    int printf(const char* fmt, ...)
+    {
+        char buf[4096];
+        
+        va_list args;
+        va_start(args, fmt);
+        int n = vsnprintf(buf, sizeof(buf), fmt, args);
+        va_end(args);
+
+        char* tbuf = buf;
+        
+        if (n >= (int)sizeof(buf))
+        {
+            // failed. allocate temp buffer
+            tbuf = new char[n+1];
+            va_start(args, fmt);
+            n = vsnprintf(tbuf, sizeof(buf), fmt, args);
+            va_end(args);
+        }
+        
+        if (!write((const unsigned char*)tbuf, n)) n = 0;
+        if (tbuf != buf) delete [] tbuf;
+        
+        return n;
     }
 
 private:

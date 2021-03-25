@@ -7,7 +7,7 @@ You are the indomitable inspector Lance Picton, who gets the cases no one else c
 You've already figured out that exactly one member of the household is guilty. The Suspects are: Charles, Major Stephenson's brother and business partner, Charlotte the Major's wife, Jimmy the son or possibly Jeeves the family butler. 
 
 BEGIN
-\nBeta version. Please send all feedback to sia@9ize.com Thanks!
+\nSpringThing 2021 Edition. Please send any feedback to sia@9ize.com Thanks!
 \n\nYou arrive at the manor entrance where Sergeant Bulwark is currently posted.
 \n\n" 'ello Inspector," he says in his usual acerbic manner, "We got a right one 'ere! We had that numpty detective Hazelden round earlier. He poked around, got absolutely nowhere. What a fool, he even suggested that the butler did it; does he think this is some kind of game!
 \nAnyway, we saw 'im off and called you in. I've had all the suspects stay right 'ere in the 'ouse for questioning." GOODWORK
@@ -64,7 +64,8 @@ You pick up a book at random,
 * it's about fish-keeping.
 * it chronicles the rise and fall of the Roman Empire.
 * a fascinating treatise on fossils.
-* the 1898 sportsman almanac.
+* the 1898 Sportsman's Almanac.
+* A riveting read about sedimentary rock formation.
 
    Not very relevant to the case though.
 
@@ -96,7 +97,7 @@ Like I said, it's blazing away!
 
 ///////////////////// ///////// PEOPLE
 
-/////////////////// JIMMY
+/////////////////// JIMMY  // actor52
 
 JIMMY@ PERSON
 > put him in study
@@ -108,16 +109,22 @@ He's about 10 years old, wearing a maroon V-neck wool jumper and grey schoolboy 
 JIMCOPOUT
 * ask him about window
 "Stupid old greenhouse!"
+sounds/j1.ogg:voice:actor52,speech:"Stupid old greenhouse!"
 * ask him about dog
-"Yeah, the old man shot Ruffy, the dog, in a hunting accident."
+"Yes, the old man shot Ruffy the dog in a hunting accident."
+sounds/j2.ogg:voice:actor52,speech:"*Yes* the old man *shot* Ruffy the *dog* in a hunting accident."
 * ask him about charles
-"I've never liked him, but then i don't like anyone!"
+"I never liked him, but then I don't like anyone!"
+sounds/j3.ogg:voice:actor52,speech:"_I_ never liked him, but then I don't like *anyone*!"
 * ask him about charlotte
 "Spends all her time in the garden, probably digging holes for bodies!"
+sounds/j4.ogg:voice:actor52,speech:"She spends all her time in the *garden* probably digging holes for *bodies*!"
 * ask him about major
 "Got the right hump at me for breaking his greenhouse!"
+sounds/j5.ogg:voice:actor52,speech:"Got the %%right% *hump* at me for breaking his *greenhouse*!"
 * ask him for thing
 "No chance copper!"
+sounds/j6.ogg:voice:actor52,speech:"%%No chance% *copper*!"
 *= describe him
 > x it
 *+= talk to him
@@ -125,9 +132,13 @@ TALK_JIMMY
 
 JIMCOPOUT
 * "What's it to you copper!"
-* "I'm not answering that without my lawyer!"
+sounds/j7.ogg:voice:actor52,speech:"*What's* it to %%%_you_% *copper*!"
+* "I'm not answering without my lawyer!"
+sounds/j8.ogg:voice:actor52,speech:"I'm not answering without my *lawyer*!"
 * "I'm not saying anything!"
+sounds/j9.ogg:voice:actor52,speech:"I'm not saying *anything*!"
 * "I have no comment!"
+sounds/j10.ogg:voice:actor52,speech:"I have _no_ comment!"
 
 JIMCLOTH@ THING
 > put it on jimmy
@@ -140,7 +151,7 @@ grey shorts
 * x it
 Typical urchin!
 
-/////////////////// Charlotte
+/////////////////// Charlotte  // actor54
 
 CLOT@ PERSON
 > put her in dining room
@@ -151,24 +162,31 @@ A woman in her early thirties and a good deal younger than the Major, she strike
 * ask her about thing
 CLOTCOP
 * ask her about dog
-"Ruffy was the cutest puppy you've ever seen! Such a tragedy."
+"Ruffy was the cutest fluffy puppy you've ever seen! Such a tragedy."
+sounds/s1.ogg:voice:actor54,speech:"Ruffy was the *cutest* fluffy puppy you've _ever_ seen! _Such_ a tragedy."
 * ask her about jimmy
-"Such a well behaved little boy!"
+"Such a well behaved boy!"
+sounds/s2.ogg:voice:actor54,speech:"_Such_ a well behaved *boy*!"
 * ask her about charles
-"I don't think it'll be easy for him to fill the Major's shoes - wrong size, for a start!"
+"I don't think it'll be easy for him to fill the Major's shoes - wrong size for a start!"
+sounds/s3.ogg:voice:actor54,speech:"I don't think it'll be easy for him to *fill* the Major's *shoes*, the wrong size for a start!"
 * ask her about major
-"My devoted husband, taken from me! What a tragic loss. I do hope you catch him Inspector!"
+"My poor dear husband, taken! What a tragic loss. I do hope you get him Inspector!"
+sounds/s4.ogg:voice:actor54,speech:"My _poor_ dear *husband*, **taken*! What a *tragic* loss! I _do_ hope you *get* him Inspector!"
 * ask her about jeeves
-"Jeeves, he's the butler inspector! Really, you police are a bit slow sometimes."
+"Jeeves, he's our butler Inspector! Really, you police are a bit slow sometimes!"
+sounds/s5.ogg:voice:actor54,speech:"Jeeves, he's our *butler* inspector! *Really* you police are a *bit* slow sometimes!"
 * ask her for thing
-"I should say not inspector!"
+"I should say not Inspector!"
+sounds/s6.ogg:voice:actor54,speech:"I should say %%%%not% Inspector!"
 *= describe her
 > x it
 *+= talk to her
 TALK_CLOT
 
 CLOTCOP
-* "You're going to have to ask my husband about that!"
+* "You'll have to ask my husband about that!"
+sounds/s7.ogg:voice:actor54,speech:"You'll *have* to ask my husband about *that*!"
 
 DRESS@ THING
 > put it on charlotte
@@ -179,7 +197,7 @@ ensemble
 * x dress
 Worth a packet no doubt!
 
-/////////////////// CHARLES
+/////////////////// CHARLES  // actor53
 
 CHARLES@ PERSON
 > put him in drawing room
@@ -190,25 +208,34 @@ Charles is the Major's brother and partner in their investments business. He'll 
 *= describe him
 > x it
 * ask him about jeeves
-"He's been our butler for goodness know how long, not much else to say really. Don't you have a butler?"
+"He's been our butler for goodness knows how long, not much else to say really. Don't you have a butler?"
+sounds/c1.ogg:voice:actor53,speech:"*He's* been our butler for _goodness_ knows how long. Not much else to say *really*. Don't _*you*_ have a butler?."
 * ask him about major
-"He was my dear brother and business partner, such a tragic loss."
+"He was my dear brother and business partner, a terrible loss to me."
+sounds/c2.ogg:voice:actor53,speech:"He was my *dear* brother and business partner, a _*terrible*_ loss to me!"
 * ask him about charlotte
 "I'd rather not say anything about that!"
+sounds/c3.ogg:voice:actor53,speech:"I'd rather not say *anything* about *that*!"
 * ask him about jimmy
-"Young rascal! Weren't you young once Inspector?"
+"The young rascal! Weren't you young once Inspector?"
+sounds/c4.ogg:voice:actor53,speech:"The young *rascal*! Weren't _*you*_ young *once* Inspector?"
 * ask him about thing
 CHARLESCOPOUT
 * ask him about dog
-"Stupid mutt ran in front of the gun; his own silly fault really!"
+"Stupid mutt ran in front of the gun, his own silly fault!"
+sounds/c5.ogg:voice:actor53,speech:"Stupid _*mutt*_ ran in front of the *gun*. His own %%*silly*% fault!"
 * ask him for thing
-"Not the done thing, old boy!"
+"Not the done thing, old bean!"
+sounds/c6.ogg:voice:actor53,speech:"Not the done-*_thing_* *ol _been_*!"
 *+= talk to him
 TALK_CHARLES
 
 CHARLESCOPOUT
-* "I can't help you with that, at all!"
-* "What a silly question! Shouldn't you be solving the case!"
+* "I can't help you, at all!"
+sounds/c7.ogg:voice:actor53,speech:"I can't *help* you at _all_!"
+* "What a silly question! Shouldn't you be solving the case?"
+sounds/c8.ogg:voice:actor53,speech:"*What* a %silly% question! *Shouldn't* you be solving the *case*?"
+
 
 JACKET@ THING
 > put it on charles
@@ -243,19 +270,25 @@ Jeeves the butler
 * x it
 Jeeves has been in the family for as long as anyone can remember. Softly spoken and impeccably dressed in kid gloves, black waistcoat, starched white dickey and bow tie. Standing as tall as he can, he looks at you with a haughty demeanour as if you're not worth his time, whilst at the same time acting obsequiously apologetic and toady. Surely he's beyond suspicion!
 * ask him about jimmy
-"Master Jimmy is Major Stephenson's son sir!" JVPAUSE
+"Master Jimmy is Major Stephenson's son Sir!" JVPAUSE
+sounds/b1.ogg:voice:actor51,speech:Master *Jimmy* is Major Stephenson's son Sir!
 * ask him about charles
 "He's in charge of everything now Sir!" JVPAUSE
+sounds/b2.ogg:voice:actor51,speech:He's in charge of everything now Sir!
 * ask him about charlotte
 "I should say, you'd best ask her directly, Sir!" JVPAUSE
+sounds/b3.ogg:voice:actor51,speech:"I should say you'd best ask her *directly* Sir!"
 * ask him about major
 "I'm afraid he's dead, Sir!" JVPAUSE
+sounds/b4.ogg:voice:actor51,speech:I'm afraid he's *dead* Sir!
 * ask him about dog
-"Sadly, Ruffy the dog passed away recently."
+"Sadly, Ruffy the dog snuffed it recently."
+sounds/b5.ogg:voice:actor51,speech:"Sadly, Ruffy the dog snuffed it recently."
 * ask him about thing
 JEEVCOP
 * ask him for thing
 "That's not possible right now, Sir!"
+sounds/b6.ogg:voice:actor51,speech:*That's* not possible right *now* Sir!
 *= describe him
 > x it
 *+= talk to him
@@ -263,10 +296,12 @@ TALK_JEEVES
 
 JEEVCOP
 "Sorry, I can't help you with that Sir!"
+sounds/b7.ogg:voice:actor51,speech:"Sorry, I can't help you with *that* Sir!"
 
 
 JVSTART
 \n"Welcome to the Manor Sir, I am Jeeves the butler, at your disposal." JVMAIN^
+sounds/b8.ogg:voice:actor51,speech:"Welcome to the *Manor* Sir, I am Jeeves the butler, at your disposal."
 
 JVMAIN=
 *?JVPAUSE JVDELAY
@@ -282,7 +317,9 @@ JVDELAY<
 JVBEALL
 \nJeeves, 
 * "If that's all Sir?"
+sounds/b9.ogg:voice:actor51,speech:If that's *all* Sir?
 * "Will that be all Sir?"
+sounds/b10.ogg:voice:actor51,speech:Will *that* be all Sir?
 
 
 JVHERE > what is jeeves in
@@ -370,9 +407,9 @@ PROVE
 * OKBUT do you have anything to corroborate that?
 
 WHEREU
-* where were you at the time of the murder?
-* what were you doing when the murder took place?
-* do you have an alibi?
+* Where were you at the time of the murder?
+* What were you doing when the murder took place?
+* Do you have an alibi?
 
 THATSALL
 * That's all for now.
@@ -408,48 +445,63 @@ JSAYB
 JSAYS
 *-?JPROVE What where you doing outside?
 "Hiding dead bodies of course. Why don't you go dig them up!"
+sounds/j11.ogg:voice:actor52,speech:"Hiding dead bodies of course! Why don't you go dig them up!"
 *-How did the Major die?
 "He was shot in the head at point blank range, obviously!"
+sounds/j12.ogg:voice:actor52,speech:"He was shot in the *head* at point blank range, *obviously*!"
 *-Where is the body?
 "Hazelden had it sent for autopsy, to find the cause of death."
+sounds/j13.ogg:voice:actor52,speech:"*Hazelden* had it sent for autopsy, to find the cause of *death*."
 *+! THATSALL
 JIMBYE MAIN
 
   TALK_JIMMY
 
 JIMBYE
-* "\OK copper"
+* "\OK copper!"
+sounds/j14.ogg:voice:actor52,speech:"_OK_ *copper*!"
 
 JWHERE
-"I'd just come back home and was in the hall."
+"I had just come back and was in the hall."
+sounds/j15.ogg:voice:actor52,speech:"I had just come *back* and was in the *hall*."
 
 JPROVE?
 * PROVE
 "Ask Charles because he saw me there."
+sounds/j16.ogg:voice:actor52,speech:"Ask *Charles* because he saw me _there_."
 
 JSAYC MURDER
 * Jimmy
 "No, the room was empty!"
+sounds/j17.ogg:voice:actor52,speech:"*No* the room was *empty*!"
 * Charles
 "No, I don't think so."
+sounds/j18.ogg:voice:actor52,speech:"*No* I don't think so."
 *
 "Yes I did!"
+sounds/j19.ogg:voice:actor52,speech:"_Yes_ I *%%did%*!"
 
 JSAYB MURDER
 * jimmy
 "Yes, but he came out of the study and then went to the dining room."
+sounds/j20.ogg:voice:actor52,speech:"Yes, but he came out of the *study* and *then* went to the dining-room."
 * Jeeves
 "I'm pretty sure he wasn't in the dining room."
+sounds/j21.ogg:voice:actor52,speech:"I'm pretty sure he *wasn't* in the dining-room."
 *
 "Yes, I saw him setting out the table."
+sounds/j22.ogg:voice:actor52,speech:"*Yes* I saw him setting out the table."
 
 JSAYS MURDER
 * jimmy
 "She was in the dining room."
+sounds/j23.ogg:voice:actor52,speech:"She _was_ in the dining room."
 * charlotte
-"She came in from the garden at some point."
+"She came back in from the garden at some point."
+sounds/j24.ogg:voice:actor52,speech:"She came back in from the garden at *some-point*."
 *
 "No idea, but she often goes into the garden around that time."
+sounds/j25.ogg:voice:actor52,speech:"*No idea*! But she often goes into the garden around that *time*."
 
 // Charlotte
 
@@ -468,30 +520,40 @@ She says,
 
 TALK_CLOT?
 * Charlotte, WHEREU
-I was in the garden. SPROVE
+"I was in the garden."
+sounds/s14.ogg:voice:actor54,speech:"I was in the garden."
+SPROVE
 *?BPROVE Jeeves said he was in the dining room, setting the dinner table. Did you see him?
 SSAYB
 *?CPROVE Any idea where Charles was?
 "I'm not a detective, Inspector!"
+sounds/s8.ogg:voice:actor54,speech:"I'm _%not%_ a detective *Inspector*!"
 *+! THATSALL
 CLOTBYE MAIN
 
    TALK_CLOT
 
 CLOTBYE
-* "Goodbye inspector."
+* "Goodbye Inspector."
+sounds/s9.ogg:voice:actor54,speech:"*%Goodbye%* inspector!"
+* "Good luck Inspector."
+sounds/s15.ogg:voice:actor54,speech:"*%Good Luck%* inspector!"
 
 SPROVE?
 * PROVE
 "Ask Jeeves, he saw me through the window."
+sounds/s10.ogg:voice:actor54,speech:"Ask *Jeeves*, he saw me through the *window*."
 
 SSAYB MURDER
 * Charlotte
-"No, that's a lie, Jeeves wasn't here at all."
+"No that's a lie! Jeeves wasn't here at all."
+sounds/s11.ogg:voice:actor54,speech:"*No* that's a **lie*! Jeeves wasn't here at *all*."
 * Jeeves
 "No, but perhaps Jeeves was in the kitchen."
+sounds/s12.ogg:voice:actor54,speech:"*No* but %%perhaps% Jeeves was in the *%%kitchen%*."
 *
 "Of course I did!"
+sounds/s13.ogg:voice:actor54,speech:"Of course-i *%did%*!"
 
 // charles
 
@@ -505,24 +567,32 @@ CGREET<
 
 TALK_CHARLES?
 * Charles, WHEREU
-"I was in here, CDOING." CPROVE
+CDOING
+CPROVE
 *?JPROVE Was Jimmy in the hall?
 CSAYJ
 *?BPROVE Do you happen to know where Jeeves was?
 CSAYB
 *- Do you own a gun?
-"Of course, but they're all locked in the gun cupboard." GUN
-"Let's see; Jeeves of course, Charlotte has a spare, sometimes Jimmy, then there's myself." GUN1
-"Oh, don't you know. Hazelden had it sent to forensics."
+"Of course, but they're all locked in the gun cupboard."
+sounds/c9.ogg:voice:actor53,speech:"*Of course*! but they're all *locked* in the *gun-cupboard*."
+GUN
+"Let's see now; Jeeves, Charlotte has a spare, sometimes Jimmy, as well as mine of course!"
+sounds/c10.ogg:voice:actor53,speech:"Let's _see_ now, *Jeeves*, *Charlotte* has a spare and sometimes *Jimmy*, as well as mine *of course*!"
+GUN1
+"Oh, don't you know, Hazelden had it sent to forensics."
+sounds/c11.ogg:voice:actor53,speech:"_*Oh*_ don't you _know_! *Hazelden* had it sent to forensics."
 *- What kind of hunting do you do?
-"Grouse, pheasant and those despicable foxes!"
+"Grouse, pheasant, pidgeons and even the occasional dog!"
+sounds/c12.ogg:voice:actor53,speech:"*Grouse*, *pheasant*, *pigeons* and even the occasional *dog*."
 *+! THATSALL
 CHARBYE MAIN
 
    TALK_CHARLES
 
 CHARBYE
-"Toodle pip!"
+"Good day, Inspector!"
+sounds/c13.ogg:voice:actor53,speech:"_Good *day*_ inspector!"
 
 GUN?
 * Who has keys for the gun cupboard?
@@ -536,38 +606,51 @@ CHARDO
 * reading the paper
 
 CDOING
-* smoking my pipe
-* reading my book
-* playing solitaire
-* writing my new novel
-* listening to the gramophone
+"I was in here,
+* smoking my pipe."
+sounds/c21.ogg:voice:actor53,speech:"I was in here, smoking my pipe."
+* reading my book."
+sounds/c22.ogg:voice:actor53,speech:"I was in here, reading my book."
+* writing my novel."
+sounds/c23.ogg:voice:actor53,speech:"I was in here, writing my novel."
+* listening to the gramophone."
+sounds/c24.ogg:voice:actor53,speech:"I was in here, listening to the gramophone."
 
 CSAYJ MURDER
 * jimmy
 "He was there earlier, but I'm not sure exactly."
+sounds/c14.ogg:voice:actor53,speech:"He __*was*_ there *earlier*. But I'm not sure *exactly*."
 * Charles
 "No, I didn't see him at all."
+sounds/c15.ogg:voice:actor53,speech:"_*No*_ I didn't see him at *all*."
 *
 "Yes indeed, I saw him there."
+sounds/c16.ogg:voice:actor53,speech:"*Yes indeed*! I saw him *there*."
+
 
 CSAYB MURDER
 * jeeves
 "I heard someone come out of the study."
+sounds/c17.ogg:voice:actor53,speech:"I heard *someone* come out of the study."
 * charles
 "I think he came out of the study."
+sounds/c18.ogg:voice:actor53,speech:"I _*think*_ he came out of the *study*."
 *
 "No idea, old bean!"
-
+sounds/c19.ogg:voice:actor53,speech:"I've  no  _*idear*_  *ol _bean_*!"
 
 CPROVE?
 * PROVE
-"Jimmy came to see me, ask him."
+"Jimmy came to see me, just ask him!"
+sounds/c20.ogg:voice:actor53,speech:"*Jimmy* came to *see-me*! Just _*ask*_ *him*!"
 
 // jeeves
 
 TALK_JEEVES?
 * Jeeves, WHEREU
-"I was in the dining room, preparing the dinner table." BPROVE
+"I was in the dining room, preparing the dinner table."
+sounds/b11.ogg:voice:actor51,speech:"I was in the dining room preparing the dinner *table*."
+BPROVE
 *?SPROVE Did you see Charlotte in the garden?
 BSAYS
 *?JPROVE Did you see Jimmy in the hall?
@@ -580,38 +663,51 @@ JEEVESBYE MAIN
    TALK_JEEVES
 
 JEEVESBYE
-"Very good Sir."
+* "Very good Sir."
+sounds/b12.ogg:voice:actor51,speech:"*Very* good Sir."
+* "If that's all Sir?"
+sounds/b9.ogg
 
 BPROVE?
 * PROVE
 BWHERE
 
 BWHERE
-"Certainly sir, ask Charlotte, she saw me preparing the dinner table."
+"Certainly Sir, ask Charlotte, she saw me preparing the dinner table."
+sounds/b13.ogg:voice:actor51,speech:"*Certainly* sir, ask Charlotte, she saw me preparing the dinner table."
 
 BSAYS MURDER
 * jeeves
-"No, she's finished that some time before."
+"No, she had finished that some time before."
+sounds/b22.ogg:voice:actor51,speech:"*No* she had finished *that* some-time *before*."
 * Charlotte
 "She did do some gardening, but I think she'd finished by then."
+sounds/b14.ogg:voice:actor51,speech:"She _*%%did%*_ do some gardening but I *think* she'd finished by *then*."
 * 
 "Yes, I distinctly remember seeing her through the window."
+sounds/b15.ogg:voice:actor51,speech:"Yes, I *distinctly* remember *seeing* her through the window."
 
 BSAYJ MURDER
 * jimmy
 "No, I can't recall seeing him."
+sounds/b16.ogg:voice:actor51,speech:"*No* I can't recall seeing him."
 * Jeeves
 "He wasn't in the hall, I remember that."
+sounds/b17.ogg:voice:actor51,speech:"He *wasn't* in the hall, I remember *that*!"
 *
 "Yes of course, I answered the door."
+sounds/b18.ogg:voice:actor51,speech:"Yes of course! i answered the *door*!"
 
 BSAYC MURDER
 * charles
-"Sorry Sir, I can't recal."
+"Sorry Sir, I can't recall."
+sounds/b19.ogg:voice:actor51,speech:"Sorry Sir, I can't recall."
 * jeeves
 "He was definitely there at some point, but not all the time."
+sounds/b20.ogg:voice:actor51,speech:"He was *definitely* there at some point, but not _all_ the time."
 *
 "Sorry Sir, I've no idea."
+sounds/b21.ogg:voice:actor51,speech:"*Sorry* Sir, I've _*no*_ idea!"
 
 ENT_OUT=
 *?(GOSTUDY or GODININGROOM or GODRAWINGROOM) "Shall I arrest someone, inspector?" he asks. ACCUSE
@@ -714,6 +810,12 @@ TOP_BEGIN
 LOSE
 Sorry, wrong answer, the real murderer was MURDER. ISBUTLER 
 TOP_BEGIN
+
+QUIT
+Give up eh?
+Well, the murderer was MURDER. You'll never make a detective! ISBUTLER 
+TOP_BEGIN
+
 
 ISBUTLER MURDER
 * jeeves

@@ -193,6 +193,34 @@ struct SDLHandler: public IFIHandler
         return true;
     }
 
+    bool ifiSoundResponse(const string& js) override
+    {
+
+        int chan = 0;
+        int dur = -1;
+        string fname;
+
+        for (JSONWalker jw(js); jw.nextKey(); jw.next())
+        {
+            bool isObject;
+            const char* st = jw.checkValue(isObject);
+            if (!st) break; // bad json
+            
+            if (!isObject)
+            {
+                // throw all the meta data into the handler propset
+                var v = jw.collectValue(st);
+                if (jw._key == IFI_CHANNEL) chan =  v.toInt();
+                else if (jw._key == IFI_DURATION) dur = v.toInt();
+                else if (jw._key == IFI_NAME) fname = v.toString();
+            }
+        }
+
+        LOG1("Got audio ", js << " " << fname);
+        if (!fname.empty()) play_audio(fname.c_str());
+        return true;
+    }
+
     string getGameTitle()
     {
         // meta title of game for window header
@@ -331,7 +359,7 @@ struct StrandCtx
 
     const char* configdir = ".";
     const char* datadir = "."; // default;
-    const char* story = "story.stz"; // compressed single file
+    const char* story = "story.str"; 
 
     IFIHost host;
     SDLHandler h;

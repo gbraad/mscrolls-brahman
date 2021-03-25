@@ -40,7 +40,6 @@ INITCORE
     (setq get-title
           (fn (t) (tree (list 'title (capswords (textify t))))
               ))
-
 }
 
 UPDATEINV > what is in player
@@ -60,6 +59,8 @@ UPDATEMAP MAP_BACKIMAGE
 * them
 { (ifisend (tree (list 'map (tree (list 'backimage (textify IT)))))) }
 
+CREDITS_PLAIN
+Credits: { (printf (HTMLToPlain (runterm "GAME_CREDITS"))) }
 
 CONCEPT@
 * name
@@ -161,6 +162,10 @@ Your score is
 WAIT
 * wait
 WAIT
+* quit
+QUITGAME
+* credits
+CREDITS_PLAIN
 
 WAIT
 zzz...
@@ -524,7 +529,6 @@ This is interactive fiction. You can move around and interact with the world and
 Type \LOOK to refresh the room description.\n
 Move about with commands like "go north", "go east" and so on. These can be abbreviated to "n" and "e" for example.\n
 Ask people about things, for example, "ask butler about dog", and so on.
-
 
 
 

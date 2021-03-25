@@ -41,15 +41,16 @@ IFIDEFS := -DIFI_BUILD -DIFI_STATIC -DIFI_HANDLE_CHOICE -s ASYNCIFY=1 #-DLOGGING
 GAMEDIR := .
 GAMESRC = $(GAMEDIR)/story.str $(GAMEDIR)/core.str $(GAMEDIR)/map.str $(GAMEDIR)/picton.str
 
-GAME := --preload-file story.stz@story.stz --preload-file $(GAMEDIR)/init.kl@init.kl
+GAME := --preload-file story.stz@story.str --preload-file $(GAMEDIR)/init.kl@init.kl
 
 FONTS = --preload-file $(SDLDIR)/fonts@/fonts
+SOUNDS = --preload-file $(GAMEDIR)/sounds@sounds
 
 ## if using package
 PACKFLAGS = $(FONTS) $(GAME) --js-output=$(WEB_DIR)/index.js
 
 ## if using emcc to package
-LDFLAGS += $(FONTS) $(GAME)
+LDFLAGS += $(FONTS) $(GAME) $(SOUNDS)
 
 
 
@@ -58,6 +59,7 @@ LDFLAGS += $(FONTS) $(GAME)
 ##---------------------------------------------------------------------
 
 EMS += -s USE_SDL=2 -s FORCE_FILESYSTEM=1 -s WASM=1 -s SDL2_IMAGE_FORMATS='[]'
+EMS += -s USE_SDL_MIXER=2 -s USE_OGG=1
 #EMS += -s ALLOW_MEMORY_GROWTH=1
 #EMS += -s DISABLE_EXCEPTION_CATCHING=1 -s NO_EXIT_RUNTIME=0
 #EMS += -s ASSERTIONS=1
@@ -76,7 +78,7 @@ CPPFLAGS = -I$(SDLDIR) -I$(IMGUI_DIR) -I$(IFIDIR) -I$(COMMONDIR) -I$(IMGUI_DIR)/
 CPPFLAGS += -Wall -Wformat -O3 -Wno-switch -fno-rtti -fno-exceptions
 CPPFLAGS += $(EMS)
 LIBS += $(EMS)
-LDFLAGS += -O3 --shell-file $(SDLDIR)/shell.html
+LDFLAGS += --shell-file $(SDLDIR)/shell.html -O3
 
 ##---------------------------------------------------------------------
 ## BUILD RULES

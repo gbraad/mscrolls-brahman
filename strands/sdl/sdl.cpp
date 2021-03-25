@@ -17,10 +17,12 @@
 #include <emscripten.h>
 #include <SDL.h>
 #include <SDL_opengles2.h>
+#include <SDL_mixer.h>
 #include <emscripten/fiber.h>
 
 // forward
 const char* gui_input_pump();
+void play_audio(const char* name);
 
 #include "ifisdl.h"
 #include "freetypetest.h"
@@ -28,6 +30,7 @@ const char* gui_input_pump();
 SDL_Window*     g_Window = NULL;
 SDL_GLContext   g_GLContext = NULL;
 static float    fontSize = 24;
+static bool     audioEnabled = true;
 
 // For clarity, our main loop code is declared at the end.
 static void main_loop();
@@ -98,9 +101,39 @@ void strand_pump()
 int main(int, char**)
 {
     // Setup SDL
-    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_GAMECONTROLLER) != 0)
+    if (SDL_Init(SDL_INIT_VIDEO
+                 | SDL_INIT_TIMER
+                 | SDL_INIT_GAMECONTROLLER
+                 | SDL_INIT_AUDIO) != 0)
     {
         printf("Error: %s\n", SDL_GetError());
+        return -1;
+    }
+
+
+    int frequency, active_flags;
+
+    frequency = EM_ASM_INT_V({
+            var context;
+            try {
+                context = new AudioContext();
+            } catch (e) {
+                context = new webkitAudioContext(); // safari only
+            }
+            return context.sampleRate;
+	});
+
+      
+    if (Mix_OpenAudio(frequency, MIX_DEFAULT_FORMAT, 2, 1024) == -1) {
+        printf("Failed to Mix_OpenAudio(): %s\n", Mix_GetError());
+        return -1;
+    }
+
+    int mix_flags = MIX_INIT_OGG;
+    active_flags = Mix_Init(mix_flags);
+    
+    if ((mix_flags & active_flags) != mix_flags) {
+        printf("Failed to Mix_Init(): %s\n", Mix_GetError());
         return -1;
     }
 
@@ -169,6 +202,9 @@ int main(int, char**)
 
     G.fibers[0].init_with_api(runfiber, 0);
     emscripten_set_main_loop(main_loop, 0, true);
+
+    play_audio(0);  // stop and free music
+    Mix_CloseAudio();
 }
 
 static void main_loop()
@@ -313,22 +349,16 @@ static void setF(const char* name)
 }
 
 
-#if 0
 void PopKeyboard()
 {
-    SDL_StartTextInput();
+    /* doesnt work!
+    EM_ASM({
+            var canvas = document.getElementById('canvas');
+            canvas.contentEditable=true;
+  });
+    */
 
-
-      if (SDL_HasScreenKeyboardSupport())
-      {
-          if (!SDL_IsTextInputActive() || !SDL_IsScreenKeyboardShown(sdlWindow)) {
-      /* User killed the keyboard (e.g. with Android Back button), let's grab it back. */
-              SDL_Log("Start text input\n");
-              SDL_StartTextInput();
-          }
-      }
 }
-#endif
 
 static const char* fontName(ImFont* f)
 {
@@ -347,13 +377,14 @@ static const char* fontName(ImFont* f)
 static void fontMenu()
 {
     float h = ImGui::GetFrameHeightWithSpacing();
-    float w = 26*fontSize;
-    if (w < 500) w = 500;
+    float w = 20*fontSize;
+    if (w < 400) w = 400;
     ImGui::BeginChild("fontchooser", ImVec2(w,h), false);
     ImGuiIO& io = ImGui::GetIO();
     
     ImFont* font_current = ImGui::GetFont();
 
+    ImGui::SetNextItemWidth(w/2);
     if (ImGui::BeginCombo("Font", fontName(font_current)))
     {
         for (int n = 0; n < io.Fonts->Fonts.Size; n++)
@@ -369,9 +400,7 @@ static void fontMenu()
     }
     ImGui::SameLine();
 
-    float w1 = 4*fontSize;
-    if (w1 < 100) w1 = 100;
-    ImGui::SetNextItemWidth(w1);
+    ImGui::SetNextItemWidth(w/4);
     int fz = fontSize;
     ImGui::InputInt("Size", &fz, 1, 0);
     if (fz > 40) fz = 40;
@@ -446,15 +475,16 @@ void StrandWindow(bool* strand_open)
         if (ImGui::BeginMenu("Font"))
         {
             fontMenu();
-            /*
-            for (int n = 0; n < io.Fonts->Fonts.Size; n++)
+            ImGui::EndMenu();
+        }
+
+        if (ImGui::BeginMenu("Options"))
+        {
+            if (ImGui::MenuItem("Sound", NULL, audioEnabled))
             {
-                ImFont* font = io.Fonts->Fonts[n];
-                ImGui::PushID((void*)font);
-                if (ImGui::MenuItem(font->GetDebugName())) io.FontDefault = font;
-                ImGui::PopID();
+                audioEnabled = !audioEnabled;
+                if (!audioEnabled) play_audio(0); // kill 
             }
-            */
             ImGui::EndMenu();
         }
         ImGui::EndMenuBar();
@@ -517,7 +547,6 @@ void StrandWindow(bool* strand_open)
         ImGui::BeginChild("Main", textBoxSz, true);
         
         //ImGui::TextWrapped("%s", textbuf);
-        sctx._mainText.render();
         
         if (sctx._mainText._changed)
         {
@@ -525,6 +554,9 @@ void StrandWindow(bool* strand_open)
             ImGui::SetScrollY(ym);
             sctx._mainText._changed = false;
         }
+
+        sctx._mainText.render();
+
         ImGui::EndChild();
     }
 
@@ -626,13 +658,57 @@ void StrandWindow(bool* strand_open)
                 claimed = true;
             }
         }
+
+        static bool popper = false;
         
         if (reclaim_focus)
+        {
+            popper = false;
             ImGui::SetKeyboardFocusHere(-1); // Auto focus previous widget
+        }
+        
+        if (ImGui::IsItemFocused())
+        {
+            if (!popper)
+            {
+                popper = true;
+                PopKeyboard();
+            }
+        }
+        else popper = false;
         
         ImGui::EndChild();
     }
 
     ImGui::End();
+}
+
+void play_audio(const char* fname)
+{
+    static Mix_Music* m = 0;
+    
+    if (m)
+    {
+        Mix_FreeMusic(m);
+        m = 0;
+    }
+
+    if (fname && audioEnabled)
+    {
+        m = Mix_LoadMUS(fname);
+        if (m)
+        {
+            if (Mix_PlayMusic(m, 1))
+            {
+                LOG1("Unable to play audio ", fname);
+                Mix_FreeMusic(m);
+                m = 0;
+            }
+        }
+        else
+        {
+            LOG1("Unable to load audio ", fname);
+        }
+    }
 }
 

@@ -40,6 +40,11 @@ extern IFIHandler* ifih;
 
 #include "strandi.h"
 
+namespace KLS
+{
+#include "tformat.h"
+};
+
 
 struct KLStrandi: public KLLib
 {
@@ -92,10 +97,7 @@ struct KLStrandi: public KLLib
         {
             Term t = EVALAI;
             string s = _textify(t);
-            if (s.size())
-            {
-                r = Stringt(s);
-            }
+            if (!s.empty()) r = Stringt(s);
         }
         return r;
     }
@@ -133,6 +135,38 @@ struct KLStrandi: public KLLib
         
     }
 
+    Term _primPlainToHTMLFn(List::iterator& ai, Env& env)
+    {
+        Term r;
+        
+        return r;
+    }
+    
+    Term _primHTMLToPlainFn(List::iterator& ai, Env& env)
+    {
+        Term t = EVALAI;
+        KLS::TextFormat tf;
+        tf.setHTML(t.toStringRaw());
+        Term r = Stringt(tf._text);
+        //LOG1("HTMLTOPLain = ", tf._text);
+        return r;
+    }
+
+    Term _primRunTermFn(List::iterator& ai, Env& env)
+    {
+        Term t = EVALAI;
+        string tname = t.toStringRaw();
+        string s;
+        if (!tname.empty())
+        {
+            s = _strandi->runSingleTerm(tname);
+            //LOG3("KLStrandi, eval sym ", tname << " = " << s);
+        }
+        Term r = Stringt(s);        
+        return r;
+        
+    }
+
     void _init()
     {
         Tree g;
@@ -141,6 +175,9 @@ struct KLStrandi: public KLLib
         DEF_PRIM(Textify, "textify");
         DEF_PRIM(TermID, "termid");
         DEF_PRIM(CapsWords, "capswords");
+        DEF_PRIM(HTMLToPlain, "htmltoplain");
+        DEF_PRIM(PlainToHTML, "plaintohtml");
+        DEF_PRIM(RunTerm, "runterm");
 
         _host->_env._env = List(g, *_host->_env._env);
 

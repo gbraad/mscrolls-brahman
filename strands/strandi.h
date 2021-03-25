@@ -842,6 +842,10 @@ struct Strandi: public Traits
                 delete cp;
             }
         }
+        else
+        {
+            LOG1(TAG "run code, missing evaluator for ", *ec);
+        }
     }
 
     bool run(Flow::EltCommand* c)

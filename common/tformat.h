@@ -710,20 +710,27 @@ struct TextFormat
         return u._isspace(u.lastChar());
     }
 
-    void _convertNode(Node* n, bool emitp, Emitter& out)
+    void _convertNode(Node* n, bool emitp, Emitter& out, Node* last)
     {
         if (n->type() == Node::nodeTypeTag)
         {
             NodeTag* tag = (NodeTag*)n;
-            bool par = (tag->_tag == "p");
             bool head = false;
 
-            if (par)
+            if (tag->_tag == "p")
             {
                 emitp = true;
+
+                bool block = _text.empty() || !last;
+
+                if (!block)
+                {
+                    NodeTag* tl = 0;
+                    if (last->type() == Node::nodeTypeTag) tl = (NodeTag*)last;
+                    block = !tl || tl->_tag != "p";
+                }
                 
-                if (!_text.empty()) 
-                    out("\n\n");
+                if (!block) out("\n\n");
             }
             else if (tag->_tag == "a")
             {
@@ -738,9 +745,14 @@ struct TextFormat
                         Emitter e(this, &linkcontent);
                         
                         // collect content inside link
+
+                        Node* last = 0;
                         for (Node::Nodes::iterator it = tag->_content.begin();
                              it != tag->_content.end(); ++it)
-                            _convertNode(it, true, e);
+                        {
+                            _convertNode(it, true, e, last);
+                            last = it;
+                        }
                         
                         if (equalsIgnoreCase(linkref, linkcontent))
                         {
@@ -779,14 +791,19 @@ struct TextFormat
             }
             else if ((head = isHeader(tag)) != false)
             {
+                out("\n\n");
                 emitp = true;
             }
-            
+
+            Node* last = 0;
             for (Node::Nodes::iterator it = tag->_content.begin();
                  it != tag->_content.end(); ++it)
-                _convertNode(it, emitp, out);            
+            {
+                _convertNode(it, emitp, out, last);
+                last = it;
+            }
             
-            if (head) out("\n\n");
+            if (head) out("\n");
         }
         else
         {
@@ -801,7 +818,7 @@ struct TextFormat
         // convert parsed HTML into plain
         _text.clear();
         Emitter e(this, &_text);
-        _convertNode(root, false, e);
+        _convertNode(root, false, e, 0);
     }
 
     string      _text;
