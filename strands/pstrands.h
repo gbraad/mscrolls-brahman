@@ -77,8 +77,6 @@
 #define SYM_ATTRIBUTE ':'
 #define SYM_ATTR_SEP ','
 
-#define MEDIA_ATTR_VOICE        "voice"
-#define MEDIA_ATTR_SPEECH       "speech"
 
 namespace ST
 {

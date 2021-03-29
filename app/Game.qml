@@ -242,7 +242,7 @@ C1.SplitView
             }
         }
         
-        visible: app.enableTextInput && !choiceActive
+            visible: app.enableTextInput && choicebox.uiTextAccepted
 
         Component.onCompleted:
         {

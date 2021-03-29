@@ -422,25 +422,45 @@ public:
         _fontSpec(gs, fname, fsize2/2, fw);
         gs.append("\n}</style>\n");
 
-        fontSpec(gs, "line1", fname, fsize1, fw);
-        gs.append("<p align=\"center\">");
-        gs.append(STRQ(organisation)); // Strand Games
-        gs.append("</p></span>");
+        if (organisation.length() > 0)
+        {
+            fontSpec(gs, "line1", fname, fsize1, fw);
+            gs.append("<p align=\"center\">");
+            gs.append(STRQ(organisation)); // Strand Games
+            gs.append("</p></span>");
         
-        fontSpec(gs, "line2", fname, fsize2/3, fw);
-        gs.append("<p align=\"center\">");
-        gs.append("Presents");
-        gs.append("</p></span>");
+            fontSpec(gs, "line2", fname, fsize2/3, fw);
+            gs.append("<p align=\"center\">");
+            gs.append("Presents");
+            gs.append("</p></span>");
+ 
+            fontSpec(gs, "line3", fname, fsize2, fw);
+            gs.append("<p align=\"center\">");
+            gs.append(STRQ(title));
+            gs.append("</p></span>");
 
-        fontSpec(gs, "line3", fname, fsize2, fw);
-        gs.append("<p align=\"center\">");
-        gs.append(STRQ(title));
-        gs.append("</p></span>");
-
-        fontSpec(gs, "line4", fname, fsize2/2, fw);
-        gs.append("<p align=\"center\">");
-        gs.append(STRQ(author));
-        gs.append("</p></span>");
+            fontSpec(gs, "line4", fname, fsize2/2, fw);
+            gs.append("<p align=\"center\">");
+            gs.append(STRQ(author));
+            gs.append("</p></span>");
+        }
+        else
+        {
+            fontSpec(gs, "line1", fname, fsize1, fw);
+            gs.append("<p align=\"center\">");
+            gs.append(STRQ(author));
+            gs.append("</p></span>");
+        
+            fontSpec(gs, "line2", fname, fsize2/3, fw);
+            gs.append("<p align=\"center\">");
+            gs.append("Presents");
+            gs.append("</p></span>");
+ 
+            fontSpec(gs, "line3", fname, fsize2, fw);
+            gs.append("<p align=\"center\">");
+            gs.append(STRQ(title));
+            gs.append("</p></span>");
+        }
 
         gs.add(0);
         

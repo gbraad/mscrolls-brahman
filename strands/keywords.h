@@ -77,7 +77,11 @@
 #define EXEC_FALSE  "no"
 
 
-
+// media
+#define MEDIA_ATTR_VOICE        "voice"
+#define MEDIA_ATTR_SPEECH       "speech"
+#define MEDIA_ATTR_DURATION     "duration"
+#define MEDIA_ATTR_CHAN         "chan"
 
 
 

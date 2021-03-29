@@ -6,7 +6,7 @@ TOP_BEGIN
 \nGame Over.
 
 GAME_FILES
-core.str map.str picton.str
+core.str picton.str
 
 GAME_TITLE
 Picton Murder Whodunnit
@@ -15,10 +15,10 @@ GAME_AUTHOR
 Sia See
 
 GAME_VERSION
-1.09
+1.11
 
 GAME_ORGANISATION
-Strand Games
+
 
 GAME_BACKIMAGE
 images/title.jpg
@@ -33,7 +33,7 @@ GAME_META
 :ui_ucanvas:false,ui_sidebar:false,autolink:false
 
 GAME_CREDITS
-<h1>GAME_TITLE<br/><em>by GAME_ORGANISATION</em></h1>
+<h1>GAME_TITLE</h1>
 <h3>Implemented in Strands</h3>
 <h4>Strand Games Team</h4>
 <ul>

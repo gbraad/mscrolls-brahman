@@ -93,9 +93,7 @@ void strand_pump()
 {
     // switch to strand
     if (!strand_done)
-    {
         emscripten_fiber_swap(&G.main, &G.fibers[0].context);
-    }
 }
 
 int main(int, char**)
@@ -441,7 +439,7 @@ void StrandWindow(bool* strand_open)
     ImGuiIO& io = ImGui::GetIO();
 
     ImGuiStyle& style = ImGui::GetStyle();
-    style.ScrollbarSize = 18.0f;
+    style.ScrollbarSize = 24.0f;  // fat enough for mobile
     style.ChildRounding = 4.0f;
     
     ImVec2 pad = style.FramePadding;
@@ -545,18 +543,25 @@ void StrandWindow(bool* strand_open)
     {
         // main text box
         ImGui::BeginChild("Main", textBoxSz, true);
+
+        static bool requestScroll = false;
+
+        // render our text, a block at a time
+        sctx._mainText.render();
         
-        //ImGui::TextWrapped("%s", textbuf);
-        
-        if (sctx._mainText._changed)
+        if (requestScroll)
         {
-            float ym = ImGui::GetScrollMaxY() + 1000; // XXX
-            ImGui::SetScrollY(ym);
-            sctx._mainText._changed = false;
+            ImGui::SetScrollHereY(1);
+            requestScroll = false;
         }
 
-        sctx._mainText.render();
-
+        if (sctx._mainText._changed)
+        {
+            // if changed, set flag to scroll on NEXT frame.
+            requestScroll = true;
+            sctx._mainText._changed = false;
+        }
+        
         ImGui::EndChild();
     }
 

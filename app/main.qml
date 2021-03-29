@@ -53,7 +53,7 @@ ApplicationWindow
     visible: true
 
     property string author: QControl.gameAuthor();
-    property string organisation: "Strand Games"
+    property string organisation: ""
     property string currentMetaJSON: QControl.currentMetaJSON
     property bool enableSidebar: QControl.gameEnableSidebar()
     property bool enableTextInput: QControl.gameEnableTextbox()
@@ -269,7 +269,7 @@ ApplicationWindow
         if (mf.length > 0)
         {
             setSoundVol(1.0)  // always play max
-            playSound(mf, 0);
+            playSound(mf, 0, -1);
         }
     }
 
@@ -278,13 +278,13 @@ ApplicationWindow
         stopSound(0)
     }            
 
-    function playSound(f, ch)
+    function playSound(f, ch, loops)
     {
         if (!QControl.prefs.musicEnabled) return;
 
         //console.log("playSound", f);
-        soundplayer1.loops = -1
-        soundplayer1.fade = 1000
+        soundplayer1.loops = loops
+        soundplayer1.fade = 500
         soundplayer1.play(ch, f)
     }
 
@@ -325,7 +325,7 @@ ApplicationWindow
                 if (v.length > 0)
                 {
                     setSoundVol(soundVol)
-                    playSound(v, ch)
+                    playSound(v, ch, d)
                 }
             }
         }

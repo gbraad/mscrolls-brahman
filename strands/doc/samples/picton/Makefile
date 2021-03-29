@@ -39,7 +39,7 @@ COMMONDIR := $(TOP)/common
 IFIDEFS := -DIFI_BUILD -DIFI_STATIC -DIFI_HANDLE_CHOICE -s ASYNCIFY=1 #-DLOGGING
 
 GAMEDIR := .
-GAMESRC = $(GAMEDIR)/story.str $(GAMEDIR)/core.str $(GAMEDIR)/map.str $(GAMEDIR)/picton.str
+GAMESRC = $(GAMEDIR)/story.str $(GAMEDIR)/core.str $(GAMEDIR)/picton.str
 
 GAME := --preload-file story.stz@story.str --preload-file $(GAMEDIR)/init.kl@init.kl
 

@@ -727,7 +727,20 @@ struct Strandi: public Traits
         GrowString gs;
 
         int chan = 0;
-        int dur = -1;
+
+        // play once by default
+        // override with "duration:X in media attri
+        int dur = 1;
+
+        // pick up channel if specified
+        if (em._attr)
+        {
+            var chanv = em._attr->find(MEDIA_ATTR_CHAN);
+            if (chanv) chan = chanv.toInt();
+
+            var durv = em._attr->find(MEDIA_ATTR_DURATION);
+            if (durv) dur = durv.toInt();
+        }
 
         bool stop = em._filename == "null.ogg"; // XX
         if (stop) dur = 0;

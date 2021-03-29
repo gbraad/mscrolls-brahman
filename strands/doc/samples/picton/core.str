@@ -60,7 +60,7 @@ UPDATEMAP MAP_BACKIMAGE
 { (ifisend (tree (list 'map (tree (list 'backimage (textify IT)))))) }
 
 CREDITS_PLAIN
-Credits: { (printf (HTMLToPlain (runterm "GAME_CREDITS"))) }
+{ (printf (HTMLToPlain (runterm "GAME_CREDITS"))) } \n\n
 
 CONCEPT@
 * name
@@ -303,7 +303,7 @@ out
 GETTABLE@ THING
 * be it
 IT
-*= get it
+* get it
 DOGET
 * drop it
 DODROP
@@ -524,11 +524,11 @@ On IT you see, LAST.
 /// HELP
 
 HELP
-This is interactive fiction. You can move around and interact with the world and with people. You can type commands like "get lamp" and "kill troll with axe" and also select choices presented to you by selecting their number.
+This is interactive fiction. You can move around and interact with the world and with people. You can type commands like "get lamp" and "kill troll with axe" and also select choices.
 
-Type \LOOK to refresh the room description.\n
-Move about with commands like "go north", "go east" and so on. These can be abbreviated to "n" and "e" for example.\n
-Ask people about things, for example, "ask butler about dog", and so on.
+Type \LOOK to refresh the room description.
+\nMove about with commands like "go north", "go east" and so on. These can be abbreviated to "n" and "e" for example.
+\nAsk people about things, for example, "ask butler about dog" etc.\n
 
 
 

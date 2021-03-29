@@ -79,7 +79,7 @@ FocusScope
     function updateJSONModel(js) 
     {
         // [{choiceobj}...]
-        // {text:"heading",choice:[{choiceobj}...]}
+        // {text:"heading",ui_textinput:true,choice:[{choiceobj}...]}
         // choiceobj = {"text":"whatever","chosen":"text"...}
 
         //console.log("update choice JSON", js)
