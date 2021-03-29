@@ -8,7 +8,7 @@
 // so that we can get it from glue
 IFIClient* ifi;
 
-IFI* IFI::create()
+IFI* IFI::create(IFI::Pump* p)
 {
     ifi = new IFIClient();
     return ifi;
