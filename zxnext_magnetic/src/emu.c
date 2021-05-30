@@ -66,8 +66,9 @@
  * Fortunately, only a 4-byte longword or a 16-character string needs to be
  * saved in a temporary buffer in this manner.
  *
- * Some general functions have been split into several specialized functions for
- * improved performance.
+ * To improve performance, some parts of the interpreter have been rewritten
+ * in Z80 assembler and some general functions have been split into several
+ * specialized functions.
  *
  * Files are accessed using ESXDOS whose API is different but similar to the
  * standard POSIX file I/O API. When using the ESXDOS API, the Spectrum ROM must
@@ -105,6 +106,7 @@
 
 #include "zconfig.h"
 #include "defs.h"
+#include "emu_asm.h"
 #include "hunks.h"
 #include "ide_friendly.h"
 
@@ -134,56 +136,57 @@
 #define write_l(ptr, val) (*(type32 *)(ptr) = intrinsic_swap_endian_32(val))
 #define write_w(ptr, val) (*(type16 *)(ptr) = intrinsic_swap_endian_16(val))
 
-void page_in_rom(void);
-void page_out_rom(void);
+#if USE_PROG_FORMAT
 
-static type16 read_reg_w(type8 i) __z88dk_fastcall;
-static type32 read_reg_l(type8 i) __z88dk_fastcall;
-static type8 read_dreg_b(type8 i) __z88dk_fastcall;
-static type16 read_dreg_w(type8 i) __z88dk_fastcall;
-static type32 read_dreg_l(type8 i) __z88dk_fastcall;
-static type16 read_areg_w(type8 i) __z88dk_fastcall;
-static type32 read_areg_l(type8 i) __z88dk_fastcall;
+#define MAX_SP_STACK_SIZE 5
 
-static void write_dreg_b(type8 i, type8 val);
-static void write_dreg_w(type8 i, type16 val);
-static void write_dreg_l(type8 i, type32 val);
-static void write_areg_w(type8 i, type16 val);
-static void write_areg_l(type8 i, type32 val);
+typedef struct sp_continuation
+{
+    type8 in_stopron;
+    type8 *stopron_continuation;
+    type8 stopron_page;
+} sp_continuation_t;
 
-static type32 dreg[8];
-static type32 areg[8];
+static sp_continuation_t sp_stack[MAX_SP_STACK_SIZE];
+static type8 sp_stack_size = 0;
+
+#endif
+
+extern void add_startup_commands(void);
+
+type32 dreg[8];
+type32 areg[8];
 static type32 i_count;
 static type32 mem_size;
 static type32 string_size;
 static type32 rseed;
-static type32 pc;
-static type32 arg1i;
+type32 pc;
+type32 arg1i;
 static type16 properties;
 static type16 fl_sub;
 static type16 fl_tab;
 static type16 fl_size;
 static type16 fp_tab;
 static type16 fp_size;
-static type8 zflag;
-static type8 nflag;
-static type8 cflag;
-static type8 vflag;
-static type8 byte1;
-static type8 byte2;
-static type8 regnr;
-static type8 admode;
-static type8 opsize;
-static type8 *arg1;
-static type8 *arg2;
-static type8 arg2_buf[4];
-static type8 is_reversible;
+type8 zflag;
+type8 nflag;
+type8 cflag;
+type8 vflag;
+type8 byte1;
+type8 byte2;
+type8 regnr;
+type8 admode;
+type8 opsize;
+type8 *arg1;
+type8 *arg2;
+type8 arg2_buf[4];
+type8 is_reversible;
 static type8 running;
-static type8 tmparg[4];
+type8 tmparg[4];
 static type8 lastchar;
-static type8 version;
+type8 version;
 static type8 sd;
-static type8 quick_flag;
+type8 quick_flag;
 static type8 str_buf[16];
 static type8 game_file[16] = {0};
 
@@ -242,20 +245,20 @@ static type8 dict_input_buffer[DICT_INPUT_BUFFER_SIZE];
  ******************************************************************************/
 
 type8 current_page;
-static type8 code_base_page;
+type8 code_base_page;
 static type8 code_num_pages;
-static type8 string_base_page;
+type8 string_base_page;
 static type8 string_num_pages;
 #if USE_PROG_FORMAT
 static type8 string_index_base_page;
 static type8 string_index_num_pages;
 #else
-static type8 string2_base_page;
+type8 string2_base_page;
 static type8 string2_num_pages;
-static type8 string3_base_page;
+type8 string3_base_page;
 static type8 string3_num_pages;
 #endif
-static type8 dict_base_page;
+type8 dict_base_page;
 static type8 dict_num_pages;
 
 #ifdef LOGEMU
@@ -265,22 +268,18 @@ static char dbg_buf[128];
 
 static type32 frame_counter = 0;
 
-static void out(char *format, ...)
+void out(char *format, ...)
 {
     int size;
     va_list args;
 
     va_start(args, format);
-#ifdef __SCCZ80
-    size = vsnprintf(dbg_buf, sizeof(dbg_buf), va_ptr(args, char *), args);
-#else
     size = vsnprintf(dbg_buf, sizeof(dbg_buf), format, args);
-#endif
     va_end(args);
 
     page_in_rom();
     esx_f_write(dbg_log, dbg_buf, size);
-    page_out_rom();
+    page_in_game();
 }
 
 IM2_DEFINE_ISR_8080(increase_frame_counter)
@@ -299,7 +298,7 @@ static void install_isr(void)
 
 static type8 calc_num_pages(type32 size) __z88dk_fastcall
 {
-    return zxn_page_from_addr(size) + (type8) ((size % 0x2000 == 0) ? 0 : 1); // page = size / 0x2000
+    return addr_to_page(size) + (type8) ((size % 0x2000 == 0) ? 0 : 1); // page = size / 0x2000
 }
 
 static void init_state(void)
@@ -325,18 +324,6 @@ static void init_state(void)
 #endif
 }
 
-void page_in_rom(void)
-{
-    ZXN_WRITE_MMU0(255);
-    ZXN_WRITE_MMU1(255);
-}
-
-void page_out_rom(void)
-{
-    ZXN_WRITE_MMU0(current_page);
-    ZXN_WRITE_MMU1(current_page + 1);
-}
-
 static type8 load_section(type8 fh, type32 size, type8 base_page)
 {
     type8 num_pages;
@@ -349,7 +336,7 @@ static type8 load_section(type8 fh, type32 size, type8 base_page)
      */
 
     errno = 0;
-    num_pages = zxn_page_from_addr(size); // num_pages = size / 0x2000
+    num_pages = addr_to_page(size); // num_pages = size / 0x2000
 
     for (page = base_page; num_pages--; ++page)
     {
@@ -376,159 +363,6 @@ static type8 load_section(type8 fh, type32 size, type8 base_page)
 end:
     ZXN_WRITE_MMU2(10);
     return (errno == 0);
-}
-
-/* Convert virtual pointer to effective pointer */
-
-static type8 *effective(type32 ptr) __z88dk_fastcall
-{
-    type8 page;
-    type16 addr;
-    type8 new_page;
-
-#if !USE_PROG_FORMAT
-    if (version < 4)
-    {
-        ptr &= 0xFFFF;
-    }
-#endif
-
-    page = zxn_page_from_addr(ptr); // page = ptr / 0x2000
-    addr = (type16) (ptr % 0x2000);
-    new_page = code_base_page + page;
-
-#if MS_FATAL_CHECK
-    if (page >= code_num_pages)
-    {
-        ms_fatal("Outside code memory");
-        return NULL;
-    }
-#endif
-
-    if (current_page != new_page)
-    {
-        current_page = new_page;
-        ZXN_WRITE_MMU0(current_page);
-        ZXN_WRITE_MMU1(current_page + 1);
-    }
-
-    return (type8 *) addr;
-}
-
-static type8 *effective_string(type32 ptr) __z88dk_fastcall
-{
-    type8 page;
-    type16 addr;
-    type8 new_page;
-
-    page = zxn_page_from_addr(ptr); // page = ptr / 0x2000
-    addr = (type16) (ptr % 0x2000);
-    new_page = string_base_page + page;
-
-#if MS_FATAL_CHECK
-    if (page >= string_num_pages)
-    {
-        ms_fatal("Outside string memory");
-        return NULL;
-    }
-#endif
-
-    if (current_page != new_page)
-    {
-        current_page = new_page;
-        ZXN_WRITE_MMU0(current_page);
-        ZXN_WRITE_MMU1(current_page + 1);
-    }
-
-    return (type8 *) addr;
-}
-
-#if !USE_PROG_FORMAT
-
-static type8 *effective_string2(type32 ptr) __z88dk_fastcall
-{
-    type8 page;
-    type16 addr;
-    type8 new_page;
-
-    page = zxn_page_from_addr(ptr); // page = ptr / 0x2000
-    addr = (type16) (ptr % 0x2000);
-    new_page = string2_base_page + page;
-
-#if MS_FATAL_CHECK
-    if (page >= string2_num_pages)
-    {
-        ms_fatal("Outside string2 memory");
-        return NULL;
-    }
-#endif
-
-    if (current_page != new_page)
-    {
-        current_page = new_page;
-        ZXN_WRITE_MMU0(current_page);
-        ZXN_WRITE_MMU1(current_page + 1);
-    }
-
-    return (type8 *) addr;
-}
-
-static type8 *effective_string3(type32 ptr) __z88dk_fastcall
-{
-    type8 page;
-    type16 addr;
-    type8 new_page;
-
-    page = zxn_page_from_addr(ptr); // page = ptr / 0x2000
-    addr = (type16) (ptr % 0x2000);
-    new_page = string3_base_page + page;
-
-#if MS_FATAL_CHECK
-    if (page >= string3_num_pages)
-    {
-        ms_fatal("Outside string3 memory");
-        return NULL;
-    }
-#endif
-
-    if (current_page != new_page)
-    {
-        current_page = new_page;
-        ZXN_WRITE_MMU0(current_page);
-        ZXN_WRITE_MMU1(current_page + 1);
-    }
-
-    return (type8 *) addr;
-}
-
-#endif
-
-static type8 *effective_dict(type32 ptr) __z88dk_fastcall
-{
-    type8 page;
-    type16 addr;
-    type8 new_page;
-
-    page = zxn_page_from_addr(ptr); // page = ptr / 0x2000
-    addr = (type16) (ptr % 0x2000);
-    new_page = dict_base_page + page;
-
-#if MS_FATAL_CHECK
-    if (page >= dict_num_pages)
-    {
-        ms_fatal("Outside dictionary memory");
-        return NULL;
-    }
-#endif
-
-    if (current_page != new_page)
-    {
-        current_page = new_page;
-        ZXN_WRITE_MMU0(current_page);
-        ZXN_WRITE_MMU1(current_page + 1);
-    }
-
-    return (type8 *) addr;
 }
 
 #if !USE_PROG_FORMAT
@@ -558,12 +392,6 @@ static void init_decode_table_chars(void)
 
 #endif
 
-static void save_arg2(void)
-{
-    memcpy(arg2_buf, arg2, sizeof(arg2_buf));
-    arg2 = arg2_buf;
-}
-
 static void save_str(type8 **str) __z88dk_fastcall
 {
     if (*str != NULL)
@@ -579,25 +407,6 @@ static void save_str(type8 **str) __z88dk_fastcall
 void ms_seed(type32 seed) __z88dk_fastcall
 {
     rseed = seed;
-}
-
-static type16 seed_r(void) __preserves_regs(b,c,d,e) __naked
-{
-#ifdef IDE_FRIENDLY
-    // Dummy statement to keep the IDE happy.
-    return 1;
-#else
-    __asm
-
-    ld a,r
-    ld l,a
-    cpl
-    ld h,a
-
-    ret
-
-    __endasm;
-#endif
 }
 
 #if USE_PROG_FORMAT
@@ -635,8 +444,7 @@ void ms_stop(void)
 
 /* zero all registers and flags and load the game */
 
-// FIXME: Use fastcall when z88dk bug #689 on github is fixed.
-type8 ms_init(type8 *name)
+type8 ms_init(type8 *name) __z88dk_fastcall
 {
     type8 fh;
     static type8 header[42];
@@ -782,7 +590,7 @@ end:
 
 #else
 
-static type32 get_long(type8 fh) // FIXME: __z88dk_fastcall
+static type32 get_long(type8 fh) __z88dk_fastcall
 {
     type16 num_read;
     type32 value;
@@ -898,7 +706,7 @@ static void handle_prog_symbol(type8 *name, type32 value)
     }
 }
 
-static type8 load_prog_symbols(type8 fh) // FIXME: __z88dk_fastcall
+static type8 load_prog_symbols(type8 fh) __z88dk_fastcall
 {
     type8 name[32];
 
@@ -1061,8 +869,7 @@ end:
 
 /* zero all registers and flags and load the game */
 
-// FIXME: Use fastcall when z88dk bug #689 on github is fixed.
-type8 ms_init(type8 *name)
+type8 ms_init(type8 *name) __z88dk_fastcall
 {
     type8 fh;
     type8 num_sections;
@@ -1212,310 +1019,8 @@ void ms_status(void)
         pc, zflag & 1, cflag & 1, nflag & 1, vflag & 1, i_count);
 }
 
-/* align register pointer for word/byte accesses */
-
-static type8 *reg_align(type8 *ptr, type8 size)
+static void char_out(type8 c) __z88dk_fastcall
 {
-    type8 *p = ptr; // transfer param to Z80 register
-
-    if (size == 1)
-        p += 2;
-    else if (size == 0)
-        p += 3;
-    return p;
-}
-
-/*
- * Optimization:
- * The read_reg() function has been split into several functions
- * per register type and size for improved performance.
- */
-
-static type16 read_reg_w(type8 i) __z88dk_fastcall
-{
-    type8 *ptr;
-
-#if MS_FATAL_CHECK
-    if (i > 15)
-    {
-        ms_fatal("invalid register in read_reg_w");
-        return 0;
-    }
-#endif
-
-    if (i < 8)
-        ptr = (type8 *) &dreg[i];
-    else
-        ptr = (type8 *) &areg[i - 8];
-
-    return read_w(ptr + 2);
-}
-
-static type32 read_reg_l(type8 i) __z88dk_fastcall
-{
-    type8 *ptr;
-
-#if MS_FATAL_CHECK
-    if (i > 15)
-    {
-        ms_fatal("invalid register in read_reg_l");
-        return 0;
-    }
-#endif
-
-    if (i < 8)
-        ptr = (type8 *) &dreg[i];
-    else
-        ptr = (type8 *) &areg[i - 8];
-
-    return read_l(ptr);
-}
-
-static type8 read_dreg_b(type8 i) __z88dk_fastcall
-{
-    type8 *ptr;
-
-#if MS_FATAL_CHECK
-    if (i > 7)
-    {
-        ms_fatal("invalid register in read_dreg_b");
-        return 0;
-    }
-#endif
-
-    ptr = (type8 *) &dreg[i];
-    return ptr[3];
-}
-
-static type16 read_dreg_w(type8 i) __z88dk_fastcall
-{
-    type8 *ptr;
-
-#if MS_FATAL_CHECK
-    if (i > 7)
-    {
-        ms_fatal("invalid register in read_dreg_w");
-        return 0;
-    }
-#endif
-
-    ptr = (type8 *) &dreg[i];
-    return read_w(ptr + 2);
-}
-
-static type32 read_dreg_l(type8 i) __z88dk_fastcall
-{
-    type8 *ptr;
-
-#if MS_FATAL_CHECK
-    if (i > 7)
-    {
-        ms_fatal("invalid register in read_dreg_l");
-        return 0;
-    }
-#endif
-
-    ptr = (type8 *) &dreg[i];
-    return read_l(ptr);
-}
-
-static type16 read_areg_w(type8 i) __z88dk_fastcall
-{
-    type8 *ptr;
-
-#if MS_FATAL_CHECK
-    if (i > 7)
-    {
-        ms_fatal("invalid register in read_areg_w");
-        return 0;
-    }
-#endif
-
-    ptr = (type8 *) &areg[i];
-    return read_w(ptr + 2);
-}
-
-static type32 read_areg_l(type8 i) __z88dk_fastcall
-{
-    type8 *ptr;
-
-#if MS_FATAL_CHECK
-    if (i > 7)
-    {
-        ms_fatal("invalid register in read_areg_l");
-        return 0;
-    }
-#endif
-
-    ptr = (type8 *) &areg[i];
-    return read_l(ptr);
-}
-
-/*
- * Optimization:
- * The write_reg() function has been split into several functions
- * per register type and size for improved performance.
- */
-
-static void write_dreg_b(type8 i, type8 val)
-{
-    type8 *ptr;
-
-#if MS_FATAL_CHECK
-    if (i > 7)
-    {
-        ms_fatal("invalid register in write_dreg_b");
-        return;
-    }
-#endif
-
-    ptr = (type8 *) &dreg[i];
-    ptr[3] = val;
-}
-
-static void write_dreg_w(type8 i, type16 val)
-{
-    type8 *ptr;
-
-#if MS_FATAL_CHECK
-    if (i > 7)
-    {
-        ms_fatal("invalid register in write_dreg_w");
-        return;
-    }
-#endif
-
-    ptr = (type8 *) &dreg[i];
-    write_w(ptr + 2, val);
-}
-
-static void write_dreg_l(type8 i, type32 val)
-{
-    type8 *ptr;
-
-#if MS_FATAL_CHECK
-    if (i > 7)
-    {
-        ms_fatal("invalid register in write_dreg_l");
-        return;
-    }
-#endif
-
-    ptr = (type8 *) &dreg[i];
-    write_l(ptr, val);
-}
-
-static void write_areg_w(type8 i, type16 val)
-{
-    type8 *ptr;
-
-#if MS_FATAL_CHECK
-    if (i > 7)
-    {
-        ms_fatal("invalid register in write_areg_w");
-        return;
-    }
-#endif
-
-    ptr = (type8 *) &areg[i];
-    write_w(ptr + 2, val);
-}
-
-static void write_areg_l(type8 i, type32 val)
-{
-    type8 *ptr;
-
-#if MS_FATAL_CHECK
-    if (i > 7)
-    {
-        ms_fatal("invalid register in write_areg_l");
-        return;
-    }
-#endif
-
-    ptr = (type8 *) &areg[i];
-    write_l(ptr, val);
-}
-
-/*
- * Optimization: Specialized functions for incrementing/decrementing a register.
- */
-
-static void inc_dreg_w(type8 i) __z88dk_fastcall
-{
-    type8 *ptr;
-
-#if MS_FATAL_CHECK
-    if (i > 7)
-    {
-        ms_fatal("invalid register in inc_dreg_w");
-        return;
-    }
-#endif
-
-    ptr = (type8 *) &dreg[i];
-    ptr += 2;
-    write_w(ptr, read_w(ptr) + 1);
-}
-
-static void dec_dreg_w(type8 i) __z88dk_fastcall
-{
-    type8 *ptr;
-
-#if MS_FATAL_CHECK
-    if (i > 7)
-    {
-        ms_fatal("invalid register in dec_dreg_w");
-        return;
-    }
-#endif
-
-    ptr = (type8 *) &dreg[i];
-    ptr += 2;
-    write_w(ptr, read_w(ptr) - 1);
-}
-
-static void inc_areg_w(type8 i) __z88dk_fastcall
-{
-    type8 *ptr;
-
-#if MS_FATAL_CHECK
-    if (i > 7)
-    {
-        ms_fatal("invalid register in inc_areg_w");
-        return;
-    }
-#endif
-
-    ptr = (type8 *) &areg[i];
-    ptr += 2;
-    write_w(ptr, read_w(ptr) + 1);
-}
-
-static void inc_var_areg_w(type8 i, type16 val)
-{
-    type8 *ptr;
-
-#if MS_FATAL_CHECK
-    if (i > 7)
-    {
-        ms_fatal("invalid register in inc_var_areg_w");
-        return;
-    }
-#endif
-
-    ptr = (type8 *) &areg[i];
-    ptr += 2;
-    write_w(ptr, read_w(ptr) + val);
-}
-
-/* [35c4] */
-
-// FIXME: Use fastcall when z88dk bug #689 on github is fixed.
-static void char_out(type8 c_in)
-{
-    // FIXME: Remove local copy of param when bug #689 is fixed.
-    type8 c = c_in; // transfer param to Z80 register
     static type8 big = 0, period = 0, pipe = 0;
 
     if (c == 0xff)
@@ -1559,14 +1064,14 @@ static void char_out(type8 c_in)
             char_out(0x20);
     }
     period = 0;
-    if (version < 4)
+#if !USE_MAGNETIC_WINDOWS
     {
         if ((c == 0x2e) || (c == 0x3f) || (c == 0x21) || (c == 0x0a))
             big = 1;
         else if (c == 0x22)
             big = 0;
     }
-    else
+#else
     {
         if ((c == 0x20) && (lastchar == 0x0a))
             return;
@@ -1575,6 +1080,7 @@ static void char_out(type8 c_in)
         else if (c == 0x22)
             big = 0;
     }
+#endif
     if (((c == 0x20) || (c == 0x0a)) && (c == lastchar))
         return;
     if (version < 3)
@@ -1605,673 +1111,6 @@ static void char_out(type8 c_in)
     if ((c == 0x2e) || (c == 0x2c) || (c == 0x3b) || (c == 0x3a) || (c == 0x21) || (c == 0x3f))
         period = 1;
     ms_putchar(c);
-}
-
-/* extract addressing mode information [1c6f] */
-
-static void set_info(type8 b) __z88dk_fastcall
-{
-    regnr = (type8) (b & 0x07);
-    admode = (type8) ((b >> 3) & 0x07);
-    opsize = (type8) (b >> 6);
-}
-
-/* read a word and increase pc */
-
-static void read_word(void)
-{
-    type8 *epc;
-
-    epc = effective(pc);
-    byte1 = epc[0];
-    byte2 = epc[1];
-    pc += 2;
-}
-
-/* get addressing mode and set arg1 [1c84] */
-
-static void set_arg1(void)
-{
-    is_reversible = 1;
-    switch (admode)
-    {
-    case 0:
-        arg1 = reg_align((type8 *) &dreg[regnr], opsize); /* Dx */
-        is_reversible = 0;
-#ifdef LOGEMU
-        out(" d%.1d", regnr);
-#endif
-        break;
-    case 1:
-        arg1 = reg_align((type8 *) &areg[regnr], opsize); /* Ax */
-        is_reversible = 0;
-#ifdef LOGEMU
-        out(" a%.1d", regnr);
-#endif
-        break;
-    case 2:
-        arg1i = read_areg_l(regnr); /* (Ax) */
-#ifdef LOGEMU
-        out(" (a%.1d)", regnr);
-#endif
-        break;
-    case 3:
-        arg1i = read_areg_l(regnr); /* (Ax)+ */
-        write_areg_l(regnr, arg1i + (type8) (1 << opsize));
-#ifdef LOGEMU
-        out(" (a%.1d)+", regnr);
-#endif
-        break;
-    case 4:
-        // Optimization: Reordered statements to minimize read_areg_l() calls.
-        arg1i = read_areg_l(regnr) - (type8) (1 << opsize); /* -(Ax) */
-        write_areg_l(regnr, arg1i);
-#ifdef LOGEMU
-        out(" -(a%.1d)", regnr);
-#endif
-        break;
-    case 5:
-        {
-            type16s i = (type16s) read_w(effective(pc));
-            arg1i = read_areg_l(regnr) + i;
-            pc += 2; /* offset.w(Ax) */
-#ifdef LOGEMU
-            out(" %X(a%.1d)", i, regnr);
-#endif
-        }
-        break;
-    case 6:
-        {
-            type8 tmp1, tmp2;
-
-            tmp1 = byte1;
-            tmp2 = byte2;
-            read_word(); /* offset.b(Ax, Dx/Ax) [1d1c] */
-#ifdef LOGEMU
-            out(" %.2X(a%.1d,", (type16) byte2, regnr);
-#endif
-            arg1i = read_areg_l(regnr) + (type8s) byte2;
-#ifdef LOGEMU
-            if ((byte1 >> 4) > 8)
-                out("a%.1d", (byte1 >> 4) - 8);
-            else
-                out("d%.1d", byte1 >> 4);
-#endif
-            if (byte1 & 0x08)
-            {
-#ifdef LOGEMU
-                out(".l)");
-#endif
-                arg1i += (type32s) read_reg_l(byte1 >> 4);
-            }
-            else
-            {
-#ifdef LOGEMU
-                out(".w)");
-#endif
-                arg1i += (type16s) read_reg_w(byte1 >> 4);
-            }
-            byte1 = tmp1;
-            byte2 = tmp2;
-        }
-        break;
-    case 7: /* specials */
-        switch (regnr)
-        {
-        case 0:
-            arg1i = read_w(effective(pc)); /* $xxxx.W */
-            pc += 2;
-#ifdef LOGEMU
-            out(" %.4X.w", arg1i);
-#endif
-            break;
-        case 1:
-            arg1i = read_l(effective(pc)); /* $xxxx */
-            pc += 4;
-#ifdef LOGEMU
-            out(" %.4X", arg1i);
-#endif
-            break;
-        case 2:
-            arg1i = (type16s) read_w(effective(pc)) + pc; /* $xxxx(PC) */
-            pc += 2;
-#ifdef LOGEMU
-            out(" %.4X(pc)", arg1i);
-#endif
-            break;
-        case 3:
-            {
-                type8 l1c = effective(pc)[0]; /* $xx(PC,A/Dx) */
-#ifdef LOGEMU
-                out(" ???2", arg1i);
-#endif
-                if (l1c & 0x08)
-                    arg1i = pc + (type32s) read_reg_l(l1c >> 4);
-                else
-                    arg1i = pc + (type16s) read_reg_w(l1c >> 4);
-                l1c = effective(pc)[1];
-                pc += 2;
-                arg1i += (type8s) l1c;
-            }
-            break;
-        case 4:
-            arg1i = pc; /* #$xxxx */
-            if (opsize == 0)
-                arg1i += 1;
-            if (opsize == 2)
-                pc += 4;
-            else
-                pc += 2;
-#ifdef LOGEMU
-            out(" #%.4X", arg1i);
-#endif
-            break;
-        }
-        break;
-    }
-
-    if (is_reversible)
-        arg1 = effective(arg1i);
-}
-
-/* get addressing mode and set arg2 [1bc5] */
-
-static void set_arg2_nosize(type8 use_dx, type8 b)
-{
-    if (use_dx)
-        arg2 = (type8 *) dreg;
-    else
-        arg2 = (type8 *) areg;
-    arg2 += (b & 0x0e) << 1;
-}
-
-static void set_arg2(type8 use_dx, type8 b)
-{
-    set_arg2_nosize(use_dx, b);
-    arg2 = reg_align(arg2, opsize);
-}
-
-/* [1b9e] */
-
-static void swap_args(void)
-{
-    type8 *tmp;
-
-    tmp = arg1;
-    arg1 = arg2;
-    arg2 = tmp;
-}
-
-/* [1cdc] */
-
-// FIXME: Use fastcall when z88dk bug #689 on github is fixed.
-static void push(type32 c)
-{
-    // Optimization: Reordered statements to minimize read_areg_l() calls.
-    type32 new_sp = read_areg_l(7) - 4;
-    write_areg_l(7, new_sp);
-    write_l(effective(new_sp), c);
-}
-
-/* [1cd1] */
-
-static type32 pop(void)
-{
-    // Optimization: Reordered statements to minimize read_areg_l() calls.
-    type32 old_sp = read_areg_l(7);
-    write_areg_l(7, old_sp + 4);
-    return read_l(effective(old_sp));
-}
-
-/* check addressing mode and get argument [2e85] */
-
-static void get_arg(void)
-{
-#ifdef LOGEMU
-    out(" %.4X", pc);
-#endif
-    set_info(byte2);
-    arg2 = effective(pc);
-    if (opsize == 2)
-        pc += 4;
-    else
-        pc += 2;
-    if (opsize == 0)
-        arg2 += 1;
-    save_arg2();
-    set_arg1();
-}
-
-static void set_flags(void)
-{
-    type16 i;
-    type32 j;
-
-    zflag = nflag = 0;
-    switch (opsize)
-    {
-    case 0:
-        if (arg1[0] > 127)
-            nflag = 0xff;
-        else if (arg1[0] == 0)
-            zflag = 0xff;
-        break;
-    case 1:
-        i = read_w(arg1);
-        if (i == 0)
-            zflag = 0xff;
-        else if (i & 0x8000)
-            nflag = 0xff;
-        break;
-    case 2:
-        j = read_l(arg1);
-        if (j == 0)
-            zflag = 0xff;
-        else if (j & 0x80000000UL)
-            nflag = 0xff;
-        break;
-    }
-}
-
-/* [263a] */
-
-static type8 condition(type8 b) __z88dk_fastcall
-{
-    switch (b & 0x0f)
-    {
-    case 0:
-        return 0xff;
-    case 1:
-        return 0x00;
-    case 2:
-        return (zflag | cflag) ^ 0xff;
-    case 3:
-        return (zflag | cflag);
-    case 4:
-        return cflag ^ 0xff;
-    case 5:
-        return cflag;
-    case 6:
-        return zflag ^ 0xff;
-    case 7:
-        return zflag;
-    case 8:
-        return vflag ^ 0xff;
-    case 9:
-        return vflag;
-    case 10:
-    case 12:
-        return nflag ^ 0xff;
-    case 11:
-    case 13:
-        return nflag;
-    case 14:
-        return (zflag | nflag) ^ 0xff;
-    case 15:
-        return (zflag | nflag);
-    }
-    return 0x00;
-}
-
-/* [26dc] */
-
-static void branch(type8 b) __z88dk_fastcall
-{
-    if (b == 0)
-        pc += (type16s) read_w(effective(pc));
-    else
-        pc += (type8s) b;
-#ifdef LOGEMU
-    out(" %.4X", pc);
-#endif
-}
-
-/* [2869] */
-
-/*
- * Optimization:
- * The do_add(type8 adda) function has been split into do_add() and do_adda() for improved performance.
- */
-
-static void do_add(void)
-{
-    cflag = 0;
-
-    if (opsize == 0)
-    {
-        arg1[0] += arg2[0];
-        if (arg2[0] > arg1[0])
-            cflag = 0xff;
-    }
-    else if (opsize == 1)
-    {
-        write_w(arg1, (type16) (read_w(arg1) + read_w(arg2)));
-        if (read_w(arg2) > read_w(arg1))
-            cflag = 0xff;
-    }
-    else if (opsize == 2)
-    {
-        write_l(arg1, read_l(arg1) + read_l(arg2));
-        if (read_l(arg2) > read_l(arg1))
-            cflag = 0xff;
-    }
-
-    if (version < 3 || !quick_flag)
-    {
-        /* Corruption onwards */
-        vflag = 0;
-        set_flags();
-    }
-}
-
-static void do_adda(void)
-{
-    if (opsize == 0)
-        write_l(arg1, read_l(arg1) + (type8s) arg2[0]);
-    else if (opsize == 1)
-        write_l(arg1, read_l(arg1) + (type16s) read_w(arg2));
-    else if (opsize == 2)
-        write_l(arg1, read_l(arg1) + (type32s) read_l(arg2));
-}
-
-/* [2923] */
-
-/*
- * Optimization:
- * The do_sub(type8 suba) function has been split into do_sub() and do_suba() for improved performance.
- */
-
-static void do_sub(void)
-{
-    cflag = 0;
-
-    if (opsize == 0)
-    {
-        if (arg2[0] > arg1[0])
-            cflag = 0xff;
-        arg1[0] -= arg2[0];
-    }
-    else if (opsize == 1)
-    {
-        if (read_w(arg2) > read_w(arg1))
-            cflag = 0xff;
-        write_w(arg1, (type16) (read_w(arg1) - read_w(arg2)));
-    }
-    else if (opsize == 2)
-    {
-        if (read_l(arg2) > read_l(arg1))
-            cflag = 0xff;
-        write_l(arg1, read_l(arg1) - read_l(arg2));
-    }
-
-    if (version < 3 || !quick_flag)
-    {
-        /* Corruption onwards */
-        vflag = 0;
-        set_flags();
-    }
-}
-
-static void do_suba(void)
-{
-    if (opsize == 0)
-        write_l(arg1, read_l(arg1) - (type8s) arg2[0]);
-    else if (opsize == 1)
-        write_l(arg1, read_l(arg1) - (type16s) read_w(arg2));
-    else if (opsize == 2)
-        write_l(arg1, read_l(arg1) - (type32s) read_l(arg2));
-}
-
-/* [283b] */
-
-static void do_eor(void)
-{
-    if (opsize == 0)
-        arg1[0] ^= arg2[0];
-    else if (opsize == 1)
-        *(type16 *)(arg1) ^= *(type16 *)(arg2);
-    else if (opsize == 2)
-        *(type32 *)(arg1) ^= *(type32 *)(arg2);
-    cflag = vflag = 0;
-    set_flags();
-}
-
-/* [280d] */
-
-static void do_and(void)
-{
-    if (opsize == 0)
-        arg1[0] &= arg2[0];
-    else if (opsize == 1)
-        *(type16 *)(arg1) &= *(type16 *)(arg2);
-    else if (opsize == 2)
-        *(type32 *)(arg1) &= *(type32 *)(arg2);
-    cflag = vflag = 0;
-    set_flags();
-}
-
-/* [27df] */
-
-static void do_or(void)
-{
-    if (opsize == 0)
-        arg1[0] |= arg2[0];
-    else if (opsize == 1)
-        *(type16 *)(arg1) |= *(type16 *)(arg2);
-    else if (opsize == 2)
-        *(type32 *)(arg1) |= *(type32 *)(arg2);
-    cflag = vflag = 0;
-    set_flags(); /* [1c2b] */
-}
-
-/* [289f] */
-
-static void do_cmp(void)
-{
-    type8 *tmp;
-
-    tmp = arg1;
-    memcpy(tmparg, arg1, sizeof(tmparg));
-    arg1 = tmparg;
-    quick_flag = 0;
-    do_sub();
-    arg1 = tmp;
-}
-
-/* [2973] */
-
-/*
- * Optimization:
- * The do_move() function has been split into several functions per size for improved performance.
- */
-
-static void do_move_b(void)
-{
-    arg1[0] = arg2[0];
-
-    if (version < 2 || admode != 1)
-    {
-        /* Jinxter: no flags if destination Ax */
-        cflag = vflag = 0;
-        set_flags();
-    }
-}
-
-static void do_move_w(void)
-{
-    *(type16 *)(arg1) = *(type16 *)(arg2);
-
-    if (version < 2 || admode != 1)
-    {
-        /* Jinxter: no flags if destination Ax */
-        cflag = vflag = 0;
-        set_flags();
-    }
-}
-
-static void do_move_l(void)
-{
-    memcpy(arg1, arg2, sizeof(type32));
-
-    if (version < 2 || admode != 1)
-    {
-        /* Jinxter: no flags if destination Ax */
-        cflag = vflag = 0;
-        set_flags();
-    }
-}
-
-static type8 do_btst(type8 a) __z88dk_fastcall
-{
-    a &= admode ? 0x7 : 0x1f;
-    if (admode == 0)
-    {
-        while (a >= 8)
-        {
-            a -= 8;
-            arg1 -= 1;
-        }
-    }
-    zflag = 0;
-    if ((arg1[0] & (type8) (1 << a)) == 0)
-        zflag = 0xff;
-    return a;
-}
-
-/* bit operation entry point [307c] */
-
-static void do_bop(type8 b, type8 a)
-{
-#ifdef LOGEMU
-    out("bop (%.2X,%.2X) ", (type16) b, (type16) a);
-#endif
-    b = b & 0xc0;
-    a = do_btst(a);
-#ifdef LOGEMU
-    if (b == 0x00)
-        out("no bop???");
-#endif
-    if (b == 0x40)
-    {
-        arg1[0] ^= (1 << a); /* bchg */
-#ifdef LOGEMU
-        out("bchg");
-#endif
-    }
-    else if (b == 0x80)
-    {
-        arg1[0] &= ((1 << a) ^ 0xff); /* bclr */
-#ifdef LOGEMU
-        out("bclr");
-#endif
-    }
-    else if (b == 0xc0)
-    {
-        arg1[0] |= (1 << a); /* bset */
-#ifdef LOGEMU
-        out("bset");
-#endif
-    }
-}
-
-static void check_btst(void)
-{
-#ifdef LOGEMU
-    out("btst");
-#endif
-    set_info((type8) (byte2 & 0x3f));
-    set_arg1();
-    set_arg2(1, byte1);
-    do_bop(byte2, arg2[0]);
-}
-
-static void check_lea(void)
-{
-#ifdef LOGEMU
-    out("lea");
-#endif
-    if ((byte2 & 0xc0) == 0xc0)
-    {
-        set_info(byte2);
-        opsize = 2;
-        set_arg1();
-        set_arg2(0, byte1);
-        *(type16 *)(arg2) = 0;
-        if (is_reversible)
-            write_l(arg2, arg1i);
-        else
-            ms_fatal("illegal addressing mode for LEA");
-    }
-    else
-    {
-        ms_fatal("unimplemented instruction CHK");
-    }
-}
-
-/* [33cc] */
-
-static void check_movem(void)
-{
-#ifdef LOGEMU
-    out("movem");
-#endif
-    set_info((type8) (byte2 - 0x40));
-    read_word();
-    for (type8 l1c = 0; l1c < 8; l1c++)
-    {
-        if (byte2 & (type8) (1 << l1c))
-        {
-            set_arg1();
-            if (opsize == 2)
-                memcpy(arg1, &areg[7 - l1c], sizeof(type32));
-            else if (opsize == 1)
-                *(type16 *)(arg1) = *(type16 *)(((type8 *) &areg[7 - l1c]) + 2);
-        }
-    }
-    for (type8 l1c = 0; l1c < 8; l1c++)
-    {
-        if (byte1 & (type8) (1 << l1c))
-        {
-            set_arg1();
-            if (opsize == 2)
-                memcpy(arg1, &dreg[7 - l1c], sizeof(type32));
-            else if (opsize == 1)
-                *(type16 *)(arg1) = *(type16 *)(((type8 *) &dreg[7 - l1c]) + 2);
-        }
-    }
-}
-
-/* [3357] */
-
-static void check_movem2(void)
-{
-#ifdef LOGEMU
-    out("movem (2)");
-#endif
-    set_info((type8) (byte2 - 0x40));
-    read_word();
-    for (type8 l1c = 0; l1c < 8; l1c++)
-    {
-        if (byte2 & (type8) (1 << l1c))
-        {
-            set_arg1();
-            if (opsize == 2)
-                memcpy(&dreg[l1c], arg1, sizeof(type32));
-            else if (opsize == 1)
-                *(type16 *)(((type8 *) &dreg[l1c]) + 2) = *(type16 *)(arg1);
-        }
-    }
-    for (type8 l1c = 0; l1c < 8; l1c++)
-    {
-        if (byte1 & (type8) (1 << l1c))
-        {
-            set_arg1();
-            if (opsize == 2)
-                memcpy(&areg[l1c], arg1, sizeof(type32));
-            else if (opsize == 1)
-                *(type16 *)(((type8 *) &areg[l1c]) + 2) = *(type16 *)(arg1);
-        }
-    }
 }
 
 /* [30e4] in Jinxter, ~540 lines of 6510 spaghetti-code */
@@ -2444,7 +1283,7 @@ static void dict_lookup(void)
 /* l22 = output2,     l1e = adjlist, l20 = obj_adj, l26 = word, l2f = c2 */
 /* l1c = adjlist_bak, 333C = i,      l2d = bank,    l2c = flag, l30e3 = flag2 */
 
-    write_dreg_w(1, 0); /* D1.W=0  [32B5] */
+    write_dreg_w(1, 0); /* D1.W=0 */
     flag2 = 0;
     output_bak = output;
     output2 = output;
@@ -2526,7 +1365,7 @@ static void dict_lookup(void)
 
 #if USE_PROG_FORMAT
 
-/* A0=findproperties(D0) [2b86], properties_ptr=[2b78] A0FE */
+/* A0=findproperties(D0) A0FE */
 
 static void do_findprop(void)
 {
@@ -2548,7 +1387,7 @@ static void do_findprop(void)
 
 #else
 
-/* A0=findproperties(D0) [2b86], properties_ptr=[2b78] A0FE */
+/* A0=findproperties(D0) A0FE */
 
 static void do_findprop(void)
 {
@@ -2612,6 +1451,9 @@ static void write_string(void)
      * Assumption: The string is not longer than
      * (16K - address_in_bottom_8k(string)) characters and it
      * does not cross string sections.
+     *
+     * NOTE: In Wonderland, a string can actually cross string
+     * sections so we have to take care of that.
      */
     if (offset >= string_size)
         str_ptr = effective_string2(offset - string_size);
@@ -2638,7 +1480,19 @@ static void write_string(void)
             {
                 mask = 1;
                 offset++;
+#if USE_MAGNETIC_WINDOWS
+                if (offset == MAX_STRING_SIZE)
+                    // Going from string1 to string3 section.
+                    str_ptr = effective_string3(offset - MAX_STRING_SIZE);
+                else if (offset == string_size)
+                    // Going from string3 to string2 section.
+                    str_ptr = effective_string2(offset - string_size);
+                else
+                    // Staying within same string section.
+                    str_ptr++;
+#else
                 str_ptr++;
+#endif
             }
         }
         c &= 0x7f;
@@ -2681,56 +1535,18 @@ static type8 emit_stopron(void)
 
     // Page in the string page again.
     current_page = string_page;
-    page_out_rom();
+    page_in_game();
 
     return (obj != 0);
 }
 
-static void emit_chars(type8 *msg)
+static void _emit_chars(type8 *msg)
 {
-    static type8 in_stopron = 0;
-    static type8 *stopron_continuation = NULL;
-    static type8 stopron_page;
-
-    type8 *str;
-    type8 ch;
     type8 last_ch = 0;
-
-    if (in_stopron)
-    {
-        // Wait for the countdown to hit zero then, if there is a continuation, emit it.
-        if (!--in_stopron)
-        {
-            str = stopron_continuation;
-            if (str)
-            {
-                type8 string_page;
-
-                stopron_continuation = NULL;
-
-                // Save the string page and page in the stopron continuation page.
-                string_page = current_page;
-                current_page = stopron_page;
-                page_out_rom();
-
-                // Print the stopron continuation.
-                while (*str != '\n')
-                {
-                    char_out(*str++);
-                }
-
-                // Page in the string page again.
-                current_page = string_page;
-                page_out_rom();
-            }
-        }
-    }
-
-    str = msg;
 
     for (;;)
     {
-        ch = *str++;
+        type8 ch = *msg++;
 
         if (ch == '\n')
         {
@@ -2754,11 +1570,14 @@ static void emit_chars(type8 *msg)
              */
             if (emit_stopron())
             {
-                in_stopron = 2;
-                if (*str != '\n')
+                if (*msg != '\n')
                 {
-                    stopron_continuation = str;
-                    stopron_page = current_page;
+                    // Push the stopron continuation string on the sp_stack.
+                    sp_continuation_t *spc = &sp_stack[sp_stack_size];
+                    spc->in_stopron = 2;
+                    spc->stopron_continuation = msg;
+                    spc->stopron_page = current_page;
+                    sp_stack_size++;
                 }
                 return;
             }
@@ -2769,6 +1588,48 @@ static void emit_chars(type8 *msg)
         }
 
         last_ch = ch;
+    }
+}
+
+static void emit_chars(type8 *msg)
+{
+    if (sp_stack_size)
+    {
+        // Wait for the countdown to hit zero then, if there is a continuation, emit it.
+        sp_continuation_t *spc = &sp_stack[sp_stack_size - 1];
+        if (!--spc->in_stopron)
+        {
+            type8 *str;
+            type8 string_page;
+
+            // Swap the current msg string with the stopron continuation string.
+            str = spc->stopron_continuation;
+            spc->stopron_continuation = msg;
+            msg = str;
+
+            // Swap the current msg page with the stopron continuation page.
+            string_page = current_page;
+            current_page = spc->stopron_page;
+            page_in_game();
+            spc->stopron_page = string_page;
+        }
+    }
+
+    _emit_chars(msg);
+
+    while (sp_stack_size && !sp_stack[sp_stack_size - 1].in_stopron)
+    {
+        sp_continuation_t *spc;
+
+        // Pop the sp_stack and emit its string.
+
+        sp_stack_size--;
+        spc = &sp_stack[sp_stack_size];
+
+        current_page = spc->stopron_page;
+        page_in_game();
+
+        _emit_chars(spc->stopron_continuation);
     }
 }
 
@@ -2855,7 +1716,14 @@ static void do_line_a(void)
                 if (dtype == 7)
                 {
                     /* Picture: gfx mode = normal, df is not called if graphics are off */
+#if USE_ANIM
+                    str = effective(a1reg + 3);
+                    save_str(&str);
+                    str[6] = '\0'; // Max six chars
+                    ms_showpic(str, 2);
+#else
                     ms_showpic((type8) (a1reg + 3), 2);
+#endif
                 }
             }
             break;
@@ -2886,11 +1754,13 @@ static void do_line_a(void)
             break;
 
         case 6: /* A0E3 */
+#if !USE_PROG_FORMAT
             if (read_dreg_l(1) == 0)
             {
                 if ((version < 4) || (read_dreg_l(6) == 0))
                     ms_showpic(0, 0);
             }
+#endif
             break;
 
         case 7: /* A0E4 sp+=4, RTS */
@@ -2912,7 +1782,7 @@ static void do_line_a(void)
             zflag = 0;
             break;
 
-        case 12: /* A0E9 [3083 - j] */
+        case 12: /* A0E9 */
             ptr = read_areg_w(0);
             ptr2 = read_areg_w(1);
             do
@@ -2946,7 +1816,7 @@ static void do_line_a(void)
             write_dreg_b(3, tmp8);
             break;
 
-        case 14: /* A0EB [3037 - j] */
+        case 14: /* A0EB */
             effective_dict(read_areg_w(1))[0] = read_dreg_b(1);
             break;
 
@@ -2954,19 +1824,34 @@ static void do_line_a(void)
             write_dreg_b(1, effective_dict(read_areg_w(1))[0]);
             break;
 
-        case 16:
-            ms_stop(); /* infinite loop A0ED */
+        case 16: /* A0ED */
+            ms_stop(); /* infinite loop */
             break;
-        case 17:
+
+        case 17: /* A0EE */
             if (!ms_init(NULL))
-                ms_stop(); /* restart game ie. pc, sp etc. A0EE */
+                ms_stop(); /* restart game ie. pc, sp etc. */
+            add_startup_commands();
+#if USE_PROG_FORMAT
+            ms_config();
+#endif
             break;
-        case 18: /* printer A0EF */
+
+        case 18: /* A0EF printer */
             break;
-        case 19:
-            ms_showpic(read_dreg_b(0), read_dreg_b(1)); /* Do_picture(D0) A0F0 */
+
+        case 19: /* A0F0 */
+#if USE_ANIM
+            str = effective(read_dreg_b(0));
+            save_str(&str);
+            str[6] = '\0'; // Max six chars
+            ms_showpic(str, read_dreg_b(1)); /* Do_picture(D0) */
+#else
+            ms_showpic(read_dreg_b(0), read_dreg_b(1)); /* Do_picture(D0) */
+#endif
             break;
-        case 20:
+
+        case 20: /* A0F1 */
             {
                 /*
                  * Optimization: Minimize number of effective() calls.
@@ -2974,7 +1859,7 @@ static void do_line_a(void)
                  * (16K - address_in_bottom_8k(ptr)) times.
                  */
                 type16 d0_reg;
-                ptr = read_areg_w(1); /* A1=nth_string(A1,D0) A0F1 */
+                ptr = read_areg_w(1); /* A1=nth_string(A1,D0) */
                 effective_ptr = effective(ptr);
                 tmp16 = ptr;
                 d0_reg = read_dreg_w(0);
@@ -2986,7 +1871,7 @@ static void do_line_a(void)
             }
             break;
 
-        case 21: /* [2a43] A0F2 */
+        case 21: /* A0F2 */
             cflag = 0;
             write_dreg_w(0, read_dreg_w(2));
             do_findprop();
@@ -3009,37 +1894,37 @@ static void do_line_a(void)
             }
             break;
 
-        case 22:
-            char_out(read_dreg_b(1)); /* A0F3 */
+        case 22: /* A0F3 */
+            char_out(read_dreg_b(1));
             break;
 
-        case 23: /* D7=Save_(filename A0) D1 bytes starting from A1  A0F4 */
+        case 23: /* A0F4 D7=Save_(filename A0) D1 bytes starting from A1 */
             str = (version < 4) ? effective(read_areg_w(0)) : NULL;
             save_str(&str);
             write_dreg_b(7, ms_save_file(str, effective(read_areg_w(1)), read_dreg_w(1)));
             break;
 
-        case 24: /* D7=Load_(filename A0) D1 bytes starting from A1  A0F5 */
+        case 24: /* A0F5 D7=Load_(filename A0) D1 bytes starting from A1 */
             str = (version < 4) ? effective(read_areg_w(0)) : NULL;
             save_str(&str);
             write_dreg_b(7, ms_load_file(str, effective(read_areg_w(1)), read_dreg_w(1)));
             break;
 
-        case 25: /* D1=Random(0..D1-1) [3748] A0F6 */
+        case 25: /* A0F6 D1=Random(0..D1-1) */
             l1c = read_dreg_b(1);
             write_dreg_w(1, (type16) (rand_emu() % (l1c ? l1c : 1)));
             break;
 
-        case 26: /* D0=Random(0..255) [3742] A0F7 */
+        case 26: /* A0F7 D0=Random(0..255) */
             tmp16 = (type16) rand_emu();
             write_dreg_b(0, (type8) (tmp16 + (tmp16 >> 8)));
             break;
 
-        case 27: /* write string [D0] [2999] A0F8 */
+        case 27: /* A0F8 write string [D0] */
             write_string();
             break;
 
-        case 28: /* Z,D0=Get_inventory_item(D0) [2a9e] A0F9 */
+        case 28: /* A0F9 Z,D0=Get_inventory_item(D0) */
             /*
              * Optimization: Minimize number of effective() calls.
              */
@@ -3081,7 +1966,7 @@ static void do_line_a(void)
             write_dreg_w(0, ptr + 1);
             break;
 
-        case 29: /* [2b18] A0FA */
+        case 29: /* A0FA */
             /*
              * Optimization: Minimize number of effective() calls and cache
              * read-only registers.
@@ -3126,7 +2011,7 @@ static void do_line_a(void)
             while ((!l1c) && (read_dreg_w(3) != d4_reg));
             break;
 
-        case 30: /* [2bd1] A0FB */
+        case 30: /* A0FB */
             /*
              * Optimization: Minimize number of effective()/effective_dict() calls.
              * Assumption: ptr is not incremented more than
@@ -3144,7 +2029,7 @@ static void do_line_a(void)
             write_areg_w(1, ptr);
             break;
 
-        case 31: /* [2c3b] A0FC */
+        case 31: /* A0FC */
             /*
              * Optimization: Minimize number of effective()/effective_dict() calls.
              * Assumption: ptr and ptr2 are not incremented more than
@@ -3170,7 +2055,7 @@ static void do_line_a(void)
             write_areg_w(1, ptr2);
             break;
 
-        case 32: /* Set properties pointer from A0 [2b7b] A0FD */
+        case 32: /* A0FD Set properties pointer from A0 */
             properties = read_areg_w(0);
             if (version > 0)
                 fl_sub = read_areg_w(3);
@@ -3197,14 +2082,14 @@ static void do_line_a(void)
             do_findprop();
             break;
 
-        case 34: /* Dictionary_lookup A0FF */
+        case 34: /* A0FF Dictionary_lookup */
             dict_lookup();
             break;
         }
     }
 }
 
-/* emulate an instruction [1b7e] */
+/* emulate an instruction */
 
 type8 ms_rungame(void)
 {
@@ -3258,7 +2143,7 @@ type8 ms_rungame(void)
             }
             else
             {
-                /* OR [27df] */
+                /* OR */
 #ifdef LOGEMU
                 out("or");
 #endif
@@ -3396,7 +2281,7 @@ type8 ms_rungame(void)
         check_btst();
         break;
 
-/* 10-1F [3327] MOVE.B */
+/* 10-1F MOVE.B */
     case 0x08: case 0x09: case 0x0a: case 0x0b:
     case 0x0c: case 0x0d: case 0x0e: case 0x0f:
 
@@ -3413,7 +2298,7 @@ type8 ms_rungame(void)
         do_move_b();
         break;
 
-/* 20-2F [32d1] MOVE.L */
+/* 20-2F MOVE.L */
     case 0x10: case 0x11: case 0x12: case 0x13:
     case 0x14: case 0x15: case 0x16: case 0x17:
 
@@ -3430,7 +2315,7 @@ type8 ms_rungame(void)
         do_move_l();
         break;
 
-/* 30-3F [3327] MOVE.W */
+/* 30-3F MOVE.W */
     case 0x18: case 0x19: case 0x1a: case 0x1b:
     case 0x1c: case 0x1d: case 0x1e: case 0x1f:
 
@@ -3451,7 +2336,6 @@ type8 ms_rungame(void)
     case 0x20:
         if (byte1 == 0x40)
         {
-            /* [31d5] */
             ms_fatal("unimplemented instructions NEGX and MOVE SR,xx");
         }
         else
@@ -3461,7 +2345,6 @@ type8 ms_rungame(void)
     case 0x21:
         if (byte1 == 0x42)
         {
-            /* [3188] */
             if ((byte2 & 0xc0) == 0xc0)
             {
                 ms_fatal("unimplemented instruction MOVE CCR,xx");
@@ -3491,7 +2374,6 @@ type8 ms_rungame(void)
     case 0x22:
         if (byte1 == 0x44)
         {
-            /* [31a0] */
             if ((byte2 & 0xc0) == 0xc0)
             {
                 /* MOVE to CCR */
@@ -3636,7 +2518,7 @@ type8 ms_rungame(void)
     case 0x25:
         if (byte1 == 0x4a)
         {
-            /* [3219] TST */
+            /* TST */
             if ((byte2 & 0xc0) == 0xc0)
             {
                 ms_fatal("unimplemented instruction TAS");
@@ -3658,7 +2540,7 @@ type8 ms_rungame(void)
 
     case 0x26:
         if (byte1 == 0x4c)
-            check_movem2(); /* [3350] MOVEM.L (Ax)+,A/Dx */
+            check_movem2(); /* MOVEM.L (Ax)+,A/Dx */
         else
             check_lea(); /* LEA */
         break;
@@ -3666,7 +2548,6 @@ type8 ms_rungame(void)
     case 0x27:
         if (byte1 == 0x4e)
         {
-            /* [3290] */
             if (byte2 == 0x75)
             {
                 /* RTS */
@@ -3717,7 +2598,7 @@ type8 ms_rungame(void)
             check_lea(); /* LEA */
         break;
 
-/* 50-5F [2ed5] ADDQ/SUBQ/Scc/DBcc */
+/* 50-5F ADDQ/SUBQ/Scc/DBcc */
     case 0x28: case 0x29: case 0x2a: case 0x2b:
     case 0x2c: case 0x2d: case 0x2e: case 0x2f:
 
@@ -3795,7 +2676,7 @@ type8 ms_rungame(void)
         }
         break;
 
-/* 60-6F [26ba] Bcc */
+/* 60-6F Bcc */
     case 0x30:
         if (byte1 == 0x61)
         {
@@ -3840,7 +2721,7 @@ type8 ms_rungame(void)
         }
         break;
 
-/* 70-7F [260a] MOVEQ */
+/* 70-7F MOVEQ */
     case 0x38: case 0x39: case 0x3a: case 0x3b:
     case 0x3c: case 0x3d: case 0x3e: case 0x3f:
 
@@ -3856,7 +2737,7 @@ type8 ms_rungame(void)
         zflag = byte2 ? 0 : 0xff;
         break;
 
-/* 80-8F [2f36] */
+/* 80-8F */
     case 0x40: case 0x41: case 0x42: case 0x43:
     case 0x44: case 0x45: case 0x46: case 0x47:
 
@@ -3882,7 +2763,7 @@ type8 ms_rungame(void)
         }
         break;
 
-/* 90-9F [3005] SUB */
+/* 90-9F SUB */
     case 0x48: case 0x49: case 0x4a: case 0x4b:
     case 0x4c: case 0x4d: case 0x4e: case 0x4f:
 
@@ -3913,7 +2794,7 @@ type8 ms_rungame(void)
         break;
 
 /* A0-AF various special commands [LINE_A] */
-    case 0x50: case 0x56: case 0x57: /* [2521] */
+    case 0x50: case 0x56: case 0x57:
         do_line_a();
 #ifdef LOGEMU
         out("LINE_A A0%.2X", byte2);
@@ -3941,7 +2822,7 @@ type8 ms_rungame(void)
     case 0x53:
         if ((byte2 & 0xc0) == 0xc0)
         {
-            /* TST [321d] */
+            /* TST */
             ms_fatal("unimplemented instructions LINE_A #$6C0-#$6FF");
         }
         else
@@ -3964,7 +2845,7 @@ type8 ms_rungame(void)
         check_movem2();
         break;
 
-/* B0-BF [2fe4] */
+/* B0-BF */
     case 0x58: case 0x59: case 0x5a: case 0x5b:
     case 0x5c: case 0x5d: case 0x5e: case 0x5f:
 
@@ -4008,7 +2889,7 @@ type8 ms_rungame(void)
         }
         break;
 
-/* C0-CF [2f52] EXG, AND */
+/* C0-CF EXG, AND */
     case 0x60: case 0x61: case 0x62: case 0x63:
     case 0x64: case 0x65: case 0x66: case 0x67:
 
@@ -4092,7 +2973,7 @@ type8 ms_rungame(void)
         }
         break;
 
-/* D0-DF [2fc8] ADD */
+/* D0-DF ADD */
     case 0x68: case 0x69: case 0x6a: case 0x6b:
     case 0x6c: case 0x6d: case 0x6e: case 0x6f:
 
@@ -4122,7 +3003,7 @@ type8 ms_rungame(void)
         }
         break;
 
-/* E0-EF [3479] LSR ASL ROR ROL */
+/* E0-EF LSR ASL ROR ROL */
     case 0x70: case 0x71: case 0x72: case 0x73:
     case 0x74: case 0x75: case 0x76: case 0x77:
 
@@ -4190,7 +3071,7 @@ type8 ms_rungame(void)
             {
                 if (opsize == 0)
                 {
-                    cflag = arg1[0] & 0x80 ? 0xff : 0; /* [3527] */
+                    cflag = arg1[0] & 0x80 ? 0xff : 0;
                     arg1[0] <<= 1;
                     if (cflag && (byte2 == 3))
                         arg1[0] |= 0x01;
@@ -4216,7 +3097,7 @@ type8 ms_rungame(void)
         set_flags();
         break;
 
-/* F0-FF [24f3] LINE_F */
+/* F0-FF LINE_F */
     case 0x78: case 0x79: case 0x7a: case 0x7b:
     case 0x7c: case 0x7d: case 0x7e: case 0x7f:
 

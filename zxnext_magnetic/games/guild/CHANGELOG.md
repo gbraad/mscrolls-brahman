@@ -2,6 +2,18 @@
 
 All notable changes to The Guild of Thieves game will be documented in this file.
 
+## 1.3.0 (2021-05-23)
+
+* Recompiled with z88dk v2.1 using the new Magnetic interpreter optimisations.
+* Fixed a bug where a displayed location image would sometimes disappear after
+a while.
+* Make sure the game starts in verbose mode when restarted.
+* Make "graphics on" command take immediate effect.
+* Adjusted digit '1' in the proportional font so that all digits are monospaced.
+* Fixed a text scrolling issue when going from a location without an image to a
+location with an image and that movement triggers text output that is partially
+hidden behind the new location image.
+
 ## 1.2.0 (2020-09-04)
 
 * Improved font for Timex hi-res mode.

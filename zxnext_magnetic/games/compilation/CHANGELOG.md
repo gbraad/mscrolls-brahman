@@ -12,6 +12,11 @@ here:
 * [Corruption](../corrupt/CHANGELOG.md)
 * [Fish!](../fish/CHANGELOG.md)
 * [Myth](../myth/CHANGELOG.md)
+* [Wonderland](../wonder/CHANGELOG.md)
+
+## 1.1.0 (2021-05-23)
+
+* Wonderland added to the compilation.
 
 ## 1.0.0 (2020-09-22)
 

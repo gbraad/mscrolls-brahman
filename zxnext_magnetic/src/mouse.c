@@ -3,14 +3,12 @@
  *
  * Implementation of mouse.h; a C API for PS/2 Kempston mouse support.
  *
- * This module queries the mouse state from the mouse driver each 1/50th second
- * in an IM2 ISR. The module then updates the mouse pointer using a hardware
- * sprite and invokes a user-supplied mouse listener. The mouse pointer is
- * hidden if the mouse is not moved for a while.
+ * This module contains an ISR that queries the mouse state from the mouse
+ * driver and that should be called each 1/50th second. The ISR then updates
+ * the mouse pointer using a hardware sprite and invokes a user-supplied mouse
+ * listener. The mouse pointer is hidden if the mouse is not moved for a while.
  ******************************************************************************/
 
-#include <z80.h>
-#include <intrinsic.h>
 #include <input.h>
 #include <stdint.h>
 
@@ -45,7 +43,19 @@ static MOUSE_LISTENER user_mouse_listener;
  * be moved less than half a rotation between two readings.
  ******************************************************************************/
 
-IM2_DEFINE_ISR(mouse_handler)
+void init_mouse(const void *mouse_sprite_buf, MOUSE_LISTENER mouse_listener)
+{
+    user_mouse_listener = mouse_listener;
+
+    // Load and set mouse pointer hardware sprite using the default sprite palette.
+    sprite_load_patterns("gfx/mouse.spr", mouse_sprite_buf, 1, MOUSE_SPRITE_SLOT);
+
+    // Init PS/2 Kempston mouse.
+    in_mouse_kempston_init();
+    in_mouse_kempston_setpos(0, 0);
+}
+
+void mouse_isr(void)
 {
     uint8_t last_mouse_x = mouse_x;
     uint8_t last_mouse_y = mouse_y;
@@ -98,22 +108,4 @@ IM2_DEFINE_ISR(mouse_handler)
 
     // Invoke user-supplied mouse listener.
     user_mouse_listener(mouse_x, mouse_y, mouse_buttons, wheel_delta);
-}
-
-void init_mouse(const void *mouse_sprite_buf, MOUSE_LISTENER mouse_listener)
-{
-    user_mouse_listener = mouse_listener;
-
-    // Load and set mouse pointer hardware sprite using the default sprite palette.
-    sprite_load_patterns("gfx/mouse.spr", mouse_sprite_buf, 1, MOUSE_SPRITE_SLOT);
-
-    // Init PS/2 Kempston mouse.
-    in_mouse_kempston_init();
-    in_mouse_kempston_setpos(0, 0);
-
-    // Install mouse handler interrupt service routine.
-    intrinsic_di();
-    z80_bpoke(0xFDFD, 0xC3); // jp
-    z80_wpoke(0xFDFE, (uint16_t) mouse_handler);
-    intrinsic_ei();
 }

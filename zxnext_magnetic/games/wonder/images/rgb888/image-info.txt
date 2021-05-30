@@ -1,0 +1,111 @@
+bank
+banque
+barnes
+bath
+beahol
+beaver (animation type1)
+bed
+brkrom
+broom
+bumble (animation type1)
+bygate
+byriv
+catter (animation type1)
+cedge
+cenhal
+conser (animation type2)
+cooksb (animation type2)
+court  (animation type1)
+croque (animation type2)
+dbed
+ddine  (animation type1)
+dkitch (animation type2)
+dland
+dloung
+dormou
+dpond  (animation type1)
+drive
+dunge
+end
+enthal (animation type1)
+epond
+ewall
+frog   (animation type2)
+frtpal
+giant
+glade  (animation type1)
+grove  (animation type1)
+grthal
+guardr
+hatrom
+hedge
+house
+inriv
+insky
+intea
+jury1  (animation type1)
+jury2  (animation type1)
+jury3  (animation type1)
+jury4  (animation type1)
+lane
+lane2
+ledge
+limb
+lounge (animation type1)
+maddin
+madfoo
+madkit
+music  (animation type1)
+nest
+npond
+nwall
+observ (animation type1)
+onbrge (animation type1)
+outcel
+outdun
+outgat
+outkit (animation type1 ?)
+outpal (animation type1)
+palkit (animation type2)
+pantry
+pass3
+passag
+path
+pland
+plough
+rabbed
+rabhal
+rabhse
+rabkit
+rablan
+rbrige (animation type1)
+river
+secret
+shed
+sink
+spond
+sstrem
+tailor
+throne
+tinyt
+tree
+treehs
+tunnel (animation type1)
+turtle
+underb (animation type1)
+utree
+vege
+waiter (animation type1)
+walgdn
+wall
+well
+well1
+well2  (animation type2)
+well3  (animation type2)
+westhl
+wood
+wood3
+wpond
+wwall
+wwpa3
+wwpa6

@@ -65,7 +65,7 @@ public class ConvertText {
             return;
         }
 
-        content = removeGameSpecificMarkup(basename, content);
+        content = changeGameSpecificText(basename, content);
         content = removeMarkup(content);
 
         try {
@@ -84,13 +84,19 @@ public class ConvertText {
         System.out.println("Converted " + filename + " to " + basename + ".txt and " + basename + ".idx.");
     }
 
-    private static String removeGameSpecificMarkup(String game, String content) {
+    private static String changeGameSpecificText(String game, String content) {
         switch (game) {
             case "pawn":
+                content = content.replace("^You didn't really want to do that.",
+                    "^Do you want to quit or restart (q/r)?");
+                content = content.replace("^Please enter filename:",
+                    "^Please enter filename: ");
                 break;
             case "guild":
                 break;
             case "jinxter":
+                content = content.replace("^Do you want to [restart](resetgame)?",
+                    "^Do you want to quit or restart (q/r)?");
                 content = content.replace("\\[here](http://strandgames.com/files/jinxter/document.html)\\",
                     "at http://strandgames.com/files/jinxter/document.html");
                 break;

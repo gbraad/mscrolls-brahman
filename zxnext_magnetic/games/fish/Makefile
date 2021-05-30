@@ -12,7 +12,7 @@ GAME_START_IMAGE := 19
 
 GAME_LAST_IMAGE := 26
 
-GAME_VERSION_STR := 'Fish for ZX Spectrum Next v1.1.0'
+GAME_VERSION_STR := 'Fish for ZX Spectrum Next v1.2.0'
 
 MAGNETIC := ../..
 

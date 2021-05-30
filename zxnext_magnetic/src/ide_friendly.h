@@ -11,6 +11,7 @@
 
 #ifdef IDE_FRIENDLY
 #define __z88dk_fastcall
+#define __z88dk_callee
 #define __preserves_regs(...)
 #define __naked
 #define IM2_DEFINE_ISR(name) void name(void)

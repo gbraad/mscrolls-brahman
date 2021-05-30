@@ -2,7 +2,7 @@
  10 REG 7,3
  20 CLS
  30 REG 127,0
- 40 .SPUI menu -x 5 -y 8 -c 22 -r 7 -t "Magnetic Scrolls" "The Pawn" "The Guild of Thieves" Jinxter Corruption Fish! Myth ">Exit"
+ 40 .SPUI menu -i "c:/magnetic/menu.ini"
  50 LET %m = % REG 127
  60 IF %m = 1 THEN CD "c:/magnetic/pawn": .nexload pawn_512.nex
  70 IF %m = 2 THEN CD "c:/magnetic/guild": .nexload guild_512.nex
@@ -10,4 +10,5 @@
  90 IF %m = 4 THEN CD "c:/magnetic/corrupt": .nexload corrupt_512.nex
 100 IF %m = 5 THEN CD "c:/magnetic/fish": .nexload fish_512.nex
 110 IF %m = 6 THEN CD "c:/magnetic/myth": .nexload myth_512.nex
-120 ERASE
+120 IF %m = 7 THEN CD "c:/magnetic/wonder": .nexload wonder_512.nex
+130 ERASE

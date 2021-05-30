@@ -15,6 +15,7 @@ divert(-1)
 #
 # The following definitions are also configurable from the M4 command-line:
 # - USE_PROG_FORMAT
+# - USE_MAGNETIC_WINDOWS
 # - GAME_FILE
 # - GAME_DIR
 # - GAME_START_IMAGE
@@ -22,13 +23,13 @@ divert(-1)
 # - GAME_VERSION_STR
 # - USE_TIMEX_HIRES
 # - USE_GFX
+# - USE_ANIM
 # - MAX_IMAGE_HEIGHT
 # - USE_SOUND
 # - USE_MOUSE
 # - USE_SCRIPT
 # - USE_LOGEMU
 # - USE_IMAGE_SLIDESHOW
-# - MS_FATAL_CHECK
 # - FAST_COMPILE (Winmake.bat only)
 ################################################################################
 
@@ -37,13 +38,16 @@ divert(-1)
 # Non-zero to enable PROG game story file format, default is MAG file format.
 ifdef(`USE_PROG_FORMAT',, `define(`USE_PROG_FORMAT', 0)')
 
+# Non-zero if Magnetic Windows (Wonderland), default is not Magnetic Windows.
+ifdef(`USE_MAGNETIC_WINDOWS',, `define(`USE_MAGNETIC_WINDOWS', 0)')
+
 # Game story file, default is "pawn.mag".
 ifdef(`GAME_FILE', `define(`GAME_FILE', "GAME_FILE")', `define(`GAME_FILE', "pawn.mag")')
 
 # Game directory, default is pawn.
 ifdef(`GAME_DIR', `define(`GAME_DIR', GAME_DIR)', `define(`GAME_DIR', pawn)')
 
-# Image number of the game's start location image, default is 4 as for pawn.mag.
+# Image number/name of the game's start location image, default is 4 as for pawn.mag.
 ifdef(`GAME_START_IMAGE',, `define(`GAME_START_IMAGE', 4)')
 
 # Image number of the game's last location image, default is 29 as for pawn.mag.
@@ -95,6 +99,9 @@ define(`STATUS_FONT_COLOR', 0xD4)
 # Non-zero to enable intro and location graphics, default is no graphics.
 ifdef(`USE_GFX',, `define(`USE_GFX', 0)')
 
+# Non-zero to enable animated graphics, default is no animated graphics.
+ifdef(`USE_ANIM',, `define(`USE_ANIM', 0)')
+
 # Height of all location images in pixels.
 ifdef(`MAX_IMAGE_HEIGHT',, `define(`MAX_IMAGE_HEIGHT', 136)')
 
@@ -128,11 +135,6 @@ define(`LOG_FILE', "log.txt")
 # Used for debugging and testing.
 ifdef(`USE_IMAGE_SLIDESHOW',, `define(`USE_IMAGE_SLIDESHOW', 0)')
 
-# Runtime error checks
-
-# Non-zero to enable performance-heavy emulator fatal error checks, default is off.
-ifdef(`MS_FATAL_CHECK',, `define(`MS_FATAL_CHECK', 0)')
-
 ################################################################################
 # NO CHANGES BELOW
 ################################################################################
@@ -151,6 +153,7 @@ divert
 `#define' _ZCONFIG_H
 
 `#define' `USE_PROG_FORMAT' USE_PROG_FORMAT
+`#define' `USE_MAGNETIC_WINDOWS' USE_MAGNETIC_WINDOWS
 `#define' `GAME_FILE' GAME_FILE
 `#define' `GAME_START_IMAGE' GAME_START_IMAGE
 `#define' `GAME_LAST_IMAGE' GAME_LAST_IMAGE
@@ -162,6 +165,7 @@ ifdef(`GAME_VERSION_STR', `#define' `GAME_VERSION_STR' GAME_VERSION_STR, `dnl')
 `#define' `STATUS_FONT_COLOR' STATUS_FONT_COLOR
 
 `#define' `USE_GFX' USE_GFX
+`#define' `USE_ANIM' USE_ANIM
 `#define' `MAX_IMAGE_HEIGHT' MAX_IMAGE_HEIGHT
 `#define' `MAX_IMAGE_HEIGHT_IN_CHARS' MAX_IMAGE_HEIGHT_IN_CHARS
 
@@ -179,8 +183,6 @@ ifelse(USE_LOGEMU, 0,,
 
 `#define' `USE_IMAGE_SLIDESHOW' USE_IMAGE_SLIDESHOW
 
-`#define' `MS_FATAL_CHECK' MS_FATAL_CHECK
-
 `#endif'
 divert(-1)
 ')
@@ -196,6 +198,7 @@ IFNDEF _ZCONFIG_INC
 DEFC _ZCONFIG_INC = 1
 
 defc `USE_PROG_FORMAT' = USE_PROG_FORMAT
+defc `USE_MAGNETIC_WINDOWS' = USE_MAGNETIC_WINDOWS
 
 defc `KEY_REPEAT_RATE' = KEY_REPEAT_RATE
 defc `ASCII_CODE_UP' = ASCII_CODE_UP
@@ -206,7 +209,10 @@ defc `USE_TIMEX_HIRES' = USE_TIMEX_HIRES
 defc `TEXT_WINDOW_HEIGHT' = TEXT_WINDOW_HEIGHT
 
 defc `USE_GFX' = USE_GFX
+defc `USE_ANIM' = USE_ANIM
 defc `MAX_IMAGE_HEIGHT' = MAX_IMAGE_HEIGHT
+
+defc `LOGEMU' = USE_LOGEMU
 
 ENDIF
 divert(-1)
@@ -284,14 +290,14 @@ ifelse(TARGET, 5,
 `
 divert
 ifdef(`FAST_COMPILE', ifelse(USE_TIMEX_HIRES, 0, `src/emu-s.o', `src/emu-t.o'), `src/emu.c')
+src/emu_asm.asm
 src/main.c
 src/sprite.c
 src/interrupt.asm
 src/in_key_translation_table.asm
 src/zx_01_input_kbd_inkey_custom.asm
-src/console_01_output_char_stdio_msg_ictl.asm
 src/scroll_prompt.asm
-src/status_bar.c
+ifelse(USE_MAGNETIC_WINDOWS, 0, `src/status_bar.c')
 src/text_color.asm
 src/layer2_fzx.asm
 ifelse(TEXT_FONT, `_ff_pd_QLStyle',
@@ -304,12 +310,17 @@ src/zx_01_output_fzx_custom.asm
 ',
 `
 src/tshr_01_output_fzx_custom.asm
-src/status_font.asm
+ifelse(USE_MAGNETIC_WINDOWS, 0, `src/status_font.asm')
 ')dnl
 ifelse(USE_GFX, 0,,
 `
 src/layer2.c
 src/gfx_util.asm
+')dnl
+ifelse(USE_ANIM, 0,,
+`
+src/layer2_blit.asm
+src/animation.c
 ')dnl
 ifelse(USE_SOUND, 0,,
 `
@@ -323,6 +334,10 @@ ifelse(USE_MOUSE, 0,,
 src/asm_in_mouse_kempston.asm
 src/asm_in_mouse_kempston_wheel.asm
 src/mouse.c
+')dnl
+ifelse(eval(USE_MOUSE || USE_ANIM), 0,,
+`
+src/interrupt_handler.c
 ')dnl
 ifelse(USE_SCRIPT, 0,,
 `

@@ -85,6 +85,9 @@ pawn directory is denoted as &lt;pawn&gt;.
 The game can be run on the Spectrum Next hardware or in the CSpect and ZEsarUX
 emulators.
 
+**Note:** When updating the game to a newer version and you have save files that
+you still want to use, just copy those save files to the new game folder.
+
 ### Spectrum Next
 
 1. On your PC, unpack the downloaded ZIP file pawn.zip on an SD card containing
@@ -167,6 +170,7 @@ Special commands:
 * save - Save the current game to file.
 * load - Load a previously saved game from file.
 * restart - Restart the game.
+* quit - Quit the game.
 * normal/verbose/brief - Select location description mode.
 * graphics on/off - Turn graphics on or off.
 * score - Print the current score.
