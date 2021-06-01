@@ -532,6 +532,15 @@ static type8 access_file(type8 *name, type8 *ptr, type16 size, type8 read)
     type8 ret = 0;
 
     /*
+     * If animations are enabled, we must disable interrupts while reading/writing the file since this
+     * function temporarily uses MMU slots 0, 1 and 2 and so does the interrupt driven animation module.
+     */
+
+#if USE_ANIM
+    intrinsic_di();
+#endif
+
+    /*
      * When using ESXDOS, the bottom 16 KB (MMU slot 0 and 1) must contain the
      * Spectrum ROM. The given argument ptr points in the currently swapped in
      * page in MMU slot 0. Since we must temporarily swap in the Spectrum ROM in
@@ -580,6 +589,9 @@ close:
 end:
     ZXN_WRITE_MMU2(10);
     page_in_game();
+#if USE_ANIM
+    intrinsic_ei();
+#endif
     return ret;
 }
 

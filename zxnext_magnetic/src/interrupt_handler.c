@@ -39,9 +39,7 @@ IM2_DEFINE_ISR(interrupt_handler)
     {
         animate();
         page_in_game();
-        // FIXME: This line should not be needed since animate() restores MMU
-        // slot 2 but I think the sdcc compiler sometimes ignores ZXN_WRITE_MMU
-        // calls when there are many of them in a function.
+        // Restore default page 10 in MMU slot 2.
         ZXN_WRITE_MMU2(10);
     }
 

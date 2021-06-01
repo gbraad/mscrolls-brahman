@@ -115,8 +115,6 @@ static void blit_image_copy(void)
         y += section_height;
         height -= section_height;
     }
-
-    ZXN_WRITE_MMU0(255);
 }
 
 /*
@@ -200,9 +198,6 @@ static void blit_frame(nxa_frame_t *frame, nxa_frame_position_t *frame_position,
         y += section_height;
         height -= section_height;
     }
-
-    ZXN_WRITE_MMU0(255);
-    ZXN_WRITE_MMU1(255);
 }
 
 /*
@@ -245,8 +240,6 @@ static void blit_background(frame_rect_t *frame_rect)
         y += section_height;
         height -= section_height;
     }
-
-    ZXN_WRITE_MMU0(255);
 }
 
 /*
@@ -273,15 +266,11 @@ static void load_main_image(uint8_t filehandle)
         esx_f_read(filehandle, MMU2_ADDRESS, buffer_size);
         if (errno)
         {
-            goto end;
+            return;
         }
 
         size -= buffer_size;
     }
-
-end:
-    // Restore default page 10 in MMU slot 2.
-    ZXN_WRITE_MMU2(10);
 }
 
 /*
@@ -302,7 +291,7 @@ static void load_frame_data(uint8_t filehandle)
         esx_f_read(filehandle, MMU2_ADDRESS, 0x2000);
         if (errno)
         {
-            goto end;
+            return;
         }
     }
 
@@ -315,15 +304,14 @@ static void load_frame_data(uint8_t filehandle)
         ZXN_WRITE_MMU2(page);
         esx_f_read(filehandle, MMU2_ADDRESS, rest);
     }
-
-end:
-    // Restore default page 10 in MMU slot 2.
-    ZXN_WRITE_MMU2(10);
 }
 
 /*
  * Load the specified animated image file.
  * The given 256 bytes buffer is used internally.
+ *
+ * Note: MMU slots 0, 1 and 2 are temporarily used and restored
+ * to their default values (i.e. the ROM and ULA screen).
  */
 void load_animation(const char *filename, uint8_t *buf_256)
 {
@@ -427,9 +415,6 @@ void load_animation(const char *filename, uint8_t *buf_256)
             goto end;
         }
 
-        // Done with loading the animation variables.
-        ZXN_WRITE_MMU2(10);
-
         // Load animation frame data.
         load_frame_data(filehandle);
         if (errno)
@@ -472,7 +457,9 @@ void load_animation(const char *filename, uint8_t *buf_256)
     }
 
 end:
-    // Restore default page 10 in MMU slot 2.
+    // Restore default pages in MMU slots 0, 1 and 2.
+    ZXN_WRITE_MMU0(255);
+    ZXN_WRITE_MMU1(255);
     ZXN_WRITE_MMU2(10);
     esx_f_close(filehandle);
 }
@@ -560,6 +547,9 @@ static void flip_frame_rects(void)
  *
  * If animation_on is true, this function should be called with the
  * frequency specified in the animation header in the animated image file.
+ *
+ * Note: MMU slots 0, 1 and 2 are temporarily used and must be restored by
+ * the caller.
  */
 void animate(void)
 {
@@ -583,7 +573,6 @@ void animate(void)
 
     if (!has_more)
     {
-        ZXN_WRITE_MMU2(10);
         animation_on = false;
         return;
     }
@@ -608,8 +597,6 @@ void animate(void)
             ZXN_WRITE_MMU2(ANIM_VARS_PAGE);
         }
     }
-
-    ZXN_WRITE_MMU2(10);
 
     // If the video line is < ANIMATION_START_LINE, the drawing of this
     // animation step took too long time and we have entered the displaying of

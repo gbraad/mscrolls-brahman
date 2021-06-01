@@ -32,6 +32,9 @@ extern bool animation_on;
 /*
  * Load the specified animated image file.
  * The given 256 bytes buffer is used internally.
+ *
+ * Note: MMU slots 0, 1 and 2 are temporarily used and restored
+ * to their default values (i.e. the ROM and ULA screen).
  */
 void load_animation(const char *filename, uint8_t *buf_256);
 
@@ -40,6 +43,9 @@ void load_animation(const char *filename, uint8_t *buf_256);
  *
  * If animation_on is true, this function should be called with the
  * frequency specified in the animation header in the animated image file.
+ *
+ * Note: MMU slots 0, 1 and 2 are temporarily used and must be restored by
+ * the caller.
  */
 void animate(void);
 

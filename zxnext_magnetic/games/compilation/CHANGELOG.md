@@ -14,6 +14,10 @@ here:
 * [Myth](../myth/CHANGELOG.md)
 * [Wonderland](../wonder/CHANGELOG.md)
 
+## 1.2.0 (2021-06-01)
+
+* Version 1.1.0 of Wonderland with an important bug fix.
+
 ## 1.1.0 (2021-05-23)
 
 * Wonderland added to the compilation.

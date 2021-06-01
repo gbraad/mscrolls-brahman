@@ -3,7 +3,8 @@
  *
  * Layer 2 blit functions.
  *
- * Note: MMU slot 2 is temporarily used when accessing the layer 2 screen.
+ * Note: MMU slot 2 is temporarily used when accessing the layer 2 screen and
+ * then restored with its default MMU page (i.e. page 10 the ULA screen).
  ******************************************************************************/
 
 #ifndef _LAYER2_BLIT_H

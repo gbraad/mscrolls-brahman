@@ -12,7 +12,7 @@ GAME_START_IMAGE := '\"bank\"'
 
 GAME_LAST_IMAGE := 110
 
-GAME_VERSION_STR := 'Wonderland for ZX Spectrum Next v1.0.0'
+GAME_VERSION_STR := 'Wonderland for ZX Spectrum Next v1.1.0'
 
 MAGNETIC := ../..
 
