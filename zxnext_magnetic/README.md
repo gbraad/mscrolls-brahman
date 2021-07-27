@@ -82,15 +82,20 @@ original .text file used in the desktop/mobile versions of the remastered games.
 The .text file contains additional markup that is removed by this tool. The .txt
 and .idx files are loaded into a contiguous set of 8 KB banks by the interpreter.
 
+The [convert_gfx](tools/convert_gfx) tool is used for extracting images and
+animated images from the game Wonderland's graphics file (wonder.gfx) and
+converting those images to separate .nxa files. An NXA file describes an
+animated layer 2 image for the Spectrum Next.
+
 The Magnetic port to Spectrum Next is done using the
 [z88dk](https://github.com/z88dk/z88dk) C compiler. In addition to modifying the
 interpreter source code to support bank switching, some C constructs have been
 changed to generate better Z80 machine code. For example, unsigned integers and
 chars are used where possible, z88dk built-in functions for fast endian
 conversion are used, the z88dk fastcall calling convention is used where
-applicable, etc. Some parts are written in Z80 assembler for improved
-performance. More technical information about the port can be found in the
-emu.c file.
+applicable, etc. Some parts of the interpreter have been rewritten in Z80
+assembler for improved performance. More technical information about the port
+can be found in the emu.c and emu_asm.asm files.
 
 The screen of the Magnetic interpreter uses the Timex hi-res mode (or standard
 ULA mode) as background layer for displaying the text with a proportional font.
@@ -133,17 +138,15 @@ The table below shows the special keys used by the Magnetic interpreter:
 
 ## Games
 
-The goal is to recreate all Magnetic Scrolls games for the Spectrum Next using
-the Magnetic interpreter. The following is a list of all Magnetic Scrolls games
-where the currently available games for Spectrum Next are marked with links.
-Click on a game link to read about and download the game. Games marked as
-remastered use the remastered game story file by Strand Games while games
-marked as classic use the original game story file.
+All Magnetic Scrolls games have been recreated for the Spectrum Next using the
+Magnetic interpreter. Click on a game below to read about and download the game.
+Games marked as remastered use the remastered game story file by Strand Games
+while games marked as classic use the original game story file.
 
-The Magnetic Scrolls Compilation is a compilation of all currently available
-Magnetic Scrolls games for the Spectrum Next. This compilation is provided as a
-convenience if you want to download all the games in a bundle and, optionally,
-create your own physical edition of the compilation with a case and cover.
+The Magnetic Scrolls Compilation is a compilation of all of Magnetic Scrolls
+games for the Spectrum Next. This compilation is provided as a convenience if
+you want to download all the games in a bundle and, optionally, create your own
+physical edition of the compilation with a case and cover.
 
 * [The Pawn (remastered)](games/pawn)
 * [The Guild of Thieves (remastered)](games/guild)
@@ -151,7 +154,7 @@ create your own physical edition of the compilation with a case and cover.
 * [Corruption (classic)](games/corrupt)
 * [Fish! (classic)](games/fish)
 * [Myth (classic)](games/myth)
-* Wonderland (classic)
+* [Wonderland (classic)](games/wonder)
 * [The Magnetic Scrolls Compilation](games/compilation)
 
 ## How to Build
@@ -164,13 +167,9 @@ the steps below:
 or similar for the basic Unix commands (GNU make, Bash, mkdir, rm, cp, cat and zip).
 Make sure the Unix commands are available in your PATH environment variable.
 
-2. Download and install [z88dk](https://github.com/z88dk/z88dk) v1.99C or later.
+2. Download and install [z88dk](https://github.com/z88dk/z88dk) v2.1 or later.
 Add the environment variable ZCCCFG whose value should be &lt;z88dk&gt;/lib/config.
 Also add &lt;z88dk&gt;/bin to your PATH environment variable.
-**Note:** As of 2020-02-10, the optimisation rule z88dk-606ah in
-&lt;z88dk&gt;/libsrc/_DEVELOPMENT/sdcc_peeph.3 must be removed or its condition
-changed to `if notSame(%1 'h'), notSame(%1 '(hl)')`. If not, the optimised builds
-(BUILD_OPT=true) of Jinxter, Corruption and Wonderland will not work properly.
 
 3. Download and install the latest version of the [CSpect](http://www.cspect.org/)
 or [ZEsarUX](https://github.com/chernandezba/zesarux) Spectrum Next emulator.
@@ -244,6 +243,10 @@ game story file into a contiguous set of memory banks that are mapped in as
 needed to the bottom 16 KB of the 64 KB address space. Several changes have
 been done to improve the performance for Spectrum Next.
 
+* emu_asm.asm <br>
+Module containing functions originally in emu.c that have been compiled to Z80
+assembly and then manually optimised.
+
 * main.c <br>
 Implementation of the platform-dependent part of the Magnetic interpreter.
 Handles the user interface, terminal I/O, main loop, displaying of location
@@ -252,6 +255,10 @@ test mode).
 
 * interrupt.asm <br>
 Module for setting up IM2 interrupt mode.
+
+* interrupt_handler.c <br>
+General IM2 interrupt handler that invokes the mouse handler and/or animation
+module.
 
 * status_bar.c <br>
 Module for printing the game status in the status bar above the screen in the
@@ -273,6 +280,10 @@ FZX proportional font drawing function for layer 2. Used together with the FZX
 proportional font driver in z88dk for printing text on the layer 2 screen or a
 layer 2 off-screen memory area.
 
+* layer2_blit.asm <br>
+Layer 2 blit functions for blitting opaque and transparent bitmaps. Used by the
+animation module.
+
 * sprite.c <br>
 Module for loading, displaying and handling hardware sprites. Used for displaying
 the status bar, scroll prompt and mouse pointer.
@@ -286,6 +297,9 @@ Module for playing music using the Vortex Tracker II player.
 
 * music_module.asm.m4 <br>
 Module for bringing in the intro music PT3 module.
+
+* animation.c <br>
+Module for loading and playing an NXA animated image file.
 
 * gfx_util.asm <br>
 Module for handling scrolling of the location image using the keyboard or mouse.

@@ -18,4 +18,6 @@ typedef void (*MOUSE_LISTENER)(uint8_t mouse_x, uint8_t mouse_y, uint8_t mouse_b
 
 void init_mouse(const void *mouse_sprite_buf, MOUSE_LISTENER mouse_listener);
 
+void mouse_isr(void);
+
 #endif

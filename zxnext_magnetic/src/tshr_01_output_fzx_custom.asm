@@ -21,6 +21,9 @@
 ; connected input terminal and sets the cursor to '_'  even if
 ; Caps Lock is on.
 ;
+; The driver also translates tabs to spaces when printing on
+; the output terminal.
+;
 ; ;;;;;;;;;;;;;;;;;;;;
 ; DRIVER CLASS DIAGRAM
 ; ;;;;;;;;;;;;;;;;;;;;
@@ -38,6 +41,7 @@ SECTION code_driver_terminal_output
 PUBLIC tshr_01_output_fzx_custom
 
 EXTERN tshr_01_output_fzx
+EXTERN console_01_output_fzx_oterm_msg_putc
 EXTERN console_01_output_fzx_iterm_msg_putc
 EXTERN console_01_output_fzx_iterm_msg_print_cursor
 EXTERN asm_in_wait_nokey
@@ -48,15 +52,21 @@ EXTERN image_key_scroll
 EXTERN image_height_in_chars
 EXTERN show_scroll_prompt
 
+EXTERN OTERM_MSG_PUTC
 EXTERN OTERM_MSG_PAUSE
 EXTERN OTERM_MSG_SCROLL_LIMIT
 EXTERN ITERM_MSG_READLINE_SCROLL_LIMIT
 EXTERN ITERM_MSG_PUTC
 EXTERN ITERM_MSG_PRINT_CURSOR
 
+defc ASCII_CODE_TAB = 9
 defc ASCII_CODE_LF = 10
+defc ASCII_CODE_SPACE = 32
 
 tshr_01_output_fzx_custom:
+
+   cp OTERM_MSG_PUTC
+   jp z, oterm_msg_putc
 
    cp OTERM_MSG_SCROLL_LIMIT
    jr z, oterm_msg_scroll_limit
@@ -118,6 +128,22 @@ wait_done:
    call show_scroll_prompt
 
    ret
+
+oterm_msg_putc:
+
+   ; OTERM_MSG_PUTC:
+   ;
+   ; enter  :  c = char to output
+   ; can use:  af, bc, de, hl
+   ;
+   ; Output given character and translate tab to space (otherwise '?' is printed).
+
+   ld a,c
+   cp ASCII_CODE_TAB
+   jr nz, not_tab
+   ld c,ASCII_CODE_SPACE
+not_tab:
+   jp console_01_output_fzx_oterm_msg_putc
 
 oterm_msg_scroll_limit:
 

@@ -52,6 +52,8 @@
 #include "text_color.h"
 #include "sound.h"
 #include "mouse.h"
+#include "animation.h"
+#include "interrupt_handler.h"
 #include "gfx_util.h"
 #include "esxdos_util.h"
 #include "stack.h"
@@ -92,7 +94,7 @@ extern void ms_config(void);
 extern type8 toggle_game_mode(void);
 #endif
 extern void page_in_rom(void);
-extern void page_out_rom(void);
+extern void page_in_game(void);
 extern type8 current_page;
 
 #if USE_GFX && USE_MOUSE
@@ -122,8 +124,10 @@ bool edit_pressed = false;
 static type8 num_commands = 0;
 static type8 command_pos = 0;
 
+#if !USE_MAGNETIC_WINDOWS
 static type8 statuschar_pos = 0;
 static type8 statuschar_tab;
+#endif
 
 #if USE_GFX
 type8 gfx_on = 0;
@@ -236,8 +240,7 @@ static void show_intro(void)
 }
 #endif
 
-// FIXME: Use fastcall when z88dk bug #689 on github is fixed.
-static void init_out_terminal(FILE *out)
+static void init_out_terminal(FILE *out) __z88dk_fastcall
 {
     int fd;
     struct r_Rect16 paper;
@@ -273,13 +276,20 @@ static void create_screen(void)
     init_out_terminal(stdout);
 
     // Init status bar.
+#if !USE_MAGNETIC_WINDOWS
     init_status_bar(out_term_font);
+#endif
 
 #if USE_GFX && USE_MOUSE
     // Init PS/2 Kempston mouse.
-    // Note: From this point on, usage of the sprite slot port must be atomic (di/ei)
-    // since the mouse interrupt handler will write to the sprite slot port each frame.
     init_mouse(buf_256, mouse_handler);
+#endif
+
+#if USE_MOUSE || USE_ANIM
+    // Init IM2 interrupt handler.
+    // Note: From this point on, usage of the sprite slot port must be made atomic
+    // (di/ei) since the mouse isr will write to the sprite slot port each frame.
+    init_interrupt_handler();
 #endif
 }
 
@@ -487,19 +497,23 @@ static type8 *get_filename(type8 *name) __z88dk_fastcall
 
     if (name != NULL)
     {
+        // Game version 0 - 3.
         realname = name;
     }
     else
     {
         // Game version 4.
+        fputs("Filename: ", stdout);
+
         do
         {
-            fputs("Filename: ", stdout);
             filename[0] = '\0';
             fgets(filename, sizeof(filename), stdin);
             fflush(stdin);
         }
         while (*(realname = strrstrip(strstrip(filename))) == '\0');
+
+        fputs("\n", stdout);
     }
 
     return realname;
@@ -516,6 +530,15 @@ static type8 access_file(type8 *name, type8 *ptr, type16 size, type8 read)
     type16 addr;
     type8 *buffer;
     type8 ret = 0;
+
+    /*
+     * If animations are enabled, we must disable interrupts while reading/writing the file since this
+     * function temporarily uses MMU slots 0, 1 and 2 and so does the interrupt driven animation module.
+     */
+
+#if USE_ANIM
+    intrinsic_di();
+#endif
 
     /*
      * When using ESXDOS, the bottom 16 KB (MMU slot 0 and 1) must contain the
@@ -565,11 +588,48 @@ close:
     esx_f_close(fh);
 end:
     ZXN_WRITE_MMU2(10);
-    page_out_rom();
+    page_in_game();
+#if USE_ANIM
+    intrinsic_ei();
+#endif
     return ret;
 }
 
 #if USE_GFX
+#if USE_ANIM
+void set_image_window_height(type8 image_height)
+{
+    type8 image_height_rest;
+    type8s image_window_height_change;
+
+    image_height_rest = image_height % 8;
+    if (image_height_rest != 0)
+    {
+        image_height += 8 - image_height_rest;
+    }
+
+    image_window_height_change = image_height - gfx_window_height;
+    image_mouse_scroll(image_window_height_change);
+}
+
+void show_location_image(type8 *image_name) __z88dk_fastcall
+{
+    // Load and display the given location image.
+
+    sprintf(filename, "gfx/%s.nxa", image_name);
+
+    errno = 0;
+    page_in_rom();
+
+    load_animation(filename, buf_256);
+
+    page_in_game();
+    if (errno)
+    {
+        printf("\nError loading image %s\n", filename);
+    }
+}
+#else
 void show_location_image(type8 image_number) __z88dk_fastcall
 {
     // Load and display the given location image. In order to minimize flicker
@@ -588,12 +648,13 @@ void show_location_image(type8 image_number) __z88dk_fastcall
     layer2_flip_main_shadow_screen();
     layer2_flip_display_palettes();
 
-    page_out_rom();
+    page_in_game();
     if (errno)
     {
         printf("\nError loading image %s\n", filename);
     }
 }
+#endif
 
 #if USE_MOUSE
 static void mouse_handler(type8 mouse_x, type8 mouse_y, type8 mouse_buttons, type8s wheel_delta)
@@ -685,6 +746,17 @@ static void remove_command(void)
     }
 }
 
+void add_startup_commands(void)
+{
+#if (USE_ANIM || USE_PROG_FORMAT) && !USE_SCRIPT
+    add_command("verbose");
+#endif
+
+#if USE_ANIM
+    add_command("graphics on");
+#endif
+}
+
 #if USE_PROG_FORMAT
 
 static void set_game_mode_sprites(type8 start_sprite_slot, bool visible)
@@ -711,6 +783,7 @@ void switch_game_mode(void)
 
 void ms_statuschar(type8 c) __z88dk_fastcall
 {
+#if !USE_MAGNETIC_WINDOWS
     // A sequence of calls to print a status line with the current room name
     // (variable length) to the left and the score/turn (always 9 characters,
     // prepended with spaces if necessary) to the right.
@@ -737,6 +810,7 @@ void ms_statuschar(type8 c) __z88dk_fastcall
         // Buffer the output.
         buf_256[statuschar_pos++] = c;
     }
+#endif
 }
 
 void ms_flush(void)
@@ -798,7 +872,7 @@ type8 ms_getchar(type8 trans) __z88dk_fastcall
                 // Read input from script file.
                 page_in_rom();
                 c = read_script(trans && (i == 0));
-                page_out_rom();
+                page_in_game();
             }
             else
             {
@@ -857,7 +931,11 @@ type8 ms_getchar(type8 trans) __z88dk_fastcall
     return (type8) c;
 }
 
+#if USE_ANIM
+void ms_showpic(type8 *c, type8 mode)
+#else
 void ms_showpic(type8 c, type8 mode)
+#endif
 {
 #if USE_GFX
     if (mode)
@@ -881,11 +959,32 @@ void ms_showpic(type8 c, type8 mode)
         // Turn off graphics if on.
         if (gfx_on)
         {
+            /*
+             * In remastered games, the last location image is not continued to be displayed for locations without an
+             * image. Instead, the graphics is turned off for locations without an image. A problem with this approach
+             * is that if you go from a location without an image to a location with an image and the movement triggers
+             * text output that scrolls into the designated image area, that text will be quickly hidden when the image
+             * for the new location is displayed.
+             * To overcome this issue, when graphics is turned off, we must still set the scroll limit to the bottom
+             * text area of the screen even though the whole screen is available for text in this case. In practice,
+             * this turns out quite okay. Unfortunately, we cannot differentiate between the graphics being turned off
+             * temporarily for a location without an image or the user issuing the "graphics off" command for turning
+             * off the graphics completely. This is a minor inconvenience but hey, the games are supposed to be played
+             * with the graphics on anyway.
+             */
+#if USE_PROG_FORMAT
+            gfx_on = 0;
+            gfx_window_height = MAX_IMAGE_HEIGHT;
+            gfx_window_height_adjustment = 0;
+            layer2_config(false);
+            ioctl(FD_STDOUT, IOCTL_OTERM_SCROLL_LIMIT, (TEXT_WINDOW_HEIGHT - MAX_IMAGE_HEIGHT_IN_CHARS));
+#else
             gfx_on = 0;
             gfx_window_height = 0;
             gfx_window_height_adjustment = 0;
             layer2_config(false);
             ioctl(FD_STDOUT, IOCTL_OTERM_SCROLL_LIMIT, TEXT_WINDOW_HEIGHT);
+#endif
         }
     }
 #endif
@@ -925,9 +1024,7 @@ int main(void)
 #endif
     create_screen();
 
-#if USE_PROG_FORMAT && !USE_SCRIPT
-    add_command("verbose");
-#endif
+    add_startup_commands();
 
 #if USE_IMAGE_SLIDESHOW
     run_image_slideshow();

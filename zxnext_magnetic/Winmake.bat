@@ -22,8 +22,4 @@ REM set SDCC_OPT=-SO3 --max-allocs-per-node200000
 
 @echo on
 
-REM SCCZ80
-REM zcc +zxn -vn -m -startup=31 -clib=new -O3 -Cm"-I src" -Ivt_sound/include -pragma-include:src/zpragma.inc @zproject.lst -o bin/magnetic -subtype=nex -Cz"--main-fence 0xFDFD" -create-app
-
-REM SDCC
 zcc +zxn -vn -m -startup=31 -clib=sdcc_iy %SDCC_OPT% -Cm"-I src" -Ivt_sound/include -pragma-include:src/zpragma.inc @zproject.lst -o bin/magnetic -subtype=nex -Cz"--main-fence 0xFDFD" -create-app

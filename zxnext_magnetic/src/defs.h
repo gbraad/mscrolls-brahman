@@ -37,6 +37,7 @@
 #ifndef MAGNETIC_DEFS_H
 #define MAGNETIC_DEFS_H
 
+#include "zconfig.h"
 #include "ide_friendly.h"
 
 /******************************************************************************\
@@ -156,7 +157,7 @@ type8 ms_getchar(type8 trans) __z88dk_fastcall;
 *
 * Purpose: Displays or hides a picture.
 *
-* Parameter:    type8   c       number of image to be displayed
+* Parameter:    type8   c       number/name of image to be displayed
 *               type8   mode    mode == 0 means gfx off,
 *                               mode == 1 gfx on thumbnails,
 *                               mode == 2 gfx on normal.
@@ -164,7 +165,11 @@ type8 ms_getchar(type8 trans) __z88dk_fastcall;
 * Note: For retrieving the raw data of a picture call ms_extract().
 \******************************************************************************/
 
+#if USE_ANIM
+void ms_showpic(type8 *c, type8 mode);
+#else
 void ms_showpic(type8 c, type8 mode);
+#endif
 
 /******************************************************************************\
 * Function: ms_fatal
@@ -195,7 +200,7 @@ void ms_fatal(type8 *txt) __z88dk_fastcall;
 * Note: You must call this function before starting the ms_rungame() loop.
 \******************************************************************************/
 
-type8 ms_init(type8 *name);
+type8 ms_init(type8 *name) __z88dk_fastcall;
 
 /******************************************************************************\
 * Function: ms_rungame

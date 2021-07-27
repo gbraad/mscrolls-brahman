@@ -803,7 +803,7 @@ You have died.
 However, I'll let you off.
 You will have to be nearer, to examine it properly.
 ^Are you sure (y/n)?
-^Do you want to restart?
+^Do you want to quit or restart (q/r)?
 ^Ensure 'The Guild of Thieves' is in drive one.
 I agree.
 Sorry, I can't handle that many noun phrases.
@@ -1454,7 +1454,7 @@ Unfortunately @ moves up.
 Strangely, @ clicks down.
 ^There is a barely audible click from deep in the safe.
 "Not so fast, buster, not so fast," she snarls, "pay your bill before I takes any more orders."
-The postmistress takes @ , and slaps it down on the scales. "Comes to 
+The postmistress takes @ , and slaps it down on the scales. 
 The baker suddenly rummages through @ , and comes up clutching the charm.
 You cannot remove the shoes whilst you are dancing!
 Why the rush? The train is still here (though for how much longer, there's no way to tell).
@@ -1805,4 +1805,5 @@ You hear the brakes of the bus screeching, but it is simply too fast to stop in 
 Unfortunately, the bus driver fails to stop in time, and there is nobody to rescue you. The bus hits you hard.~~On waking up again, you have faint memories of an operating theatre, witches and Guardians around.~~"... we are losing...this damn magic...won't like it... back alive..."~~Well, they made it. Good, you had almost all your luck left. Ok, there were some complications...~~Some parts of you were in really bad shape and they had to wing it. If only you had all your luck with you. But... it isn't that bad.~~You got pelican feet, walrus teeth, a big horn on your forehead, and a dragon-like face. Without the cool fire stuff, though.~~But hey, YOU WON! You defeated Jannedor and survived the bus. Congratulations!~~You think, there must be a bit beyond this? So, how about this:
 Unfortunately, the bus driver fails to stop in time, and there is nobody to rescue you. The bus hits you hard.~After waking up, the first thing you notice is that many different odours are wafting across your nose. Very strange odours. And you are hungry. Very hungry. You would kill for a cheese sandwich. And you had this strange dream of the Guardian yelling, "Fetch the stick! Fetch the stick!" at you. Something is very wrong. You feel much smaller!~~Ok, ok, you know, you were a mess. They brought you to the hospital as soon as possible and they did what they could. If only you had been more lucky. But hey, look how cute you are and a a dog's life is much less troubled. And they will put up a statue for you in the Walled Garden, definitely! But what really counts is...~~YOU WON! You defeated Jannedor and survived the bus (sort of). Congratulations!~~Not satisfied? So, how about this:
 Unfortunately, the bus driver fails to stop in time, and there is nobody to rescue you. The bus hits you hard.~After waking up, you feel light and relieved. You are standing in your garden. An old pal is sitting in your deckchair, "Hey you, nice to meet you. In fact, you have no idea how nice it is."~~You are puzzled. You wonder who he is. This overcoat. He is probably another Guardian. But he looks pale, almost translucent. You ask him what happened to him. "You want to know what happened to me? My friend, better get a look at yourself." You look down at your hand. Translucent! You're about to panic, but the old guy interrupts;~~"Yeah, I know, a bit disgusting. I was on my way to rescue you, but I got jinxed. Seems, you were practically out of luck. I just made it in time to grab the last remnants. But it isn't as bad as it sounds. We've got an incredible new job for you, and you can even stay at home. Was looking for someone to take over my duties in the house for quite some time. You know, slamming doors, shaking chairs, creepy noises, and all that stuff. Now I can finally retire."~~Perhaps it wasn't your life's dream, but it could have been worse (not much though). You'll soon get used to it! But what really counts is...~~YOU WON! You defeated Jannedor and almost survived the bus. Congratulations!~~Not satisfied? So, how about this:
+"Comes to 
 none yet

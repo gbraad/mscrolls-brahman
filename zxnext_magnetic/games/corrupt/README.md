@@ -72,6 +72,9 @@ corrupt directory is denoted as &lt;corrupt&gt;.
 The game can be run on the Spectrum Next hardware or in the CSpect and ZEsarUX
 emulators.
 
+**Note:** When updating the game to a newer version and you have save files that
+you still want to use, just copy those save files to the new game folder.
+
 ### Spectrum Next
 
 1. On your PC, unpack the downloaded ZIP file corrupt.zip on an SD card containing

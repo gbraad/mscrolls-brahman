@@ -422,7 +422,7 @@ what
 but the 
 wasn't specified
 Bizarre!
-^Please enter filename:
+^Please enter filename: 
 the 
 an 
 and 
@@ -726,7 +726,7 @@ You have died.
 However, I'll let you off.
 Place microdrive in drive two, game number (0-7)?
 ^Are you sure (y/n)?
-^You didn't really want to do that.
+^Do you want to quit or restart (q/r)?
 ^Ensure 'The Pawn' is in drive one.
 I agree.
 Sorry, I can't handle that many noun phrases

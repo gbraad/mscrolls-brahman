@@ -1,21 +1,11 @@
-* Remove copy of console_01_output_char_stdio_msg_ictl.asm when fixed in z88dk.
-
-* Switch back to z88dk's mouse driver when it's improved.
-
-* Update and recompile when z88dk bug #689 is fixed.
-
-* Intermittent zsdcc -SO3 optimisation bug in z88dk v1.99C when building
-  remastered jinxter. For a bad build, the game restarts after the command
-  "melt plastic key with candle" is given in jinxter_prg.rec. Workaround:
-  Rebuild and test jinxter_256.nex and jinxter_512.nex until working.
-  Test by loading bug.SAV and entering command "melt plastic key with candle".
-
 * Fix the FIXMEs/TODOs.
 
-* Create videos.
+* The @ text substitution output is intermingled with the "Your score just went
+up by XX points" text.
+
+* When Wonderland is remastered, lower MAX_PRG_CODE_SIZE from 128 KB to 88 KB
+(eleven 8 KB pages) in emu.c and in the game code.
 
 * Toggle graphics on/off with right mouse button or GRAPH key?
-
-* A0E9 in do_line_a() can be optimized. Not used in pawn/guild/jinxter.
 
 * Future improvement: Move input cursor left or right and delete or insert a character.

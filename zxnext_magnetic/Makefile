@@ -36,8 +36,6 @@ RM := rm -rf
 
 CAT := cat
 
-# Note: Use -clib=new and -O3 to compile with SCCZ80 compiler.
-
 ifeq ($(BUILD_OPT), true)
 CFLAGS_OPT := -SO3 --max-allocs-per-node200000
 endif
@@ -120,6 +118,7 @@ games:
 	$(MAKE) -C games/corrupt clean all
 	$(MAKE) -C games/fish    clean all
 	$(MAKE) -C games/myth    clean all
+	$(MAKE) -C games/wonder  clean all
 	$(MAKE) -C games/compilation clean all
 
 .PHONY: clean

@@ -9,7 +9,7 @@
 
 GAMES := magnetic
 
-SPUI := resources/SPUI-0.2.1.zip
+SPUI := resources/SPUI-0.3.0.zip
 
 CP := cp -r
 
@@ -33,6 +33,7 @@ games:
 	$(UNZIP) ../corrupt/build/corrupt.zip -d tmp/$(GAMES)
 	$(UNZIP) ../fish/build/fish.zip -d tmp/$(GAMES)
 	$(UNZIP) ../myth/build/myth.zip -d tmp/$(GAMES)
+	$(UNZIP) ../wonder/build/wonder.zip -d tmp/$(GAMES)
 	$(RM) build/$(GAMES).zip
 	cd tmp; $(ZIP) ../build/$(GAMES).zip $(GAMES)
 	$(RM) tmp
@@ -46,6 +47,7 @@ games_boot:
 	$(CP) tmp/RELEASE-SPUI/SPUI/dot/SPUI tmp/boot/dot/
 	$(CP) resources/autoexec.bas tmp/boot/nextzxos/
 	$(UNZIP) build/$(GAMES).zip -d tmp/boot
+	$(CP) resources/menu.ini tmp/boot/magnetic/
 	$(RM) build/$(GAMES)-boot.zip
 	cd tmp/boot; $(ZIP) ../../build/$(GAMES)-boot.zip .
 	$(RM) tmp

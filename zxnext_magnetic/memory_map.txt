@@ -121,6 +121,11 @@ area when reading and writing files using ESXDOS.
   Saving/loading the game state (which is part of the loaded game story file)
   to/from a file is done via MMU slot 2.
 
+* Animation module:
+  MMU pages 8 (8 KB), 55 to 59 (40 KB) and 60 up to 95 (max 288 KB) contain the
+  current animation variables, main image and animation frames. MMU slots 0, 1
+  and 2 are temporarily used by the animation module.
+
 
 Below is a list of all MMU pages and their usage in the Magnetic interpreter.
 
@@ -134,7 +139,7 @@ MMU page   Usage
 05         Main program
 06         Music module (only used initially)
 07         Music module (only used initially)
-08         <free>
+08         Animation variables (if animation)
 09         <free>
 10         ULA screen / Timex hi-res screen
 11         Timex hi-res screen
@@ -160,8 +165,13 @@ MMU page   Usage
 31         Game story file
 32         Game story file
 ..         Game story file
-..         Game story file / String file (if remaster)
-..         Game story file / String file (if remaster)
-93         Game story file / String file (if remaster)
-94         Game story file / String file (if remaster)
-95         Game story file / String file (if remaster)
+55         Game story file / Main image (if animation)
+..         Game story file / Main image (if animation)
+59         Game story file / Main image (if animation)
+60         Game story file / Animation frames (if animation)
+..         Game story file / Animation frames (if animation)
+..         Game story file / String file (if remaster) / Animation frames (if animation)
+..         Game story file / String file (if remaster) / Animation frames (if animation)
+93         Game story file / String file (if remaster) / Animation frames (if animation)
+94         Game story file / String file (if remaster) / Animation frames (if animation)
+95         Game story file / String file (if remaster) / Animation frames (if animation)

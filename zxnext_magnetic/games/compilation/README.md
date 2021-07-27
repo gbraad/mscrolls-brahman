@@ -5,11 +5,11 @@
 ### [DOWNLOAD CASE COVER](resources/case-cover.png)
 ### [DOWNLOAD SD CARD LABEL](resources/sd-card-label.png)
 
-The Magnetic Scrolls Compilation is a compilation of all currently available
-Magnetic Scrolls text adventure games for the ZX Spectrum Next. This compilation
-is provided as a convenience if you want to download all the games in a bundle
-and, optionally, create your own physical edition of the compilation with a case
-and cover. A big thank you to John Blythe for creating the beautiful cover!
+The Magnetic Scrolls Compilation is a compilation of all of Magnetic Scrolls
+text adventure games for the ZX Spectrum Next. This compilation is provided as
+a convenience if you want to download all the games in a bundle and, optionally,
+create your own physical edition of the compilation with a case and cover.
+A big thank you to John Blythe for creating the beautiful cover!
 
 Some of the games are remastered versions by Strand Games that contain bug
 fixes, playability improvements and, in some cases, additional location images.
@@ -66,6 +66,10 @@ text and &lt;game&gt;_256.nex uses the standard Spectrum mode (256 x 192).
 The auto-bootable compilation uses the Timex hi-res mode version of the games
 since they are really the best ones. In the games-only compilation, you can
 decide for yourself which version you want to run.
+
+**Note:** When updating the compilation to a newer version and you have save
+files that you still want to use, just copy those save files to the new game
+folder(s).
 
 ### Auto-bootable compilation
 
@@ -143,6 +147,7 @@ games marked as classic use the original game story file.
 * [Corruption (classic)](../corrupt)
 * [Fish! (classic)](../fish)
 * [Myth (classic)](../myth)
+* [Wonderland (classic)](../wonder)
 
 ## User Interface
 
@@ -157,6 +162,9 @@ the EDIT key. The graphics can be scrolled up and down using the up and down
 arrow keys to make more or less room for the text. If a PS/2 mouse is connected
 to the Spectrum Next, it can also be used to scroll the graphics up and down by
 dragging it with the mouse or using the mouse wheel.
+
+Note: The status bar is currently missing in Wonderland. Hopefully, it will be
+available in the forthcoming remastered version of the game.
 
 The text colour can be changed by cycling downwards or upwards through a palette
 of 32 colours by pressing TRUE VIDEO and INV VIDEO, respectively. The default
@@ -221,6 +229,7 @@ Special commands:
 * save - Save the current game to file.
 * load - Load a previously saved game from file.
 * restart - Restart the game.
+* quit - Quit the game.
 * normal/verbose/brief - Select location description mode.
 * graphics on/off - Turn graphics on or off.
 * score - Print the current score.
@@ -246,6 +255,8 @@ Fish! is copyright (C) 1988 by Magnetic Scrolls Ltd.
 
 Myth is copyright (C) 1989 by Magnetic Scrolls Ltd.
 
+Wonderland is copyright (C) 1990 by Magnetic Scrolls Ltd.
+
 The remastered version of The Pawn is copyright (C) 2017, 2019 by Strand Games.
 
 The remastered version of The Guild of Thieves is copyright (C) 2017 by Strand
@@ -259,8 +270,9 @@ The Vortex Tracker II player is copyright (C) 2004-2007 by Sergey Bulba.
 
 The music track in The Pawn is copyright (C) 2004 by Oleg Nikitin (Nik-O).
 
-The music tracks in The Guild of Thieves, Jinxter, Corruption, Fish and Myth are
-copyright (C) 1999, 2018, 2011, 2019 and 2017 by Sergey Kosov (MmcM).
+The music tracks in The Guild of Thieves, Jinxter, Corruption, Fish, Myth and
+Wonderland are copyright (C) 1999, 2018, 2011, 2019, 2017 and 1995 by Sergey
+Kosov (MmcM).
 
 The start menu is created with SPUI from Stale Pixels.
 
