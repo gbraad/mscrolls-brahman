@@ -95,7 +95,6 @@ inline unsigned char* readz(FDBuf& fb, size_t* fsize = 0)
     {
         // not binary. seek back to before the header and return fail
         // the caller could use this to fallback to reading a text version
-        LOG3("readz, text file?", "");
         fb._fd->seek(startpos);
         return 0; // fail
     }

@@ -45,15 +45,31 @@ using namespace std;
 #include "ificlient.h"
 #include "ifiglue.h" // include last
 #include "ifihandler.h"
+#include "strands.h"
 
-// so that we can get it from glue and inside strandi
+struct KLClient: public IFIClient
+{
+    void coopWork() override;
+
+    ~KLClient()
+    {
+        LOG3("~KLClient", "");
+        ST::Term::clearTerms();
+    }
+
+    Ctx*        _ifictx = 0;
+};
+
+// so that we can get it from glue and inside strandi and klstrandi
 IFIClient* ifi;
 IFIHandler* ifih;
 bool cmdWaiting;
 
+// our reference to ifi
+#define KIFI  ((KLClient*)ifi)
+
 #endif // IFI_BUILD
 
-#include "strands.h"
 #include "pstrands.h"
 #include "strandi.h"
 
@@ -102,6 +118,8 @@ struct InStream: public Stream
 #ifdef IFI_BUILD
 struct KLHandler: public IFIHandler
 {
+    // this is the client
+    
     typedef IFIHandler  parentT;
     using Strandi = ST::Strandi;
     using ParseStrands = ST::ParseStrands;
@@ -242,7 +260,10 @@ struct KLHandler: public IFIHandler
     
         LOG3(TAG "story ", sfile);
         std::vector<string> fv = { sfile };
-        if (_ps.loadFiles(fv))
+
+        bool loaded = _ps.loadFiles(fv, KIFI->_ifictx);
+
+        if (loaded)
         {
             LOG3(TAG "loading story ", sfile);
             if (_ps.validate())
@@ -426,17 +447,17 @@ struct KLHandler: public IFIHandler
 
     bool ifiBeginGame() override
     {
-        LOG2(TAG "received begin signal ", _story);
+        LOG2(TAG "received begin signal, ", _story);
 
         if (_gameReady)
         {
             if (!_strandi.start(_ps._startTerm))
             {
-                LOG1(TAG "cannot start ", _story);
+                LOG1(TAG "cannot start, ", _story);
             }
         }
 
-        LOG2(TAG "game finished ", _story);
+        LOG2(TAG "game finished, ", _story);
         
         return true;
     }
@@ -448,20 +469,23 @@ struct KLHandler: public IFIHandler
     
 };
 
-struct KLClient: public IFIClient
-{
-    void coopWork() override;
-};
 
-IFI* IFI::create(Pump* p)
+IFI* IFI::create(IFI::Ctx* ctx)
 {
+    LOG3(TAG, "Creating ifi client");
+
     ifi = new KLClient();
 
-    if (p)
+    if (ctx)
     {
-        // if we want to run in coop mode
-        ifi->_coop = true;
-        ifi->_pump = *p;
+        if (ctx->_p)
+        {
+            // if we want to run in coop mode
+            ifi->_coop = true;
+            ifi->_pump = ctx->_p;
+        }
+
+        KIFI->_ifictx = ctx;
     }
 
     return ifi;
@@ -526,40 +550,40 @@ struct KLI
     }
 };
 
+static KLI* kli;
 
-static bool interactive(KLI& kli)
+static bool interactive(KLI* kli)
 {
     // drop into interactive 
 
     bool more = true;
     
-    if (!ifi->_coop) prompt(kli._kl);
+    if (!ifi->_coop) prompt(kli->_kl);
 
 #ifdef IFI_BUILD
     const char* r = ifi->getRequest();
     if (r)
     {
         LOG3("KL interative, request: ", r);
-        kli._ifiHandler.handle(r);
+        kli->_ifiHandler.handle(r);
     }
     else more = false; // shutdown
 #else
         
     SBuf sb;
-    if (!kli._kl._in->getline(sb))
+    if (!kli->_kl._in->getline(sb))
     {
         more = false; // EOF or shutdown
     }
     else
     {
         const char* line = sb;
-        if (*line) handleCommand(kli._kl, line);
+        if (*line) handleCommand(kli->_kl, line);
     }
 #endif
     return more;
 }
 
-static KLI kli;
 
 void KLClient::coopWork()
 {
@@ -640,23 +664,26 @@ int main(int argc, char** argv)
     // form path of init file
     initFile += initFilename;
 
+    if (kli) delete kli;  // only happens when we reload
+    kli = new KLI();
+
     // automatically load initfile, if present
-    kli.loadFile(initFile);
+    kli->loadFile(initFile);
 
 #ifdef IFI_BUILD
 
     using namespace std::placeholders;
-    ST::Strandi& si = kli._ifiHandler._strandi;
-    si.setEmitter(std::bind(&KLI::put, &kli, _1));
+    ST::Strandi& si = kli->_ifiHandler._strandi;
+    si.setEmitter(std::bind(&KLI::put, kli, _1));
     
     // pass start json to the handler *after* init file has loaded.
-    kli._ifiHandler._kl = &kli._kl;
-    kli._ifiHandler.handle(startjson);
+    kli->_ifiHandler._kl = &kli->_kl;
+    kli->_ifiHandler.handle(startjson);
 #endif    
     
     for (int i = 1; i < argc; ++i)
     {
-        if (argv[i][0] != '-') kli.loadFile(argv[i]);
+        if (argv[i][0] != '-') kli->loadFile(argv[i]);
     }
     
     //LOG2("Total Objects: ", Head::_count);

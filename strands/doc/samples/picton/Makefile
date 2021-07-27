@@ -15,70 +15,54 @@
 
 CC = emcc
 CXX = em++
-PACK = file_packager
-WEB_DIR = picton
+WEB_DIR = web
 EXE = $(WEB_DIR)/index.html
 TOP = ../../../..
 IMGUI_DIR = $(TOP)/tools/imgui
-SDLDIR = $(TOP)/strands/sdl
 KLDIR = $(TOP)/strands
+SRCDIR = $(KLDIR)/imgui
+SOKDIR := $(SRCDIR)/sokol
 IFIDIR := $(TOP)/ifi
 KLSRC = $(KLDIR)/head.cpp $(KLDIR)/list.cpp $(KLDIR)/sat.cpp $(KLDIR)/tree.cpp $(KLDIR)/kl.cpp $(KLDIR)/blob.cpp $(KLDIR)/parsectx.cpp $(KLDIR)/klstrandi.cpp $(KLDIR)/porter2.c $(KLDIR)/strands.cpp  $(IFIDIR)/ifiglue.cpp
-SOURCES = $(SDLDIR)/sdl.cpp $(SDLDIR)/imgui_freetype.cpp
-SOURCES += $(IMGUI_DIR)/imgui.cpp $(IMGUI_DIR)/imgui_demo.cpp $(IMGUI_DIR)/imgui_draw.cpp $(IMGUI_DIR)/imgui_tables.cpp $(IMGUI_DIR)/imgui_widgets.cpp
-SOURCES += $(IMGUI_DIR)/backends/imgui_impl_sdl.cpp $(IMGUI_DIR)/backends/imgui_impl_opengl3.cpp
+SOURCES = $(SRCDIR)/main.cpp 
+SOURCES += $(IMGUI_DIR)/imgui.cpp $(IMGUI_DIR)/imgui_demo.cpp $(IMGUI_DIR)/imgui_draw.cpp $(IMGUI_DIR)/imgui_tables.cpp $(IMGUI_DIR)/imgui_widgets.cpp $(IMGUI_DIR)/misc/freetype/imgui_freetype.cpp $(SRCDIR)/stb_vorbis.c
 SOURCES += $(KLSRC)
+
+
 OBJS = $(addsuffix .o, $(basename $(notdir $(SOURCES))))
 UNAME_S := $(shell uname -s)
-USE_FILE_SYSTEM := 1
 
 ## just headers here
-FREETYPE := freetype
+FREETYPE := $(SRCDIR)/freetype
 
 COMMONDIR := $(TOP)/common
-IFIDEFS := -DIFI_BUILD -DIFI_STATIC -DIFI_HANDLE_CHOICE -s ASYNCIFY=1 #-DLOGGING
+IFIDEFS := -DIFI_BUILD -DIFI_STATIC -DIFI_HANDLE_CHOICE #-DLOGGING
 
-GAMEDIR := .
-GAMESRC = $(GAMEDIR)/story.str $(GAMEDIR)/core.str $(GAMEDIR)/picton.str
-
-GAME := --preload-file story.stz@story.str --preload-file $(GAMEDIR)/init.kl@init.kl
-
-FONTS = --preload-file $(SDLDIR)/fonts@/fonts
-SOUNDS = --preload-file $(GAMEDIR)/sounds@sounds
-
-## if using package
-PACKFLAGS = $(FONTS) $(GAME) --js-output=$(WEB_DIR)/index.js
-
-## if using emcc to package
-LDFLAGS += $(FONTS) $(GAME) $(SOUNDS)
-
-
+VORBDEFS := -DSTB_VORBIS_NO_PUSHDATA_API -DSTB_VORBIS_MAX_CHANNELS=2 -DSTB_VORBIS_NO_INTEGER_CONVERSION
 
 ##---------------------------------------------------------------------
 ## EMSCRIPTEN OPTIONS
 ##---------------------------------------------------------------------
 
-EMS += -s USE_SDL=2 -s FORCE_FILESYSTEM=1 -s WASM=1 -s SDL2_IMAGE_FORMATS='[]'
-EMS += -s USE_SDL_MIXER=2 -s USE_OGG=1
-#EMS += -s ALLOW_MEMORY_GROWTH=1
-#EMS += -s DISABLE_EXCEPTION_CATCHING=1 -s NO_EXIT_RUNTIME=0
-#EMS += -s ASSERTIONS=1
+EMS += -s WASM=1
 EMS += -s USE_FREETYPE=1
+EMS += -s ASYNCIFY=1
+EMS += -s ALLOW_MEMORY_GROWTH=1 
+EMS += -s "EXPORTED_FUNCTIONS=['_main','_reload_story']"
 
-
-LDFLAGS += -s ASYNCIFY=1
-
+LDFLAGS += --preload-file $(KLDIR)/games/core/init.kl@init.kl
 
 ##---------------------------------------------------------------------
 ## FINAL BUILD FLAGS
 ##---------------------------------------------------------------------
 
-CPPFLAGS = -I$(SDLDIR) -I$(IMGUI_DIR) -I$(IFIDIR) -I$(COMMONDIR) -I$(IMGUI_DIR)/backends -I$(FREETYPE)/include $(IFIDEFS)
+SOKFLAGS = -I$(SOKDIR) -I$(SOKDIR)/util  -I$(FTDIR)/include
+CPPFLAGS = -I.. -I$(IMGUI_DIR) -I$(IFIDIR) -I$(COMMONDIR) -I$(IMGUI_DIR)/backends -I$(FREETYPE)/include $(IFIDEFS) $(SOKFLAGS)
 #CPPFLAGS += -g
 CPPFLAGS += -Wall -Wformat -O3 -Wno-switch -fno-rtti -fno-exceptions
 CPPFLAGS += $(EMS)
 LIBS += $(EMS)
-LDFLAGS += --shell-file $(SDLDIR)/shell.html -O3
+LDFLAGS += --shell-file $(SRCDIR)/shell.html -O3
 
 ##---------------------------------------------------------------------
 ## BUILD RULES
@@ -93,6 +77,9 @@ LDFLAGS += --shell-file $(SDLDIR)/shell.html -O3
 %.o:$(IMGUI_DIR)/backends/%.cpp
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c -o $@ $<
 
+%.o:$(IMGUI_DIR)/misc/freetype/%.cpp
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c -o $@ $<
+
 %.o:$(KLDIR)/%.cpp
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c -o $@ $<
 
@@ -102,29 +89,33 @@ LDFLAGS += --shell-file $(SDLDIR)/shell.html -O3
 %.o:$(IFIDIR)/%.cpp
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c -o $@ $<
 
-%.o:$(SDLDIR)/%.cpp
+%.o:$(SRCDIR)/%.cpp
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c -o $@ $<
 
-%.o:../libs/gl3w/GL/%.c
-	$(CC) $(CPPFLAGS) $(CFLAGS) -c -o $@ $<
 
 all: $(EXE)
 	@echo Build complete for $(EXE)
 
 $(WEB_DIR):
-	mkdir $@
-
-story.stz: $(GAMESRC)
-	$(KLDIR)/strands -bin -only $(GAMESRC)
+	mkdir -p $@
+	mkdir -p $(WEB_DIR)/fonts
+	mkdir -p $(WEB_DIR)/audio
+	mkdir -p $(WEB_DIR)/images
 
 serve: all
 	python3 -m http.server -d $(WEB_DIR)
 
-$(EXE): $(OBJS) $(WEB_DIR) story.stz
+$(EXE): $(OBJS) $(WEB_DIR) Makefile
 	$(CXX) -o $@ $(OBJS) $(LIBS) $(LDFLAGS)
-#	$(PACK) $(WEB_DIR)/index.data $(PACKFLAGS)
-	cp -v $(SDLDIR)/shell-async.html $(WEB_DIR)/index.html
+	cp -v $(SRCDIR)/fonts/*.ttf $(WEB_DIR)/fonts
+	cp -v $(SRCDIR)/favicon.ico $(WEB_DIR)
+	cp -v $(SRCDIR)/shell-async.html $(WEB_DIR)/index.html
+	cp -v audio/*.ogg $(WEB_DIR)/audio
+	cp -v images/* $(WEB_DIR)/images
+	cp -v *.str $(WEB_DIR)
 
+stb_vorbis.o:$(SRCDIR)/stb_vorbis.c
+	$(CC) $(CPPFLAGS) $(CFLAGS) $(VORBDEFS) -c -o $@ $<
 
 clean:
-	rm -rf $(OBJS) $(WEB_DIR) story.stz
+	rm -rf $(OBJS) $(WEB_DIR)

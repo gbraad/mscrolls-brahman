@@ -149,7 +149,7 @@ struct Flow: public Traits
 
         EltCommand(const string& s) : Elt(t_command), _command(s) {}
         
-        ~EltCommand() { delete _parse; }
+        ~EltCommand() override { delete _parse; }
 
         void setParse(pnode* pn)
         {
@@ -185,7 +185,7 @@ struct Flow: public Traits
         EltMedia(const string& s, MediaType mt)
             : Elt(t_media), _filename(s), _mType(mt) {}
 
-        ~EltMedia() { delete _attr; }
+        ~EltMedia() override { delete _attr; }
         
         string _toString(bool x) const override
         {
@@ -203,7 +203,7 @@ struct Flow: public Traits
         
         EltCond(enode* e) : Elt(t_cond), _cond(e) {}
         
-        ~EltCond() { delete _cond; }
+        ~EltCond() override { delete _cond; }
         
         string _toString(bool x) const override
         {
@@ -243,7 +243,7 @@ struct Flow: public Traits
 
     };
 
-    Elt::List           _elts;
+    Elt::ListO          _elts;
     
     ~Flow() { _purge(); }
     
@@ -329,12 +329,7 @@ private:
 
     void _purge()
     {
-        for (auto i = _elts.begin(); i != _elts.end(); ++i)
-        {
-            Flow::Elt* e = i;
-            delete e;
-        }
-        _elts.clear();
+        _elts.clear(); // deletes elts
     }
 
 };
@@ -481,7 +476,12 @@ struct Selectors: public Traits
 
 private:
 
-   void _purge() { for (auto i: _selectors) delete i; _selectors.clear(); }
+   void _purge()
+   {
+       for (auto i: _selectors)
+           delete i;
+       _selectors.clear();
+   }
 };
    
 struct Term: public Traits
@@ -542,7 +542,11 @@ struct Term: public Traits
         return stab[t];
     }
 
-    ~Term() { _purge(); }
+    ~Term()
+    {
+        //if (!_name.empty()) LOG1("~Term ", _name);
+        _purge();
+    }
     
     string      _name;
     Type        _type = t_generator;
@@ -641,6 +645,7 @@ struct Term: public Traits
             Term t(name);
             Terms::iterator it = _allTerms.find(&t);
             if (it != _allTerms.end()) ft = *it;
+            t._name.clear(); // just for debug 
         }
         return ft;
     }
@@ -654,6 +659,7 @@ struct Term: public Traits
 
     static void add(Term* t)
     {
+        // should never have duplicates
         bool ok = _allTerms.insert(t).second;
         assert(ok);
     }
@@ -893,6 +899,13 @@ struct Term: public Traits
         if (!_selectors.visit(ff)) v = false;
         if (!ff(_postflow)) v = false;
         return v;
+    }
+
+    static void clearTerms()
+    {
+        // delete all terms!
+        for (Term* t : _allTerms) delete t;
+        _allTerms.clear();
     }
 
 private:

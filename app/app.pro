@@ -39,6 +39,10 @@ include($$PROJ/app.pri)
 
 DEFINES += STB_VORBIS_NO_PULLDATA_API STB_VORBIS_MAX_CHANNELS=2
 
+# so we can include ifi.h
+INCLUDEPATH += $$IFIDIR
+DEFINES += IFI_IMPORT
+
 ### ////////////////// BASE ///////////////////////////////////////////
 
 ios {

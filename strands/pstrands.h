@@ -77,6 +77,12 @@
 #define SYM_ATTRIBUTE ':'
 #define SYM_ATTR_SEP ','
 
+#ifdef IFI_BUILD
+typedef IFI::Ctx IFICtx;
+#else
+typedef void* IFICtx;
+#endif
+
 
 namespace ST
 {
@@ -801,12 +807,7 @@ struct ParseStrands: public ParseBase
             skipws();
 
             bool v = parseProps(t);
-
-            if (!v)
-            {
-                delete t;
-                t = 0;
-            }
+            if (!v)  { delete t; t = 0; }
         }
         return t;
     }
@@ -1003,12 +1004,7 @@ struct ParseStrands: public ParseBase
 
             if (!nobody)
             {
-                if (!parseBody(t))
-                {
-                    delete t;
-                    t = 0;
-                }
-
+                if (!parseBody(t)) { delete t; t = 0; }
             }
         }
         return t;
@@ -1171,10 +1167,8 @@ struct ParseStrands: public ParseBase
                 else
                 {
                     LOG1("ERROR: Duplicate term ", t->_name);
+                    delete t;
                 }
-
-                //DLOG0(_debug, t->toString());
-
             }
             else
             {
@@ -1184,55 +1178,77 @@ struct ParseStrands: public ParseBase
         }
     }
 
-    bool processFile(const string& filename, bool* wasCompressed = 0)
+    char* loadFile(const string& filename,
+                   IFICtx* ctx = 0,                   
+                   bool* wasCompressed = 0)
     {
+        unsigned char* data = 0;
+        
         lineno = 1;
         _filename = makePath(_loadFilePrefix, filename);
 
         LOG3("processfile ", _filename);
 
         FD fd;
-        bool r = fd.open(_filename);
-        if (r)
+        if (fd.open(_filename))
         {
             // try reading compressed first
             size_t usize;
-            unsigned char* data = readz(fd, &usize);
+            data = readz(fd, &usize);
 
-            if (wasCompressed) *wasCompressed = data != 0;
-            
-            if (!data)
+            if (data)
+            {
+                FD::Pos sz = usize;
+                FD::removeDOSLines(data, sz);
+                if (wasCompressed) *wasCompressed = true;
+            }
+            else
             {            
                 FD::Pos fsize;
                 data = fd.readAll(&fsize, true); // remove dos newlines
             }
-            
-            if (data)
-            {
-                processString((char*)data);
-                delete data;
-            }
-            else r = false;
         }
 
-        if (!r)
+#ifdef IFI_BUILD
+        if (!data && ctx)
+        {
+            if (ctx->_loader)
+            {
+                int sz;
+                LOG1("Using fallback ifi loader for ", _filename);
+                data = (unsigned char*)ctx->_loader(_filename.c_str(), sz);
+                if (data)
+                {
+                    FD::Pos size = sz;
+                    FD::removeDOSLines(data, size);
+                }
+            }
+        }
+#endif // IFI_BUILD
+
+        if (!data)
         {
             ERR1("Can't open input file", filename);
         }
-        return r;
+        return (char*)data;
     }
 
-    bool loadFiles(std::vector<std::string>& files, bool loadGameFiles = true)
+    bool loadFiles(std::vector<std::string>& files,
+                   IFICtx* ctx = 0,
+                   bool loadGameFiles = true)
     {
         // false if any file fails
         bool v = true;
-        bool wasCompressed;
+        bool wasCompressed = false;
 
         for (auto& f : files)
         {
-            v = processFile(f, &wasCompressed);
-            if (!v) break;
-
+            char* data = loadFile(f, ctx, &wasCompressed);
+            if (!data) break;
+            
+            processString(data);
+            delete data;
+            
             // dont auto load game files if compressed
             // as we assume this is a complete story in one
             if (wasCompressed) loadGameFiles = false;
@@ -1262,7 +1278,13 @@ struct ParseStrands: public ParseBase
                         if (em->_mType == m_file)
                         {
                             // a game source file
-                            if (!processFile(em->_filename)) v = false;
+                            char* data = loadFile(em->_filename, ctx);
+                            if (data)
+                            {
+                                processString(data);
+                                delete data;
+                            }
+                            else v = false;
                         }
                     }
                 }

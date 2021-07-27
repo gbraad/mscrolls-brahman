@@ -271,11 +271,11 @@ struct KL: public HeadTraits
 
         if (r)
         {
-            LOG2("Loaded file '", fpath << '\'');
+            LOG1("Loaded file '", fpath << '\'');
         }
         else 
         {
-            LOG2("Failed to load file '", name << '\'');
+            LOG1("Failed to load file '", name << '\'');
         }
 
         return r;

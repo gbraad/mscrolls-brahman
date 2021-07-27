@@ -43,6 +43,7 @@
 #include "os.h"
 #include "json.h"
 #include "ap.h"
+#include "ifi.h"
 #include "utils.h"
 
 // forward
@@ -71,7 +72,7 @@ struct DLLX Control: public APIType
     virtual ~Control();
 
     typedef Strings Words;
-    typedef std::function<void(void)> Pump;
+    typedef IFI::Pump   Pump;
 
     Prefs::Ref                  _prefs;
     Transcript::Ref             _transcript;

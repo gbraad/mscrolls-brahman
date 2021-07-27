@@ -34,7 +34,7 @@
 #include "ifi.h"
 #include "logged.h"
 
-IFI* IFI::create(Pump* p)
+IFI* IFI::create(IFI::Ctx* ctx)
 {
     Logged initLog;
 

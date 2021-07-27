@@ -7,7 +7,9 @@ object_script.*
 *.stash
 *.exe
 save
-*.bat
-b.sh
 /*.str
-
+push.bat
+mktags.bat
+purge.bat
+/Makefile
+/cli/Makefile

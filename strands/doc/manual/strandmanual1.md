@@ -10,17 +10,19 @@
 
 ## Introduction
 
-Strand Games is working on a novel technology for IF production called `Strand`.
+Strand Games has developed a novel technology for IF production called `Strand`.
 
 Easily make parser IF, choice IF and anything in between with no programming. Deploy to mobile, desktop or the web with a GUI supporting pictures, animation and sound.
 
-Historically, IF systems were designed around computer limitations at the expense of creativity. `Strand` turns this around putting authoring ahead of technobabble.
+Historically, IF systems were designed around computer limitations at the expense of creativity. `Strand` turns this around and puts creative authoring in the lead.
 
-`Strand` does not claim to be more capable than other systems, nor does it claim to do more or have more features. Instead, `Strand` strives to be quick and easy to use while following one simple idea:
+`Strand` does not claim to be more capable than other systems, nor does it claim to be better or have more features. Instead, `Strand` strives to be quick and easy to use while following simple ideas.
 
-_Don't let the 10% complicated features poison the simplicity of the 90%._
+* Write your game in your favourite editor as a text file.
+* Use a single "building block" in a variety of ways to make your game.
+* Don't let the 10% of complicated features poison the simplicity of the 90%.
 
-The documentation will show you how _one simple construct_ is used in different ways to build diverse and functional games, expressing content generation, choices, world building and text input.
+The documentation will show you how _one simple building block_ is used in different ways to build diverse and functional games, expressing content generation, choices, world building and text input.
 
 Anyone can use `Strand`. Write your game in your favourite editor, then run it immediately!
 
@@ -39,32 +41,30 @@ Here is a story;
 
 ```
 STORY
-Once there were three bears, then they all died!
+Once there were three bears, they all died!
 The End.
 ```
 
-OK, not a very exciting story (or even very original), but it illustrates the building block called the _term._;
+OK, not a very exciting story (or even very original), but it illustrates the building block called the _term._
 
 **Anything in capital letters is a _term_ and the rest is _flow._**
 
-`STORY` is a _term_ and the text, "Once there were three bears, then they all died! The End." is its _flow._ Let's run this story and see the output;
+`STORY` is a _term_ and the text, "Once there were three bears, they all died! The End." is its _flow._ Let's run this story and see the output;
 
-> Once there were three bears, then they all died! The End.
+> Once there were three bears, they all died! The End.
 
-You may have noticed the line break in the `STORY`, before "The End", does not appear in the output. Line breaks in text flows are ignored.
-
-You can however have blank lines in text flow, for example;
+Line breaks in flow do not appear in the output. You can however have blank lines in text flow, for example;
 
 ```
 STORY
-Once there were three bears, then they _all_ **died!**
+Once there were three bears, they _all_ **died!**
 
 **The End.**
 ```
 
 Produces the output;
 
-> Once there were three bears, then they _all_ **died!**
+> Once there were three bears, they _all_ **died!**
 >
 > **The End.**
 

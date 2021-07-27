@@ -857,6 +857,12 @@ struct IFIHandler
         return true;
     }
 
+    void resetAll()
+    {
+        _props.clear();
+        _startDone = false;
+    }
+
 protected:
     
     static bool _makeTextF(const string& js, TextF& textF)
@@ -886,7 +892,6 @@ protected:
         }
         return res;
     }
-
 };
 
 #undef TAG

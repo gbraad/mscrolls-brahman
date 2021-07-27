@@ -3,7 +3,11 @@ Once upon a time there was a boy called Jack. He lived with his widowed mother. 
 
 You are Jack. One day your old mother says you must take the cow and sell it at the market, as there is no money left for food.
 
-Along the way you meet OLDMAN, he offers you some "magic beans" in exchange for the cow. DOSELL \nThe End.
+Along the way you meet OLDMAN, he offers you some "magic beans" in exchange for the cow.
+images/cow.jpg
+audio/yakyak.ogg
+DOSELL
+\nThe End.
 
 ///// Here we put some terms for the UI
 
@@ -58,6 +62,7 @@ Your mother cooks a giant curry with the money from the cow.
 
 
 CLIMB?
+images/climb.jpg
 DOCLIMB do you?
 *?!CHICKEN Climb the beanstalk
 ATTOP
@@ -93,6 +98,7 @@ GIANTDOING
 ATTOP?
 At the top you see a huge castle fit for a giant. Do you?
 * Enter the castle
+images/giant.jpg
 Inside the castle is an enormous hall.
 At the far end sits a huge fat giant, GIANTDOING Luckily he hasn't seen you. In the middle of the room is a table atop of which is; a hen, a magic harp and a bag of old coins. WHATDO
 * Climb back down to get some weapons.
@@ -132,6 +138,7 @@ SOUND
 *?GETHARP The strings of the harp strum a note which alerts the giant.
 
 RUNAWAY?
+images/runaway.jpg
 You run like hell! But the giant's huge stride is catching you fast. You;
 * Hide under a table.
 Nice try, the giant lifts the table then pounds it back down squashing you to death! LOSE

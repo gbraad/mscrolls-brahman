@@ -358,6 +358,19 @@ struct FD: public FDBase
         return write(buf, amt, nw);
     }
 
+    static void removeDOSLines(unsigned char* data, Pos& sz)
+    {
+        unsigned char* p = data;
+        unsigned char* q = p;
+        for (Pos s = sz; s; --s)
+        {
+            if (*p != '\r') *q++ = *p;
+            else --sz;
+            ++p;
+        }
+        data[sz] = 0; 
+    }
+
     unsigned char* readAll(Pos* fsize = 0, bool removeDOS = false)
     {
         // removeDOS true removes all '\r' from buffer
@@ -373,17 +386,7 @@ struct FD: public FDBase
             {
                 if (read(data, sz))
                 {
-                    if (removeDOS)
-                    {
-                        unsigned char* p = data;
-                        unsigned char* q = p;
-                        for (Pos s = sz; s; --s)
-                        {
-                            if (*p != '\r') *q++ = *p;
-                            else --sz;
-                            ++p;
-                        }
-                    }
+                    if (removeDOS) removeDOSLines(data, sz);
                     data[sz] = 0; 
                 }
                 else

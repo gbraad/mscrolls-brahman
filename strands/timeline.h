@@ -71,8 +71,13 @@ struct Timeline
     
     Ents                                _ents;
 
-    // boolean values
+    void clear()
+    {
+        // clear entire timeline
+        _ents.clear();
+    }
 
+    // boolean values
     const Ent* find(const string& tag) const
     {
         // scan backwards to find (tag...) or ~(tag...)

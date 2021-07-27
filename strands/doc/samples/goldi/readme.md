@@ -2,4 +2,5 @@
 
 
 
-http://stvle.s3.amazonaws.com/goldi/index.html
+http://stvle.s3.amazonaws.com/goldi/index.html?story=goldi.str
+

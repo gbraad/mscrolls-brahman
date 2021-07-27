@@ -467,8 +467,6 @@ struct ParseCommand: public ParseBase
     const Word*         _it;
     const Word*         _that;
 
-    ParseCommand() { _init(); }
-
     const Word* findWord(const string& word) const
     {
         // dictionary words are case sensitive.
@@ -512,7 +510,7 @@ struct ParseCommand: public ParseBase
         uint         _pos;
     };
 
-    void _internStandardWords()
+    void internStandardWords()
     {
         static const StdWord stdWords[] =
         {
@@ -739,7 +737,7 @@ struct ParseCommand: public ParseBase
     pnode* parseUNoun()
     {
         // parse attributive nouns or possessive syntax
-        // eg "cat fur" where two (or more) nouns are put together
+        // eg "cat's fur" where two (or more) nouns are put together
         // this means "fur of cat"
         // also "cat's fur", which is also "fur of cat"
         //
@@ -1572,14 +1570,12 @@ struct ParseCommand: public ParseBase
 
     pnode* parse(const string& s, int line = 0)
     { return parse(s.c_str(), line); }
-    
-private:
 
-    void _init()
+    void clear()
     {
-        _internStandardWords();
+        _dictionary.clear();
     }
-    
+
 };
 
 }; // ST

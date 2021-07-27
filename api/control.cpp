@@ -46,7 +46,6 @@
 #include "varset.h"
 #include "wordstat.h"
 #include "opt.h"
-#include "ifi.h"
 #include "ifihost.h"
 #include "ifroster.h"
 #include "ifproduct.h"
@@ -117,11 +116,14 @@ struct ImpIFI: public IFIHandler, public ControlImpBase
     
     bool loadIFI(Pump p)
     {
-        _ifi = IFI::create();
+        _ifi = IFI::create(0);  // not coop
         if (_ifi)
         {
             _ifiHost.setIFI(_ifi);
-            _ifiHost._pump = p;
+
+            // but we can store a pump function even though
+            // we're not coop
+            _ifiHost._pump = p; 
             
             // set the emitter 
             _ifi->setEmitter(&IFIHost::emitter, &_ifiHost);

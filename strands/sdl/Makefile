@@ -36,7 +36,7 @@ COMMONDIR := ../../common
 IFIDEFS := -DIFI_BUILD -DIFI_STATIC -DIFI_HANDLE_CHOICE -s ASYNCIFY=1 #-DLOGGING
 
 GAMEDIR := ../doc/samples/picton
-GAME := --preload-file $(GAMEDIR)/story.str@story.str --preload-file $(GAMEDIR)/core.str@core.str --preload-file $(GAMEDIR)/map.str@map.str --preload-file $(GAMEDIR)/picton.str@picton.str --preload-file $(GAMEDIR)/init.kl@init.kl
+GAME := --preload-file $(GAMEDIR)/story.str@story.str --preload-file $(GAMEDIR)/core.str@core.str --preload-file $(GAMEDIR)/picton.str@picton.str --preload-file $(GAMEDIR)/init.kl@init.kl
 
 ##---------------------------------------------------------------------
 ## EMSCRIPTEN OPTIONS
@@ -61,7 +61,7 @@ CPPFLAGS = -I.. -I$(IMGUI_DIR) -I$(IFIDIR) -I$(COMMONDIR) -I$(IMGUI_DIR)/backend
 CPPFLAGS += -Wall -Wformat -O3 -Wno-switch
 CPPFLAGS += $(EMS)
 LIBS += $(EMS)
-LDFLAGS += --shell-file shell_minimal.html
+LDFLAGS += --shell-file shell.html
 
 ##---------------------------------------------------------------------
 ## BUILD RULES

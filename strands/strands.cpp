@@ -44,9 +44,6 @@
 
 #define DEFAULT_VOICE_FILE   "voice.txt"
 
-#ifdef __EMSCRIPTEN__
-#endif
-
 namespace ST
 {
 Term::Terms Term::_allTerms(&Term::compareLess);

@@ -57,11 +57,18 @@
 struct DLL IFI
 {
     typedef void charEmitFn(void*, const char*);
-    typedef std::function<void(void)> Pump;
+    typedef std::function<bool(void)> Pump;
+    typedef std::function<char*(const char*, int& sz)> Loader;
+
+    struct Ctx
+    {
+        Pump            _p;
+        Loader          _loader;
+    };
 
     virtual ~IFI() {}
 
-    static IFI* create(Pump* p = 0);
+    static IFI* create(Ctx* ctx = 0);
     
     virtual void setEmitter(charEmitFn* emitter, void* ctx) = 0;
     virtual bool eval(const char* json) = 0;

@@ -1,12 +1,12 @@
 # Picton Murder Whodunnit
 
-![](media/pictoncover.jpg)
+![](images/pictoncover.jpg)
 
 * Title: Picton Murder Whodunnit
 * Story Author: Sia See, sia@9ize.com
 
 * Short Desc:
-  Who shot Major Stephenson: Charles, his brother and business partner, his wife Charlotte, the son Jimmy or even Jeeves the family butler? I don't know either because the villain changes each game!
+  Who shot Major Stephenson: Charles, his brother and business partner, his wife Charlotte, the son Jimmy or even Jeeves the family butler? I don't know either because the villain changes for each game!
 
 * Format: Strand
 
@@ -26,7 +26,7 @@ Version: 1.1.02/1.11, for SpringThing 2021.
 
 Each time you play, the game picks a new villain! So the murderer can be different every time. Be advised, if you refresh the browser page, it will restart the game!
 
-This game uses a mixture of Choice + Parser text input, so this is a bit different than most players are used to. I'm interested in whether this "works".
+This game uses a mixture of Choice & Parser text input, so this is a bit different than most players are used to. You can play with choices, but parser input can give more detail.
 
 ## Acknowledgements
 

@@ -171,12 +171,12 @@ public:
         _size += n;
     }
 
-    void remove(uint pos, int n)
+    void remove(unsigned int pos, int n)
     {
         // remove characters from buffer at `pos` for `n` chars
         if (pos < _size)
         {
-            uint endp = pos + n;
+            unsigned int endp = pos + n;
             if (endp >= _size)
             {
                 // remove from pos onwards

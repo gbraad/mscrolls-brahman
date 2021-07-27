@@ -2,4 +2,4 @@
 
 
 
-http://stvle.s3.amazonaws.com/beanstalk/index.html
+http://stvle.s3.amazonaws.com/beanstalk/index.html?story=beanstalk.str

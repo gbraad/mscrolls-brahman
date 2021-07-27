@@ -144,7 +144,8 @@ public:
 
         void clear()
         {
-            while (!this->empty()) this->first()->removeAndDelete();
+            while (!this->empty())
+                this->first()->removeAndDelete();
         }
     };
 

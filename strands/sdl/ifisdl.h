@@ -58,7 +58,6 @@ struct SDLHandler: public IFIHandler
     SDLHandler(IFIHost* host) : _host(host) {}
     ~SDLHandler() { delete _choice; }
 
-
     void _emit(const string& s)
     {
         assert(_emitter);
@@ -83,6 +82,7 @@ struct SDLHandler: public IFIHandler
         return true;
     }
 
+    /*
     bool ifiSave(const uchar* data, int size, const string& name) override
     {
         // any suggested name?
@@ -165,6 +165,7 @@ struct SDLHandler: public IFIHandler
         }
         return true;
     }
+    */
 
     bool ifiTitleTextResponse(const string& s) override
     {
@@ -195,7 +196,6 @@ struct SDLHandler: public IFIHandler
 
     bool ifiSoundResponse(const string& js) override
     {
-
         int chan = 0;
         int dur = -1;
         string fname;
@@ -288,7 +288,7 @@ struct SDLHandler: public IFIHandler
         return done;
     }
 
-    void pumpfn()
+    bool  pumpfn()
     {
         //static int cc;
         //LOG1("pump! ", ++cc);
@@ -311,6 +311,7 @@ struct SDLHandler: public IFIHandler
 
             _host->eval(js.start());
         }
+        return true;
     }
 };
 
@@ -363,7 +364,7 @@ struct StrandCtx
 
     IFIHost host;
     SDLHandler h;
-    IFI::Pump _p;
+    IFI::Ctx   ifiCtx;
 
     char            _guiInputBuf[256];
     bool            _guiInputReady = false;
@@ -377,7 +378,7 @@ struct StrandCtx
         Logged::_logLevel = 3; // XXX
 
         using namespace std::placeholders;  
-        _p = std::bind(&SDLHandler::pumpfn, &h);
+        ifiCtx._p = std::bind(&SDLHandler::pumpfn, &h);
     }
 
     const char* getTitle() const { return h._title.c_str(); }
@@ -410,7 +411,7 @@ struct StrandCtx
 
     bool init(SDLHandler::TextEmitter& e)
     {
-        ifi = IFI::create(&_p);
+        ifi = IFI::create(&ifiCtx);
         if (!ifi)
         {
             e("Failed to create IFI");

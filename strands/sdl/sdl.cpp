@@ -132,7 +132,6 @@ int main(int, char**)
     
     if ((mix_flags & active_flags) != mix_flags) {
         printf("Failed to Mix_Init(): %s\n", Mix_GetError());
-        return -1;
     }
 
     const char* glsl_version = "#version 100";

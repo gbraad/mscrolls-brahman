@@ -766,7 +766,7 @@ public:
         std::cout << "qcontrol cout sentinel " << msg << "\n" << std::flush;
     }
 
-    void _pumpGUI();
+    bool _pumpGUI();
 
 public slots:
 

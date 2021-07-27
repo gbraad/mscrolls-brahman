@@ -518,10 +518,11 @@ bool QControl::loadEngine()
     return res;
 }
 
-void QControl::_pumpGUI()
+bool QControl::_pumpGUI()
 {
     assert(_app);
     _app->processEvents();
+    return true;
 }
 
 QStringList QControl::loadGameFiles()

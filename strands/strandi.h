@@ -176,30 +176,57 @@ struct Strandi: public Traits
         run_media = 2,
     };
     
-    Terms*      _terms;
+    Terms*      _terms;   // not owned
     Ranq1       _rand;
     Emitter     _emitter;
     Timeline    _state;
     ParseCommand _pcom;
-    bool        _prepared = false;
-    uint        _runtypemask = (uint)-1;
+    bool        _prepared;
+    uint        _runtypemask;
     CapStack*   _out = 0;
     Evaluator   _eval;
 
     // runtime
-    Term*       _player = 0;
-    Term*       _thing = 0;
-    Term*       _tick = 0;
-    Term*       _scopeSeed = 0;
-    Term*       _errorNocando = 0;
-    Term*       _errorNosuch = 0;
-    Term*       _errorSyntax = 0;
+    Term*       _player;
+    Term*       _thing;
+    Term*       _tick;
+    Term*       _scopeSeed;
+    Term*       _errorNocando;
+    Term*       _errorNosuch;
+    Term*       _errorSyntax;
 
     jmp_buf     _env_top;
-    int         _time = 0;
+    int         _time;
 
-    //Exec        _exec;
+    void _init()
+    {
+        _prepared = false;
+        _runtypemask = (uint)-1;
+        _out = 0;
+        _player = 0;
+        _thing = 0;
+        _tick = 0;
+        _scopeSeed = 0;
+        _errorNocando = 0;
+        _errorNosuch = 0;
+        _errorSyntax = 0;
+        _time = 0;
+    }
 
+    void resetAll()
+    {
+        // erase everything
+
+        // clear timeline
+        _state.clear();
+
+        // erase dictionary
+        _pcom.clear();
+
+        // reset locals
+        _init();
+        
+    }
 
     struct PronBinding
     {
@@ -259,9 +286,6 @@ struct Strandi: public Traits
         // stack of temp LAST bindings
         LastCap              _lastCap;
 
-        // last generator index selected
-        //int                  _lastGen = 0;
-        
         PronBinding*        _pronouns = 0;
 
         // currently available
@@ -684,6 +708,8 @@ struct Strandi: public Traits
     
     Strandi(Terms* t = 0) : _terms(t) 
     {
+        _init();
+        
         using namespace std::placeholders;  
         _emitter = std::bind(&Strandi::_emitterDefault, _1);
 
@@ -857,7 +883,7 @@ struct Strandi: public Traits
         }
         else
         {
-            LOG1(TAG "run code, missing evaluator for ", *ec);
+            LOG2(TAG "run code, missing evaluator for ", *ec);
         }
     }
 
@@ -1209,12 +1235,15 @@ struct Strandi: public Traits
             }
             else
             {
+                bool shutdown = true;
+                
                 if (ifi->_coop)
                 {
                     assert(ifi->_pump);
-                    (ifi->_pump)();
+                    shutdown = !(ifi->_pump)();
                 }
-                else
+
+                if (shutdown)
                 {
                     LOG1(TAG, "request shutdown");
                     longjmp(_env_top, 1);
@@ -4573,6 +4602,8 @@ struct Strandi: public Traits
         // adds words used in object reactors to dictionary
         // creates initial verb list.
         // also add term IDs
+
+        _pcom.internStandardWords();
         
         for (auto t: *_terms)
         {
