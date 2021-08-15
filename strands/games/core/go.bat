@@ -1,2 +1,2 @@
-..\..\..\strands story.str %1 %2
+..\..\strands story.str %1 %2
 

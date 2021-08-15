@@ -69,6 +69,8 @@ extern int ifi_scanf(const char*,...);
 extern int ifi_main(int, char**);
 extern const char* ifi_getRequest();
 extern void ifi_emitResponse(const char* json);
+extern void ifi_pump();
+extern void ifi_flush();
 C_END
 
 // need to move main into the main loop for IFIClient

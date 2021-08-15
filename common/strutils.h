@@ -80,7 +80,7 @@ inline std::string replaceAll(const std::string& source,
     do
     {
         newString.append(source, lastPos, findPos - lastPos);
-        newString += to;
+        if (to) newString += to;
         lastPos = findPos + 1;
         findPos = source.find(from, lastPos);
     } while (findPos != std::string::npos);

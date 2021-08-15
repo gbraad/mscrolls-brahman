@@ -54,7 +54,6 @@ int ifi_putchar(int c)
 int ifi_printf(const char* m, ...)
 {
     assert(ifi);
-
     va_list args;
     va_start(args, m);
     int n = ifi->vprintf(m, args);
@@ -66,10 +65,16 @@ char* ifi_gets(char* s)
 {
     char* p = s;
     int c;
+
+    for (;;)
+    {
+        c = ifi_getchar();
+        if (c <= 0 || c == '\n') break;
+        *p++ = c;
+    }
     
-    while ((c = ifi_getchar()) != EOF && c != '\n') *p++ = c;
     *p = 0;
-    return c == EOF && p == s ? 0 : s;
+    return c <= 0 && p == s ? 0 : s;
 }
 
 char* ifi_gets_s(char* s, size_t sz)
@@ -78,13 +83,17 @@ char* ifi_gets_s(char* s, size_t sz)
     int c;
 
     if (!sz) return 0;
-    --sz; 
-    
-    while ((c = ifi_getchar()) != EOF && c != '\n')
-        if (p - s < (int)sz) *p++ = c;
+    --sz;
 
+    for (;;)
+    {
+        c = ifi_getchar();
+        if (c <= 0 || c == '\n') break;
+        if (p - s < (int)sz) *p++ = c;
+    }
+    
     *p = 0;
-    return c == EOF && p == s ? 0 : s;
+    return c <= 0 && p == s ? 0 : s;
 }
 
 char* ifi_fgets(char* s, int n, FILE* fp)
@@ -132,6 +141,19 @@ void ifi_emitResponse(const char* json)
 {
     // C version
     ifi->emitResponse(json);
+}
+
+void ifi_pump()
+{
+    // coop pumper
+    assert(ifi);
+    if (ifi->_pump) (ifi->_pump)();
+}
+
+void ifi_flush()
+{
+    assert(ifi);
+    ifi->flush();
 }
 
 } // extern C

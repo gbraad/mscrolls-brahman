@@ -75,7 +75,6 @@ struct IFIHandler
         void clear() { _text.clear(); }
     };
 
-#ifdef IFI_HANDLE_CHOICE
     
     struct ChoiceInfo
     {
@@ -111,6 +110,7 @@ struct IFIHandler
         }
     };
 
+#ifdef IFI_HANDLE_CHOICE
     struct HandlerCtx
     {
         ChoicesInfo*     _choices = 0;

@@ -11,5 +11,3 @@ save
 push.bat
 mktags.bat
 purge.bat
-/Makefile
-/cli/Makefile

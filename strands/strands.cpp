@@ -171,7 +171,7 @@ int main(int argc, char** argv)
         Logged::_logLevel = debug;
     }
 
-    bool v = ps.loadFiles(files, loadGameFiles);
+    bool v = ps.loadFiles(files, 0, loadGameFiles);
 
     if (v)
     {

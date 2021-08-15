@@ -595,7 +595,7 @@ struct ParseCommand: public ParseBase
         else
         {
             if (u_isalpha(AT)) BUMP;
-            while (u_isalnum(AT)) BUMP;
+            while (u_isalnum(AT) || AT == '-') BUMP; // allow hypens
             s = POPSPAN;
         }
 

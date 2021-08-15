@@ -1,6 +1,6 @@
 
 #define SOKOL_IMPL
-#define SOKOL_GLES2
+//#define SOKOL_GLES2
 
 #include "sokol_app.h"
 #include "sokol_gfx.h"
@@ -51,8 +51,11 @@ static sg_pass_action pass_action;
 
 #include "imgui_internal.h"
 #include <stdio.h>
+
+#ifdef __EMSCRIPTEN__
 #include <emscripten.h>
 #include <emscripten/fiber.h>
+#endif
 
 // forward
 const char* gui_input_pump();
@@ -126,14 +129,13 @@ struct Fetcher
     {
         if (loading) return false; // wait until free
         
-        sfetch_request_t fr;
+        sfetch_request_t fr = {};
         loading = true;
         ok = true;
         currentName = path;
 
         doneFn = cb;
         doneCtx = ctx;
-        memset(&fr, 0, sizeof(fr));
         fr.path = currentName.c_str();
         fr.callback = _fetch_cb;
         fr.chunk_size = CHUNK_SIZE;
@@ -170,9 +172,11 @@ static Fetcher fetcher;
 void StrandWindow(bool* open);
 void StrandInit(const char*);
 
+
+#ifdef __EMSCRIPTEN__
+
 #define ASTACK_SZ 1024*16
 #define FIBSTACK_SZ 1024*64
-
 
 struct Fiber
 {
@@ -245,6 +249,8 @@ void strand_pump()
     if (strand_enabled)
         emscripten_fiber_swap(&G->_main, &G->fibers[0].context);
 }
+
+#endif // __EMSCRIPTEN__
 
 static StrandCtx sctx;
 
@@ -1058,8 +1064,10 @@ void cleanup(void)
     sargs_shutdown();
 }
 
-void input(const sapp_event* event) {
-    if (event->type == SAPP_EVENTTYPE_QUIT_REQUESTED) {
+void input(const sapp_event* event)
+{
+    if (event->type == SAPP_EVENTTYPE_QUIT_REQUESTED)
+    {
         show_quit_dialog = true;
         sapp_cancel_quit();
     }
@@ -1096,8 +1104,10 @@ sapp_desc sokol_main(int argc, char* argv[])
     adesc.argv = argv;
     sargs_setup(&adesc);
 
+    /*
     for (int i = 0; i < sargs_num_args(); i++)
         printf("key: %s, value: %s\n", sargs_key_at(i), sargs_value_at(i));
+    */
 
     // have a "story" arg?
     const char* str = sargs_value("story");
@@ -1111,11 +1121,14 @@ sapp_desc sokol_main(int argc, char* argv[])
     desc.width = 1024;
     desc.height = 768;
     desc.fullscreen = true;
+
+    // renders full size on Hi DPI screens
     desc.high_dpi = true;
     desc.html5_ask_leave_site = html5_ask_leave_site;
     desc.ios_keyboard_resizes_canvas = false;
-    desc.gl_force_gles2 = true;
-    desc.window_title = "Dear ImGui HighDPI (sokol-app)";
+    //desc.icon.sokol_default = true;
+    //desc.gl_force_gles2 = true;
+    //desc.window_title = "Dear ImGui HighDPI (sokol-app)";
     return desc;
 }
 

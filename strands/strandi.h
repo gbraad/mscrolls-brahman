@@ -293,6 +293,8 @@ struct Strandi: public Traits
         execInfo*           _currentExec = 0;
         bool                _scopeChanged = false;
 
+        void                markScope() { _scopeChanged = true; }
+
         Context(Strandi* h) : _host(h) {}
         ~Context() { _purge(); }
 
@@ -957,7 +959,7 @@ struct Strandi: public Traits
                     // signal to run background flow, but do nothing at this point
                     // do not initially mark as visited.
                     // set (term TICK)
-                    _state.set(t->_name, TERM_TICK); // does not add if already
+                    setTick(t);
                 }
                 else if (et->_flags & Flow::ft_reset)
                 {
@@ -982,8 +984,7 @@ struct Strandi: public Traits
         bool v = true;
         if (!run1(et))
         {
-            Term* t = et->_term;
-            v = run(t);
+            v = run(et->_term);
         }
         return v;
     }
@@ -1487,6 +1488,7 @@ struct Strandi: public Traits
             {
                 execReaction(ei, *cc._reactor);
                 updateIt(ei);
+                c._valid = !ei._break;
             }
         }
         else
@@ -1629,8 +1631,12 @@ struct Strandi: public Traits
 
         ectx._fnFn =
             std::bind(&Strandi::_evalEnodeFunction, this, _1, _2);
+
+        var v = ectx.eval(en);
+
+        //LOG1("evaluating conditional ", en->toString() << " = " << v);
         
-        return ectx.eval(en);
+        return v;
     }
     
     bool checkSelectorCond(Selector* s)
@@ -1645,6 +1651,7 @@ struct Strandi: public Traits
             if (e && e->isCond())
             {
                 Flow::EltCond* ec = (Flow::EltCond*)e;
+                assert(ec->_cond);
                 v = evalEnode(ec->_cond).isTrue();
             }
         }
@@ -2300,9 +2307,8 @@ struct Strandi: public Traits
         updateScope();
 
         if (c)
-        {
             c._valid = run(c._t->_postflow);
-        }
+
         return c;
     }
     
@@ -2469,6 +2475,18 @@ struct Strandi: public Traits
         return v;
     }
 
+    void setTick(Term* t)
+    {
+        _state.set(t->_name, TERM_TICK); // does not add if already
+    }
+    
+    void resetTick(Term* t)
+    {
+        // remove from background flow
+        // clear (term TICK) if present
+        _state.clear(t->_name, TERM_TICK);
+    }
+    
     void resetTerm(Term* t)
     {
         // release all state from `t`
@@ -2478,7 +2496,7 @@ struct Strandi: public Traits
         
         // remove from background flow
         // clear (term TICK) if present
-        _state.clear(t->_name, TERM_TICK);
+        resetTick(t);
 
         // clear the visit marker, if present
         _state.clear(t->_name);
@@ -2531,7 +2549,18 @@ struct Strandi: public Traits
             v = _run(t);
         
             // mark as visited at the end
-            _state.set(t->_name);
+            if (_state.set(t->_name))
+            {
+                // XX this is a bit annoying
+                // reactions can have conditionals on visited nodes
+                // so when a node is visited, it can change the condition
+                // and therefore change the current reaction set.
+                //
+                // for now we just mark changed if a new term is visited
+                // but ideally we could check to see if any conditionals
+                // use this term before forcing a recalculation of scope.
+                _ctx->markScope();
+            }
 
             if (v) break;
 
@@ -4177,12 +4206,12 @@ struct Strandi: public Traits
                 if (*ei._verb == SYM_PUT && !ei._verbPrep)
                 {
                     v = execPut(ei);
-                    if (v) _ctx->_scopeChanged = true;
+                    if (v) _ctx->markScope();
                 }
                 else if (*ei._verb == SYM_SET)
                 {
                     v = execSet(ei);
-                    if (v) _ctx->_scopeChanged = true;
+                    if (v) _ctx->markScope();
                 }
 
                 // handle queries

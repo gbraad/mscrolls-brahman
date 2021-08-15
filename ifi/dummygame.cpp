@@ -101,11 +101,22 @@ struct Handler: public IFIHandler
 
 Handler ifiHandler;
 
-IFI* IFI::create()
+IFI* IFI::create(IFI::Ctx* ctx)
 {
     LOG1(TAG, "loading");
     
     ifi = new IFIClient();
+
+    if (ctx)
+    {
+        if (ctx->_p)
+        {
+            // if we want to run in coop mode
+            ifi->_coop = true;
+            ifi->_pump = ctx->_p;
+        }
+    }
+        
     ifiHandler._ifi = ifi;
     
     return ifi;

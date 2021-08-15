@@ -176,15 +176,6 @@ struct ImText
                     int w = pi->_img._w;
                     int h = pi->_img._h;
 
-                    /*
-                    if (h > 512)
-                    {
-                        double sc = 512.0/h;
-                        w = (int)(w*sc);
-                        h = 512;
-                    }
-                    */
-
                     ImVec2 uv_min = ImVec2(0.0f, 0.0f); // Top-left
                     ImVec2 uv_max = ImVec2(1.0f, 1.0f); // Lower-right
 
@@ -207,15 +198,26 @@ struct ImText
                     
                     int vw = ImGui::GetContentRegionAvail().x;
                     int padw = vw - (w + 2); // border
+                    padw /= 2;
+                    
                     if (padw < 0)
                     {
                         double sc = ((double)vw)/(w + 2);
                         h = sc * h;
                         w = vw - 2;
                     }
-                    else ImGui::Indent(padw/2);
+
+                    if (padw > 0)
+                    {
+                       ImGui::Indent(padw);
+                    }
                     
                     ImGui::Image(pi->_img._tid, ImVec2(w, h), uv_min, uv_max, tint_col, border_col);
+                    if (padw > 0)
+                    {
+                        ImGui::Unindent(padw);
+                    }
+                    
                 }
                 break;
             }

@@ -101,8 +101,19 @@ struct Timeline
         return e ? !e->_neg : false;
     }
 
-    void set(const string& tag) { if (!test(tag)) _append(tag); }
-    void clear(const string& tag) { if (test(tag)) _append(tag, true); }
+    bool set(const string& tag)
+    {
+        bool r = !test(tag);
+        if (r) _append(tag);
+        return r;
+    }
+    
+    bool clear(const string& tag)
+    {
+        bool r = test(tag);
+        if (r) _append(tag, true);
+        return r;
+    }
 
     // single property
     

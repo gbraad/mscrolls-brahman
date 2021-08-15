@@ -40,14 +40,14 @@
 #include "strutils.h"
 #include "fd.h"
 
-struct Handler: public IFIHandler
+struct ConHandler: public IFIHandler
 {
     IFIHost*        _host;
     ChoicesInfo*    _choice = 0;
     bool            _quit = false; 
      
-    Handler(IFIHost* host) : _host(host) {}
-    ~Handler() { delete _choice; }
+    ConHandler(IFIHost* host) : _host(host) {}
+    ~ConHandler() { delete _choice; }
 
     void _emit(const string& s)
     {
@@ -70,7 +70,7 @@ struct Handler: public IFIHandler
         return true;
     }
 
-    bool ifiSave(const uchar* data, int size, const string& name) 
+    bool ifiSave(const uchar* data, int size, const string& name) override
     {
         // any suggested name?
         string f = name;
@@ -171,7 +171,7 @@ struct Handler: public IFIHandler
         }
     }
 
-    // NB: build with IFI_HANDLE_CHOICE
+#ifdef IFI_HANDLE_CHOICE    
     bool ifiHandleChoicesInfo(ChoicesInfo* ci) override
     {
         assert(ci);
@@ -199,7 +199,7 @@ struct Handler: public IFIHandler
         
         return true;
     }
-
+#endif // IFI_HANDLE_CHOICE    
 
 #if 0    
     int handleInput(const string& line)
@@ -377,12 +377,12 @@ int start(int argc, char** argv)
     LOG1("IFIConsole start, ", story);
     
     IFIHost host;
-    Handler h(&host);
+    ConHandler h(&host);
 
     IFI::Ctx ifiCtx;
 
     using namespace std::placeholders;
-    ifiCtx._p = std::bind(&Handler::pumpfn, &h);
+    ifiCtx._p = std::bind(&ConHandler::pumpfn, &h);
 
     IFI* ifi = IFI::create(coop ? &ifiCtx : 0);
     if (!ifi)

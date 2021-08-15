@@ -289,7 +289,7 @@ struct SDLHandler: public IFIHandler
         }
     }
 
-    // NB: build with IFI_HANDLE_CHOICE
+#ifdef IFI_HANDLE_CHOICE
     bool ifiHandleChoicesInfo(ChoicesInfo* ci) override
     {
         assert(ci);
@@ -313,6 +313,7 @@ struct SDLHandler: public IFIHandler
         
         return true;
     }
+#endif // IFI_HANDLE_CHOICE    
 
     bool flush()
     {
