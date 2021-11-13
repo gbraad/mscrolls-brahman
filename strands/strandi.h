@@ -106,6 +106,66 @@ template<class T> struct Stacked
     };
 };
 
+template<class T, int N> struct Tops
+{
+    T           _v[N];
+    int         _size = 0;
+
+    void        add(const T& t)
+    {
+        int i;
+        for (i = 0; i < _size; ++i)
+        {
+            if (_v[i] == t)
+            {
+                // already present, bring to front
+                memmove(&_v[1], &_v[0], i*sizeof(T));
+                _v[0] = t;            
+                return;
+            }
+        }
+
+        if (i < N)
+        {
+            ++_size;
+        }
+        else
+        {
+            // overwrite last
+            --i;
+        }
+        
+        memmove(&_v[1], &_v[0], i*sizeof(T));
+        _v[0] = t;
+
+        LOG3("Focus: ", toString());
+
+    }
+
+    bool        contains(const T& t) const
+    {
+        for (int i = 0; i < _size; ++i)
+            if (_v[i] == t) return true;
+        return false;
+    }
+
+    std::string toString() const
+    {
+        string s;
+        s += "{";
+        s += std::to_string(_size);
+        s += ' ';
+        for (int i = 0; i < _size; ++i)
+        {
+            if (i) s += ',';
+            s += _v[i]->_name;
+        }
+        s += "}";
+        return s;
+    }
+    
+};
+
 
 struct Strandi: public Traits
 {
@@ -275,6 +335,7 @@ struct Strandi: public Traits
     struct Context
     {
         typedef Stacked<Capture*>  LastCap;
+        typedef Tops<Term*, 3>     Focus;
         
         // resolution context
         Strandi*            _host;
@@ -292,6 +353,8 @@ struct Strandi: public Traits
         Reactions           _reactions;
         execInfo*           _currentExec = 0;
         bool                _scopeChanged = false;
+
+        Focus               _focus;
 
         void                markScope() { _scopeChanged = true; }
 
@@ -374,7 +437,7 @@ struct Strandi: public Traits
             
             _resolutionScope.clear();
             concatc(_resolutionScope, _scope);
-            _host->resolveAllReactions(_scope);
+            _host->resolveAllReactions();
             return true;
         }
 
@@ -1055,6 +1118,27 @@ struct Strandi: public Traits
         return v;
     }
 
+    bool runAfterCommand(Flow& f)
+    {
+        // expect a flow with a command followed by other terms
+        // skip the command and run the remainder of the flow
+        bool v = true;
+        bool begun = false;
+        for (auto i = f._elts.begin(); i != f._elts.end(); ++i) 
+        {
+            Flow::Elt* e = i;
+            if (!begun)
+            {
+                if (e->_type == Flow::t_command) begun = true;
+                continue;
+            }
+                 
+            v = run(e);
+            if (!v) break;
+        }
+        return v;
+    }
+
     void _pushcap(uint rmask = -1)
     {
         CapStack* cs = new CapStack;
@@ -1407,7 +1491,31 @@ struct Strandi: public Traits
 
     void acceptInput(Choices& c)
     {
-        c._line = toLower(_getline());
+        // Input is converted before parsing.
+        // input is converted to lower case to prevent the user
+        // from entering terms directly.
+        //
+        // However, raw terms are used by autolinks and these should
+        // not be converted.
+        //
+        // In general, if we are running a debug command, then we do not
+        // convert to lower case.
+        // A debug command is a verb starting with underscore "_".
+        //
+
+        bool downcase = true;
+        
+        string line = _getline();
+        
+        if (!line.empty())
+        {
+            char c = line[0];
+            if (c == '_') downcase = false;
+        }
+
+        if (downcase) line = toLower(line);
+        
+        c._line = line;
     }
 
     bool handleDebugCmd(Choices& c)
@@ -1565,6 +1673,7 @@ struct Strandi: public Traits
         }
         else
         {
+            //LOG3(TAG "command parse failed ", c._line);
             if (_errorSyntax)
             {
                 c._valid = run(_errorSyntax);
@@ -1588,11 +1697,7 @@ struct Strandi: public Traits
             // handle command
             
             assert(c._cmdChoice);
-
-            if (!handleDebugCmd(c))
-            {
-                handleCmd(c);
-            }
+            if (!handleDebugCmd(c)) handleCmd(c);
         }
     }
 
@@ -2086,6 +2191,10 @@ struct Strandi: public Traits
 
     bool suppressElevatedChoice(Selector* s)
     {
+        /* try to figure out whether this command if elevated to choice
+         * actually does not do anything.
+         */
+        
         bool suppress = !s->_action;
         if (!suppress && s->_action.size() == 1)
         {
@@ -2144,26 +2253,50 @@ struct Strandi: public Traits
                 {
                     // this is a command masquerading as a choice
 
-                    string ctext;
-                    pnode* pn = 0;
-
                     assert(reactor);
-
-                    pn = reactor->_reactor;
                     
-                    assert(pn);
-
-                    if (!suppressElevatedChoice(s))
+                    if (_ctx->_focus.contains(s->_host))
                     {
-                        // convert the bound reaction into plain text
-                        ctext = textifyFancy(pn);
-                        //LOG3("creating choice ", ctext << " from " << pn->toStringStruct());
-                        if (!ctext.empty())
+                        pnode* pn = 0;
+
+                        pn = reactor->_reactor;
+                    
+                        assert(pn);
+
+                        if (!suppressElevatedChoice(s))
                         {
-                            // capitalise start, if needed.
-                            ctext[0] = u_toupper(ctext[0]);
-                            c._choices.emplace_back(Choice(ctext, reactor));
-                            r = true;
+                            string ctext;
+
+                            if (s->_text.size() > 1)
+                            {
+                                // flow has additional elements than
+                                // just command. So this end flow is
+                                // used to form the prompt.
+
+                                _pushcap();
+                                c._valid = runAfterCommand(s->_text);
+                                CapRef ccap = _popcap();
+
+                                if (c && ccap->_cap)
+                                    ctext = textify(ccap->_cap);
+                            }
+
+                            // if now end flow or it didn't generate
+                            // textify the command
+                            if (ctext.empty())
+                            {
+                                // convert the bound reaction into plain text
+                                ctext = textifyFancy(pn);
+                                //LOG3("creating choice ", ctext << " from " << pn->toStringStruct());
+                            }
+
+                            if (!ctext.empty())
+                            {
+                                // capitalise start, if needed.
+                                ctext[0] = u_toupper(ctext[0]);
+                                c._choices.emplace_back(Choice(ctext, reactor));
+                                r = true;
+                            }
                         }
                     }
                 }
@@ -3990,6 +4123,10 @@ struct Strandi: public Traits
         assert(!ei._currentSelector);
         ei._currentSelector = r._s;
 
+        // update focus with the object who owns this reactor
+        Term* t = ei._it;
+        if (t) _ctx->_focus.add(t);
+
         _pushExec(ei);
         bool v = run(r._s->_action);
         _popExec();
@@ -4295,16 +4432,40 @@ struct Strandi: public Traits
             resolveTermReactions(*it);
     }
 
-    void resolveAllReactions(const TermList& scope)
+    void resolveAllReactions()
     {
         //LOG1("resolving scope reactions ", "");
-        for (auto t : scope)
+        for (auto t : _ctx->_scope)
         {
             // within a reaction, "it" corresponds to itself
             // and also within parents
             BindIt bind(this, t);
             resolveTermReactions(t);
         }
+
+        /* consider a second pass where objects added to reference scope
+         * are also added BUT only reactors of their root parent.
+         *
+         * This will bring in synonyms and general handlers of objects
+         * mentioned but prevent direct methods on the objects. 
+         */
+        for (auto t : _ctx->_resolutionScope)
+        {
+            if (!contains(_ctx->_scope, t))
+            {
+                // within a reaction, "it" corresponds to itself
+                // and also within parents
+                Term* rp = t->rootParent();
+                if (rp)
+                {
+                    BindIt bind(this, t);
+
+                    // NB: This can extend `resolutionScope`
+                    resolveReactions(rp);
+                }
+            }
+        }
+        
     }
 
     /////////////////////////
@@ -4450,21 +4611,160 @@ struct Strandi: public Traits
 
                         // throw away resolution bindings after setup.
                         clearBindings(ec->_parse);
-                                                
                     }
                 }
             }
         }
     }
-    
+
+    bool autoLink(string& t)
+    {
+        bool r = true;
+        bool changed = false;
+        size_t start = 0;
+        size_t sz = t.size();
+        string res;
+        for (;;)
+        {
+            size_t p1 = t.find('[', start);
+            if (p1 == string::npos) break;
+            
+            size_t p2 = t.find(']', p1);
+            if (p2 == string::npos) break;
+
+            ++p2;  // char after ]
+
+            if (p2 >= sz) break; // nothing following ']'
+
+            // what follows ]
+            if (t[p2] == '(') break; // link already defined
+
+            // append up to and including end ]
+            res.append(t, start, p2-start);
+
+            string termwords = t.substr(p1+1, p2-p1-2); // adjust for +1
+
+            // if empty, just skip over and ignore
+            if (!termwords.empty())
+            {
+                bool resolved = false;
+                
+                LOG5("Parsing autolink ", termwords);
+                pnode* pn = _pcom.parseNoun(termwords.c_str());
+                if (pn)
+                {
+                    // create bindings
+                    ResInfo ri(pn); // no scope restriction
+                    resolve(ri);
+                    resolved = ri.resolved();
+
+                    if (resolved)
+                    {
+                        LOG4("Parsed autolink ", termwords << " = " << textify(pn));
+                        Binding* b = pn->getBinding();
+                        if (b)
+                        {
+                            int sz = b->size();
+                            assert(sz > 0);
+                            if (sz > 1)
+                            {
+                                LOG1("Warning autolink has multiple matches ", textify(pn));
+                            }
+
+                            Term* term = b->first();
+                            assert(term);
+
+                            res.append("(_be ");
+                            res.append(term->_name);
+                            res.append(")");
+                            
+                            changed = true;
+                        }
+                        else
+                        {
+                            LOG1("cannot resolve autolink ", termwords << " = " << textify(pn));
+                            resolved = false; // not after all
+                        }
+                    }
+                    
+                    delete pn;
+                }
+
+                if (!resolved)
+                {
+                    LOG1("Failed to parse autolink; ", termwords);
+                    r = false;
+                }
+            }
+            start = p2;
+        }
+
+        if (changed)
+        {
+            // add in any remainder
+            res.append(t, start, string::npos);
+            
+            // update!
+            t = res;
+        }
+        
+        return r;
+    }
+                      
+
+    bool autoLinks(Flow& f, FlowVisitor& fv)
+    {
+        bool v = true;
+        for (auto i = f._elts.begin(); i != f._elts.end(); ++i)
+        {
+            Flow::Elt* e = i;
+            if (e->_type == Flow::t_text)
+            {
+                Flow::EltText* et = (Flow::EltText*)e;
+                if (!autoLink(et->_text)) v = false;
+            }
+        }
+        return v;
+    }
+
+    bool prepareAutoLinks(bool err = true)
+    {
+        // Autolinks are no longer created by searching the raw text
+        // for objects. This causes too many false positives
+        // instead look for markup of the form:
+        //
+        // bla bla bla [thing] bla bla
+        //
+        // and convert to
+        //
+        // bla bla bla [thing](_be THING) bla bla
+
+        // if err, emit error messages
+        using namespace std::placeholders;  
+        FlowVisitor ff(std::bind(&Strandi::autoLinks, this, _1, _2));
+        ff._err = err; 
+        bool v = true;
+
+        // all flows in all terms need to be resolved.
+        for (auto t : Term::_allTerms)
+            if (!t->visit(ff)) v = false;
+
+        return v;
+    }
+
     void prepare()
     {
         if (!_prepared)
         {
             _buildDictionary();
             _prepared = _preparseCommands();
-            _processObjectProperties();
-            _prepareObjectRuntime();
+            _prepared = _prepared && prepareAutoLinks();
+
+            if (_prepared)
+            {
+                _processObjectProperties();
+                _prepareObjectRuntime();
+            }
         }
     }
 
@@ -4678,15 +4978,17 @@ struct Strandi: public Traits
 
                         pnode* pn = 0;
 
-                        if (!words.empty())
+                        int sz = words.size();
+                        if (sz)
                         {
-                            for (i = 0; i < (int)words.size()-1; ++i)
+                            for (i = 0; i < (int)sz-1; ++i)
                             {
                                 // skip any known articles
                                 const Word* wi = _pcom.findWord(words[i]);
-                                if (wi && wi->isArticle()) continue;
-
+                                if (wi && wi->isArticle()) continue;                
                                 // otherwise assume adjective
+                                // Note: adjectives can be things like
+                                // "rupert's"
                                 LOG4("Adding adjective ", words[i]);
                                 _pcom.internWordType(words[i], Word::pos_adj);
                             }
@@ -4696,7 +4998,7 @@ struct Strandi: public Traits
 
                             // now we've added the words, parse the nounphrase
                             // and store as one of our names.
-                            LOG4("Parsing name ", abuf.c_str());
+                            LOG4("Parsing name ", abuf);
                             pn = _pcom.parseNoun(abuf.c_str());
                         }
                         

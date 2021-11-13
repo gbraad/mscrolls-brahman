@@ -875,7 +875,7 @@ struct Term: public Traits
     friend std::ostream& operator<<(std::ostream& os, const Term& t)
     { return os << t._name; } 
 
-    void getParents(TermList& tl)
+    void getParents(TermList& tl) const
     {
         if (_type == t_object) // only objects have parents
         {
@@ -889,6 +889,35 @@ struct Term: public Traits
                 tl.push_back(ti);
             }
         }
+    }
+
+    Term* firstParent() const
+    {
+        Term* parent = 0;
+        if (_type == t_object) // only objects have parents
+        {
+            // flow will be terms
+            if (!_topflow._elts.empty())
+            {
+                Flow::Elt* e = _topflow._elts.first();
+                assert(e->_type == Flow::t_term);
+                parent = ((Flow::EltTerm*)e)->_term;
+            }
+        }
+        return parent;
+    }
+
+    Term* rootParent() const
+    {
+        // if we have no parents, we have no root.
+        Term* parent = 0;
+        Term* p = firstParent();
+        while (p)
+        {
+            parent = p;
+            p = p->firstParent();
+        }
+        return parent;
     }
 
     bool visit(FlowVisitor ff)

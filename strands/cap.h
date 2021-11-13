@@ -161,16 +161,45 @@ struct Capture
     static void cats(string& s, const string& s1)
     {
         // append s1 to s and add space if necessary
+
+        // note, some cases cannot be fixed.
+        // eg "FOO" FOO -> "foo"foo
+        // because we dont know if it's a start or end quote
+        // otherwise get, " foo" foo
+        // where one is correct and other end wrong.
+
         if (!s1.empty())
         {
             uint sz = s.size();
             if (sz)
             {
-                if (!u_isspace(s[sz-1]) &&
-                    !strchr("\t .,?;:!'", s1[0])) s += ' ';
-                s += s1;
+                char last = s[sz-1];
+                bool albefore = u_isalnum(last);
+
+                // preceding punctuation that requires a space following
+                // when we continue with a normal word.
+                bool puncbefore = strchr(".,?;:!'", last) != 0;
+
+                if (albefore || puncbefore)
+                {
+                    // add a space if next segment starts with non-punctuation
+                    char n = s1[0];
+
+                    // following alphanum needs space
+                    bool nxalnum = u_isalnum(n);
+
+                    // also certain chars count like letters here, eg $40
+                    bool nxspc = strchr("£$", n) != 0;
+
+                    // things like quotes following punctuation must have
+                    // space. eg he said, "hello"
+                    bool force = puncbefore && strchr("\"", n) != 0;
+                    
+                    if (nxalnum || nxspc || force) s += ' ';
+
+                }
             }
-            else s = s1;
+            s += s1;
         }
     }
     

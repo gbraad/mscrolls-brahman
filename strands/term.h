@@ -150,11 +150,7 @@ private:
 
 inline std::ostream& operator<<(std::ostream& os, const Term& t)
 {
-    if (t._head) 
-        os << *t._head;
-    else 
-        os << "NULL";
-    return os;
+    return os << t.toString();
 }
 
 extern Term parseTerm(Stream& s, ParseContext* ctx = 0);

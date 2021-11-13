@@ -546,6 +546,7 @@ struct ParseCommand: public ParseBase
             { "for", Word::pos_prep },
             { "with", Word::pos_prep },
             { "through", Word::pos_prep },
+            { "out", Word::pos_prep },
 
             { PRON_IT, Word::pos_pronoun },
             { PRON_THAT, Word::pos_pronoun },
@@ -585,18 +586,57 @@ struct ParseCommand: public ParseBase
         string s;
         
         skipws();
-        PUSHSPAN;
+        PUSHSPAN;  // does not need corresponding pop
 
-        if (ispunct(AT))
+        // expect start with alpha
+        bool ok = u_isalpha(AT);
+
+        // allow words to start with underscore for debug commands
+        if (!ok) ok = AT == '_';
+            
+        if (ok)
         {
-            // punctuation characters appear as individual words
-            s = GETC;
+            BUMP;
+            // allow hypens
+            while (u_isalnum(AT) || AT == '-') BUMP;
+            s = POPSPAN;
         }
         else
         {
-            if (u_isalpha(AT)) BUMP;
-            while (u_isalnum(AT) || AT == '-') BUMP; // allow hypens
+            // punctuation characters appear as individual words
+            s = GETC;            
+        }
+
+        return s;
+    }
+
+    string wordadj()
+    {
+        // get next word, expected to be an adjective
+        // here we allow apostrophe in the wordyes
+        
+        string s;
+        
+        skipws();
+        PUSHSPAN;  // does not need corresponding pop
+
+        // expect start with alpha
+        bool ok = u_isalpha(AT);
+
+        // allow words to start with underscore for debug commands
+        if (!ok) ok = AT == '_';
+            
+        if (ok)
+        {
+            BUMP;
+            // allow hypens and apostrophe
+            while (u_isalnum(AT) || AT == '-' || AT == '\'') BUMP;
             s = POPSPAN;
+        }
+        else
+        {
+            // punctuation characters appear as individual words
+            s = GETC;            
         }
 
         return s;
@@ -626,7 +666,7 @@ struct ParseCommand: public ParseBase
         pnode* pl;
         
         _push();
-        pl = parseType(word(), ps, type);
+        pl = parseType(wordadj(), ps, type);
         if (pl)
         {
             pnode* plast = pl;
@@ -635,8 +675,8 @@ struct ParseCommand: public ParseBase
             for (;;)
             {
                 _push();
-                string w = word();
-                if (wordType(w, Word::pos_conj)) w = word(); // skip "and"
+                string w = wordadj();
+                if (wordType(w, Word::pos_conj)) w = wordadj(); // skip "and"
                 pnode* p2 = parseType(w, ps, type);
                 if (p2)
                 {
@@ -1502,7 +1542,7 @@ struct ParseCommand: public ParseBase
 
                     // lift (verb nouns) -> (verb nouns prep nouns)
                     bool v = liftParseIO(ps);
-                    DLOG0(_debug > 1 && v, "lifted parse");
+                    //DLOG0(_debug > 1 && v, "lifted parse");
                 }
             }
             else

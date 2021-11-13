@@ -1,0 +1,10 @@
+Merriweather-Bold.ttf
+Merriweather-Italic.ttf
+Merriweather-Regular.ttf
+PT_Serif-Web-Bold.ttf
+PT_Serif-Web-Italic.ttf
+PT_Serif-Web-Regular.ttf
+PxPlus_IBM_VGA9.ttf
+Roboto-Bold.ttf
+Roboto-Italic.ttf
+Roboto-Regular.ttf

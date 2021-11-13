@@ -10,9 +10,17 @@ Specifically, messages in both directions are `json` strings whose schema and te
 struct IFI
 {
     typedef void charEmitFn(void*, const char*);
+    typedef std::function<bool(void)> Pump;
+    typedef std::function<char*(const char*, int& sz)> Loader;
+
+    struct Ctx
+    {
+        Pump            _p;
+        Loader          _loader;
+    };
 
     virtual ~IFI() {}
-    static IFI* create();
+    static IFI* create(Ctx* ctx = 0);
     
     virtual void setEmitter(charEmitFn* emitter, void* ctx) = 0;
     virtual bool eval(const char* json) = 0;
@@ -281,6 +289,12 @@ The _reply_ json, sent from the back-end to the front-end, can have these terms 
 * `delay: int`
   _Optional_. schedule animation to start `delay` seconds after the end of the current animation.
 
+* `hide: "bone"`
+   Interpret `play` as name of animation _part_ and hide it.
+   
+* `show: "bone"`
+   Interpret `play` as name of animation _part_ and show it.
+   
 ### object
 
 * `id:` ID  

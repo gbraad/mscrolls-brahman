@@ -88,6 +88,9 @@ struct Traits
                 ++p;
 
             l = p - p0;
+
+            // name cannot end with underscore or hypen
+            if (l > 0 && (p[-1] == '_' || p[-1] == '-')) --l;
             if (l < 2) l = 0;
         }
         return l;
@@ -99,7 +102,9 @@ struct Traits
         // here, a "word" is a alphanumeric term starting with a letter
         while (u_isspace(*s)) ++s;
         const char* p = s;
-        if (u_isalpha(*p))
+
+        // Allow an underscore to start a word as these are debug commands
+        if (u_isalpha(*p) || *p == '_')
         {
             ++p;
             while (u_isalnum(*p)) ++p;
@@ -232,9 +237,11 @@ struct ParseBase: public Traits
     const char* posStart = 0;
     const char* pos;
     const char* lastdef = 0;
-    string _filename;
-    int lineno = 0;
-    int _debug = 0;
+    
+    string      _filename;
+    int         lineno = 0;
+    int         _debug = 0;
+    bool        _dump = false;
 
     char _prevc()
     {
@@ -296,6 +303,8 @@ struct ParseBase: public Traits
 
 #define POS pos
 #define GETC _getc()
+
+#define AT1 pos[1]
 
 // only use when we can advance without testing newlines
 #define SETPOS(_x) POS = _x
@@ -449,6 +458,7 @@ struct ParseBase: public Traits
         static const char* animSufTab[] =
         {
             ".json",
+            ".atlas",
         };
 
         if (inTable(imageSufTab, ASIZE(imageSufTab), s)) m = m_image;

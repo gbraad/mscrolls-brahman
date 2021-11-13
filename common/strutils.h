@@ -277,13 +277,14 @@ inline bool sameWithUnderscore(const char* s1, const char* s2)
 
 inline void split(std::vector<std::string>& list, const char* p, char c = ' ')
 {
-    while (*p && *p == c) ++p;
+    while (*p == c) ++p;
     while (*p)
     {
         const char* start = p;
         while (*p && *p != c) ++p;
-        list.emplace_back(std::string(start, p));
-        while (*p && *p == c) ++p;
+        if (p != start)
+            list.emplace_back(std::string(start, p));
+        while (*p == c) ++p;
     }
 }
 

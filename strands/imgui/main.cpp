@@ -12,17 +12,21 @@
 #include "sokol_fetch.h"
 #include "sokol_args.h"
 
+// generated shader for animation
+#include "imgui-anim.glsl.h"
+
 #define STB_IMAGE_IMPLEMENTATION
 #define STBI_NO_STDIO
 #define STBI_NO_BMP
 #define STBI_NO_TGA
 #define STBI_NO_GIF
 #include "stb_image.h"
+#undef STB_IMAGE_IMPLEMENTATION
 
 #define STB_VORBIS_HEADER_ONLY
 #include "stb_vorbis.c"
 
-#include "growbuf.h"
+#include <vector>
 #include "logged.h"
 
 static bool show_demo_window = false;
@@ -34,19 +38,23 @@ static bool audioEnabled = true;
 static bool fontsChanged = true;
 static float fontSize = 24;
 
-static const char* fontFiles[] =
+struct FontFileInfo
 {
-    "fonts/Roboto-Regular.ttf",
-    "fonts/Merriweather-Light.ttf",
-    "fonts/PT_Serif-Web-Regular.ttf",
-    "fonts/PxPlus_IBM_VGA9.ttf",
+    std::string         _name;
+    bool                _bold = false;
+    bool                _italic = false;
+    ImFont*             _imFont = 0;
+
+    FontFileInfo(const std::string& name) : _name(name) {}
 };
 
-static const char* requestFontName = fontFiles[0];
-static std::string requestStoryName;
-static std::string requestImageName;
-static std::string requestAudioName;
+static std::vector<FontFileInfo> fontFiles;
 
+
+static const char* requestFontList;
+static std::string requestFontName;
+static std::string requestStoryName;
+static std::string requestAudioName;
 static sg_pass_action pass_action;
 
 #include "imgui_internal.h"
@@ -57,115 +65,25 @@ static sg_pass_action pass_action;
 #include <emscripten/fiber.h>
 #endif
 
+
 // forward
-const char* gui_input_pump();
+std::string gui_input_pump();
 void play_audio(const char* name);
 void stop_audio();
 void show_picture(const std::string&);
 
-// set chunk_size to 0 for no chunks
-#define CHUNK_SIZE 0
-#define BUFFER_SIZE 1024*1024
+#include "fetcher.h"
 
-struct Fetcher
-{
-    typedef std::string string;
-    typedef void fetch_done(const char* name, void* ctx);
-    
-    char fetchBuffer[BUFFER_SIZE];
-    GrowString fetchFile;
-    bool loading = false;
-    bool ok = true;
-    fetch_done* doneFn = 0;
-    void* doneCtx = 0;
-    string currentName;
-    
-    
-    static void _fetch_cb(const sfetch_response_t* r)
-    {
-        Fetcher* f = *(Fetcher**)r->user_data;
-        f->fetch_cb(r);
-    }
+Fetcher fetcher;
 
-    void fetch_cb(const sfetch_response_t* r)
-    {
-        if (r->fetched)
-        {
-            int sz = r->fetched_size;
-            int off = r->fetched_offset;
-            LOG2("fetched ", r->path << " " << sz << " at " << off);
-            fetchFile.append((char*)r->buffer_ptr, sz);
-        }
-        else if (r->failed)
-        {
-            LOG1("fetch ", r->path << " failed with " << r->error_code);
-            switch (r->error_code)
-            {
-            case SFETCH_ERROR_FILE_NOT_FOUND:
-                LOG1("fetch, file not found ", r->path);
-                break;
-            case SFETCH_ERROR_BUFFER_TOO_SMALL:
-                LOG1("fetch, buffer too small ", r->path);
-                break;
-            case SFETCH_ERROR_INVALID_HTTP_STATUS:
-                LOG1("fetch, invalid http status ", r->path);
-                break;
-            }
-            
-            ok = false;
-            fetchFile.clear();
-        }
+#include "imtex.h"
 
-        if (r->finished)
-        {
-            LOG3("fetch ", r->path << " finished " << fetchFile.size());
-            assert(doneFn);
-            loading = false;
-            (*doneFn)(r->path, doneCtx);
-        }
-    }
-    
-    bool start(const char* path, fetch_done* cb, void* ctx = 0)
-    {
-        if (loading) return false; // wait until free
-        
-        sfetch_request_t fr = {};
-        loading = true;
-        ok = true;
-        currentName = path;
+ImTexLoader texLoader(fetcher);
 
-        doneFn = cb;
-        doneCtx = ctx;
-        fr.path = currentName.c_str();
-        fr.callback = _fetch_cb;
-        fr.chunk_size = CHUNK_SIZE;
-        fr.buffer_size = BUFFER_SIZE;
-        fr.buffer_ptr = (void*)fetchBuffer;
 
-        void* ptr = (void*)this;
-        fr.user_data_ptr = (void*)&ptr;
-        fr.user_data_size = sizeof(ptr);
-        
-        LOG1("fetching ", fr.path);
-        fetchFile.clear();
-        sfetch_send(&fr);
-        return true;
-    }
-
-    char* yield(int& sz)
-    {
-        sz = fetchFile.size();
-        return fetchFile.donate();
-    }
-
-    void poll()
-    {
-        sfetch_dowork();
-    }
-    
-};
-
-static Fetcher fetcher;
+#ifdef USESPINE
+#include "sspine.h"
+#endif
 
 #include "ifisdl.h"
 
@@ -254,22 +172,21 @@ void strand_pump()
 
 static StrandCtx sctx;
 
-const char* gui_input_pump()
+std::string gui_input_pump()
 {
     // called from strand to poll for input
     const char* label;
-    const char* s = sctx.yieldCmd(&label);
-    if (s)
+    std::string s;
+    if (sctx.yieldCmd(s, &label))
     {
         sctx._mainText.add(label, true);
-        return s; // something to do
     }
     else
     {
         // yield back to main
         G->fibers[0].swap(&G->_main);
     }
-    return 0;
+    return s;
 }
 
 static void textReceiver(const char* s)
@@ -330,29 +247,10 @@ static void setF(const char* name)
 }
 
 
-static const char* fontName(const char* fname)
-{
-    static char buf[64];
-
-    const char* p = strrchr(fname, '/');
-    if (!p) p = strrchr(fname, '\\');
-    if (!p) p = fname;
-    else ++p;
-    
-    char* q = buf;
-    while (*p)
-    {
-        if (*p == '.') break;
-        *q++ = *p++;
-    }
-    *q = 0;
-    return buf;
-}
-
 static const char* fontName(ImFont* f)
 {
     const char* p = f->GetDebugName();
-    return fontName(p);
+    return p;
 }
 
 static void fontMenu()
@@ -367,10 +265,14 @@ static void fontMenu()
     ImFont* font_current = ImGui::GetFont();
     if (ImGui::BeginCombo("Font", fontName(font_current)))
     {
-        for (int i = 0; i < ASIZE(fontFiles); ++i)
+        for (int i = 0; i < fontFiles.size(); ++i)
         {
-            const char* fi = fontFiles[i];
-            if (ImGui::Selectable(fontName(fi))) requestFontName = fi;
+            const FontFileInfo& ffi = fontFiles[i];
+            if (!ffi._bold && !ffi._italic)
+            {
+                const char* fi = ffi._name.c_str();
+                if (ImGui::Selectable(fi)) requestFontName = fi;
+            }
         }
 
         ImGui::EndCombo();
@@ -654,7 +556,7 @@ void StrandWindow(bool* strand_open)
 
 void show_picture(const std::string& fname)
 {
-    requestImageName = fname;
+    sctx._mainText.addImage(fname);
 }
 
 void play_audio(const char* fname)
@@ -666,6 +568,16 @@ void play_audio(const char* fname)
 void stop_audio()
 {
     ;
+}
+
+void play_animation(AnimInfo* ai)
+{
+#ifdef USESPINE
+    LOG1("play_animation ", ai->_name << " " << ai->_play);
+
+    // no point in loading otherwise
+    sctx._mainText.setAnimation(ai);
+#endif    
 }
 
 static void makeFonts()
@@ -703,6 +615,85 @@ static void makeFonts()
     }
 }
 
+static std::string fontStem(const char* name)
+{
+    // remove any final "-bold" etc 
+    std::string stem;
+    const char* p = strrchr(name, '-');
+    if (p)
+    {
+        stem = std::string(name, (p-name));
+    }
+    else stem = name;
+    return stem;
+}
+
+static inline std::string fontStem(const std::string& name)
+{ return fontStem(name.c_str()); }
+
+static FontFileInfo* findFontInfo(const std::string& name)
+{
+    // find the exact info
+    std::string fn = filenameOf(name);
+    for (auto& ffi : fontFiles)
+        if (ffi._name == fn) return &ffi;
+            
+    return 0;
+}
+
+static FontFileInfo* findFontInfoFor(const std::string& name,
+                                     bool bold, bool italic)
+{
+    std::string sname = fontStem(filenameOf(name));
+    for (auto& ffi : fontFiles)
+    {
+        if (fontStem(ffi._name) == sname
+            && ffi._bold == bold
+            && ffi._italic == italic) return &ffi;
+    }
+            
+    return 0;
+}
+
+static void font_list_loaded(const char* name, void* ctx)
+{
+    if (fetcher.ok)
+    {
+        ImGuiIO& io = ImGui::GetIO();
+    
+        int sz;
+        char* fdata = fetcher.yield(sz);
+
+        // expect fontlist.txt in unix format (not DOS)
+        std::vector<std::string> fonts;
+        split(fonts, fdata, '\n');
+
+        int baseFont = 0;
+
+        for (int i = 0; i < fonts.size(); ++i)
+        {
+            std::string& fname = fonts[i];
+            FontFileInfo ffi(fname);
+            std::string f = toLower(fname);
+            if (f.find("bold") != std::string::npos) ffi._bold = true;
+            if (f.find("italic") != std::string::npos) ffi._italic = true;
+
+            if (!ffi._bold && !ffi._italic && f.find("roboto") != std::string::npos) baseFont = i;
+
+            fontFiles.push_back(ffi);
+        }
+
+        LOG1("Loaded font list ", fdata << " entries " << fontFiles.size());
+
+        if (fontFiles.size())
+        {
+            // kick off loading of the first font
+            requestFontName = fontFiles[baseFont]._name;
+        }
+
+        delete fdata;
+    }
+}
 
 static void font_loaded(const char* name, void* ctx)
 {
@@ -712,8 +703,39 @@ static void font_loaded(const char* name, void* ctx)
     
         LOG1("Loaded font ", name);
 
-        // delete everything
-        io.Fonts->Clear();
+        FontFileInfo* ffi = findFontInfo(name);
+        assert(ffi);
+
+        FontFileInfo* ffn = 0;
+
+        // if loading regular -> load bold
+        // if loading bold -> load italic
+        // if loading italic -> done
+
+        if (!ffi->_italic)
+        {
+            if (ffi->_bold)
+            {
+                // load italic (if exists)
+                ffn = findFontInfoFor(name, false, true);
+            }
+            else
+            {
+                // load bold
+                ffn = findFontInfoFor(name, true, false);
+
+                io.Fonts->Clear();
+                for (auto& fi : fontFiles) fi._imFont = 0;
+                sctx._mainText.setBoldFont(0);
+                sctx._mainText.setItalicFont(0);
+            }
+        }
+
+        if (ffn)
+        {
+            // another font of same family, so trigger load
+            requestFontName = ffn->_name;
+        }
 
         int sz;
         char* fdata = fetcher.yield(sz);
@@ -722,66 +744,15 @@ static void font_loaded(const char* name, void* ctx)
         const char* p;
         for (p = name + strlen(name); p > name && p[-1] != '/' && p[-1] != '\\'; p--) {}
         ImFormatString(cfg.Name, IM_ARRAYSIZE(cfg.Name), "%s, %.0fpx", p, fontSize);
-        
-        io.Fonts->AddFontFromMemoryTTF((void*)fdata, sz, fontSize, &cfg);
+
+        ImFont* imf =
+            io.Fonts->AddFontFromMemoryTTF((void*)fdata, sz, fontSize, &cfg);
+
+        ffi->_imFont = imf;
+        if (ffi->_bold && !ffi->_italic) sctx._mainText.setBoldFont(imf);
+        if (!ffi->_bold && ffi->_italic) sctx._mainText.setItalicFont(imf);
+
         fontsChanged = true;
-    }
-}
-
-static void image_loaded(const char* name, void* ctx)
-{
-    if (fetcher.ok)
-    {
-        //ImGuiIO& io = ImGui::GetIO();
-
-        int sz;
-        char* fdata = fetcher.yield(sz);
-
-        LOG1("Loaded image ", name << " data size:" << sz);
-
-        int width, height, num_channels;
-        const int desired_channels = 4;
-        stbi_uc* pixels = stbi_load_from_memory((const unsigned char*)fdata,
-                                                sz,
-                                                &width, &height,
-                                                &num_channels,
-                                                desired_channels);
-
-        if (pixels)
-        {
-            //LOG1("Loaded image got pixels ", name);
-            sg_image_desc sgid;
-            memset(&sgid, 0, sizeof(sgid));
-            sgid.width = width;
-            sgid.height = height;
-            sgid.pixel_format = SG_PIXELFORMAT_RGBA8;
-            sgid.min_filter = SG_FILTER_LINEAR;
-            sgid.mag_filter = SG_FILTER_LINEAR;
-            sgid.wrap_u = SG_WRAP_CLAMP_TO_EDGE;
-            sgid.wrap_v = SG_WRAP_CLAMP_TO_EDGE;
-            auto& si = sgid.data.subimage[0][0];
-            si.ptr = pixels;
-            si.size = (size_t)(width * height * 4);
-
-            sg_image sgi = sg_make_image(&sgid);
-            stbi_image_free(pixels);
-
-            ImImg ii;
-            ii._name = name;
-            ii._tid = (ImTextureID)sgi.id;
-            ii._w = width;
-            ii._h = height;
-
-            //LOG1("Loaded image adding to text ", name << " id = " << sgi.id);
-            sctx._mainText.add(ii);
-            
-        }
-        else
-        {
-            LOG1("Image cannot decode", name);
-        }
-
-        delete fdata;
     }
 }
 
@@ -912,22 +883,23 @@ static void audio_loaded(const char* name, void* ctx)
     }
 }
 
-static void loadFonts()
+static void loadFontList()
 {
-    if (requestFontName)
+    if (requestFontList)
     {
-        if (fetcher.start(requestFontName, font_loaded))
-            requestFontName = 0;
+        if (fetcher.start(requestFontList, font_list_loaded))
+            requestFontList = 0;
     }
 }
 
-static void loadImage()
+static void loadFonts()
 {
-    if (!requestImageName.empty())
+    if (!requestFontName.empty())
     {
-        LOG1("requesting image ", requestImageName);
-        if (fetcher.start(requestImageName.c_str(), image_loaded))
-            requestImageName.clear();
+        // expect all fonts to be in "fonts" subdir
+        std::string fpath = "fonts/" + requestFontName;
+        if (fetcher.start(fpath, font_loaded))
+            requestFontName.clear();
     }
 }
 
@@ -936,7 +908,7 @@ static void loadAudio()
     if (!requestAudioName.empty())
     {
         LOG1("requesting audio ", requestAudioName);
-        if (fetcher.start(requestAudioName.c_str(), audio_loaded))
+        if (fetcher.start(requestAudioName, audio_loaded))
             requestAudioName.clear();
     }
 }
@@ -971,8 +943,10 @@ static void pumpAudio()
     }
 }
 
+SGState state;
 
-void init(void) {
+void init()
+{
     // setup sokol-gfx and sokol-time
     sg_desc desc = { };
     desc.context = sapp_sgcontext();
@@ -1003,7 +977,9 @@ void init(void) {
     simgui_desc.dpi_scale = sapp_dpi_scale();
     simgui_setup(&simgui_desc);
 
-
+    // file with list of fonts on server
+    requestFontList = "fontlist.txt";
+    
     // configure Dear ImGui with our own embedded font
     //    auto& io = ImGui::GetIO();
     
@@ -1020,6 +996,48 @@ void init(void) {
     pass_action.colors[0].action = SG_ACTION_CLEAR;
     pass_action.colors[0].value = { 0.45f, 0.55f, 0.6f, 1.0f };
 
+#ifdef USESPINE    
+    static sg_buffer_desc sgb = {};
+
+    // supply data later
+    sgb.size = MAX_SVERTICES*sizeof(SVertex);
+    sgb.usage = SG_USAGE_STREAM;
+    //sgb.label = "vertices";
+    state.anim.bind.vertex_buffers[0] = sg_make_buffer(&sgb);
+
+    static sg_buffer_desc sgb2 = {};
+    sgb2.type = SG_BUFFERTYPE_INDEXBUFFER;
+    sgb2.size = (MAX_SVERTICES*3/2)*sizeof(unsigned short);
+    sgb2.usage = SG_USAGE_STREAM;
+    //sgb2.label = "indices";
+    state.anim.bind.index_buffer = sg_make_buffer(&sgb2);
+
+    static sg_pipeline_desc sgpip = {};
+    sgpip.layout.attrs[ATTR_vs_pos].format = SG_VERTEXFORMAT_FLOAT2;
+    sgpip.layout.attrs[ATTR_vs_color0].format   = SG_VERTEXFORMAT_FLOAT4;
+    sgpip.layout.attrs[ATTR_vs_texcoord0].format = SG_VERTEXFORMAT_FLOAT2;
+    sgpip.shader =  sg_make_shader(scene_shader_desc(sg_query_backend()));
+    sgpip.index_type = SG_INDEXTYPE_UINT16;
+    sgpip.depth.compare = SG_COMPAREFUNC_LESS_EQUAL;
+    sgpip.depth.write_enabled = true;
+    sgpip.cull_mode = SG_CULLMODE_BACK;
+
+    sg_blend_state& bs = sgpip.colors[0].blend;
+    bs.enabled = true;
+    //bs.src_factor_rgb = SG_BLENDFACTOR_ONE;
+    bs.src_factor_rgb = SG_BLENDFACTOR_SRC_ALPHA;
+    //bs.dst_factor_rgb = SG_BLENDFACTOR_ZERO;
+    bs.dst_factor_rgb = SG_BLENDFACTOR_ONE_MINUS_SRC_ALPHA;
+    bs.src_factor_alpha = SG_BLENDFACTOR_ONE;
+    bs.dst_factor_alpha = SG_BLENDFACTOR_ZERO;
+        
+    state.anim.pip = sg_make_pipeline(&sgpip);
+
+    // set up things spine needs to load etc.
+    SSpineCtx* ssc = SSpineCtx::get();
+    ssc->_loader = &texLoader;
+#endif // USESPINE    
+
     G = new Globals();
     G->fibers[0].init_with_api(runfiber, 0);
 
@@ -1031,15 +1049,16 @@ void frame(void)
     const int width = sapp_width();
     const int height = sapp_height();
 
+    loadFontList();
     loadFonts();
-    loadImage();
     loadAudio();
+    texLoader.poll();  // use fetcher to load images
     fetcher.poll();
     makeFonts();
 
     pumpAudio();
-    
-    simgui_new_frame(width, height, 1.0/60.0);
+
+    simgui_new_frame(width, height, 1.0/30.0); // 30 fps
 
     if (show_demo_window)
         ImGui::ShowDemoWindow(&show_demo_window);

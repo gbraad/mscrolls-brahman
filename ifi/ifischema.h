@@ -135,6 +135,8 @@
 #define IFI_TRACK         "track"
 #define IFI_LOOP          "loop"
 #define IFI_DELAY         "delay"
+#define IFI_HIDE          "hide"
+#define IFI_SHOW          "show"
 
 // masks for directions
 #define IFI_DIR_N       1

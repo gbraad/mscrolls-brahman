@@ -136,10 +136,8 @@ int main(int argc, char** argv)
                 // if emitting bin, do not compress
                 compress = false;
             }
-            else if (!u_stricmp(argv[i], "-genvoice"))
-            {
-                ps._collectVoices = true;
-            }
+            else if (!u_stricmp(argv[i], "-genvoice")) ps._collectVoices = true;
+            else if (!u_stricmp(argv[i], "-dump")) ps._dump = true;
             else
             {
                 printf("unrecognised option '%s'\n", argv[i]);
@@ -160,7 +158,7 @@ int main(int argc, char** argv)
     
     if (!files.size())
     {
-        printf("Usage: %s [-bin [-nocompress]] [-genvoice] [-only] [-d] file...\n", argv[0]);
+        printf("Usage: %s [-bin [-nocompress]] [-genvoice] [-dump] [-only] [-d [n]] file...\n", argv[0]);
         return -1;
     }
 

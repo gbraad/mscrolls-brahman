@@ -269,6 +269,52 @@ struct SDLHandler: public IFIHandler
         return true;
     }
 
+    bool ifiAnimateResponse(const string& js) override
+    {
+        if (js[0] == '{')
+        {
+            // json
+            LOG1("Got animation request ", js);
+
+            AnimInfo* ai = new AnimInfo();
+
+            for (JSONWalker jw(js); jw.nextKey(); jw.next())
+            {
+                bool isObject;
+                const char* st = jw.checkValue(isObject);
+                if (!st) break; // bad json
+            
+                if (!isObject)
+                {
+                    // throw all the meta data into the handler propset
+                    var v = jw.collectValue(st);
+                    if (jw._key == IFI_NAME)
+                    {
+                        ai->_anim = v.toString();
+                        ai->_name = changeSuffix(ai->_anim, 0);
+                    }
+                    else if (jw._key == IFI_ATLAS) ai->_atlas = v.toString();
+                    else if (jw._key == IFI_PLAY) ai->_play = v.toString();
+                    else if (jw._key == IFI_LOOP) ai->_loop = v.isTrue();
+                    else if (jw._key == IFI_DELAY)
+                    {
+                        ai->_delay = v.toInt();
+
+                        // even for zero delay, this means append
+                        ai->_append = true;
+                    }
+                    else if (jw._key == IFI_SHOW) ai->_op = AnimState::op_show;
+                    else if (jw._key == IFI_HIDE) ai->_op = AnimState::op_hide;
+                }
+            }
+
+            extern void play_animation(AnimInfo* ai);
+            if (ai->validate()) play_animation(ai);  // consumes ai
+            else delete ai;
+        }
+        return true; // handled
+    }
+
     /////
 
     void presentChoices()
@@ -335,8 +381,8 @@ struct SDLHandler: public IFIHandler
         //static int cc;
         //LOG1("pump! ", ++cc);
         flush();
-        const char* s = gui_input_pump();
-        if (s)
+        std::string s = gui_input_pump();
+        if (!s.empty())
         {
             // XX
             // should figure out if this is a choice
@@ -345,7 +391,7 @@ struct SDLHandler: public IFIHandler
             
             GrowString js;
             buildJSONStart(js);
-            buildCmdJSON(s);
+            buildCmdJSON(s.c_str());
             buildJSONEnd();
 
             // clear any choices after input
@@ -509,16 +555,29 @@ struct StrandCtx
         _guiInputReady = true;
     }
 
-    const char* yieldCmd(const char** label)
+    bool yieldCmd(string& cmd, const char** label)
     {
-        const char* s = 0;
-        if (_guiInputReady)
+        bool r = false;
+
+        // do we have a click command from the text?
+        r = !_mainText._clickCommand.empty();
+
+        if (r)
         {
-            s = _guiInputBuf;
+            // yes, in that case send this first
+            cmd = _mainText._clickCommand;
+
+            // taken
+            _mainText._clickCommand.clear();
+        }
+        else if (_guiInputReady)
+        {
+            r = true;
+            cmd = _guiInputBuf;
             *label = _cmdLabel.c_str();
             _guiInputReady = false;
         }
-        return s;
+        return r;
     }
 
     bool init(SDLHandler::TextEmitter& e, const char* storyname)

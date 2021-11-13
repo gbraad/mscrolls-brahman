@@ -77,12 +77,16 @@
 #define SYM_ATTRIBUTE ':'
 #define SYM_ATTR_SEP ','
 
+#define SYM_FLOWBREAK '#'
+
 #ifdef IFI_BUILD
 typedef IFI::Ctx IFICtx;
 #else
 typedef void* IFICtx;
 #endif
 
+#define ATSELECTOR  (AT == '*' && AT1 != '*')
+#define SELECTOR(_p) ((_p)[0] == '*' && (_p)[1] != '*')
 
 namespace ST
 {
@@ -233,7 +237,6 @@ struct ParseStrands: public ParseBase
     Flow::EltMedia* _addMedia(Flow& f, const string& fname, MediaType mt)
     {
         assert(fname.size());
-        //printf("adding file '%s'\n", fname.c_str());
         auto m = new Flow::EltMedia(fname, mt);
         f._elts.push_back(m);
         return m;
@@ -384,7 +387,8 @@ struct ParseStrands: public ParseBase
                             --s;
                         } while (s != q);
 
-                        if (s != p)
+                        // ignore ![](foo) and [](foo) markdowns
+                        if (s != p && *s != '!' && *s != '[')
                         {
                             string fname = string(s, e - s);
                             
@@ -523,7 +527,7 @@ struct ParseStrands: public ParseBase
 
                         if (last == '\n')
                         {
-                            if (AT == '*')
+                            if (ATSELECTOR)
                             {
                                 // start of selector
                                 break;
@@ -640,19 +644,26 @@ struct ParseStrands: public ParseBase
                     PUSHSPAN;
 
                     // commands must be on a single line
-                    while (AT && AT != '\n') BUMP;
+                    // but can be ended by a flow break '#'
+                    char c;
+                    for (;;)
+                    {
+                        c = AT;
+                        if (!c || c == '\n' || c == SYM_FLOWBREAK) break;
+                        BUMP;
+                    }
+                    
+                    addCommand(f, trim(POPSPAN), oktypes);
 
-                    string c = trim(POPSPAN);
-                    addCommand(f, c, oktypes);
-
-                    // eat newline after command
-                    if (AT == '\n') BUMP;
+                    // eat char after command
+                    if (c) BUMP;
                     
                     // assume text follows code
                     tn = Flow::t_text;
 
                     // don't allow any more flow
-                    if (!allowednl) tn = Flow::t_void;
+                    // except for flow-breaks which can add further text
+                    if (!allowednl && c != SYM_FLOWBREAK) tn = Flow::t_void;
                 }
                 break;
             }
@@ -920,7 +931,7 @@ struct ParseStrands: public ParseBase
         }
 
         // followed by another selector or blank => no action
-        if (AT != '*' && AT != '\n')
+        if (!ATSELECTOR && AT != '\n')
         {
             parseFlow(s->_action, 1, -1);
         }
@@ -935,7 +946,7 @@ struct ParseStrands: public ParseBase
 
     void parseSelectors(Term* t)
     {
-        assert(AT == '*');
+        assert(ATSELECTOR);
 
         int sid = 0;
         while (AT == '*')
@@ -955,7 +966,7 @@ struct ParseStrands: public ParseBase
         uint oktypes = -1;
         
         // can be empty flow
-        if (AT != '*')
+        if (!ATSELECTOR)
         {
             // headflow: only commands allowed for objects
             if (t->_type == Term::t_object) oktypes = Flow::t_command;
@@ -964,7 +975,8 @@ struct ParseStrands: public ParseBase
 
         const char* p = nextNonBlank();
         // a selector
-        if (*p == '*')
+
+        if (SELECTOR(p))
         {
             _advance(p);
             parseSelectors(t);
@@ -994,8 +1006,9 @@ struct ParseStrands: public ParseBase
                 // unless a selector
                 
                 BUMP;
-                
-                if (*nextNonBlank() == '*')
+
+                const char* p = nextNonBlank();
+                if (SELECTOR(p))
                 {
                     // allow header blanks before first selector
                     nobody = false;
@@ -1148,8 +1161,6 @@ struct ParseStrands: public ParseBase
             SETPOS(data);
         }
         
-        //_dump(); return;
-
         for (;;)
         {
             skipblank();
@@ -1163,6 +1174,11 @@ struct ParseStrands: public ParseBase
                 {
                     if (!_startTerm) _startTerm = t;
                     Term::add(t);
+
+                    if (_dump)
+                    {
+                        LOG("", t->toString());
+                    }
                 }
                 else
                 {
@@ -1215,7 +1231,7 @@ struct ParseStrands: public ParseBase
             if (ctx->_loader)
             {
                 int sz;
-                LOG1("Using fallback ifi loader for ", _filename);
+                LOG2("Using fallback ifi loader for ", _filename);
                 data = (unsigned char*)ctx->_loader(_filename.c_str(), sz);
                 if (data)
                 {
@@ -1302,10 +1318,8 @@ struct ParseStrands: public ParseBase
         Term::intern(TERM_IT);
         Term::intern(TERM_THAT);
         Term::intern(TERM_VERSION);
-        //Term::intern(TERM_LASTGEN);
         
         bool v = linkTerms();
-
         if (v)
         {
             v = validateTerms();
