@@ -201,7 +201,10 @@ struct ConHandler: public IFIHandler
     }
 #endif // IFI_HANDLE_CHOICE    
 
-#if 0    
+#ifdef IFI_CONSOLE_CHOICE
+    /* this code is needed when you want the console host to 
+     * process the choice responses. Sometimes this is done in the engine
+     */
     int handleInput(const string& line)
     {
         // return < 0 if done
@@ -321,24 +324,34 @@ struct ConHandler: public IFIHandler
         if (done) return -1;
         return 1;
     }
-#endif
+#endif // IFI_CONSOLE_CHOICE
 
     void sendInput()
     {
-        // wait for input
-        std::string cmd;
-        std::cout << getProp(IFI_PROMPT); std::cout.flush();
-        std::getline(std::cin, cmd);
-
-        if (cmd == "quit") _quit = true;
-        else
+        bool done = false;
+        do
         {
-            GrowString js;
-            buildJSONStart(js);
-            buildCmdJSON(cmd.c_str());
-            buildJSONEnd();
-            _host->eval(js.start());
-        }
+            // wait for input
+            std::string cmd;
+            std::cout << getProp(IFI_PROMPT); std::cout.flush();
+            std::getline(std::cin, cmd);
+            done = true;
+
+            if (cmd == "quit") _quit = true;
+            else
+            {
+#ifdef IFI_CONSOLE_CHOICE
+                int v = handleInput(cmd);
+                if (!v) done = false; // get more input
+#else
+                GrowString js;
+                buildJSONStart(js);
+                buildCmdJSON(cmd.c_str());
+                buildJSONEnd();
+                _host->eval(js.start());
+#endif
+            }
+        } while (!done);
     }
 
     bool flush()

@@ -287,7 +287,7 @@ struct IFIHandler
     {
         if (!json || !*json) return;
 
-        LOG5("IFI Handler; ", json);
+        LOG5("IFIHandler::handle ", json);
 
         ifiBegin();
         handleAux(json, string());
@@ -687,18 +687,16 @@ struct IFIHandler
             delete ci;
         }
     }
-
-    
 #endif // IFI_HANDLE_CHOICE
 
     virtual bool ifiChoiceListResponse(const string& js)
     {
         // [{choiceobj}...]
-        
-#ifdef IFI_HANDLE_CHOICE
-        
+
         LOG5(TAG "choice list ", js);
         
+#ifdef IFI_HANDLE_CHOICE
+
         _hctx.init();
         JSONWalker jw;
         jw._json = js.c_str();
@@ -726,7 +724,6 @@ struct IFIHandler
         }
 
         finishChoice();
-        
 #endif // IFI_HANDLE_CHOICE
         
         return true; // accept regardless
