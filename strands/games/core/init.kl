@@ -170,4 +170,9 @@
       (fn (t n)
           (ifisend (tree (list 'text
                                (tree (list 'text t) (list 'id n)))))
-          ))
+        ))
+
+(setq set-prompt
+   (fn (s)
+      (ifisend (tree (list 'prompt s)))
+    ))

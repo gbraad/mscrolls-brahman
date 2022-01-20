@@ -522,7 +522,9 @@ void StrandWindow(bool* strand_open)
         bool reclaim_focus = false;
         static bool claimed = false;
 
-        if (ImGui::InputTextWithHint("", "type here", buf1, sizeof(buf1),
+        std::string pr = sctx.h.prompt();
+        pr += " type here";
+        if (ImGui::InputTextWithHint("", pr.c_str(), buf1, sizeof(buf1),
                                      tf, InputCallback))
         {
             sctx.sendCmd(buf1);

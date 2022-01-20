@@ -873,6 +873,7 @@ struct Strandi: public Traits
         }
         else
         {
+            LOG3(TAG "emit picture ", em._filename);
             ifi->emitSingleResponse(IFI_PICTURE, em._filename);
         }
     }
@@ -1058,6 +1059,11 @@ struct Strandi: public Traits
         {
             // when we run media we send a request
 #ifdef IFI_BUILD
+
+            // flush before emitting picture so that text and pictures
+            // are emitted in the correct order. 
+            flush();
+            
             switch (em->_mType)
             {
             case m_image:
@@ -1175,6 +1181,8 @@ struct Strandi: public Traits
         Selector*       _action;
         Reaction*       _reactor = 0;
         bool            _selected = false;
+
+        // NB: null matching might no longer be needed?
         bool            _nullmatch = false; // match for null list
         bool            _setmatch = false; // match for whole input set
         
@@ -1202,6 +1210,12 @@ struct Strandi: public Traits
 
         bool specialMatch() const { return _nullmatch || _setmatch; }
         string id() const { return _reactor ? _reactor->id() : _action->id(); }
+
+        bool isInput() const
+        {
+            assert(_action);
+            return _action->isInput();
+        }
                 
     };
 
@@ -1316,10 +1330,12 @@ struct Strandi: public Traits
                     cmdWaiting = false;
                     break; // fall through and handle line
                 }
-                    
             }
             else
             {
+                // no response means shutdown unless we're coop
+                // in which case we pump and pump tells us to shutdown
+                
                 bool shutdown = true;
                 
                 if (ifi->_coop)
@@ -1412,13 +1428,14 @@ struct Strandi: public Traits
             ifi->emitResponse(gs.start());
         }
 
+        // this will block for non-coop or poll for coop
         yield();
     }
 #endif // IFI_BUILD    
 
     void presentChoicesConsole(Choices& c)
     {
-                // for console mode, we just emit head flow
+        // for console mode, we just emit head flow
         // then emit the choices as text
         OUTP(c._headFlow);
 
@@ -1509,12 +1526,10 @@ struct Strandi: public Traits
         
         if (!line.empty())
         {
-            char c = line[0];
-            if (c == '_') downcase = false;
+            char c1 = line[0];
+            if (c1 == '_') downcase = false;
+            if (downcase) line = toLower(line);
         }
-
-        if (downcase) line = toLower(line);
-        
         c._line = line;
     }
 
@@ -1695,7 +1710,6 @@ struct Strandi: public Traits
         else
         {
             // handle command
-            
             assert(c._cmdChoice);
             if (!handleDebugCmd(c)) handleCmd(c);
         }
@@ -1910,7 +1924,7 @@ struct Strandi: public Traits
         }
         return ch;
     }
-
+    
     bool runGeneratorAction(Choices& c)
     {
         // return true if done something
@@ -1923,11 +1937,11 @@ struct Strandi: public Traits
         if (!nchoices)
         {
             // no matches, then we choose from fallbacks
-            // which are those choices with empty flows
+            // which are those matches with empty flows
             for (auto& ci : c._choices)
             {
                 // evaluated flow, but is empty?
-                bool v = !ci.specialMatch() &&
+                bool v = !ci.specialMatch() && !ci.isInput() &&
                     ci._select && ci._select->_cap.empty();
                 
                 ci._selected = v;
@@ -1942,8 +1956,9 @@ struct Strandi: public Traits
 
         // when we're matching we have some of the selectors as choices
         // and some of those are selected
+        //
         // when we're not matching, we have all the selectors as choices
-        // but those failing conditional are not selected.
+        // except those failing conditional.
         if (c._matching)
         {
             assert(rtype == Term::t_random);
@@ -1968,7 +1983,7 @@ struct Strandi: public Traits
 
         assert(ch >= 0 && ch < nchoices);
 
-        const Choice* cp = 0;
+        Choice* cp = 0;
 
         // find the ch'th selected choice
         int ri = 0;
@@ -1986,15 +2001,63 @@ struct Strandi: public Traits
         assert(cp);
 
         // ri is the raw index, not just those selected
-        //_ctx->_lastGen = ri; 
 
-        // when we're not matching the select flow is part of the output
-        if (!cp->_select)
-            c._valid = run(cp->_action->_text);
+        if (cp->isInput())
+        {
+            assert(!c._cmdChoice);
 
+            // assign this as the command selector
+            c._cmdChoice = cp->_action;
+            runInputSelector(c);
+        }
+        else
+        {
+            // select is defined when we're matching as we've already
+            // run the text flow in order to perform the match.
+            // when we're not matching, the selector flow is part of the output
+            if (!cp->_select)
+                c._valid = run(cp->_action->_text);
+
+        }
+        
         // but we always run the action
         if (c._valid)
             c._valid = run(cp->_action->_action);
+
+        return true;
+    }
+
+    bool runInputSelector(Choices& c)
+    {
+        // return false if break
+        // although this shouldn't be the case inside input?
+
+        assert(c._cmdChoice);
+        Selector* s = c._cmdChoice;
+        
+        assert(s);
+        assert(s->isInput());
+
+        _pushcap();
+        bool v = run(s->_text);
+        CapRef capr = _popcap();
+        if (!v) return false; // break
+
+        // flatten prompt to text
+        string pr = textify(capr->_cap);
+
+        do acceptInput(c); while (c._line.empty());
+            
+        if (s->isParse())
+        {
+            if (!handleDebugCmd(c)) handleCmd(c);
+            bool exec = s->isExec();
+        }
+        else
+        {
+            // string input
+            OUTP(c._line);
+        }
 
         return true;
     }
@@ -2057,7 +2120,13 @@ struct Strandi: public Traits
                 // for later matching
                 for (auto s : c._t->_selectors._selectors)
                 {
-                    if (checkSelectorCond(s)) // ignore failed conditional
+                    // totally ignore input selectors when matching
+                    bool v = !s->isInput();
+                    
+                    // ignore failed conditional
+                    if (v) v = checkSelectorCond(s);
+                    
+                    if (v)
                     {
                         // when matching we must run all selector flows
                         // in order to make match.
@@ -2139,6 +2208,9 @@ struct Strandi: public Traits
                     // flow later
                     // add all selectors even if fails condition, but
                     // mark as not selected.
+                    //
+                    // a selector here could be an input selector
+                    // this gets added like the others and handled later.
                     Choice ch(s);
                     ch._selected = checkSelectorCond(s);
                     c._choices.emplace_back(ch);
@@ -2414,25 +2486,24 @@ struct Strandi: public Traits
         if (c) c._headFlow = textify(ccap->_cap);
     }
 
-    void runChoice2(Choices& c)
+    void presentChoices(Choices& c)
     {
         // present input until accepted
         for (;;)
         {
-            
 #ifdef IFI_BUILD
                 presentChoicesIFI(c);
 #else
                 presentChoicesConsole(c);
 #endif
-
+                // blocks here in console mode otherwise reads input
+                // already buffered for IFI
                 acceptInput(c);
                 if (validateInput(c)) break;
-            
         }
     }
 
-    bool runChoice3(Choices& c)
+    bool runChoicesFinal(Choices& c)
     {
         // return false for stack break
         runChoices(c);
@@ -2591,8 +2662,8 @@ struct Strandi: public Traits
                 runChoiceHead(choices);
                 if (choices.present())
                 {
-                    runChoice2(choices);
-                    v = runChoice3(choices);
+                    presentChoices(choices);
+                    v = runChoicesFinal(choices);
                 }
             }
         }
@@ -5360,7 +5431,7 @@ struct Strandi: public Traits
                     if (c->present())
                     {
                         ipush(e, op_choice3);
-                        runChoice2(*c);
+                        presentChoices(*c);
                     }
                 }
                 break;

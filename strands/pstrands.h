@@ -58,8 +58,13 @@
 #define SYM_FILLER '-'
 #define SYM_TERMINAL '!'
 
+#define SYM_COMMAND '>'
+
 // object flags
 #define SYM_ASCHOICE '='
+
+// input selector flag
+#define SYM_INPUT '<'
 
 // selector flags
 #define SYM_CONDITION '?'
@@ -532,7 +537,7 @@ struct ParseStrands: public ParseBase
                                 // start of selector
                                 break;
                             }
-                            else if (AT == '>')
+                            else if (AT == SYM_COMMAND)
                             {
                                 // start of a command
                                 tn = Flow::t_command;
@@ -635,7 +640,7 @@ struct ParseStrands: public ParseBase
                 {
                     // will always be at > unless we're calling
                     // parsecommandflow, in which case it is optional.
-                    if (AT == '>')
+                    if (AT == SYM_COMMAND)
                     {
                         BUMP;
                         skipws();
@@ -687,8 +692,12 @@ struct ParseStrands: public ParseBase
     bool parseProps(Term* t)
     {
         // [\?@][ ]*[~&>=]{0-2}!?[ ]*\n
+
+
+        // get the type indicator
         char c = AT;
 
+        // type is generator by default
         switch (c)
         {
         case SYM_CHOICE:
@@ -737,9 +746,10 @@ struct ParseStrands: public ParseBase
                     skipws();
                 }
 
-                if (AT == '>' || AT == '{' || u_isalnum(AT)) 
+                if (AT == SYM_COMMAND || AT == '{' || u_isalnum(AT)) 
                 {
                     // optional input top flow
+                    // can be text, code or command
                     parseFlow(t->_topflow, 0, -1); // consume nl
 
                     if (t->_rtype != Term::t_random)
@@ -765,7 +775,6 @@ struct ParseStrands: public ParseBase
             }
             break;
         case Term::t_choice:
-
             for (;;)
             {
                 if (AT == SYM_STICKY)
@@ -776,8 +785,8 @@ struct ParseStrands: public ParseBase
                 }
                 else if (AT == SYM_CMD_CHOICES)
                 {
-                    // signify reactors marked as choices will be displayed
-                    // along with the command line.
+                    // signify reactors marked as choices will be elevated
+                    // to choices.  eg FOO?>
                     t->cmdChoices(true);
                     BUMP;
                     skipws();
@@ -856,11 +865,32 @@ struct ParseStrands: public ParseBase
 
     uint parseObjectFlags(Selector* s)
     {
-        int f = 0;
+        uint f = 0;
         for (;;)
         {
             char c = AT;
             if (c == SYM_ASCHOICE) f |= Selector::o_aschoice;
+            else break;
+
+            BUMP;
+            skipws();
+        }
+        return f;
+    }
+
+    uint parseInputFlags(Selector* s)
+    {
+        uint f = 0;
+        uint fi = Selector::i_input;
+        for (;;)
+        {
+            char c = AT;
+            if (c == SYM_INPUT)
+            {
+                f |= fi;
+                fi <<= 1;  // NB: assume input flags in power2 sequence.
+                if (fi > Selector::i_exec) break;
+            }
             else break;
 
             BUMP;
@@ -896,6 +926,8 @@ struct ParseStrands: public ParseBase
 
         // so that flags can be in any order
         if (host->isObject()) f |= parseObjectFlags(s);
+        
+        f |= parseInputFlags(s);
 
         s->_flags = f;
 

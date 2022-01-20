@@ -82,6 +82,11 @@ struct SDLHandler: public IFIHandler
         return true;
     }
 
+    string prompt() const
+    {
+        return getProp(IFI_PROMPT).toString();
+    }
+
     /*
     bool ifiSave(const uchar* data, int size, const string& name) override
     {
@@ -549,6 +554,9 @@ struct StrandCtx
     
     void sendCmd(const char* s, const string* label = 0)
     {
+        // mark text as no longer fresh
+        _mainText.seenText();
+        
         strcpy(_guiInputBuf, s);
         _hist.add(_guiInputBuf);
         setLabel(label ? *label : s);

@@ -31,10 +31,11 @@ endif
 TOP = ../..
 IMGUI_DIR = $(TOP)/tools/imgui
 KLDIR = $(TOP)/strands
+SRCDIR = $(KLDIR)/imgui
 IFIDIR := $(TOP)/ifi
 KLSRC = $(KLDIR)/head.cpp $(KLDIR)/list.cpp $(KLDIR)/sat.cpp $(KLDIR)/tree.cpp $(KLDIR)/kl.cpp $(KLDIR)/blob.cpp $(KLDIR)/parsectx.cpp $(KLDIR)/klstrandi.cpp $(KLDIR)/porter2.c $(KLDIR)/strands.cpp  $(IFIDIR)/ifiglue.cpp
-SOURCES = main.cpp 
-SOURCES += $(IMGUI_DIR)/imgui.cpp $(IMGUI_DIR)/imgui_demo.cpp $(IMGUI_DIR)/imgui_draw.cpp $(IMGUI_DIR)/imgui_tables.cpp $(IMGUI_DIR)/imgui_widgets.cpp $(IMGUI_DIR)/misc/freetype/imgui_freetype.cpp stb_vorbis.c
+SOURCES = $(SRCDIR)/main.cpp 
+SOURCES += $(IMGUI_DIR)/imgui.cpp $(IMGUI_DIR)/imgui_demo.cpp $(IMGUI_DIR)/imgui_draw.cpp $(IMGUI_DIR)/imgui_tables.cpp $(IMGUI_DIR)/imgui_widgets.cpp $(IMGUI_DIR)/misc/freetype/imgui_freetype.cpp $(SRCDIR)/stb_vorbis.c
 SOURCES += $(KLSRC)
 UNAME_S := $(shell uname -s)
 SOKDIR := $(TOP)/tools/sokol
@@ -107,7 +108,7 @@ SPINESRC =  \
     $(SPINE)/TransformConstraintTimeline.cpp \
     $(SPINE)/TranslateTimeline.cpp \
     $(SPINE)/Triangulator.cpp \
-    $(SPINE)/TwoColorTimeline.cpp \
+    $(SPINE)/Log.cpp \
     $(SPINE)/Updatable.cpp \
     $(SPINE)/VertexAttachment.cpp \
     $(SPINE)/VertexEffect.cpp
@@ -134,8 +135,8 @@ EMS += -s "EXPORTED_FUNCTIONS=['_main','_reload_story']"
 
 LDFLAGS += --preload-file ../games/core/init.kl@init.kl
 #CPPFLAGS += $(EMS)
-LIBS += $(EMS) --pre-js pre.js
-LDFLAGS += --shell-file shell.html -O3
+LIBS += $(EMS) --pre-js $(SRCDIR)/pre.js
+LDFLAGS += --shell-file $(SRCDIR)/shell.html -O3
 endif
 
 ifdef WINDOWS
@@ -171,8 +172,8 @@ endif
 %.o:$(SPINE)/%.cpp
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c -o $@ $<
 
-%.o:../libs/gl3w/GL/%.c
-	$(CC) $(CPPFLAGS) $(CFLAGS) -c -o $@ $<
+%.o:$(SRCDIR)/%.cpp
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c -o $@ $<
 
 all:	$(TARGET)
 	@echo Build complete for $(TARGET)
@@ -184,7 +185,7 @@ $(WEB_DIR):
 	mkdir -p $(WEB_DIR)/images
 
 $(WEB_DIR)/fontlist.txt: $(WEB_DIR)
-	ls -1 fonts > $(WEB_DIR)/fontlist.txt
+	ls -1 $(SRCDIR)/fonts > $(WEB_DIR)/fontlist.txt
 
 serve: all
 	python3 -m http.server -d $(WEB_DIR)
@@ -192,16 +193,16 @@ serve: all
 ifdef WEB
 $(TARGET): $(WEB_DIR) $(OBJS) Makefile $(WEB_DIR)/fontlist.txt
 	$(CXX) -o $@ $(OBJS) $(LIBS) $(LDFLAGS)
-	cp -v fonts/*.ttf $(WEB_DIR)/fonts
-	cp -v favicon.ico $(WEB_DIR)
-	cp -v shell-async.html $(WEB_DIR)/index.html
+	cp -v $(SRCDIR)/fonts/*.ttf $(WEB_DIR)/fonts
+	cp -v $(SRCDIR)/favicon.ico $(WEB_DIR)
+	cp -v $(SRCDIR)/shell-async.html $(WEB_DIR)/index.html
 else
 $(TARGET): $(OBJS) Makefile
 	$(CXX) -o $@ $(OBJS) $(LIBS) $(LDFLAGS)
 endif
 
-stb_vorbis.o:stb_vorbis.c
+stb_vorbis.o:$(SRCDIR)/stb_vorbis.c
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(VORBDEFS) -c -o $@ $<
 
 clean:
-	rm -rf $(TARGET) $(OBJS) $(WEB_DIR) 
+	rm -rf $(TARGET) $(WEB_DIR) *.tmp *.o *~

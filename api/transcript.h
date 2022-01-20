@@ -43,6 +43,7 @@ struct DLLX Transcript: public API<Transcript>
     struct Notifier
     {
         virtual void changed(int what = 0) {}
+        virtual void addedText(int what, const string&) {}
     };
 
 
@@ -59,6 +60,7 @@ struct DLLX Transcript: public API<Transcript>
     string              customJSON() const;
     void                resetCustomJSON();
     void                clear();
+    bool                notifyPending();
 
     string              styleHTML() const;
 

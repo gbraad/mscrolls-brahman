@@ -173,7 +173,8 @@ HEADERS += \
     playsource.h \
     soundplayer.h \
     vorbis.h \
-    levelfilter.h
+    levelfilter.h \
+    qaccess.h
 
 DISTFILES += \
     android/AndroidManifest.xml \

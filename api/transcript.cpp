@@ -53,6 +53,7 @@ void Transcript::clear() { _imp->clear(); }
 int Transcript:: width() const { return _imp->_page._width; }
 void Transcript::setWidth(int w) { _imp->_page._width = w; }
 string Transcript::styleHTML() const { return _imp->styleHTML(); }
+bool Transcript::notifyPending() { return _imp->notifyPending(); }
 
 
 

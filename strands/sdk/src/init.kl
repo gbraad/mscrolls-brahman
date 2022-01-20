@@ -1,0 +1,178 @@
+;
+;  
+;  
+;    ______              _
+;    | ___ \            | |
+;    | |_/ / _ __  __ _ | |__   _ __ ___    __ _  _ __
+;    | ___ \| '__|/ _` || '_ \ | '_ ` _ \  / _` || '_ \
+;    | |_/ /| |  | (_| || | | || | | | | || (_| || | | |
+;    \____/ |_|   \__,_||_| |_||_| |_| |_| \__,_||_| |_|
+;  
+;  
+;    "The creative principle which lies realized in the whole world"
+;  
+;   Copyright (c) Voidware 2016-2021.
+;  
+;   This program is free software: you can redistribute it and/or modify it
+;   under the terms of the GNU Lesser General Public License (LGPL) as published
+;   by the Free Software Foundation, either version 3 of the License, or (at
+;   your option) any later version.
+;   
+;   This program is distributed in the hope that it will be useful, but WITHOUT
+;   ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+;   FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License
+;   for more details.
+;   
+;   You should have received a copy of the GNU Lesser General Public License
+;   along with this program. If not, see <http://www.gnu.org/licenses/>.
+;  
+;   contact@strandgames.com
+;  
+;  
+
+
+; init.kl automatically loaded
+
+(set 'setq (def (x v) (set 'x v)))
+(setq first (fn (l) (at l 0)))
+(setq second (fn (l) (at l 1)))
+(setq third (fn (l) (at l 2)))
+(setq forth (fn (l) (at l 3)))
+
+(setq |= (fn (t k) (|- t k 1)))
+(setq |< (fn (t k) (|- t k -1)))
+
+(setq local
+     (def args
+        (eval args (list (tree) (env)))))
+
+(setq eval-in
+      ;; eval `e` within environment extension `s`, a set.
+      (def (s e)
+           (eval e (list s (env)))
+           ))
+
+(setq inc
+      (def (v)
+           (set! 'v (+ v 1))))
+
+(setq dec
+      (def (v)
+           (set! 'v (- v 1))))
+
+(setq for
+      ;; eg (for x 1 10 (print x)) NB: 10 not included
+     (def (v a b e)
+          (forall 'v a
+                  (while (< v b) e (inc v)))
+          ))
+
+(setq for2
+      ;; XX alternative?
+      ;; eg (for x 1 10 (print x)) NB: 10 not included
+     (def (v a b e)
+          (local (set 'v a) (while (< v b) e (inc v)))
+     ))
+
+(setq list? (fn (x) (== (typeof x) 2)))
+(setq tree? (fn (x) (== (typeof x) 1)))
+(setq string? (fn (x) (== (typeof x) 6)))
+(setq atom? (fn (x) (and (>= (typeof x) 3) (<= (typeof x) 6))))
+(setq symbol? (fn (x) (== (typeof x) 3)))
+(setq fn? (fn (x) (and (>= (typeof x) 8) (<= (typeof x) 10))))
+
+(setq assert (def (a)
+    (if (not a) (print "assert fail " 'a))                 
+))
+
+(setq eval-to-file (def (expr file)
+    ;; (eval-to-file expression "filename")
+    (local
+        (setq s (output (stream file)))
+        (setq v (eval expr))
+        (output s)
+        v
+    )
+    ))
+
+(setq bfs 
+      ;; breadth first search expanding state `s` with function `gen`
+      (fn (s gen)
+          (local
+           (setq ss (list))
+           (setq s1 (list s))
+           (while s1
+             (conc! ss s1)
+             (setq s2 (list))
+             (forall 'xx s1 (conc! s2 (gen xx)))
+             (setq s1 s2)
+             )
+           ss)
+          ))
+
+(setq expand-1
+      (fn (s)
+          (local
+           (setq l (list))           
+           (forall 'si (eval s (env))
+                   (insert e si)
+                   (if (symbol? si) (insert l si)))
+           l)
+          ))
+
+(setq expand
+      (fn (s)
+          (local 
+           (setq e (tree))
+           (bfs s expand-1)
+           e)
+          ))
+
+
+(setq ~~ 
+      (fn (p k)
+          (~ p (expand k))
+          ))
+
+(setq val
+      ;; return the value of a potentially unbound variable
+      (def (v)
+           (eval 'v (env))
+           ))
+
+(setq valsym
+      ;; return the value of a symbol or itself if not bound
+      (def (v)
+           (or (eval 'v (env)) 'v)
+           ))
+
+(setq min (fn (a b) (ife (< b a) b a)))
+(setq max (fn (a b) (ife (> b a) b a)))
+
+(setq ifi (fn (a)
+              (print "ifi called with " a)
+              ))
+
+
+(setq show-picture
+      ;; display picture at path `p`
+      (fn (p)
+          (if p (ifisend (tree (list 'picture p))))
+          ))
+
+(setq play-sound
+      (fn (p d)
+          (ifisend (tree (list 'sound (tree (list 'name p) (list 'duration d)))))
+          ))
+
+(setq text-formatted
+      ; send text as textobj, with formattng
+      (fn (t n)
+          (ifisend (tree (list 'text
+                               (tree (list 'text t) (list 'id n)))))
+        ))
+
+(setq set-prompt
+   (fn (s)
+      (ifisend (tree (list 'prompt s)))
+    ))

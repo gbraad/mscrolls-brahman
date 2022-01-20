@@ -63,6 +63,7 @@
 #include "brahmanapp.h"
 #include "opt.h"
 #include "soundplayer.h"
+#include "qaccess.h"
 
 #ifdef USE_SPINE
 #include "spineqml.h"
@@ -164,6 +165,7 @@ int main(int argc, char *_argv[])
     QREGISTER_MAPBOX;
     QREGISTER_SHAPE;
     QREGISTER_SOUNDPLAYER;
+    QREGISTER_QACCESS;
 
 #ifdef USE_SPINE
     SpineRegisterTypes();  // from spineqml.cpp

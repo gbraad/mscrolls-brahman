@@ -36,11 +36,11 @@
 #include <assert.h>
 #include <string>
 #include <vector>
-#include "strutils.h"
 #include "logged.h"
 #include "obj.h"
+#include "mdfilter.h"
 
-struct Autolink
+struct Autolink: public MDFilter
 {
     typedef std::string string;
     typedef ObjectList::Item Item;
@@ -71,70 +71,6 @@ struct Autolink
         int             _dir;
     };
 
-    static bool wordChar(char c)
-    {
-        return u_isalnum(c);
-    }
-
-    bool skipMarkup()
-    {
-        // skip "[foo](bar)"
-        bool r = (*_pos == '[');
-
-        if (r)
-        {
-            while (*++_pos)
-            {
-                if (*_pos == ']')
-                {
-                    if (*++_pos == '(')
-                    {
-                        int level = 1;
-                        while (*++_pos)
-                        {
-                            if (*_pos == '(') ++level;
-                            else if (*_pos == ')' && !--level)
-                            {
-                                ++_pos;
-                                break;
-                            }
-                        }
-                    }
-                    break;
-                }
-            }
-        }
-        return r;
-    }
-
-    void advance()
-    {
-        // advance position, but skip existing markup as if it is not
-        // present in the input.
-        if (!skipMarkup()) ++_pos;
-    }
-
-    void skipSpace()
-    {
-        while (u_isspace(*_pos)) advance();
-    }
-
-    void skipWord()
-    {
-        while (wordChar(*_pos)) ++_pos;
-    }
-
-    void skipToWord()
-    {
-        // skip markup, spaces and punctuation until we start a word
-        for (;;)
-        {
-            skipSpace();
-            if (!*_pos || wordChar(*_pos)) break;
-            advance();
-        }
-    }
-    
     int markupDirection(const string& word)
     {
         int d = -1; // none
@@ -461,8 +397,4 @@ struct Autolink
 
         return scmd;
     }
-
-protected:
-    
-    const char*         _pos;
 };

@@ -40,6 +40,9 @@ struct ImText
         string          _text;
         bool            _hilite = false;
 
+        // text is fresh until the next input
+        bool            _fresh = true;
+
         ParText(ImText* host, const char* s, bool hilite)
             : Par(host, par_text), _text(s), _hilite(hilite) {}
         
@@ -145,6 +148,24 @@ struct ImText
         _add(p);
     }
 
+    void seenText()
+    {
+        // text no longer fresh
+        Pars::iterator it = _pars.begin();
+        Pars::iterator ie = _pars.end();
+        
+        while (it != ie)
+        {
+            const Par* p = *it;
+            ++it;
+
+            if (p->_type == Par::par_text)
+            {
+                ParText* pt = (ParText*)p;
+                pt->_fresh = false;
+            }
+        }
+    }
 
     void linkCallback(ImGui::MarkdownLinkCallbackData d)
     {
@@ -274,26 +295,8 @@ struct ImText
                     ParText* pt = (ParText*)p;
                     ImVec4 col;
 
-                    bool lastText = last;
-
-                    if (!lastText)
-                    {
-                        // are we actually the last text though?
-                        lastText = true;
-                        Pars::iterator i = it;
-                        while (i != ie)
-                        {
-                            if ((*i)->_type == Par::par_text)
-                            {
-                                // no, more text follows
-                                lastText = false;
-                                break;
-                            }
-                            ++i;
-                        }
-                    }
-                    
-                    if (lastText)
+                    // fresh text is shown lighter.
+                    if (pt->_fresh)
                     {
                         if (pt->_hilite)
                         {
@@ -352,7 +355,9 @@ struct ImText
                         }
 
                         //LOG1("rendering image ", pi->_img._name << " w:" << w << " h:" << h);
-                    
+
+                        ImGui::TextWrapped("\n"); // add space before picture
+                        
                         int vw = ImGui::GetContentRegionAvail().x;
                         int padw = vw - (w + 2); // border
                         padw /= 2;

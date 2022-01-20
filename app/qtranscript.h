@@ -45,10 +45,15 @@
 #include "qcontrol.h"
 #include "transcript.h"
 #include "braschema.h"
+#include "logged.h"
+#include "mdfilter.h"
+#include "qaccess.h"
 
 #define QREGISTER_TRANSCRIPT  QREGISTER(QTranscript)
 
-class QTranscript: public QObject, public Transcript::Notifier
+class QTranscript:
+    public QObject,
+    public Transcript::Notifier
 {
 public:
 
@@ -68,11 +73,13 @@ public:
         // share the transcript with the api controller
         _transcript = QControl::theControl()->_transcript;
         _transcript->_notifier = this;
+        if (_transcript->notifyPending()) addedText(0, _transcript->text());
     }
    
     ~QTranscript()
     {
         _transcript->_notifier = 0;
+        delete _qac;
     }
 
     QString text() const
@@ -151,6 +158,62 @@ public:
         }
     }
 
+    void addTTS(char c)
+    {
+        if (strchr(">#*_", c)) c = 0;  // dump markup chars
+        if (c) _tts += c;
+    }
+
+    void addedText(int what, const string& s) override
+    {
+        // notification when new text is added.
+        if (!_qac)
+        {
+            // create on demand
+            _qac = new QAccess();
+        }
+        
+        if (*_qac)
+        {
+            MDFilter f;
+            f._pos = s.c_str();
+            
+            f.skipSpace();
+            for (;;)
+            {
+                const char* p = f._pos;
+                if (!*p) break;
+                if (f.skipMarkup())
+                {
+                    ++p; // skip '['
+                    while (*p && *p != ']') addTTS(*p++);
+                }
+                else if (*p == '{')  // dump {foo:bar} syntax
+                {
+                    while (*p)
+                    {
+                        if (*p == '}')
+                        {
+                            f._pos = ++p;
+                            break;
+                        }
+                        ++p;
+                    }
+                }
+                else
+                {
+                    addTTS(*f._pos);
+                    f.advance();
+                }
+            }
+            
+            LOG4("TTS text: '", _tts << "'");
+            _qac->speak(_tts);
+            _tts.clear();
+        }
+        
+    }
+
     Q_INVOKABLE void setWidth(int w)
     {
         if (w != _transcript->width())
@@ -167,6 +230,8 @@ public:
     }
 
     Transcript::Ref     _transcript;
+    QAccess*            _qac = 0;
+    string              _tts;
 
 signals:
 

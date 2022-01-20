@@ -1,0 +1,64 @@
+START
+INITCORE
+STORY
+GAME_DETAILS
+TOP_BEGIN
+\nGame Over.
+
+GAME_FILES
+core.str map.str game.str
+
+GAME_TITLE
+The Game
+
+GAME_AUTHOR
+by A.Hacker
+
+GAME_VERSION
+1.0
+
+GAME_ORGANISATION
+Strand Games
+
+GAME_BACKIMAGE
+images/title.jpg
+
+GAME_COVERTEXT
+:color:blue,font:Kanit Thin,weight:200
+
+MAP_BACKIMAGE
+images/map.png
+
+GAME_META
+:ui_ucanvas:false,ui_sidebar:false,autolink:false
+
+GAME_CREDITS
+<h1>GAME_TITLE<br/><em>by GAME_ORGANISATION</em></h1>
+<h3>Implemented in Strands</h3>
+<h4>Strand Games Team</h4>
+<ul>
+<li>Hugh Steers</li>
+<li>Stefan Meier</li>
+<li>Stefan Bylund</li>
+<li>Thomas Dettbarn</li>
+</ul>
+<h4>Writing</h4>
+<ul>
+<li>GAME_AUTHOR</li>
+</ul>
+<h4>Art</h4>
+<ul>
+<li>An Artist</li>
+</ul>
+<h4>Music</h4>
+<ul>
+<li>A Musician</li>
+</ul>
+<h4>Testing</h4>
+<ul>
+<li>A Tester</li>
+</ul>
+
+QUITGAME
+// put quit link to story here
+

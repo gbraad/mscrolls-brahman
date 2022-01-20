@@ -353,6 +353,7 @@ struct FlowVisitor
 
 struct Selector: public Traits
 {
+    // choice flags
     enum CFLag
     {
         c_none = 0,
@@ -362,10 +363,19 @@ struct Selector: public Traits
         c_terminal = 8,  // only add if some already
     };
 
+    // object flags
     enum OFlag
     {
         o_normal = 0,
         o_aschoice = 128,
+    };
+
+    enum IFlag
+    {
+        i_none = 0,
+        i_input = 256,  // NB: these values have to be in order
+        i_parse = 512,
+        i_exec = 1024,
     };
 
     Term*   _host;
@@ -385,8 +395,12 @@ struct Selector: public Traits
     bool terminal() const { return (_flags & c_terminal) != 0; }
     bool aschoice() const { return (_flags & o_aschoice) != 0; }
 
-    Selector(Term* t) : _host(t) {}
+    bool isInput() const { return (_flags & (i_input|i_parse|i_exec)) != 0; }
+    bool isParse() const { return (_flags & (i_parse|i_exec)) != 0; }
+    bool isExec() const { return (_flags & i_exec) != 0; }
 
+    Selector(Term* t) : _host(t) {}
+    
     bool        hostIsObject() const;
 
     string flagsString() const

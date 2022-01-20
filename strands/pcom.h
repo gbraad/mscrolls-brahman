@@ -547,6 +547,7 @@ struct ParseCommand: public ParseBase
             { "with", Word::pos_prep },
             { "through", Word::pos_prep },
             { "out", Word::pos_prep },
+            { "from", Word::pos_prep },
 
             { PRON_IT, Word::pos_pronoun },
             { PRON_THAT, Word::pos_pronoun },
@@ -651,7 +652,7 @@ struct ParseCommand: public ParseBase
 
             if (wt)
             {
-                LOG4("parsing '", w << "' as " << Word::posName(pos));
+                LOG5("parsing '", w << "' as " << Word::posName(pos));
             }
             
             if (wt) pn = new pnode(wt, t);

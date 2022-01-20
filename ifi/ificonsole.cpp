@@ -171,6 +171,44 @@ struct ConHandler: public IFIHandler
         }
     }
 
+    bool ifiPictureResponse(const string& js) override
+    {
+        string fname;
+
+        if (!js.size()) return true; // ignore
+        if (js[0] == '{')
+        {
+            // json
+            LOG3("Got picture request ", js);
+
+            for (JSONWalker jw(js); jw.nextKey(); jw.next())
+            {
+                bool isObject;
+                const char* st = jw.checkValue(isObject);
+                if (!st) break; // bad json
+            
+                if (!isObject)
+                {
+                    // throw all the meta data into the handler propset
+                    var v = jw.collectValue(st);
+                    if (jw._key == IFI_NAME) fname = v.toString();
+                }
+            }
+        }
+        else
+        {
+            // assume simple file name
+            fname = js;
+        }
+
+        if (fname.size())
+        {
+            LOG1("\n[show picture ", fname << "]\n");
+        }
+
+        return true;
+    }
+
 #ifdef IFI_HANDLE_CHOICE    
     bool ifiHandleChoicesInfo(ChoicesInfo* ci) override
     {

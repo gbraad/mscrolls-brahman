@@ -184,11 +184,14 @@ $(WEB_DIR):
 	mkdir -p $(WEB_DIR)/audio
 	mkdir -p $(WEB_DIR)/images
 
+$(WEB_DIR)/fontlist.txt: $(WEB_DIR)
+	ls -1 $(SRCDIR)/fonts > $(WEB_DIR)/fontlist.txt
+
 serve: all
 	python3 -m http.server -d $(WEB_DIR)
 
 ifdef WEB
-$(TARGET): $(WEB_DIR) $(OBJS) Makefile
+$(TARGET): $(WEB_DIR) $(OBJS) Makefile $(WEB_DIR)/fontlist.txt
 	$(CXX) -o $@ $(OBJS) $(LIBS) $(LDFLAGS)
 	cp -v $(SRCDIR)/fonts/*.ttf $(WEB_DIR)/fonts
 	cp -v $(SRCDIR)/favicon.ico $(WEB_DIR)
@@ -205,4 +208,4 @@ stb_vorbis.o:$(SRCDIR)/stb_vorbis.c
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(VORBDEFS) -c -o $@ $<
 
 clean:
-	rm -rf $(TARGET) $(OBJS) $(WEB_DIR) 
+	rm -rf $(TARGET) $(OBJS) $(WEB_DIR) *.tmp

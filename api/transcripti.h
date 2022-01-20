@@ -61,6 +61,14 @@ struct Transcript::Imp : public ImpType<Transcript>
         else finish();
     }
 
+    bool notifyPending()
+    {
+        // get pending status and clears it.
+        bool v = _notifyPending;
+        _notifyPending = false;
+        return v;
+    }
+
     static string imagePathToJSON(const string& imagepath)
     {
         GrowString gs;
@@ -218,6 +226,8 @@ struct Transcript::Imp : public ImpType<Transcript>
                 // NB: non-ifi is not refreshonnewline
                 // so main text goes here.
 
+                //LOG1("Append, '", _segmentText << "'");
+
                 // can erase a segment with non-empty whitespace text 
                 if (_page.appendSegment(_segmentText, _currentSegmentId))
                     changed = true;
@@ -230,6 +240,15 @@ struct Transcript::Imp : public ImpType<Transcript>
             if (changed)
             {
                 //LOG3("transcript, append segment, '", _segmentText << "' (" << _currentSegmentId << ")");
+
+                // NB: this notifier isn't set up at the very start
+                // for the initial text.
+                if (_host->_notifier)
+                {
+                    _host->_notifier->addedText(_currentSegmentId,
+                                                _segmentText);
+                }
+                else _notifyPending = true; // remember we missed one
             }
         
             _segmentText.clear();
@@ -252,9 +271,10 @@ struct Transcript::Imp : public ImpType<Transcript>
     int                 _currentSegmentId;
     string              _segmentText;
     string              _customJSON; // for custom UI
+    bool                _notifyPending = false;
 };
 
 
 
 
-
+    
