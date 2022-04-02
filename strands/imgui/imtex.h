@@ -4,6 +4,9 @@
 #include <assert.h>
 #include <list>
 #include "stb_image.h"
+#include "strutils.h"
+#include "imwebp.h"
+#include "logged.h"
 
 #define TAG_IMTEX "ImTex, "
 
@@ -26,11 +29,35 @@ struct ImTex
         _name = name;
         
         const int desired_channels = 4;
-        stbi_uc* pixels = stbi_load_from_memory((const unsigned char*)data,
-                                                sz,
-                                                &_w, &_h,
-                                                &_chans,
-                                                desired_channels);
+
+        stbi_uc* pixels = 0;
+
+        string suf = toLower(suffixOf(name));
+
+        bool webp = (suf == ".webp");
+
+        if (webp)
+        {
+            LOG3("decoding webp ", name);
+            pixels = decodeWebp(data,
+                                sz,
+                                &_w, &_h,
+                                &_chans,
+                                desired_channels);
+
+            if (!pixels)
+            {
+                LOG1("webp decode FAILED, ", name);
+            }
+        }
+        else
+        {
+            pixels = stbi_load_from_memory(data,
+                                           sz,
+                                           &_w, &_h,
+                                           &_chans,
+                                           desired_channels);
+        }
 
         if (pixels)
         {
@@ -48,7 +75,15 @@ struct ImTex
             si.size = (size_t)(_w * _h * 4);  // XX
 
             sg_image sgi = sg_make_image(&sgid);
-            stbi_image_free(pixels);
+
+            if (webp)
+            {
+                decodeWebpFree(pixels);
+            }
+            else
+            {
+                stbi_image_free(pixels);
+            }
             _tid = (ImTextureID)sgi.id;
         }
         else

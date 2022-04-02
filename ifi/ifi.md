@@ -159,6 +159,11 @@ These are the json tags that may appear in a _request_. See the _Replies_ sectio
 *  `subcommand: "foo"`
   Special command sent from the UI to the backend, to be processed outside of normal flow. For example, asynchronous _term_ to be executed as a result of animation.
 
+* `postsave: true`
+   Sent to the back-end after a save to indicate to the game whether it worked. This is in addition to any message dialog.
+
+* `postload: true`
+   Sent to the back-end after a load. 
    
 ## Replies
 
@@ -416,7 +421,7 @@ Same meanings as `item`.
   Switch on or off the _autolinking_ feature of the GUI. This is the process of automatically converting the output text into markdown using the `objects` table.
 
 * `saveload: true`  
-   Enable save/load UI in app.
+   Show save/load options in the UI. Eg menus.
 
 * `ui_restart: true`  
    Enable restart button in app.
@@ -601,6 +606,15 @@ If an empty _filepath_ is provided, the GUI will prompt the user for the file to
 |-----------|---------|
 | back → front | `loaddata:"filepath"` or `loaddata:""` |
 | front → back | `loaddata:"blob"` |
+
+
+Whether to show _save_ and _load_ options on the GUI menu _at all_, is controlled by the `metaobj` message tag `saveload:true`.
+
+After a save, the front end will issue `postsave:true` or `postsave:false` to the back end. This allows the game to print something if required.
+
+When save data is loaded by the front end, if this fails `postload:false` is issued to the back-end, so it can print something. If save data is loaded, it is sent to the back-end as described above, but this does not guarantee the load is successful (perhaps the data is corrupt). The game, after processing the data will call it's own `postload:true` handler (or false).
+
+This handler usually dispatches into the game, executing some commands. For example, refresh the screen.
 
 ## Themes and Colours
 

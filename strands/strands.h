@@ -339,6 +339,23 @@ struct FlowVisitor
 {
     typedef std::function<bool(Flow&, FlowVisitor&)> FlowVisit;
 
+    // collect up all parses using a given verb, so we can
+    // infer verb word properties from the collective set of templates
+    struct WordUse
+    {
+        typedef std::list<pnode*>  Uses;
+        const Word*     _verb;
+        Uses            _uses;
+
+        WordUse(const Word* v) : _verb(v) {}
+
+        // use pointer, since verbs are unique
+        bool operator<(const WordUse& wu) const { return _verb < wu._verb; }
+    };
+
+    typedef std::set<WordUse>     WordUses;
+    WordUses        _wordUses;
+
     FlowVisit       _f;
     Term*           _hostTerm = 0;
     int             _pass = 0;
@@ -348,6 +365,13 @@ struct FlowVisitor
 
     bool operator()(Flow& f) { return _f(f, *this); }
     FlowVisitor(FlowVisit f) : _f(f) {}
+
+    void addUsage(const Word* verb, pnode* ps)
+    {
+        auto it = _wordUses.emplace(WordUse(verb)).first;
+        WordUse& wu = const_cast<WordUse&>(*it); // XX bogus const
+        wu._uses.push_back(ps);
+    }
 };
 
 
@@ -384,7 +408,7 @@ struct Selector: public Traits
     Flow    _action;
     int     _id = 0; // nth selector
     int     _lineno = 0;
-    bool    _isReactor = false;
+    bool    _isReactor = false;  // user defined reactor
 
     // conditional term ref
     Flow      _cond;
@@ -434,7 +458,7 @@ struct Selector: public Traits
         return s;
     }
 
-    bool visit(FlowVisitor ff)
+    bool visit(FlowVisitor& ff)
     {
         bool v = true;
 
@@ -442,6 +466,8 @@ struct Selector: public Traits
 
         if (hostIsObject())
         {
+            // always parse user defined reactors
+            // skip fake "non-reactors" like "name" and "label"
             if (!ff._skipNonReactors || _isReactor)
             {
                 v = ff(_text);
@@ -472,7 +498,9 @@ struct Selectors: public Traits
 
     ~Selectors() { _purge(); }
 
-    int size() const { return _selectors.size(); }
+    int         size() const { return _selectors.size(); }
+    bool        isEmpty() const { return _selectors.empty(); }
+    
     string toString() const
     {
         string s = "{\n";
@@ -481,7 +509,7 @@ struct Selectors: public Traits
         return s;
     }
 
-    bool visit(FlowVisitor ff)
+    bool visit(FlowVisitor& ff)
     {
         bool v = true;
         for (auto s : _selectors) if (!s->visit(ff)) v = false;
@@ -515,11 +543,11 @@ struct Term: public Traits
     const char* typeString() const
     {
         static const char* stab[] =
-            {
-                "generator",
-                "choice",
-                "object",
-            };
+        {
+            "generator",
+            "choice",
+            "object",
+        };
         
         return stab[_type];
     }
@@ -532,6 +560,7 @@ struct Term: public Traits
         t_nonrandom,
         t_sequence,
         t_first,
+        t_all,
     };
 
     enum Flags
@@ -539,6 +568,8 @@ struct Term: public Traits
          f_none = 0,
          f_sticky = 1,
          f_cmd_choices = 2,
+         f_run_conditional = 4,
+         f_is_class = 8,  // has child instances
     };
 
     static const char* rtypeString(int t) 
@@ -551,6 +582,7 @@ struct Term: public Traits
                 "nonrandom",
                 "sequence",
                 "first",
+                "all",
             };
         
         return stab[t];
@@ -558,7 +590,6 @@ struct Term: public Traits
 
     ~Term()
     {
-        //if (!_name.empty()) LOG1("~Term ", _name);
         _purge();
     }
     
@@ -603,7 +634,8 @@ struct Term: public Traits
 
     DEF_FLAG(sticky, f_sticky);
     DEF_FLAG(cmdChoices, f_cmd_choices);
-
+    DEF_FLAG(runConditional, f_run_conditional);
+    DEF_FLAG(isClass, f_is_class);
 
     static bool compareLess(const Term* a, const Term* b)
     {
@@ -616,6 +648,16 @@ struct Term: public Traits
     bool   isGenerator() const { return _type == t_generator; }
     bool   isChoice() const { return _type == t_choice; }
     bool   isObject() const { return _type == t_object; }
+    bool   isPure() const
+    {
+        // a pure term has no side effects, but has some action
+        // it has:
+        // * a topflow
+        // * no flow, selectors, postflow
+        // * is a generator (for now)
+
+        return isGenerator() && _topflow && !_flow && !_postflow && _selectors.isEmpty();
+    }
 
     string primaryWord() const
     {
@@ -708,6 +750,8 @@ struct Term: public Traits
         // pn = noun
         // pa = (a a a)
         // pa can be null.
+
+        //LOG4("matchName, matching ", pn->toString());
 
         if (pn->_word->isID())
         {
@@ -891,15 +935,16 @@ struct Term: public Traits
 
     void getParents(TermList& tl) const
     {
-        if (_type == t_object) // only objects have parents
+        if (isObject())  // only objects have parents
         {
             // flow will be terms
-            for (auto i = _topflow._elts.begin(); i != _topflow._elts.end(); ++i) 
+            for (auto& i : _topflow._elts)
             {
-                Flow::Elt* e = i;
+                Flow::Elt* e = &i;
                 assert(e->_type == Flow::t_term);
                 Term* ti = ((Flow::EltTerm*)e)->_term;
                 assert(ti); // assume linked
+                assert(ti->isObject());
                 tl.push_back(ti);
             }
         }
@@ -908,7 +953,7 @@ struct Term: public Traits
     Term* firstParent() const
     {
         Term* parent = 0;
-        if (_type == t_object) // only objects have parents
+        if (isObject())  // only objects have parents
         {
             // flow will be terms
             if (!_topflow._elts.empty())
@@ -934,7 +979,7 @@ struct Term: public Traits
         return parent;
     }
 
-    bool visit(FlowVisitor ff)
+    bool visit(FlowVisitor& ff)
     {
         ff._hostTerm = this;
         bool v = ff(_topflow);

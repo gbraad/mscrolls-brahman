@@ -30,7 +30,6 @@
  *
  */
 
-
 #pragma once
 
 #include <setjmp.h>
@@ -46,8 +45,7 @@
 #include "dl.h"
 
 #define GENSTATE_KEY  "_gen"
-
-std::string em_getline(); // emscripten
+#define FOCUS_DEPTH 4
 
 #undef TAG
 #define TAG "Strandi, "
@@ -138,7 +136,7 @@ template<class T, int N> struct Tops
         memmove(&_v[1], &_v[0], i*sizeof(T));
         _v[0] = t;
 
-        LOG3("Focus: ", toString());
+        LOG2("Focus: ", toString());
 
     }
 
@@ -176,6 +174,7 @@ struct Strandi: public Traits
     typedef enode::nodeType enodeType;
     typedef Timeline::Strings Strings;
     typedef Timeline::Vars Vars;
+    typedef Timeline::Mark Mark;
     typedef Word::scopeType scopeType;
 
     struct Reaction
@@ -194,7 +193,10 @@ struct Strandi: public Traits
 
                 // Doesn't really have to be "fancy",
                 // but do need to expand bindings.
-                s += _host->textifyFancy(_reactor);
+                // make sure no spaces!
+                s += replaceAll(_host->textifyFancy(_reactor, false),
+                                ' ', '_');
+
             }
             return s;
         }
@@ -246,10 +248,15 @@ struct Strandi: public Traits
     CapStack*   _out = 0;
     Evaluator   _eval;
 
+    // when you run a single term, it can break
+    // this needs to be communicated back to the main stack.
+    bool        _runSingleTermBreak = false;
+
     // runtime
     Term*       _player;
     Term*       _thing;
     Term*       _tick;
+    Term*       _undo;
     Term*       _scopeSeed;
     Term*       _errorNocando;
     Term*       _errorNosuch;
@@ -257,6 +264,8 @@ struct Strandi: public Traits
 
     jmp_buf     _env_top;
     int         _time;
+    var::Format _vfmt;
+    var::Format::BlobParser _genStateParser;  // restore genstates
 
     void _init()
     {
@@ -266,11 +275,20 @@ struct Strandi: public Traits
         _player = 0;
         _thing = 0;
         _tick = 0;
+        _undo = 0;
         _scopeSeed = 0;
         _errorNocando = 0;
         _errorNosuch = 0;
         _errorSyntax = 0;
         _time = 0;
+
+        
+        using namespace std::placeholders;
+        _genStateParser = std::bind(&Strandi::genStateParser, this, _1);
+
+        // default to 2 decimal places when printing floats
+        _vfmt._prec = 2;
+        _vfmt._blobParser = &_genStateParser;
     }
 
     void resetAll()
@@ -326,7 +344,6 @@ struct Strandi: public Traits
         // current exec info
         Selector*   _currentSelector = 0; // being exec
         execInfo*   _prev = 0; // upchain of execs
-        
 
         execInfo(pnode* ps): _ps(ps) {}
     };
@@ -334,8 +351,8 @@ struct Strandi: public Traits
 
     struct Context
     {
-        typedef Stacked<Capture*>  LastCap;
-        typedef Tops<Term*, 3>     Focus;
+        typedef Stacked<Capture*>               LastCap;
+        typedef Tops<Term*, FOCUS_DEPTH>        Focus;
         
         // resolution context
         Strandi*            _host;
@@ -354,7 +371,11 @@ struct Strandi: public Traits
         execInfo*           _currentExec = 0;
         bool                _scopeChanged = false;
 
+        // mark objects as visited (explored) during exec
+        bool                 _visitObj = false;
+
         Focus               _focus;
+
 
         void                markScope() { _scopeChanged = true; }
 
@@ -520,9 +541,15 @@ struct Strandi: public Traits
         NRan(Ranq1* r, int n, int maxp) : _ran(r), _n(n), _maxp(maxp)
         {
             _runs = 0;
-            _stats = new unsigned int[_n];
-            memset(_stats, 0, sizeof(unsigned int)*_n);
-            _warmup();
+            _stats = 0;
+
+            // N=0 should only be used to construct dummy NRan
+            if (_n > 0)
+            {
+                _stats = new unsigned int[_n];
+                memset(_stats, 0, sizeof(unsigned int)*_n);
+                _warmup();
+            }
         }
 
         NRan(const NRan& nr)
@@ -576,6 +603,43 @@ struct Strandi: public Traits
             // clear counter as warmup doesn't count.
             _runs = 0;
         }
+
+        string toString() const
+        {
+            // emit N MAXP followed by N stats
+            string s;
+            s += std::to_string(_n);
+            s += ' ';
+            s += std::to_string(_maxp);
+            for (int i = 0; i < _n; ++i)
+            {
+                s += ' ';
+                s += std::to_string(_stats[i]);
+            }
+            return s;
+        }
+
+        bool fromString(const char* s)
+        {
+            // opposite of tostring
+            assert(!_stats);
+            assert(!_n);
+
+            bool r = ParseBase::parseUInt(&s, _n)
+                && ParseBase::parseUInt(&s, _maxp);
+
+            r = _n > 0 && _maxp > 0;
+            if (r)
+            {
+                // read n integers into stats
+                _stats = new unsigned int[_n];
+                for (int i = 0; i < _n && r; ++i)
+                    r = ParseBase::parseUInt(&s, _stats[i]);
+            }
+            
+            return r;
+        }
+        
     };
 
     struct GenState : public var::Blob
@@ -583,9 +647,9 @@ struct Strandi: public Traits
         Strandi*        _host;
         Term::RType     _type;
         int             _seq = 0;
-        int             _n = 0;  // used for seq
+        int             _n = 0;  // used for seq & random
         NRan*           _nr = 0;
-
+        
         GenState(Strandi* host) : _host(host) {}
         GenState(Strandi* host, Term::RType t, int n)
             : _host(host), _type(t), _n(n) { _init(); }
@@ -622,11 +686,12 @@ struct Strandi: public Traits
             switch (_type)
             {
             case Term::t_sequence:
-                if (_seq)
-                {
-                    changed = true;
-                    _seq = 0;
-                }
+
+                // NB: mark as changed even if we're already at seq=0
+                // this is because we have logically changed and we want
+                // to write to the timeline the initial state
+                changed = true;
+                _seq = 0;
                 break;
             case Term::t_shuffle:
                 // always reshuffle
@@ -768,8 +833,150 @@ struct Strandi: public Traits
         
         void destroy() override { delete this; }
         bool operator==(const Blob& b) const override { return this == &b; }
-        string toString() const override { return "blob"; }
+
+        string toString() const override
+        {
+            string s;
+            char buf[128];
+            
+            s += '{';
+            s += Term::rtypeString(_type);
+            switch (_type)
+            {
+            case Term::t_random:
+                s += ' ';
+                s += std::to_string(_n);
+                break;
+            case Term::t_shuffle:
+            case Term::t_nonrandom:
+                assert(_nr);
+                s += ' ';
+                s += _nr->toString();
+                break;
+            case Term::t_sequence:
+                sprintf(buf, " %d %d", _n, _seq);
+                s += buf;
+                break;
+            case Term::t_first:
+                break;
+            case Term::t_all:
+                break;
+            default:
+                s += " unknown";
+                break;
+            }
+            s += '}';
+            return s;
+        }
+
+        bool _fromStringNR(const char* s)
+        {
+            // make dummy
+            NRan* nr = new NRan(&_host->_rand, 0, 0);
+
+            // restore
+            bool r =  nr->fromString(s);
+            if (r) _nr = nr;
+            else delete nr;
+
+            //LOG1("fromStringNR ", s << " = " << r);
+                        
+            return r;
+        }
+
+        bool fromString(const char* s)
+        {
+            // opposite of toString
+            bool r = *s == '{';
+            if (r)
+            {
+                int l = ParseBase::atSimpleName(++s);
+                r = l > 0;
+                if (r)
+                {
+                    string ts(s, l); s += l;
+                    ParseBase::_skipws(&s);
+                    
+                    if (ts == "random")
+                    {
+                        // N
+                        _type = Term::t_random;
+                        r = ParseBase::parseInt(&s, _n);
+                    }
+                    else if (ts == "shuffle")
+                    {
+                        _type = Term::t_shuffle;
+                        r = _fromStringNR(s);
+                    }
+                    else if (ts == "nonrandom")
+                    {
+                        _type = Term::t_nonrandom;
+                        r = _fromStringNR(s);
+                    }
+                    else if (ts == "sequence")
+                    {
+                        // N SEQ
+                        _type = Term::t_sequence;
+                        r = ParseBase::parseInt(&s, _n)
+                            && ParseBase::parseInt(&s, _seq);
+                    }
+                    else if (ts == "first")
+                    {
+                        _type = Term::t_first;
+                    }
+                    else if (ts == "all")
+                    {
+                        _type = Term::t_all;
+                    }
+                    else r = false;
+                }
+            }
+            return r;
+        }
+
+        friend std::ostream& operator<<(std::ostream& os, const GenState& g)
+        { os << g.toString(); return os; }
     };
+
+    var::Blob* genStateParser(const char** sp)
+    {
+        // this is used as the var format blob parser
+        // in order to restore genstates from the timeline
+        
+        GenState* gs = 0;
+        const char* s = *sp;
+
+        if (*s == '{')
+        {
+            //LOG1("genStateParser ", s);
+            
+            gs = new GenState(this);
+            bool r = gs->fromString(s);
+            if (r)
+            {
+                // to find the end, simple scan for close '}'
+                while (*s && *s != '}') ++s;
+                if (*s)
+                {
+                    ++s; // park just after close '}'
+                }
+                else
+                {
+                    r = false; // failed
+                }
+            }
+
+            if (!r)
+            {
+                // failed
+                delete gs;
+                gs = 0;
+            }
+        }
+
+        if (gs) *sp = s;
+        return gs;
+    }
     
     Strandi(Terms* t = 0) : _terms(t) 
     {
@@ -912,21 +1119,46 @@ struct Strandi: public Traits
         LOG3(TAG "emit animation ", gs.start());
         ifi->emitResponse(gs.start());
     }
-    
-#endif
+
+    void emitPrompt(const string& s)
+    {
+        GrowString gs;
+        gs.add('{');
+
+        JSONWalker::addKeyValue(gs, IFI_PROMPT, s.c_str());
+        gs.add('}');
+        gs.add(0);
+        LOG3(TAG "emit prompt ", gs.start());
+        ifi->emitResponse(gs.start());
+    }
+#endif // IFI_BUILD
+
+    enum ArtScopeType
+    {
+        artscope_none = 0, // do not resolve artscope at all
+        artscope_instances, // things that are not classes
+        artscope_all,  // everything
+    };
 
     struct ResInfo
     {
         pnode*  _pn;
-        bool    _toScope;
-        bool    _valid = true;  // resolved
+        bool    _valid = true;  // not valid means resolve failed
         bool    _empty = false; // resolved to nothing?
-        bool    _artScope = false;
+
+        // resolve articles, "the", "my", "this" etc
+        ArtScopeType _artScope = artscope_none;
+        
+        // resolve to interactive scope (ideal)
+        bool    _toScope = false;
+
+        // remember why scope failed
+        bool    _scopeFailed = false;
+        bool    _artFailed = false;
 
         bool    resolved() const { return _valid && !_empty; }
 
-        ResInfo(pnode* pn, bool toScope = false)
-            : _pn(pn), _toScope(toScope) {}
+        ResInfo(pnode* pn) : _pn(pn) {}
         
     };
 
@@ -959,7 +1191,12 @@ struct Strandi: public Traits
         if (c->_parse)
         {
             ResInfo ri(c->_parse);
-            ri._artScope = true;
+
+            // enable only article scoping but keep resolution scope global
+            // because we are running at author/load time.
+            // this means authoring commands must make their words precise
+            // (eg adjectives) or use IDs.
+            ri._artScope = artscope_all;
                         
             resolve(ri);
             if (ri.resolved())
@@ -975,23 +1212,34 @@ struct Strandi: public Traits
                 }
                             
                 ei._err = false; // no built in errors
-                exec(ei);
-
+                bool done = exec(ei);
+                
                 // retrieve manual break request from exec
                 if (ei._break)
                 {
                     v = false;
                     //LOG1("command had break ", textify(c->_parse));
                 }
-
-                clearBindings(c->_parse);
-                updateScope();
+                else
+                {
+                    if (done) updateScope();
+                    else
+                    {
+                        //LOG3(TAG "failed to exec command ", textify(c->_parse));
+                        if (_errorNocando)
+                        {
+                            if (!run(_errorNocando)) v = false; // can break?
+                        }
+                    }
+                }
             }
 
             if (!ri._valid)
             {
                 ERR1("flow cannot resolve", textify(c->_parse));
             }
+
+            clearBindings(c->_parse);
         }
         else
         {
@@ -1000,12 +1248,13 @@ struct Strandi: public Traits
         return v;
     }
 
-    bool run1(Flow::EltTerm* et)
+    bool prerun(Flow::EltTerm* et, bool& dobreak)
     {
-        // handle immediate eval of term element
-        // return true if done, otherwise need to run it.
+        // handle cases of immediate eval of term element
+        // return true if done, otherwise need to run term itself.
         
         bool done = true;
+        dobreak = false;
         
         Term* t = et->_term;
         if (t)
@@ -1028,6 +1277,14 @@ struct Strandi: public Traits
                 else if (et->_flags & Flow::ft_reset)
                 {
                     resetTerm(t);
+
+                    if (t == _currentTickTerm)
+                    {
+                        //LOG1("reset term, breaking flow ", t->_name);
+                        
+                        // indicate we wish to break from flow
+                        dobreak = true;
+                    }
                 }
                 else
                 {
@@ -1046,9 +1303,14 @@ struct Strandi: public Traits
     bool run(Flow::EltTerm* et)
     {
         bool v = true;
-        if (!run1(et))
+        bool dobreak;
+        if (!prerun(et, dobreak))
         {
             v = run(et->_term);
+        }
+        else
+        {
+            if (dobreak) v = false; // simulate break but from reset
         }
         return v;
     }
@@ -1205,6 +1467,11 @@ struct Strandi: public Traits
             : _text(text), _reactor(r)
         {
             assert(_reactor);
+            
+            // capitalise start, if needed.
+            if (!_text.empty())
+                _text[0] = u_toupper(_text[0]);
+            
             _action = _reactor->_s;
         }
 
@@ -1237,8 +1504,12 @@ struct Strandi: public Traits
         Selector*           _cmdChoice = 0;
         bool                _matching = false;
 
+        string              _prompt;
         string              _line;  // input
-        int                 _ch = -1; // choice
+        int                 _ch; // choice
+
+        // when cmd expects a nounphrase allow "nothing" to break
+        bool                _allowNothing = false;
 
         // invalid when a manual break occurs
         operator bool() const { return _valid; }
@@ -1256,6 +1527,14 @@ struct Strandi: public Traits
 
         int size() const { return _choices.size(); }
         bool isEmpty() const { return _choices.empty(); }
+
+        int  choiceCount() const
+        {
+            // number of selected choices
+            int c = 0;
+            for (auto& ci : _choices) if (ci._selected) ++c;
+            return c;
+        }
     };
 
     void flush()
@@ -1263,48 +1542,29 @@ struct Strandi: public Traits
         // emit the current capture
         string t = textify(_popcap()->_cap);
         _pushcap();
-        if (t.size())
+        if (!t.empty())
         {
             _emit(t);
             _emit((char)0); // force
         }
     }
 
-#if defined(__EMSCRIPTEN__) && !defined(IFI_BUILD)
-    string _getline()
-    {
-        return em_getline();
-    }
-    
-#else    
-    void _getline(char* buf, uint sz)
-    {
-        assert(sz);
-        --sz; // space for terminator
-        
-        while (sz)
-        {
-            int c = getchar();
-            if (!c || c == EOF || c == '\n') break;
-            *buf++ = c;
-            --sz;
-        }
-        *buf = 0;
-    }
-
-    string _getline()
-    {
-        char tbuf[256];
-        _getline(tbuf, sizeof(tbuf));
-        return tbuf;
-    }
-#endif    
 
     void setTermValue(Term* t, const var& v)
     {
         _state.setfn(t->_name, "=", v);
     }
 
+    bool setVisited(Term* t)
+    {
+        return _state.set(t->_name);
+    }
+
+    bool getVisited(Term* t)
+    {
+        return _state.test(t->_name);
+    }
+    
     const var* getTermValue(Term* t)
     {
         return _state.getfn(t->_name, "=");
@@ -1316,6 +1576,14 @@ struct Strandi: public Traits
         for (;;)
         {
             const char* r = ifi->getRequest();
+
+            if (_runSingleTermBreak)
+            {
+                //LOG1("IFI yield, single term break", "");
+                cmdWaiting = false;
+                break;
+            }
+            
             if (r)
             {
                 LOG4(TAG "request ", r);
@@ -1328,7 +1596,7 @@ struct Strandi: public Traits
                 if (cmdWaiting)
                 {
                     cmdWaiting = false;
-                    break; // fall through and handle line
+                    break; 
                 }
             }
             else
@@ -1356,52 +1624,61 @@ struct Strandi: public Traits
     bool buildChoiceJSON(GrowString& gs, Choices& c)
     {
         // return true if choice json has some content to emit
-        bool res = false;
         
-        gs.add('{');
-        JSONWalker::addKey(gs, IFI_CHOICE);
+        int nchoices = c.choiceCount(); // those selected
 
-        // always uses the nested syntax
-        gs.add('{');
-
-        if (c._headFlow.size())
-            JSONWalker::addStringValue(gs, IFI_TEXT, c._headFlow);
-
-        // even if no choices need to request text input
-        res = c._cmdChoice != 0; 
-
-        // request or deny text input
-        JSONWalker::addBoolValue(gs, IFI_UI_TEXTINPUT, c._cmdChoice != 0);
+        bool res = (nchoices > 0); // something to do
         
-        if (!c.isEmpty())
+        if (!res)
         {
-            res = true;
-
-            JSONWalker::toAdd(gs);
-            JSONWalker::addKey(gs, IFI_CHOICE);
-            gs.add('[');
-
-            int cc = 0;
-            for (auto& ci : c._choices)
-            {
-                JSONWalker::toAdd(gs);
-                gs.add('{');
-                JSONWalker::addStringValue(gs, IFI_TEXT, ci._text);
-
-                // Commands within sub-json will not echo
-                JSONWalker::toAdd(gs);
-                JSONWalker::addKey(gs, IFI_CHOSEN);
-                gs.add('{');
-                JSONWalker::addKeyValue(gs, IFI_COMMAND, ++cc);
-                gs.add('}');
-                gs.add('}');
-            }                
-            gs.add(']');
+            // even if no choices need to request text input
+            res = c._cmdChoice != 0;
         }
 
-        gs.add('}'); // end subobject
-        gs.add('}'); // end choice
-        gs.add(0);
+        if (res)
+        {
+            gs.add('{');
+            JSONWalker::addKey(gs, IFI_CHOICE);
+
+            // always uses the nested syntax
+            gs.add('{');
+
+            if (c._headFlow.size())
+                JSONWalker::addStringValue(gs, IFI_TEXT, c._headFlow);
+
+            // request or deny text input
+            JSONWalker::addBoolValue(gs, IFI_UI_TEXTINPUT, c._cmdChoice != 0);
+        
+            if (nchoices > 0)
+            {
+                JSONWalker::toAdd(gs);
+                JSONWalker::addKey(gs, IFI_CHOICE);
+                gs.add('[');
+
+                int cc = 0;
+                for (auto& ci : c._choices)
+                {
+                    if (!ci._selected) continue;  // ignore these
+                    
+                    JSONWalker::toAdd(gs);
+                    gs.add('{');
+                    JSONWalker::addStringValue(gs, IFI_TEXT, ci._text);
+
+                    // Commands within sub-json will not echo
+                    JSONWalker::toAdd(gs);
+                    JSONWalker::addKey(gs, IFI_CHOSEN);
+                    gs.add('{');
+                    JSONWalker::addKeyValue(gs, IFI_COMMAND, ++cc);
+                    gs.add('}');
+                    gs.add('}');
+                }                
+                gs.add(']');
+            }
+
+            gs.add('}'); // end subobject
+            gs.add('}'); // end choice
+            gs.add(0);
+        }
 
         //LOG3(TAG "choice json ", gs.start());
         return res;
@@ -1412,27 +1689,30 @@ struct Strandi: public Traits
         GrowString gs;
         bool v = buildChoiceJSON(gs, c);
         
-        // without choices, emit any headflow into the main text
-        // otherwise it gets put into the choice box
-        if (c.isEmpty())
+        // head flow will normally be put in the UI choice box
+        // unless it's just text input.
+        if (!c.choiceCount())  // no active choices
         {
             OUTP(c._headFlow);
         }
 
-        // emit the current capture
-        flush();
-
         if (v)
         {
+            // emit the current capture before the UI
+            flush();
+
+            emitPrompt(c._prompt);
+
             // emit the choices or request command line
             ifi->emitResponse(gs.start());
+
+            // this will block for non-coop or poll for coop
+            yield();
         }
-
-        // this will block for non-coop or poll for coop
-        yield();
     }
-#endif // IFI_BUILD    
-
+     
+#else // !IFI_BUILD  
+    
     void presentChoicesConsole(Choices& c)
     {
         // for console mode, we just emit head flow
@@ -1443,17 +1723,35 @@ struct Strandi: public Traits
         flush();
 
         _emit('\n');
-                
-        int cc = 0;
+
+        int nc = 0;
         for (auto& ci : c._choices)
         {
+            if (!ci._selected) continue; // ignore
+            
             char buf[16];
-            sprintf(buf, "(%d) ", ++cc);
+            sprintf(buf, "(%d) ", ++nc);
             _emit(buf);
             _emit(ci._text);
             _emit('\n');
         }
+
+        if (c._prompt.empty())
+        {
+            // default prompt
+            if (c._cmdChoice)
+                _emit("> ");   // when we can also type a command
+            else
+                _emit("? ");   // when only choices available
+        }
+        else
+        {
+            _emit(c._prompt);
+            _emit(' ');
+        }
     }
+#endif // IFI_BUILD    
+    
     
     bool validateInput(Choices& c)
     {
@@ -1464,7 +1762,9 @@ struct Strandi: public Traits
         
         bool v = false;
 
-        int nchoices = c.size();
+        int nchoices = c.choiceCount(); // selected count
+
+        c._ch = -1;  // mark invalid
 
         if (c._line.empty())
         {
@@ -1486,12 +1786,11 @@ struct Strandi: public Traits
                 int ch = 0;
                 if (c._line.length() < 10) ch = std::stoi(c._line);
                 
-                if (ch > 0 &&  ch <= (int)c.size())
+                if (ch > 0 && ch <= nchoices)
                 {
                     v = true;
                     c._ch = ch;
                 }
-                
             }
             else
             {
@@ -1505,6 +1804,37 @@ struct Strandi: public Traits
         }
         return v;
     }
+
+#if defined(__EMSCRIPTEN__) && !defined(IFI_BUILD)
+    string _getline()
+    {
+        extern std::string em_getline(); // emscripten
+        return em_getline();
+    }
+    
+#else    
+    void _getline(char* buf, uint sz)
+    {
+        assert(sz);
+        --sz; // space for terminator
+        
+        while (sz)
+        {
+            int c = getchar();
+            if (!c || c == EOF || c == '\n') break;
+            *buf++ = c;
+            --sz;
+        }
+        *buf = 0;
+    }
+
+    string _getline()
+    {
+        char tbuf[256];
+        _getline(tbuf, sizeof(tbuf));
+        return tbuf;
+    }
+#endif    
 
     void acceptInput(Choices& c)
     {
@@ -1521,6 +1851,11 @@ struct Strandi: public Traits
         //
 
         bool downcase = true;
+
+#ifdef LOGGING
+        // debug builds never downcase so we can enter terms directly
+        downcase = false;
+#endif        
         
         string line = _getline();
         
@@ -1546,31 +1881,59 @@ struct Strandi: public Traits
             const char* p = c._line.c_str() + 1; // skip "?"
             string dcmd = firstWordOf(p);
 
-            if (dcmd.size())
+            if (!dcmd.empty())
             {
-                bool any = dcmd == "?";
-                        
-                // special case to examine reactions
-                int cc = 0;
-                for (auto& r : _ctx->_reactions)
+                // "??" lists all reactors
+                // ?foo lists only for FOO@
+                // ?state lists the timeline state
+
+                if (dcmd == "state")
                 {
-                    assert(r._reactor);
-                    const string& host = r._s->_host->_name;
-                    if (any || equalsIgnoreCase(dcmd, host))
+                    string s1 = _state.toString();
+                    _emit(s1);
+                    _emit('\n');
+
+                    //Timeline t2;
+                    //t2.fromString(s1.c_str(), &_vfmt);
+                    //LOG1("restored as: ", t2);
+                }
+                else
+                {
+                    bool any = dcmd == "?";  
+                        
+                    // special case to examine reactions
+                    int cc = 0;
+                    for (auto& r : _ctx->_reactions)
                     {
-                        bool aschoice = r._s->aschoice();
+                        assert(r._reactor);
+                        const string& host = r._s->_host->_name;
+                        if (any || equalsIgnoreCase(dcmd, host))
+                        {
+                            bool aschoice = r._s->aschoice();
                                 
-                        _emit('\n');
-                        _emit(++cc);
-                        _emit(") ");
-                        _emit(host);
-                        _emit(':');
-                        if (aschoice) _emit('=');
-                        _emit(' ');
-                        _emit(textify(r._reactor));
+                            _emit('\n');
+                            _emit(++cc);
+                            _emit(") ");
+                            _emit(host);
+                            _emit(':');
+                            if (aschoice) _emit('=');
+                            _emit(' ');
+                            _emit(textify(r._reactor));
+                        }
+                    }
+                    _emit('\n');
+
+                    if (!cc && !any)
+                    {
+                        Term* t = Term::find(dcmd);
+                        if (t)
+                        {
+                            string s = t->toString();
+                            _emit(s);
+                            _emit('\n');
+                        }
                     }
                 }
-                _emit('\n');
             }
         }
 #endif  // LOGGING
@@ -1589,6 +1952,7 @@ struct Strandi: public Traits
         int ch = c._ch;
         
         assert(ch > 0 && ch <= c.size());
+        assert(c.size() == c.choiceCount()); // will all be selected
         
         LOG3(TAG "choice made ", ch);
 
@@ -1600,7 +1964,8 @@ struct Strandi: public Traits
                 
         // arrange for newline after choice and before subsequent
         // text, ONLY if there is text!
-        requestNL();
+		// XX why is this needed?
+        //requestNL();
 
         if (cc._reactor)
         {
@@ -1616,9 +1981,10 @@ struct Strandi: public Traits
         }
         else
         {
-            // choices remember their last chosen choice text
-            // also to support sticky choices
-            setTermValue(c._t, cc._text);
+            // choices remember their last chosen choice text when sticky
+            if (c._t->sticky())
+                setTermValue(c._t, cc._text);
+
             c._valid = run(s->_action);
         }
     }
@@ -1636,8 +2002,12 @@ struct Strandi: public Traits
         if (ps)
         {
             // create bindings
+            ResInfo ri(ps);
+
             // restrict input to resolution scope
-            ResInfo ri(ps, true);
+            ri._toScope = true;
+            ri._artScope = artscope_all;
+            
             resolve(ri);
             if (ri.resolved())
             {
@@ -1646,9 +2016,11 @@ struct Strandi: public Traits
                 // perform resolution against reactor match
                 ei._resolving = true;
                 ei._internalOps = false; // prevent internal "put"
-                            
-                done = exec(ei);
 
+                // if exec changes an object, mark it as explored/visited
+                _ctx->_visitObj = true; 
+                done = exec(ei);
+                
                 if (ei._break)
                 {
                     c._valid = false;
@@ -1666,21 +2038,18 @@ struct Strandi: public Traits
                     else
                     {
                         if (_errorNocando)
-                        {
                             c._valid = run(_errorNocando);
-                            done = true;
-                        }
                     }
                 }
+
+                _ctx->_visitObj = false;
+
             }
             else
             {
                 // no such object
                 if (_errorNosuch)
-                {
                     c._valid = run(_errorNosuch);
-                    done = true;
-                }
             }
 
             // will also delete bindings
@@ -1690,35 +2059,142 @@ struct Strandi: public Traits
         {
             //LOG3(TAG "command parse failed ", c._line);
             if (_errorSyntax)
-            {
                 c._valid = run(_errorSyntax);
-                done = true;
-            }
         }
         return done;
     }
-    
-    void runChoices(Choices& c)
-    {
-        // ch > 0 will be a choiceP
-        // ch == 0 is a cmd.
 
+    Binding* handleNounParse(Choices& c)
+    {
+        // NB: caller must delete returned binding
+        Binding* b = 0;
+
+        LOG3(TAG "noun parse '", c._line << "'");
+
+        //requestNL();
+        
+        // try to parse command and execute
+        pnode* ps = _pcom.parseNoun(c._line.c_str());
+        if (ps)
+        {
+            // create bindings
+            ResInfo ri(ps);
+
+            // restrict input to resolution scope
+            ri._toScope = true;
+            ri._artScope = artscope_all;
+            
+            resolve(ri);
+            if (ri.resolved())
+            {
+                pnode* pn = ps->getBindingNode();
+                if (pn)
+                {
+                    b = pn->_binding;
+                    pn->_binding = 0; // detach
+                }
+            }
+            else
+            {
+                // no such object
+                if (_errorNosuch) run(_errorNosuch);
+            }
+
+
+            // will also delete bindings
+            delete ps;
+        }
+        else
+        {
+            if (_errorSyntax) run(_errorSyntax);
+        }
+        return b;
+    }
+    
+    bool runChoices(Choices& c)
+    {
+        // ch > 0 will be a choice
+        // ch == 0 is a cmd.
+        // return true if handled
+
+        bool r;
         if (c._ch > 0)
         {
             handleChoice(c);
+            r = true;
         }
         else
         {
             // handle command
             assert(c._cmdChoice);
-            if (!handleDebugCmd(c)) handleCmd(c);
+
+            r = handleDebugCmd(c);
+            if (!r) r = handleCmd(c);
         }
+        return r;
     }
 
     var _evalEnodeTerm(eNodeCtx* ctx, const char* name)
     {
+        // terms in expressions evaluate according to their visit status
+        // either as numeric 1 or 0.
         assert(name && *name);
-        var v = _state.test(name) ? 1 : 0;
+
+        var v(0);
+
+        bool done = false;
+        
+        Term* t = Term::find(name);
+        if (t)
+        {
+            // terms can be marked "runConditional" which means they are "run"
+            // when encountered in conditional expressions. Such terms are expected
+            // to return EXEC_TRUE or EXEC_FALSE
+            //
+            // Or the term can be pure, where it is run and does not have to
+            // be marked as runConditional.
+            
+            if (t->runConditional() || t->isPure())
+            {
+                _pushcap();
+                bool r = _run(t);
+                CapRef capr = _popcap();
+                const Capture& cap = capr->_cap;
+
+                done = true;
+
+                //LOG3("Eval node, eval pure term ", name << " = " << cap);
+                
+                if (cap.matchSimple(EXEC_TRUE))
+                {
+                    v = 1;
+                }
+                else if (cap.matchSimple(EXEC_FALSE))
+                {
+                    // v already 0
+                }
+                else
+                {
+                    // pure term should be true or false
+                    // treat as false, but emit a warning
+                    LOG3("WARNIG Eval node, degenerate runConditional term ", name << " = " << cap);                    
+                }
+                
+                if (!r)
+                {
+                    // should not get breaks inside pure terms as they
+                    // have no side effects. In any case they will be ignored.
+                    LOG1("WARNING, break inside conditional runConditional term ", name);
+                }
+            }
+        }
+        else
+        {
+            LOG1("WARNING, cannot locate term ", name);
+        }
+
+        if (!done && _state.test(name)) v = 1;
+        
         return v;
     }
 
@@ -1832,7 +2308,7 @@ struct Strandi: public Traits
 
         // we should only get here if we have a choice for all selectors
         assert(ns == c._t->_selectors.size());
-
+        
         GenState* g1 = getGenState(c._t->_name);
         GenState* g2;
         if (g1)
@@ -1852,7 +2328,7 @@ struct Strandi: public Traits
             // a sequence will walk through the possibilities and
             // park on the end
 
-            // the state stores the next sequence# to try
+            // the state stores the next sequence# to try, we return this one.
             // seq runs through the selectors not the available choices
             // as these can change.
             int seq = 0;
@@ -1861,7 +2337,6 @@ struct Strandi: public Traits
             assert(ns > 1); // otherwise wont need state at all
 
             // find first available choice from `seq`
-            
             while (seq < ns)
             {
                 ch = choiceForSelector(c, seq);
@@ -1889,7 +2364,6 @@ struct Strandi: public Traits
                 g2->_seq = seq; // assign current, might be == ns ie fin
                 g2->choose(); // bump for next time
             }
-            
         }
         else
         {
@@ -1905,7 +2379,7 @@ struct Strandi: public Traits
             if (ch < 0)
             {
                 // should not happen, above should find selected eventually
-                LOG1("handleGenTypesm, failed to find selector ", c._t->_name);
+                LOG1("handleGenTypes, failed to find selector ", c._t->_name);
 
                 // fallback to last valid in emergency
                 int i = 0;
@@ -1919,9 +2393,15 @@ struct Strandi: public Traits
         {
             // shuffle and sequence can change state
             if (g2->finished()) g2->convertTo(c._t->_rtypenext);
+        }
 
+        //LOG1("++genstate ", c._t->_name << " was " << (g1 ? g1->toString() : string("null")) << " to " << *g2 << " currently " << ch);
+
+        if (g2 && g2 != g1)
+        {
             setGenState(c._t->_name, g2); // consumes g2
         }
+        
         return ch;
     }
     
@@ -1929,12 +2409,9 @@ struct Strandi: public Traits
     {
         // return true if done something
         
-        int nchoices = 0;
+        int nchoices = c.choiceCount(); // those selected
 
-        for (auto& ci : c._choices)
-            if (ci._selected) ++nchoices;
-
-        if (!nchoices)
+        if (!nchoices && c._matching)
         {
             // no matches, then we choose from fallbacks
             // which are those matches with empty flows
@@ -1961,11 +2438,22 @@ struct Strandi: public Traits
         // except those failing conditional.
         if (c._matching)
         {
-            assert(rtype == Term::t_random);
-            rtype = Term::t_random;
+            bool ok = rtype == Term::t_random || rtype == Term::t_first || rtype == Term::t_all;
+
+            if (!ok)
+            {
+                LOG1("WARNING, matching TERM must be random, first or all ",
+                     c._t->_name);
+
+                // fallback to random
+                rtype = Term::t_random;
+            }
         }
         
         int ch = 0;
+
+        // NB: if "all", then all are selected, but conditionals have
+        // not yet been evaluated.
 
         if (nchoices > 1) switch (rtype)
         {
@@ -1976,6 +2464,8 @@ struct Strandi: public Traits
         case Term::t_first:
             // ch = 0 selects first selected
             break;
+        case Term::t_all:
+            break;
         default:
             ch = handleGenTypes(c, nchoices);
             break;
@@ -1983,46 +2473,52 @@ struct Strandi: public Traits
 
         assert(ch >= 0 && ch < nchoices);
 
-        Choice* cp = 0;
-
-        // find the ch'th selected choice
-        int ri = 0;
+        // run all the selectors!
+        bool doall = rtype == Term::t_all;
+        
+        // find the ch'th selected choice unless all
         for (auto& ci : c._choices)
         {
+            if (doall)
+            {
+                // evaluate conditionals as we go, as these can change
+                ci._selected = checkSelectorCond(ci._action);
+            }
+            
             if (ci._selected)
             {
-                cp = &ci;
-                if (!ch) break;
+                if (doall || !ch)
+                {
+                    // run this choice
+                    if (ci.isInput())
+                    {
+                        assert(!c._cmdChoice);
+
+                        // assign this as the command selector
+                        c._cmdChoice = ci._action;
+                        c._allowNothing = true;
+                        c._valid = runInputSelector(c);
+                    }
+                    else
+                    {
+                        // select is defined when we're matching as we've already
+                        // run the text flow in order to perform the match.
+                        // when we're not matching, the selector flow is part of the output
+                        if (!ci._select)
+                            c._valid = run(ci._action->_text);
+
+                    }
+
+                    // but we always run the action
+                    if (c._valid)
+                        c._valid = run(ci._action->_action);
+
+                    if (!doall) break;  // done
+                    
+                }
                 --ch;
             }
-            ++ri;
         }
-        
-        assert(cp);
-
-        // ri is the raw index, not just those selected
-
-        if (cp->isInput())
-        {
-            assert(!c._cmdChoice);
-
-            // assign this as the command selector
-            c._cmdChoice = cp->_action;
-            runInputSelector(c);
-        }
-        else
-        {
-            // select is defined when we're matching as we've already
-            // run the text flow in order to perform the match.
-            // when we're not matching, the selector flow is part of the output
-            if (!cp->_select)
-                c._valid = run(cp->_action->_text);
-
-        }
-        
-        // but we always run the action
-        if (c._valid)
-            c._valid = run(cp->_action->_action);
 
         return true;
     }
@@ -2038,27 +2534,88 @@ struct Strandi: public Traits
         assert(s);
         assert(s->isInput());
 
+        // mark all selectors as not selected
+        // because we are just prompting for text input
+        for (auto& ci : c._choices) ci._selected = false;
+
+        // capture any flow to be used as the prompt
         _pushcap();
         bool v = run(s->_text);
         CapRef capr = _popcap();
         if (!v) return false; // break
 
-        // flatten prompt to text
-        string pr = textify(capr->_cap);
+        // change prompt if defined
+        c._prompt = trim(textify(capr->_cap));
+        
+        // Special handing when sticky
+        // If we're sticky, it's because we want to capture the input
+        // We might also have some capture already that will need to
+        // be flushed because it needs to be seen before input.
+        //
+        // A sticky term might well have flow that would normally become
+        // part of the sticky value. But for input, we dont want it. only
+        // the actual input.
+        //
+        // If sticky, pop and dub any current capture to lower capture.
+        // then flush, which will emit if we're level 1
 
-        do acceptInput(c); while (c._line.empty());
-            
-        if (s->isParse())
+        for (;;)
         {
-            if (!handleDebugCmd(c)) handleCmd(c);
-            bool exec = s->isExec();
-        }
-        else
-        {
-            // string input
-            OUTP(c._line);
-        }
+            if (c._t->sticky())
+            {
+                CapRef cs = _popcap();
 
+                // dub onto base cap
+                outCap(cs->_cap);
+            }
+        
+            // there are no selected choices, only a text input
+            // this will flush and get input
+            presentChoices(c);
+
+            // If sticky, then need to re-establish capture so sticky term
+            // becomes the input.
+            if (c._t->sticky()) _pushcap(_runtypemask);
+        
+            if (s->isExec())
+            {
+                if (handleDebugCmd(c)) break;
+
+                // will continue to loop if input fails.
+                if (handleCmd(c)) break;  
+            }
+            else if (s->isParse())
+            {
+                if (c._allowNothing)
+                {
+                    // test for break input
+                    if (c._line == "nothing" || c._line == "none")
+                    {
+                        // in such case emit string
+                        OUTP("nothing");
+                        return true;
+                    }
+                }
+                
+                // if this does not parse, an error will be emitted
+                // and we loop round again
+                Binding* b = handleNounParse(c);
+                if (b)
+                {
+                    LOG3("runInputSelector, parsed: ", textify(b->_terms));
+                    for (auto t : b->_terms) OUTP(t);
+                    delete b;
+
+                    break;
+                }
+            }
+            else
+            {
+                // string input (will go sticky if pushed)
+                OUTP(c._line);
+                break;
+            }
+        }
         return true;
     }
 
@@ -2068,6 +2625,9 @@ struct Strandi: public Traits
         
         // top flow is input for matching generators
         CapRef topflowcap;
+
+        // track whether we use the topflow
+        bool unusedTopflow = false;
 
         // run top flow and keep result, this becomes
         // an input selector.
@@ -2085,9 +2645,12 @@ struct Strandi: public Traits
             
             // NB: result can be empty
             topflowcap = _popcap();
+
+            // we have some content in the topflow, as yet unused.
+            if (topflowcap->_cap) unusedTopflow = true;
         }
 
-        // install results of topflow as lastcap
+        // install results of topflow as LAST
         LastCap::Tmp ltmp(_ctx->_lastCap, &topflowcap->_cap);
         
         bool stickpushed = false;
@@ -2101,7 +2664,11 @@ struct Strandi: public Traits
             
             // run head flow after any topflow
             // NB: code within headflow can access topflow via lastcap
-            c._valid = run(c._t->_flow);
+            if (c._t->_flow)
+            {
+                unusedTopflow = false; // used!
+                c._valid = run(c._t->_flow);
+            }
         }
 
         if (c)
@@ -2122,9 +2689,12 @@ struct Strandi: public Traits
                 {
                     // totally ignore input selectors when matching
                     bool v = !s->isInput();
+
+                    // if we have any selectors, the topflow is used
+                    unusedTopflow = false;
                     
-                    // ignore failed conditional
-                    if (v) v = checkSelectorCond(s);
+                    // ignore failed conditionals
+                    v = v && checkSelectorCond(s);
                     
                     if (v)
                     {
@@ -2198,6 +2768,17 @@ struct Strandi: public Traits
                         }
                     }
                 }
+
+                if (unusedTopflow)
+                {
+                    // pure term.
+                    // this is where we had a non-empty topflow
+                    // and no selectors and no head flow
+                    // in such case, the term value becomes the topflow
+                    //LOG4(TAG "unused topflowcap in ", c._t->_name << " = " << topflowcap->_cap.toString());
+                    assert(topflowcap);
+                    outCap(topflowcap->_cap);
+                }
             }
             else
             {
@@ -2212,9 +2793,20 @@ struct Strandi: public Traits
                     // a selector here could be an input selector
                     // this gets added like the others and handled later.
                     Choice ch(s);
-                    ch._selected = checkSelectorCond(s);
+
+                    ch._selected = 1; 
+
+                    // Mark selected if condition true, but always add
+                    // anyway.
+                    // if "all", do not evaluate condition here as it
+                    // may change as we execute multiple selectors.
+                    // conditional is evaluated later.
+                    if (c._t->_rtype != Term::t_all)
+                        ch._selected = checkSelectorCond(s);
+                    
                     c._choices.emplace_back(ch);
                 }
+
                 runGeneratorAction(c);
             }
         }
@@ -2222,6 +2814,9 @@ struct Strandi: public Traits
         if (stickpushed)
         {
             assert(c._t->sticky());
+
+            // If sticky, collect the capture and set the term value
+            // for next time.
             
             CapRef cs = _popcap();
 
@@ -2230,8 +2825,17 @@ struct Strandi: public Traits
                 // save sticky
                 setTermValue(c._t, cs->_cap.toVar());
 
-                // dub onto base cap
-                outCap(cs->_cap);
+                // also we want to emit the value this time
+                // unless we were actually an input.
+                // that's because the user has already typed the input
+                // and we will otherwise just repeat it.
+                //
+                // cmdChoice is only set for input generators.
+                if (!c._cmdChoice)
+                {
+                    // dub onto base cap
+                    outCap(cs->_cap);
+                }
             }
         }
 
@@ -2326,8 +2930,9 @@ struct Strandi: public Traits
                     // this is a command masquerading as a choice
 
                     assert(reactor);
-                    
-                    if (_ctx->_focus.contains(s->_host))
+
+                    // XXX disable focus checks for now
+                    if (1 || _ctx->_focus.contains(s->_host))
                     {
                         pnode* pn = 0;
 
@@ -2343,8 +2948,8 @@ struct Strandi: public Traits
                             {
                                 // flow has additional elements than
                                 // just command. So this end flow is
-                                // used to form the prompt.
-
+                                // used to form the actual menu text
+                                // rather than a textified command
                                 _pushcap();
                                 c._valid = runAfterCommand(s->_text);
                                 CapRef ccap = _popcap();
@@ -2364,8 +2969,6 @@ struct Strandi: public Traits
 
                             if (!ctext.empty())
                             {
-                                // capitalise start, if needed.
-                                ctext[0] = u_toupper(ctext[0]);
                                 c._choices.emplace_back(Choice(ctext, reactor));
                                 r = true;
                             }
@@ -2398,6 +3001,10 @@ struct Strandi: public Traits
 
     void prepareChoices(Choices& c)
     {
+        // populates the choice list in the right order.
+        // all choices will be marked as selected
+        // because failed ones are not put in the list
+        
         Term* t = c._t;
         assert(t);
 
@@ -2466,10 +3073,25 @@ struct Strandi: public Traits
         }
         
         // flatten choice text
-        for (auto& ci : c._choices)
+        if (c) for (auto& ci : c._choices)
         {
+
+            // the selected field is used mainly for generators
+            // to mark the ones to choose from
+            // for choices, we dont put the non selected ones on
+            // the list, so they are all "selected"
+            // this is needed as the UI builder ignores non-selected
+            ci._selected = true;
+            
             if (ci._text.empty())
-                ci._text = textify(ci._select->_cap);
+            {
+                ci._text = textify(ci._select->_cap, true);
+                if (!ci._text.empty())
+                {
+                    // ensure starts with caps.
+                    ci._text[0] = u_toupper(ci._text[0]);
+                }
+            }
         }
     }
 
@@ -2478,8 +3100,8 @@ struct Strandi: public Traits
         // choice does not run the headflow (nor tail)
         // if there are no actual valid choices
         // TODO: can choices have topflow? what does this mean?
-        
-        // run head flow ONCE we know we have choices
+
+        // run and capture
         _pushcap();
         c._valid = run(c._t->_flow);  // collect manual break
         CapRef ccap = _popcap();
@@ -2492,28 +3114,43 @@ struct Strandi: public Traits
         for (;;)
         {
 #ifdef IFI_BUILD
-                presentChoicesIFI(c);
+            presentChoicesIFI(c);
 #else
-                presentChoicesConsole(c);
+            presentChoicesConsole(c);
 #endif
-                // blocks here in console mode otherwise reads input
-                // already buffered for IFI
+            // blocks here in console mode otherwise reads input
+            // already buffered for IFI
+            if (!_runSingleTermBreak)
                 acceptInput(c);
-                if (validateInput(c)) break;
+
+            // while input was been waiting, another command
+            // executed a break
+            if (_runSingleTermBreak)
+            {
+                //LOG1("presentChoices got a single Term break in ", c._t->_name);
+                _runSingleTermBreak = false;
+                c._valid = false; // propagate manual break
+                break;
+            }
+            
+            if (validateInput(c)) break;
         }
     }
 
     bool runChoicesFinal(Choices& c)
     {
-        // return false for stack break
-        runChoices(c);
+        // return true if handled
         
-        updateScope();
+        bool r = runChoices(c);
+        if (r)
+        {
+            updateScope();
 
-        if (c)
-            c._valid = run(c._t->_postflow);
+            if (c)
+                c._valid = run(c._t->_postflow);
+        }
 
-        return c;
+        return r;
     }
     
     struct RuntimeTermStack
@@ -2526,6 +3163,9 @@ struct Strandi: public Traits
 
     RuntimeTermStack*       _termStack = 0;
 
+    // if we're currently running a background term, this is set
+    Term*                   _currentTickTerm = 0;
+
     void _runTick()
     {
         ++_time;
@@ -2535,7 +3175,7 @@ struct Strandi: public Traits
 
         // previous ticks are not retracted. Just keep adding
         // tick values to mark time.
-        _state.set(_tick->_name, "=", _time);
+        _state.setNoTest(_tick->_name, "=", _time); // wont already be true
 
         // run background flows
 
@@ -2549,12 +3189,114 @@ struct Strandi: public Traits
             if (t)
             {
                 LOG4(TAG "run background ", *s);
-                run(t);
+
+                // remember the currently running background term
+                // in case we reset this term!
+                Term* ot = _currentTickTerm;
+                _currentTickTerm = t;
+                bool r = run(t);
+                _currentTickTerm = ot;
+
+                if (!r)
+                {
+                    LOG4("runtick received break, ", t->_name);
+                }
             }
         }
-        
     }
 
+
+#define ONTICK(_m) \
+    ((_m).tag() == TERM_TICK && (_m).prop() == "=")
+
+    bool _undoMove()
+    {
+        bool r = false;
+
+        if (_time > 1)   // cannot undo first more
+        {
+            Mark m = _state.beginMarkScan();
+
+            // scan back to previous tick where change was made
+            bool change = false;
+
+            while (m)
+            {
+                // if we are parked on a TICK, then this doesn't count
+                if (ONTICK(m))
+                {
+                    if (change) break;
+                }
+                else
+                {
+                    // is a property change
+                    if (!m.prop().empty()) change = true;
+                }
+                --m;
+            }
+
+            if (m)
+            {
+                int t1 = m.val().toInt();
+                LOG3("undoMove rewinding to time ", t1);
+                
+                _state.clearToMark(m);
+                _time = t1;
+                r = true;
+                
+                // scope needs recalculating
+                _ctx->markScope();
+            }
+        }
+        return r;
+    }
+
+    bool undoToTerm(const string& termname)
+    {
+        // rewind until `termname` was asserted.
+        // this might not actually be the first assert if it was subsequently
+        // denied, then re-asserted. In which case, the re-assert point is
+        // located.
+        // Then backup to the time tick and undo from there, in order to
+        // undo complete moves.
+
+        assert(_tick);
+        
+        bool r = false;
+        LOG3("undoToTerm ", termname);
+
+        Mark m = _state.beginMarkScan();
+
+        // scan back to locate the tag itself
+        _state.scanMarkFor(m, termname, string(), var());
+        _state.scanMarkFor(m, _tick->_name, "=", var());
+        
+        if (m)
+        {
+            int t1 = m._p->_val.toInt();
+            
+            //LOG1("undoToTerm rewinding to time ", t1 << " from " << termname);
+            
+            if (t1 > 0)
+            {
+                LOG3("undoToTerm, rewinding to time ", t1);
+                _state.clearToMark(m);
+                _time = t1;
+                
+                r = true;
+                
+                // scope needs recalculating
+                _ctx->markScope();
+            }
+        }
+        else
+        {
+            LOG1("UndoToTerm, not found, ", termname);
+        }
+        
+        return r;
+    }
+    
     bool _runSpecial(Term* t)
     {
         // return true iff handled
@@ -2591,18 +3333,20 @@ struct Strandi: public Traits
             v = true;
             _runTick();
         }
+        else if (t->_name == TERM_UNDO)
+        {
+            v = true;
+            if (!_undoMove())
+            {
+                OUTP("Nothing to undo.");
+                //LOG1("Can't undo ", _time);
+            }
+        }
         else if (t->_name == TERM_VERSION)
         {
             v = true;
             OUTP(var(VERSION " " BUILD_VER));
         }
-        /*
-        else if (t->_name == TERM_LASTGEN)
-        {
-            v = true;
-            OUTP(var(_ctx->_lastGen));
-        }
-        */
         return v;
     }
 
@@ -2642,9 +3386,9 @@ struct Strandi: public Traits
         return done;
     }
 
-    bool _run2(Term* t)
+    bool runChoiceOrGenerator(Term* t)
     {
-        // return false for break
+        // return false for manual break
         bool v = true;
 
         // run a term and selectors
@@ -2662,8 +3406,18 @@ struct Strandi: public Traits
                 runChoiceHead(choices);
                 if (choices.present())
                 {
-                    presentChoices(choices);
-                    v = runChoicesFinal(choices);
+                    bool r;
+                    do
+                    {
+                        presentChoices(choices);
+                        v = choices;  // manual break already?
+                        if (v)
+                        {
+                            r = runChoicesFinal(choices);
+                            v = choices; // check for break
+                        }
+                        
+                    } while (v && !r);
                 }
             }
         }
@@ -2675,7 +3429,7 @@ struct Strandi: public Traits
         // return false for break
 
         bool v = true;
-        if (!_run1(t)) v = _run2(t);
+        if (!_run1(t)) v = runChoiceOrGenerator(t);
         return v;
     }
 
@@ -2694,7 +3448,7 @@ struct Strandi: public Traits
     void resetTerm(Term* t)
     {
         // release all state from `t`
-        // Does this also reset the term value (eg sticky)??
+        // Does this also reset the term value (eg sticky)?
 
         //LOG1("Resetting term ", t->_name);
         
@@ -2713,7 +3467,11 @@ struct Strandi: public Traits
             GenState* g2 = g1->copyIf();
             if (g2 != g1)
             {
-                if (g2->reset()) setGenState(t->_name, g2);
+                if (g2->reset())
+                {
+                    //LOG1("resetting gen state for ", t->_name << " to " << *g2);
+                    setGenState(t->_name, g2);
+                }
                 else delete g2; // reset did not change state
             }
         }
@@ -2752,12 +3510,17 @@ struct Strandi: public Traits
         {
             v = _run(t);
         
-            // mark as visited at the end
-            if (_state.set(t->_name))
+            // mark as visited at the end unless object
+            // object visited state is insteasd used for "explored".
+            
+            // NB: still mark even if we are in break
+            // because we are like a goto.
+            
+            if (!t->isObject() && setVisited(t))
             {
                 // XX this is a bit annoying
-                // reactions can have conditionals on visited nodes
-                // so when a node is visited, it can change the condition
+                // reactions can have conditionals on visited terms
+                // so when a term is visited, it can change the condition
                 // and therefore change the current reaction set.
                 //
                 // for now we just mark changed if a new term is visited
@@ -3023,11 +3786,13 @@ struct Strandi: public Traits
     
     void subInTerms(TermList& tl, Term* p)
     {
+        // all things in P (non-recursive).
         subPropTerms(tl, p, PROP_IN);
     }
 
     void subOnTerms(TermList& tl, Term* p)
     {
+        // all things on P
         subPropTerms(tl, p, PROP_ON);
     }
 
@@ -3047,6 +3812,30 @@ struct Strandi: public Traits
         // all things Y, p in Y
         // use when things can be in multiple things.
         propTerms(tl, p, PROP_IN);
+    }
+    
+    bool XinY(Term* x, Term* y)
+    {
+        // Is X in Y, recursive
+        // true if X is in Y, or X is in something that is in Y (recursive)
+        assert(x && y);
+
+        // walk up from x to see if it is in Y
+        Term* t = x;
+        for (;;)
+        {
+            t = inTerm(t);
+            if (!t) break; 
+            if (t == y) return true;
+        }
+
+        return false;
+    }
+
+    Term* onTerm(Term* p)
+    {
+        // thing Y, p on Y, assuming p is only on ONE thing
+        return propTerm(p, PROP_ON);
     }
 
     static bool is(Term* a, Term* p)
@@ -3119,6 +3908,7 @@ struct Strandi: public Traits
         // the scope is:
         // all things (recursively) in the thing P is in.
         // ensure p is included.
+        // AND all things "on" things determined above.
         tl.clear();
 
         for (auto t : seed)
@@ -3137,6 +3927,26 @@ struct Strandi: public Traits
         // ensure the location of player is in scope
         Term* loc = inTerm(_player);
         if (loc && !contains(tl, loc)) tl.push_back(loc);
+
+        // Additionally we include things inside parents of things
+        // this is so we can create generic parent objects that have
+        // things. like people have hands and feet etc.
+
+        // collect all parents of objects so far. make the parents
+        // list first, since this has a lot of repeats and then
+        // we only have to look at the contents of the combined parent list.
+        TermList allparents;
+        for (auto t : tl)
+        {
+            TermList pl;
+            t->getParents(pl);
+            concatm(allparents, pl);
+        }
+
+        // then take all the things IN this parent list that are not
+        // already in scope.
+        // NOTE: We're not using recursive in here.
+        subPropTermsSet(tl, allparents, PROP_IN);
 
         // add all things "on" things in scope to scope.
         TermList ons;
@@ -3199,7 +4009,7 @@ struct Strandi: public Traits
             ok = true;
             inTerms(tl, _player);
         }
-        else if (*w == PRON_ALL)
+        else if (*w == PRON_ALL)  // literal
         {
             assert(_player);
             ok = true;
@@ -3430,6 +4240,7 @@ struct Strandi: public Traits
             if (!ok)
             {
                 ri._valid = false;  // did not resolve
+                ri._scopeFailed = true;  // log that scoping failed
                 
                 // not an error if given a resolution scope
                 if (!ri._toScope)
@@ -3512,9 +4323,33 @@ struct Strandi: public Traits
                         
                         if (ri._valid)
                         {
-                            // resolve when full scope is selected
-                            // also if just article scope selected
-                            if (ri._toScope || ri._artScope)
+                            // XX currently toscope => artscope
+                            assert(!ri._toScope || ri._artScope);
+
+                            // always?
+                            bool ascope = ri._artScope == artscope_all;
+
+                            if (!ascope)
+                            {
+                                if (ri._artScope == artscope_instances)
+                                {
+                                    // apply, unless all are classes
+                                    
+                                    ascope = true;
+                                    
+                                    // do not apply to classes
+                                    for (Term* ti : ns->_binding->_terms)
+                                    {
+                                        if (ti->isClass())
+                                        {
+                                            ascope = false;
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                            
+                            if (ascope)
                             {
                                 if (!resolveScope(*ns->_binding, ns->_binding->_scope))
                                 {
@@ -3522,6 +4357,9 @@ struct Strandi: public Traits
                                     delete ns->_binding;
                                     ns->_binding = 0;
                                     ri._empty = true;
+
+                                    // remember that article failed
+                                    ri._artFailed = true;
                                 }
                             }
                         }
@@ -3552,13 +4390,94 @@ struct Strandi: public Traits
         }
     }
 
+    bool _eiHelpIOBJ(execInfo& ei, pnode* pn)
+    {
+        // helper to fill out iobj or value
+        //
+        // pn is at prep phrase
+        // prep is actual prep word (possibly inside phrase)
+        // expect iobj or value following prep
+
+        bool v = false;
+
+        pnode* prep;
+
+        if (pn->_type == nodeType::p_prepmod)
+        {
+            // point to whole (prepmod prep)
+            ei._prepn = pn;
+            
+            pnode* pm = pn->_head;
+            assert(pm && pm->_word);
+            ei._prepmod = pm->_word;
+            
+            // actual prep node (or property)
+            prep = pm->_next;
+        }
+        else
+        {
+            // prep node is simple word
+            prep = ei._prepn = pn;
+        }
+
+        // at the moment should always get a prep
+        assert(prep);
+
+        // but otherwise it's failed
+        if (!prep) return false; 
+
+        // if our "prep" isnt, then these tests will fail and we're false
+        if (prep->_type == nodeType::p_prep)
+        {
+            ei._prep = prep->_word;
+            assert(ei._prep);
+
+            // expect a NP
+
+            pn = ei._iobjn = pn->_next;
+            assert(pn && pn->isNounPhrase());
+            
+            if (pn)
+            {
+                ei._iobj = pn->getBinding();
+                                    
+                // if we have indirect object, must be bound   
+                v = ei._iobj != 0;
+                                    
+                // ensure iobj list isnt empty
+                assert(!ei._iobj || ei._iobj->size());
+            }
+        }
+        else if (prep->_type == nodeType::p_property)
+        {
+            // not prep, but store in same slots
+            // verb will know
+                                
+            ei._prep = prep->_word;
+            assert(ei._prep);
+
+            // same for p_value
+            pn = pn->_next;
+            if (pn && pn->_type == nodeType::p_value)
+            {
+                // head of value is actually an enode
+                GETENODE(pn);
+                ei._value = en;
+                v = true;
+
+                // NB: leave iobj unset
+            }
+        }
+        return v;
+    }
+
     bool prepareExecInfo(execInfo& ei)   
     {
         bool v = false;
         
         if (!ei._ps) return false;
-        
-        if (ei._ps->_type == nodeType::p_cs)
+
+        if (ei._ps->isSentence())
         {
             // command sentence V DOBJ PREP IOBJ
 
@@ -3611,72 +4530,28 @@ struct Strandi: public Traits
                         pn = pn->_next;
                         if (pn)
                         {
-                            v = false;
-                            pnode* prep;
-
-                            if (pn->_type == nodeType::p_prepmod)
-                            {
-                                // point to whole (prepmod prep)
-                                ei._prepn = pn;
-                                
-                                pnode* pm = pn->_head;
-                                assert(pm && pm->_word);
-                                ei._prepmod = pm->_word;
-                                
-                                // actual prep node (or property)
-                                prep = pm->_next;
-                            }
-                            else
-                            {
-                                // prep node is simple word
-                                prep = ei._prepn = pn;
-                            }
-
-                            assert(prep);
-
-                            if (prep->_type == nodeType::p_prep)
-                            {
-                                ei._prep = prep->_word;
-                                assert(ei._prep);
-
-                                pn = ei._iobjn = pn->_next;
-                                if (pn)
-                                {
-                                    ei._iobj = pn->getBinding();
-                                    
-                                    // if we have indirect object, must be bound                                    
-                                    v = ei._iobj != 0;
-                                    
-                                    // ensure iobj list isnt empty
-                                    assert(!ei._iobj || ei._iobj->size());
-                                }
-                            }
-                            else if (prep->_type == nodeType::p_property)
-                            {
-                                // not prep, but store in same slots
-                                // verb will know
-                                
-                                ei._prep = prep->_word;
-                                assert(ei._prep);
-
-                                // same for p_value
-                                pn = pn->_next;
-                                if (pn && pn->_type == nodeType::p_value)
-                                {
-                                    // head of value is actually an enode
-                                    GETENODE(pn);
-                                    ei._value = en;
-                                    v = true;
-                                }
-                            }
+                            // extract iobj or value
+                            v = _eiHelpIOBJ(ei, pn);
                         }
                     }
                 }
             }
         }
-        else if (ei._ps->_type == nodeType::p_qs)
+        else if (ei._ps->isQuery())
         {
-            // query sentence Q DOBJ PREP NULL or Q NULL PREP IOBJ
+            // query sentence
+
+            // (Q prep rn)  eg (what in box)
+            // (Q prop value) eg (what feel wet)
+            // (Q N prep) eg (what box in)
+            // (Q N prop) eg (what box feel)
+            //
+            // (IS N)
+            // (IS VAL)
+            // (IS N prep Y)
+            // (is N prop V)
+
+            // (Q DOBJ PREP NULL or Q NULL PREP IOBJ)
 
             // query goes into verb slot
             pnode* pn = ei._verbn = ei._ps->_head;
@@ -3685,6 +4560,8 @@ struct Strandi: public Traits
                 ei._verb = pn->_word;
                 assert(ei._verb);
 
+                bool isare = pn->_word->isISARE();
+
                 pn = pn->_next;
                 if (pn)
                 {
@@ -3692,6 +4569,7 @@ struct Strandi: public Traits
                     {
                         // what player in
                         // what box feels
+                        // is N ...
                         
                         ei._dobjn = pn;
                         ei._dobj = pn->getBinding();
@@ -3704,52 +4582,49 @@ struct Strandi: public Traits
                             pn = pn->_next;
                             if (pn)
                             {
-                                assert(pn->_type == nodeType::p_prep || pn->_type == nodeType::p_property);
-                                ei._prepn = pn;
-                                ei._prep = pn->_word;
-                                assert(ei._prep);
-                                v = true;
+                                if (isare)
+                                {
+                                    // (is N prep Y)
+                                    // (is N prop V)
+                                    v = _eiHelpIOBJ(ei, pn);    
+                                }
+                                else
+                                {
+                                    assert(pn->_type == nodeType::p_prep || pn->_type == nodeType::p_property);
+                                    ei._prepn = pn;
+                                    ei._prep = pn->_word;
+                                    assert(ei._prep);
+
+                                    // (Q N prep)
+                                    // (Q N prop)
+                                    v = true;
+                                }
                             }
+                            else
+                            {
+                                // have only (is N), allowed
+                                if (isare) v = true;
+                            }
+                        }
+                    }
+                    else if (isare)
+                    {
+                        // (is VAL)
+                        
+                        if (pn->_type == nodeType::p_value)
+                        {
+                            // head of value is actually an enode
+                            GETENODE(pn);
+                            ei._value = en;
+                            v = true;
+                            // we have dobj & iobj blank.
                         }
                     }
                     else
                     {
-                        if (pn->_type == nodeType::p_prep)
-                        {
-                            // what in player
-                            ei._prepn = pn;
-                            ei._prep = pn->_word;
-                            assert(ei._prep);
-
-                            // expect a noun, but this in iobj
-                            pn = pn->_next;
-                            assert(pn && pn->isNounPhrase());
-
-                            ei._iobjn = pn;
-                            ei._iobj = pn->getBinding();
-                            
-                            if (ei._iobj)
-                            {
-                                assert(ei._iobj->size());
-                                v = true;
-                            }
-                        }
-                        else if (pn->_type == nodeType::p_property)
-                        {
-                            // what feels wet
-                            ei._prepn = pn;
-                            ei._prep = pn->_word;
-                            assert(ei._prep);
-
-                            pn = pn->_next;
-                            assert(pn && pn->_type == nodeType::p_value);
-
-                            GETENODE(pn);
-                            ei._value = en;
-                            
-                            // NB: iobj is blank
-                            v = true;
-                        }
+                        // (Q prep N)
+                        // (Q prop V)
+                        v = _eiHelpIOBJ(ei, pn);
                     }
                 }
             }
@@ -3782,25 +4657,30 @@ struct Strandi: public Traits
     bool execValidate(execInfo& ei)
     {
         bool v = ei._verb;
-        if (v && ei._verb->isVerb())
+
+        if (v)
         {
-            v = !ei._verb->isDOVerb() || ei._dobj;
-            if (v)
+            if (ei._verb->isVerb())
             {
-                // ioverb not enforced with verbprep as it changes meaning
-                if (ei._verb->isIOVerb() && !ei._verbPrep)
+                v = !ei._verb->isDOVerb() || ei._dobj;
+                if (v)
                 {
-                    if (!ei._iobj)
+                    // ioverb not enforced with verbprep as it changes meaning
+                    if (ei._verb->isIOVerb() && !ei._verbPrep)
                     {
-                        v = false;
-                        ERR1("command expected indirect object", textify(ei._ps));
+                        if (!ei._iobj)
+                        {
+                            v = false;
+                            ERR1("command expected indirect object", textify(ei._ps));
+                        }
                     }
                 }
+                else if (ei._err)
+                {
+                    ERR1("command expected direct object", textify(ei._ps));
+                }
             }
-            else if (ei._err)
-            {
-                ERR1("command expected direct object", textify(ei._ps));
-            }
+            else v = ei._verb->isQuery();
         }
 
         if (!v && ei._output) OUTP(EXEC_SYNTAX);
@@ -3842,7 +4722,7 @@ struct Strandi: public Traits
         return v;
     }
 
-    bool execPut1(execInfo& ei, Term* t)
+    bool execPutEach(execInfo& ei, Term* t)
     {
         Term* iobj = ei._iobj->first();
         string prop = ei._prep->_text;
@@ -3893,7 +4773,7 @@ struct Strandi: public Traits
             v = !contains(allT, iobj);
             if (!v)
             {
-                LOG3("PUT, preventing loop with ", *t);
+                LOG2("PUT, preventing loop with ", *t);
             }
         }
 
@@ -3901,7 +4781,7 @@ struct Strandi: public Traits
         {
             if (multival)
             {
-                _state.set(t->_name, prop, iobj->_name);
+                v = _state.set(t->_name, prop, iobj->_name);
             }
             else
             {
@@ -3936,7 +4816,7 @@ struct Strandi: public Traits
         return v;
     }
 
-    bool execSet1(execInfo& ei, Term* t)
+    bool execSetEach(execInfo& ei, Term* t)
     {
         bool multival = false;
         bool negate = false;
@@ -3949,7 +4829,7 @@ struct Strandi: public Traits
             multival = true;
         }
 
-        string val;
+        var val;
             
         if (ei._iobj)
         {
@@ -3960,8 +4840,7 @@ struct Strandi: public Traits
         else
         {
             assert(ei._value);
-            var ev = evalEnode(ei._value);
-            val = ev.toString();
+            val = evalEnode(ei._value);
         }
 
         if (multival)
@@ -3998,7 +4877,12 @@ struct Strandi: public Traits
             v = false;
             for (auto t : ei._dobj->_terms)
             {
-                if (execPut1(ei, t)) v = true;
+                if (execPutEach(ei, t))
+                {
+                    // mark objects visited when they move
+                    if (_ctx->_visitObj) setVisited(t);
+                    v = true;
+                }
             }
         }
         if (v && ei._output) OUTP(EXEC_OK);
@@ -4011,64 +4895,130 @@ struct Strandi: public Traits
         // needs to check prop val
 
         bool v = ei._prep;
-        if (v) for (auto t : ei._dobj->_terms) if (!execSet1(ei, t)) v = false;
+        if (v) for (auto t : ei._dobj->_terms)
+                   if (!execSetEach(ei, t)) v = false;
         if (v && ei._output) OUTP(EXEC_OK);
         return v;
     }
 
+    bool queryXwithY(Term* x, Term* y)
+    {
+        // Is X with Y.
+        // true if X is in Y, or X is in something that is in Y (recursive)
+        // or X is on Y
+        // or X is on something in Y.
+
+        assert(x && y);
+
+        Term* t = x;
+        for (;;)
+        {
+            bool r = XinY(t, y);
+            if (r) return true;
+
+            // t on something?
+            t = onTerm(t);
+            if (!t) break;  // no
+            if (t == y) return true; // X is on Y
+        }
+
+        return false;
+    }
+
     bool execQuery(execInfo& ei)
     {
-        // XX TODO
-        // handle is/does X prop Y
-
         //LOG1("execQuery, ", textify(ei._ps));
+
+        // what prep N
+        // what prop VAL
+        // what N prep
+        // what N prop
+
+        // is/are
+        // is N prep Y
+        // is N prop V
+        // is N
+        // is VAL
         
         bool v = false;
+
+        assert(ei._verb);
+        
+        bool isare = ei._verb->isISARE();
+        
         if (ei._dobj)
         {
-            // what N in, eg what player in
+            // what N prep, eg what player in
             // what N prop, eg what box feels
+            // is N
+            // is N prep Y
+            // is N prop V
 
             //LOG1("execQuery dobj, ", textify(ei._ps));
-
-            if (!ei._prep)
-            {
-                // eg ioLift and not ioverb
-                // then query is true
-                OUTP(EXEC_TRUE);
-                return true;
-            }
             
             // currently only query singleton N
             v = execChkSingleDO(ei);
             if (v)
             {
-                if (ei._iobj)
+                Term* x = ei._dobj->first();
+                if (isare)
                 {
-                    // is player in hall
-                    // _iobj is NP
+                    bool r = false;
                     
-                    v = execChkSingleIO(ei);
-                    if (v)
+                    if (!ei._prep)
                     {
-                        Term* t = ei._dobj->first();
-                        string val = ei._iobj->first()->_name;
-                        bool r = _state.test(t->_name, ei._prep->_text, val);
-                        //LOG1("exec iobj QUERY ", *t << ' ' << *ei._prep << " " << val << " = " << r);
-                        if (r)
+                        // what/is N
+                        r = true;
+                    }
+                    else
+                    {
+                        if (ei._iobj)
                         {
-                            OUTP(EXEC_TRUE);
+                            // is X prep Y
+                            // where Y is NP
+
+                            v = execChkSingleIO(ei);
+                            if (v)
+                            {
+                                Term* y = ei._iobj->first();
+                                //LOG1("exec iobj QUERY ", *x << ' ' << *ei._prep << " " << val << " = " << *y);
+                            
+                                if (ei._prep->_text == PROP_WITH)
+                                {
+                                    r = queryXwithY(x, y);
+                                }
+                                else
+                                {
+                                    r = _state.test(x->_name, ei._prep->_text, y->_name);
+                                }
+                            }
                         }
-                        else
+                        else if (ei._value)
                         {
-                            OUTP(EXEC_FALSE);                            
+                            // is X prop Val
+
+                            // evaluate the expression and test if true
+                            var ev = evalEnode(ei._value);
+                            r = _state.test(x->_name, ei._prep->_text, ev.toString());
                         }
+                    }
+                    
+                    if (r)
+                    {
+                        OUTP(EXEC_TRUE);
+                    }
+                    else
+                    {
+                        OUTP(EXEC_FALSE);                            
                     }
                 }
                 else
                 {
-                    assert(!ei._value);
+                    // what X prep
+                    // what X prop
 
+                    assert(ei._prep);
+                    
                     // Wait!
                     // properties and prep can be multivalued!
                     // normally setting X in Y, replaces X in Z
@@ -4079,10 +5029,9 @@ struct Strandi: public Traits
                     //
                     // need a way for query to return a set.
                     
-                    Term* t = ei._dobj->first();
-                    const var* y = _state.getfn(t->_name, ei._prep->_text);
-                    
-                    //LOG1("execQuery dobj + !obj ", *t << ' ' << *ei._prep << " = " << (y ? y->toString() : "null"));
+                    const var* y = _state.getfn(x->_name, ei._prep->_text);
+
+                    //LOG1("execQuery dobj + !obj ", *x << ' ' << *ei._prep << " = " << (y ? y->toString(&_vfmt) : "null"));
 
                     if (y)
                     {
@@ -4091,7 +5040,7 @@ struct Strandi: public Traits
                             // expect term
                             Term* r = Term::find(y->rawString());
                             OUTP(r);
-                            //LOG1("exec prep QUERY ", *t << ' ' << *ei._prep << " = " << textify(r));
+                            //LOG1("exec prep QUERY ", *x << ' ' << *ei._prep << " = " << textify(r));
                         }
                         else
                         {
@@ -4099,13 +5048,13 @@ struct Strandi: public Traits
                             Term* r = Term::find(y->rawString());
                             if (r)
                             {
-                                //LOG1("exec QUERY ", *t << ' ' << *ei._prep << " = " << textify(r));
+                                //LOG1("exec QUERY ", *x << ' ' << *ei._prep << " = " << textify(r));
                                 OUTP(r);
                             }
                             else
                             {
                                 // add raw value
-                                //LOG1("exec QUERY ", *t << ' ' << *ei._prep << " = (val) " << y->rawString());
+                                //LOG1("exec QUERY ", *x << ' ' << *ei._prep << " = (val) " << y->rawString());
                                 OUTP(*y);
                             }
                         }
@@ -4115,45 +5064,68 @@ struct Strandi: public Traits
         }
         else if (ei._iobj || ei._value)
         {
-            // what in player
-            // what feels wet
+            // what prep N
+            // what prop VAL
+            // is VAL
 
-            assert(ei._prep);
-
-            string val;
-
-            if (ei._prep->isPrep())
+            if (isare)
             {
-                // eg. what in player => terms
+                // is VAL ?
+                assert(ei._value);
+                v = true;
                 
-                // _iobj is NP
-                assert(ei._iobj);
+                var ev = evalEnode(ei._value);
+                bool r = ev.isTrue();
                 
-                v = execChkSingleIO(ei);
-                if (v)
+                if (r)
                 {
-                    val = ei._iobj->first()->_name;
+                    OUTP(EXEC_TRUE);
+                }
+                else
+                {
+                    OUTP(EXEC_FALSE);                            
                 }
             }
             else
             {
-                // property, iobj is blank
-                assert(ei._value);
-                var ev = evalEnode(ei._value);
-                val = ev.toString();
-                v = true;
-            }
+                // otherwise expect a prep
+                assert(ei._prep);
 
-            if (v)
-            {
-                const string& prop = ei._prep->_text;
-                Strings tags;
-                _state.getdsv(prop, val, tags);
-                for (auto s : tags)
+                string val;
+
+                if (ei._prep->isPrep())
                 {
-                    Term* r = Term::find(*s);
-                    OUTP(r);
-                    DLOG4(_pcom._debug, "exec QUERY", prop, val, "=", textify(r));
+                    // eg. what in player => terms
+                
+                    // _iobj is NP
+                    assert(ei._iobj);
+                
+                    v = execChkSingleIO(ei);
+                    if (v)
+                    {
+                        val = ei._iobj->first()->_name;
+                    }
+                }
+                else
+                {
+                    // property, iobj is blank
+                    assert(ei._value);
+                    var ev = evalEnode(ei._value);
+                    val = ev.toString();
+                    v = true;
+                }
+
+                if (v)
+                {
+                    const string& prop = ei._prep->_text;
+                    Strings tags;
+                    _state.getdsv(prop, val, tags);
+                    for (auto s : tags)
+                    {
+                        Term* r = Term::find(*s);
+                        OUTP(r);
+                        DLOG4(_pcom._debug, "exec QUERY", prop, val, "=", textify(r));
+                    }
                 }
             }
         }
@@ -4408,30 +5380,44 @@ struct Strandi: public Traits
 
             if (ei._internalOps)
             {
-                done = true;
-                
-                // handle built in cases 
+                // internal ops are primitive put and set, not allowed
+                // on command line.
                 if (*ei._verb == SYM_PUT && !ei._verbPrep)
                 {
+                    done = true;
                     v = execPut(ei);
                     if (v) _ctx->markScope();
                 }
                 else if (*ei._verb == SYM_SET)
                 {
+                    done = true;
                     v = execSet(ei);
+
+                    // Does "set" really change scope??
                     if (v) _ctx->markScope();
                 }
+            }
 
+            // normally we dont allow queries on the command line
+            bool allowQuery = ei._internalOps;
+
+#ifdef LOGGING
+            // but we do for debug builds
+            allowQuery = true;
+#endif            
+
+            if (!done && allowQuery)
+            {
                 // handle queries
-                else if (ei._verb->isQuery())
+                if (ei._verb->isQuery())
                 {
+                    done = true;
                     v = execQuery(ei);
                     if (!v)
                     {
                         LOG4("exec query failed ", textify(ei._ps));
                     }
                 }
-                else done = false;
             }
 
             if (!done)
@@ -4465,9 +5451,23 @@ struct Strandi: public Traits
             
             // conditionals can eliminate a reactor
             if (!checkSelectorCond(s)) continue;
-            
-            pnode* pn = ec->_parse->copy();  // consumed by reaction
+
+            // create a copy so that the original reactor can be
+            // a template and we will resolve the copy.
+            pnode* pn = ec->_parse->copy();
             ResInfo ri(pn);
+
+            // since we are making copies, apply article scoping.
+            // This may cause resolution to fail.
+            // the upshot of this is as if the reaction were absent.
+            //
+            // However, we need to retain reactions defined on articled
+            // classes.
+            // eg give my GETTABLE to him
+            // defined in the base class. So we need to apply scoping
+            // only to instances.
+            ri._artScope = artscope_instances;
+            
             resolve(ri);
             if (ri.resolved())
             {
@@ -4479,28 +5479,39 @@ struct Strandi: public Traits
             }
             else
             {
-                ERR1("failed to resolve reactor", pn->toStringStruct());
+                if (!ri._artFailed)
+                {
+                    // not an overt error if failed due to article scoping
+                    ERR1("failed to resolve reactor", pn->toStringStruct());
+                }
                 delete pn;
             }
         }
     }
 
+    static void expandParents(TermList& tl) 
+    {
+        for (auto t : tl)
+        {
+            TermList tpl;
+            t->getParents(tpl);
+
+            // reactions are added in reverse parent order
+            // so that secondary parents can be added to override main
+            // parents
+            for (auto it = tpl.crbegin(); it != tpl.crend(); ++it)
+                if (!contains(tl, *it)) tl.push_back(*it);
+        }
+    }
+
     void resolveTermReactions(Term* t)
     {
-        resolveReactions(t);
-
-        // parent reactions that match child reactions at the same rank
-        // will appear in the list but after the child reaction.
-        // if this matches at rank, then it will not be chosen as the
-        // child reaction is first.
         TermList tl;
-        t->getParents(tl);
+        tl.push_back(t);
 
-        // reactions are added in reverse parent order
-        // so that secondary parents can be added to override main
-        // parents
-        for (auto it = tl.crbegin(); it != tl.crend(); ++it)
-            resolveTermReactions(*it);
+        // make a complete list of parents breadth first.
+        expandParents(tl);
+        for (auto ti : tl) resolveReactions(ti);
     }
 
     void resolveAllReactions()
@@ -4514,15 +5525,20 @@ struct Strandi: public Traits
             resolveTermReactions(t);
         }
 
-        /* consider a second pass where objects added to reference scope
-         * are also added BUT only reactors of their root parent.
+        /* consider a second pass where reactors from objects in reference
+         * scope are also added BUT only reactors of their root parent.
          *
          * This will bring in synonyms and general handlers of objects
          * mentioned but prevent direct methods on the objects. 
+         *
+         * It's important that these added reactors are from instances
+         * and not classes. Otherwise we get rectors on "thing" etc.
+         *
+         * examples: try (l/x/look) walls
          */
         for (auto t : _ctx->_resolutionScope)
         {
-            if (!contains(_ctx->_scope, t))
+            if (!t->isClass() && !contains(_ctx->_scope, t))
             {
                 // within a reaction, "it" corresponds to itself
                 // and also within parents
@@ -4536,7 +5552,6 @@ struct Strandi: public Traits
                 }
             }
         }
-        
     }
 
     /////////////////////////
@@ -4594,7 +5609,6 @@ struct Strandi: public Traits
                 {
                     LOG1("seed cap empty ", textify(_scopeSeed));
                 }
-
             }
 
             if (seed.empty())
@@ -4617,30 +5631,29 @@ struct Strandi: public Traits
         }
     }
 
+#define DEF_SPECIAL_TERM(_var, _name)                           \
+_var = Term::find(_name);                                       \
+if (!_var) LOG1("Warning, there is no term, ", _name);   
+
     void _prepareObjectRuntime()
     {
         // find well known objects
-        _player = Term::find(TERM_PLAYER);
-        if (!_player) DLOG0(_pcom._debug, "There is no " TERM_PLAYER);
-
-        _thing = Term::find(TERM_THING);
-        if (!_thing) DLOG0(_pcom._debug, "There is no " TERM_THING);
+        DEF_SPECIAL_TERM(_player, TERM_PLAYER);
+        DEF_SPECIAL_TERM(_thing, TERM_THING);
 
         _tick =  Term::find(TERM_TICK); // automatically added
         assert(_tick);
+
+        _undo = Term::find(TERM_UNDO);
+        assert(_undo);
 
         // may not exist
         _scopeSeed = Term::find(TERM_SCOPE);
 
         // optional handler when cannot resolve
-        _errorNocando = Term::find(TERM_NOCANDO);
-        if (!_errorNocando) DLOG0(_pcom._debug, "Warning, There is no handler " TERM_NOCANDO);
-
-        _errorNosuch =  Term::find(TERM_NOSUCH);
-        if (!_errorNosuch) DLOG0(_pcom._debug, "Warning, There is no handler " TERM_NOSUCH);
-
-        _errorSyntax =  Term::find(TERM_SYNTAX);
-        if (!_errorSyntax) DLOG0(_pcom._debug, "Warning, There is no handler " TERM_SYNTAX);
+        DEF_SPECIAL_TERM(_errorNocando, TERM_NOCANDO);
+        DEF_SPECIAL_TERM(_errorNosuch, TERM_NOSUCH);
+        DEF_SPECIAL_TERM(_errorSyntax, TERM_SYNTAX);
 
         // calculate initial scope
         updateScope();
@@ -4823,6 +5836,32 @@ struct Strandi: public Traits
         return v;
     }
 
+    void _prepareNames()
+    {
+        // Objects can have multiple names. These are usually listed
+        // in the object and have been collected by buildDictionary.
+        // However, object parents can also have names which are
+        // attributed to the instance rather than the parent.
+
+        // collect these up and add to the instance.
+        for (auto t : Term::_allTerms)
+        {
+            if (t->isObject())
+            {
+                TermList tl;
+                t->getParents(tl);
+                for (auto ti : tl)
+                {
+                    for (auto pi : ti->_namenodes)
+                    {
+                        if (!contains(t->_namenodes, pi))
+                            t->_namenodes.push_back(pi);
+                    }
+                }
+            }
+        }
+    }
+
     void prepare()
     {
         if (!_prepared)
@@ -4833,46 +5872,52 @@ struct Strandi: public Traits
 
             if (_prepared)
             {
+                _prepareNames();
+                
                 _processObjectProperties();
                 _prepareObjectRuntime();
             }
         }
     }
 
-    string runSingleTerm(const string& tname)
+    bool runSingleTerm(const string& tname)
     {
-        // use for evaluating a term outside of normal flow
-        // for example meta data.
-        string s;
+        // NB: caller consider flush
+        // return false if run issues manual break
+        
+        bool r = true;
 
         if (_prepared)  // must already be prepared
         {
             Term* t = Term::find(tname);
             if (t)
             {
-                _pushcap(~run_media); // do not process media
-                run(t);
-                s = textify(_popcap()->_cap);
+                r = run(t);
+            }
+            else
+            {
+                LOG1("runSingleTerm not found, ", tname);
             }
         }
-        return s;
-    }
 
-    void _runTerm(Term* t)
-    {
-        if (t && !setjmp(_env_top))
+        if (!r)
         {
-            _pushcap();
-            run(t);
-            flush();
-        }        
+            // initiate a break to the main stack
+            LOG1("runSingleTerm, initiate break from ", tname);
+            _runSingleTermBreak = true;
+        }
+        return r;
     }
 
-    void runTerm(const string& tname)
+    string runSingleTermCap(const string& tname)
     {
-        // run a term by name, used for subcommands outside of flow
-        assert(_prepared);
-        _runTerm(Term::find(tname));
+        // use for evaluating a term outside of normal flow
+        // for example meta data.
+        // NB: term output is captured and returned, not emitted.
+
+        _pushcap(~run_media); // do not process media
+        runSingleTerm(tname);
+        return textify(_popcap()->_cap);
     }
 
     bool start(Term* startTerm)
@@ -4884,7 +5929,18 @@ struct Strandi: public Traits
             if (!_prepared) prepare();
 
             v = _prepared;
-            if (v) _runTerm(startTerm);
+            if (v)
+            {
+                assert(startTerm);
+
+                // create a toplevel jump point for shutdown
+                if (!setjmp(_env_top))
+                {
+                    _pushcap(); // create the top-level output capture
+                    run(startTerm);
+                    flush();
+                } 
+            }
             else
             {
                 ERR0("not prepared");
@@ -4909,12 +5965,11 @@ struct Strandi: public Traits
         int pass = fv._pass;
         bool v = true;
 
-        for (auto i = f._elts.begin(); i != f._elts.end(); ++i)
+        for (auto& e : f._elts)
         {
-            Flow::Elt* e = i;
-            if (e->_type == Flow::t_command)
+            if (e._type == Flow::t_command)
             {
-                Flow::EltCommand* ec = (Flow::EltCommand*)e;
+                Flow::EltCommand* ec = (Flow::EltCommand*)&e;
                 //DLOG1(_pcom._debug, "parsing", *ec);
 
                 if (!pass)
@@ -4924,7 +5979,7 @@ struct Strandi: public Traits
                     pnode* pv = _pcom.parseVerb(ec->_command.c_str());
                     if (pv)
                     {
-                        const Word* verb = _pcom.getVerb(pv);
+                        const Word* verb = ParseCommand::getVerb(pv);
                         delete pv;
                         
                         //DLOG1(verb && _pcom._debug, "pass 1 verb", verb->_text);
@@ -4939,13 +5994,24 @@ struct Strandi: public Traits
                     }
                     else
                     {
-                        //DLOG1(1, "failed to pre-parse verb ", *ec);
+                        // NB: queries come here
+                        //LOG1("failed to pre-parse verb ", *ec);
                     }
                 }
                 else
                 {
-                    pnode* pn = _pcom.parse(ec->_command, fv._lineno);
-                    if (pn) ec->setParse(pn); //owns
+                    pnode* ps = _pcom.parse(ec->_command, fv._lineno);
+                    if (ps)
+                    {
+                        if (ps->isSentence())
+                        {
+                            // collect usages for global template properties
+                            const Word* verb = ParseCommand::getVerb(ps);
+                            if (verb) fv.addUsage(verb, ps);
+                        }
+                        
+                        ec->setParse(ps); //owns
+                    }
                     else v = false;
                 
                     if (v)
@@ -4966,6 +6032,9 @@ struct Strandi: public Traits
     {
         using namespace std::placeholders;
 
+        // enable definition mode which simplified ambiguous terms for templates
+        _pcom._defMode = true;
+
         FlowVisitor ff(std::bind(&Strandi::preParseFlowCommands, this, _1, _2));
 
         // selector text is a command, but not to be parsed
@@ -4978,7 +6047,7 @@ struct Strandi: public Traits
         // first pass
         for (auto t: *_terms)
         {
-            // visit all flows and parse commands that create dictionary
+            // visit all flows and parse commands to create dictionary
             // entries.
             if (!t->visit(ff)) v = false;
         }
@@ -4992,6 +6061,44 @@ struct Strandi: public Traits
         {
             // visit all flows and parse their commands
             if (!t->visit(ff)) v = false;
+        }
+
+        _pcom._defMode = false;  // back to normal
+
+        // Now process the collected word usages in the visitor.
+        for (auto& wu : ff._wordUses)
+        {
+            bool canio = false;
+            bool allio = true;
+
+            //LOG1("considering verb properties of ", *wu._verb);
+
+            // ignore verbs already flagged as they will be predefined
+            if (!wu._verb->isIOLift()) 
+            {
+                for (auto pn : wu._uses)
+                {
+                    // can take IO as found in template
+                    if (ParseCommand::getIONode(pn)) canio = true;
+                    else allio = false;  // not every case has IO
+                }
+
+                if (!canio) allio = false; // must at least one
+
+                // signal that we require an IO, because all cases did so.
+                // for example "give" so we can know later to lift and
+                // to separate dnouns, eg "give witch socks".
+                if (allio)
+                {
+                    LOG3("Setting Required IO verb ", *wu._verb);
+                    const_cast<Word*>(wu._verb)->setIOVerb();
+                }
+                else if (canio)
+                {
+                    LOG3("Setting Can IO verb ", *wu._verb);
+                    const_cast<Word*>(wu._verb)->setCanIOVerb();
+                }
+            }
         }
 
         return v;
@@ -5015,7 +6122,7 @@ struct Strandi: public Traits
         
             if (t->isObject())
             {
-                // the term object ID is added as anoun
+                // the term NAME is added as anoun
                 _pcom.internWordType(t->_name, Word::pos_noun | Word::pos_ID);
                 
                 for (auto s : t->_selectors._selectors)
@@ -5123,7 +6230,7 @@ struct Strandi: public Traits
                 Capture::cats(s, textify(sl));
                 sl.clear();
 
-                if (e._v) Capture::cats(s, e._v.toString());
+                if (e._v) Capture::cats(s, e._v.toString(&_vfmt));
                 else Capture::cats(s, e._s);
             }
             else if (e._term)
@@ -5180,10 +6287,10 @@ struct Strandi: public Traits
     string textify(const Vars& vs)
     {
         std::list<string> sl;
-        for (auto v : vs)
+        for (const var* v : vs)
         {
             string vi = textify(v);
-            if (vi.size()) sl.push_back(vi);
+            if (!vi.empty()) sl.push_back(vi);
         }
         return textify(sl);        
     }
@@ -5207,8 +6314,18 @@ struct Strandi: public Traits
                 // try the name nodes
                 for (auto pn : t->_namenodes)
                 {
-                    s = pn->toString();
-                    if (s.size()) break;
+#if 0
+                    string s1 = pn->toString();
+                    if (!s1.empty())
+                    {
+                        s += '[' + s1 + ']';
+                        s += "(_be " + t->_name + ')';
+                        break;
+                    }
+#else
+                    s = textifyExploredArticle(pn, t);
+                    if (!s.empty()) break;
+#endif
                 }
             }
 
@@ -5230,20 +6347,61 @@ struct Strandi: public Traits
         // since it should be the same.
         const pnode* pn = h._current;
         bool res = pn->_type == pnode::p_pronoun && pn->_binding;
-        
+
+        string s;
         if (res)
         {
-            string s = textify(*pn->_binding);
+            s = textify(*pn->_binding);
+        }
+        else if (h._expandTerms)
+        {
+            if (pn->_type == pnode::p_noun && pn->_binding)
+            {
+                assert(pn->_word);
+                res = pn->_word->isID();
+                if (res)
+                {
+                    s = textify(*pn->_binding);                    
+                }
+            }
+        }
+
+        if (!s.empty())
+        {
             if (!h.s.empty()) h.s += ' ';
             h.s += s;
         }
         return res;
     }
 
-    string textifyFancy(pnode* pn)
+    bool _textifyArticle(pnode::SHelper& h) 
+    {
+        const pnode* pn = h._current;
+        
+        bool res = false;
+        if (pn->_type == pnode::p_article && h._binding)
+        {
+            Term* t = h._binding;
+            assert(t->isObject());
+            bool e = getVisited(t);
+
+            // only overide if we have everthing and the object is
+            // explored
+            if (e)
+            {
+                if (!h.s.empty()) h.s += ' ';
+                h.s += "the";
+                res = true;
+            }
+        }
+        return res;
+    }
+
+    string textifyFancy(pnode* pn, bool expandterms = true)
     {
         using namespace std::placeholders;  
         pnode::SHelper h;
+        h._expandTerms = expandterms;
         h._hook = std::bind(&Strandi::_textifyExpandBinding, this, _1);
 
         pn->toString(&h);
@@ -5252,7 +6410,17 @@ struct Strandi: public Traits
         return h.s;
     }
 
-    string textify(pnode* pn) 
+    string textifyExploredArticle(pnode* pn, Term* t)
+    {
+        using namespace std::placeholders;  
+        pnode::SHelper h;
+        h._binding = t;
+        h._hook = std::bind(&Strandi::_textifyArticle, this, _1);
+        pn->toString(&h);
+        return h.s;
+    }
+
+    string textify(const pnode* pn) 
     {
         // similar to `toStringStruct`, but with parse node details.
         
@@ -5268,7 +6436,7 @@ struct Strandi: public Traits
             else
             {
                 bool close = false;
-                pnode* n = pn;
+                const pnode* n = pn;
                 if (pn->_word)
                 {
                     assert(!pn->_head);
@@ -5300,6 +6468,65 @@ struct Strandi: public Traits
             pn = pn->_next;
         }
         return s;
+    }
+
+    int getTimelineTime()
+    {
+        int t = 0;
+        Mark m = _state.beginMarkScan();
+        _state.scanMarkFor(m, TERM_TICK, "=", var());
+        if (m)
+        {
+            t = m.val().toInt();
+        }
+        return t;
+    }
+
+    string timelineSaveState()
+    {
+        // get the state data to save.
+        // this will be the timeline as a string, but only as far
+        // as the last tick point, in order to save whole moves.
+        string s;
+
+        //LOG1("timelineSaveState, ", _state);
+
+        Mark m = _state.beginMarkScan();
+        _state.scanMarkFor(m, _tick->_name, "=", var());
+        if (m)
+        {
+            //LOG1("timelineSaveState only to time:",  m.val().toInt());
+            
+            // bump to include the tick entry
+            ++m;
+            if (m) s = _state.toStringEnd(m._p);
+        }
+        return s;
+    }
+
+    bool loadTimelineState(const string& data)
+    {
+        // pass in the genstate blob parser
+        bool r = _state.fromString(data.c_str(), &_vfmt);
+        LOG1("restoring data, size:", data.size() << " " << r);
+        
+        if (r)
+        {
+            // find the current time
+            _time = getTimelineTime();
+            if (_time < 1) _time = 1;
+            
+            if (r)
+            {
+                // scope needs recalculating
+                // we need to do this right now, as immediately after
+                // we execute POSTLOAD_OK
+                _ctx->markScope();
+                updateScope();
+            }
+        }
+        
+        return r;
     }
 
 

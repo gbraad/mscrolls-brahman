@@ -116,6 +116,7 @@ C1.SplitView
                     id: area
                     wrapMode: TextArea.Wrap
                     textMargin: (QControl.lowMargins ? 8 : 16)*M.Units.dp
+                    bottomPadding: (M.Device.hasTouchScreen ? 8 : 0)*M.Units.dp
                     color: M.Theme.textColor
                     font: gameFont
                     width: parent.width

@@ -36,6 +36,7 @@
 #include <string>
 #include "cutils.h"
 #include "defs.h"
+#include "utf8.h"
 #include "strutils.h"
 
 namespace ST
@@ -115,18 +116,18 @@ struct Traits
     static string firstAlphabeticWord(const string& s)
     { return firstAlphabeticWord(s.c_str()); }
 
-    static string processEscapes(const char* t, int l)
+    static string processEscapes(const char* t, int l, bool& inQuote)
     {
         // also newlines within a single text segment are changed to space
         // multiple spaces are combined.
         string s;
         bool esc = false;
-        char last = 0;
+        int last = 0;
         
         while (l > 0)
         {
             --l;
-            char c = *t++;
+            int c = *t++;
             if (!c) break;
             if (esc)
             {
@@ -139,6 +140,12 @@ struct Traits
                 {
                     esc = true;
                     continue;
+                }
+                else if (c == '"')
+                {
+                    // convert to Unicode start and end quote.
+                    c = inQuote ? Utf8::closeQuote : Utf8::openQuote;
+                    inQuote = !inQuote;
                 }
                 else if (c == '\n')
                 {
@@ -163,7 +170,14 @@ struct Traits
 
             if (c)
             {
-                s += c;
+                if (c > 0xff)
+                {
+                    char buf[5];
+                    int n = Utf8::UtoUtf8(buf, c);
+                    buf[n] = 0;
+                    s += buf;
+                }
+                else s += (char)c;
                 last = c;
             }
         }
@@ -378,6 +392,10 @@ struct ParseBase: public Traits
         return s;
     }
 
+    static void _skipws(const char** sp)
+    {
+        while (u_isspaceortab(**sp)) ++(*sp);
+    }
 
     void skipws()
     {
@@ -531,7 +549,98 @@ struct ParseBase: public Traits
         if (v) SETPOS(POS + strlen(w));
         return v;
     }
-    
+
+    bool _atIntegerOrFloat(int* vi, double* vd)
+    {
+        // if we're at a non-negative integer or float
+        bool r = u_isdigit(AT);
+        if (r)
+        {
+            // collect integer part
+            *vi = AT - '0';
+            for (;;)
+            {
+                BUMP;
+                if (!u_isdigit(AT)) break;
+                *vi = ((*vi)*10) + AT - '0';
+            }
+
+            *vd = 0;
+
+            // collect fractional part
+            if (AT == '.')
+            {
+                BUMP;
+                double d = 0;
+                double tens = 1;
+
+                while (u_isdigit(AT))
+                {
+                    tens *= 10;
+                    d += (AT - '0')/tens;
+                    BUMP;
+                }
+                *vd = *vi + d;
+            }
+        }
+        return r;
+    }
+
+    bool parseNumber(var& v)
+    {
+        int vi;
+        bool r;
+            
+        double vd;
+        r = _atIntegerOrFloat(&vi, &vd);
+        if (r)
+        {
+            if (vd) v = var(vd); // float
+            else v = var(vi); // int
+        }
+        return r;
+    }
+
+    static bool parseInt(const char** sp, int& v)
+    {
+        // parse simple integer, advance sp
+        // ignore whitespace
+
+        bool r = false;
+        const char* s = *sp;
+        bool neg = false;
+
+        v = 0;
+        while (u_isspace(*s)) ++s;
+        if (*s == '-') { neg = true; ++s; }
+        while (u_isdigit(*s))
+        {
+            v = v*10 + (*s++ - '0');
+            r = true;
+        }
+        if (neg) v = -v;
+        
+        //LOG1("parse int ", *sp << " = " << val);
+        
+        if (r) *sp = s; // advance input
+        return r;
+    }
+
+    static bool parseUInt(const char** sp, unsigned int& v)
+    {
+        int t;
+        bool r = parseInt(sp, t) && t >= 0;
+        v = t;
+        return r;
+    }
+
+    void setup(const char* s, int line)
+    {
+        SETPOS(s);
+        lineno = line;
+        lastdef = 0;
+    }
+
 };
 
 #define GETENODE(_n)                    \

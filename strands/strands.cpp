@@ -38,6 +38,7 @@
 #include "fdz.h"
 #include "strands.h"
 #include "logged.h"
+#include "kl.h"
 
 #define DEFAULT_STORY_FILE   "story.str"
 #define DEFAULT_STORY_BINARY "story.stz"
@@ -51,7 +52,6 @@ Term::Terms Term::_allTerms(&Term::compareLess);
 
 #ifdef STANDALONE
 
-using namespace ST;
 
 #include "strandi.h"
 #include "pstrands.h"
@@ -74,7 +74,7 @@ bool writeBinary(GrowString& buf, const char* fname, bool compress)
     return r;
 }
 
-bool writeVoices(ParseStrands::VoiceSet& vs, const char* fname)
+bool writeVoices(ST::ParseStrands::VoiceSet& vs, const char* fname)
 {
     FD out;
     bool r = out.open(fname, FD::fd_new);
@@ -92,16 +92,130 @@ bool writeVoices(ParseStrands::VoiceSet& vs, const char* fname)
     return r;
 }
 
+struct KLEnv
+{
+    typedef std::string string;
+
+    struct CapStdStream: public StdStream
+    {
+        string _buf;
+        bool _emit(StdStreamBuf* buf) override
+        {
+            _buf += (const char*)*buf;
+            return true;
+        }
+    };
+
+    
+    KL                  _kl;
+    ST::Strandi*        _strandi;
+
+    KLEnv(ST::Strandi& s) : _strandi(&s)
+    {
+        extern void initKLStrandi(KL* host, ST::Strandi* s);
+        initKLStrandi(&_kl, _strandi);
+    }
+
+    bool loadFile(const string& f) { return _kl.loadFile(f, _kl._env); }
+
+    ST::Capture* evalKL(const string& buf, ST::Capture* args)
+    {
+        //LOG1(TAG "eval KL ", buf);
+            
+        int cc = 0;
+            
+        ST::Capture* r = new ST::Capture;
+
+        if (args)
+        {
+
+            List arglist;
+            List::iterator it(arglist);
+            LValue lv(it);
+            for (auto& e : args->_elts)
+            {
+                if (e._v)
+                {
+                    lv = *KL::varToTerm(e._v);
+                    ++cc;
+                }
+                else if (e._term)
+                {
+                    ParseContext ctx(&_kl);
+                    Term t = Symbol(e._term->_name.c_str()).find(&ctx);
+                    if (t)
+                    {
+                        lv = *t;
+                        ++cc;
+                    }
+                }
+                else
+                {
+                    // append string if valid
+                    if (e._s.size())
+                    {
+                        lv = Stringt(e._s);
+                        ++cc;
+                    }
+                }
+            }
+
+            if (cc)
+            {
+                ParseContext ctx(&_kl);
+                Term s = Symbol("IT").intern(&ctx);
+
+                //Tree e;
+                //List et(e, _kl->_env._env);
+                //Env env(et, _kl->_env._args);
+                _kl._bindvar(s, &arglist, _kl._env, true, false);
+            }
+        }
+
+        CapStdStream tout;
+        StdStream* old = _kl.setOutput(&tout);
+        _kl.loadString(buf.c_str(), _kl._env); // eval!
+        _kl.setOutput(old);
+        r->add(tout._buf); // ignore if empty
+
+        //LOG1(TAG "eval KL result ", tout._buf);
+
+#if 0            
+        if (v)
+        {
+            LOG1(TAG "evalKL result ", v->toString());
+                     
+            // return values are ignored unless a string
+            if (v.isString())
+            {
+                // avoid quotes in standard KL stringification
+                r->add(v.asString().c_str());
+            }
+        }
+#endif
+        
+        if (r->empty())
+        {
+            delete r;
+            r = 0;
+        }
+        
+        return r;
+    }
+};
+
 int main(int argc, char** argv)
 {
     int debug = 0;
     Logged initLog;
-    ParseStrands ps;
+    ST::ParseStrands ps;
 
     // write all files out as compressed story
     bool emitBin = false;
     bool loadGameFiles = true;
     bool compress = true;
+
+    const char* initFilename = "init";
 
     std::vector<std::string> files;
     
@@ -192,8 +306,14 @@ int main(int argc, char** argv)
             }
             else
             {
-                Strandi si(&Term::_allTerms);
+                ST::Strandi si(&ST::Term::_allTerms);
                 si.setdebug(debug);
+
+                KLEnv kle(si);
+                kle.loadFile(initFilename);
+
+                using namespace std::placeholders;
+                si.setEvaluator(std::bind(&KLEnv::evalKL, &kle, _1, _2));
 
                 time_t tt;
                 si.randomise(time(&tt));

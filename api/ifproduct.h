@@ -51,6 +51,7 @@ struct ProductInfoBuilder: public InfoBuilder
     // info
     _PS(Title, BRA_PRO_TITLE);
     _PS(Author, BRA_PRO_AUTHOR);
+    _PS(Organisation, BRA_PRO_ORGANISATION);
     _PS(Credits, BRA_PRO_CREDITS);
     _PS(CoverText, BRA_PRO_COVERTEXT);
     _PS(CoverTextColor, BRA_PRO_COVERTEXT_COL);

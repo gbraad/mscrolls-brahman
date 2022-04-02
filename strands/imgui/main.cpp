@@ -2,6 +2,11 @@
 #define SOKOL_IMPL
 //#define SOKOL_GLES2
 
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+#include <emscripten/fiber.h>
+#endif
+
 #include "sokol_app.h"
 #include "sokol_gfx.h"
 #include "sokol_time.h"
@@ -23,6 +28,8 @@
 #include "stb_image.h"
 #undef STB_IMAGE_IMPLEMENTATION
 
+#include "imfilebrowser.h"
+
 #define STB_VORBIS_HEADER_ONLY
 #include "stb_vorbis.c"
 
@@ -37,6 +44,7 @@ static bool show_strand = true;
 static bool audioEnabled = true;
 static bool fontsChanged = true;
 static float fontSize = 24;
+static bool transcriptEnabled = false;
 
 struct FontFileInfo
 {
@@ -57,13 +65,11 @@ static std::string requestStoryName;
 static std::string requestAudioName;
 static sg_pass_action pass_action;
 
+static bool expectSave;
+static bool expectLoad;
+
 #include "imgui_internal.h"
 #include <stdio.h>
-
-#ifdef __EMSCRIPTEN__
-#include <emscripten.h>
-#include <emscripten/fiber.h>
-#endif
 
 
 // forward
@@ -71,6 +77,7 @@ std::string gui_input_pump();
 void play_audio(const char* name);
 void stop_audio();
 void show_picture(const std::string&);
+void syncFilesystem();
 
 #include "fetcher.h"
 
@@ -79,6 +86,8 @@ Fetcher fetcher;
 #include "imtex.h"
 
 ImTexLoader texLoader(fetcher);
+
+static ImGui::FileBrowser* fbrowser;
 
 
 #ifdef USESPINE
@@ -110,21 +119,9 @@ struct Fiber
                               asyncify_stack, sizeof(asyncify_stack));
     }
 
-    /*
-    void init_manually(em_arg_callback_func entry, void *arg)
-    {
-        context.stack_base = c_stack + sizeof(c_stack);
-        context.stack_limit = c_stack;
-        context.stack_ptr = context.stack_base;
-        context.entry = entry;
-        context.user_data = arg;
-        context.asyncify_data.stack_ptr = asyncify_stack;
-        context.asyncify_data.stack_limit = asyncify_stack + sizeof(asyncify_stack);
-    }
-    */
-
     void swap(emscripten_fiber_t *fiber)
     {
+        // swap from `context` to `fiber`
         emscripten_fiber_swap(&context, fiber);
     }
 };
@@ -172,14 +169,29 @@ void strand_pump()
 
 static StrandCtx sctx;
 
+void addText(const char* s, bool hilite)
+{
+    int sz = strlen(s);
+    if (sz)
+    {
+        sctx._mainText.add(s, hilite);
+
+        if (sctx._transcript)
+        {
+            char last = s[sz-1];
+            sctx._transcript->write(s);
+            if (last != '\n') sctx._transcript->write('\n');
+        }
+    }
+}
+
 std::string gui_input_pump()
 {
     // called from strand to poll for input
-    const char* label;
     std::string s;
-    if (sctx.yieldCmd(s, &label))
+    if (sctx.yieldCmd(s))
     {
-        sctx._mainText.add(label, true);
+        addText(sctx._cmdLabel.c_str(), true);
     }
     else
     {
@@ -191,7 +203,7 @@ std::string gui_input_pump()
 
 static void textReceiver(const char* s)
 {
-    sctx._mainText.add(s);
+    addText(s, false);
 }
 
 void StrandInit(const char* story)
@@ -201,7 +213,7 @@ void StrandInit(const char* story)
     bool v = sctx.init(e, story);
 }
 
-static int InputCallback(ImGuiInputTextCallbackData* data)
+static int inputCallback(ImGuiInputTextCallbackData* data)
 {
     if (data->EventFlag == ImGuiInputTextFlags_CallbackCompletion)
     {
@@ -289,10 +301,32 @@ static void fontMenu()
         fontSize = fz;
         fontsChanged = true;
     }
-    
     ImGui::EndChild();
 }
 
+
+#ifdef __EMSCRIPTEN__
+EM_JS(void, call_js_args, (const char* fname, int fnamez, const char* mime, int mimez), {
+    offerDownload(UTF8ToString(fname, fnamez), UTF8ToString(mime, mimez));
+});
+
+void exportTranscript()
+{
+    if (sctx._transcript)
+    {
+        const std::string& fname = sctx._transcript->_name;
+        std::string mime = "text/plain";
+        std::string content = sctx._transcript->getAll();
+        LOG1("exporting transcript size, ", content.size());
+        if (!content.empty())
+        {
+            call_js_args(content.c_str(), content.size(), mime.c_str(), mime.size());
+        }
+    }
+}
+#else
+void exportTranscript() {}
+#endif
 
 void StrandWindow(bool* strand_open)
 {
@@ -317,7 +351,9 @@ void StrandWindow(bool* strand_open)
     ImGui::SetNextWindowSize(use_work_area ? viewport->WorkSize : viewport->Size);
 #endif    
 
-    //ImGuiIO& io = ImGui::GetIO();
+    ImGuiIO& io = ImGui::GetIO();
+    //io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+    io.ConfigInputTextCursorBlink = true;
 
     ImGuiStyle& style = ImGui::GetStyle();
     style.ScrollbarSize = 24.0f;  // fat enough for mobile
@@ -333,15 +369,32 @@ void StrandWindow(bool* strand_open)
 
     if (ImGui::BeginMenuBar())
     {
-#if 0
         if (ImGui::BeginMenu("File"))
         {
-            if (ImGui::MenuItem("Open..", "Ctrl+O")) { /* Do stuff */ }
-            if (ImGui::MenuItem("Save", "Ctrl+S"))   { /* Do stuff */ }
-            if (ImGui::MenuItem("Close", "Ctrl+W"))  { *strand_open = false; }
+            if (ImGui::MenuItem("Save", "Ctrl+S"))
+            {
+                if (fbrowser)
+                {
+                    expectSave = true;
+                    fbrowser->SetTitle("Save Game");
+                    fbrowser->SetFlags(ImGuiFileBrowserFlags_EnterNewFilename);
+                    fbrowser->Open();
+                }
+            }
+
+            if (ImGui::MenuItem("Load", "Ctrl+L"))
+            {
+                if (fbrowser)
+                {
+                    expectLoad = true;
+                    fbrowser->SetTitle("Load Game");
+                    fbrowser->SetFlags(0);  // be there already
+                    fbrowser->Open();
+                }
+            }
+            
             ImGui::EndMenu();
         }
-#endif
 
         if (ImGui::BeginMenu("Style"))
         {
@@ -363,6 +416,39 @@ void StrandWindow(bool* strand_open)
             {
                 audioEnabled = !audioEnabled;
                 if (!audioEnabled) stop_audio();
+            }
+            if (ImGui::MenuItem("Transcript", NULL, transcriptEnabled))
+            {
+                transcriptEnabled = !transcriptEnabled;
+
+                if (sctx._transcript)
+                {
+                    LOG1("Closing Transcript, ", sctx._transcript->_name);
+
+                    sctx._transcript->close();
+                    exportTranscript();
+                    
+                    delete sctx._transcript;
+                    sctx._transcript = 0;
+
+                    
+                }
+                
+                if (transcriptEnabled)
+                {
+                    Transcript* t = new TranscriptFile;
+                    const char* tFilename = "transcript.txt";
+                    if (t->open(tFilename))
+                    {
+                        sctx._transcript = t;
+                        LOG1("opened transcript ", tFilename);
+                    }
+                    else
+                    {
+                        delete t;
+                        LOG1("Failed to open transcript, ", tFilename);
+                    }
+                }
             }
             ImGui::EndMenu();
         }
@@ -435,6 +521,23 @@ void StrandWindow(bool* strand_open)
             ImGui::SetScrollHereY(1);
             requestScroll = false;
         }
+        else
+        {
+            int dy = 0;
+            
+            if (ImGui::IsKeyPressed(ImGuiKey_PageDown)) dy = 10;
+            else if (ImGui::IsKeyPressed(ImGuiKey_DownArrow)) dy = 1;
+            else if (ImGui::IsKeyPressed(ImGuiKey_PageUp)) dy = -10;
+            else if (ImGui::IsKeyPressed(ImGuiKey_UpArrow)) dy = -1;
+
+            if (dy)
+            {
+                float fy = ImGui::GetFontSize()*2;
+                float y = ImGui::GetScrollY();
+                y += dy*fy;
+                ImGui::SetScrollY(y);
+            }
+        }
 
         if (sctx._mainText._changed)
         {
@@ -477,7 +580,7 @@ void StrandWindow(bool* strand_open)
             if (ImGui::IsItemFocused())
             {
                 ch->_selected = i;
-                if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Enter)))
+                if (ImGui::IsKeyPressed(ImGuiKey_Enter))
                 {
                     accept = true;
                 }
@@ -507,13 +610,14 @@ void StrandWindow(bool* strand_open)
     if (inputActive)
     {
         // input box
-        static char buf1[128];
+        static char buf1[256];
         ImGui::BeginChild("Input", inputBoxSz, true);
         ImGui::SetNextItemWidth(inputBoxSz.x - pad.x*2);
 
         int tf =
             ImGuiInputTextFlags_CallbackCompletion
             | ImGuiInputTextFlags_CallbackHistory
+            | ImGuiInputTextFlags_EnterReturnsTrue
             //| ImGuiInputTextFlags_CallbackEdit
             ;
 
@@ -524,8 +628,9 @@ void StrandWindow(bool* strand_open)
 
         std::string pr = sctx.h.prompt();
         pr += " type here";
-        if (ImGui::InputTextWithHint("", pr.c_str(), buf1, sizeof(buf1),
-                                     tf, InputCallback))
+        if (ImGui::InputTextWithHint("InputText",
+                                     pr.c_str(), buf1, sizeof(buf1),
+                                     tf, inputCallback))
         {
             sctx.sendCmd(buf1);
             *buf1 = 0; // clear
@@ -697,6 +802,18 @@ static void font_list_loaded(const char* name, void* ctx)
     }
 }
 
+
+static const ImWchar* GetGlyphRangesIFI()
+{
+    static const ImWchar ranges[] =
+    {
+        0x0020, 0x00FF, // Basic Latin + Latin Supplement
+        0x201C, 0x201D, // open and close quote
+        0,
+    };
+    return &ranges[0];
+}
+
 static void font_loaded(const char* name, void* ctx)
 {
     if (fetcher.ok)
@@ -748,7 +865,8 @@ static void font_loaded(const char* name, void* ctx)
         ImFormatString(cfg.Name, IM_ARRAYSIZE(cfg.Name), "%s, %.0fpx", p, fontSize);
 
         ImFont* imf =
-            io.Fonts->AddFontFromMemoryTTF((void*)fdata, sz, fontSize, &cfg);
+            io.Fonts->AddFontFromMemoryTTF((void*)fdata, sz, fontSize, &cfg,
+                                           GetGlyphRangesIFI());
 
         ffi->_imFont = imf;
         if (ffi->_bold && !ffi->_italic) sctx._mainText.setBoldFont(imf);
@@ -945,7 +1063,42 @@ static void pumpAudio()
     }
 }
 
+#ifdef USESPINE
 SGState state;
+#endif
+
+#ifdef __EMSCRIPTEN__
+
+void syncFilesystem()
+{
+    LOG1("syncing filesystem", "");
+    
+  // sync from memory state to persisted and then
+  // run 'success'
+  EM_ASM(
+         FS.syncfs(false,function (err) {
+            if (err) console.log("failed to sync filesystem");
+    });
+  );
+}
+
+void initFilesystem()
+{
+    EM_ASM(
+           FS.mkdir('/savegames');
+           FS.mount(IDBFS, {}, '/savegames');
+
+           // sync from persisted state into memory 
+            FS.syncfs(true, function (err) {
+            if (err)
+                console.log("failed to init filesystem");
+               });
+           );
+}
+#else
+void initFilesystem() {}
+void syncFilesystem() {}
+#endif
 
 void init()
 {
@@ -976,7 +1129,7 @@ void init()
     // setup sokol-imgui, but provide our own font
     simgui_desc_t simgui_desc = { };
     simgui_desc.no_default_font = true;
-    simgui_desc.dpi_scale = sapp_dpi_scale();
+    //simgui_desc.dpi_scale = sapp_dpi_scale();
     simgui_setup(&simgui_desc);
 
     // file with list of fonts on server
@@ -997,6 +1150,11 @@ void init()
     // initial clear color
     pass_action.colors[0].action = SG_ACTION_CLEAR;
     pass_action.colors[0].value = { 0.45f, 0.55f, 0.6f, 1.0f };
+
+    initFilesystem();
+
+    fbrowser = new ImGui::FileBrowser();
+    fbrowser->SetTypeFilters({ ".sav" });
 
 #ifdef USESPINE    
     static sg_buffer_desc sgb = {};
@@ -1043,14 +1201,12 @@ void init()
     G = new Globals();
     G->fibers[0].init_with_api(runfiber, 0);
 
-    strand_enabled = true; // start from main loop
+    if (show_strand)
+        strand_enabled = true; // start from main loop
 }
 
-void frame(void)
+void frame()
 {
-    const int width = sapp_width();
-    const int height = sapp_height();
-
     loadFontList();
     loadFonts();
     loadAudio();
@@ -1060,17 +1216,54 @@ void frame(void)
 
     pumpAudio();
 
-    simgui_new_frame(width, height, 1.0/30.0); // 30 fps
+    strand_pump();
+
+    //double dt = sapp_frame_duration(); // 1/30.0;
+    double dt = 1/30.0;
+    
+    simgui_frame_desc_t frame;
+    frame.width = sapp_width();
+    frame.height = sapp_height();
+    frame.delta_time = dt;
+    frame.dpi_scale = sapp_dpi_scale();
+    
+    simgui_new_frame(frame);
+
+    if (show_strand)
+        StrandWindow(&show_strand);
 
     if (show_demo_window)
         ImGui::ShowDemoWindow(&show_demo_window);
 
-    strand_pump();
+    if (fbrowser)
+    {
+        fbrowser->Display();
+        if (fbrowser->HasSelected())
+        {
+            std::string f = fbrowser->GetSelected().string();
+            LOG1("selected ", f);
+            
+            if (expectSave)
+            {
+                sctx.h._requestSaveFile = f;
+                sctx.requestSave(f);
+            }
 
-    if (show_strand) StrandWindow(&show_strand);
+            if (expectLoad)
+            {
+                sctx.h._requestLoadFile = f;
+                sctx.requestLoad(f);
+            }
+               
+            fbrowser->ClearSelected();
+
+            expectSave = false;
+            expectLoad = false;
+        }
+    }
 
     // the sokol_gfx draw pass
-    sg_begin_default_pass(&pass_action, width, height);
+    sg_begin_default_pass(&pass_action, frame.width, frame.height);
     simgui_render();
     sg_end_pass();
     sg_commit();
@@ -1085,20 +1278,21 @@ void cleanup(void)
     sargs_shutdown();
 }
 
-void input(const sapp_event* event)
+void input(const sapp_event* e)
 {
-    if (event->type == SAPP_EVENTTYPE_QUIT_REQUESTED)
+    if (e->type == SAPP_EVENTTYPE_QUIT_REQUESTED)
     {
         show_quit_dialog = true;
         sapp_cancel_quit();
     }
     else
     {
-        if (event->type == SAPP_EVENTTYPE_KEY_DOWN)
+        if (e->type == SAPP_EVENTTYPE_KEY_DOWN)
         {
-            if (event->key_code == SAPP_KEYCODE_F1) show_demo_window = true;
+            int code = e->key_code;
+            if (code == SAPP_KEYCODE_F1) show_demo_window = true;
         }
-        simgui_handle_event(event);
+        simgui_handle_event(e);
     }
 }
 
@@ -1137,8 +1331,8 @@ sapp_desc sokol_main(int argc, char* argv[])
     sapp_desc desc = { };
     desc.init_cb = init;
     desc.frame_cb = frame;
-    desc.cleanup_cb = cleanup;
     desc.event_cb = input;
+    desc.cleanup_cb = cleanup;
     desc.width = 1024;
     desc.height = 768;
     desc.fullscreen = true;
@@ -1146,9 +1340,9 @@ sapp_desc sokol_main(int argc, char* argv[])
     // renders full size on Hi DPI screens
     desc.high_dpi = true;
     desc.html5_ask_leave_site = html5_ask_leave_site;
-    desc.ios_keyboard_resizes_canvas = false;
-    //desc.icon.sokol_default = true;
-    //desc.gl_force_gles2 = true;
+    desc.ios_keyboard_resizes_canvas = true;
+    desc.icon.sokol_default = true;
+    desc.gl_force_gles2 = true;
     //desc.window_title = "Dear ImGui HighDPI (sokol-app)";
     return desc;
 }

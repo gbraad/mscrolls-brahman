@@ -32,11 +32,14 @@
 
 
 #include "kllib.h"
+
+#ifdef IFI_BUILD
 #include "ificlient.h"
 #include "ifihandler.h"
 
 extern IFIClient* ifi;
 extern IFIHandler* ifih;
+#endif // IFI_BUILD
 
 #include "strandi.h"
 
@@ -92,6 +95,7 @@ struct KLStrandi: public KLLib
 
     Term _primTextifyFn(List::iterator& ai, Env& env)
     {
+        // (textify term)
         Term r;
         if (ai)
         {
@@ -154,17 +158,30 @@ struct KLStrandi: public KLLib
 
     Term _primRunTermFn(List::iterator& ai, Env& env)
     {
+        // (runtime name)
         Term t = EVALAI;
         string tname = t.toStringRaw();
         string s;
         if (!tname.empty())
         {
-            s = _strandi->runSingleTerm(tname);
+            s = _strandi->runSingleTermCap(tname);
             //LOG3("KLStrandi, eval sym ", tname << " = " << s);
         }
         Term r = Stringt(s);        
         return r;
-        
+    }
+
+    Term _primUndoTermFn(List::iterator& ai, Env& env)
+    {
+        Term t = EVALAI;
+        string tname = t.toStringRaw();
+
+        int r = 0;
+        if (!tname.empty())
+        {
+            if (_strandi->undoToTerm(tname)) r = 1;
+        }
+        return Int(r);
     }
 
     void _init()
@@ -178,6 +195,7 @@ struct KLStrandi: public KLLib
         DEF_PRIM(HTMLToPlain, "htmltoplain");
         DEF_PRIM(PlainToHTML, "plaintohtml");
         DEF_PRIM(RunTerm, "runterm");
+        DEF_PRIM(UndoTerm, "undoterm");
 
         _host->_env._env = List(g, *_host->_env._env);
 

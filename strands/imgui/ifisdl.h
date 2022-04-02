@@ -32,6 +32,7 @@
 
 
 #include <iostream>
+#include <stdio.h>
 #include <functional>
 #include <string>
 #include "ifi.h"
@@ -54,6 +55,9 @@ struct SDLHandler: public IFIHandler
     TextEmitter     _emitter;
 
     string          _title;
+
+    string          _requestSaveFile;
+    string          _requestLoadFile;
      
     SDLHandler(IFIHost* host) : _host(host) {}
     ~SDLHandler() { delete _choice; }
@@ -87,20 +91,53 @@ struct SDLHandler: public IFIHandler
         return getProp(IFI_PROMPT).toString();
     }
 
-    /*
+    void emitPostSave(bool v)
+    {
+        // send a message to the engine to indicate save worked or not.
+        GrowString js;
+        buildJSONStart(js);        
+
+        JSONWalker::addBoolValue(js, IFI_POSTSAVE, v);
+        buildJSONEnd();
+
+        // send
+        _host->eval(js.start());
+    }
+
+    void emitPostLoad(bool v)
+    {
+        // send a message to the engine to indicate load worked or not.
+        GrowString js;
+        buildJSONStart(js);        
+
+        JSONWalker::addBoolValue(js, IFI_POSTLOAD, v);
+        buildJSONEnd();
+
+        // send
+        _host->eval(js.start());
+    }
+
     bool ifiSave(const uchar* data, int size, const string& name) override
     {
+        // ifiSaveDataResponse is handled in the ifihandler, which
+        // calls this to actually perform the save to file.
+        // the name is optionally provided in the json.
+        
         // any suggested name?
         string f = name;
 
         // otherwise invent our own
-        if (f.empty()) f = "save";
+        if (f.empty()) f = _requestSaveFile;
 
-        string dataDir = getProp(IFI_DATADIR).toString();
-        string path = makePath(dataDir, changeSuffix(f, ".sav"));
+        // ensure we use a save suffix
+        f = changeSuffix(f, ".sav");
 
-        LOG3("ifiSave ", f);
+        //string dataDir = getProp(IFI_DATADIR).toString();
+        //string path = makePath(dataDir, changeSuffix(f, ".sav"));
 
+        string path = f;
+        LOG1("ifiSave ", path << " size:" << size);
+        
         FD fd;
         bool r = fd.open(path.c_str(), FD::fd_new);
 
@@ -113,34 +150,48 @@ struct SDLHandler: public IFIHandler
             }
             else
             {
-                LOG("ifiSave, cannot write to file '", path << "'\n");
+                LOG1("ifiSave, cannot write to file '", path << "'\n");
             }
         }
         else
         {
-            LOG("ifiSave, can't open save file '", path << "'\n");
+            LOG1("ifiSave, can't open save file '", path << "'\n");
         }
-        
+
+        if (r)
+        {
+            // XX defined in main. This syncs the persistent files
+            syncFilesystem();
+        }
+
+        emitPostSave(r);
+
         return r;
     }
 
     bool ifiLoadData(const string& s) override
     {
-        // NB: this can be a request or a response.
-        // when a request: `s` is the data
-        // when a response: `s` is optionally, a filename
-        // and although a "response" is actually a request to load
+        // called directly from requestLoad.
+        // we load from file and send it to the back end.
         
         string f = s;
 
         // otherwise invent our own
-        if (f.empty()) f = "save";
-
-        string dataDir = getProp(IFI_DATADIR).toString();
-        string path = makePath(dataDir, changeSuffix(f, ".sav"));
+        if (f.empty()) f = _requestLoadFile;
         
+        // ensure we use a save suffix
+        f = changeSuffix(f, ".sav");
+
+        //string dataDir = getProp(IFI_DATADIR).toString();
+        //string path = makePath(dataDir, changeSuffix(f, ".sav"));
+        string path = f;
+
+        LOG1("Loading ", path);
+
         FD fd;
-        if (fd.open(path))
+        
+        bool v = fd.open(path);
+        if (v)
         {
             uchar* data = fd.readAll();
             if (data)
@@ -148,10 +199,10 @@ struct SDLHandler: public IFIHandler
                 GrowString js;
                 buildJSONStart(js);        
 
-                JSONWalker::addRawStringValue(js, IFI_LOADDATA, (char*)data);
+                JSONWalker::addStringValue(js, IFI_LOADDATA, (char*)data);
                 buildJSONEnd();
 
-                LOG3("Loading ", path);
+                //LOG1("ifiLoadData, ", js.start());
 
                 // send
                 _host->eval(js.start());
@@ -162,15 +213,24 @@ struct SDLHandler: public IFIHandler
             else
             {
                 LOG1("IFI loadGame, error reading '", path << "'");
+                v = false;
             }
         }
         else
         {
             LOG2("IFI loadGame, unable to open '", path << "'");
         }
+
+        if (!v)
+        {
+            // only need to send if failed!
+            // if it worked, we have sent the data and that data needs
+            // to be restored before we know if it has worked.
+            emitPostLoad(v);
+        }
+        
         return true;
     }
-    */
 
     bool ifiTitleTextResponse(const string& s) override
     {
@@ -241,7 +301,7 @@ struct SDLHandler: public IFIHandler
         if (js[0] == '{')
         {
             // json
-            LOG1("Got picture request ", js);
+            LOG2("Got picture request ", js);
 
             for (JSONWalker jw(js); jw.nextKey(); jw.next())
             {
@@ -276,6 +336,7 @@ struct SDLHandler: public IFIHandler
 
     bool ifiAnimateResponse(const string& js) override
     {
+#ifdef USESPINE        
         if (js[0] == '{')
         {
             // json
@@ -318,6 +379,9 @@ struct SDLHandler: public IFIHandler
             else delete ai;
         }
         return true; // handled
+#else
+        return false;
+#endif        
     }
 
     /////
@@ -383,9 +447,11 @@ struct SDLHandler: public IFIHandler
 
     bool pumpfn()
     {
-        //static int cc;
-        //LOG1("pump! ", ++cc);
         flush();
+
+        //static int cc;
+        //LOG1("pumpfn! ", ++cc);
+        
         std::string s = gui_input_pump();
         if (!s.empty())
         {
@@ -451,6 +517,104 @@ struct History
     
 };
 
+struct Transcript
+{
+    typedef std::string string;
+
+    string      _name;
+    size_t      _size;
+    int         _error = 0;
+
+    virtual ~Transcript() {}
+
+    virtual bool open(const string& name) = 0;
+    virtual void close() = 0;
+    virtual bool write(const char* s, size_t sz) = 0;
+    virtual bool write(const char c) = 0;
+    virtual string getAll() = 0;
+    
+    bool write(const string& t) { return write(t.c_str(), t.size()); }
+    bool write(const char* s) { return write(s, strlen(s)); }
+    
+};
+
+struct TranscriptFile: public Transcript
+{
+    FILE*       _fp = 0;
+
+    ~TranscriptFile()
+    {
+        close();
+    }
+
+    bool isOpen() const { return _fp != 0; }
+
+    bool open(const string& name) override
+    {
+        close();
+        _name = name;
+        _size = 0;
+        _fp = fopen(name.c_str(), "w");
+        return _fp != 0;
+    }
+
+    void close() override
+    {
+        if (_fp)
+        {
+            fclose(_fp);
+            _fp = 0;
+        }
+    }
+
+    bool write(char c) override
+    {
+        bool r = isOpen() && !_error;
+        if (r)
+        {
+            r = fputc(c, _fp) != EOF;
+            if (r) ++_size;
+            else _error = 1;
+        }
+        return r;
+    }
+    
+    bool write(const char* s, size_t sz) override
+    {
+        bool r = isOpen() && !_error;
+
+        if (r)
+        {
+            //LOG1("transcript: ", s);
+            r = fwrite(s, 1, sz, _fp) == sz;
+            if (r) _size += sz;
+            else _error = 1;
+        }
+        return r;
+    }
+
+    string getAll() override
+    {
+        assert(!isOpen());
+
+        string all;
+        if (_size)
+        {
+            FILE* fp = fopen(_name.c_str(), "r");
+            if (fp)
+            {
+                all.resize(_size);
+                fread((char*)all.data(), 1, _size, fp);
+                fclose(fp);
+                
+            }
+        }
+        return all;
+    }
+
+    
+};
+
 struct StrandCtx
 {
     typedef std::string string;
@@ -475,12 +639,13 @@ struct StrandCtx
     int             _loadSz;
     char*           _loadData;
 
+    Transcript*     _transcript = 0;
+
     void resetAll()
     {
         _hist.clear();
         _mainText.clear();
 
-        
         // drop the client
         if (ifi)
         {
@@ -518,6 +683,7 @@ struct StrandCtx
 
         while (!fetcher.start(name, _fetch_done, this))
         {
+            //LOG1("fetchload waiting pump ", name);
             (ifiCtx._p)(); // pump while waiting to start loading
         }
 
@@ -549,21 +715,45 @@ struct StrandCtx
     void setLabel(const string& label)
     {
         _cmdLabel = "\n> ";
-        _cmdLabel += label;
+        if (!label.empty())
+        {
+            char first = label[0];
+            if (first == '_')
+            {
+                // debug command, from a click link
+                //std::string w = lastWordOf(label);
+                //Term* t = Term::find(w);
+                //std::strint l = t->textify();
+
+                // XXX
+                // ignore special commands
+            }
+            else
+            {
+                _cmdLabel += label;
+            }
+        }
     }
     
     void sendCmd(const char* s, const string* label = 0)
     {
+        // command `s' but sometimes we wish to display this instead
+        // but a given `label`.
+        // For example, choices are entered as numbers, but we want to
+        // display the actual choice text.
+        
         // mark text as no longer fresh
         _mainText.seenText();
         
         strcpy(_guiInputBuf, s);
         _hist.add(_guiInputBuf);
+
+        // either use the label or the command text
         setLabel(label ? *label : s);
         _guiInputReady = true;
     }
 
-    bool yieldCmd(string& cmd, const char** label)
+    bool yieldCmd(string& cmd)
     {
         bool r = false;
 
@@ -575,14 +765,17 @@ struct StrandCtx
             // yes, in that case send this first
             cmd = _mainText._clickCommand;
 
+            // click command display as command
+            setLabel(cmd);
+
             // taken
             _mainText._clickCommand.clear();
         }
         else if (_guiInputReady)
         {
+            // label is already set
             r = true;
             cmd = _guiInputBuf;
-            *label = _cmdLabel.c_str();
             _guiInputReady = false;
         }
         return r;
@@ -671,4 +864,28 @@ struct StrandCtx
 
         LOG3("IFIConsole, ", "finished");
     }
+
+    void requestSave(const string& name)
+    {
+        LOG1("UI requesting save, ", name);
+
+        GrowString js;
+        h.buildJSONStart(js);
+        JSONWalker::addBoolValue(js, IFI_SAVEDATA, true);
+        h.buildJSONEnd();
+
+        // send to back end via host
+        host.eval(js.start());
+    }
+
+    void requestLoad(const string& name)
+    {
+        LOG1("UI requesting load, ", name);
+
+        // call our handler directly, this will load and
+        // send data to backend
+        h.ifiLoadData(name);
+        
+    }
+
 };

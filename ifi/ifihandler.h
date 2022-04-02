@@ -377,6 +377,7 @@ struct IFIHandler
         else if (key == IFI_SAVEDATA)
         {
             // should be a request. response should be saveobj
+            // savedata:true
             if (isBool(v) && isTrue(v))
             {
                 // is a request to provide save data
@@ -393,6 +394,8 @@ struct IFIHandler
             // ignore argument
             r = ifiRestartResponse();
         }
+        else if (key == IFI_POSTSAVE) { r = ifiPostSave(isTrue(v)); }
+        else if (key == IFI_POSTLOAD) { r = ifiPostLoad(isTrue(v)); }
 
         if (!r) ifiDefault(key, v);
     }
@@ -453,7 +456,9 @@ struct IFIHandler
                 }
                 else if (jw._key == IFI_DATA)
                 {
-                    data = jw.collectRawStringValue(st);
+                    // need to decode strings
+                    var d = jw.collectValue(st);
+                    data = d.toString();
                 }
                 else
                 {
@@ -500,6 +505,11 @@ struct IFIHandler
     virtual bool ifiMapResponse(const string& js) { return false; }
     virtual bool ifiMapPlacesResponse(const string& js) { return false; }
     virtual bool ifiSoundResponse(const string& js) { return false; }
+
+
+    // these are optional
+    virtual bool ifiPostSave(bool v) { return true; }
+    virtual bool ifiPostLoad(bool v) { return true; }
 
     bool ifiMetaResponsePrep(const string& js)
     {

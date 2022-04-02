@@ -282,6 +282,11 @@
 
         sdtx_set_context(SDTX_DEFAULT_CONTEXT)
 
+    Alternatively, use the function sdtx_default_context() to get the default
+    context handle:
+
+        sdtx_set_context(sdtx_default_context());
+
     To destroy a context, call:
 
         sdtx_destroy_context(ctx)
@@ -538,6 +543,7 @@ SOKOL_DEBUGTEXT_API_DECL sdtx_context sdtx_make_context(const sdtx_context_desc_
 SOKOL_DEBUGTEXT_API_DECL void sdtx_destroy_context(sdtx_context ctx);
 SOKOL_DEBUGTEXT_API_DECL void sdtx_set_context(sdtx_context ctx);
 SOKOL_DEBUGTEXT_API_DECL sdtx_context sdtx_get_context(void);
+SOKOL_DEBUGTEXT_API_DECL sdtx_context sdtx_default_context(void);
 
 /* draw and rewind the current context */
 SOKOL_DEBUGTEXT_API_DECL void sdtx_draw(void);
@@ -3301,7 +3307,7 @@ static const uint8_t _sdtx_vs_bytecode_wgpu[1648] = {
     0x08,0x00,0x00,0x00,0x2a,0x00,0x00,0x00,0x29,0x00,0x00,0x00,0x3e,0x00,0x03,0x00,
     0x27,0x00,0x00,0x00,0x2a,0x00,0x00,0x00,0xfd,0x00,0x01,0x00,0x38,0x00,0x01,0x00,
 };
-static const uint8_t _sdtx_vs_bytecode_wgpu[940] = {
+static const uint8_t _sdtx_fs_bytecode_wgpu[940] = {
     0x03,0x02,0x23,0x07,0x00,0x00,0x01,0x00,0x08,0x00,0x08,0x00,0x1a,0x00,0x00,0x00,
     0x00,0x00,0x00,0x00,0x11,0x00,0x02,0x00,0x01,0x00,0x00,0x00,0x0b,0x00,0x06,0x00,
     0x02,0x00,0x00,0x00,0x47,0x4c,0x53,0x4c,0x2e,0x73,0x74,0x64,0x2e,0x34,0x35,0x30,
@@ -3732,10 +3738,8 @@ static void _sdtx_setup_common(void) {
         shd_desc.vs.bytecode = SG_RANGE(_sdtx_vs_bytecode_d3d11);
         shd_desc.fs.bytecode = SG_RANGE(_sdtx_fs_bytecode_d3d11);
     #elif defined(SOKOL_WGPU)
-        shd_desc.vs.byte_code = _sdtx_vs_bytecode_wgpu;
-        shd_desc.vs.byte_code_size = sizeof(_sdtx_vs_bytecode_wgpu);
-        shd_desc.fs.byte_code = _sdtx_fs_bytecode_wgpu;
-        shd_desc.fs.byte_code_size = sizeof(_sdtx_fs_bytecode_wgpu);
+        shd_desc.vs.bytecode = SG_RANGE(_sdtx_vs_bytecode_wgpu);
+        shd_desc.fs.bytecode = SG_RANGE(_sdtx_fs_bytecode_wgpu);
     #else
         shd_desc.vs.source = _sdtx_vs_src_dummy;
         shd_desc.fs.source = _sdtx_fs_src_dummy;
@@ -3881,6 +3885,7 @@ static sdtx_desc_t _sdtx_desc_defaults(const sdtx_desc_t* in_desc) {
 }
 
 /*=== PUBLIC API FUNCTIONS ===================================================*/
+
 SOKOL_API_IMPL void sdtx_setup(const sdtx_desc_t* desc) {
     SOKOL_ASSERT(desc);
     memset(&_sdtx, 0, sizeof(_sdtx));
@@ -3974,6 +3979,10 @@ SOKOL_API_IMPL void sdtx_set_context(sdtx_context ctx_id) {
 SOKOL_API_IMPL sdtx_context sdtx_get_context(void) {
     SOKOL_ASSERT(_SDTX_INIT_COOKIE == _sdtx.init_cookie);
     return _sdtx.cur_ctx_id;
+}
+
+SOKOL_API_IMPL sdtx_context sdtx_default_context(void) {
+    return SDTX_DEFAULT_CONTEXT;
 }
 
 SOKOL_API_IMPL void sdtx_font(int font_index) {

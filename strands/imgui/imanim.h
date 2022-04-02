@@ -1,5 +1,7 @@
 #pragma once
 
+#ifdef USESPINE
+
 #include <chrono>
 #include "strutils.h"
 
@@ -200,3 +202,12 @@ struct AnimState: public AnimInfo
     }
 };
 
+#else
+// stubs
+struct AnimInfo {};
+struct AnimState: public AnimInfo
+{
+    void clear() {}
+};
+
+#endif

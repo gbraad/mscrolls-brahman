@@ -1,7 +1,7 @@
 // Strand Core library
 
 CORE_VERSION
-1.02
+1.03
 
 GAME_DETAILS
 \n\n**GAME_TITLE** by _GAME_AUTHOR_, GAME_VERSION.
@@ -53,7 +53,6 @@ UPDATEINV > what is in player
 UPDATETITLE > what is player in
 *
 { (ifisend (get-title IT)) }
-
 
 UPDATEMAP MAP_BACKIMAGE
 * them
@@ -150,14 +149,40 @@ HELP
 > s
 * go up
 > u
+* up
+> u
 * go down
 > d
+* down
+> d
+* go in
+> in
+* enter
+> in
+* get in
+> in
 * go out
 > out
 * get out
 > out
 * exit
 > out
+* go northeast
+> ne
+* go ne
+> ne
+* go northwest
+> nw
+* go nw
+> nw
+* go southeast
+> se
+* go se
+> se
+* go southwest
+> sw
+* go sw
+> sw
 * score
 Your score is
 > what is player score
@@ -223,7 +248,17 @@ NOWAY
 NOWAY
 * d
 NOWAY
+* in
+NOWAY
 * out
+NOWAY
+* ne
+NOWAY
+* nw
+NOWAY
+* se
+NOWAY
+* sw
 NOWAY
 
 PERSON@ THING
@@ -302,9 +337,30 @@ down
 * name
 d
 
-OUT@
+NORTHEAST@
 * name
-out
+northeast
+* name
+ne
+
+NORTHWEST@
+* name
+northwest
+* name
+nw
+
+SOUTHEAST@
+* name
+southeast
+* name
+se
+
+SOUTHWEST@
+* name
+southwest
+* name
+sw
+
 
 GETTABLE@ THING
 * be it

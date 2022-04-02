@@ -31,6 +31,7 @@
  */
 
 
+#include <list>
 #include "fd.h"
 #include "strutils.h"
 #include "varset.h"
@@ -45,6 +46,8 @@
 #define SYM_NONRAMDOM '#'
 #define SYM_SEQUENCE '<'
 #define SYM_FIRST '='
+#define SYM_ALL '$'
+#define SYM_RUN_CONDITIONAL '%'
 
 // choice flags
 #define SYM_CMD_CHOICES '>'
@@ -114,6 +117,7 @@ struct ParseStrands: public ParseBase
     typedef std::list<VoiceInfo>   VoiceSet;
 
     VoiceSet           _voiceSet;
+    bool               _inQuote = false;
     bool               _collectVoices = false;
     
     string parseName()
@@ -152,6 +156,9 @@ struct ParseStrands: public ParseBase
             break;
         case SYM_FIRST:
             rt = Term::t_first;
+            break;
+        case SYM_ALL:
+            rt = Term::t_all;
             break;
         default:
             c = 0;
@@ -215,7 +222,7 @@ struct ParseStrands: public ParseBase
         if (p != st)
         {
             //ERR0("add text '" << string(st, p - st) << "'");
-            string s = processEscapes(st, p - st);
+            string s = processEscapes(st, p - st, _inQuote);
             if (s.size())
             {
                 if (Flow::t_text & oktypes)
@@ -323,7 +330,12 @@ struct ParseStrands: public ParseBase
                 if (vs == p) break; // no value given, drop out
 
                 string val(vs, p - vs);
-                vv.parse(val.c_str(), true);
+
+                var::Format vf;
+                vf._mapBool = true;
+
+                const char* vp = val.c_str();
+                vv.parse(&vp, &vf);
             }
             
             if (vv)
@@ -344,6 +356,10 @@ struct ParseStrands: public ParseBase
     {
         // break authored text into its component flows;
         // stretches of plain text, term references and media refs.
+
+        // assume we are not in quotes at the start of any text span
+        _inQuote = false;
+        
         const char* q = t.c_str();
         for (;;)
         {
@@ -724,24 +740,45 @@ struct ParseStrands: public ParseBase
                 if (ty) t->_rtype = ty;  // default is random
                 ty = parseRType();
                 if (ty) t->_rtypenext = ty; // default void
-            
-                if (AT == SYM_STICKY)
+
+                for (;;)
                 {
-                    if (t->_rtype == Term::t_shuffle
-                        || t->_rtype == Term::t_nonrandom)
+                    // [!>]
+
+                    bool used = false;
+                    
+                    if (AT == SYM_STICKY)
                     {
-                        // no point having state for term used once
-                        LOG1("sticky term changed to random ", t->_name);
-                        t->_rtype = Term::t_random;
-                    }
-                    if (t->_rtype == Term::t_sequence)
-                    {
-                        // no need for sequence, same as first match
-                        LOG1("sticky term changed to first ", t->_name);
-                        t->_rtype = Term::t_first;
-                    }
+                        used = true;
+                        if (t->_rtype == Term::t_shuffle
+                            || t->_rtype == Term::t_nonrandom)
+                        {
+                            // no point having state for term used once
+                            LOG1("sticky term changed to random ", t->_name);
+                            t->_rtype = Term::t_random;
+                        }
+                        if (t->_rtype == Term::t_sequence ||
+                            t->_rtype == Term::t_all)
+                        {
+                            // no need for sequence, same as first match
+                            LOG1("sticky term changed to first ", t->_name);
+                            t->_rtype = Term::t_first;
+                        }
             
-                    t->sticky(true);
+                        t->sticky(true);
+                    }
+                    else if (AT == SYM_RUN_CONDITIONAL)
+                    {
+                        used = true;
+
+                        // when term is referenced in a conditional, we run the
+                        // term, rather than testing for visit.
+                        // Such terms are expected to return EXEC_TRUE or EXEC_FALSE
+                        t->runConditional(true);
+                    }
+
+                    if (!used) break;
+                    
                     BUMP;
                     skipws();
                 }
@@ -775,6 +812,8 @@ struct ParseStrands: public ParseBase
             }
             break;
         case Term::t_choice:
+
+            // ?[!]>
             for (;;)
             {
                 if (AT == SYM_STICKY)
@@ -914,6 +953,7 @@ struct ParseStrands: public ParseBase
     Selector* parseSelector(Term* host)
     {
         // POS just past "*"
+        // *=[+-!][<][?]
         Selector* s = new Selector(host);
         s->_lineno = lineno;
 
@@ -1150,7 +1190,12 @@ struct ParseStrands: public ParseBase
                 t->getParents(parents);
                 for (auto p : parents)
                 {
-                    if (p->_type != Term::t_object)
+                    if (p->_type == Term::t_object)
+                    {
+                        // only leaves are instances
+                        p->isClass(true);
+                    }
+                    else
                     {
                         PERR0(t->_name << " parent " << p->_name << " not object");
                         v = false;
@@ -1346,6 +1391,7 @@ struct ParseStrands: public ParseBase
     {
         // ensure special terms are present
         Term::intern(TERM_TICK);
+        Term::intern(TERM_UNDO);
         Term::intern(TERM_LAST);
         Term::intern(TERM_IT);
         Term::intern(TERM_THAT);

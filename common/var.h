@@ -37,8 +37,11 @@
 #include <string.h> //strcmp
 #include <math.h> // floor
 #include <stdlib.h>
+#include <functional>
 #include "cutils.h"
 #include "types.h"
+
+#define VAR_EPS  1e-9
 
 struct var
 {
@@ -51,6 +54,18 @@ struct var
         virtual void destroy() = 0;
         virtual bool operator==(const Blob& b) const = 0;
         virtual string toString() const = 0;
+    };
+
+    struct Format
+    {
+        typedef std::function<Blob*(const char**)> BlobParser;
+    
+        bool    _quoteStrings = false;
+        bool    _mapBool = false;
+        int     _prec = 0;
+
+        // if we want parse to handle blobs
+        BlobParser*  _blobParser = 0;
     };
 
     struct list
@@ -91,14 +106,14 @@ struct var
             return l;
         }
 
-        string toString() const
+        string toString(const Format* f = 0) const
         {
             assert(_size && _vars);
-            string s = _vars[0].toString();
+            string s = _vars[0].toString(f);
             for (int i = 1; i < _size; ++i)
             {
                 s += ',';
-                s += _vars[i].toString();
+                s += _vars[i].toString(f);
             }
             return s;
         }
@@ -240,6 +255,7 @@ struct var
 
     bool operator==(const var& v) const
     {
+        // strictly equal including type
         bool res = _type == v._type;
         if (res) 
         {
@@ -251,7 +267,7 @@ struct var
                 res = !strcmp(_s, v._s);
                 break;
             case var_double:
-                res = _d == v._d;
+                res = fabs(_d - v._d) < VAR_EPS;
                 break;
             case var_int:
                 res = _i == v._i;
@@ -270,11 +286,31 @@ struct var
     }
 
     bool operator==(const string& s) const
-    {
-        return _type == var_string && s == _s;
-    }
+    { return _type == var_string && s == _s; }
 
     bool operator!=(const var& v) const { return !(*this == v); }
+
+    bool equ(const var& v) const
+    {
+        // like "==" but across types
+        if (_type == v._type) return *this == v;
+        
+        bool r = false;
+        if (*this && v) // both non-null
+        {
+            switch(_type)
+            {
+            case var_string:
+            case var_double:
+            case var_int:
+                if (v.isNumber() || v.isString())
+                    r = fabs(toDouble() - v.toDouble()) < VAR_EPS;
+                break;
+            }
+        }
+        return r;
+    }
+    
     int size() const
     {
         return isList() && _l ? _l->_size : 0;
@@ -399,14 +435,16 @@ struct var
     {
         return _type == var_string ? _s : 0;
     }
-    
-    string toString(bool quoteStrings = false) const
+
+    string toString(const Format* f = 0) const
     {
         switch (_type)
         {
         case var_string:
-            if (quoteStrings)
+            if (f && f->_quoteStrings)
             {
+                // XX need to process escapes
+                
                 string s;
                 s = '"';
                 s += _s;
@@ -417,7 +455,11 @@ struct var
         case var_double:
             {
                 char buf[32];
-                sprintf(buf, "%f", _d);
+                if (f && f->_prec)
+                {
+                    sprintf(buf, "%.*f", f->_prec, _d);
+                }
+                else sprintf(buf, "%g", _d);
                 return buf;
             }
             break;
@@ -435,7 +477,7 @@ struct var
             {
                 string s;
                 s += '(';
-                if (_l) s += _l->toString();
+                if (_l) s += _l->toString(f);
                 s += ')';
                 return s;
             }
@@ -521,27 +563,103 @@ struct var
         return res;
     }
 
-    void parse(const char* s, bool mapBoolNames = false)
+    bool parse(const char** sp, Format* f = 0)
     {
-        if (s && *s)
+        const char* s = *sp;
+        bool r = (s && *s);
+
+        if (r)
         {
-            const char* p = s;
-            if (!_parse(&p))
+            r = _parse(&s);
+
+            if (!r)
             {
-                if (mapBoolNames)
+                if (f && f->_mapBool)
                 {
                     // detect names of bool and map to values
-                    if (!strcmp(s, "true")) { _type = var_int; _i = 1; }
-                    else if (!strcmp(s, "false")) { _type = var_int; _i = 0; }
+                    if (!strcmp(s, "true"))
+                    {
+                        _type = var_int;
+                        _i = 1;
+                        s += 4;
+                        r = true;
+                    }
+                    else if (!strcmp(s, "false"))
+                    {
+                        _type = var_int;
+                        _i = 0;
+                        s += 5;
+                        r = true;
+                    }
                 }
 
-                if (!_type)
+                if (!r)
                 {
-                    _type = var_string;
-                    _enstring(s);
+                    if (*s == '{' && f && f->_blobParser)
+                    {
+                        // blobs indicated by "{...}"
+                        // only consider them if we have a blob parser
+                        // otherwise will be interpreted as strings
+                    
+                        // expect parser to park immediately afterwards
+                        // if successful.
+                        //LOG1("Calling blobparser on ", s);
+                        Blob* b = (*f->_blobParser)(&s);
+                        if (b)
+                        {
+                            _type = var_blob;
+                            _b = b;
+                            r = true;
+                        }
+
+                        // but if fails, then we fail, as it was a blob!
+                    }
+                    else
+                    {
+                        // do we expect quoted strings?
+                        bool q = f && f->_quoteStrings;
+
+                        int sz = 0;
+
+                        if (q)
+                        {
+                            // expect quote
+                            if (*s == '"')
+                            {
+                                // XX need to decode string escapes!
+                                ++s;
+                                const char* p = s;
+
+                                while (*p && *p != '"') ++p;
+
+                                // fail unless close quote is found
+                                if (*p)
+                                {
+                                    sz = p - s;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            // without quotes interpret everything as string
+                            sz = strlen(s);
+                        }
+                        
+                        if (sz > 0)
+                        {
+                            r = true;
+                            _type = var_string;
+                            _enstring(s, sz);
+
+                            s += sz;
+                            if (q) ++s; // skip close quote
+                        }
+                    }
                 }
             }
+            if (r) *sp = s;
         }
+        return r;
     }
 
     void purge()

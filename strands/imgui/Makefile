@@ -14,7 +14,7 @@
 # All three are needed to run the demo.
 
 # comment this out to remove spine
-USESPINE=1
+#USESPINE=1
 
 ifdef WINDOWS
 CC = gcc
@@ -23,7 +23,7 @@ TARGET = game.exe
 else
 WEB=1
 CC = emcc
-CXX = em++
+CXX = em++ -std=c++17
 WEB_DIR = web
 TARGET = $(WEB_DIR)/index.html
 endif
@@ -35,7 +35,7 @@ SRCDIR = $(KLDIR)/imgui
 IFIDIR := $(TOP)/ifi
 KLSRC = $(KLDIR)/head.cpp $(KLDIR)/list.cpp $(KLDIR)/sat.cpp $(KLDIR)/tree.cpp $(KLDIR)/kl.cpp $(KLDIR)/blob.cpp $(KLDIR)/parsectx.cpp $(KLDIR)/klstrandi.cpp $(KLDIR)/porter2.c $(KLDIR)/strands.cpp  $(IFIDIR)/ifiglue.cpp
 SOURCES = $(SRCDIR)/main.cpp 
-SOURCES += $(IMGUI_DIR)/imgui.cpp $(IMGUI_DIR)/imgui_demo.cpp $(IMGUI_DIR)/imgui_draw.cpp $(IMGUI_DIR)/imgui_tables.cpp $(IMGUI_DIR)/imgui_widgets.cpp $(IMGUI_DIR)/misc/freetype/imgui_freetype.cpp $(SRCDIR)/stb_vorbis.c
+SOURCES += $(IMGUI_DIR)/imgui.cpp $(IMGUI_DIR)/imgui_demo.cpp $(IMGUI_DIR)/imgui_draw.cpp $(IMGUI_DIR)/imgui_tables.cpp $(IMGUI_DIR)/imgui_widgets.cpp $(IMGUI_DIR)/misc/freetype/imgui_freetype.cpp $(SRCDIR)/stb_vorbis.c $(SRCDIR)/imwebp.cpp
 SOURCES += $(KLSRC)
 UNAME_S := $(shell uname -s)
 SOKDIR := $(TOP)/tools/sokol
@@ -43,8 +43,47 @@ COMMONDIR := $(TOP)/common
 IFIDEFS := -DIFI_BUILD -DIFI_STATIC -DIFI_HANDLE_CHOICE #-DLOGGING
 VORBDEFS := -DSTB_VORBIS_NO_PUSHDATA_API -DSTB_VORBIS_MAX_CHANNELS=2 -DSTB_VORBIS_NO_INTEGER_CONVERSION
 
+WEBP_DIR = $(TOP)/tools/libwebp
+
+WEBPSRC = \
+    $(WEBP_DIR)/src/dec/alpha_dec.c \
+    $(WEBP_DIR)/src/dec/buffer_dec.c \
+    $(WEBP_DIR)/src/dec/frame_dec.c \
+    $(WEBP_DIR)/src/dec/idec_dec.c \
+    $(WEBP_DIR)/src/dec/io_dec.c \
+    $(WEBP_DIR)/src/dec/quant_dec.c \
+    $(WEBP_DIR)/src/dec/tree_dec.c \
+    $(WEBP_DIR)/src/dec/vp8_dec.c \
+    $(WEBP_DIR)/src/dec/vp8l_dec.c \
+    $(WEBP_DIR)/src/dec/webp_dec.c \
+	\
+    $(WEBP_DIR)/src/dsp/alpha_processing.c \
+    $(WEBP_DIR)/src/dsp/cpu.c \
+    $(WEBP_DIR)/src/dsp/dec.c \
+    $(WEBP_DIR)/src/dsp/dec_clip_tables.c \
+    $(WEBP_DIR)/src/dsp/filters.c \
+    $(WEBP_DIR)/src/dsp/lossless.c \
+    $(WEBP_DIR)/src/dsp/rescaler.c \
+    $(WEBP_DIR)/src/dsp/upsampling.c \
+    $(WEBP_DIR)/src/dsp/yuv.c \
+	\
+    $(WEBP_DIR)/src/utils/bit_reader_utils.c \
+    $(WEBP_DIR)/src/utils/color_cache_utils.c \
+    $(WEBP_DIR)/src/utils/filters_utils.c \
+    $(WEBP_DIR)/src/utils/huffman_utils.c \
+    $(WEBP_DIR)/src/utils/quant_levels_dec_utils.c \
+    $(WEBP_DIR)/src/utils/random_utils.c \
+    $(WEBP_DIR)/src/utils/rescaler_utils.c \
+    $(WEBP_DIR)/src/utils/thread_utils.c \
+    $(WEBP_DIR)/src/utils/utils.c \
+
+
+SOURCES += $(WEBPSRC)
+WEBPDEFS += -I$(WEBP_DIR)
+
+
 SOKFLAGS = -I$(SOKDIR) -I$(SOKDIR)/util 
-CPPFLAGS = -I.. -I$(IMGUI_DIR) -I$(IFIDIR) -I$(COMMONDIR) -I$(IMGUI_DIR)/backends $(IFIDEFS) $(SOKFLAGS) -I$(IMGUI_DIR)/misc/freetype/include
+CPPFLAGS = -I.. -I$(IMGUI_DIR) -I$(IFIDIR) -I$(COMMONDIR) -I$(IMGUI_DIR)/backends $(IFIDEFS) $(SOKFLAGS) -I$(IMGUI_DIR)/misc/freetype/include $(WEBPDEFS)
 #CPPFLAGS += -g
 
 SPINEDIR = $(TOP)/tools/spine-cpp
@@ -130,9 +169,10 @@ SOKFLAGS += -DSOKOL_GLES2
 EMS += -s WASM=1
 EMS += -s USE_FREETYPE=1
 EMS += -s ASYNCIFY=1
-EMS += -s ALLOW_MEMORY_GROWTH=1 
+EMS += -s ALLOW_MEMORY_GROWTH=1
 EMS += -s "EXPORTED_FUNCTIONS=['_main','_reload_story']"
 
+LDFLAGS += -lidbfs.js
 LDFLAGS += --preload-file ../games/core/init.kl@init.kl
 #CPPFLAGS += $(EMS)
 LIBS += $(EMS) --pre-js $(SRCDIR)/pre.js
@@ -174,6 +214,15 @@ endif
 
 %.o:$(SRCDIR)/%.cpp
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c -o $@ $<
+
+%.o:$(WEBP_DIR)/src/dec/%.c
+	$(CC) $(CPPFLAGS) $(CXXFLAGS) -c -o $@ $<
+
+%.o:$(WEBP_DIR)/src/dsp/%.c
+	$(CC) $(CPPFLAGS) $(CXXFLAGS) -c -o $@ $<
+
+%.o:$(WEBP_DIR)/src/utils/%.c
+	$(CC) $(CPPFLAGS) $(CXXFLAGS) -c -o $@ $<
 
 all:	$(TARGET)
 	@echo Build complete for $(TARGET)

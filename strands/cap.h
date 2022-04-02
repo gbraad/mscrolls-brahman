@@ -33,6 +33,7 @@
 
 #pragma once
 
+#include "utf8.h"
 #include "logged.h"
 
 #define TAG_CAP "Cap, "
@@ -104,11 +105,11 @@ struct Capture
             return s;
         }
         
-        string toString() const
+        string toString(var::Format* f = 0) const
         {
             string s;
             if (_term) s = _term->_name;
-            else if (_v) s = _v.toString();
+            else if (_v) s = _v.toString(f);
             else s = _s;
             return s;
         }
@@ -156,6 +157,12 @@ struct Capture
 
     bool empty() const { return _elts.empty(); }
     int size() const { return _elts.size(); }
+    void clear()
+    {
+        _elts.clear();
+        _needNewline = false;
+    }
+    
     operator bool() const { return !empty(); }
     
     static void cats(string& s, const string& s1)
@@ -173,30 +180,66 @@ struct Capture
             uint sz = s.size();
             if (sz)
             {
-                char last = s[sz-1];
-                bool albefore = u_isalnum(last);
+                Utf8 us(s);
+                int last = us.lastChar();
 
-                // preceding punctuation that requires a space following
-                // when we continue with a normal word.
-                bool puncbefore = strchr(".,?;:!'", last) != 0;
-
-                if (albefore || puncbefore)
+                Utf8 us1(s1);
+                int first = *us1; // first char
+                
+                // normally wont end in a space already but it could
+                // be escaped in.
+                // first char wont be space unless escaped in
+                if (last != ' ' && first != ' ')
                 {
-                    // add a space if next segment starts with non-punctuation
-                    char n = s1[0];
+                    bool spc = false;
 
-                    // following alphanum needs space
-                    bool nxalnum = u_isalnum(n);
+                    // open quotes must be preceded by space
+                    if (first == Utf8::openQuote) spc = true;
+                    else
+                    {
+                        // or any other open bracket
+                        if (first < 0xff && strchr("([{",first)) spc = true;
+                    }
 
-                    // also certain chars count like letters here, eg $40
-                    bool nxspc = strchr("£$", n) != 0;
+                    bool alnumFirst = false;
 
-                    // things like quotes following punctuation must have
-                    // space. eg he said, "hello"
-                    bool force = puncbefore && strchr("\"", n) != 0;
+                    if (!spc)
+                    {
+                        // end quote or close bracket followed by alphanum (ie non-punc)
+                        // count underscores like letters
+                        alnumFirst = u_isalnum(first);
+                        
+                        if (alnumFirst)
+                        {
+                            if (last == Utf8::closeQuote) spc = true;
+                            else if (last < 0xff && strchr(")}]", last)) spc = true;
+                        }
+                    }
                     
-                    if (nxalnum || nxspc || force) s += ' ';
+                    if (!spc)
+                    {
+                        bool albefore = u_isalnum(last);
+                                            
+                        // preceding punctuation that requires a space following
+                        // when we continue with a normal word.
+                        bool puncbefore = last < 0xff && strchr(".,?;:!'", last) != 0;
+                        if (albefore || puncbefore)
+                        {
+                            // add a space if next segment starts with non-punctuation
+                            // underscore after punct => space
+                            spc = alnumFirst || first == '_';
 
+                            // also certain chars count like letters here, eg $40
+                            if (first < 0xff && strchr("£$", first) != 0) spc = true;
+
+                            // things like quotes following punctuation must have
+                            // space. eg he said, "hello"
+                        
+                            if (puncbefore && Utf8::isQuote(first)) spc = true;
+                        }
+                    }
+                        
+                    if (spc) s += ' ';
                 }
             }
             s += s1;

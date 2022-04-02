@@ -1,7 +1,39 @@
+/*
+ *
+ *
+ *   ______              _
+ *   | ___ \            | |
+ *   | |_/ / _ __  __ _ | |__   _ __ ___    __ _  _ __
+ *   | ___ \| '__|/ _` || '_ \ | '_ ` _ \  / _` || '_ \
+ *   | |_/ /| |  | (_| || | | || | | | | || (_| || | | |
+ *   \____/ |_|   \__,_||_| |_||_| |_| |_| \__,_||_| |_|
+ *
+ *
+ *  "The creative principle which lies realized in the whole world"
+ *
+ *  Copyright (c) Strand Games 2022.
+ *
+ *  This program is free software: you can redistribute it and/or modify it
+ *  under the terms of the GNU Lesser General Public License (LGPL) as published
+ *  by the Free Software Foundation, either version 3 of the License, or (at
+ *  your option) any later version.
+ * 
+ *  This program is distributed in the hope that it will be useful, but WITHOUT
+ *  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ *  FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License
+ *  for more details.
+ * 
+ *  You should have received a copy of the GNU Lesser General Public License
+ *  along with this program. If not, see <http://www.gnu.org/licenses/>.
+ *
+ *  contact@strandgames.com
+ *
+ */
+
 // Strand Core library
 
 CORE_VERSION
-1.03
+1.06
 
 GAME_DETAILS
 \n\n**GAME_TITLE** by _GAME_AUTHOR_, GAME_VERSION.
@@ -10,12 +42,12 @@ GAME_DETAILS
 TOP_BEGIN
 *?!BEGIN BEGIN
 
+GAMEOVER
 
-MAIN
-TICK
-WHATSHERE
-CMD
-MAIN
+// NB: TICK can change GAMEOVER
+MAIN$
+*?!GAMEOVER TICK
+*?!GAMEOVER WHATSHERE CMD MAIN
 
 MORE?
 *+ Continue
@@ -30,6 +62,9 @@ WHATSHERE STUFFHERE
 
 CMD?>
 *
+
+OK
+\OK
 
 INITCORE
 {
@@ -54,13 +89,29 @@ UPDATETITLE > what is player in
 *
 { (ifisend (get-title IT)) }
 
-
 UPDATEMAP MAP_BACKIMAGE
 * them
 { (ifisend (tree (list 'map (tree (list 'backimage (textify IT)))))) }
 
 CREDITS_PLAIN
 { (printf (HTMLToPlain (runterm "GAME_CREDITS"))) } \n\n
+
+
+// save & load
+POSTLOAD_OK
+Game Loaded.
+> look
+MAIN
+
+POSTLOAD_FAIL
+Load Game Failed!
+
+POSTSAVE_OK
+Game Saved.
+
+POSTSAVE_FAIL
+Cannot Save Game.
+
 
 CONCEPT@
 * name
@@ -81,6 +132,10 @@ BORING
 THING@ CONCEPT
 * name
 a thing
+* name
+something
+* be it
+NULL
 * get it
 You can't get that.
 * take it
@@ -119,6 +174,10 @@ BORING
 FEELIT
 That won't help.
 
+XHERE0
+\
+UPDATETITLE
+
 XHERE
 \
 UPDATETITLE
@@ -138,8 +197,6 @@ You're looking good!
 INV
 * inv
 INV
-* help
-HELP
 * go west
 > w
 * go east
@@ -167,6 +224,8 @@ HELP
 * get out
 > out
 * exit
+> out
+* leave
 > out
 * go northeast
 > ne
@@ -196,26 +255,24 @@ WAIT
 QUITGAME
 * credits
 CREDITS_PLAIN
+* undo
+Undoing...
+UNDO
+XHERE
+* help
+HELPME
+* hint
+HELPME
 
 WAIT
-zzz...
+* Zzz...
+* time passes...
+* pom-de pom...
 
 INCSCORE
 \nYou scored a point!
 > set player score PLAYER(score)+1
 
-
-// player body parts
-FEET@ THING
-> put it in player
-* name
-feet
-* name
-foot
-* x it
-Feet are size 9.
-* smell it
-Pooh!
 
 
 NOWAY
@@ -229,10 +286,12 @@ ERROR_NOSUCH
 There is no such thing here.
 
 ERROR_SYNTAX
-* Sorry, i don't understand.
+* Sorry, I don't understand.
 * I can't make sense of that.
 
 ROOM@ THING
+* name
+room
 * look
 XHERE
 * l
@@ -261,46 +320,6 @@ NOWAY
 NOWAY
 * sw
 NOWAY
-
-PERSON@ THING
-* kiss it
-MOLESTATION
-* feel it
-MOLESTATION
-* touch it
-MOLESTATION
-* rape it
-MOLESTATION
-* attack it
-ATTACKPERSON
-* hit it
-> attack it
-* punch it
-> attack it
-* kick it
-> attack it
-* fight it
-> attack it
-* kill it
-> attack it
-* eat it
-MOLESTATION
-* smell it
-MOLESTATION
-* bite it
-ATTACKPERSON
-* grab it
-> attack it
-* give this GETTABLE to it
-THAT doesn't want it.
-
-MOLESTATION
-I don't think IT would take too kindly to that!
-
-ATTACKPERSON
-* Violence is not the answer.
-* You stop and reconsider.
-
 
 EAST@ 
 * name
@@ -361,6 +380,119 @@ SOUTHWEST@
 southwest
 * name
 sw
+
+////////////////////////////////////////////////////////////
+
+PMOLEST@
+* kiss it
+> molest it
+* feel it
+> molest it
+* touch it
+> molest it
+* rape it
+> molest it
+* eat it
+> molest it
+* smell it
+> molest it
+* attack it
+
+PATTACK@
+* hit it
+> attack it
+* punch it
+> attack it
+* kick it
+> attack it
+* fight it
+> attack it
+* kill it
+> attack it
+* push it
+> attack it
+
+PERSONAL@ THING PMOLEST PATTACK
+* attack it
+ATTACKPERSON
+* molest it
+MOLESTATIONPART
+* bite it
+MOLESTATIONPART
+* grab it
+MOLESTATIONPART
+
+ASKABOUTMAN
+* \n"I know nothing about him."
+* \n"Sorry, I don't know him."
+
+ASKABOUTWOMAN
+* \n"I know nothing about her."
+* \n"Sorry, I don't know her."
+
+PERSON@ THING PMOLEST PATTACK
+* name
+person
+* molest it
+MOLESTATION
+* attack it
+ATTACKPERSON
+* grab it
+ATTACKPERSON
+* bite it
+ATTACKPERSON
+* give this GETTABLE to it
+THAT doesn't want it.
+* ask it about MAN
+ASKABOUTMAN
+* ask it about WOMAN
+ASKABOUTWOMAN
+
+MOLESTATION
+I don't think IT would take too kindly to that!
+
+MOLESTATIONPART
+Yeah right!
+
+ATTACKPERSON
+* Violence is not the answer.
+* You stop and reconsider.
+* Not a good idea.
+
+MAN@ PERSON
+* name
+man
+
+WOMAN@ PERSON
+* name
+woman
+
+///////////// BODY PARTS ///////////////////////////////////////
+
+FEET@ THING
+> put it in player
+* name
+the feet
+* name
+foot
+* x it
+The feet are size 9.
+* smell it
+Pooh!
+
+HEAD@ PERSONAL
+> put it in PERSON
+* name
+head
+
+HANDS@ PERSONAL
+> put it in PERSON
+* name
+hands
+* name
+hand
+
+////////////////////////////////////////////////////////////
 
 
 GETTABLE@ THING
@@ -587,21 +719,50 @@ WHATSALSOON > what is on it
 On IT you see, LAST.
 *
 
+// Garment hooks
+
+GARMENTHOOK@ THING
+* look on it
+GWHATSON
+* x it
+GWHATSALSOON
+* put my GARMENT on it
+GDOPUTON
+* sit on it
+Not a good idea.
+
+GDOPUTON > put it on that
+* ok
+You put IT on THAT.
+*
+You can't.
+
+GWHATSON > what is on it
+* them
+On it you see, LAST.
+*
+There's nothing there.
+
+GWHATSALSOON > what is on it
+* them
+On IT you see, LAST.
+*
+
+///
+
+// give something
+
+GIVEWHAT
+You have, YOURSTUFF.
+*<< Give what?
+
 /// Places
 
-HELL@ ROOM
+HELL@ INSIDE
 * name
 hell
 
 
-/// HELP
-
-HELP
-This is interactive fiction. You can move around and interact with the world and with people. You can type commands like "get lamp" and "kill troll with axe" and also select choices.
-
-Type \LOOK to refresh the room description.
-\nMove about with commands like "go north", "go east" and so on. These can be abbreviated to "n" and "e" for example.
-\nAsk people about things, for example, "ask butler about dog" etc.\n
 
 
 

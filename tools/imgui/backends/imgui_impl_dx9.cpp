@@ -46,7 +46,7 @@ struct ImGui_ImplDX9_Data
     int                         VertexBufferSize;
     int                         IndexBufferSize;
 
-    ImGui_ImplDX9_Data()        { memset(this, 0, sizeof(*this)); VertexBufferSize = 5000; IndexBufferSize = 10000; }
+    ImGui_ImplDX9_Data()        { memset((void*)this, 0, sizeof(*this)); VertexBufferSize = 5000; IndexBufferSize = 10000; }
 };
 
 struct CUSTOMVERTEX
@@ -251,7 +251,7 @@ void ImGui_ImplDX9_RenderDrawData(ImDrawData* draw_data)
                 // Project scissor/clipping rectangles into framebuffer space
                 ImVec2 clip_min(pcmd->ClipRect.x - clip_off.x, pcmd->ClipRect.y - clip_off.y);
                 ImVec2 clip_max(pcmd->ClipRect.z - clip_off.x, pcmd->ClipRect.w - clip_off.y);
-                if (clip_max.x < clip_min.x || clip_max.y < clip_min.y)
+                if (clip_max.x <= clip_min.x || clip_max.y <= clip_min.y)
                     continue;
 
                 // Apply Scissor/clipping rectangle, Bind texture, Draw
@@ -295,8 +295,9 @@ bool ImGui_ImplDX9_Init(IDirect3DDevice9* device)
 
 void ImGui_ImplDX9_Shutdown()
 {
-    ImGuiIO& io = ImGui::GetIO();
     ImGui_ImplDX9_Data* bd = ImGui_ImplDX9_GetBackendData();
+    IM_ASSERT(bd != NULL && "No renderer backend to shutdown, or already shutdown?");
+    ImGuiIO& io = ImGui::GetIO();
 
     ImGui_ImplDX9_InvalidateDeviceObjects();
     if (bd->pd3dDevice) { bd->pd3dDevice->Release(); }

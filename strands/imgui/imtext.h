@@ -63,20 +63,14 @@ struct ImText
         ~ParImg()
         {
             // XX what about multiple refs to same image
-            if (texLoader.remove(_name))
-                --_host->_imgCount;
+            //if (texLoader.remove(_name)) --_host->_imgCount;
         }
     };
 
     struct ParAnim: public Par
     {
         AnimState _a;
-
-        ParAnim(ImText* host) : Par(host, par_anim)
-        {
-            _a.clear();
-        }
-
+        ParAnim(ImText* host) : Par(host, par_anim) { _a.clear(); }
     };
 
     typedef std::list<Par*> Pars;
@@ -148,6 +142,46 @@ struct ImText
         _add(p);
     }
 
+    void removeImage(const string& name)
+    {
+        // go through all the pars and remove all the images with the
+        // given name (usually only one).
+        // then remove the underlying texture.
+
+        int cc = 0;
+        auto it = _pars.begin();
+        while (it != _pars.end())
+        {
+            if ((*it)->_type == Par::par_img)
+            {
+                ParImg* pi = (ParImg*)(*it);
+
+                if (pi->_name == name)
+                {
+                    it = _pars.erase(it);
+
+                    // delete par but does not delete texture.
+                    delete pi;
+                    
+                    ++cc;
+                    
+                    --_imgCount; // adjust total image pars
+
+                    continue;
+                }
+            }
+            ++it;
+        }
+
+        if (cc)
+        {
+            LOG3(TAG_IMTEXT "trimming ", cc << " images, " << name);
+
+            // dump texture
+            texLoader.remove(name);
+        }
+    }
+
     void seenText()
     {
         // text no longer fresh
@@ -176,7 +210,7 @@ struct ImText
 
             if (startsWith(url, "http://") || startsWith(url, "https://"))
             {
-                LOG1(TAG_IMTEXT "link clicked ", url);
+                LOG2(TAG_IMTEXT "link clicked ", url);
                 
 #ifdef __EMSCRIPTEN__
 	/* Implementation in pre.js */
@@ -186,8 +220,7 @@ struct ImText
             else if (!url.empty())
             {
                 // treat as a command, send back to game
-
-                LOG1(TAG_IMTEXT "command clicked ", url);
+                LOG2(TAG_IMTEXT "command clicked ", url);
                 _clickCommand = url;
             }
         }
@@ -359,26 +392,32 @@ struct ImText
                         ImGui::TextWrapped("\n"); // add space before picture
                         
                         int vw = ImGui::GetContentRegionAvail().x;
-                        int padw = vw - (w + 2); // border
+                        int margin = vw/10; // 10% each side
+                        int border = 1;
+                        
+                        int padw = (vw - margin*2) - (w + border*2); // border
                         padw /= 2;
                     
                         if (padw < 0)
                         {
-                            double sc = ((double)vw)/(w + 2);
+                            double sc = ((double)vw - margin*2)/(w + border*2);
                             h = sc * h;
-                            w = vw - 2;
+                            w = sc * w;
+                            padw = 0;
                         }
 
-                        if (padw > 0) ImGui::Indent(padw);
+                        padw += margin;
+
+                        ImGui::Indent(padw);
                         ImGui::Image(tex->_tid, ImVec2(w, h), uv_min, uv_max, tint_col, border_col);
-                        if (padw > 0) ImGui::Unindent(padw);
+                        ImGui::Unindent(padw);
                     }
                 }
                 break;
             case Par::par_anim:
                 {
-                    ParAnim* pa = (ParAnim*)p;
 #ifdef USESPINE
+                    ParAnim* pa = (ParAnim*)p;
                     if (pa->_a._active && pa->_a.loaded())
                     {
                         SSpineCtx* ctx = SSpineCtx::get();
@@ -419,9 +458,8 @@ struct ImText
             }
         }
     }
-
+    
 #ifdef USESPINE
-
     ParAnim* bump(AnimInfo* ai)
     {
         // find animation and bump to active
@@ -608,6 +646,16 @@ protected:
         _changed = true;
     }
 
+    ParImg* _lastImage()
+    {
+        ParImg* pl = 0;
+        
+        for (auto pi : _pars)
+            if (pi->_type == Par::par_img) pl = (ParImg*)pi;
+
+        return pl;
+    }
+
     void _trim()
     {
         if (_maxText)
@@ -626,25 +674,31 @@ protected:
                 delete p;
             }
         }
+        
         if (_maxImg && _imgCount > _maxImg)
         {
-            auto it = _pars.begin();
-            while (it != _pars.end())
-            {
-                if ((*it)->_type == Par::par_img)
+            // find the first image, that's not also the last image
+            // and remove it.
 
+            ParImg* pl = _lastImage();
+            assert(pl);
+            
+            for (auto pi : _pars)
+            {
+                if (pi->_type == Par::par_img)
                 {
-                    ParImg* pi = (ParImg*)(*it);
-                    //LOG1("trimming image ", pi->_img._name);
-                    it = _pars.erase(it);
-                    delete pi; // adjusts imgCount
-                    if (_imgCount <= _maxImg) break; // now ok.
+                    ParImg* p = (ParImg*)pi;
+
+                    if (p->_name != pl->_name)
+                    {
+                        // remove all instances with name AND texture.
+                        removeImage(p->_name);
+                        break;
+                    }
                 }
-                else ++it;
             }
         }
     }
-    
-    
+
     
 };

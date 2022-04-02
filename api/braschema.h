@@ -79,6 +79,7 @@
 // product & theme tags
 #define BRA_PRO_TITLE           "title"
 #define BRA_PRO_AUTHOR          "author"
+#define BRA_PRO_ORGANISATION    "organisation"
 #define BRA_PRO_CREDITS         "credits"
 #define BRA_PRO_MARKET_ANDROID  "android_market"
 #define BRA_PRO_MARKET_IOS      "ios_market"

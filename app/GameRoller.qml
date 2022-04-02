@@ -182,8 +182,8 @@ Roller
             id: effect1
             anchors.fill: pic
             source: pic
-            brightness: QControl.prefs.imageadjEnabled ? picarea.imgBrightness : 0.0
-            contrast: QControl.prefs.imageadjEnabled ? picarea.imgContrast : 0.0
+            brightness: QControl.prefs.imageadjEnabled && (!Device.isIOS() && !Device.isMac()) ? picarea.imgBrightness : 0.0
+            contrast: QControl.prefs.imageadjEnabled && (!Device.isIOS() && !Device.isMac()) ? picarea.imgContrast : 0.0
             visible: false
         }
 
@@ -191,8 +191,8 @@ Roller
             id: effect2
             anchors.fill: effect1
             source: effect1
-            saturation: (QControl.prefs.imageadjEnabled && !Device.isIOS())? picarea.imgSaturation : 0.0
-            lightness: QControl.prefs.imageadjEnabled ? picarea.imgLightness : 0.0
+            saturation: (QControl.prefs.imageadjEnabled) && (!Device.isIOS() && !Device.isMac())? picarea.imgSaturation : 0.0
+            lightness: (QControl.prefs.imageadjEnabled) && (!Device.isIOS() && !Device.isMac())? picarea.imgLightness : 0.0
             visible: false
         }
 

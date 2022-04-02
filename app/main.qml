@@ -52,8 +52,8 @@ ApplicationWindow
     title: QControl.gameTitle()
     visible: true
 
-    property string author: QControl.gameAuthor();
-    property string organisation: ""
+    property string author: QControl.gameAuthor()
+    property string organisation: QControl.gameOrganisation()
     property string currentMetaJSON: QControl.currentMetaJSON
     property bool enableSidebar: QControl.gameEnableSidebar()
     property bool enableTextInput: QControl.gameEnableTextbox()

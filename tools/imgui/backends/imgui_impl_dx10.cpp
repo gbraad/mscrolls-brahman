@@ -59,7 +59,7 @@ struct ImGui_ImplDX10_Data
     int                         VertexBufferSize;
     int                         IndexBufferSize;
 
-    ImGui_ImplDX10_Data()       { memset(this, 0, sizeof(*this)); VertexBufferSize = 5000; IndexBufferSize = 10000; }
+    ImGui_ImplDX10_Data()       { memset((void*)this, 0, sizeof(*this)); VertexBufferSize = 5000; IndexBufferSize = 10000; }
 };
 
 struct VERTEX_CONSTANT_BUFFER
@@ -256,7 +256,7 @@ void ImGui_ImplDX10_RenderDrawData(ImDrawData* draw_data)
                 // Project scissor/clipping rectangles into framebuffer space
                 ImVec2 clip_min(pcmd->ClipRect.x - clip_off.x, pcmd->ClipRect.y - clip_off.y);
                 ImVec2 clip_max(pcmd->ClipRect.z - clip_off.x, pcmd->ClipRect.w - clip_off.y);
-                if (clip_max.x < clip_min.x || clip_max.y < clip_min.y)
+                if (clip_max.x <= clip_min.x || clip_max.y <= clip_min.y)
                     continue;
 
                 // Apply scissor/clipping rectangle
@@ -556,8 +556,9 @@ bool    ImGui_ImplDX10_Init(ID3D10Device* device)
 
 void ImGui_ImplDX10_Shutdown()
 {
-    ImGuiIO& io = ImGui::GetIO();
     ImGui_ImplDX10_Data* bd = ImGui_ImplDX10_GetBackendData();
+    IM_ASSERT(bd != NULL && "No renderer backend to shutdown, or already shutdown?");
+    ImGuiIO& io = ImGui::GetIO();
 
     ImGui_ImplDX10_InvalidateDeviceObjects();
     if (bd->pFactory) { bd->pFactory->Release(); }

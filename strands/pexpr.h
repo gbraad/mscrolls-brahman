@@ -54,6 +54,12 @@ namespace ST
             e_add,
             e_sub,
             e_neg,
+            e_ge,
+            e_le,
+            e_gt,
+            e_lt,
+            e_eq,
+            e_neq,
             e_simplename,  // property or function
             e_function,
             e_typeCount,
@@ -134,7 +140,9 @@ namespace ST
             else if (_type == e_val)
             {
                 assert(!_head);
-                s += _v.toString(true); // quote strings
+                var::Format f;
+                f._quoteStrings = true;
+                s += _v.toString(&f); // quote strings
             }
             else if (_type == e_function)
             {
@@ -186,7 +194,6 @@ namespace ST
         int stringWalk(const char* p)
         {
             // return the number of bytes INCLUDING THE TERMINATOR
-
             bool esc = 0;
             const char* p0 = p;
             
@@ -247,61 +254,9 @@ namespace ST
             return r;
         }
 
-        bool _atIntegerOrFloat(int* vi, double* vd)
-        {
-            // if we're at a non-negative integer or float
-            bool r = u_isdigit(AT);
-            if (r)
-            {
-                // collect integer part
-                *vi = AT - '0';
-                for (;;)
-                {
-                    BUMP;
-                    if (!u_isdigit(AT)) break;
-                    *vi = ((*vi)*10) + AT - '0';
-                }
-
-                *vd = 0;
-
-                // collect fractional part
-                if (AT == '.')
-                {
-                    BUMP;
-                    double d = 0;
-                    double tens = 1;
-
-                    while (u_isdigit(AT))
-                    {
-                        tens *= 10;
-                        d += (AT - '0')/tens;
-                        BUMP;
-                    }
-                    *vd = *vi + d;
-                }
-            }
-            return r;
-        }
-
-        bool parseNumber(var& v)
-        {
-            int vi;
-            bool r;
-            
-            double vd;
-            r = _atIntegerOrFloat(&vi, &vd);
-            if (r)
-            {
-                if (vd) v = var(vd); // float
-                else v = var(vi); // int
-            }
-            return r;
-        }
-        
         enode* parseTermName()
         {
             // `[A-Z][A-Z0-9-_]+`
-
             enode* e = 0;
             int l = atName(POS);
 
@@ -491,21 +446,36 @@ namespace ST
 
         typedef enode* (ParseExpr::*TermFn)();
 
-        enode* parseBinTerm(char op, nodeType t, TermFn fn)
+        enode* parseBinTerm(const char* op, nodeType t, TermFn fn)
         {
-            // A or (op A B...) 
+            // A or (op A B...)
+            // ASSUME `op` is 1 or 2 characters only
+            
             enode* a = (this->*fn)();
             if (a)
             {
                 enode* el = 0;
+
+                bool twochars = op[1] != 0;
                 
                 while (!_err)
                 {
                     skipws();
-                    if (AT == op)
+
+                    bool match;
+                    if (twochars)
                     {
-                        char c = AT;
+                        match = AT == *op && AT1 == op[1];
+                    }
+                    else
+                    {
+                        match = AT == *op;
+                    }
+
+                    if (match)
+                    {
                         BUMP;
+                        if (twochars) BUMP;
                         skipws();
                         enode* b = (this->*fn)();
                         if (b)
@@ -514,7 +484,7 @@ namespace ST
                         }
                         else
                         {
-                            PERR1("expr, expected expression after ", c << " at " << POS);
+                            PERR1("expr, expected expression after ", POS);
                             _err = true;
                         }
                     }
@@ -525,21 +495,20 @@ namespace ST
         }        
         
         enode* parseMulTerm()
-        { return parseBinTerm('*', nodeType::e_mul, &ParseExpr::parseFactor); }
+        { return parseBinTerm("*", nodeType::e_mul, &ParseExpr::parseFactor); }
 
         enode* parseDivTerm()
-        { return parseBinTerm('/', nodeType::e_div, &ParseExpr::parseMulTerm); }
+        { return parseBinTerm("/", nodeType::e_div, &ParseExpr::parseMulTerm); }
 
         enode* parseAddTerm()
-        { return parseBinTerm('+', nodeType::e_add, &ParseExpr::parseDivTerm); }
+        { return parseBinTerm("+", nodeType::e_add, &ParseExpr::parseDivTerm); }
 
         enode* parseSubTerm()
-        { return parseBinTerm('-', nodeType::e_sub, &ParseExpr::parseAddTerm); }
+        { return parseBinTerm("-", nodeType::e_sub, &ParseExpr::parseAddTerm); }
         
         enode* parseAnd()
         {
             // (e_and (A B)) or A
-            
             enode* a = parseSubTerm();
             if (a)
             {
@@ -571,7 +540,6 @@ namespace ST
         enode* parseOr()
         {
             // (e_or (A B)) or A
-            
             enode* a = parseAnd();
             if (a)
             {
@@ -600,16 +568,32 @@ namespace ST
             return a;
         }
 
+        enode* parseGE()
+        { return parseBinTerm(">=", nodeType::e_ge, &ParseExpr::parseOr); }
+
+        enode* parseLE()
+        { return parseBinTerm("<=", nodeType::e_le, &ParseExpr::parseGE); }
+
+        enode* parseGT()
+        { return parseBinTerm(">", nodeType::e_gt, &ParseExpr::parseLE); }
+
+        enode* parseLT()
+        { return parseBinTerm("<", nodeType::e_lt, &ParseExpr::parseGT); }
+
+        enode* parseNEqu()
+        { return parseBinTerm("!=", nodeType::e_neq, &ParseExpr::parseLT); }
+
+        enode* parseEqu()
+        { return parseBinTerm("=", nodeType::e_eq, &ParseExpr::parseNEqu); }
+        
         enode* parseExpr()
         {
-            return parseOr();
+            return parseEqu();
         }
         
         enode* parse(const char* s, int line = 0)
         {
-            SETPOS(s);
-            lineno = line;
-
+            setup(s, line);
             enode* en = parseExpr();
             
             if (!en && line)
@@ -631,6 +615,21 @@ namespace ST
         static var _divOp(const var& a, const var& b) { return a/b; }
         static var _addOp(const var& a, const var& b) { return a+b; }
         static var _subOp(const var& a, const var& b) { return a-b; }
+
+        static var _geOp(const var& a, const var& b) { return a>=b; }
+        static var _leOp(const var& a, const var& b) { return a<=b; }
+        static var _gtOp(const var& a, const var& b) { return a>b; }
+        static var _ltOp(const var& a, const var& b) { return a<b; }
+
+        static var _eqOp(const var& a, const var& b)
+        {
+            return a.equ(b) ? 1 : 0;
+        }
+        
+        static var _neqOp(const var& a, const var& b)
+        {
+            return a.equ(b) ? 0 : 1;
+        }
 
         enode*          _top;
         termEval        _termFn;
@@ -693,6 +692,24 @@ namespace ST
             case enode::e_sub:
                 v = _evalBinOp(e->_head, _subOp);
                 break;
+            case enode::e_ge:
+                v = _evalBinOp(e->_head, _geOp);
+                break;
+            case enode::e_le:
+                v = _evalBinOp(e->_head, _leOp);
+                break;
+            case enode::e_gt:
+                v = _evalBinOp(e->_head, _gtOp);
+                break;
+            case enode::e_lt:
+                v = _evalBinOp(e->_head, _ltOp);
+                break;
+            case enode::e_eq:
+                v = _evalBinOp(e->_head, _eqOp);
+                break;
+            case enode::e_neq:
+                v = _evalBinOp(e->_head, _neqOp);
+                break;                
             case enode::e_neg:
                 assert(e->_head);
                 v = eval(e->_head).neg();

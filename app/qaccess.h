@@ -43,6 +43,10 @@
 #include "qdefs.h"
 #include "logged.h"
 
+#if defined(Q_OS_OSX) || defined(Q_OS_IOS)
+#define _cdecl __cdecl
+#endif
+
 #define QREGISTER_QACCESS  QREGISTER(QAccess);
 
 #define TAG_ACCESS      "Access, "

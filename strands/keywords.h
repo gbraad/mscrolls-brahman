@@ -39,29 +39,34 @@
 #define SYM_LABEL   "label"
 #define SYM_SET     "set"
 #define SYM_PUT     "put"
-#define SYM_IS      "is"
 
 // special terms
 #define TERM_PLAYER  "PLAYER"
 #define TERM_THING  "THING"
 #define TERM_GAME_FILES "GAME_FILES"
-
 #define TERM_LAST   "LAST"
 #define TERM_IT     "IT"
 #define TERM_THAT   "THAT"
 #define TERM_TICK   "TICK"
+#define TERM_UNDO   "UNDO"
 #define TERM_NOCANDO "ERROR_NOCANDO"
 #define TERM_NOSUCH "ERROR_NOSUCH"
 #define TERM_SYNTAX "ERROR_SYNTAX"
 #define TERM_SCOPE  "SCOPE_SEED"
-//#define TERM_LASTGEN "LAST_GEN"
 #define TERM_VERSION "SYSTEM_VERSION"
+
+// special terms for save & load
+#define TERM_POSTSAVE_OK "POSTSAVE_OK"
+#define TERM_POSTSAVE_FAIL "POSTSAVE_FAIL"
+#define TERM_POSTLOAD_OK "POSTLOAD_OK"
+#define TERM_POSTLOAD_FAIL "POSTSAVE_FAIL"
 
 // special properties
 #define PROP_IN     "in"
 #define PROP_INTO   "into"
 #define PROP_ON     "on"
 #define PROP_ONTO   "onto"
+#define PROP_WITH   "with"
 
 // match empty result
 #define MATCH_NULL  "null"

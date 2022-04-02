@@ -55,6 +55,8 @@
 #define IFI_BEGIN       "begin"
 #define IFI_RESTART     "restart"
 #define IFI_ANIMATE     "animate"
+#define IFI_POSTSAVE    "postsave"
+#define IFI_POSTLOAD    "postload"
 
 // reply only
 
@@ -105,7 +107,10 @@
 #define IFI_AUTOLINK    "autolink"
 #define IFI_UI_RESTART  "ui_restart"
 #define IFI_SAVELOAD    "saveload"
-#define IFI_SAVELOADCHOICE "saveloadchoice"
+
+// XX what is this?
+//#define IFI_SAVELOADCHOICE "saveloadchoice"
+
 //#define IFI_TITLE       "title"
 
 // textobj

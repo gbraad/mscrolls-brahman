@@ -55,6 +55,9 @@
 
 struct Utf8
 {
+    static const int openQuote = 0x201c;
+    static const int closeQuote = 0x201d;
+    
     enum
     {
         UTFmax	= 4,		/* maximum bytes per rune */
@@ -1100,6 +1103,11 @@ bad:
 	if(p && c == p[0])
             return c + p[1] - 500;
 	return c;
+    }
+
+    static bool isQuote(int c)
+    {
+        return c == '"' || c == openQuote || c == closeQuote;
     }
 
     std::string toupper() const

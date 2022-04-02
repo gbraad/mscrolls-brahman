@@ -303,6 +303,7 @@ public:
     
     _GAME_STR_D(Title, TITLE, "Game");
     _GAME_STR_D(Author, AUTHOR, "Strand Games");
+    _GAME_STR_D(Organisation, ORGANISATION, "");
     _GAME_STR(Credits, CREDITS);
     _GAME_STR(MarketAndroid, MARKET_ANDROID);
     _GAME_STR(MarketIOS, MARKET_IOS);

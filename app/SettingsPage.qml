@@ -198,11 +198,12 @@ Page
             {
                 text: "Image Adjustment"
                 subText: "Apply image colour adjustments"
+                enabled: (!Device.isIOS() && !Device.isMac())
                 secondaryItem: Switch
                 {
                     id: imageadjSwitch
                     anchors.verticalCenter: parent.verticalCenter
-                    checked: QControl.prefs.imageadjEnabled
+                    checked: (!Device.isIOS() && !Device.isMac())?QControl.prefs.imageadjEnabled : false
                     onCheckedChanged: QControl.prefs.imageadjEnabled = checked
                 }
                 onClicked: imageadjSwitch.checked = !imageadjSwitch.checked

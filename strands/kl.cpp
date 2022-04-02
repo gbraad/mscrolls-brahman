@@ -37,15 +37,15 @@
 #include "opt.h"
 #include "var.h"
 
+#include "strands.h"
 
 using namespace std;
 
 #ifdef IFI_BUILD
 
 #include "ificlient.h"
-#include "ifiglue.h" // include last
+#include "ifiglue.h"
 #include "ifihandler.h"
-#include "strands.h"
 
 struct KLClient: public IFIClient
 {
@@ -53,7 +53,6 @@ struct KLClient: public IFIClient
 
     ~KLClient()
     {
-        LOG3("~KLClient", "");
         ST::Term::clearTerms();
     }
 
@@ -320,7 +319,9 @@ struct KLHandler: public IFIHandler
     bool ifiSubcommand(const string& cmd) override
     {
         LOG3(TAG "ifi SUB command ", cmd);
-        _strandi.runTerm(cmd);
+
+        // NB: does not produce output
+        _strandi.runSingleTermCap(cmd);
         return true;
     }
 
@@ -328,7 +329,7 @@ struct KLHandler: public IFIHandler
     {
         string t = "GAME_";
         t += toUpper(tag);
-        return _strandi.runSingleTerm(t);
+        return _strandi.runSingleTermCap(t);
     }
     
     void collectMeta(VarSet& vs, const char* tag)
@@ -459,6 +460,91 @@ struct KLHandler: public IFIHandler
 
         LOG2(TAG "game finished, ", _story);
         
+        return true;
+    }
+
+    bool ifiSaveData() override
+    {
+        // we've received a save request.
+        // create a buffer of save data and send it back to the UI.
+
+        int t = _strandi.getTimelineTime();
+
+        bool ok = t > 0;
+
+        if (ok)
+        {
+            string sdata = _strandi.timelineSaveState();
+            LOG1(TAG "received ifisave request, data size:", sdata.size());
+            
+            ok = !sdata.empty();
+
+            if (ok)
+            {
+                GrowString gs;
+                gs.add('{');
+                JSONWalker::addKey(gs, IFI_SAVEDATA);
+
+                // now add the save data object
+                gs.add('{');
+                JSONWalker::addStringValue(gs, IFI_DATA, sdata);
+                gs.add('}');
+
+                // close
+                gs.add('}');
+                gs.add(0);
+        
+                //LOG1(TAG "ifiSaveData response: ", gs.start());
+                ifi->emitResponse(gs.start());
+            }
+        }
+
+        if (!ok)
+        {
+            // can't save (yet)
+            ifiPostSave(false);
+        }
+
+        // handled, whether valid or not
+        return true;
+    }
+
+    bool ifiPostSave(bool v) override
+    {
+        // called after save to indicate success or not.
+        //LOG1("ifiPostSave, ", v);
+
+        // tell the game
+        _strandi.runSingleTerm(v ? TERM_POSTSAVE_OK : TERM_POSTSAVE_FAIL);
+        _strandi.flush();
+        
+        return true;
+    }
+
+    bool ifiPostLoad(bool v) override
+    {
+        // called after load to indicate success or not.
+        //LOG1("ifiPostLoad, ", v);
+
+        // tell the game
+        _strandi.runSingleTerm(v ? TERM_POSTLOAD_OK : TERM_POSTLOAD_FAIL);
+        _strandi.flush();
+        
+        return true;
+    }
+
+    bool ifiLoadData(const string& data) override
+    {
+        LOG1(TAG "received ifi load data, size: ", data.size());
+
+        // we will only get here if the front end has loaded the data.
+        // if not, `ifiPostLoad` is called by the front-end
+        // if good, we get here and the front-end does not call `ifiPostLoad`
+        // and we have to determine whether the data can be restored or not.
+        bool v = _strandi.loadTimelineState(data);
+        ifiPostLoad(v);
+
+        // handled, even if restore failed.
         return true;
     }
 
@@ -671,7 +757,6 @@ int main(int argc, char** argv)
     kli->loadFile(initFile);
 
 #ifdef IFI_BUILD
-
     using namespace std::placeholders;
     ST::Strandi& si = kli->_ifiHandler._strandi;
     si.setEmitter(std::bind(&KLI::put, kli, _1));
