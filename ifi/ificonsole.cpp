@@ -409,6 +409,7 @@ struct ConHandler: public IFIHandler
 
     bool pumpfn()
     {
+        //LOG4("console, ", "Pump");
         flush();
         sendInput();
         return !_quit;
@@ -478,7 +479,7 @@ int start(int argc, char** argv)
     {
         host.release();
         h._startDone = true;
-
+        
         // we guarantee the back-end will receive some prologue json
         // *before* any commands. This allows the back-end to get ready
         // after it has been started, but *also* to allow the back-end to
@@ -486,6 +487,8 @@ int start(int argc, char** argv)
         h.buildJSONStart(js);
         h.buildPrologueJSON();
         h.buildJSONEnd();
+
+        LOG3("IFIConsole, sending start json, ", js.start());
 
         if (host.eval(js.start()))
         {

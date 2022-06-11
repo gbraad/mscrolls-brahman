@@ -54,15 +54,28 @@
 #include "ifihandler.h"
 #include "logged.h"
 
+struct AClient: public IFIClient
+{
+    void coopWork() override;
+
+    ~AClient() {}
+
+    Ctx*        _ifictx = 0;
+};
+
+
 // so that we can get it from glue
 IFIClient* ifi;
 static int moveCount;
+
+// our reference to ifi
+#define AIFI  ((AClient*)ifi)
 
 #define TAG  "Dummy, "
 
 struct Handler: public IFIHandler
 {
-    IFIClient* _ifi;
+    AClient* _ifi;
 
     bool ifiCommand(const string&) override { return true; }
     bool ifiMoves(int n) override
@@ -73,6 +86,7 @@ struct Handler: public IFIHandler
         }
         return true;
     }
+    
     bool ifiMeta(bool v) override
     {
         // send meta response
@@ -105,7 +119,7 @@ IFI* IFI::create(IFI::Ctx* ctx)
 {
     LOG1(TAG, "loading");
     
-    ifi = new IFIClient();
+    ifi = new AClient();
 
     if (ctx)
     {
@@ -116,8 +130,9 @@ IFI* IFI::create(IFI::Ctx* ctx)
             ifi->_pump = ctx->_p;
         }
     }
-        
-    ifiHandler._ifi = ifi;
+
+    AIFI->_ifictx = ctx;
+    ifiHandler._ifi = AIFI;
     
     return ifi;
 }
@@ -224,6 +239,20 @@ bool ifiTest(const char* cmd)
     return r;
 }
 
+void AClient::coopWork()
+{
+    LOG1(TAG "AClient::coopwork", "");
+
+    for (;;)
+    {
+        const char* r = ifi->getRequest();
+        if (!r) break;
+        
+        LOG1(TAG "interative, request: ", r);
+        //kli->_ifiHandler.handle(r);
+    }
+};
+
 int main(int argc, char** argv)
 {
     // OK, not much of a game :-)
@@ -247,9 +276,21 @@ int main(int argc, char** argv)
     {
 #ifdef IFI_BUILD
 
+        //int foo; LOG1(TAG "Stack at ", &foo);
+
         // here is one difference. If we want to handle JSON requests
         // as well as regular "commands", there has to be a handler somewhere.
-        ifiHandler.handle(ifi->getRequest());
+        const char* ins;
+        for (;;)
+        {
+            ins = ifi->getRequest();
+            if (ins) break;
+            LOG1(TAG "Pumping", "");
+            if (ifi->_pump) (ifi->_pump)();
+        }
+
+        ifiHandler.handle(ins);
+
 #endif
 
         prompt();

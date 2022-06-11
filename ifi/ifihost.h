@@ -278,7 +278,7 @@ struct IFIHost
     {
         bool r;
 
-        LOG5("IFIHost sending; ", s);
+        LOG4("IFIHost sending; ", s);
 
         if (_inSync)
         {

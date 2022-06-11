@@ -741,7 +741,7 @@ struct IFIHandler
 
     virtual void ifiDefault(const string& key, const var& v)
     {
-        LOG4("IFI unhandled ", key << " " << v.toString(true));
+        LOG4("IFI unhandled ", key << " " << v.toString());
     }
 
     var getProp(const string& key) const
