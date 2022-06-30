@@ -204,6 +204,7 @@ std::string gui_input_pump()
 static void textReceiver(const char* s)
 {
     addText(s, false);
+    while (*s) sctx._wstat.learnWords(*s++);
 }
 
 void StrandInit(const char* story)
@@ -213,11 +214,63 @@ void StrandInit(const char* story)
     bool v = sctx.init(e, story);
 }
 
+static std::string lastInputBuf;  
+static int lastSuggest; // last suggestion index
+static int lastInputEnd; // length of input text without last word
+static WordStat::WordList suggestedWords;
+
 static int inputCallback(ImGuiInputTextCallbackData* data)
 {
     if (data->EventFlag == ImGuiInputTextFlags_CallbackCompletion)
     {
-        data->InsertChars(data->CursorPos, "..");
+        if (data->BufTextLen > 0)
+        {
+            // same buffer means more suggestions
+            bool same = (lastInputBuf == data->Buf);
+
+            if (!same)
+            {
+                // update buffer for further suggestions next time
+                lastSuggest = 0;
+                lastInputBuf = data->Buf;
+
+                // backup to find length before last word
+                int pos = data->BufTextLen;
+                do
+                {
+                    --pos;
+                    if (data->Buf[pos] == ' ') break;
+
+                } while (pos > 0);
+                lastInputEnd = pos;
+
+                suggestedWords.clear();
+                sctx._wstat.suggestCompletion(data->Buf, suggestedWords);
+            }
+            
+            int sz = suggestedWords.size();
+            if (lastSuggest >= sz) lastSuggest = 0; // cycle
+
+            if (lastSuggest < sz)
+            {
+                //LOG("suggest ", suggestedWords[lastSuggest] << " len:" << lastInputEnd);
+                
+                data->DeleteChars(0, data->BufTextLen);
+
+                if (lastInputEnd)
+                {
+                    // +1 to get space from original string
+                    data->InsertChars(0, lastInputBuf.c_str(),
+                                      lastInputBuf.c_str() + lastInputEnd + 1);
+                }
+                
+                data->InsertChars(data->CursorPos, suggestedWords[lastSuggest++].c_str());
+
+                // text with suggestion becomes last buf so to match next time.
+                // but leave length as before so to change last word.
+                lastInputBuf = data->Buf;
+            }
+        }
     }
     else if (data->EventFlag == ImGuiInputTextFlags_CallbackHistory)
     {
@@ -491,7 +544,6 @@ void StrandWindow(bool* strand_open)
     ImVec2 choiceBoxSz(sz.x, cby);
     ImVec2 textBoxSz(sz.x, txy);
 
-
     // title box
     const char* titleText = sctx.getTitle();
     int f = ImGuiWindowFlags_NoScrollbar;
@@ -513,6 +565,10 @@ void StrandWindow(bool* strand_open)
 
         static bool requestScroll = false;
 
+        // only show links when we have an input box, otherwise
+        // autolinks do not execute.
+        sctx._mainText._showLinks = inputActive;
+        
         // render our text, a block at a time
         sctx._mainText.render();
         
@@ -544,6 +600,12 @@ void StrandWindow(bool* strand_open)
             // if changed, set flag to scroll on NEXT frame.
             requestScroll = true;
             sctx._mainText._changed = false;
+        }
+
+        if (sctx._mainText._requestScroll)
+        {
+            requestScroll = true;
+            sctx._mainText._requestScroll = false;
         }
         
         ImGui::EndChild();
@@ -632,6 +694,8 @@ void StrandWindow(bool* strand_open)
                                      pr.c_str(), buf1, sizeof(buf1),
                                      tf, inputCallback))
         {
+            lastInputBuf.clear();
+            
             sctx.sendCmd(buf1);
             *buf1 = 0; // clear
             reclaim_focus = true;
@@ -1232,8 +1296,10 @@ void frame()
     if (show_strand)
         StrandWindow(&show_strand);
 
+#ifdef USEDEMO    
     if (show_demo_window)
         ImGui::ShowDemoWindow(&show_demo_window);
+#endif    
 
     if (fbrowser)
     {

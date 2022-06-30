@@ -27,7 +27,6 @@ struct ImTex
         assert(!_tid);
         
         _name = name;
-        
         const int desired_channels = 4;
 
         stbi_uc* pixels = 0;
@@ -119,6 +118,10 @@ struct ImTexLoader
         bool            _pending = false;
         bool            _failed = false;
         bool            _isImage = false;
+
+        // this is set when we load and can be reset so that
+        // we can handle one off operations after load
+        bool            _justLoaded = false;
         ImTex           _tex;
         char*           _data;
         int             _sz;
@@ -185,12 +188,16 @@ struct ImTexLoader
                     LOG1("Loaded image ", name << " data size:" << r._sz);
                     r._tex.create(name, (const unsigned char*)fdata, r._sz);
                     delete fdata;
+
+                    // signal that we just loaded it.
+                    r._justLoaded = true;
                 }
                 else
                 {
                     r._data = fdata;
                 }
-                
+
+                // remove from queue
                 _r.erase(it);
                 
                 // add to pool
@@ -258,7 +265,8 @@ struct ImTexLoader
         for (auto& r : _r)
         {
             if (r._pending || r._failed) continue;
-            
+
+            // keep issuing this start until accepted.
             if (fetcher.start(r._name, _loaded, this))
             {
                 r._pending = true;

@@ -18,7 +18,7 @@ GAME_VERSION
 1.13
 
 GAME_ORGANISATION
-
+Strand Games
 
 GAME_BACKIMAGE
 images/title.jpg
@@ -33,14 +33,14 @@ GAME_META
 :ui_ucanvas:false,ui_sidebar:false,autolink:false
 
 GAME_CREDITS
-<h1>GAME_TITLE</h1>
+<h1>GAME_TITLE<br/><em>by GAME_ORGANISATION</em></h1>
 <h3>Implemented in Strands</h3>
 <h4>Strand Games Team</h4>
 <ul>
 <li>Hugh Steers</li>
 <li>Stefan Meier</li>
-<li>Stefan Bylund</li>
 <li>Thomas Dettbarn</li>
+<li>Stefan Bylund</li>
 </ul>
 <h4>Writing</h4>
 <ul>
@@ -53,3 +53,11 @@ GAME_CREDITS
 
 QUITGAME
 QUIT
+
+HELP1
+This is interactive fiction. You can move around and interact with the world and with people. You can type commands like "get lamp" and "kill troll with axe" and also select choices as shortcuts. Type _look_ to refresh the room description, type _inv_ to see what you're carrying and if you get into a mess, you can always _undo_.
+\nPressing \TAB on the command line performs word completion.
+
+
+HELPME
+* HELP1

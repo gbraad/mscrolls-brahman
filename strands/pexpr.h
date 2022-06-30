@@ -98,7 +98,16 @@ namespace ST
                 "/",
                 "+",
                 "-",
+                ">=",
+                "<=",
+                ">",
+                "<",
+                "==",
+                "!=",
+                "name"
+                "fn",
             };
+            assert(t < ASIZE(sTab));
             return sTab[t];
         }
 
@@ -455,7 +464,6 @@ namespace ST
             if (a)
             {
                 enode* el = 0;
-
                 bool twochars = op[1] != 0;
                 
                 while (!_err)

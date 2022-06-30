@@ -813,35 +813,44 @@ struct ParseStrands: public ParseBase
             break;
         case Term::t_choice:
 
-            // ?[!]>
+            // ? !>
             for (;;)
             {
+                bool used = false;
+                
                 if (AT == SYM_STICKY)
                 {
                     t->sticky(true);
-                    BUMP;
-                    skipws();
+                    used = true;
                 }
                 else if (AT == SYM_CMD_CHOICES)
                 {
                     // signify reactors marked as choices will be elevated
                     // to choices.  eg FOO?>
                     t->cmdChoices(true);
-                    BUMP;
-                    skipws();
+                    used = true;
                 }
-                else if (AT == '\n')
-                {
-                    BUMP;
-                    break;
-                }
-                else
-                {
-                    PERR1("unexpected property", AT);
-                    return false;
-                }
+
+                if (!used) break;
+                
+                BUMP;
+                skipws();
             }
 
+            if (u_isalnum(AT))   // topflow on choice are sub-choices
+            {
+                parseFlow(t->_topflow, 0, Flow::t_term);
+            }
+            else if (AT == '\n')
+            {
+                BUMP;
+            }
+            else
+            {
+                PERR1("unexpected property", AT);
+                return false;
+            }
+            
             break;
         case Term::t_object:
             {

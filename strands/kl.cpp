@@ -550,7 +550,7 @@ struct KLHandler: public IFIHandler
 
     void ifiDefault(const string& key, const var& v) override
     {
-        LOG3(TAG "unhandled ", key << " " << v.toString(true));
+        LOG3(TAG "unhandled ", key << " " << v.toString());
     }
     
 };

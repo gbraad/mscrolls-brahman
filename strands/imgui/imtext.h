@@ -51,19 +51,14 @@ struct ImText
 
     struct ParImg: public Par
     {
-        string   _name;
+        // NB: we can have multiple ParImg with the same texture
         
+        string   _name;
         ParImg(ImText* host, const string& name)
             : Par(host, par_img), _name(name)
         {
             // will initiate loading if not in pool
             texLoader.getTex(name);
-        }
-        
-        ~ParImg()
-        {
-            // XX what about multiple refs to same image
-            //if (texLoader.remove(_name)) --_host->_imgCount;
         }
     };
 
@@ -82,9 +77,18 @@ struct ImText
     int         _maxImg = 3;
     int         _imgCount = 0;
 
+    ParImg*     _imageView = 0;
+    bool        _requestScroll;
+
+    ImVec4 tint_col = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
+    ImVec4 bg_col = ImVec4(0.0f, 0.0f, 0.0f, 0.0f);
+    ImVec4 hover_col = ImVec4(1.0f, 1.0f, 1.0f, 0.1f); // button hovered
+    ImVec4 active_col = ImVec4(1.0f, 1.0f, 1.0f, 0.5f);  // button pressed
+
     // set when we click on a command link
     // this is picked up by yieldCmd
     string      _clickCommand;
+    bool        _showLinks = true;
 
     // markdown
     ImGui::MarkdownConfig       _mdConfig;
@@ -220,7 +224,7 @@ struct ImText
             else if (!url.empty())
             {
                 // treat as a command, send back to game
-                LOG2(TAG_IMTEXT "command clicked ", url);
+                LOG2(TAG_IMTEXT "command clicked '", url << "'");
                 _clickCommand = url;
             }
         }
@@ -292,6 +296,18 @@ struct ImText
                 }
             }
             break;
+        case ImGui::MarkdownFormatType::LINK:
+
+            //LOG1("Formatcallback hovered ", info.itemHovered);
+
+            // mark as done if we're not showing links.
+            if (!_showLinks)
+            {
+                // XX cancel any hover.
+                const_cast<ImGui::MarkdownFormatInfo&>(info).itemHovered = false;
+                done = true;
+            }
+            break;
         }
 
         if (!done)
@@ -309,8 +325,74 @@ struct ImText
         ImGui::Markdown(t.c_str(), t.length(), _mdConfig);
     }
 
+
+    bool renderImageView()
+    {
+        // ensure loaded
+        ImTex* tex = 0;
+        ImTexLoader::Rec* r = texLoader.find(_imageView->_name);
+        if (r && r->_isImage && r->_tex.valid()) tex = &r->_tex;
+
+        bool ok = tex != 0;
+
+        if (ok)
+        {
+            int w = tex->_w;
+            int h = tex->_h;
+
+            ImVec2 uv_min = ImVec2(0.0f, 0.0f); // Top-left
+            ImVec2 uv_max = ImVec2(1.0f, 1.0f); // Lower-right
+
+            int border = 1;
+            int vw = ImGui::GetContentRegionAvail().x - 24; // scrollbar
+            int wb = w + border*2;
+            
+            int padw = vw - wb;
+            if (padw < 0)
+            {
+                double sc = ((double)vw)/wb;
+                h = sc * h;
+                w = sc * w;
+                padw = 0;
+            }
+            
+            padw /= 2;
+
+            ImGui::Indent(padw);
+
+            ImGui::PushStyleColor(ImGuiCol_Button, bg_col);
+            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, hover_col);
+            ImGui::PushStyleColor(ImGuiCol_ButtonActive, active_col);
+            if (ImGui::ImageButton(tex->_tid,
+                                   ImVec2(w, h),
+                                   uv_min, uv_max,
+                                   border,
+                                   bg_col,
+                                   tint_col))
+            {
+                _imageView = 0; // cancel
+
+                // when we go back we scroll to the end.
+                _requestScroll = true;
+            }
+            ImGui::PopStyleColor(3);
+            ImGui::Unindent(padw);
+        }
+
+        if (!ok)
+        {
+            LOG1(TAG_IMTEXT "renderimageview no image, ", _imageView->_name);
+            _imageView = 0; // cancel
+        }
+        
+        return ok;
+    }
+
     void render()
     {
+        // handle image focus view
+        if (_imageView && renderImageView()) return;
+        
         Pars::iterator it = _pars.begin();
         Pars::iterator ie = _pars.end();
         
@@ -366,14 +448,18 @@ struct ImText
 
                     if (tex)
                     {
+                        if (r->_justLoaded)
+                        {
+                            // first time loaded
+                            r->_justLoaded = false; // one off
+                            _requestScroll = true;
+                        }
+                        
                         int w = tex->_w;
                         int h = tex->_h;
 
                         ImVec2 uv_min = ImVec2(0.0f, 0.0f); // Top-left
                         ImVec2 uv_max = ImVec2(1.0f, 1.0f); // Lower-right
-
-                        // No tint
-                        ImVec4 tint_col = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
                     
                         // 50% opaque white
                         ImVec4 border_col = ImVec4(1.0f, 1.0f, 1.0f, 0.5f);
@@ -389,28 +475,57 @@ struct ImText
 
                         //LOG1("rendering image ", pi->_img._name << " w:" << w << " h:" << h);
 
-                        ImGui::TextWrapped("\n"); // add space before picture
-                        
-                        int vw = ImGui::GetContentRegionAvail().x;
-                        int margin = vw/10; // 10% each side
+
                         int border = 1;
+                        int vw = ImGui::GetContentRegionAvail().x;
+                        int padw = 0;
+                        int wb = w + border*2;
                         
-                        int padw = (vw - margin*2) - (w + border*2); // border
-                        padw /= 2;
-                    
-                        if (padw < 0)
+                        if (wb <= vw/2)
                         {
-                            double sc = ((double)vw - margin*2)/(w + border*2);
+                            // if the images is smaller than half screen
+                            // show it centred.
+                            padw = (vw - wb)/2;
+                        }
+                        else
+                        {
+                            // scale the image to a quarter thumb and
+                            // show on left.
+                            int wspace = vw/4;
+                            
+                            double sc = ((double)wspace)/wb;
                             h = sc * h;
                             w = sc * w;
-                            padw = 0;
+                            //padw = 0;
                         }
 
-                        padw += margin;
 
-                        ImGui::Indent(padw);
-                        ImGui::Image(tex->_tid, ImVec2(w, h), uv_min, uv_max, tint_col, border_col);
-                        ImGui::Unindent(padw);
+                        if (padw)
+                        {
+                            ImGui::Indent(padw);
+                            ImGui::Image(tex->_tid, ImVec2(w, h), uv_min, uv_max, tint_col, border_col);
+                            ImGui::Unindent(padw);
+                        }
+                        else
+                        {
+                            ImGui::PushStyleColor(ImGuiCol_Button, bg_col);
+                            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, hover_col);
+                            ImGui::PushStyleColor(ImGuiCol_ButtonActive, active_col);
+                            ImGui::PushID(pi);
+                            if (ImGui::ImageButton(tex->_tid,
+                                                   ImVec2(w, h),
+                                                   uv_min, uv_max,
+                                                   border,
+                                                   bg_col,
+                                                   tint_col))
+                            {
+                                //LOG1("Image button clicked, ", pi->_name);
+                                // focus on image
+                                _imageView = pi;
+                            }
+                            ImGui::PopID();
+                            ImGui::PopStyleColor(3);
+                        }
                     }
                 }
                 break;

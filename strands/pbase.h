@@ -497,6 +497,7 @@ struct ParseBase: public Traits
     };
 
     PPoint*     _pstack = 0;
+    PPoint*     _pstackCheck;
 
     void _push()
     {
@@ -535,6 +536,16 @@ struct ParseBase: public Traits
         assert(_pstack);
         SETPOS(_pstack->_pos);
         lineno = _pstack->_line;
+    }
+
+    void _stkBegin()
+    {
+        _pstackCheck = _pstack;
+    }
+
+    void _stkEnd()
+    {
+        assert(_pstackCheck == _pstack);
     }
 
     bool atLiteral(const char* w) const

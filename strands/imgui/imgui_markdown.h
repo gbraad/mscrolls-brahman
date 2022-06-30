@@ -497,14 +497,14 @@ namespace ImGui
             const char* text = markdown_ + textStart + 1;
             textRegion_.RenderTextWrapped( text, text + textSize - 1 );
         }
-        else if( line_.isEmphasis )         // render emphasis
-        {
-            formatInfo.level = line_.emphasisCount;
-            formatInfo.type = MarkdownFormatType::EMPHASIS;
-            mdConfig_.formatCallback(formatInfo, true);
-            const char* text = markdown_ + textStart;
-            textRegion_.RenderTextWrapped(text, text + textSize);
-        }
+		else if( line_.isEmphasis )         // render emphasis
+		{
+			formatInfo.level = line_.emphasisCount;
+			formatInfo.type = MarkdownFormatType::EMPHASIS;
+			mdConfig_.formatCallback(formatInfo, true);
+			const char* text = markdown_ + textStart;
+			textRegion_.RenderTextWrapped(text, text + textSize);
+		}
         else                                // render a normal paragraph chunk
         {
             formatInfo.type = MarkdownFormatType::NORMAL_TEXT;
@@ -686,57 +686,57 @@ namespace ImGui
             }
 
             // Test to see if we have emphasis styling
-            switch( em.state )
-            {
-            case Emphasis::NONE:
-                if( link.state == Link::NO_LINK && !line.isHeading )
+			switch( em.state )
+			{
+			case Emphasis::NONE:
+				if( link.state == Link::NO_LINK && !line.isHeading )
                 {
                     int next = i + 1;
                     int prev = i - 1;
-                    if( ( c == '*' || c == '_' )
+					if( ( c == '*' || c == '_' )
                         && ( i == line.lineStart
-                             || markdown_[ prev ] == ' '
-                             || markdown_[ prev ] == '\t' ) // empasis must be preceded by whitespace or line start
+                            || markdown_[ prev ] == ' '
+                            || markdown_[ prev ] == '\t' ) // empasis must be preceded by whitespace or line start
                         && (int)markdownLength_ > next // emphasis must precede non-whitespace
                         && markdown_[ next ] != ' '
                         && markdown_[ next ] != '\n'
                         && markdown_[ next ] != '\t' )
                     {
-                        em.state = Emphasis::LEFT;
-                        em.sym = c;
+						em.state = Emphasis::LEFT;
+						em.sym = c;
                         em.text.start = i;
-                        line.emphasisCount = 1;
-                        continue;
-                    }
-                }
-                break;
-            case Emphasis::LEFT:
-                if( em.sym == c )
+						line.emphasisCount = 1;
+						continue;
+					}
+				}
+				break;
+			case Emphasis::LEFT:
+				if( em.sym == c )
                 {
-                    ++line.emphasisCount;
-                    continue;
-                }
+					++line.emphasisCount;
+					continue;
+				}
                 else
                 {
-                    em.text.start = i;
-                    em.state = Emphasis::MIDDLE;
-                }
-                break;
-            case Emphasis::MIDDLE:
-                if( em.sym == c )
+					em.text.start = i;
+					em.state = Emphasis::MIDDLE;
+				}
+				break;
+			case Emphasis::MIDDLE:
+				if( em.sym == c )
                 {
-                    em.state = Emphasis::RIGHT;
-                    em.text.stop = i;
-                    // pass through to case Emphasis::RIGHT
-                }
+					em.state = Emphasis::RIGHT;
+					em.text.stop = i;
+                   // pass through to case Emphasis::RIGHT
+				}
                 else
                 {
                     break;
                 }
-            case Emphasis::RIGHT:
-                if( em.sym == c )
+			case Emphasis::RIGHT:
+				if( em.sym == c )
                 {
-                    if( line.emphasisCount < 3 && ( i - em.text.stop + 1 == line.emphasisCount ) )
+					if( line.emphasisCount < 3 && ( i - em.text.stop + 1 == line.emphasisCount ) )
                     {
                         // render text up to emphasis
                         int lineEnd = em.text.start - line.emphasisCount;
@@ -744,22 +744,22 @@ namespace ImGui
                         {
                             line.lineEnd = lineEnd;
                             RenderLine( markdown_, line, textRegion, mdConfig_ );
-                            ImGui::SameLine( 0.0f, 0.0f );
+						    ImGui::SameLine( 0.0f, 0.0f );
                             line.isUnorderedListStart = false;
                             line.leadSpaceCount = 0;
                         }
-                        line.isEmphasis = true;
-                        line.lastRenderPosition = em.text.start - 1;
+						line.isEmphasis = true;
+						line.lastRenderPosition = em.text.start - 1;
                         line.lineStart = em.text.start;
-                        line.lineEnd = em.text.stop;
-                        RenderLine( markdown_, line, textRegion, mdConfig_ );
-                        ImGui::SameLine( 0.0f, 0.0f );
-                        line.isEmphasis = false;
-                        line.lastRenderPosition = i;
-                        em = Emphasis();
+					    line.lineEnd = em.text.stop;
+					    RenderLine( markdown_, line, textRegion, mdConfig_ );
+					    ImGui::SameLine( 0.0f, 0.0f );
+					    line.isEmphasis = false;
+					    line.lastRenderPosition = i;
+					    em = Emphasis();
                     }
                     continue;
-                } 
+				} 
                 else
                 {
                     em.state = Emphasis::NONE;
@@ -775,8 +775,8 @@ namespace ImGui
                         line.lastRenderPosition = line.lineStart - 1;
                     }
                 }
-                break;
-            }
+				break;
+			}
 
             // handle end of line (render)
             if( c == '\n' )
@@ -840,7 +840,9 @@ namespace ImGui
         ImGui::PopTextWrapPos();
 
         bool bThisItemHovered = ImGui::IsItemHovered();
-        if(bThisItemHovered)
+
+        // callback can change this
+        if (formatInfo.itemHovered) 
         {
             *linkHoverStart_ = markdown_ + link_.text.start;
         }
@@ -869,6 +871,16 @@ namespace ImGui
             float       scale = ImGui::GetIO().FontGlobalScale;
             float       widthLeft = GetContentRegionAvail().x;
             const char* endLine = ImGui::GetFont()->CalcWordWrapPositionA( scale, text_, text_end_, widthLeft );
+
+            // XX
+            // Hack to take a line unless the whole link fits
+            if (endLine != text_end_)
+            {
+                ImGui::NewLine();
+                widthLeft = GetContentRegionAvail().x;
+                endLine = ImGui::GetFont()->CalcWordWrapPositionA( scale, text_, text_end_, widthLeft );
+            }
+            
             bool bHovered = RenderLinkText( text_, endLine, link_, markdown_, mdConfig_, linkHoverStart_ );
             if( bIndentToHere_ )
             {
@@ -905,81 +917,81 @@ namespace ImGui
         {
         case MarkdownFormatType::NORMAL_TEXT:
             break;
-        case MarkdownFormatType::EMPHASIS:
+		case MarkdownFormatType::EMPHASIS:
+        {
+            MarkdownHeadingFormat fmt;
+            // default styling for emphasis uses last headingFormats - for your own styling
+            // implement EMPHASIS in your formatCallback
+            if( markdownFormatInfo_.level == 1 )
             {
-                MarkdownHeadingFormat fmt;
-                // default styling for emphasis uses last headingFormats - for your own styling
-                // implement EMPHASIS in your formatCallback
-                if( markdownFormatInfo_.level == 1 )
-                {
-                    // normal emphasis
-                    if( start_ )
-                    {
-                        ImGui::PushStyleColor( ImGuiCol_Text, ImGui::GetStyle().Colors[ ImGuiCol_TextDisabled ] );
-                    }
-                    else
-                    {
-                        ImGui::PopStyleColor();
-                    }              
-                }
+                // normal emphasis
+ 			    if( start_ )
+			    {
+                    ImGui::PushStyleColor( ImGuiCol_Text, ImGui::GetStyle().Colors[ ImGuiCol_TextDisabled ] );
+			    }
                 else
-                {
-                    // strong emphasis
-                    fmt = markdownFormatInfo_.config->headingFormats[ MarkdownConfig::NUMHEADINGS - 1 ];
-                    if( start_ )
-                    {
-                        if( fmt.font )
-                        {
-                            ImGui::PushFont( fmt.font );
-                        }
-                    }
-                    else
-                    {
-                        if( fmt.font )
-                        {
-                            ImGui::PopFont();
-                        }
-                    }
-                }
-                break;
+			    {
+                    ImGui::PopStyleColor();
+			    }              
             }
-        case MarkdownFormatType::HEADING:
+            else
             {
-                MarkdownHeadingFormat fmt;
-                if( markdownFormatInfo_.level > MarkdownConfig::NUMHEADINGS )
-                {
-                    fmt = markdownFormatInfo_.config->headingFormats[ MarkdownConfig::NUMHEADINGS - 1 ];
-                }
+                // strong emphasis
+                fmt = markdownFormatInfo_.config->headingFormats[ MarkdownConfig::NUMHEADINGS - 1 ];
+			    if( start_ )
+			    {
+				    if( fmt.font )
+				    {
+					    ImGui::PushFont( fmt.font );
+				    }
+			    }
                 else
+			    {
+				    if( fmt.font )
+				    {
+					    ImGui::PopFont();
+				    }
+			    }
+            }
+            break;
+        }
+        case MarkdownFormatType::HEADING:
+        {
+            MarkdownHeadingFormat fmt;
+            if( markdownFormatInfo_.level > MarkdownConfig::NUMHEADINGS )
+            {
+                fmt = markdownFormatInfo_.config->headingFormats[ MarkdownConfig::NUMHEADINGS - 1 ];
+            }
+            else
+            {
+                fmt = markdownFormatInfo_.config->headingFormats[ markdownFormatInfo_.level - 1 ];
+            }
+            if( start_ )
+            {
+                if( fmt.font  )
                 {
-                    fmt = markdownFormatInfo_.config->headingFormats[ markdownFormatInfo_.level - 1 ];
+                    ImGui::PushFont( fmt.font );
                 }
-                if( start_ )
+                ImGui::NewLine();
+            }
+            else
+            {
+                if( fmt.separator )
                 {
-                    if( fmt.font  )
-                    {
-                        ImGui::PushFont( fmt.font );
-                    }
+                    ImGui::Separator();
                     ImGui::NewLine();
                 }
                 else
                 {
-                    if( fmt.separator )
-                    {
-                        ImGui::Separator();
-                        ImGui::NewLine();
-                    }
-                    else
-                    {
-                        ImGui::NewLine();
-                    }
-                    if( fmt.font )
-                    {
-                        ImGui::PopFont();
-                    }
+                    ImGui::NewLine();
                 }
-                break;
+                if( fmt.font )
+                {
+                    ImGui::PopFont();
+                }
             }
+            break;
+        }
         case MarkdownFormatType::UNORDERED_LIST:
             break;
         case MarkdownFormatType::LINK:

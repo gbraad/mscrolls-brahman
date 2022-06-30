@@ -41,6 +41,7 @@
 #include "strutils.h"
 #include "fd.h"
 #include "imtext.h"
+#include "wordstat.h"
 
 #define CHOICE_TEXTXX
 
@@ -449,26 +450,59 @@ struct SDLHandler: public IFIHandler
     {
         flush();
 
-        //static int cc;
-        //LOG1("pumpfn! ", ++cc);
+        //static int cc; LOG1("pumpfn! ", ++cc);
         
         std::string s = gui_input_pump();
         if (!s.empty())
         {
-            // XX
-            // should figure out if this is a choice
-            // then use the json response in choiceinfo
-            // but for now, we only have numbers anyway.
-            
-            GrowString js;
-            buildJSONStart(js);
-            buildCmdJSON(s.c_str());
-            buildJSONEnd();
+            bool done = false;
+
+            if (_choice)
+            {
+                int nc = _choice->size();
+                int chosen = 0;
+                const char* p = s.c_str();
+                while (u_isdigit(*p))
+                {
+                    chosen = chosen*10 + (*p - '0');
+                    ++p;
+                }
+
+                if (chosen > 0 && chosen <= nc)
+                {
+                    //LOG1(">>> pump got choice ", chosen);
+
+                    // have accepted a value
+                    ChoiceList::iterator it = _choice->_choices.begin();
+                    if (chosen > 1) std::advance(it, chosen-1);
+
+                    ChoiceInfo ci = *it; // copy
+
+                    if (ci._response[0] == '{')
+                    {
+                        // response is JSON, so just use it.
+                
+                        LOG4("IFI choice, sending direct response ", ci._response);
+                
+                        _host->eval(ci._response.c_str());
+
+                        done = true;
+                    }
+                }
+            }
 
             // clear any choices after input
             delete _choice; _choice = 0;
-
-            _host->eval(js.start());
+            
+            if (!done)
+            {
+                GrowString js;
+                buildJSONStart(js);
+                buildCmdJSON(s.c_str());
+                buildJSONEnd();
+                
+                _host->eval(js.start());
+            }
         }
         return true;
     }
@@ -640,6 +674,7 @@ struct StrandCtx
     char*           _loadData;
 
     Transcript*     _transcript = 0;
+    WordStat        _wstat;
 
     void resetAll()
     {

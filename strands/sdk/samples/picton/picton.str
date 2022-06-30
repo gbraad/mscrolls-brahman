@@ -1,0 +1,1180 @@
+/*
+ *
+ *
+ *   ______              _
+ *   | ___ \            | |
+ *   | |_/ / _ __  __ _ | |__   _ __ ___    __ _  _ __
+ *   | ___ \| '__|/ _` || '_ \ | '_ ` _ \  / _` || '_ \
+ *   | |_/ /| |  | (_| || | | || | | | | || (_| || | | |
+ *   \____/ |_|   \__,_||_| |_||_| |_| |_| \__,_||_| |_|
+ *
+ *
+ *  "The creative principle which lies realized in the whole world"
+ *
+ *  Copyright (c) Strand Games 2021.
+ *
+ *  Permission is hereby granted, free of charge, to any person obtaining a copy
+ *  of this software and associated documentation files (the "Software"), to
+ *  deal in the Software without restriction, including without limitation the
+ *  rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+ *  sell copies of the Software, and to permit persons to whom the Software is
+ *  furnished to do so, subject to the following conditions:
+ * 
+ *  The above copyright notice and this permission notice shall be included in
+ *  all copies or substantial portions of the Software.
+ * 
+ *  THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ *  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ *  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ *  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ *  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ *  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+ *  IN THE SOFTWARE.
+ * 
+ *  contact@strandgames.com
+ */
+ 
+
+/*
+
+   +---------------------------------------------------------+
+   |                                                         |
+   | Garden                                                  |
+   |                                                         |
+   +-+ +-----------------------------------------------------+
+   +-+ +-----+ +------------------------+
+   |         | |                        |
+   |         | |                        |
+   | Kitchen | | Dining Room            |
+   |         | |                        |
+   |         | |                        |
+   |         | |                        |
+   |         | |                        |
+   |         | |                        |
+   +---------+ +-----------------+  +---+
+                                 |  |
+                            +----+  +---+  +-----------------+
+                            |           |  |                 |
+                            |           |  |                 |
+               +---------+  |           |  |                 |
+               |         |  |           |  |                 |
+               | Study   |  |   Hall    |  |  Drawing Room   |
+               |         |  |           |  |                 |
+               |         |  |           |  |                 |
+               |         +--+           +--+                 |
+               |                                             |
+               |         +--+           +--+                 |
+               |         |  |           |  |                 |
+               +---------+  +-+       +-+  +-----------------+
+                            +-+       +-+
+                            |           |
+                            | Entrance  |
+                            |           |
+                            +-----------+
+*/
+
+MANOR@ INSIDE
+* name
+the manor
+* name
+house
+* x manor
+It's an old manor house.
+
+////////////////// Entrance
+
+BULDOING
+* looking bored
+* making an entry in his notebook
+* shuffling restlessly
+
+ENTRANCE@ MANOR
+* name
+the main entrance
+* name
+outside
+* x it
+You're standing in the doorway, north is the main hall.
+\nSgt. Bulwark is here, BULDOING.
+* n
+GOHALL
+* go hall
+GOHALL
+
+GOENT
+> put player in entrance
+You step out into the entrance.
+XHERE ENT_OUT
+
+///////////////// Hall
+
+HALL@ MANOR
+* name
+the hall
+* x it
+You're in the hall. A large grandfather [clock] stands against one wall.
+Westwards is the study, east is the drawing room and further north leads through to the dining room. Going south takes you back out through the main entrance.
+* w
+GOSTUDY
+*=+ go into the study
+GOSTUDY
+* e
+GODRAWINGROOM
+*=+ go into the drawing room
+GODRAWINGROOM
+* n
+GODININGROOM
+*=+ go into the dining room
+GODININGROOM
+* s
+GOENT
+* out
+GOENT
+* go entrance
+GOENT
+*=+ go outside
+GOENT
+
+GOHALL
+> put player in hall
+You go into the hall.
+images/hall.jpg
+XHERE
+
+CLOCK@ THING
+> put it in hall
+* name
+the grandfather clock
+* x it
+It's one of the many valuable antiques in the manor.
+* listen to it
+It's ticking!
+
+
+///////////////////// study
+
+STUDY@ MANOR
+* name
+the study
+* x it
+This study was used by the Major for his business affairs. A huge [desk] dominates the centre and along the back wall stands an impressive [bookcase], and on another, a row of hunting [trophies].
+Back east is the hall.
+* e
+GOHALL
+*=+ go into the hall
+GOHALL
+
+GOSTUDY
+> put player in study
+You go into the study.
+images/study.jpg
+XHERE ENT_STUDY
+
+////////////////// drawing room
+
+DRAWINGROOM@ MANOR
+* name
+the drawing room
+* x it
+You're in the drawing room.
+There's an impressive fireplace with a [fire] blazing away.
+West leads back to the hall.
+* w
+GOHALL
+*=+ go into the hall
+GOHALL
+
+GODRAWINGROOM
+> put player in drawing room
+You go into the drawing room.
+images/drawing.jpg
+XHERE ENT_DRAWING
+
+//////////////////// Dining room
+
+DININGROOM@ MANOR
+* name
+the dining room
+* x it
+This is the dining room, you can see the [garden] through the north windows. West leads to the kitchen, but that's staff only. Back south is the hall. 
+* s
+GOHALL
+*=+ go into the hall
+GOHALL
+* w
+TRYKITCHEN
+* go kitchen
+TRYKITCHEN
+
+GODININGROOM
+> put player in dining room
+You go into the dining room.
+images/dining.jpg
+XHERE ENT_DINING
+
+GARDEN@ THING
+> put it in dining room
+* name
+the garden
+* name
+window
+* name
+windows
+* name
+greenhouse
+* x it
+Through the window you can see a fantastic garden, and a large greenhouse with a broken window.
+
+TRYKITCHEN
+"Just where do you think you're going Inspector!" Charlotte tells you, "there's nobody in the kitchen to question!"
+
+
+////////////////// kitchen
+
+KITCHEN@ MANOR
+* name
+the kitchen
+* x it
+You're in the kitchen.
+There's a fridge up against the back wall. The east exit takes you back to the dining room.
+* e
+GODININGROOM
+* go dining room
+GODININGROOM
+
+GOKITCHEN
+> put player in kitchen
+You go into the kitchen.
+images/kitchen.jpg
+XHERE
+
+/////////////////////////////////////////////////////////////////
+
+
+STORY
+Major Stephenson has been shot dead in his study!
+
+You are the indomitable Inspector Lance Picton, who gets the cases no one else can solve. Your tenacious approach to detail consistently nails the guilty.
+
+You've already figured out that exactly one member of the household is guilty. The Suspects are: Charles, Major Stephenson's brother and business partner, Charlotte the Major's wife, Jimmy the son or possibly Jeeves the family butler. 
+
+BEGIN
+\n\nYou arrive at the manor entrance where Sergeant Bulwark is currently posted.
+\n\n"'ello Inspector," he says in his usual acerbic manner, "We got a right one 'ere! We had that numpty detective Hazelden round earlier. He poked around, got absolutely nowhere. What a fool, he even suggested that the butler did it; does he think this is some kind of game!
+\nAnyway, we saw 'im off and called you in. I've had all the suspects stay right 'ere in the 'ouse for questioning." GOODWORK
+"When you've rumbled it, come back 'ere 'an I'll nab 'im. Or her, that is!"
+\nWith that, the sergeant thumps his fist on the door, which flies open revealing a flustered butler.
+UPDATEMAP
+GOHALL JVSTART
+\n\nTo play the game, type commands or choose options, type \HELP for more info.\n
+MAIN
+
+GOODWORK?
+* Good work Sergeant
+
+/////////////////////////
+
+// computer randomly picks murderer each game
+MURDER!
+* Jimmy
+* Charlotte
+* Charles
+* Jeeves
+
+//////////////////// STUDY
+
+DESK@ SURFACE
+> put it in study
+* name
+the desk
+* x it
+A solidly built mahogany desk, the Major was sat here when he was murdered.
+> x it
+
+BOOKCASE@ THING
+> put it in study
+* name
+bookcase
+* x it
+There are a lot of [books] here.
+
+BOOK@ THING
+> put it on bookcase
+* name
+a book
+* name
+books
+* x it
+GETBOOK
+* get it
+GETBOOK
+
+GETBOOK&
+You pick up a book at random,
+* it's about fish-keeping.
+* it chronicles the rise and fall of the Roman Empire.
+* a fascinating treatise on fossils.
+* the 1898 Sportsman's Almanac.
+* A riveting read about sedimentary rock formation.
+
+   Not very relevant to the case though.
+
+TROPHY@ THING
+> put it in study
+* name
+a hunting trophy
+* name
+trophies
+* name
+dog
+* name
+ruffy
+* x it
+Heads of innocent animals mounted in a row on the wall, presumably shot by the Major. One of them looks like a small dog.
+
+NOTE@ GETTABLE
+> put it on desk
+* name
+a note
+* x it
+XNOTE
+* read it
+XNOTE
+
+XNOTE
+It's just a torn piece of paper. Could this be a suicide note from the Major? Not particularly likely, it has the words, "It was arrrg!" scrawled on it in pencil.
+
+
+//////////////////// Drawing room
+
+FIREPLACE@ THING
+> put it in drawing room
+* name
+fireplace
+* name
+fire
+* x it
+Like I said, it's blazing away!
+
+//////////////////// kitchen
+
+///////////////////// ///////// PEOPLE
+
+/////////////////// JIMMY  // actor52
+
+JIMMY@ PERSON
+> put him in study
+* name
+Master Jimmy
+* x it
+He's about 10 years old, possibly a bit older, wearing a maroon V-neck wool jumper and grey schoolboy shorts. Despite being born with a silver spoon in his mouth, he still manages to somehow look scruffy. Piecing, piggy blue eyes stare back at you fiercely. You get the impression he totally despises the police and you in particular. He's probably guilty as Hell! Unfortunately, you need more solid proof.
+* ask him about thing
+JIMCOPOUT
+* ask him about window
+"Stupid old greenhouse!"
+audio/j1.ogg:voice:actor52,speech:"Stupid old greenhouse!"
+* ask him about dog
+"Yes, the old man shot Ruffy the dog in a hunting accident."
+audio/j2.ogg:voice:actor52,speech:"*Yes* the old man *shot* Ruffy the *dog* in a hunting accident."
+* ask him about charles
+"I never liked him, but then I don't like anyone!"
+audio/j3.ogg:voice:actor52,speech:"_I_ never liked him, but then I don't like *anyone*!"
+* ask him about charlotte
+"Spends all her time in the garden, probably digging holes for bodies!"
+audio/j4.ogg:voice:actor52,speech:"She spends all her time in the *garden* probably digging holes for *bodies*!"
+* ask him about major
+"Got the right hump at me for breaking his greenhouse!"
+audio/j5.ogg:voice:actor52,speech:"Got the %%right% *hump* at me for breaking his *greenhouse*!"
+* ask him for thing
+"No chance copper!"
+audio/j6.ogg:voice:actor52,speech:"%%No chance% copper!"
+*+= talk to him
+TALK_JIMMY
+* show this thing to him
+JSHOWCOP
+* give my thing to him
+JSHOWCOP
+* show this note to jimmy
+JASKNOTE
+* give this note to jimmy
+Jimmy eats it!
+> put note in death
+* ask him about note
+JASKNOTE
+
+JASKNOTE<
+* "Nothing to do with me, honest!"
+audio/j29.ogg:voice:actor52,speech:"*Nothing* to do with *me*, *honest*!"
+* "\OK I did write it, so what?"
+audio/j30.ogg:voice:actor52,speech:"OK I *did* write it, so *what*?"
+
+JSHOWCOP
+"Now nice!"
+audio/j31.ogg:voice:actor52,speech:"Now nice!"
+
+JIMCOPOUT
+* "What's it to you copper!"
+audio/j7.ogg:voice:actor52,speech:"*What's* it to %%%_you_% *copper*!"
+* "I'm not answering without my lawyer!"
+audio/j8.ogg:voice:actor52,speech:"I'm not answering without my *lawyer*!"
+* "I'm not saying anything!"
+audio/j9.ogg:voice:actor52,speech:"I'm not saying *anything*!"
+* "I have no comment!"
+audio/j10.ogg:voice:actor52,speech:"I have _no_ comment!"
+
+JIMCLOTH@ THING
+> put it on jimmy
+* name
+the clothes
+* name
+wool jumper
+* name
+grey shorts
+* x it
+Typical urchin!
+
+/////////////////// Charlotte  // actor54
+
+CLOT@ PERSON
+> put her in dining room
+* name
+Charlotte
+* x it
+A woman in her early thirties and a good deal younger than the Major, she strikes you as attractive, devious and effortlessly manipulative. Wearing a stunning Worth couture magenta floral [ensemble], she glides silently around the house, where you can be sure, she never misses a trick!
+* ask her about thing
+CLOTCOP
+* ask her about dog
+"Ruffy was the cutest fluffy puppy you've ever seen! Such a tragedy."
+audio/s1.ogg:voice:actor54,speech:"Ruffy was the *cutest* fluffy puppy you've _ever_ seen! _Such_ a tragedy."
+* ask her about jimmy
+"Such a well behaved boy!"
+audio/s2.ogg:voice:actor54,speech:"_Such_ a well behaved *boy*!"
+* ask her about charles
+"I don't think it'll be easy for him to fill the Major's shoes - wrong size for a start!"
+audio/s3.ogg:voice:actor54,speech:"I don't think it'll be easy for him to *fill* the Major's *shoes*, the wrong size for a start!"
+* ask her about major
+"My poor dear husband, taken! What a tragic loss. I do hope you get him Inspector!"
+audio/s4.ogg:voice:actor54,speech:"My _poor_ dear *husband*, **taken*! What a *tragic* loss! I _do_ hope you *get* him Inspector!"
+* ask her about jeeves
+"Jeeves, he's our butler Inspector! Really, you police are a bit slow sometimes!"
+audio/s5.ogg:voice:actor54,speech:"Jeeves, he's our *butler* inspector! *Really* you police are a *bit* slow sometimes!"
+* ask her for thing
+"I should say not Inspector!"
+audio/s6.ogg:voice:actor54,speech:"I should say %%%%not% Inspector!"
+*+= talk to her
+TALK_CLOT
+* show this thing to her
+"What's that supposed to mean Inspector!"
+audio/s18.ogg:voice:actor54,speech:"What's _that_ supposed to mean *Inspector*!"
+* show this note to her
+"Looks like Jimmy's writing."
+audio/s19.ogg:voice:actor54,speech:"Looks like Jimmy's writing."
+* ask her about note
+"I don't think that's important Inspector!"
+audio/s20.ogg:voice:actor54,speech:"I don't think that's important Inspector!"
+* give my note to her
+She tears it up!
+> put note in death
+
+CLOTCOP
+* "You'll have to ask my husband about that!"
+audio/s7.ogg:voice:actor54,speech:"You'll *have* to ask my husband about *that*!"
+
+DRESS@ THING
+> put it on charlotte
+* name
+the dress
+* name
+ensemble
+* x dress
+Worth a packet no doubt!
+
+/////////////////// CHARLES  // actor53
+
+CHARLES@ PERSON
+> put him in drawing room
+* name
+Charles
+* x it
+Charles is the Major's brother and partner in their investments business. He'll now be worth a pretty penny, becoming the sole proprietor along with the manor house and its antiques. That certainly gives him a solid motive. You don't trust him, sat there in his pompous [cravat] and tweedy, shoulder patched, green shooting [jacket]. When did he last shoot anything anyway?
+* ask him about jeeves
+"He's been our butler for goodness knows how long, not much else to say really. Don't you have a butler?"
+audio/c1.ogg:voice:actor53,speech:"*He's* been our butler for _goodness_ knows how long. Not much else to say *really*. Don't _*you*_ have a butler?"
+* ask him about major
+"He was my dear brother and business partner, a terrible loss to me."
+audio/c2.ogg:voice:actor53,speech:"He was my *dear* brother and business partner, a _*terrible*_ loss to me!"
+* ask him about charlotte
+"I'd rather not say anything about that!"
+audio/c3.ogg:voice:actor53,speech:"I'd rather not say anything about *that*!"
+* ask him about jimmy
+"The young rascal! Weren't you young once Inspector?"
+audio/c4.ogg:voice:actor53,speech:"The young *rascal*! Weren't _*you*_ young *once* Inspector?"
+* ask him about thing
+CHARLESCOPOUT
+* ask him about dog
+"Stupid mutt ran in front of the gun, his own silly fault!"
+audio/c5.ogg:voice:actor53,speech:"Stupid _*mutt*_ ran in front of the *gun*. His own %%*silly*% fault!"
+* ask him for thing
+"Not the done thing, old bean!"
+audio/c6.ogg:voice:actor53,speech:"Not the done-*_thing_* *ol _bean_*!"
+*+= talk to him
+TALK_CHARLES
+* show this thing to him
+"So what? Inspector!"
+audio/c27.ogg:voice:actor53,speech:"*So* _what_ inspector!"
+* show this note to him
+CHARNOTE
+* give my note to him
+CHARNOTE
+* ask him about note
+CHARNOTE
+
+CHARNOTE
+"No doubt, one of Jimmy's pranks!"
+audio/c28.ogg:voice:actor53,speech:"No doubt one of Jimmy's pranks!"
+
+CHARLESCOPOUT
+* "I can't help you, at all!"
+audio/c7.ogg:voice:actor53,speech:"I can't *help* you at _all_!"
+* "What a silly question! Shouldn't you be solving the case!"
+audio/c8.ogg:voice:actor53,speech:"*What* a %silly% question! *Shouldn't* you be solving the *case*!"
+
+
+JACKET@ THING
+> put it on charles
+* name
+tweedy tweed shooting jacket
+* name
+cravat
+* x it
+Dapper hunting indeed.
+
+
+MAJOR@ PERSON
+* name
+the Major
+* name
+major stephenson
+* x it
+He's dead!
+
+///////////////////// JEEVES /////////////////
+
+JEEVES@ PERSON
+> put him in hall
+* be it
+IT
+* name
+Jeeves
+* name
+butler
+* label
+Jeeves the butler
+* x it
+Jeeves has been in the family for as long as anyone can remember. Softly spoken and impeccably dressed in kid gloves, black waistcoat, starched white dickey and bow tie. Standing as tall as he can, he looks at you with a haughty demeanour as if you're not worth his time, whilst at the same time acting obsequiously apologetic and toady. Surely he's beyond suspicion!
+* ask him about jimmy
+"Master Jimmy is Major Stephenson's son Sir!"
+audio/b1.ogg:voice:actor51,speech:Master *Jimmy* is Major Stephenson's son Sir!
+JVPAUSE
+* ask him about charles
+"He's in charge of everything now Sir!"
+audio/b2.ogg:voice:actor51,speech:He's in charge of everything now Sir!
+JVPAUSE
+* ask him about charlotte
+"I should say, you'd best ask her directly, Sir!" 
+audio/b3.ogg:voice:actor51,speech:"I should say you'd best ask her *directly* Sir!"
+JVPAUSE
+* ask him about major
+"I'm afraid he's dead, Sir!" 
+audio/b4.ogg:voice:actor51,speech:I'm afraid he's *dead* Sir!
+JVPAUSE
+* ask him about dog
+"Sadly, Ruffy the dog snuffed it recently." JVPAUSE
+audio/b5.ogg:voice:actor51,speech:"Sadly, Ruffy the dog *snuffed* it recently."
+* ask him about thing
+JEEVCOP
+* ask him for thing
+"That's not possible right now, Sir!"
+audio/b6.ogg:voice:actor51,speech:"*That's* not possible right *now* Sir!"
+*+= talk to him
+TALK_JEEVES
+* show this thing to him
+BSHOWCOP
+* give my thing to him
+BSHOWCOP
+* show this note to him
+BNOTE
+* ask him about note
+BNOTE
+* give this note to him
+He takes the note from you.
+> put note in death
+JVPAUSE
+
+BNOTE
+"Is that a clue Sir?" 
+audio/b23.ogg:voice:actor51,speech:"Is that a *clue*, Sir?"
+JVPAUSE
+
+BSHOWCOP
+"I've already got one, Sir!"
+audio/b24.ogg:voice:actor51,speech:"I've already got one, Sir!"
+
+JEEVCOP
+"Sorry, I can't help you with that Sir!"
+audio/b7.ogg:voice:actor51,speech:"Sorry, I can't help you with *that* Sir!"
+
+
+JVSTART
+\n"Welcome to the Manor Sir, I am [Jeeves] the butler, at your disposal." JVMAIN^
+audio/b8.ogg:voice:actor51,speech:"Welcome to the Manor Sir, I am Jeeves the butler, at your disposal."
+
+JVMAIN=
+*?JVPAUSE JVDELAY
+* JVLOOP
+
+JVPAUSE
+
+JVDELAY<
+*
+*
+* JVPAUSE# JVDELAY# JVBEALL
+
+JVBEALL
+\nJeeves, 
+* "If that's all Sir?"
+audio/b9.ogg:voice:actor51,speech:If that's *all* Sir?
+* "Will that be all Sir?"
+audio/b10.ogg:voice:actor51,speech:Will *that* be all Sir?
+
+
+JVHERE > what is jeeves in
+* > what is player in
+\n[Jeeves] arrives!
+*
+
+JVGO > what is jeeves in
+* > what is player in
+\nJeeves leaves the room.
+*
+
+// start in hall
+JVLOOP<<
+*
+*
+*
+JVGO
+> put jeeves in dining room
+JVHERE
+*
+*
+JVGO
+> put jeeves in kitchen
+JVHERE
+*
+*
+JVGO
+> put jeeves in dining room
+JVHERE
+*
+*
+JVGO
+> put jeeves in hall
+JVHERE
+*
+*
+JVGO
+> put jeeves in drawing room
+JVHERE
+*
+*
+JVGO
+> put jeeves in hall
+JVHERE
+*
+*
+JVGO
+> put jeeves in study
+JVHERE
+*
+*
+JVGO
+> put jeeves in hall
+JVHERE
+
+////////////////////////////////////////
+
+BULWARK@ PERSON
+> put him in entrance
+* name
+Sergeant Sgt Bulwark
+* name
+policeman
+* x it
+Built like a brick-house!
+
+HAZELDEN@ PERSON
+* name
+Hazelden
+* name
+detective
+
+
+//// PEOPLE
+
+OKBUT
+* I see, but
+* But
+* Ok, but
+
+PROVE
+* OKBUT can you prove that?
+* OKBUT how can you prove that?
+* OKBUT do you have anything to corroborate that?
+
+WHEREU
+* Where were you at the time of the murder?
+* What were you doing when the murder took place?
+* Do you have an alibi?
+
+THATSALL
+* That's all for now.
+* I have no more questions.
+
+// Jimmy
+
+ENT_STUDY
+\n[Jimmy] is here, JIMDO. JIMGREET
+
+JIMDO
+* loitering
+* looking suspicious
+
+JIMGREET<
+He says,
+* "You must be the Inspector!"
+audio/j26.ogg:voice:actor52,speech:"_**You*_ must-be the *inspector*!"
+* "What do you want Inspector?"
+audio/j27.ogg:voice:actor52,speech:"_*What*_ do you _want_ *inspector*?"
+* "Now what?"
+audio/j28.ogg:voice:actor52,speech:"_Now_ *what*?"
+
+TALK_JIMMY?
+* Jimmy, WHEREU
+JWHERE JPROVE
+*?CPROVE Did you see Charles in the drawing room?
+JSAYC
+*?BPROVE Did you happen to see Jeeves in the dining room?
+JSAYB
+*?SPROVE Do you know where Charlotte was?
+JSAYS
+*-?JPROVE What where you doing outside?
+"Hiding dead bodies of course. Why don't you go dig them up!"
+audio/j11.ogg:voice:actor52,speech:"Hiding dead bodies of course! Why don't you go dig them up!"
+*-How did the Major die?
+"He was shot in the head at point blank range, obviously!"
+audio/j12.ogg:voice:actor52,speech:"He was shot in the *head* at point blank range, *obviously*!"
+*-Where is the body?
+"Hazelden had it sent for autopsy, to find the cause of death."
+audio/j13.ogg:voice:actor52,speech:"*Hazelden* had it sent for autopsy, to find the cause of *death*."
+*+! THATSALL
+JIMBYE MAIN
+
+  TALK_JIMMY
+
+JIMBYE
+* "\OK copper!"
+audio/j14.ogg:voice:actor52,speech:"**OK* Copper!"
+
+JWHERE
+"I had just come back and was in the hall."
+audio/j15.ogg:voice:actor52,speech:"I had just come *back* and was in the *hall*."
+
+JPROVE?
+* PROVE
+"Ask Charles because he saw me there."
+audio/j16.ogg:voice:actor52,speech:"Ask *Charles* because he saw me _there_."
+
+JSAYC MURDER
+* Jimmy
+"No, the room was empty!"
+audio/j17.ogg:voice:actor52,speech:"*No* the room was *empty*!"
+* Charles
+"No, I don't think so."
+audio/j18.ogg:voice:actor52,speech:"*No* I don't think so."
+*
+"Yes I did!"
+audio/j19.ogg:voice:actor52,speech:"_Yes_ I *%%did%*!"
+
+JSAYB MURDER
+* jimmy
+"Yes, but he came out of the study and then went to the dining room."
+audio/j20.ogg:voice:actor52,speech:"Yes, but he came out of the *study* and *then* went to the dining-room."
+* Jeeves
+"I'm pretty sure he wasn't in the dining room."
+audio/j21.ogg:voice:actor52,speech:"I'm pretty sure he *wasn't* in the dining-room."
+*
+"Yes, I saw him setting out the table."
+audio/j22.ogg:voice:actor52,speech:"*Yes* I saw him setting out the table."
+
+JSAYS MURDER
+* jimmy
+"She was in the dining room."
+audio/j23.ogg:voice:actor52,speech:"She _was_ in the dining room."
+* charlotte
+"She came back in from the garden at some point."
+audio/j24.ogg:voice:actor52,speech:"She came back in from the garden at *some-point*."
+*
+"No idea, but she often goes into the garden around that time."
+audio/j25.ogg:voice:actor52,speech:"*No idea*! But she often goes into the garden around that *time*."
+
+// Charlotte
+
+ENT_DINING
+\n[Charlotte] is here, CLOTDO. CLOTGREET
+
+CLOTDO
+* arranging the flowers
+* looking out the window
+* composing her poetry
+
+CLOTGREET<
+She says,
+* "Can I help you Inspector?"
+audio/s16.ogg:voice:actor54,speech:"Can I help _you_ *%%inspector%*?"
+* "More questions, inspector?"
+audio/s17.ogg:voice:actor54,speech:"_*More*_ questions %%%inspector%?"
+
+TALK_CLOT?
+* Charlotte, WHEREU
+"I was in the garden."
+audio/s14.ogg:voice:actor54,speech:"I was in the garden."
+SPROVE
+*?BPROVE Jeeves said he was in the dining room, setting the dinner table. Did you see him?
+SSAYB
+*?CPROVE Any idea where Charles was?
+"I'm not a detective, Inspector!"
+audio/s8.ogg:voice:actor54,speech:"I'm _%not%_ a detective *Inspector*!"
+*+! THATSALL
+CLOTBYE MAIN
+
+   TALK_CLOT
+
+CLOTBYE
+* "Goodbye Inspector."
+audio/s9.ogg:voice:actor54,speech:"*%Goodbye%* inspector!"
+* "Good luck Inspector."
+audio/s15.ogg:voice:actor54,speech:"*%Good Luck%* inspector!"
+
+SPROVE?
+* PROVE
+"Ask Jeeves, he saw me through the window."
+audio/s10.ogg:voice:actor54,speech:"Ask *Jeeves*, he saw me through the *window*."
+
+SSAYB MURDER
+* Charlotte
+"No that's a lie! Jeeves wasn't here at all."
+audio/s11.ogg:voice:actor54,speech:"*No* that's a **lie*! Jeeves wasn't here at *all*."
+* Jeeves
+"No, but perhaps Jeeves was in the kitchen."
+audio/s12.ogg:voice:actor54,speech:"*No* but %%perhaps% Jeeves was in the *%%kitchen%*."
+*
+"Of course I did!"
+audio/s13.ogg:voice:actor54,speech:"Of course-i *%did%*!"
+
+// Charles
+
+ENT_DRAWING
+\n[Charles] is here, CHARDO. CGREET
+
+CGREET<
+\n
+* "Ah there you are Inspector!" exclaims Charles, "I trust you'll be clearing up this awful matter soon, it's been a terrible shock to us all."
+audio/c25.ogg:voice:actor53,speech:"Ah *there* you are inspector! I trust you'll be clearing up this awful matter soon, it's been a terrible shock to us all."
+* "Hello Inspector," he says.
+audio/c26.ogg:voice:actor53,speech:"*Hello* inspector!"
+
+TALK_CHARLES?
+* Charles, WHEREU
+CDOING
+CPROVE
+*?JPROVE Was Jimmy in the hall?
+CSAYJ
+*?BPROVE Do you happen to know where Jeeves was?
+CSAYB
+*- Do you own a gun?
+"Of course, but they're all locked in the gun cupboard."
+audio/c9.ogg:voice:actor53,speech:"*Of course*! but they're all *locked* in the *gun-cupboard*."
+GUN
+"Let's see now; Jeeves, Charlotte has a spare, sometimes Jimmy, as well as mine of course!"
+audio/c10.ogg:voice:actor53,speech:"Let's _see_ now, *Jeeves*, *Charlotte* has a spare and sometimes *Jimmy*, as well as mine *of course*!"
+GUN1
+"Oh, don't you know, Hazelden had it sent to forensics."
+audio/c11.ogg:voice:actor53,speech:"_*Oh*_ don't you _know_! *Hazelden* had it sent to forensics."
+*- What kind of hunting do you do?
+"Grouse, pheasant, pigeons and even the occasional dog!"
+audio/c12.ogg:voice:actor53,speech:"*Grouse*, *pheasant*, *pigeons* and even the occasional *dog*."
+*+! THATSALL
+CHARBYE MAIN
+
+   TALK_CHARLES
+
+CHARBYE
+"Good day, Inspector!"
+audio/c13.ogg:voice:actor53,speech:"_Good *day*_ inspector!"
+
+GUN?
+* Who has keys for the gun cupboard?
+
+GUN1?
+* Where's the gun that shot the Major?
+
+CHARDO
+* smoking his pipe
+* reading a book
+* reading the paper
+
+CDOING
+"I was in here,
+* smoking my pipe."
+audio/c21.ogg:voice:actor53,speech:"I was in here, smoking my pipe."
+* reading my book."
+audio/c22.ogg:voice:actor53,speech:"I was in here, reading my book."
+* writing my novel."
+audio/c23.ogg:voice:actor53,speech:"I was in here, writing my novel."
+* listening to the gramophone."
+audio/c24.ogg:voice:actor53,speech:"I was in here, listening to the gramophone."
+
+CSAYJ MURDER
+* jimmy
+"He was there earlier, but I'm not sure exactly."
+audio/c14.ogg:voice:actor53,speech:"He __*was*_ there *earlier*. But I'm not sure *exactly*."
+* Charles
+"No, I didn't see him at all."
+audio/c15.ogg:voice:actor53,speech:"_*No*_ I didn't see him at *all*."
+*
+"Yes indeed, I saw him there."
+audio/c16.ogg:voice:actor53,speech:"*Yes indeed*! I saw him *there*."
+
+
+CSAYB MURDER
+* jeeves
+"I heard someone come out of the study."
+audio/c17.ogg:voice:actor53,speech:"I heard *someone* come out of the study."
+* charles
+"I think he came out of the study."
+audio/c18.ogg:voice:actor53,speech:"I _*think*_ he came out of the *study*."
+*
+"No idea, old bean!"
+audio/c19.ogg:voice:actor53,speech:"I've  no  _*idear*_  *ol _bean_*!"
+
+CPROVE?
+* PROVE
+"Jimmy came to see me, just ask him!"
+audio/c20.ogg:voice:actor53,speech:"*Jimmy* came to *see-me*! Just _*ask*_ *him*!"
+
+// Jeeves
+
+TALK_JEEVES?
+* Jeeves, WHEREU
+"I was in the dining room, preparing the dinner table."
+audio/b11.ogg:voice:actor51,speech:"I was in the dining room preparing the dinner *table*."
+BPROVE
+*?SPROVE Did you see Charlotte in the garden?
+BSAYS
+*?JPROVE Did you see Jimmy in the hall?
+BSAYJ
+*?CPROVE Do you know if Charles was in the drawing room?
+BSAYC
+*+! THATSALL
+JEEVESBYE MAIN
+
+   TALK_JEEVES
+
+JEEVESBYE
+* "Very good Sir."
+audio/b12.ogg:voice:actor51,speech:"*Very* good Sir."
+* "If that's all Sir?"
+audio/b9.ogg
+
+BPROVE?
+* PROVE
+BWHERE
+
+BWHERE
+"Certainly Sir, ask Charlotte, she saw me setting the table."
+audio/b13.ogg:voice:actor51,speech:"*Certainly* sir, ask Charlotte, she saw me setting the table."
+
+BSAYS MURDER
+* jeeves
+"No, she had finished that some time before."
+audio/b22.ogg:voice:actor51,speech:"*No* she had finished *that* some-time *before*."
+* Charlotte
+"She did do some gardening, but I think she'd finished by then."
+audio/b14.ogg:voice:actor51,speech:"She _*%%did%*_ do some gardening but I *think* she'd finished by *then*."
+* 
+"Yes, I distinctly remember seeing her through the window."
+audio/b15.ogg:voice:actor51,speech:"Yes, I *distinctly* remember *seeing* her through the window."
+
+BSAYJ MURDER
+* jimmy
+"No, I can't recall seeing him."
+audio/b16.ogg:voice:actor51,speech:"*No* I can't recall seeing him."
+* Jeeves
+"He wasn't in the hall, I remember that."
+audio/b17.ogg:voice:actor51,speech:"He *wasn't* in the hall, I remember *that*!"
+*
+"Yes of course, I answered the door."
+audio/b18.ogg:voice:actor51,speech:"Yes of course! i answered the *door*!"
+
+BSAYC MURDER
+* charles
+"Sorry Sir, I can't recall."
+audio/b19.ogg:voice:actor51,speech:"Sorry Sir, I can't recall."
+* jeeves
+"He was definitely there at some point, but not all the time."
+audio/b20.ogg:voice:actor51,speech:"He was *definitely* there at some point, but not _all_ the time."
+*
+"Sorry Sir, I've no idea."
+audio/b21.ogg:voice:actor51,speech:"*Sorry* Sir, I've _*no*_ idea!"
+
+ENT_OUT=
+*?(GOSTUDY or GODININGROOM or GODRAWINGROOM) "Shall I arrest someone, Inspector?" he asks. ACCUSE
+* "Aren't you going to interrogate the suspects, Inspector?" GOHALL
+
+
+ACCUSE?
+\nArrest,
+* Jimmy
+ARRESTJIMMY
+CHKJ
+* Charlotte
+ARRESTCLOT
+CHKS
+* Charles
+ARRESTCHARLES
+CHKC
+* Jeeves
+ARRESTJEEVES
+CHKB
+* No one yet!
+GOHALL
+
+BUL1
+"Right! Let's
+
+BUL2
+Sergeant Bulwark rams open the front door, and rushes in. You hear a muffled commotion and several crashes, followed by Bulwark dragging
+
+BUL3
+is unceremoniously bundled into the waiting black Mariah and the door slammed shut!
+
+ARRESTJIMMY
+BUL1 get 'im!" BUL2 Jimmy out by his pullover. Jimmy kicking and screaming, yelling, "I'll get you for this you pigs!" BUL3
+
+GRILLING
+hires the best lawyers in town and you're given a royal grilling in Court.
+
+FAVOUR
+The Jury finds in favour of
+
+FINDMURDER
+convicting him of first degree murder, sending him down for life.
+
+SOLID
+But your solid evidence shoots down all the excuses and fake alibis. The Jury easily finds against
+
+WRONGJIMMY
+Turns out Jimmy isn't without resources. He GRILLING FAVOUR Jimmy on account of his cast iron alibi. DISGRACE
+
+ISJIMMY
+Turns out Jimmy isn't without resources, he hires top lawyers to defend him. SOLID Jimmy FINDMURDER
+
+ARRESTCLOT
+BUL1 get 'er!" BUL2 Charlotte out pulling her expensive dress across the mud in the most undignified manner. Shrieking at the top of her voice, you hear Charlotte scream, "Hands off me, you vile beasts!". She BUL3
+
+WRONGCLOT
+With poisonous vengeance, Charlotte GRILLING All the time, she stares at you with the most penetrating stare, almost willing you dead! FAVOUR Charlotte on account of her alibi. DISGRACE
+
+ISCLOT
+With poisonous vengeance, Charlotte GRILLING All the time, she stares at you with the most penetrating stare, almost willing you dead! SOLID her, convicting her of first degree murder.
+
+ARRESTJEEVES
+BUL1 get 'im!" BUL2 Jeeves out by his coattails, his polished shoes and starched white shirt splattered in mud. He looks livid with rage, yelling and shouting, you hear him say, "You think you can better me do you!". He BUL3
+
+WRONGJEEVES
+Turns out Jeeves isn't without connections, his valet buddies put monies up for his defence. He GRILLING FAVOUR Jeeves on account of his cast iron alibi. DISGRACE
+
+ISJEEVES
+Jeeves' valet buddies put up monies up for his defence. SOLID him FINDMURDER
+
+ARRESTCHARLES
+BUL1 get 'im!" BUL2 Charles out by his tweedy jacket lapels, he looks in a right state, losing his silk cravat in the mud, his face incandescent with rage and indignation he shouts, "You incompetent Neanderthal coppers! I'll have you whipped and roasted for this!". He BUL3
+
+CHARLESCASE
+With his substantial wealth, resources and influence Charles defence is formidable. Instructing no less than Denton Hall and Savage, they prepare to, almost literally, rip you apart in court. 
+
+WRONGCHARLES
+CHARLESCASE Unfortunately, your case collapses within the first five minutes as Charles' cast iron alibi is unshakeable. DISGRACE
+
+ISCHARLES
+CHARLESCASE SOLID him FINDMURDER 
+
+DISGRACE
+\nYou are disgraced, you failed the case, arrested the wrong person. Your reputation is in tatters, and you're demoted from Inspector to janitor. 
+
+
+CHKJ MURDER
+* jimmy
+ISJIMMY
+WIN
+*
+WRONGJIMMY
+LOSE
+
+CHKS MURDER
+* charlotte
+ISCLOT
+WIN
+*
+WRONGCLOT
+LOSE
+
+CHKC MURDER
+* charles
+ISCHARLES
+WIN
+*
+WRONGCHARLES
+LOSE
+
+CHKB MURDER
+* jeeves
+ISJEEVES
+WIN
+*
+WRONGJEEVES
+LOSE
+
+WIN
+Well done! The murderer was indeed MURDER! ISBUTLER
+TOP_BEGIN
+
+LOSE
+Sorry, wrong answer, the real murderer was MURDER. ISBUTLER 
+TOP_BEGIN
+
+QUIT
+Give up eh?
+Well, the murderer was MURDER. You'll never make a detective! ISBUTLER 
+TOP_BEGIN
+
+
+ISBUTLER MURDER
+* jeeves
+Yes I know, the butler did it!
+
+
+
+
+

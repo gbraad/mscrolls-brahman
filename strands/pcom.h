@@ -33,6 +33,8 @@
 
 #pragma once
 
+#define DEBUGSTKxx
+
 #include <set>
 #include <list>
 #include "logged.h"
@@ -132,7 +134,7 @@ struct Word: public Traits
         scope_any_one,
         scope_the_one,
         scope_here,  // 3
-        scope_have,
+        scope_have,  // my
         scope_here_nothave,
     };
 
@@ -245,6 +247,11 @@ struct Binding
     {
         assert(!_terms.empty());
         return _terms.front();
+    }
+
+    void add(Term* t)
+    {
+        _terms.push_back(t);
     }
 
     bool empty() const { return _terms.empty(); }
@@ -929,28 +936,54 @@ struct ParseCommand: public ParseBase
         return pl;
     }
 
+#ifdef DEBUGSTK
+#define SBEGIN _stkBegin()
+#define SEND   _stkEnd()
+    
+#else
+#define SBEGIN
+#define SEND
+#endif    
+
     pnode* parseTNoun()
     {
         // #pronoun
         // #unoun
         // #tnoun = (#unoun the)
-        
+        // #tnoun = (#pronoun the)
+
+        // Note: allow "the it" as this is convenient for scoping articles
+        // such as "my it" etc.
+
         _push();
         string w = word();
+
+        // [the] thing
+        pnode* pa = parseType(w, Word::pos_article, nodeType::p_article);
+        if (pa)
+        {
+            _push();
+            w = word();
+        }
 
         // it
         pnode* pn = parseType(w, Word::pos_pronoun, nodeType::p_pronoun);
         if (pn)
         {
+            if (pa)
+            {
+                // make node (it the)
+                assert(!pn->_next);
+                pn->_next = pa;
+                pn = new pnode(pn, nodeType::p_tnoun);
+                _drop();
+            }
             _drop();
         }
         else
         {
-            // [the] thing
-            pnode* pa = parseType(w, Word::pos_article, nodeType::p_article);
-
-            if (!pa)
-                _poppush();
+            if (pa) _pop();
+            if (!pa) _poppush();
 
             // the (cup and saucer)
             pn = parseNounList();
@@ -961,10 +994,8 @@ struct ParseCommand: public ParseBase
                     // make node (noun the) or ((nouns) the)
                     assert(!pn->_next);
                     pn->_next = pa;
-
                     pn = new pnode(pn, nodeType::p_tnoun);
                 }
-                
                 _drop();
                      
             }
@@ -1292,8 +1323,21 @@ struct ParseCommand: public ParseBase
         return p;
     }
 
+    bool verbIsSet(pnode* ps)
+    {
+        // is this sentence "SET ..."
+        assert(ps);
+        assert(ps->_head);
+        
+        const Word* verb = getVerb(ps->_head);  // search verb branch
+        return verb && verb->_text == SYM_SET;
+    }
+
     bool parseSet(pnode* ps)
     {
+        // ASSUME verb is "set"
+        // return false if error
+        
         // ps = (verb (nouns))
         // forms are:
         // set N [not/also] prop value
@@ -1305,65 +1349,62 @@ struct ParseCommand: public ParseBase
         assert(ps->_head);
         
         pnode* pn = ps->_head->_next; // nouns
-        if (!pn) return true;
+        if (!pn) return true; // no error
         
         assert(!pn->_next); // no prep lifted yet.
 
-        bool ok = true;
+        //const Word* verb = getVerb(ps->_head);  // search verb branch
+        //if (verb && verb->_text == SYM_SET)
         
-        const Word* verb = getVerb(ps->_head);  // search verb branch
-        if (verb && verb->_text == SYM_SET)
+        _push();
+            
+        bool ok = false;
+            
+        string w = word();
+
+        // optional not/also
+        const Word* prepmod = wordType(w, Word::pos_prepmod);
+        if (prepmod) w = word();
+
+        string prop;
+
+        // new properties are stemmed
+
+        // properties are not case sensitive
+        w = toLower(w);
+            
+        if (atSimpleName(w.c_str())) prop = wordStem(w);
+        else
         {
-            _push();
-            
+            PERR1("expected a property word instead of ", w);
             ok = false;
+        }
             
-            string w = word();
+        if (!prop.empty())
+        {
+            enode* en = parseValueExpr();
 
-            // optional not/also
-            const Word* prepmod = wordType(w, Word::pos_prepmod);
-            if (prepmod) w = word();
-
-            string prop;
-
-            // new properties are stemmed
-
-            // properties are not case sensitive
-            w = toLower(w);
-            
-            if (atSimpleName(w.c_str())) prop = wordStem(w);
-            else
+            if (en)
             {
-                PERR1("expected a property word instead of ", w);
-                ok = false;
-            }
-            
-            if (!prop.empty())
-            {
-                enode* en = parseValueExpr();
-
-                if (en)
-                {
-                    LOG4("adding property ", *pn << " " << prop << " " << *en);
+                LOG4("adding property ", *pn << " " << prop << " " << *en);
                     
-                    // add properties to dictionary
-                    // (prop)
-                    pnode* pp =
-                        new pnode(&internWordType(prop, Word::pos_property),
-                                  nodeType::p_property);
+                // add properties to dictionary
+                // (prop)
+                pnode* pp =
+                    new pnode(&internWordType(prop, Word::pos_property),
+                              nodeType::p_property);
 
-                    pp = makePrepMod(prepmod, pp);  // prepmod can be null
+                pp = makePrepMod(prepmod, pp);  // prepmod can be null
 
-                    // wrap expression as a `pnode`.
-                    pp->_next = makeValueNode(en);
+                // wrap expression as a `pnode`.
+                pp->_next = makeValueNode(en);
                     
-                    // hook into sentence
-                    // (set nouns (prop (value X)))
-                    pn->_next = pp;
+                // hook into sentence
+                // (set nouns (prop (value X)))
+                pn->_next = pp;
 
-                    ok = true;
-                    _drop();
-                }
+                ok = true;
+                _drop();
             }
 
             if (!ok) _pop();
@@ -1649,6 +1690,9 @@ struct ParseCommand: public ParseBase
         // (#cs verb)
         // (#PS verb nouns)
         // (#qs ...)
+
+        SBEGIN;
+        
         pnode* ps = parseAVerb();
         if (ps)
         {
@@ -1670,14 +1714,17 @@ struct ParseCommand: public ParseBase
                     skipws();
                     if (AT)
                     {
-                        // more to parse!
-                        if (parseSet(ps))
+                        if (verbIsSet(ps))
                         {
-                            LOG4("Parse set: ", ps->toStringStruct());
-                        }
-                        else
-                        {
-                            LOG1("parse set problem ", POS);
+                            // more to parse!
+                            if (parseSet(ps))
+                            {
+                                LOG4("Parse set: ", ps->toStringStruct());
+                            }
+                            else
+                            {
+                                LOG1("parse set problem ", POS);
+                            }
                         }
                     }
 
@@ -1697,6 +1744,9 @@ struct ParseCommand: public ParseBase
         {
             ps = parseQuery();
         }
+
+        SEND;
+        
         return ps;
     }
 

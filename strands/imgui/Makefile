@@ -15,6 +15,7 @@
 
 # comment this out to remove spine
 #USESPINE=1
+#USEDEMO=1
 
 ifdef WINDOWS
 CC = gcc
@@ -35,7 +36,7 @@ SRCDIR = $(KLDIR)/imgui
 IFIDIR := $(TOP)/ifi
 KLSRC = $(KLDIR)/head.cpp $(KLDIR)/list.cpp $(KLDIR)/sat.cpp $(KLDIR)/tree.cpp $(KLDIR)/kl.cpp $(KLDIR)/blob.cpp $(KLDIR)/parsectx.cpp $(KLDIR)/klstrandi.cpp $(KLDIR)/porter2.c $(KLDIR)/strands.cpp  $(IFIDIR)/ifiglue.cpp
 SOURCES = $(SRCDIR)/main.cpp 
-SOURCES += $(IMGUI_DIR)/imgui.cpp $(IMGUI_DIR)/imgui_demo.cpp $(IMGUI_DIR)/imgui_draw.cpp $(IMGUI_DIR)/imgui_tables.cpp $(IMGUI_DIR)/imgui_widgets.cpp $(IMGUI_DIR)/misc/freetype/imgui_freetype.cpp $(SRCDIR)/stb_vorbis.c $(SRCDIR)/imwebp.cpp
+SOURCES += $(IMGUI_DIR)/imgui.cpp $(IMGUI_DIR)/imgui_draw.cpp $(IMGUI_DIR)/imgui_tables.cpp $(IMGUI_DIR)/imgui_widgets.cpp $(IMGUI_DIR)/misc/freetype/imgui_freetype.cpp $(SRCDIR)/stb_vorbis.c $(SRCDIR)/imwebp.cpp
 SOURCES += $(KLSRC)
 UNAME_S := $(shell uname -s)
 SOKDIR := $(TOP)/tools/sokol
@@ -157,8 +158,14 @@ SOURCES += $(SPINESRC)
 CPPFLAGS += -I$(SPINEDIR)/include -DUSESPINE
 endif
 
+ifdef USEDEMO
+SOURCES += $(IMGUI_DIR)/imgui_demo.cpp
+CPPFLAGS += -DUSEDEMO
+endif
+
 OBJS = $(addsuffix .o, $(basename $(notdir $(SOURCES))))
-CPPFLAGS += -Wall -Wformat -O3 -Wno-switch -fno-rtti -fno-exceptions
+OPTFLAGS = -Os
+CPPFLAGS += -Wall -Wformat -O2 -Wno-switch -fno-rtti -fno-exceptions $(OPTFLAGS)
 
 ##---------------------------------------------------------------------
 ## EMSCRIPTEN OPTIONS
@@ -176,7 +183,7 @@ LDFLAGS += -lidbfs.js
 LDFLAGS += --preload-file ../games/core/init.kl@init.kl
 #CPPFLAGS += $(EMS)
 LIBS += $(EMS) --pre-js $(SRCDIR)/pre.js
-LDFLAGS += --shell-file $(SRCDIR)/shell.html -O3
+LDFLAGS += --shell-file $(SRCDIR)/shell.html $(OPTFLAGS)
 endif
 
 ifdef WINDOWS

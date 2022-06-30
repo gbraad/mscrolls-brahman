@@ -1,10 +1,11 @@
 #pragma once
 // set chunk_size to 0 for no chunks
 #define CHUNK_SIZE 0
-#define BUFFER_SIZE 1024*1024
+#define BUFFER_SIZE 2*1024*1024
 
 #include <string>
 #include "growbuf.h"
+#include "logged.h"
 
 struct Fetcher
 {

@@ -45,7 +45,6 @@
 #include "dl.h"
 
 #define GENSTATE_KEY  "_gen"
-#define FOCUS_DEPTH 4
 
 #undef TAG
 #define TAG "Strandi, "
@@ -135,9 +134,6 @@ template<class T, int N> struct Tops
         
         memmove(&_v[1], &_v[0], i*sizeof(T));
         _v[0] = t;
-
-        LOG2("Focus: ", toString());
-
     }
 
     bool        contains(const T& t) const
@@ -194,9 +190,7 @@ struct Strandi: public Traits
                 // Doesn't really have to be "fancy",
                 // but do need to expand bindings.
                 // make sure no spaces!
-                s += replaceAll(_host->textifyFancy(_reactor, false),
-                                ' ', '_');
-
+                s += replaceAll(_host->textifyFancy(_reactor, false), ' ', '_');
             }
             return s;
         }
@@ -326,6 +320,7 @@ struct Strandi: public Traits
         const Word* _verbPrep = 0;  // look at
         pnode*      _dobjn = 0;
         Binding*    _dobj = 0;
+        Term*       _dobji = 0;    // ith dobj when iterating
         pnode*      _prepn = 0;
         const Word* _prep = 0;
         const Word* _prepmod = 0; // modifier for prep eg also/not
@@ -352,7 +347,6 @@ struct Strandi: public Traits
     struct Context
     {
         typedef Stacked<Capture*>               LastCap;
-        typedef Tops<Term*, FOCUS_DEPTH>        Focus;
         
         // resolution context
         Strandi*            _host;
@@ -373,9 +367,6 @@ struct Strandi: public Traits
 
         // mark objects as visited (explored) during exec
         bool                 _visitObj = false;
-
-        Focus               _focus;
-
 
         void                markScope() { _scopeChanged = true; }
 
@@ -1926,7 +1917,7 @@ struct Strandi: public Traits
                     if (!cc && !any)
                     {
                         Term* t = Term::find(dcmd);
-                        if (t)
+                        if (t && !t->isObject())
                         {
                             string s = t->toString();
                             _emit(s);
@@ -1974,7 +1965,8 @@ struct Strandi: public Traits
             execInfo ei(cc._reactor->_reactor);
             if (prepareExecInfo(ei) && execValidate(ei))
             {
-                execReaction(ei, *cc._reactor);
+                setItThat(ei, 0);
+                execReaction(ei, cc._reactor->_s);
                 updateIt(ei);
                 c._valid = !ei._break;
             }
@@ -1995,7 +1987,7 @@ struct Strandi: public Traits
 
         LOG3(TAG "command ", c._line);
 
-        requestNL();
+        //requestNL();
         
         // try to parse command and execute
         pnode* ps = _pcom.parse(c._line);
@@ -2071,8 +2063,6 @@ struct Strandi: public Traits
 
         LOG3(TAG "noun parse '", c._line << "'");
 
-        //requestNL();
-        
         // try to parse command and execute
         pnode* ps = _pcom.parseNoun(c._line.c_str());
         if (ps)
@@ -2917,7 +2907,7 @@ struct Strandi: public Traits
     bool prepareChoice(Choices& c, Selector* s, Reaction* reactor)
     {
         // a `reactor` is given if this is a command
-        // elevated to choice
+        // elevated to choice or if we are inheriting from an object.
         
         bool r = false; // return true if choice was added
         
@@ -2928,50 +2918,42 @@ struct Strandi: public Traits
                 if (s->_isReactor)
                 {
                     // this is a command masquerading as a choice
-
                     assert(reactor);
-
-                    // XXX disable focus checks for now
-                    if (1 || _ctx->_focus.contains(s->_host))
-                    {
-                        pnode* pn = 0;
-
-                        pn = reactor->_reactor;
                     
-                        assert(pn);
+                    pnode* pn = reactor->_reactor;
+                    assert(pn);
 
-                        if (!suppressElevatedChoice(s))
+                    if (!suppressElevatedChoice(s))
+                    {
+                        string ctext;
+
+                        if (s->_text.size() > 1)
                         {
-                            string ctext;
+                            // flow has additional elements than
+                            // just command. So this end flow is
+                            // used to form the actual menu text
+                            // rather than a textified command
+                            _pushcap();
+                            c._valid = runAfterCommand(s->_text);
+                            CapRef ccap = _popcap();
 
-                            if (s->_text.size() > 1)
-                            {
-                                // flow has additional elements than
-                                // just command. So this end flow is
-                                // used to form the actual menu text
-                                // rather than a textified command
-                                _pushcap();
-                                c._valid = runAfterCommand(s->_text);
-                                CapRef ccap = _popcap();
+                            if (c && ccap->_cap)
+                                ctext = textify(ccap->_cap);
+                        }
 
-                                if (c && ccap->_cap)
-                                    ctext = textify(ccap->_cap);
-                            }
+                        // if no end flow or it didn't generate
+                        // textify the command
+                        if (ctext.empty())
+                        {
+                            // convert the bound reaction into plain text
+                            ctext = textifyFancy(pn);
+                            //LOG3("creating choice ", ctext << " from " << pn->toStringStruct());
+                        }
 
-                            // if now end flow or it didn't generate
-                            // textify the command
-                            if (ctext.empty())
-                            {
-                                // convert the bound reaction into plain text
-                                ctext = textifyFancy(pn);
-                                //LOG3("creating choice ", ctext << " from " << pn->toStringStruct());
-                            }
-
-                            if (!ctext.empty())
-                            {
-                                c._choices.emplace_back(Choice(ctext, reactor));
-                                r = true;
-                            }
+                        if (!ctext.empty())
+                        {
+                            c._choices.emplace_back(Choice(ctext, reactor));
+                            r = true;
                         }
                     }
                 }
@@ -2999,34 +2981,152 @@ struct Strandi: public Traits
         return r;
     }
 
-    void prepareChoices(Choices& c)
+    bool prepareTermChoice(Choices& c, Selector* s, Term* t)
     {
-        // populates the choice list in the right order.
-        // all choices will be marked as selected
-        // because failed ones are not put in the list
+        // called when we are preparing from a specific term
+        // If that term is an object, we want to include all
+        // reactors (not just ones elevated).
+        bool v = false;
         
-        Term* t = c._t;
-        assert(t);
+        if (t && t->isObject())
+        {
+            assert(s->_isReactor);
 
-        // first process all choices that are not fillers
-        int terminal = 0;
+            // find the current reaction corresponding to this selector.
+            // There will be one if the object is in scope.
+            // Otherwise ignore it and do not add a choice
+            for (auto& ri : _ctx->_reactions)
+            {
+                if (ri._s == s)
+                {
+                    v = prepareChoice(c, s, &ri);
+                    break;
+                }
+            }
+        }
+        else
+        {
+            // non-object version
+            v = prepareChoice(c, s, 0);
+        }
+        return v;
+    }
+
+    void prepareTermFillerChoices(Term* t, Choices& c, int& maxfill)
+    {
+        // pad with filler choices?
+        for (auto s : t->_selectors._selectors)
+        {
+            if (s->filler())
+            {
+                if (prepareTermChoice(c, s, t)) --maxfill;
+                if (!c || maxfill <= 0) break;
+            }
+        }
+
+        if (c && maxfill > 0)
+        {
+            for (auto& i : t->_topflow._elts)
+            {
+                Flow::Elt* e = &i;
+                assert(e->_type == Flow::t_term);
+                Term* ti = ((Flow::EltTerm*)e)->_term;
+                assert(ti); // assume linked
+
+                // we allow choices or objects as parents
+                if (!ti->isChoiceOrObject()) continue;
+
+                // add in standard choices from topflow recursive.
+                prepareTermFillerChoices(ti, c, maxfill);
+                if (!c || maxfill <= 0) break;
+            }
+        }
+    }
+
+    int prepareTermTerminalChoices(Term* t, Choices& c, bool addin)
+    {
+        // add terminals or just count them
+        int tc = 0;
         for (auto s : t->_selectors._selectors)
         {
             if (s->terminal())
             {
-                // how many terminals?
-                if (selectorShown(s)) ++terminal;
+                if (addin)
+                {
+                    if (prepareTermChoice(c, s, t)) ++tc;
+                }
+                else
+                {
+                    // otherwise just count them
+                    if (selectorShown(s)) ++tc; 
+                }
+                if (!c) break;
             }
-            else if (!s->filler())
+        }
+
+        if (c)
+        {
+            for (auto& i : t->_topflow._elts)
             {
-                prepareChoice(c, s, 0);
+                Flow::Elt* e = &i;
+                assert(e->_type == Flow::t_term);
+                Term* ti = ((Flow::EltTerm*)e)->_term;
+                assert(ti); // assume linked
+            
+                // we allow choices or objects as parents
+                if (!ti->isChoiceOrObject()) continue;
+
+                // add in standard choices from topflow recursive.
+                tc += prepareTermTerminalChoices(ti, c, addin);
+                if (!c) break;
+            }
+        }
+        return tc;
+    }
+
+    void prepareTermStdChoices(Term* t, Choices& c)
+    {
+        // standard choices are those that are not terminals nor fillers.
+        // Add these and any elevated commands
+        for (auto s : t->_selectors._selectors)
+        {
+            if (!s->terminal() && !s->filler())
+            {
+                prepareTermChoice(c, s, t);
                 if (!c) break;
             }
         }
         
         if (c)
         {
-            // add in commands elevated to choice
+            // recurse to parent choices
+            for (auto& i : t->_topflow._elts)
+            {
+                Flow::Elt* e = &i;
+                assert(e->_type == Flow::t_term);
+                Term* ti = ((Flow::EltTerm*)e)->_term;
+                assert(ti); // assume linked
+            
+                // we allow choices or objects as parents
+                if (!ti->isChoiceOrObject()) continue;
+                
+                // add in standard choices from topflow recursive.
+                prepareTermStdChoices(ti, c);
+                if (!c) break;
+            }
+        }
+    }
+
+    void prepareChoices(Choices& c)
+    {
+        Term* t = c._t;
+        assert(t);
+        
+        prepareTermStdChoices(t, c);
+        
+        if (c)
+        {
+            // add in commands elevated to choice?
             if (t->cmdChoices())
             {
                 // add in any `aschoice` reactions
@@ -3044,33 +3144,23 @@ struct Strandi: public Traits
             }
         }
 
-        if (c)
+        // how many fillers can we accommodate?
+        int maxfill = t->_idealChoiceCount - c.size();
+        
+        if (maxfill > 0)
         {
-            // pad with filler choices?
-            for (auto s : t->_selectors._selectors)
-            {
-                if (t->_idealChoiceCount - (c.size() + terminal) <= 0) break;
-                
-                if (s->filler())
-                {
-                    prepareChoice(c, s, 0);
-                    if (!c) break;
-                }
-            }
+            // but need space for terminals
+            maxfill -= prepareTermTerminalChoices(t, c, false);
         }
 
-        if (c && terminal)
+        if (maxfill > 0)
         {
-            // add terminals
-            for (auto s : t->_selectors._selectors)
-            {
-                if (s->terminal())
-                {
-                    prepareChoice(c, s, 0);
-                    if (!c) break;
-                }
-            }
+            // accommodate fillers
+            prepareTermFillerChoices(t, c, maxfill);
         }
+
+        // finally, add in the terminals
+        prepareTermTerminalChoices(t, c, true);
         
         // flatten choice text
         if (c) for (auto& ci : c._choices)
@@ -3080,7 +3170,8 @@ struct Strandi: public Traits
             // to mark the ones to choose from
             // for choices, we dont put the non selected ones on
             // the list, so they are all "selected"
-            // this is needed as the UI builder ignores non-selected
+            //
+            // but mark selected as the UI builder ignores non-selected
             ci._selected = true;
             
             if (ci._text.empty())
@@ -3099,7 +3190,6 @@ struct Strandi: public Traits
     {
         // choice does not run the headflow (nor tail)
         // if there are no actual valid choices
-        // TODO: can choices have topflow? what does this mean?
 
         // run and capture
         _pushcap();
@@ -3605,6 +3695,31 @@ struct Strandi: public Traits
         return cc;
     }
         
+    bool restrictToInstanceVsClass(TermList &tl)
+    {
+        bool r = false;
+        int instanceCount = 0;
+        int classCount = 0;
+        for (auto ti : tl)
+            ti->isClass() ? ++classCount : ++instanceCount;
+
+        if (instanceCount > 0 && classCount > 0)
+        {
+            // drop the classes and leave the instances
+            auto it = tl.begin();
+            while (it != tl.end())
+            {
+                if ((*it)->isClass())
+                {
+                    LOG4("Restrict instance vs class, dropping class ", (*it)->_name);
+                    it = tl.erase(it);
+                    r = true;
+                }
+                else ++it;
+            }
+        }
+        return r;
+    }
 
     bool restrictToIdeal(TermList& l1)
     {
@@ -3636,6 +3751,9 @@ struct Strandi: public Traits
                 else ++it;
             }
         }
+
+        restrictToInstanceVsClass(l1);
+        
         return !l1.empty();
     }
 
@@ -3968,17 +4086,19 @@ struct Strandi: public Traits
     pl->_binding = 0;                       \
 }
 
+#define TL_CLEAR(_a)                    \
+{                                       \
+    delete (_a)->_binding;              \
+    (_a)->_binding = 0;                 \
+}
+
     void clearBindings(pnode* pn)
     {
         // delete all bindings in pn and below
         while (pn)
         {
-            delete pn->_binding;
-            pn->_binding = 0;
-            
-            if (pn->_type != nodeType::p_value)
-                clearBindings(pn->_head);                
-            
+            TL_CLEAR(pn);
+            if (pn->_type != nodeType::p_value) clearBindings(pn->_head); 
             pn = pn->_next;
         }
     }
@@ -4082,7 +4202,7 @@ struct Strandi: public Traits
         {
             if (st)
             {
-                LOG4("Resolving scope: ", st << ", " << textify(b));
+                LOG4("Resolving scope; type:", st << ", " << textify(b));
             }
         
             switch (st)
@@ -4181,7 +4301,7 @@ struct Strandi: public Traits
             // on way down
             switch (pn->_type)
             {
-            case nodeType::p_anoun:
+            case nodeType::p_anoun: // adj noun
                 {
                     assert(pn->_head);
                     assert(!pn->_binding);
@@ -4272,8 +4392,7 @@ struct Strandi: public Traits
                     {
                         if (!resolvePossession(*un->_binding, un->_next))
                         {
-                            delete un->_binding;
-                            un->_binding = 0;
+                            TL_CLEAR(un);
                             ri._empty = true;
                         }
 
@@ -4304,11 +4423,12 @@ struct Strandi: public Traits
             case nodeType::p_tnoun:
                 {
                     // (tn (noun the))
+                    // (tn (noun my))
                 
                     assert(!pn->_binding);
 
                     pnode* ns = pn->_head;
-                    pnode* art = pn->_head->_next;  // the
+                    pnode* art = pn->_head->_next;  // the, a, my etc
                     
                     assert(ns);
                     assert(art && art->_word);
@@ -4320,7 +4440,6 @@ struct Strandi: public Traits
                         // do not perform scope reduction in
                         // reactor templates as these are to be resolved
                         // at use-time
-                        
                         if (ri._valid)
                         {
                             // XX currently toscope => artscope
@@ -4334,7 +4453,6 @@ struct Strandi: public Traits
                                 if (ri._artScope == artscope_instances)
                                 {
                                     // apply, unless all are classes
-                                    
                                     ascope = true;
                                     
                                     // do not apply to classes
@@ -4351,11 +4469,11 @@ struct Strandi: public Traits
                             
                             if (ascope)
                             {
-                                if (!resolveScope(*ns->_binding, ns->_binding->_scope))
+                                if (!resolveScope(*ns->_binding,
+                                                  ns->_binding->_scope))
                                 {
                                     // understood, but resolved to empty
-                                    delete ns->_binding;
-                                    ns->_binding = 0;
+                                    TL_CLEAR(ns);
                                     ri._empty = true;
 
                                     // remember that article failed
@@ -4627,27 +4745,6 @@ struct Strandi: public Traits
                         v = _eiHelpIOBJ(ei, pn);
                     }
                 }
-            }
-        }
-
-        if (v)
-        {
-            assert(!ei._it);
-            assert(!ei._that);
-            
-            // setup "it" if valid
-            if (ei._dobj)
-            {
-                Term* t = ei._dobj->first();
-                assert(t);
-                if (t->isObject()) ei._it = t;
-            }
-
-            if (ei._iobj)
-            {
-                Term* t = ei._iobj->first();
-                assert(t);
-                if (t->isObject()) ei._that = t;
             }
         }
         
@@ -5156,22 +5253,25 @@ struct Strandi: public Traits
         return false;
     }
 
-    void execReaction(execInfo& ei, Reaction& r)
+    void execReaction(execInfo& ei, Selector* rs)
     {
+        // pass in the reactor's selector `rs` as we dont use the
+        // original reactor
+        
         if (ei._it) _ctx->pushIt(ei._it);
         if (ei._that) _ctx->pushThat(ei._that);
 
         // keep track of the reaction we are running
         // NB: cannot hang onto reaction as this gets regenerated.
-        assert(!ei._currentSelector);
-        ei._currentSelector = r._s;
+        //assert(!ei._currentSelector);
+        ei._currentSelector = rs;
 
         // update focus with the object who owns this reactor
-        Term* t = ei._it;
-        if (t) _ctx->_focus.add(t);
+        //Term* t = ei._it;
+        //if (t) _ctx->_focus.add(t);
 
         _pushExec(ei);
-        bool v = run(r._s->_action);
+        bool v = run(rs->_action);
         _popExec();
 
         // record whether we hit a manual break
@@ -5188,7 +5288,7 @@ struct Strandi: public Traits
 
     Reaction* matchReactionInScope(execInfo& ei)
     {
-        //LOG3("Looking for reactor match for ", textify(ei._ps));
+        //if (ei._dobji) { LOG4("Looking for reactor match for ", textify(ei._ps) << " for " << ei._dobji->_name); }
 
         for (auto& r : _ctx->_reactions) // search scope
         {
@@ -5220,18 +5320,17 @@ struct Strandi: public Traits
                     }
 
                     // both or neither
-                    v = (rei._dobj != 0) == (ei._dobj != 0);
+                    v = (rei._dobj != 0) == (ei._dobji != 0);
 
                     if (v && rei._dobj)
                     {
                         // insist they match
-                        v = subset(rei._dobj->_terms, ei._dobj->_terms);
+                        v = contains(rei._dobj->_terms, ei._dobji);
                         if (v) rank += 1000;
                         else
                         {
                             // are my terms all subtypes of template?
-                            int d = subtypes(ei._dobj->_terms,
-                                             rei._dobj->_terms);
+                            int d = subtype(ei._dobji, rei._dobj->_terms);
                             if (d)
                             {
                                 v = true;
@@ -5322,6 +5421,30 @@ struct Strandi: public Traits
         return best;
     }
 
+    void setItThat(execInfo& ei, Term* it)
+    {
+        // set "it" and "that" in the execInfo, from itself or given `it`.
+
+        // currently always take "that" from itself.
+        if (ei._iobj)
+        {
+            Term* t = ei._iobj->first();
+            assert(t && t->isObject());
+            ei._that = t;
+        }
+
+        if (!it)
+        {
+            if (ei._dobj)
+            {
+                it = ei._dobj->first();
+                assert(it && it->isObject());
+            }
+        }
+
+        if (it) ei._it = it;
+    }
+
     void updateIt(execInfo& ei)
     {
         if (ei._it)
@@ -5366,6 +5489,25 @@ struct Strandi: public Traits
         }
         return v;
     }
+
+    struct BindCluster
+    {
+        Binding         _b;
+        Reaction*       _mr;     // note this does not remain valid after exec
+        Selector*       _mrs;    // match reactor selector
+
+#ifdef LOGGING        
+        std::string     toString(Strandi& host)
+        {
+            std::string s;
+            s = "reactor: ";
+            s += host.textify(_mr->_reactor);
+            s += " with binding ";
+            s += host.textify(_b);
+            return s;
+        }
+#endif        
+    };
 
     bool exec(execInfo& ei)
     {
@@ -5423,15 +5565,145 @@ struct Strandi: public Traits
             if (!done)
             {
                 // match against current reactions
-                Reaction* mr = matchReactionInScope(ei);
-                if (mr)
+                if (ei._dobj)
                 {
-                    if (ei._resolving)
-                        v = resolveMatchingReactor(ei, *mr);
+                    // for each dobj, find the best reactor and create
+                    // a bind cluster with it and the dobj.
+                    std::vector<BindCluster> bcs;
+                    
+                    BindCluster* bcilast = 0;
+                    for (auto ti : ei._dobj->_terms)
+                    {
+                        ei._dobji = ti;
+                        Reaction* mr = matchReactionInScope(ei);
+                        if (!mr)
+                        {
+                            // XX need to know if the term was a multple
+                            // match like "key" or "X and Y"
+                            // since the latter should fail, the former
+                            // should resolve.
+                            LOG4("exec, no reactor for ", ti->_name);
+                            continue;
+                        }
 
-                    if (v) execReaction(ei, *mr);
+                        Selector* mrs = mr->_s;
+
+                        // if same as last reactor, then we merge the
+                        // objects into one binding
+                        // NB: compare selectors as reactors are already
+                        // specialised.
+                        if (bcilast && bcilast->_mrs == mrs)
+                        {
+                            // it doesn't matter that the specialised
+                            // reaction has only one of the dobjs
+                            // because the reactor has done it's job now
+                            // and the binding list is used to exec.
+                            bcilast->_b.add(ti);
+                        }
+                        else
+                        {
+                            BindCluster bci;
+                                                
+                            bci._b.add(ti);
+                            bci._mr = mr;
+                            bci._mrs = mrs;
+                            bcs.push_back(bci);
+                            bcilast = &bcs.back();
+                        }
+                    }
+
+                    int sz = bcs.size();
+                    v = sz > 0;
+
+                    if (v)
+                    {
+                        // now perform resolution on each cluster
+                        Binding* oldb = ei._dobj;
+
+                        auto it = bcs.begin();
+                        while (it != bcs.end())
+                        {
+                            ei._dobj = &(*it)._b;
+                            
+                            if (ei._resolving)
+                            {
+                                LOG4("exec, resolving cluster ", it->toString(*this));
+                                if (!resolveMatchingReactor(ei, *it->_mr))
+                                {
+                                    it = bcs.erase(it);
+                                    --sz;
+                                    continue;
+                                }
+                            }
+                            
+                            ++it;
+                        }
+
+                        v = sz > 0;
+
+                        // now execute each cluster
+
+                        /* XX There is a potential problem here:
+                         * if there are multiple items whose actions require
+                         * a scope update, then the current reactors become
+                         * invalid and it may not be possible to continue
+                         * the exec.
+                         * Example: get X and Y.
+                         * If an action of getting X also causes Y to vanish
+                         * the "get Y" reactor won't be in scope anymore.
+                         * 
+                         * To fix this, the reactors need to be matched again
+                         * for each dobj.  TODO.
+                         */
+                        if (v)
+                        {
+                            assert(!ei._it);
+                            assert(!ei._that);
+
+                            // find overall size
+                            int szt = 0;
+
+                            // each binding might be multiple
+                            for (int i = 0; i < sz; ++i)
+                                szt += bcs[i]._b.size();
+
+                            bool prompt = szt > 1;
+                            
+                            for (int i = 0; i < sz; ++i)
+                            {
+                                ei._dobj = &bcs[i]._b;
+
+                                for (auto ti : ei._dobj->_terms)
+                                {
+                                    setItThat(ei, ti);
+                                    
+                                    if (prompt)
+                                    {
+                                        OUTP(ti);
+                                        OUTP(": ");
+                                    }
+
+                                    //ei._currentSelector = 0;
+                                    execReaction(ei, bcs[i]._mrs);
+
+                                    --szt;
+                                    if (prompt && szt) OUTP('\n');
+                                }
+                            }
+                        }
+                            
+                        ei._dobj = oldb;
+                    }
                 }
-                else v = false;
+                else
+                {
+                    Reaction* mr = matchReactionInScope(ei);
+                    if (mr)
+                    {
+                        execReaction(ei, mr->_s);
+                    }
+                    else v= false;
+                }
             }
         }
         return v;
@@ -5637,6 +5909,8 @@ if (!_var) LOG1("Warning, there is no term, ", _name);
 
     void _prepareObjectRuntime()
     {
+        LOG4("prepare object runtime", "");
+        
         // find well known objects
         DEF_SPECIAL_TERM(_player, TERM_PLAYER);
         DEF_SPECIAL_TERM(_thing, TERM_THING);
@@ -5667,6 +5941,8 @@ if (!_var) LOG1("Warning, there is no term, ", _name);
         // and execute.
         //
         // NB: these commands need to be resolved against global scope.
+        LOG4("process object properties", "");
+        
         for (auto t : *_terms)
         {
             if (t->isObject())
@@ -5823,6 +6099,8 @@ if (!_var) LOG1("Warning, there is no term, ", _name);
         //
         // bla bla bla [thing](_be THING) bla bla
 
+        LOG4("prepare auto links", "");
+        
         // if err, emit error messages
         using namespace std::placeholders;  
         FlowVisitor ff(std::bind(&Strandi::autoLinks, this, _1, _2));
@@ -5842,6 +6120,8 @@ if (!_var) LOG1("Warning, there is no term, ", _name);
         // in the object and have been collected by buildDictionary.
         // However, object parents can also have names which are
         // attributed to the instance rather than the parent.
+
+        LOG4("Prepare names", "");
 
         // collect these up and add to the instance.
         for (auto t : Term::_allTerms)
@@ -5866,6 +6146,7 @@ if (!_var) LOG1("Warning, there is no term, ", _name);
     {
         if (!_prepared)
         {
+            LOG4("Preparing..", "");
             _buildDictionary();
             _prepared = _preparseCommands();
             _prepared = _prepared && prepareAutoLinks();
@@ -5877,6 +6158,8 @@ if (!_var) LOG1("Warning, there is no term, ", _name);
                 _processObjectProperties();
                 _prepareObjectRuntime();
             }
+
+            LOG4("Preparing done", "");
         }
     }
 
@@ -5974,7 +6257,7 @@ if (!_var) LOG1("Warning, there is no term, ", _name);
 
                 if (!pass)
                 {
-                    //DLOG1(1, "pass 1 pre-parsing ", *ec);
+                    //LOG4("pass 1 pre-parsing ", *ec);
 
                     pnode* pv = _pcom.parseVerb(ec->_command.c_str());
                     if (pv)
@@ -6068,8 +6351,8 @@ if (!_var) LOG1("Warning, there is no term, ", _name);
         // Now process the collected word usages in the visitor.
         for (auto& wu : ff._wordUses)
         {
-            bool canio = false;
-            bool allio = true;
+            bool canio = false; // can accept indirect object
+            bool allio = true;  // must have an indirect object
 
             //LOG1("considering verb properties of ", *wu._verb);
 
@@ -6110,6 +6393,7 @@ if (!_var) LOG1("Warning, there is no term, ", _name);
         // creates initial verb list.
         // also add term IDs
 
+        LOG4("Building dictionary", "");
         _pcom.internStandardWords();
         
         for (auto t: *_terms)
@@ -6355,13 +6639,20 @@ if (!_var) LOG1("Warning, there is no term, ", _name);
         }
         else if (h._expandTerms)
         {
-            if (pn->_type == pnode::p_noun && pn->_binding)
+            if (pn->_binding)
             {
-                assert(pn->_word);
-                res = pn->_word->isID();
-                if (res)
+                if (pn->_type == pnode::p_noun)
                 {
-                    s = textify(*pn->_binding);                    
+                    assert(pn->_word);
+                    res = pn->_word->isID();
+                    if (res) s = textify(*pn->_binding);                    
+                }
+                else if (pn->_type == pnode::p_tnoun)
+                {
+                    // eg (my MUSHROOM)
+                    // this replaces the whole "the X" phrase.
+                    s = textify(*pn->_binding);
+                    res = !s.empty();
                 }
             }
         }
@@ -6394,6 +6685,10 @@ if (!_var) LOG1("Warning, there is no term, ", _name);
                 res = true;
             }
         }
+
+        // needed?
+        //else if (h._expandTerms) res = _textifyExpandBinding(h);
+        
         return res;
     }
 
@@ -6414,6 +6709,7 @@ if (!_var) LOG1("Warning, there is no term, ", _name);
     {
         using namespace std::placeholders;  
         pnode::SHelper h;
+        h._expandTerms = true;
         h._binding = t;
         h._hook = std::bind(&Strandi::_textifyArticle, this, _1);
         pn->toString(&h);
@@ -6453,11 +6749,11 @@ if (!_var) LOG1("Warning, there is no term, ", _name);
                     s += textify(n);
                 }
 
-                if (n->_binding)
+                if (pn->_binding)
                 {
                     // term list
                     s += " [";
-                    s += textify(*n->_binding);
+                    s += textify(*pn->_binding);
                     s += ']';
                 }
 

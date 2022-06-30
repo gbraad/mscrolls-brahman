@@ -189,7 +189,7 @@ struct Capture
                 // normally wont end in a space already but it could
                 // be escaped in.
                 // first char wont be space unless escaped in
-                if (last != ' ' && first != ' ')
+                if (!u_isspace(last) && !u_isspace(first))
                 {
                     bool spc = false;
 

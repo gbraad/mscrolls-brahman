@@ -588,10 +588,7 @@ struct Term: public Traits
         return stab[t];
     }
 
-    ~Term()
-    {
-        _purge();
-    }
+    ~Term() { _purge(); }
     
     string      _name;
     Type        _type = t_generator;
@@ -601,7 +598,7 @@ struct Term: public Traits
 
     // if we are a choice term, use any filler choices
     // to pad to this number, if possible
-    int         _idealChoiceCount = 3;
+    int         _idealChoiceCount = 4;
 
     // body
     Flow        _flow;
@@ -648,6 +645,7 @@ struct Term: public Traits
     bool   isGenerator() const { return _type == t_generator; }
     bool   isChoice() const { return _type == t_choice; }
     bool   isObject() const { return _type == t_object; }
+    bool   isChoiceOrObject() const { return _type == t_choice || _type == t_object; }
     bool   isPure() const
     {
         // a pure term has no side effects, but has some action
@@ -944,7 +942,9 @@ struct Term: public Traits
                 assert(e->_type == Flow::t_term);
                 Term* ti = ((Flow::EltTerm*)e)->_term;
                 assert(ti); // assume linked
-                assert(ti->isObject());
+                
+                // should be objects but just ignore otherwise
+                if (!ti->isObject()) continue;
                 tl.push_back(ti);
             }
         }
@@ -960,7 +960,11 @@ struct Term: public Traits
             {
                 Flow::Elt* e = _topflow._elts.first();
                 assert(e->_type == Flow::t_term);
-                parent = ((Flow::EltTerm*)e)->_term;
+                Term* ti = ((Flow::EltTerm*)e)->_term;
+                assert(ti); // assume linked
+
+                // expect object, but check
+                if (ti->isObject()) parent = ti;
             }
         }
         return parent;

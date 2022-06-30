@@ -47,7 +47,7 @@ GAMEOVER
 // NB: TICK can change GAMEOVER
 MAIN$
 *?!GAMEOVER TICK
-*?!GAMEOVER WHATSHERE CMD MAIN
+*?!GAMEOVER CMD MAIN
 
 MORE?
 *+ Continue
@@ -59,6 +59,10 @@ STUFFHERE > what is in here
 WHATSHERE STUFFHERE
 * them
 \nYou can see LAST.
+
+WHATSEE > what is in here
+*
+> see LAST
 
 CMD?>
 *
@@ -136,6 +140,8 @@ a thing
 something
 * be it
 NULL
+* see it
+NULL
 * get it
 You can't get that.
 * take it
@@ -174,15 +180,12 @@ BORING
 FEELIT
 That won't help.
 
-XHERE0
-\
-UPDATETITLE
-
 XHERE
 \
 UPDATETITLE
 > x here
-
+WHATSEE
+WHATSHERE
 
 // NB: player is not a person!
 PLAYER@ THING
@@ -255,6 +258,8 @@ WAIT
 QUITGAME
 * credits
 CREDITS_PLAIN
+* about
+CREDITS_PLAIN
 * undo
 Undoing...
 UNDO
@@ -272,7 +277,6 @@ WAIT
 INCSCORE
 \nYou scored a point!
 > set player score PLAYER(score)+1
-
 
 
 NOWAY
@@ -396,7 +400,8 @@ PMOLEST@
 > molest it
 * smell it
 > molest it
-* attack it
+* stroke it
+> molest it
 
 PATTACK@
 * hit it
@@ -429,6 +434,35 @@ ASKABOUTMAN
 ASKABOUTWOMAN
 * \n"I know nothing about her."
 * \n"Sorry, I don't know her."
+
+ANIMAL@ THING PATTACK
+* name
+animal
+* kiss it
+> pet it
+* feel it
+> pet it
+* touch it
+> pet it
+* stroke it
+> pet it
+* rape it
+> molest it
+* smell it
+I don't think you want to do that.
+* molest it
+MOLESTATION
+* attack it
+ATTACKPERSON
+* bite it
+ATTACKPERSON
+* give this GETTABLE to it
+THAT doesn't want it.
+* pet it
+PETANIMAL
+
+PETANIMAL
+You pet IT.
 
 PERSON@ THING PMOLEST PATTACK
 * name
@@ -748,7 +782,6 @@ GWHATSALSOON > what is on it
 On IT you see, LAST.
 *
 
-///
 
 // give something
 
@@ -756,14 +789,15 @@ GIVEWHAT
 You have, YOURSTUFF.
 *<< Give what?
 
+UNAME!
+*< What is your name?
+
+
 /// Places
 
 HELL@ INSIDE
 * name
 hell
-
-
-
 
 
 
