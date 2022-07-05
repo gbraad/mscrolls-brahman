@@ -227,7 +227,7 @@ struct KL: public HeadTraits
         return loadStream(ss, env);
     }
 
-    bool loadFile(const string& name, Env& env)
+    bool loadFile(const string& name, Env& env, int errlevel = 1)
     {
         StreamFile s;
         s._semiColonComments = true;
@@ -275,7 +275,7 @@ struct KL: public HeadTraits
         }
         else 
         {
-            LOG1("Failed to load file '", name << '\'');
+            LOGN(errlevel, "Failed to load file '", name << '\'');
         }
 
         return r;
@@ -2279,7 +2279,6 @@ protected:
                         }
                                 
                         // have (kv vv) both atomic
-
                         JSONWalker::addKeyValue(js,
                                                 kv.toString(),
                                                 vv);

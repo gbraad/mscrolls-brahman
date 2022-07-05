@@ -116,7 +116,8 @@ struct KLEnv
         initKLStrandi(&_kl, _strandi);
     }
 
-    bool loadFile(const string& f) { return _kl.loadFile(f, _kl._env); }
+    bool loadFile(const string& f, int errlev = 1)
+    { return _kl.loadFile(f, _kl._env, errlev); }
 
     ST::Capture* evalKL(const string& buf, ST::Capture* args)
     {
@@ -310,7 +311,7 @@ int main(int argc, char** argv)
                 si.setdebug(debug);
 
                 KLEnv kle(si);
-                kle.loadFile(initFilename);
+                kle.loadFile(initFilename, 2);  // soft error
 
                 using namespace std::placeholders;
                 si.setEvaluator(std::bind(&KLEnv::evalKL, &kle, _1, _2));

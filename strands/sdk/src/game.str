@@ -4,7 +4,8 @@ STORY
 The intro.
 
 BEGIN
-\nThe game begins.
+\
+The game begins.
 UPDATEMAP
 GOHALL
 MAIN

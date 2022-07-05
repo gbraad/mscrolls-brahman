@@ -255,6 +255,7 @@ struct Strandi: public Traits
     Term*       _errorNocando;
     Term*       _errorNosuch;
     Term*       _errorSyntax;
+    int         _objectCount;
 
     jmp_buf     _env_top;
     int         _time;
@@ -275,7 +276,7 @@ struct Strandi: public Traits
         _errorNosuch = 0;
         _errorSyntax = 0;
         _time = 0;
-
+        _objectCount = 0;
         
         using namespace std::placeholders;
         _genStateParser = std::bind(&Strandi::genStateParser, this, _1);
@@ -5905,7 +5906,7 @@ struct Strandi: public Traits
 
 #define DEF_SPECIAL_TERM(_var, _name)                           \
 _var = Term::find(_name);                                       \
-if (!_var) LOG1("Warning, there is no term, ", _name);   
+if (!_var && _objectCount) LOG1("Warning, there is no term, ", _name);   
 
     void _prepareObjectRuntime()
     {
@@ -6395,6 +6396,8 @@ if (!_var) LOG1("Warning, there is no term, ", _name);
 
         LOG4("Building dictionary", "");
         _pcom.internStandardWords();
+
+        _objectCount = 0;
         
         for (auto t: *_terms)
         {
@@ -6406,6 +6409,8 @@ if (!_var) LOG1("Warning, there is no term, ", _name);
         
             if (t->isObject())
             {
+                ++_objectCount;
+                
                 // the term NAME is added as anoun
                 _pcom.internWordType(t->_name, Word::pos_noun | Word::pos_ID);
                 

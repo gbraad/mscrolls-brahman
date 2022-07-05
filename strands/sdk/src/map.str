@@ -8,6 +8,7 @@ HALL@ ROOM
 * name
 the hall
 * x it
+images/hall.jpg
 You're in the hall. East is the reception.
 * e
 GORECEPTION
@@ -17,7 +18,6 @@ GORECEPTION
 GOHALL
 > put player in hall
 You go into the hall.
-images/hall.jpg
 XHERE
 
 ////////////////////////////////////
@@ -27,6 +27,7 @@ RECEPTION@ ROOM
 * name
 the reception
 * x it
+images/reception.jpg
 You're in the reception. West is the hall.
 * w
 GOHALL
@@ -36,7 +37,6 @@ GOHALL
 GORECEPTION
 > put player in reception
 You go into the reception.
-images/reception.jpg
 XHERE
 
 ////////////////////////////////////

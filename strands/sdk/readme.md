@@ -7,7 +7,7 @@ Run the `hello.str` example which just prints "Hello world!"
 You can run this right here using the command line:
 
 ```
-bin\strands examples\hello.str
+bin\strands games\hello.str
 ```
 
 Whose output is just
@@ -16,7 +16,7 @@ Whose output is just
 Hello world!
 ```
 
-You can also run it from within the `examples` directory, like this:
+You can also run it from within the `games` directory, like this:
 
 ```
 ..\bin\strands hello.str
@@ -52,12 +52,12 @@ STORY
 Hello world!
 ```
 
-This is in `examples/hellohello.str`
+This is in `games/hellohello.str`
 
 Run it!
 
 ```
-bin\strands examples/hellohello.str
+bin\strands games/hellohello.str
 ```
 
 Output:
@@ -70,13 +70,13 @@ Flow starts at `START` simply because it's the first term in the file. Flow imme
 
 By using flow, you create a game. For documentation on flow, terms and how to build games see the manual in `doc\strandmanual.pdf`
 
-## Running the Examples
+## Running the Sample Games
 
-These examples are also covered in the `strandmanual.pdf`.
+These samples are also covered in the `strandmanual.pdf`.
 
 ### Running Beanstalk
 
-Go into the directory `examples\beanstalk`
+Go into the directory `games\beanstalk`
 
 Run the command-line version with:
 
@@ -90,7 +90,7 @@ The latter will copy the runtime and story into a local `web` directory, then la
 
 ### Running Picton
 
-Go into the directory `examples\picton`
+Go into the directory `games\picton`
 
 Run the command-line version with:
 
@@ -104,19 +104,19 @@ The latter will copy the runtime and story into a local `web` directory, then la
 
 ## How to make a new game
 
-The `core` directory contains the standard `Strands` library. This is a set of term definitions that have been put into `core.str` to get games going quickly.
+The `src` directory contains the standard `Strands` library. This is a set of term definitions that have been put into `core.str` to get games going quickly.
 
 For the following, we'll assume your game name is "mygame"
 
 ### Step 1
 
-Make your game directory and copy in the `core` files:
+Make your game directory and copy in the `src` files:
 
 ```
-cd examples
+cd games
 mkdir mygame
 cd mygame
-copy ..\..\core\*
+copy ..\..\src\*
 ```
 
 Now you can run the game already!

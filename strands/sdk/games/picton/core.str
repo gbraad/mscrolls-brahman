@@ -1,0 +1,767 @@
+/*
+ *
+ *
+ *   ______              _
+ *   | ___ \            | |
+ *   | |_/ / _ __  __ _ | |__   _ __ ___    __ _  _ __
+ *   | ___ \| '__|/ _` || '_ \ | '_ ` _ \  / _` || '_ \
+ *   | |_/ /| |  | (_| || | | || | | | | || (_| || | | |
+ *   \____/ |_|   \__,_||_| |_||_| |_| |_| \__,_||_| |_|
+ *
+ *
+ *  "The creative principle which lies realized in the whole world"
+ *
+ *  Copyright (c) Strand Games 2022.
+ *
+ *  This program is free software: you can redistribute it and/or modify it
+ *  under the terms of the GNU Lesser General Public License (LGPL) as published
+ *  by the Free Software Foundation, either version 3 of the License, or (at
+ *  your option) any later version.
+ * 
+ *  This program is distributed in the hope that it will be useful, but WITHOUT
+ *  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ *  FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License
+ *  for more details.
+ * 
+ *  You should have received a copy of the GNU Lesser General Public License
+ *  along with this program. If not, see <http://www.gnu.org/licenses/>.
+ *
+ *  contact@strandgames.com
+ *
+ */
+
+// Strand Core library
+
+CORE_VERSION
+1.06
+
+GAME_DETAILS
+\n\n**GAME_TITLE** by _GAME_AUTHOR_, GAME_VERSION.
+\nStrand SYSTEM_VERSION, Core CORE_VERSION.
+
+TOP_BEGIN
+*?!BEGIN BEGIN
+
+GAMEOVER
+
+// NB: TICK can change GAMEOVER
+MAIN$
+*?!GAMEOVER TICK
+*?!GAMEOVER WHATSHERE CMD MAIN
+
+MORE?
+*+ Continue
+
+STUFFHERE > what is in here
+*
+> be LAST
+
+WHATSHERE STUFFHERE
+* them
+\nYou can see LAST.
+
+CMD?>
+*
+
+OK
+\OK
+
+INITCORE
+{
+    (setq make-item
+          (fn (x)  (tree (list 'id (termid x)) (list 'name (textify x)))
+              ))
+
+    (setq get-title
+          (fn (t) (tree (list 'title (capswords (textify t))))
+              ))
+}
+
+UPDATEINV > what is in player
+* them
+{
+    (ifisend (tree (list 'items (map make-item IT))))
+}
+*
+{ (ifisend (tree (list 'items ()))) }
+
+UPDATETITLE > what is player in
+*
+{ (ifisend (get-title IT)) }
+
+UPDATEMAP MAP_BACKIMAGE
+* them
+{ (ifisend (tree (list 'map (tree (list 'backimage (textify IT)))))) }
+
+CREDITS_PLAIN
+{ (printf (HTMLToPlain (runterm "GAME_CREDITS"))) } \n\n
+
+
+// save & load
+POSTLOAD_OK
+Game Loaded.
+> look
+MAIN
+
+POSTLOAD_FAIL
+Load Game Failed!
+
+POSTSAVE_OK
+Game Saved.
+
+POSTSAVE_FAIL
+Cannot Save Game.
+
+
+CONCEPT@
+* name
+concept
+* x it
+BORING
+* examine it
+> x it
+* look it
+> x it
+* l it
+> x it
+
+BORING
+* You don't find anything useful.
+* There's nothing special about it.
+
+THING@ CONCEPT
+* name
+a thing
+* name
+something
+* be it
+NULL
+* get it
+You can't get that.
+* take it
+> get it
+* move it
+MOVEIT
+* push it
+> move it
+* pull it
+> move it
+* smell it
+BORING
+* eat it
+You can't eat IT.
+* search it
+BORING
+* hit it
+HITIT
+* break it
+> hit it
+* kick it
+> hit it
+* touch it
+> feel it
+* feel it
+FEELIT
+* _be it
+> x it
+
+HITIT
+Trying to break things won't help.
+
+MOVEIT
+BORING
+
+FEELIT
+That won't help.
+
+XHERE
+\
+UPDATETITLE
+> x here
+
+
+// NB: player is not a person!
+PLAYER@ THING
+> set player score 0
+* name
+the player
+* name
+me
+* x it
+You're looking good!
+* i
+INV
+* inv
+INV
+* go west
+> w
+* go east
+> e
+* go north
+> n
+* go south
+> s
+* go up
+> u
+* up
+> u
+* go down
+> d
+* down
+> d
+* go in
+> in
+* enter
+> in
+* get in
+> in
+* go out
+> out
+* get out
+> out
+* exit
+> out
+* leave
+> out
+* go northeast
+> ne
+* go ne
+> ne
+* go northwest
+> nw
+* go nw
+> nw
+* go southeast
+> se
+* go se
+> se
+* go southwest
+> sw
+* go sw
+> sw
+* score
+Your score is
+> what is player score
+.
+* z
+WAIT
+* wait
+WAIT
+* quit
+QUITGAME
+* credits
+CREDITS_PLAIN
+* about
+CREDITS_PLAIN
+* undo
+Undoing...
+UNDO
+XHERE
+* help
+HELPME
+* hint
+HELPME
+
+WAIT
+* Zzz...
+* time passes...
+* pom-de pom...
+
+INCSCORE
+\nYou scored a point!
+> set player score PLAYER(score)+1
+
+
+NOWAY
+* You can't go that way.
+* There's no exit in that direction.
+
+ERROR_NOCANDO
+You can't do that.
+
+ERROR_NOSUCH
+There is no such thing here.
+
+ERROR_SYNTAX
+* Sorry, I don't understand.
+* I can't make sense of that.
+
+ROOM@ THING
+* name
+room
+* look
+XHERE
+* l
+> look
+* n
+NOWAY
+* w
+NOWAY
+* e
+NOWAY
+* s
+NOWAY
+* u
+NOWAY
+* d
+NOWAY
+* in
+NOWAY
+* out
+NOWAY
+* ne
+NOWAY
+* nw
+NOWAY
+* se
+NOWAY
+* sw
+NOWAY
+
+EAST@ 
+* name
+east
+* name
+e
+
+WEST@ 
+* name
+west
+* name
+w
+
+NORTH@
+* name
+north
+* name
+n
+
+SOUTH@
+* name
+south
+* name
+s
+
+UP@
+* name
+up
+* name
+u
+
+DOWN@
+* name
+down
+* name
+d
+
+NORTHEAST@
+* name
+northeast
+* name
+ne
+
+NORTHWEST@
+* name
+northwest
+* name
+nw
+
+SOUTHEAST@
+* name
+southeast
+* name
+se
+
+SOUTHWEST@
+* name
+southwest
+* name
+sw
+
+////////////////////////////////////////////////////////////
+
+PMOLEST@
+* kiss it
+> molest it
+* feel it
+> molest it
+* touch it
+> molest it
+* rape it
+> molest it
+* eat it
+> molest it
+* smell it
+> molest it
+* stroke it
+> molest it
+
+PATTACK@
+* hit it
+> attack it
+* punch it
+> attack it
+* kick it
+> attack it
+* fight it
+> attack it
+* kill it
+> attack it
+* push it
+> attack it
+
+PERSONAL@ THING PMOLEST PATTACK
+* attack it
+ATTACKPERSON
+* molest it
+MOLESTATIONPART
+* bite it
+MOLESTATIONPART
+* grab it
+MOLESTATIONPART
+
+ASKABOUTMAN
+* \n"I know nothing about him."
+* \n"Sorry, I don't know him."
+
+ASKABOUTWOMAN
+* \n"I know nothing about her."
+* \n"Sorry, I don't know her."
+
+PERSON@ THING PMOLEST PATTACK
+* name
+person
+* molest it
+MOLESTATION
+* attack it
+ATTACKPERSON
+* grab it
+ATTACKPERSON
+* bite it
+ATTACKPERSON
+* give this GETTABLE to it
+THAT doesn't want it.
+* ask it about MAN
+ASKABOUTMAN
+* ask it about WOMAN
+ASKABOUTWOMAN
+
+MOLESTATION
+I don't think IT would take too kindly to that!
+
+MOLESTATIONPART
+Yeah right!
+
+ATTACKPERSON
+* Violence is not the answer.
+* You stop and reconsider.
+* Not a good idea.
+
+MAN@ PERSON
+* name
+man
+
+WOMAN@ PERSON
+* name
+woman
+
+///////////// BODY PARTS ///////////////////////////////////////
+
+FEET@ THING
+> put it in player
+* name
+the feet
+* name
+foot
+* x it
+The feet are size 9.
+* smell it
+Pooh!
+
+HEAD@ PERSONAL
+> put it in PERSON
+* name
+head
+
+HANDS@ PERSONAL
+> put it in PERSON
+* name
+hands
+* name
+hand
+
+////////////////////////////////////////////////////////////
+
+
+GETTABLE@ THING
+* be it
+IT
+* get it
+DOGET
+* drop it
+DODROP
+* postget it
+NULL
+* postdrop it
+NULL
+
+// dummy
+NULL
+
+
+DOGET > put it in player
+* ok
+You get IT.
+UPDATEINV
+> postget it
+*
+You can't get IT.
+
+DODROP > put it in here
+* ok
+You drop IT.
+> postdrop it
+UPDATEINV
+XHERE
+*
+You can't do that.
+
+
+YOURSTUFF > what is in player
+*
+> be LAST
+
+YOURCLOTHES > what is on me
+*
+> be LAST
+
+INV
+INV1 INV2
+
+INV1 YOURSTUFF
+* them
+You are carrying, LAST.
+*
+You're empty handed.
+
+INV2 YOURCLOTHES
+* them
+You're wearing LAST.
+
+
+
+// where dead things go
+DEATH@ ROOM
+* name
+death
+
+/////////////////////////////////////
+
+WALLS@ THING
+* name
+walls
+* name
+wall
+
+FLOOR@ THING
+* name
+floor
+* name
+ground
+
+SKY@ THING
+* name
+the blue sky
+* name
+the sun
+
+XFLOOR
+* It keeps you from falling down!
+* Don't bother with the ground, it's beneath you!
+
+XWALLS
+* The walls aren't really interesting.
+* Looking at the walls won't help!
+
+INSIDE@ ROOM
+* x walls
+XWALLS
+* x floor
+XFLOOR
+
+OUTSIDE@ ROOM
+* x sky
+It's up there.
+* x ground
+XFLOOR
+
+/////// DOORS
+
+OPENABLE@ THING
+* open it
+OPENTHING
+* close it
+CLOSETHING
+
+OPENTHING > what is it state
+* open
+It's already open!
+*
+> set it state open
+You open IT.
+
+CLOSETHING > what is it state
+* open
+> set it state closed
+You close IT.
+*
+It's already closed.
+
+DOOR@ OPENABLE
+
+
+// GARMENTS
+
+GARMENT@ GETTABLE
+* take off it
+> remove it
+* remove it
+REMOVEGARMENT
+* put on it
+> wear it
+* wear it
+WEARGARMENT
+* postremove it
+NULL
+
+
+WEARGARMENT > put it on me
+* ok
+You put on IT.
+*
+You can't wear that.
+
+
+REMOVEGARMENT > is it on me
+* yes
+REMOVEGARMENT2
+*
+You're not wearing IT.
+
+REMOVEGARMENT2 > put it in me
+* ok
+You take off IT.
+> postremove it
+*
+You can't remove that.
+
+
+
+/// CONTAINERS
+
+CONTAINER@ THING
+* look in it
+WHATSIN
+* x it
+WHATSALSOIN
+* put this GETTABLE in it
+DOPUTIN
+
+DOPUTIN > put it in that
+* ok
+You put IT in THAT.
+*
+You can't.
+
+STUFFIN > what is in it
+*
+> be LAST
+
+WHATSIN STUFFIN
+* them
+IT contains, LAST.
+*
+There's nothing there.
+
+WHATSALSOIN STUFFIN
+* them
+IT contains, LAST.
+*
+
+// SURFACES aka supporters
+
+SURFACE@ THING
+* look on it
+WHATSON
+* x it
+WHATSALSOON
+* put this GETTABLE on it
+DOPUTON
+* sit on it
+Not a good idea.
+
+DOPUTON > put it on that
+* ok
+You put IT on THAT.
+*
+You can't.
+
+WHATSON > what is on it
+* them
+On IT you see, LAST.
+*
+There's nothing there.
+
+WHATSALSOON > what is on it
+* them
+On IT you see, LAST.
+*
+
+// Garment hooks
+
+GARMENTHOOK@ THING
+* look on it
+GWHATSON
+* x it
+GWHATSALSOON
+* put my GARMENT on it
+GDOPUTON
+* sit on it
+Not a good idea.
+
+GDOPUTON > put it on that
+* ok
+You put IT on THAT.
+*
+You can't.
+
+GWHATSON > what is on it
+* them
+On it you see, LAST.
+*
+There's nothing there.
+
+GWHATSALSOON > what is on it
+* them
+On IT you see, LAST.
+*
+
+///
+
+// give something
+
+GIVEWHAT
+You have, YOURSTUFF.
+*<< Give what?
+
+/// Places
+
+HELL@ INSIDE
+* name
+hell
+
+
+
+
+
+
