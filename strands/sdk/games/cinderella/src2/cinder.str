@@ -1,0 +1,79 @@
+// game file
+
+STORY
+Once there was a gentleman who married for his second wife the proudest and most haughty woman that was ever seen. She had by a former husband two daughters of her own humor, who were, indeed, exactly like her in all things. He had likewise, by another wife, a young daughter, but of unparalleled goodness and sweetness of temper, which she took from her mother, who was the best creature in the world.
+
+No sooner were the ceremonies of the wedding over but the mother-in-law began to show herself in her true colors. She could not bear the good qualities of this pretty girl, and the less because they made her own daughters appear the more odious. She employed her in meanest work of the house: she scoured the dishes, tables, etc., and scrubbed madam's chamber and those of misses, her daughters; she slept in the cramped attic, upon a wretched straw bed, while her two sisters lay in fine rooms, with floors all inlaid, upon beds of the very newest fashion, and where they had looking-glasses so large that they might see themselves at their full length from head to foot.
+
+BEGIN
+\
+UPDATEMAP
+GOSTART
+MAIN
+
+///////////////////// KITCHEN ///////////////////////
+
+PLATES@ THING
+> put it in kitchen
+* name
+the dirty plates
+* name
+plate
+* name
+crockery
+* x it
+They need washing.
+* see it
+A pile of [dirty plates] here need washing
+*= wash it
+WASHPLATES
+* clean it
+WASHPLATES
+* get it
+Urg! Better just wash them.
+* smell it
+Revolting!
+
+WASHPLATES
+images/dishes.webp
+You toil away cleaning the plates. When they're all done, you put them neatly in the cupboard out of sight.
+> put plates in HELL
+
+CUPBOARD@ THING
+> put it in kitchen
+* name
+the cupboard
+* x it
+It's where you keep the crockery.
+* open it
+No need to do that.
+
+
+///////////////////// BOUDOIR ///////////////////////
+
+SCOWLS
+* scowls
+* shouts
+* yells
+
+PRUSCOLD
+Prunella SCOWLS, "SCOLD"
+
+MIRROR@ THING
+> put it in boudoir
+* name
+the full-length full length mirror
+* x it
+PRUSCOLD
+
+
+DRESSER@ THING
+> put it in boudoir
+* name
+the dresser
+* x it
+Esmeralda SCOWLS, "SCOLD"
+
+
+
+

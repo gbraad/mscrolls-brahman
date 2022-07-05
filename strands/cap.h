@@ -174,6 +174,7 @@ struct Capture
         // because we dont know if it's a start or end quote
         // otherwise get, " foo" foo
         // where one is correct and other end wrong.
+        // NB: this is fixed by using start and end quote codes.
 
         if (!s1.empty())
         {
@@ -232,10 +233,9 @@ struct Capture
                             // also certain chars count like letters here, eg $40
                             if (first < 0xff && strchr("£$", first) != 0) spc = true;
 
-                            // things like quotes following punctuation must have
+                            // plain quotes following punctuation must have
                             // space. eg he said, "hello"
-                        
-                            if (puncbefore && Utf8::isQuote(first)) spc = true;
+                            if (puncbefore && first == '"') spc = true;
                         }
                     }
                         

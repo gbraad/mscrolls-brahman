@@ -1,0 +1,46 @@
+///////////////////////////////////// MAP /////////////////////////////////////
+
+
+
+////////////////////////////////////
+
+KITCHEN@ ROOM
+* name
+the kitchen
+* x it
+images/kitchen.webp
+You're in the kitchen. Upstairs in the boudoir, your two sisters Prunella and Esmeralda are busy getting ready for something.
+* u
+GOBOUDOIR
+*=+ go to the boudoir
+GOBOUDOIR
+
+GOKITCHEN
+> put player in kitchen
+You go back to the kitchen.
+XHERE
+
+GOSTART
+> put player in kitchen
+XHERE
+
+////////////////////////////////////
+
+
+BOUDOIR@ ROOM
+* name
+the boudoir
+* x it
+images/boudoir.webp
+You're in the boudoir. 
+* d
+GOKITCHEN
+*= go to the kitchen
+GOKITCHEN
+
+GOBOUDOIR
+> put player in boudoir
+You go into the boudoir.
+XHERE
+
+////////////////////////////////////

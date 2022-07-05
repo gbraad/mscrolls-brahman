@@ -1,0 +1,55 @@
+/// Characters
+
+PRUNELLA@ WOMAN
+> put her in boudoir
+* name
+Prunella
+* name
+pru
+* x it
+Ugly!
+* see it
+[Prunella] is standing looking in the full-length miror, PRUDO, while [Esmeralda] is sat at the dresser, ESDO.
+* x PRUSTUFF
+PRUSCOLD
+
+PRUSTUFF@ THING
+* name
+hair
+* name
+dress
+* name
+shoes
+* name
+bows
+* name
+nose
+
+
+
+PRUDO
+* adjusting her hair
+* admiring her dress
+* checking her shoes
+* adjusting her bows
+
+SCOLD
+Cinderella,
+* haven't you got work to do!
+* you're supposed to be doing the cleaning!
+
+
+//////////////////////////////////////////////////
+
+
+ESMERALDA@ WOMAN
+> put her in boudoir
+* name
+Esmeralda
+* x it
+Really ugly!
+
+ESDO
+* powdering her nose
+* perfuming her hair
+* combing her hair
