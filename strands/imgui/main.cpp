@@ -45,6 +45,7 @@ static bool audioEnabled = true;
 static bool fontsChanged = true;
 static float fontSize = 24;
 static bool transcriptEnabled = false;
+static bool commandChoicesEnabled = true;
 
 struct FontFileInfo
 {
@@ -483,8 +484,6 @@ void StrandWindow(bool* strand_open)
                     
                     delete sctx._transcript;
                     sctx._transcript = 0;
-
-                    
                 }
                 
                 if (transcriptEnabled)
@@ -502,6 +501,11 @@ void StrandWindow(bool* strand_open)
                         LOG1("Failed to open transcript, ", tFilename);
                     }
                 }
+            }
+            if (ImGui::MenuItem("Command Choices", NULL, commandChoicesEnabled))
+            {
+                commandChoicesEnabled = !commandChoicesEnabled;
+                sctx.enableCommandChoices(commandChoicesEnabled);
             }
             ImGui::EndMenu();
         }
@@ -567,7 +571,9 @@ void StrandWindow(bool* strand_open)
 
         // only show links when we have an input box, otherwise
         // autolinks do not execute.
-        sctx._mainText._showLinks = inputActive;
+        //
+        // NO! what about external links and links in choice-only games??
+        sctx._mainText._showLinks = true; // inputActive;
         
         // render our text, a block at a time
         sctx._mainText.render();

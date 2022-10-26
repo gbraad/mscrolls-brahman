@@ -119,7 +119,10 @@ struct Capture
 
         var toVar() const
         {
-            return toString();
+            // will be a string unless the elt holds a var.
+            if (_term) return _term->_name;
+            else if (_v) return _v.copy();
+            return _s;
         }
 
         void fromVar(const var& v)
@@ -147,7 +150,6 @@ struct Capture
                 }
             }
         }
-       
     };
 
     typedef std::list<Elt>  Elts;
@@ -355,12 +357,10 @@ struct Capture
     {
         var v;
         int sz = size();
-        if (sz == 1)
-        {
-            v = _elts.front().toVar();
-        }
+        if (sz == 1) v = _elts.front().toVar();
         else if (sz > 1)
         {
+            // make into a list.
             for (auto& e : _elts) v.append(e.toVar());
         }
         return v;

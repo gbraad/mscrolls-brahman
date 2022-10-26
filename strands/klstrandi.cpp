@@ -184,6 +184,17 @@ struct KLStrandi: public KLLib
         return Int(r);
     }
 
+    Term _primElevateChoicesFn(List::iterator& ai, Env& env)
+    {
+        Term t = EVALAI;
+        bool v = KL::isTrue(t);
+
+        assert(_strandi);
+        _strandi->_elevateChoices = v;
+
+        return t;
+    }
+
     void _init()
     {
         Tree g;
@@ -196,6 +207,7 @@ struct KLStrandi: public KLLib
         DEF_PRIM(PlainToHTML, "plaintohtml");
         DEF_PRIM(RunTerm, "runterm");
         DEF_PRIM(UndoTerm, "undoterm");
+        DEF_PRIM(ElevateChoices, "elevatechoices");
 
         _host->_env._env = List(g, *_host->_env._env);
 

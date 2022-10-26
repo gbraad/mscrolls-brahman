@@ -73,6 +73,7 @@ template<class T> struct Stacked
     
     void push(const T& v)
     {
+        assert(v);
         Elt* e = new Elt;
         e->_v = v;
         e->_prev = _top;
@@ -256,6 +257,7 @@ struct Strandi: public Traits
     Term*       _errorNosuch;
     Term*       _errorSyntax;
     int         _objectCount;
+    bool        _elevateChoices = true;
 
     jmp_buf     _env_top;
     int         _time;
@@ -344,7 +346,6 @@ struct Strandi: public Traits
         execInfo(pnode* ps): _ps(ps) {}
     };
 
-
     struct Context
     {
         typedef Stacked<Capture*>               LastCap;
@@ -364,12 +365,24 @@ struct Strandi: public Traits
         // currently available
         Reactions           _reactions;
         execInfo*           _currentExec = 0;
-        bool                _scopeChanged = false;
+        int                 _scopeChanged = 0;
+        bool                _updatingScope = false;
+        int                 _lockScope = 0; // times when we cant update
 
         // mark objects as visited (explored) during exec
         bool                 _visitObj = false;
 
-        void                markScope() { _scopeChanged = true; }
+        void                markScope(int where)
+        {
+            // where is only used to help debug where we were called
+            // 1=>run()
+            // 2=>set/put internal op
+            // 3 = reset term
+            // 4=>undo
+            // 5=>load
+            if (where > _scopeChanged) _scopeChanged = where;
+        }
+        
 
         Context(Strandi* h) : _host(h) {}
         ~Context() { _purge(); }
@@ -476,6 +489,23 @@ struct Strandi: public Traits
     private:
 
         void _purge() { while (_pronouns) _popPron(_pronouns->_w); }
+    };
+
+    struct ReactLock
+    {
+        Context* _c;
+        
+        ReactLock(Context* c) : _c(c)
+        {
+            //assert(!_c->_lockScope);
+            ++_c->_lockScope;
+        }
+
+        ~ReactLock()
+        {
+            --_c->_lockScope;
+            assert(_c->_lockScope >= 0);
+        }
     };
 
     typedef Context::LastCap LastCap;
@@ -1163,7 +1193,8 @@ struct Strandi: public Traits
     {
         if (_eval)
         {
-            Capture* args = _ctx->_lastCap.get();
+            Capture* args = 0;
+            if (_ctx->_lastCap) args = _ctx->_lastCap.get();
             Capture* cp = (_eval)(ec->_code, args);
             if (cp)
             {
@@ -1182,7 +1213,11 @@ struct Strandi: public Traits
         bool v = true;
         if (c->_parse)
         {
-            ResInfo ri(c->_parse);
+            //pnode* pn = c->_parse->copy();
+            pnode* pn = c->_parse; 
+            ResInfo ri(pn);
+
+            //LOG1("running ", textify(pn) << " scope " << _ctx->_scopeChanged);
 
             // enable only article scoping but keep resolution scope global
             // because we are running at author/load time.
@@ -1193,7 +1228,7 @@ struct Strandi: public Traits
             resolve(ri);
             if (ri.resolved())
             {
-                execInfo ei(c->_parse);
+                execInfo ei(pn);
 
                 if ((_runtypemask & run_choice) == 0)
                 {
@@ -1205,6 +1240,9 @@ struct Strandi: public Traits
                             
                 ei._err = false; // no built in errors
                 bool done = exec(ei);
+
+                //LOG1("Clearning binding, ", textify(pn));
+                clearBindings(pn);
                 
                 // retrieve manual break request from exec
                 if (ei._break)
@@ -1230,8 +1268,6 @@ struct Strandi: public Traits
             {
                 ERR1("flow cannot resolve", textify(c->_parse));
             }
-
-            clearBindings(c->_parse);
         }
         else
         {
@@ -1392,7 +1428,6 @@ struct Strandi: public Traits
                 if (e->_type == Flow::t_command) begun = true;
                 continue;
             }
-                 
             v = run(e);
             if (!v) break;
         }
@@ -1895,6 +1930,7 @@ struct Strandi: public Traits
                         
                     // special case to examine reactions
                     int cc = 0;
+                    ReactLock rl(_ctx);
                     for (auto& r : _ctx->_reactions)
                     {
                         assert(r._reactor);
@@ -1946,12 +1982,13 @@ struct Strandi: public Traits
         assert(ch > 0 && ch <= c.size());
         assert(c.size() == c.choiceCount()); // will all be selected
         
-        LOG3(TAG "choice made ", ch);
+        //LOG3(TAG "choice made ", ch);
 
         Choice& cc = c._choices[--ch];
         Selector* s = cc._action;
                 
         // mark as chosen.
+        // see also `setVisited`
         if (s->once()) _state.set(cc.id());
                 
         // arrange for newline after choice and before subsequent
@@ -2129,6 +2166,8 @@ struct Strandi: public Traits
     {
         // terms in expressions evaluate according to their visit status
         // either as numeric 1 or 0.
+        // unless they are conditional expressions (runconditional)
+        
         assert(name && *name);
 
         var v(0);
@@ -2184,7 +2223,30 @@ struct Strandi: public Traits
             LOG1("WARNING, cannot locate term ", name);
         }
 
-        if (!done && _state.test(name)) v = 1;
+        if (!done)
+        {
+            // if term is LAST, extract value as var.
+            if (t->_name == TERM_LAST)
+            {
+                if (_ctx->_lastCap)
+                {
+                    Capture* cap = _ctx->_lastCap.get();
+                    assert(cap);
+                    v = cap->toVar();
+                    done = true;
+                }
+                else
+                {
+                    LOG1("Warning, eval LAST, but not defined ", name);
+                }
+            }
+        }
+
+        if (!done)
+        {
+            // 1 or 0, depending on visit status.
+            if (_state.test(name)) v = 1;
+        }
         
         return v;
     }
@@ -2620,6 +2682,9 @@ struct Strandi: public Traits
         // track whether we use the topflow
         bool unusedTopflow = false;
 
+        bool stickpushed = false;
+        bool lastpushed = false;
+
         // run top flow and keep result, this becomes
         // an input selector.
         if (c._t->_topflow)
@@ -2638,13 +2703,15 @@ struct Strandi: public Traits
             topflowcap = _popcap();
 
             // we have some content in the topflow, as yet unused.
-            if (topflowcap->_cap) unusedTopflow = true;
+            if (topflowcap->_cap)
+            {
+                // push new last, only valid while `topflowcap` in scope.
+                _ctx->_lastCap.push(&topflowcap->_cap);
+                lastpushed = true;
+                unusedTopflow = true;
+            }
         }
 
-        // install results of topflow as LAST
-        LastCap::Tmp ltmp(_ctx->_lastCap, &topflowcap->_cap);
-        
-        bool stickpushed = false;
         if (c)
         {
             if (c._t->sticky())
@@ -2713,7 +2780,7 @@ struct Strandi: public Traits
                     }
                     else
                     {
-                        // if we have a setmatch, then feed all in one
+                        // if we have a setmatch ("them"), then feed all in one
                         // ie a match for a whole set.
                         bool setmatch = false;
                         for (auto& ci : c._choices)
@@ -2728,7 +2795,7 @@ struct Strandi: public Traits
                             //LastCap::Tmp ltmp(_ctx->_lastCap, &topflowcap->_cap);
                             runGeneratorAction(c);
                         }
-                        else
+                        else if (!c.isEmpty())
                         {
                             // filter:
                             // feed the topflow to the matcher one at a time
@@ -2737,7 +2804,7 @@ struct Strandi: public Traits
                                 // install each individually as lastcap
                                 Capture icap;
                                 icap.add(e);
-                                LastCap::Tmp ltmp(_ctx->_lastCap, &icap);
+                                _ctx->_lastCap.push(&icap);
 
                                 //LOG1("matching topflow elt ", e.toStringTyped());
                         
@@ -2754,6 +2821,9 @@ struct Strandi: public Traits
                                 // run one of the matches choices OR
                                 // one of the null flow choices
                                 runGeneratorAction(c);
+
+                                _ctx->_lastCap.pop();
+                                
                                 if (!c) break;
                             }
                         }
@@ -2766,7 +2836,7 @@ struct Strandi: public Traits
                     // this is where we had a non-empty topflow
                     // and no selectors and no head flow
                     // in such case, the term value becomes the topflow
-                    //LOG4(TAG "unused topflowcap in ", c._t->_name << " = " << topflowcap->_cap.toString());
+                    //LOG4(TAG "unused topflowcap in ", c._t->_name << " = " << topflowcap->_cap);
                     assert(topflowcap);
                     outCap(topflowcap->_cap);
                 }
@@ -2832,14 +2902,17 @@ struct Strandi: public Traits
 
         bool res = c;
 
-        // NB: lastcap is still in scope for the postflow
+        // NB: lastcap is still pushed for the postflow
         if (res)
             res = run(c._t->_postflow);
+
+        // drop any last pushed
+        if (lastpushed) _ctx->_lastCap.pop();
 
         return res;
     }
 
-    bool selectorShown(Selector* s, Reaction* reactor = 0)
+    bool selectorShown(Selector* s, Reaction* reactor)
     {
         // should we show this selector?
         bool show = true;
@@ -2848,6 +2921,8 @@ struct Strandi: public Traits
         if (s->once())
         {
             string id = reactor ? reactor->id() : s->id();
+
+            // see also `getVisited`
             if (_state.test(id)) show = false;
         }
 
@@ -2856,12 +2931,71 @@ struct Strandi: public Traits
         return show;
     }
 
+    bool termDoesSomething(Term* t, bool usefiller = true)
+    {
+        /* try to figure out if this term `t` does something.
+         * this is not always accurate, so be false only when
+         * it does nothing. If true, then the term may well still
+         * no nothing.
+         *
+         * This is used to suppress choices that do not lead anywhere.
+         *
+         * if `usefiller', then fillers count, otherwise not.
+         */
+        bool active = false;
+        
+        // simple version that just looks at choice conditions
+        for (auto s : t->_selectors._selectors)
+        {
+            // terminals don't count
+            if (!s->terminal())
+            {
+                // not filler or we want to include them
+                if (!s->filler() || usefiller)
+                {
+                    if (selectorShown(s, findSelectorReaction(s)))
+                    {
+                        active = true;
+                        break;
+                    }
+                }
+            }
+        }
+
+        if (!active)
+        {
+            // might have active parents
+            TermList pl;
+            getParents(t, pl);
+            for (Term* ti : pl)
+            {
+                // ignore fillers in all parents
+                if (termDoesSomething(ti, false))
+                {
+                    active = true;
+                    break;
+                }
+            }
+        }
+
+        /*
+        // this version actually runs subsequent flow,
+        // then reverts it to see if something happens
+        Choices ch(t);
+        // revert any state changes whilst inspecting flow
+        Timeline::Mark m = _state.getMark();
+        prepareChoices(ch);
+        _state.clearToMark(m);
+        if (!ch.present()) active = false;
+        */
+        return active;
+    }
+    
     bool suppressElevatedChoice(Selector* s)
     {
         /* try to figure out whether this command if elevated to choice
          * actually does not do anything.
          */
-        
         bool suppress = !s->_action;
         if (!suppress && s->_action.size() == 1)
         {
@@ -2872,33 +3006,12 @@ struct Strandi: public Traits
             {
                 Term* t1 = ((Flow::EltTerm*)e)->_term;
                 assert(t1);  // otherwise not bound
-                if (t1->isChoice())
+
+                if (t1->isChoice() && !termDoesSomething(t1)) suppress = true;
+
+                if (suppress)
                 {
-#if 1
-                    // simple version that just looks at choice conditions
-                    int cc = 0;
-                    for (auto s : t1->_selectors._selectors)
-                    {
-                        // only count non-terminals
-                        if (!s->terminal() && selectorShown(s)) ++cc;
-                    }
-
-                    if (!cc) suppress = true;
-#else
-                    // this version actually runs subsequent flow,
-                    // then reverts it to see if something happens
-                    Choices ch(t1);
-                    // revert any state changes whilst inspecting flow
-                    Timeline::Mark m = _state.getMark();
-                    prepareChoices(ch);
-                    _state.clearToMark(m);
-                    if (!ch.present()) suppress = true;
-#endif                    
-
-                    if (suppress)
-                    {
-                        LOG3("suppressing elevated choice reactor ", t1->_name);
-                    }
+                    LOG3("suppressing elevated choice reactor ", t1->_name);
                 }
             }
         }
@@ -2924,7 +3037,7 @@ struct Strandi: public Traits
                     pnode* pn = reactor->_reactor;
                     assert(pn);
 
-                    if (!suppressElevatedChoice(s))
+                    if (_elevateChoices && !suppressElevatedChoice(s))
                     {
                         string ctext;
 
@@ -2982,6 +3095,28 @@ struct Strandi: public Traits
         return r;
     }
 
+    Reaction* findSelectorReaction(Selector* s)
+    {
+        Reaction* r = 0;
+        
+        if (s->_isReactor)
+        {
+            // find the current reaction corresponding to this selector.
+            // There will be one if the object is in scope.
+
+            // NB: no need for lock in simple loop that can't call anything
+            //ReactLock rl(_ctx);
+            
+            for (auto& ri : _ctx->_reactions)
+                if (ri._s == s)
+                {
+                    r = &ri;
+                    break;
+                }
+        }
+        return r;
+    }
+
     bool prepareTermChoice(Choices& c, Selector* s, Term* t)
     {
         // called when we are preparing from a specific term
@@ -2996,14 +3131,8 @@ struct Strandi: public Traits
             // find the current reaction corresponding to this selector.
             // There will be one if the object is in scope.
             // Otherwise ignore it and do not add a choice
-            for (auto& ri : _ctx->_reactions)
-            {
-                if (ri._s == s)
-                {
-                    v = prepareChoice(c, s, &ri);
-                    break;
-                }
-            }
+            Reaction* ri = findSelectorReaction(s);
+            v = prepareChoice(c, s, ri);
         }
         else
         {
@@ -3011,6 +3140,34 @@ struct Strandi: public Traits
             v = prepareChoice(c, s, 0);
         }
         return v;
+    }
+
+    void getParents(Term* t, TermList& tl)
+    {
+        // get parents evaluation conditionals
+        // see also `getStaticParents`
+
+        // flow will be terms
+        for (Flow::Elt& i : t->_topflow._elts)
+        {
+            assert(i._type == Flow::t_term);
+            Flow::EltTerm* et = (Flow::EltTerm*)&i;
+            Term* ti = et->_term;
+            assert(ti); // assume linked
+            
+            // objects only have object parents, ignore.
+            if (t->isObject() && !ti->isObject()) continue;
+
+            bool v = true;
+            
+            if (et->_cond)
+            {
+                v = evalEnode(et->_cond).isTrue();
+            }
+
+            if (v)
+                tl.push_back(ti);
+        }
     }
 
     void prepareTermFillerChoices(Term* t, Choices& c, int& maxfill)
@@ -3027,19 +3184,17 @@ struct Strandi: public Traits
 
         if (c && maxfill > 0)
         {
-            for (auto& i : t->_topflow._elts)
-            {
-                Flow::Elt* e = &i;
-                assert(e->_type == Flow::t_term);
-                Term* ti = ((Flow::EltTerm*)e)->_term;
-                assert(ti); // assume linked
+            TermList tl;
+            getParents(t, tl);
 
+            for (Term* ti : tl)
+            {
                 // we allow choices or objects as parents
                 if (!ti->isChoiceOrObject()) continue;
 
                 // add in standard choices from topflow recursive.
                 prepareTermFillerChoices(ti, c, maxfill);
-                if (!c || maxfill <= 0) break;
+                if (!c || maxfill <= 0) break;                
             }
         }
     }
@@ -3059,7 +3214,7 @@ struct Strandi: public Traits
                 else
                 {
                     // otherwise just count them
-                    if (selectorShown(s)) ++tc; 
+                    if (selectorShown(s, 0)) ++tc; 
                 }
                 if (!c) break;
             }
@@ -3067,13 +3222,11 @@ struct Strandi: public Traits
 
         if (c)
         {
-            for (auto& i : t->_topflow._elts)
+            TermList tl;
+            getParents(t, tl);
+
+            for (Term* ti : tl)
             {
-                Flow::Elt* e = &i;
-                assert(e->_type == Flow::t_term);
-                Term* ti = ((Flow::EltTerm*)e)->_term;
-                assert(ti); // assume linked
-            
                 // we allow choices or objects as parents
                 if (!ti->isChoiceOrObject()) continue;
 
@@ -3101,13 +3254,11 @@ struct Strandi: public Traits
         if (c)
         {
             // recurse to parent choices
-            for (auto& i : t->_topflow._elts)
+            TermList tl;
+            getParents(t, tl);
+
+            for (Term* ti : tl)
             {
-                Flow::Elt* e = &i;
-                assert(e->_type == Flow::t_term);
-                Term* ti = ((Flow::EltTerm*)e)->_term;
-                assert(ti); // assume linked
-            
                 // we allow choices or objects as parents
                 if (!ti->isChoiceOrObject()) continue;
                 
@@ -3132,6 +3283,7 @@ struct Strandi: public Traits
             {
                 // add in any `aschoice` reactions
                 // these are object reactions that appear as choices
+                ReactLock rl(_ctx);
                 for (auto& r : _ctx->_reactions)
                 {
                     Selector* s = r._s;
@@ -3336,7 +3488,7 @@ struct Strandi: public Traits
                 r = true;
                 
                 // scope needs recalculating
-                _ctx->markScope();
+                _ctx->markScope(4);
             }
         }
         return r;
@@ -3377,7 +3529,7 @@ struct Strandi: public Traits
                 r = true;
                 
                 // scope needs recalculating
-                _ctx->markScope();
+                _ctx->markScope(4);
             }
         }
         else
@@ -3399,7 +3551,11 @@ struct Strandi: public Traits
         {
             v = true;
             if (_ctx->_lastCap)
-                outCap(*_ctx->_lastCap.get());
+            {
+                Capture* c = _ctx->_lastCap.get();
+                assert(c);
+                outCap(*c);
+            }
         }
         else if (t->_name == TERM_IT)
         {
@@ -3518,7 +3674,6 @@ struct Strandi: public Traits
     bool _run(Term* t)
     {
         // return false for break
-
         bool v = true;
         if (!_run1(t)) v = runChoiceOrGenerator(t);
         return v;
@@ -3548,7 +3703,7 @@ struct Strandi: public Traits
         resetTick(t);
 
         // clear the visit marker, if present
-        _state.clear(t->_name);
+        bool changed = _state.clear(t->_name);
 
         // reset generate state if necessary
         GenState* g1 = getGenState(t->_name);
@@ -3558,6 +3713,8 @@ struct Strandi: public Traits
             GenState* g2 = g1->copyIf();
             if (g2 != g1)
             {
+                changed = true;
+                
                 if (g2->reset())
                 {
                     //LOG1("resetting gen state for ", t->_name << " to " << *g2);
@@ -3566,6 +3723,9 @@ struct Strandi: public Traits
                 else delete g2; // reset did not change state
             }
         }
+
+        // reset term can change scope
+        if (changed) _ctx->markScope(3);
     }
     
     bool run(Term* t)
@@ -3617,7 +3777,7 @@ struct Strandi: public Traits
                 // for now we just mark changed if a new term is visited
                 // but ideally we could check to see if any conditionals
                 // use this term before forcing a recalculation of scope.
-                _ctx->markScope();
+                _ctx->markScope(1);
             }
 
             if (v) break;
@@ -3961,7 +4121,7 @@ struct Strandi: public Traits
     {
         // is p a parent of a
         TermList tl;
-        a->getParents(tl);
+        a->getStaticParents(tl);
         return contains(tl, p);
     }
 
@@ -3972,7 +4132,7 @@ struct Strandi: public Traits
         // n => n steps away, eg 1 is immediate parent
         
         TermList tl;
-        a->getParents(tl);
+        a->getStaticParents(tl);
         if (contains(tl, p)) return 1;
 
         // recursive
@@ -4058,7 +4218,7 @@ struct Strandi: public Traits
         for (auto t : tl)
         {
             TermList pl;
-            t->getParents(pl);
+            getParents(t, pl);
             concatm(allparents, pl);
         }
 
@@ -4304,6 +4464,9 @@ struct Strandi: public Traits
             {
             case nodeType::p_anoun: // adj noun
                 {
+#ifdef LOGGING
+                    if (pn->_binding) LOG1("exteranous binding at, ", textify(pn));
+#endif                    
                     assert(pn->_head);
                     assert(!pn->_binding);
                     
@@ -4322,6 +4485,11 @@ struct Strandi: public Traits
                 break;
             case nodeType::p_noun:
                 {
+
+#ifdef LOGGING
+                    if (pn->_binding) LOG1("exteranous binding at, ", textify(pn));
+#endif
+                    
                     assert(!pn->_binding);
                     
                     ok = resolveNoun(pn, 0, tl);
@@ -5267,10 +5435,6 @@ struct Strandi: public Traits
         //assert(!ei._currentSelector);
         ei._currentSelector = rs;
 
-        // update focus with the object who owns this reactor
-        //Term* t = ei._it;
-        //if (t) _ctx->_focus.add(t);
-
         _pushExec(ei);
         bool v = run(rs->_action);
         _popExec();
@@ -5291,6 +5455,7 @@ struct Strandi: public Traits
     {
         //if (ei._dobji) { LOG4("Looking for reactor match for ", textify(ei._ps) << " for " << ei._dobji->_name); }
 
+        ReactLock rl(_ctx);
         for (auto& r : _ctx->_reactions) // search scope
         {
             r._rank = 0; // no match
@@ -5529,7 +5694,7 @@ struct Strandi: public Traits
                 {
                     done = true;
                     v = execPut(ei);
-                    if (v) _ctx->markScope();
+                    if (v) _ctx->markScope(2);
                 }
                 else if (*ei._verb == SYM_SET)
                 {
@@ -5537,11 +5702,12 @@ struct Strandi: public Traits
                     v = execSet(ei);
 
                     // Does "set" really change scope??
-                    if (v) _ctx->markScope();
+                    if (v) _ctx->markScope(2);
                 }
             }
 
             // normally we dont allow queries on the command line
+            // but if internalOps enabled, we are not on the command line
             bool allowQuery = ei._internalOps;
 
 #ifdef LOGGING
@@ -5762,12 +5928,12 @@ struct Strandi: public Traits
         }
     }
 
-    static void expandParents(TermList& tl) 
+    void expandParents(TermList& tl) 
     {
         for (auto t : tl)
         {
             TermList tpl;
-            t->getParents(tpl);
+            getParents(t, tpl);
 
             // reactions are added in reverse parent order
             // so that secondary parents can be added to override main
@@ -5852,10 +6018,25 @@ struct Strandi: public Traits
         // AND after every command within flows.
 
         if (!_ctx->_scopeChanged) return; // no need!
-        _ctx->_scopeChanged = false;
+
+        if (_ctx->_updatingScope)
+        {
+            // Can't nest this!
+            LOG3("updateScope cannot nest ", _ctx->_scopeChanged);
+            return;
+        }
+
+        if (_ctx->_lockScope)
+        {
+            LOG3("updateScope locked! ", _ctx->_scopeChanged);
+            return;
+        }
+
+        //LOG1("updating scope ", _ctx->_scopeChanged);
         
-        //LOG1("updating scope", "");
-        
+        _ctx->_scopeChanged = 0;
+        _ctx->_updatingScope = true;
+
         if (_player)
         {
             _ctx->purgeReactions();
@@ -5900,7 +6081,8 @@ struct Strandi: public Traits
             _ctx->resolveScopeReactions();
 
             // if somehow got set
-            _ctx->_scopeChanged = false;
+            _ctx->_scopeChanged = 0;
+            _ctx->_updatingScope = false; // done
         }
     }
 
@@ -6115,6 +6297,43 @@ if (!_var && _objectCount) LOG1("Warning, there is no term, ", _name);
         return v;
     }
 
+#if 0
+    bool validateFlowMedia(Flow& f, FlowVisitor& fv)
+    {
+        bool v = true;
+        for (auto i = f._elts.begin(); i != f._elts.end(); ++i)
+        {
+            Flow::Elt* e = i;
+            if (e->_type == Flow::t_media)
+            {
+                Flow::EltMedia* em = (Flow::EltMedia*)e;
+                assert(!em->_filename.empty());
+                LOG4("validating media '", em->_filename << "'");
+            }
+        }
+        return v;
+    }
+
+    bool validateMedia()
+    {
+        LOG4("validate media", "");
+        
+        using namespace std::placeholders;  
+        FlowVisitor ff(std::bind(&Strandi::validateFlowMedia, this, _1, _2));
+        
+        // if err, emit error messages
+        ff._err = true;
+            
+        bool v = true;
+
+        // all flows in all terms need to be resolved.
+        for (auto t : Term::_allTerms)
+            if (!t->visit(ff)) v = false;
+
+        return v;
+    }
+#endif
+
     void _prepareNames()
     {
         // Objects can have multiple names. These are usually listed
@@ -6130,7 +6349,7 @@ if (!_var && _objectCount) LOG1("Warning, there is no term, ", _name);
             if (t->isObject())
             {
                 TermList tl;
-                t->getParents(tl);
+                t->getStaticParents(tl);
                 for (auto ti : tl)
                 {
                     for (auto pi : ti->_namenodes)
@@ -6151,6 +6370,7 @@ if (!_var && _objectCount) LOG1("Warning, there is no term, ", _name);
             _buildDictionary();
             _prepared = _preparseCommands();
             _prepared = _prepared && prepareAutoLinks();
+            //_prepared = _prepared && validateMedia();
 
             if (_prepared)
             {
@@ -6822,7 +7042,7 @@ if (!_var && _objectCount) LOG1("Warning, there is no term, ", _name);
                 // scope needs recalculating
                 // we need to do this right now, as immediately after
                 // we execute POSTLOAD_OK
-                _ctx->markScope();
+                _ctx->markScope(4);
                 updateScope();
             }
         }
@@ -7038,8 +7258,6 @@ if (!_var && _objectCount) LOG1("Warning, there is no term, ", _name);
 };
 
 }; // ST
-
-
 
 
 

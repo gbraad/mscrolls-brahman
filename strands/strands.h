@@ -225,14 +225,26 @@ struct Flow: public Traits
         string      _name;
         Term*       _term = 0;  // binding
         uint        _flags = 0;
+        enode*      _cond = 0; // optional condition (owned)
 
         EltTerm() : Elt(t_term) {}
         EltTerm(const string& name) : Elt(t_term), _name(name) {}
+        ~EltTerm() { delete _cond; }
 
         operator bool() const { return _term != 0; }
 
         string _toBaseString() const override
-        { return _name; }
+        {
+            string s;
+            if (_cond)
+            {
+                s = "?";
+                s += _cond->toString();
+                s += ' ';
+            }
+            s += _name;
+            return s;
+        }
 
         string _toString(bool x) const override
         {
@@ -894,10 +906,11 @@ struct Term: public Traits
             s += rtypeString(_rtypenext);
             if (sticky()) s += " *sticky*";
 
-            if (_topflow.size())
+            if (_topflow)
             {
-                s += "\ninput: ";
+                s += "\ntop: { ";
                 s += _topflow.toString(false);
+                s += "}";
             }
             s += _toStringBody();
             break;
@@ -906,12 +919,12 @@ struct Term: public Traits
             s += _toStringBody();
             break;
         case t_object:
-            if (_topflow.size())
+            if (_topflow)
             {
                 s += " Parents: ";
                 s += _topflow.toString(false);
             }
-            if (_flow.size())
+            if (_flow)
             {
                 s += '\n';
                 s += _flow.toString();
@@ -931,22 +944,22 @@ struct Term: public Traits
     friend std::ostream& operator<<(std::ostream& os, const Term& t)
     { return os << t._name; } 
 
-    void getParents(TermList& tl) const
+    void getStaticParents(TermList& tl) const
     {
-        if (isObject())  // only objects have parents
+        // objects and choices have parents
+
+        // flow will be terms
+        for (Flow::Elt& i : _topflow._elts)
         {
-            // flow will be terms
-            for (auto& i : _topflow._elts)
-            {
-                Flow::Elt* e = &i;
-                assert(e->_type == Flow::t_term);
-                Term* ti = ((Flow::EltTerm*)e)->_term;
-                assert(ti); // assume linked
-                
-                // should be objects but just ignore otherwise
-                if (!ti->isObject()) continue;
-                tl.push_back(ti);
-            }
+            assert(i._type == Flow::t_term);
+            Flow::EltTerm* et = (Flow::EltTerm*)&i;
+            Term* ti = et->_term;
+            assert(ti); // assume linked
+            
+            // objects only have object parents, ignore.
+            if (isObject() && !ti->isObject()) continue;
+            
+            tl.push_back(ti);
         }
     }
 
@@ -956,7 +969,7 @@ struct Term: public Traits
         if (isObject())  // only objects have parents
         {
             // flow will be terms
-            if (!_topflow._elts.empty())
+            if (_topflow)
             {
                 Flow::Elt* e = _topflow._elts.first();
                 assert(e->_type == Flow::t_term);

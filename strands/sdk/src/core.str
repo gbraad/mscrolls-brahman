@@ -116,6 +116,22 @@ Game Saved.
 POSTSAVE_FAIL
 Cannot Save Game.
 
+CHOICE_OPT?
+Do you prefer choices over text input?
+* yes
+\nChoices On
+* no
+CHOICE_OPT_OFF
+\nChoices Off
+
+// these can be called via "subcommand" on the UI.
+// but when called, produce no output.
+CHOICE_OPT_ON
+{ (elevatechoices 1) }
+
+CHOICE_OPT_OFF
+{ (elevatechoices 0) }
+
 
 CONCEPT@
 * name
@@ -175,7 +191,8 @@ HITIT
 Trying to break things won't help.
 
 MOVEIT
-BORING
+* That doesn't get any result.
+* That doesn't help.
 
 FEELIT
 That won't help.

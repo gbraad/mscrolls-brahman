@@ -265,16 +265,18 @@ struct ParseBase: public Traits
     void _skipc()
     {
         // skip any comments
-        if (*pos == '/')
+        while (*pos == '/')
         {
+            char pc = _prevc();
+
             // XX disallow comment after colon ':', to allow http://etc
-            if (pos[1] == '/' && _prevc() != ':')
+            if (pos[1] == '/' && pc != ':')
             {
-                bool atStart = _prevc() == '\n';
+                bool atStart = !pc || pc == '\n';
                 
                 // "//" comment
                 // skip to newline, but leave newline in stream
-                // unless we started on a line, in case ignore the
+                // unless we started on a line, in which case ignore the
                 // whole line
                 while (*++pos)
                 {
@@ -303,6 +305,7 @@ struct ParseBase: public Traits
                     }
                 }
             }
+            else break;
         }
     }
 

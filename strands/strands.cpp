@@ -121,6 +121,8 @@ struct KLEnv
 
     ST::Capture* evalKL(const string& buf, ST::Capture* args)
     {
+        // NB: args can be null
+        
         //LOG1(TAG "eval KL ", buf);
             
         int cc = 0;
@@ -181,20 +183,6 @@ struct KLEnv
 
         //LOG1(TAG "eval KL result ", tout._buf);
 
-#if 0            
-        if (v)
-        {
-            LOG1(TAG "evalKL result ", v->toString());
-                     
-            // return values are ignored unless a string
-            if (v.isString())
-            {
-                // avoid quotes in standard KL stringification
-                r->add(v.asString().c_str());
-            }
-        }
-#endif
-        
         if (r->empty())
         {
             delete r;

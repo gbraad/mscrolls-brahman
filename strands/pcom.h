@@ -430,6 +430,7 @@ struct pnode: public node<pnode>
         // deep copy!
         // but not the bindings
         assert(valid());
+        assert(_type != p_value);  // copying a value?
         
         pnode* pn;
         if (_word)

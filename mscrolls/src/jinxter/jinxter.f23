@@ -150,6 +150,9 @@ synonym "pee" { piss verb }
 synonym "phone" { dial verb }
 synonym "inspect" { examine verb }
 
+synonym "sift" {  sieve verb }
+synonym "filter" { sieve verb }
+
 
 room onbus "On.The.Bus" {
     desc {

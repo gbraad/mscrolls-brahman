@@ -238,11 +238,18 @@ struct ParseStrands: public ParseBase
         }
     }
 
-    void _addTerm(Flow& f, const string& s, uint flags)
+    void _addTerm(Flow& f, const string& s, uint flags, enode* refcond)
     {
         assert(s.size());
         auto t = new Flow::EltTerm(s);
         t->_flags = flags;
+        t->_cond = refcond;
+
+        if (refcond)
+        {
+            //LOG1("conditional reference ", t->toString());
+        }
+        
         f._elts.push_back(t);
     }
 
@@ -359,31 +366,100 @@ struct ParseStrands: public ParseBase
 
         // assume we are not in quotes at the start of any text span
         _inQuote = false;
-        
+
+        // XX bit hacky
+        // assume that term-only flows can have conditionals
+        bool allowcond = (oktypes == Flow::t_term);
+
         const char* q = t.c_str();
         for (;;)
         {
-            while (u_isspace(*q)) ++q;
+            _skipws(&q);
             if (!*q) break;
             
             const char* p = q;
-            int l;
             char lastc = 0;
             uint ftFlags = 0;
+
+            // optional term ref conditional
+            enode* refcond = 0;
+
+            const char* refstart = 0;
+            const char* refend = 0;
+            string refname;
             
             while (*p)
             {
-                l = atName(p);
+                // support conditionals before term references.
+                // must have the syntax:
+                // ?FOO BAR or ?(FOO) BAR
+                // no space after the "?"
+                
+                if (allowcond)
+                {
+                    // conditionals all start with ?
+                    bool havec = (*p == '?');
+
+                    // determine if we have a conditional
+                    if (havec)
+                    {
+                        // then they can be an expression (...)
+                        // or a term ?FOO
+                        // or a neg term ?!FOO
+                        // both types must follow immediately without ws
+                        const char* p1 = p + 1;
+                        if (*p1 != '(')
+                        {
+                            if (*p1 == '!') ++p1; // neg term?
+                            if (!atName(p1))
+                                havec = false; // not a condition
+                        }
+                    }
+
+                    if (havec)
+                    {
+                        // in case somehow we already had one?
+                        // escapes?
+                        delete refcond; refcond = 0;
+                        
+                        PUSHP;
+                        SETPOS(p + 1);
+
+                        refcond = parseCond();
+                        if (refcond)
+                        {
+                            refstart = p; // at '?'
+
+                            // park after conditional, before name
+                            p = POS;
+                            _skipws(&p);
+                        }
+                        else
+                        {
+                            LOG1("malformed term pre-condition, ", p);
+                        }
+                        POPP;
+                    }
+                }
+                
+                int l = atName(p);
                 if (l)
                 {
                     if (lastc == '\\')
                     {
                         // escaped term, skip this name and treat as text
                         p += l;
+                        refstart = 0;
+                        refend = 0;
                         continue;
                     }
 
-                    ftFlags = parseFlowTermFlags(p + l);
+                    refname = string(p, l);
+                    refend = p + l;
+                    ftFlags = parseFlowTermFlags(refend);
+                    refend += countBits(ftFlags);  // account for flag symbols
+
+                    // now add text range q->p and the name.
                     break;
                 }
                 else if (*p == '.' && p != q)
@@ -426,7 +502,7 @@ struct ParseStrands: public ParseBase
                             if (_collectVoices) collectVoice(*m);
                             
                             q = p = e;
-                            assert(!l);
+                            assert(!refend);
                             break;
 
                         }
@@ -435,18 +511,24 @@ struct ParseStrands: public ParseBase
                 
                 lastc = *p++;
             }
-            
+
+            // add section of text before name
+            // will be up to refstart or p
+            if (refstart) p = refstart;
             _addText(f, q, p, oktypes);
 
-            if (l)
+            q = p;
+            
+            // now add any name
+            if (refend)
             {
                 // add term ref
-                _addTerm(f, string(p, l), ftFlags);
+                // consumes refcond
+                assert(!refname.empty());
+                _addTerm(f,  refname, ftFlags, refcond);
+                refcond = 0;
+                q = refend;
             }
-
-            // skip over any name
-            q = p + l;
-            q += countBits(ftFlags);  // account for flag symbols
         }
 
     }
@@ -642,6 +724,9 @@ struct ParseStrands: public ParseBase
 
                                         // assume text follows code
                                         tn = Flow::t_text;
+
+                                        // don't allow any more flow
+                                        if (!allowednl) tn = Flow::t_void;
                                 
                                         break;
                                     }
@@ -708,7 +793,6 @@ struct ParseStrands: public ParseBase
     bool parseProps(Term* t)
     {
         // [\?@][ ]*[~&>=]{0-2}!?[ ]*\n
-
 
         // get the type indicator
         char c = AT;
@@ -837,8 +921,10 @@ struct ParseStrands: public ParseBase
                 skipws();
             }
 
-            if (u_isalnum(AT))   // topflow on choice are sub-choices
+            if (u_isalnum(AT) || AT == '?')
             {
+                // topflow on choice are inherited choices
+                // including ?conditional
                 parseFlow(t->_topflow, 0, Flow::t_term);
             }
             else if (AT == '\n')
@@ -947,15 +1033,21 @@ struct ParseStrands: public ParseBase
         return f;
     }
 
-    void parseCondFlow(Selector* s)
+    enode* parseCond()
     {
         ParseExpr pe;
         enode* en = pe.parse(POS, lineno);
         SETPOS(pe.pos);
+        return en;
+    }
+
+    void parseCondFlow(Flow& f)
+    {
+        enode* en = parseCond();
         if (en)
         {
             //LOG1("parseCondFlow ", en->toString());
-            _addCond(s->_cond, en);
+            _addCond(f, en);
         }
     }
 
@@ -989,7 +1081,7 @@ struct ParseStrands: public ParseBase
             // selector conditional prefix
             BUMP;
             
-            parseCondFlow(s);
+            parseCondFlow(s->_cond);
             skipws();
         }
 
@@ -1196,7 +1288,7 @@ struct ParseStrands: public ParseBase
             if (t->_type == Term::t_object)
             {
                 Term::TermList parents;
-                t->getParents(parents);
+                t->getStaticParents(parents);
                 for (auto p : parents)
                 {
                     if (p->_type == Term::t_object)

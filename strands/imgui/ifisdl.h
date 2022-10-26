@@ -923,4 +923,26 @@ struct StrandCtx
         
     }
 
+    void requestSubcommand(const string& term)
+    {
+        LOG1("UI requesting subcommand, ", term);
+
+        GrowString js;
+        h.buildJSONStart(js);
+        JSONWalker::addStringValue(js, IFI_SUBCOMMAND, term);
+        h.buildJSONEnd();
+
+        // send to back end via host
+        host.eval(js.start());
+    }
+
+    void enableCommandChoices(bool v)
+    {
+        LOG1("enable command choices ", v);
+
+        // XX NB: these are terms directly in core.str
+        const char* term = v ? "CHOICE_OPT_ON" : "CHOICE_OPT_OFF";
+        requestSubcommand(term);
+    }
+
 };
